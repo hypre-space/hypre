@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Structured scale routine
@@ -28,8 +26,6 @@ HYPRE_Int
 hypre_StructScale( double              alpha,
                    hypre_StructVector *y     )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_Box       *y_data_box;
                    
    HYPRE_Int        yi;
@@ -48,26 +44,26 @@ hypre_StructScale( double              alpha,
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
-      {
-         box   = hypre_BoxArrayBox(boxes, i);
-         start = hypre_BoxIMin(box);
+   {
+      box   = hypre_BoxArrayBox(boxes, i);
+      start = hypre_BoxIMin(box);
 
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-         yp = hypre_StructVectorBoxData(y, i);
+      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      yp = hypre_StructVectorBoxData(y, i);
 
-         hypre_BoxGetSize(box, loop_size);
+      hypre_BoxGetSize(box, loop_size);
 
-	 hypre_BoxLoop1Begin(loop_size,
-                             y_data_box, start, unit_stride, yi);
+      hypre_BoxLoop1Begin(loop_size,
+                          y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
 #endif
-	 hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-            {
-               yp[yi] *= alpha;
-            }
-	 hypre_BoxLoop1End(yi);
+      hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+      {
+         yp[yi] *= alpha;
       }
+      hypre_BoxLoop1End(yi);
+   }
 
-   return ierr;
+   return hypre_error_flag;
 }

@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  * Cyclic reduction algorithm (coded as if it were a 1D MG method)
  *
@@ -27,31 +24,31 @@
  *--------------------------------------------------------------------------*/
 
 #define hypre_CycRedSetCIndex(base_index, base_stride, level, cdir, cindex) \
-{\
-   if (level > 0)\
-      hypre_SetIndex(cindex, 0, 0, 0);\
-   else\
-      hypre_CopyIndex(base_index,  cindex);\
-   hypre_IndexD(cindex, cdir) += 0;\
-}
+   {                                                                    \
+      if (level > 0)                                                    \
+         hypre_SetIndex(cindex, 0, 0, 0);                               \
+      else                                                              \
+         hypre_CopyIndex(base_index,  cindex);                          \
+      hypre_IndexD(cindex, cdir) += 0;                                  \
+   }
 
 #define hypre_CycRedSetFIndex(base_index, base_stride, level, cdir, findex) \
-{\
-   if (level > 0)\
-      hypre_SetIndex(findex, 0, 0, 0);\
-   else\
-      hypre_CopyIndex(base_index,  findex);\
-   hypre_IndexD(findex, cdir) += 1;\
-}
+   {                                                                    \
+      if (level > 0)                                                    \
+         hypre_SetIndex(findex, 0, 0, 0);                               \
+      else                                                              \
+         hypre_CopyIndex(base_index,  findex);                          \
+      hypre_IndexD(findex, cdir) += 1;                                  \
+   }
 
 #define hypre_CycRedSetStride(base_index, base_stride, level, cdir, stride) \
-{\
-   if (level > 0)\
-      hypre_SetIndex(stride, 1, 1, 1);\
-   else\
-      hypre_CopyIndex(base_stride, stride);\
-   hypre_IndexD(stride, cdir) *= 2;\
-}
+   {                                                                    \
+      if (level > 0)                                                    \
+         hypre_SetIndex(stride, 1, 1, 1);                               \
+      else                                                              \
+         hypre_CopyIndex(base_stride, stride);                          \
+      hypre_IndexD(stride, cdir) *= 2;                                  \
+   }
 
 /*--------------------------------------------------------------------------
  * hypre_CyclicReductionData data structure
@@ -180,10 +177,10 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    }
 
    Ac_stencil = hypre_StructStencilCreate(Ac_stencil_dim, Ac_stencil_size,
-                                       Ac_stencil_shape);
+                                          Ac_stencil_shape);
 
    Ac = hypre_StructMatrixCreate(hypre_StructMatrixComm(A),
-                              coarse_grid, Ac_stencil);
+                                 coarse_grid, Ac_stencil);
 
    hypre_StructStencilDestroy(Ac_stencil);
 
@@ -200,7 +197,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    Ac_num_ghost[2*cdir]     = 1;
    if (!hypre_StructMatrixSymmetric(A))
    {
-     Ac_num_ghost[2*cdir + 1] = 1;
+      Ac_num_ghost[2*cdir + 1] = 1;
    }
    hypre_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
 
@@ -248,8 +245,6 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                          
    HYPRE_Int               xOffsetA; 
                          
-   HYPRE_Int               ierr = 0;
-
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -262,131 +257,131 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
+   {
+      while (fgrid_ids[fi] != cgrid_ids[ci])
       {
-         while (fgrid_ids[fi] != cgrid_ids[ci])
-         {
-            fi++;
-         }
+         fi++;
+      }
 
-         cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
+      cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
-         cstart = hypre_BoxIMin(cgrid_box);
-         hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
+      cstart = hypre_BoxIMin(cgrid_box);
+      hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
 
-         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-         Ac_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(Ac), ci);
+      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
+      Ac_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(Ac), ci);
 
-         /*-----------------------------------------------
-          * Extract pointers for 3-point fine grid operator:
-          * 
-          * a_cc is pointer for center coefficient
-          * a_cw is pointer for west coefficient
-          * a_ce is pointer for east coefficient
-          *-----------------------------------------------*/
+      /*-----------------------------------------------
+       * Extract pointers for 3-point fine grid operator:
+       * 
+       * a_cc is pointer for center coefficient
+       * a_cw is pointer for west coefficient
+       * a_ce is pointer for east coefficient
+       *-----------------------------------------------*/
 
-         hypre_SetIndex(index,0,0,0);
-         a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
+      hypre_SetIndex(index,0,0,0);
+      a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,-1,0,0);
-         a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
+      hypre_SetIndex(index,-1,0,0);
+      a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
+      hypre_SetIndex(index,1,0,0);
+      a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
+
+      /*-----------------------------------------------
+       * Extract pointers for coarse grid operator - always 3-point:
+       *
+       * If A is symmetric so is Ac.  We build only the
+       * lower triangular part (plus diagonal).
+       * 
+       * ac_cc is pointer for center coefficient (etc.)
+       *-----------------------------------------------*/
+
+      hypre_SetIndex(index,0,0,0);
+      ac_cc = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
+
+      hypre_SetIndex(index,-1,0,0);
+      ac_cw = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
+
+      if(!hypre_StructMatrixSymmetric(A))
+      {
          hypre_SetIndex(index,1,0,0);
-         a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
+         ac_ce = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
+      }
 
-         /*-----------------------------------------------
-          * Extract pointers for coarse grid operator - always 3-point:
-          *
-          * If A is symmetric so is Ac.  We build only the
-          * lower triangular part (plus diagonal).
-          * 
-          * ac_cc is pointer for center coefficient (etc.)
-          *-----------------------------------------------*/
+      /*-----------------------------------------------
+       * Define offsets for fine grid stencil and interpolation
+       *
+       * In the BoxLoop below I assume iA and iP refer
+       * to data associated with the point which we are
+       * building the stencil for.  The below offsets
+       * are used in refering to data associated with
+       * other points. 
+       *-----------------------------------------------*/
 
-         hypre_SetIndex(index,0,0,0);
-         ac_cc = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
+      hypre_SetIndex(index,1,0,0);
+      xOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
 
-         hypre_SetIndex(index,-1,0,0);
-         ac_cw = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
+      /*-----------------------------------------------
+       * non-symmetric case
+       *-----------------------------------------------*/
 
-         if(!hypre_StructMatrixSymmetric(A))
-         {
-            hypre_SetIndex(index,1,0,0);
-            ac_ce = hypre_StructMatrixExtractPointerByIndex(Ac, ci, index);
-         }
+      if(!hypre_StructMatrixSymmetric(A))
+      {
+         hypre_BoxGetSize(cgrid_box, loop_size);
 
-         /*-----------------------------------------------
-          * Define offsets for fine grid stencil and interpolation
-          *
-          * In the BoxLoop below I assume iA and iP refer
-          * to data associated with the point which we are
-          * building the stencil for.  The below offsets
-          * are used in refering to data associated with
-          * other points. 
-          *-----------------------------------------------*/
-
-         hypre_SetIndex(index,1,0,0);
-         xOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
-
-         /*-----------------------------------------------
-          * non-symmetric case
-          *-----------------------------------------------*/
-
-         if(!hypre_StructMatrixSymmetric(A))
-         {
-            hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop2Begin(loop_size,
-                                A_dbox, fstart, stridef, iA,
-                                Ac_dbox, cstart, stridec, iAc);
+         hypre_BoxLoop2Begin(loop_size,
+                             A_dbox, fstart, stridef, iA,
+                             Ac_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc,iAm1,iAp1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
-               {
-                  iAm1 = iA - xOffsetA;
-                  iAp1 = iA + xOffsetA;
-
-                  ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
-
-                  ac_cc[iAc] = a_cc[iA]
-                     - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-                     - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
-
-                  ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
-
-               }
-            hypre_BoxLoop2End(iA, iAc);
-         }
-
-         /*-----------------------------------------------
-          * symmetric case
-          *-----------------------------------------------*/
-
-         else
+         hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
          {
-            hypre_BoxGetSize(cgrid_box, loop_size);
+            iAm1 = iA - xOffsetA;
+            iAp1 = iA + xOffsetA;
 
-            hypre_BoxLoop2Begin(loop_size,
-                                A_dbox, fstart, stridef, iA,
-                                Ac_dbox, cstart, stridec, iAc);
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+
+            ac_cc[iAc] = a_cc[iA]
+               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
+               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+
+            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
+
+         }
+         hypre_BoxLoop2End(iA, iAc);
+      }
+
+      /*-----------------------------------------------
+       * symmetric case
+       *-----------------------------------------------*/
+
+      else
+      {
+         hypre_BoxGetSize(cgrid_box, loop_size);
+
+         hypre_BoxLoop2Begin(loop_size,
+                             A_dbox, fstart, stridef, iA,
+                             Ac_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iA,iAc,iAm1,iAp1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
-               {
-                  iAm1 = iA - xOffsetA;
-                  iAp1 = iA + xOffsetA;
+         hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+         {
+            iAm1 = iA - xOffsetA;
+            iAp1 = iA + xOffsetA;
 
-                  ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
 
-                  ac_cc[iAc] = a_cc[iA]
-                     - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-                     - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
-               }
-            hypre_BoxLoop2End(iA, iAc);
+            ac_cc[iAc] = a_cc[iA]
+               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
+               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
          }
+         hypre_BoxLoop2End(iA, iAc);
+      }
 
-      } /* end ForBoxI */
+   } /* end ForBoxI */
 
    hypre_StructMatrixAssemble(Ac);
 
@@ -440,11 +435,11 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
-               {
-                  ac_cc[iAc] += (ac_cw[iAc] + ac_ce[iAc]);
-                  ac_cw[iAc]  =  0.0;
-                  ac_ce[iAc]  =  0.0;
-               }
+            {
+               ac_cc[iAc] += (ac_cw[iAc] + ac_ce[iAc]);
+               ac_cw[iAc]  =  0.0;
+               ac_ce[iAc]  =  0.0;
+            }
             hypre_BoxLoop1End(iAc);
          }
 
@@ -462,10 +457,10 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
-               {
-                  ac_cc[iAc] += (2.0  *  ac_cw[iAc]);
-                  ac_cw[iAc]  =  0.0;
-               }
+            {
+               ac_cc[iAc] += (2.0  *  ac_cw[iAc]);
+               ac_cw[iAc]  =  0.0;
+            }
             hypre_BoxLoop1End(iAc);
          }
 
@@ -475,7 +470,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    hypre_StructMatrixAssemble(Ac);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -520,8 +515,6 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                          
    HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
                          
-   HYPRE_Int               ierr = 0;
-
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
@@ -665,7 +658,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
-       /* down-cycle */
+      /* down-cycle */
       hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
                               &compute_info);
       hypre_ComputeInfoProjectSend(compute_info, findex, stride);
@@ -709,7 +702,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    if (num_levels > 1)
    {
       (cyc_red_data -> solve_flops) +=  
-          hypre_StructVectorGlobalSize(x_l[l])/2;
+         hypre_StructVectorGlobalSize(x_l[l])/2;
    }
    
 
@@ -730,7 +723,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    }
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -802,8 +795,6 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    HYPRE_Int             compute_i, fi, ci, j, l;
    HYPRE_Int             loopi, loopj, loopk;
                       
-   HYPRE_Int             ierr = 0;
-
    hypre_BeginTiming(cyc_red_data -> time_index);
 
 
@@ -824,30 +815,30 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    compute_box_a = base_points;
    hypre_ForBoxI(fi, compute_box_a)
-      {
-         compute_box = hypre_BoxArrayBox(compute_box_a, fi);
+   {
+      compute_box = hypre_BoxArrayBox(compute_box_a, fi);
 
-         x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), fi);
-         b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), fi);
+      x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), fi);
+      b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), fi);
 
-         xp = hypre_StructVectorBoxData(x, fi);
-         bp = hypre_StructVectorBoxData(b, fi);
+      xp = hypre_StructVectorBoxData(x, fi);
+      bp = hypre_StructVectorBoxData(b, fi);
 
-         hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-         hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+      hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+      hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
-         hypre_BoxLoop2Begin(loop_size,
-                                x_dbox, start, base_stride, xi,
-                                b_dbox, start, base_stride, bi);
+      hypre_BoxLoop2Begin(loop_size,
+                          x_dbox, start, base_stride, xi,
+                          b_dbox, start, base_stride, bi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,bi) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
-            {
-               xp[xi] = bp[bi];
-            }
-         hypre_BoxLoop2End(xi, bi);
+      hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
+      {
+         xp[xi] = bp[bi];
       }
+      hypre_BoxLoop2End(xi, bi);
+   }
 
    /*--------------------------------------------------
     * Down cycle:
@@ -876,33 +867,33 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       /* Step 1 */
       compute_box_a = fine_points_l[l];
       hypre_ForBoxI(fi, compute_box_a)
-         {
-            compute_box = hypre_BoxArrayBox(compute_box_a, fi);
+      {
+         compute_box = hypre_BoxArrayBox(compute_box_a, fi);
 
-            A_dbox =
-               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-            x_dbox =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+         A_dbox =
+            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
+         x_dbox =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
 
-            hypre_SetIndex(index, 0, 0, 0);
-            Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-            xp = hypre_StructVectorBoxData(x_l[l], fi);
+         hypre_SetIndex(index, 0, 0, 0);
+         Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+         xp = hypre_StructVectorBoxData(x_l[l], fi);
 
-            hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-            hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+         hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-            hypre_BoxLoop2Begin(loop_size,
-                                A_dbox, start, stride, Ai,
-                                x_dbox, start, stride, xi);
+         hypre_BoxLoop2Begin(loop_size,
+                             A_dbox, start, stride, Ai,
+                             x_dbox, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
-               {
-                  xp[xi] /= Ap[Ai]; 
-               }
-            hypre_BoxLoop2End(Ai, xi);
+         hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+         {
+            xp[xi] /= Ap[Ai]; 
          }
+         hypre_BoxLoop2End(Ai, xi);
+      }
 
       /* Step 2 */
       fgrid = hypre_StructVectorGrid(x_l[l]);
@@ -935,63 +926,63 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
          fi = 0;
          hypre_ForBoxI(ci, cgrid_boxes)
+         {
+            while (fgrid_ids[fi] != cgrid_ids[ci])
             {
-               while (fgrid_ids[fi] != cgrid_ids[ci])
-               {
-                  fi++;
-               }
+               fi++;
+            }
 
-               compute_box_a =
-                  hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+            compute_box_a =
+               hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
 
-               A_dbox =
-                  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-               x_dbox =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
-               xc_dbox =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l+1]), ci);
+            A_dbox =
+               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
+            x_dbox =
+               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+            xc_dbox =
+               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l+1]), ci);
 
-               xp  = hypre_StructVectorBoxData(x_l[l], fi);
-               xcp = hypre_StructVectorBoxData(x_l[l+1], ci);
+            xp  = hypre_StructVectorBoxData(x_l[l], fi);
+            xcp = hypre_StructVectorBoxData(x_l[l+1], ci);
 
-               hypre_SetIndex(index, -1, 0, 0);
-               Awp =
-                  hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-               xwp = hypre_StructVectorBoxData(x_l[l], fi) +
-                  hypre_BoxOffsetDistance(x_dbox, index);
+            hypre_SetIndex(index, -1, 0, 0);
+            Awp =
+               hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+            xwp = hypre_StructVectorBoxData(x_l[l], fi) +
+               hypre_BoxOffsetDistance(x_dbox, index);
 
-               hypre_SetIndex(index,  1, 0, 0);
-               Aep =
-                  hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-               xep = hypre_StructVectorBoxData(x_l[l], fi) +
-                  hypre_BoxOffsetDistance(x_dbox, index);
+            hypre_SetIndex(index,  1, 0, 0);
+            Aep =
+               hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+            xep = hypre_StructVectorBoxData(x_l[l], fi) +
+               hypre_BoxOffsetDistance(x_dbox, index);
 
-               hypre_ForBoxI(j, compute_box_a)
-                  {
-                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
+            hypre_ForBoxI(j, compute_box_a)
+            {
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-                     hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-                     hypre_StructMapFineToCoarse(start, cindex, stride,
-                                                 startc);
+               hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+               hypre_StructMapFineToCoarse(start, cindex, stride,
+                                           startc);
 
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_dbox, start, stride, Ai,
-                                         x_dbox, start, stride, xi,
-                                         xc_dbox, startc, stridec, xci);
+               hypre_BoxLoop3Begin(loop_size,
+                                   A_dbox, start, stride, Ai,
+                                   x_dbox, start, stride, xi,
+                                   xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,xci) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
-                        {
-                           xcp[xci] = xp[xi] -
-                              Awp[Ai]*xwp[xi] -
-                              Aep[Ai]*xep[xi];
-                        }
-                     hypre_BoxLoop3End(Ai, xi, xci);
-                  }
+               hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
+               {
+                  xcp[xci] = xp[xi] -
+                     Awp[Ai]*xwp[xi] -
+                     Aep[Ai]*xep[xi];
+               }
+               hypre_BoxLoop3End(Ai, xi, xci);
             }
+         }
       }
    }
    /*--------------------------------------------------
@@ -1011,36 +1002,36 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    compute_box_a = fine_points_l[l];
    hypre_ForBoxI(fi, compute_box_a)
-      {
-         compute_box = hypre_BoxArrayBox(compute_box_a, fi);
+   {
+      compute_box = hypre_BoxArrayBox(compute_box_a, fi);
 
-         A_dbox =
-            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-         x_dbox =
-            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+      A_dbox =
+         hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
+      x_dbox =
+         hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
 
-         hypre_SetIndex(index, 0, 0, 0);
-         Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-         xp = hypre_StructVectorBoxData(x_l[l], fi);
+      hypre_SetIndex(index, 0, 0, 0);
+      Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+      xp = hypre_StructVectorBoxData(x_l[l], fi);
 
-         hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+      hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-         hypre_BoxLoop2Begin(loop_size,
-                             A_dbox, start, stride, Ai,
-                             x_dbox, start, stride, xi);
+      hypre_BoxLoop2Begin(loop_size,
+                          A_dbox, start, stride, Ai,
+                          x_dbox, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
-            {
-               if (Ap[Ai] != 0.0)
-               {
-                  xp[xi] /= Ap[Ai]; 
-               }
-            }
-         hypre_BoxLoop2End(Ai, xi);
+      hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+      {
+         if (Ap[Ai] != 0.0)
+         {
+            xp[xi] /= Ap[Ai]; 
+         }
       }
+      hypre_BoxLoop2End(Ai, xi);
+   }
 
    /*--------------------------------------------------
     * Up cycle:
@@ -1067,39 +1058,39 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       cgrid_ids = hypre_StructGridIDs(cgrid);
       fi = 0;
       hypre_ForBoxI(ci, cgrid_boxes)
+      {
+         while (fgrid_ids[fi] != cgrid_ids[ci])
          {
-            while (fgrid_ids[fi] != cgrid_ids[ci])
-            {
-               fi++;
-            }
+            fi++;
+         }
 
-            compute_box = hypre_BoxArrayBox(cgrid_boxes, ci);
+         compute_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
-            hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
-            hypre_StructMapCoarseToFine(startc, cindex, stride, start);
+         hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
+         hypre_StructMapCoarseToFine(startc, cindex, stride, start);
 
-            x_dbox =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
-            xc_dbox =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l+1]), ci);
+         x_dbox =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+         xc_dbox =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l+1]), ci);
 
-            xp  = hypre_StructVectorBoxData(x_l[l], fi);
-            xcp = hypre_StructVectorBoxData(x_l[l+1], ci);
+         xp  = hypre_StructVectorBoxData(x_l[l], fi);
+         xcp = hypre_StructVectorBoxData(x_l[l+1], ci);
 
-            hypre_BoxGetSize(compute_box, loop_size);
+         hypre_BoxGetSize(compute_box, loop_size);
 
-            hypre_BoxLoop2Begin(loop_size,
-                                x_dbox, start, stride, xi,
-                                xc_dbox, startc, stridec, xci);
+         hypre_BoxLoop2Begin(loop_size,
+                             x_dbox, start, stride, xi,
+                             xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,xci) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
-               {
-                  xp[xi] = xcp[xci];
-               }
-            hypre_BoxLoop2End(xi, xci);
+         hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
+         {
+            xp[xi] = xcp[xci];
          }
+         hypre_BoxLoop2End(xi, xci);
+      }
 
       /* Step 2 */
       for (compute_i = 0; compute_i < 2; compute_i++)
@@ -1126,52 +1117,52 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          }
 
          hypre_ForBoxArrayI(fi, compute_box_aa)
+         {
+            compute_box_a =
+               hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+
+            A_dbox =
+               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
+            x_dbox =
+               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+
+            hypre_SetIndex(index, 0, 0, 0);
+            Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+            xp = hypre_StructVectorBoxData(x_l[l], fi);
+
+            hypre_SetIndex(index, -1, 0, 0);
+            Awp =
+               hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+            xwp = hypre_StructVectorBoxData(x_l[l], fi) +
+               hypre_BoxOffsetDistance(x_dbox, index);
+
+            hypre_SetIndex(index,  1, 0, 0);
+            Aep =
+               hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+            xep = hypre_StructVectorBoxData(x_l[l], fi) +
+               hypre_BoxOffsetDistance(x_dbox, index);
+
+            hypre_ForBoxI(j, compute_box_a)
             {
-               compute_box_a =
-                  hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-               A_dbox =
-                  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
-               x_dbox =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+               hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               hypre_SetIndex(index, 0, 0, 0);
-               Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-               xp = hypre_StructVectorBoxData(x_l[l], fi);
-
-               hypre_SetIndex(index, -1, 0, 0);
-               Awp =
-                  hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-               xwp = hypre_StructVectorBoxData(x_l[l], fi) +
-                  hypre_BoxOffsetDistance(x_dbox, index);
-
-               hypre_SetIndex(index,  1, 0, 0);
-               Aep =
-                  hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-               xep = hypre_StructVectorBoxData(x_l[l], fi) +
-                  hypre_BoxOffsetDistance(x_dbox, index);
-
-               hypre_ForBoxI(j, compute_box_a)
-                  {
-                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                     hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-                     hypre_BoxLoop2Begin(loop_size,
-                                         A_dbox, start, stride, Ai,
-                                         x_dbox, start, stride, xi);
+               hypre_BoxLoop2Begin(loop_size,
+                                   A_dbox, start, stride, Ai,
+                                   x_dbox, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
-                        {
-                           xp[xi] -= (Awp[Ai]*xwp[xi] +
-                                      Aep[Ai]*xep[xi]  ) / Ap[Ai];
-                        }
-                     hypre_BoxLoop2End(Ai, xi);
-                  }
+               hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+               {
+                  xp[xi] -= (Awp[Ai]*xwp[xi] +
+                             Aep[Ai]*xep[xi]  ) / Ap[Ai];
+               }
+               hypre_BoxLoop2End(Ai, xi);
             }
+         }
       }
    }
 
@@ -1182,7 +1173,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    hypre_IncFLOPCount(cyc_red_data -> solve_flops);
    hypre_EndTiming(cyc_red_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1196,7 +1187,6 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
 {
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
    HYPRE_Int                d;
-   HYPRE_Int                ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
@@ -1206,7 +1196,7 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
          hypre_IndexD(base_stride, d);
    }
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1219,7 +1209,6 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
    hypre_CyclicReductionData *cyc_red_data = cyc_red_vdata;
 
    HYPRE_Int l;
-   HYPRE_Int ierr = 0;
 
    if (cyc_red_data)
    {
@@ -1249,6 +1238,6 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
       hypre_TFree(cyc_red_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 

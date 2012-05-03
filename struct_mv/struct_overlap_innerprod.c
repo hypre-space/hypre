@@ -177,7 +177,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
     * to subtract only overlaps with boxes on processors with id < myid.
     *-----------------------------------------------------------------------*/
    neighbor_boxes = hypre_BoxArrayCreate(0);
-   hypre_BoxManGetAllEntriesBoxesProc(boxman, neighbor_boxes, neighbors_procs);
+   hypre_BoxManGetAllEntriesBoxesProc(boxman, neighbor_boxes, &neighbors_procs);
    
    selected_nboxes= hypre_BoxArrayCreate(0);
 
@@ -190,6 +190,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
       }
    }
    hypre_BoxArrayDestroy(neighbor_boxes);
+   hypre_TFree(neighbors_procs);
 
    boxes= hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    overlap_boxes= hypre_BoxArrayCreate(0);

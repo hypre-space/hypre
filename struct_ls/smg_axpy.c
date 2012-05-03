@@ -10,19 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * SMG axpy routine
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGAxpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -32,8 +22,6 @@ hypre_SMGAxpy( double              alpha,
                hypre_Index         base_index,
                hypre_Index         base_stride )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
                  
@@ -54,31 +42,31 @@ hypre_SMGAxpy( double              alpha,
    box = hypre_BoxCreate();
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
-      {
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
-         hypre_ProjectBox(box, base_index, base_stride);
-         start = hypre_BoxIMin(box);
+   {
+      hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
+      hypre_ProjectBox(box, base_index, base_stride);
+      start = hypre_BoxIMin(box);
 
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
-         xp = hypre_StructVectorBoxData(x, i);
-         yp = hypre_StructVectorBoxData(y, i);
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
 
-         hypre_BoxGetStrideSize(box, base_stride, loop_size);
-         hypre_BoxLoop2Begin(loop_size,
-                             x_data_box, start, base_stride, xi,
-                             y_data_box, start, base_stride, yi);
+      hypre_BoxGetStrideSize(box, base_stride, loop_size);
+      hypre_BoxLoop2Begin(loop_size,
+                          x_data_box, start, base_stride, xi,
+                          y_data_box, start, base_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) HYPRE_SMP_SCHEDULE
 #endif
-	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
-            {
-               yp[yi] += alpha * xp[xi];
-            }
-         hypre_BoxLoop2End(xi, yi);
+      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+      {
+         yp[yi] += alpha * xp[xi];
       }
+      hypre_BoxLoop2End(xi, yi);
+   }
    hypre_BoxDestroy(box);
 
-   return ierr;
+   return hypre_error_flag;
 }

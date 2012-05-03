@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_struct_ls.h"
 #include "red_black_gs.h"
 
@@ -21,7 +18,6 @@
 #endif
 
 /*--------------------------------------------------------------------------
- * hypre_RedBlackGS
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -74,8 +70,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              compute_i, i, j, ii, jj, kk;
    HYPRE_Int              ni, nj, nk;
 
-   HYPRE_Int              ierr = 0;
-
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
     *----------------------------------------------------------*/
@@ -101,7 +95,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
       }
 
       hypre_EndTiming(relax_data -> time_index);
-      return ierr;
+      return hypre_error_flag;
    }
    else
    {
@@ -150,89 +144,89 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
          }
 
          hypre_ForBoxArrayI(i, compute_box_aa)
+         {
+            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+            A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+            b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
+            x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+
+            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            bp = hypre_StructVectorBoxData(b, i);
+            xp = hypre_StructVectorBoxData(x, i);
+
+            hypre_ForBoxI(j, compute_box_a)
             {
-               compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-               A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-               b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-               x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               start  = hypre_BoxIMin(compute_box);
+               hypre_BoxGetSize(compute_box, loop_size);
 
-               Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
-               bp = hypre_StructVectorBoxData(b, i);
-               xp = hypre_StructVectorBoxData(x, i);
-
-               hypre_ForBoxI(j, compute_box_a)
-                  {
-                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                     start  = hypre_BoxIMin(compute_box);
-                     hypre_BoxGetSize(compute_box, loop_size);
-
-                     /* Are we relaxing index start or start+(1,0,0)? */
-                     redblack = hypre_abs(hypre_IndexX(start) +
-                                          hypre_IndexY(start) +
-                                          hypre_IndexZ(start) + rb) % 2;
+               /* Are we relaxing index start or start+(1,0,0)? */
+               redblack = hypre_abs(hypre_IndexX(start) +
+                                    hypre_IndexY(start) +
+                                    hypre_IndexZ(start) + rb) % 2;
                      
-		     bstart = hypre_BoxIndexRank(b_dbox, start);
-		     xstart = hypre_BoxIndexRank(x_dbox, start);
-                     ni = hypre_IndexX(loop_size);
-                     nj = hypre_IndexY(loop_size);
-                     nk = hypre_IndexZ(loop_size);
-                     bni = hypre_BoxSizeX(b_dbox);
-                     xni = hypre_BoxSizeX(x_dbox);
-                     bnj = hypre_BoxSizeY(b_dbox);
-                     xnj = hypre_BoxSizeY(x_dbox);
+               bstart = hypre_BoxIndexRank(b_dbox, start);
+               xstart = hypre_BoxIndexRank(x_dbox, start);
+               ni = hypre_IndexX(loop_size);
+               nj = hypre_IndexY(loop_size);
+               nk = hypre_IndexZ(loop_size);
+               bni = hypre_BoxSizeX(b_dbox);
+               xni = hypre_BoxSizeX(x_dbox);
+               bnj = hypre_BoxSizeY(b_dbox);
+               xnj = hypre_BoxSizeY(x_dbox);
 
-                     if (constant_coeff == 1)
-                     {
-                        Ai= hypre_CCBoxIndexRank(A_dbox, start);
-                        AApd= 1.0/Ap[Ai];
+               if (constant_coeff == 1)
+               {
+                  Ai= hypre_CCBoxIndexRank(A_dbox, start);
+                  AApd= 1.0/Ap[Ai];
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
 #endif
-        		for (kk = 0; kk < nk; kk++)
+                  for (kk = 0; kk < nk; kk++)
+                  {
+                     for (jj = 0; jj < nj; jj++)
+                     {
+                        ii = (kk + jj + redblack) % 2;
+                        bi = bstart + kk*bnj*bni + jj*bni + ii;
+                        xi = xstart + kk*xnj*xni + jj*xni + ii;
+                        for (; ii < ni; ii+=2, bi+=2, xi+=2)
                         {
-                           for (jj = 0; jj < nj; jj++)
-                           {
-                              ii = (kk + jj + redblack) % 2;
-                              bi = bstart + kk*bnj*bni + jj*bni + ii;
-                              xi = xstart + kk*xnj*xni + jj*xni + ii;
-                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                              {
-                                 xp[xi] = bp[bi]*AApd;
-                              }
-                           }
+                           xp[xi] = bp[bi]*AApd;
                         }
                      }
+                  }
+               }
 
-                     else      /* variable coefficient diag */
-                     {
-		         Astart = hypre_BoxIndexRank(A_dbox, start);
-                         Ani = hypre_BoxSizeX(A_dbox);
-                         Anj = hypre_BoxSizeY(A_dbox);
+               else      /* variable coefficient diag */
+               {
+                  Astart = hypre_BoxIndexRank(A_dbox, start);
+                  Ani = hypre_BoxSizeX(A_dbox);
+                  Anj = hypre_BoxSizeY(A_dbox);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
 #endif
-		         for (kk = 0; kk < nk; kk++)
-                         {
-                            for (jj = 0; jj < nj; jj++)
-                            {
-                               ii = (kk + jj + redblack) % 2;
-                               Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                               bi = bstart + kk*bnj*bni + jj*bni + ii;
-                               xi = xstart + kk*xnj*xni + jj*xni + ii;
-                               for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                               {
-                                  xp[xi] = bp[bi] / Ap[Ai];
-                               }
-                            }
-                         }
-                      }
-
+                  for (kk = 0; kk < nk; kk++)
+                  {
+                     for (jj = 0; jj < nj; jj++)
+                     {
+                        ii = (kk + jj + redblack) % 2;
+                        Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
+                        bi = bstart + kk*bnj*bni + jj*bni + ii;
+                        xi = xstart + kk*xnj*xni + jj*xni + ii;
+                        for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
+                        {
+                           xp[xi] = bp[bi] / Ap[Ai];
+                        }
+                     }
                   }
+               }
+
             }
+         }
       }
       
       rb = (rb + 1) % 2;
@@ -266,243 +260,243 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
          }
 
          hypre_ForBoxArrayI(i, compute_box_aa)
+         {
+            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+            A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+            b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
+            x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+
+            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            bp = hypre_StructVectorBoxData(b, i);
+            xp = hypre_StructVectorBoxData(x, i);
+
+            hypre_ForBoxI(j, compute_box_a)
             {
-               compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-               A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-               b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-               x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               start  = hypre_BoxIMin(compute_box);
+               hypre_BoxGetSize(compute_box, loop_size);
 
-	       Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
-               bp = hypre_StructVectorBoxData(b, i);
-               xp = hypre_StructVectorBoxData(x, i);
+               /* Are we relaxing index start or start+(1,0,0)? */
+               redblack = hypre_abs(hypre_IndexX(start) +
+                                    hypre_IndexY(start) +
+                                    hypre_IndexZ(start) + rb) % 2;
 
-               hypre_ForBoxI(j, compute_box_a)
+
+               bstart = hypre_BoxIndexRank(b_dbox, start);
+               xstart = hypre_BoxIndexRank(x_dbox, start);
+               ni = hypre_IndexX(loop_size);
+               nj = hypre_IndexY(loop_size);
+               nk = hypre_IndexZ(loop_size);
+               bni= hypre_BoxSizeX(b_dbox);
+               xni= hypre_BoxSizeX(x_dbox);
+               bnj= hypre_BoxSizeY(b_dbox);
+               xnj= hypre_BoxSizeY(x_dbox);
+               Ai = hypre_CCBoxIndexRank(A_dbox, start);
+
+               switch(stencil_size)
+               {
+                  case 7:
+                     App = hypre_StructMatrixBoxData(A, i, offd[5]);
+                     App5= App[Ai];
+                     App = hypre_StructMatrixBoxData(A, i, offd[4]);
+                     App4= App[Ai];
+                     xoff5 = hypre_BoxOffsetDistance(
+                        x_dbox, stencil_shape[offd[5]]);
+                     xoff4 = hypre_BoxOffsetDistance(
+                        x_dbox, stencil_shape[offd[4]]);
+
+                  case 5:
+                     App = hypre_StructMatrixBoxData(A, i, offd[3]);
+                     App3= App[Ai];
+                     App = hypre_StructMatrixBoxData(A, i, offd[2]);
+                     App2= App[Ai];
+                     xoff3 = hypre_BoxOffsetDistance(
+                        x_dbox, stencil_shape[offd[3]]);
+                     xoff2 = hypre_BoxOffsetDistance(
+                        x_dbox, stencil_shape[offd[2]]);
+
+                  case 3:
+                     App = hypre_StructMatrixBoxData(A, i, offd[1]);
+                     App1= App[Ai];
+                     App = hypre_StructMatrixBoxData(A, i, offd[0]);
+                     App0= App[Ai];
+                     xoff1 = hypre_BoxOffsetDistance(
+                        x_dbox, stencil_shape[offd[1]]);
+                     xoff0 = hypre_BoxOffsetDistance(
+                        x_dbox, stencil_shape[offd[0]]);
+                     break;
+               }
+
+               if (constant_coeff == 1)
+               {
+                  AApd = 1/Ap[Ai];
+
+                  switch(stencil_size)
                   {
-                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                     start  = hypre_BoxIMin(compute_box);
-                     hypre_BoxGetSize(compute_box, loop_size);
-
-                     /* Are we relaxing index start or start+(1,0,0)? */
-                     redblack = hypre_abs(hypre_IndexX(start) +
-                                          hypre_IndexY(start) +
-                                          hypre_IndexZ(start) + rb) % 2;
-
-
-           	     bstart = hypre_BoxIndexRank(b_dbox, start);
-		     xstart = hypre_BoxIndexRank(x_dbox, start);
-                     ni = hypre_IndexX(loop_size);
-                     nj = hypre_IndexY(loop_size);
-                     nk = hypre_IndexZ(loop_size);
-                     bni= hypre_BoxSizeX(b_dbox);
-                     xni= hypre_BoxSizeX(x_dbox);
-                     bnj= hypre_BoxSizeY(b_dbox);
-                     xnj= hypre_BoxSizeY(x_dbox);
-                     Ai = hypre_CCBoxIndexRank(A_dbox, start);
-
-                     switch(stencil_size)
-                     {
-                        case 7:
-                           App = hypre_StructMatrixBoxData(A, i, offd[5]);
-                           App5= App[Ai];
-                           App = hypre_StructMatrixBoxData(A, i, offd[4]);
-                           App4= App[Ai];
-                           xoff5 = hypre_BoxOffsetDistance(
-                               x_dbox, stencil_shape[offd[5]]);
-                           xoff4 = hypre_BoxOffsetDistance(
-                               x_dbox, stencil_shape[offd[4]]);
-
-                        case 5:
-                           App = hypre_StructMatrixBoxData(A, i, offd[3]);
-                           App3= App[Ai];
-                           App = hypre_StructMatrixBoxData(A, i, offd[2]);
-                           App2= App[Ai];
-                           xoff3 = hypre_BoxOffsetDistance(
-                               x_dbox, stencil_shape[offd[3]]);
-                           xoff2 = hypre_BoxOffsetDistance(
-                               x_dbox, stencil_shape[offd[2]]);
-
-                        case 3:
-                           App = hypre_StructMatrixBoxData(A, i, offd[1]);
-                           App1= App[Ai];
-                           App = hypre_StructMatrixBoxData(A, i, offd[0]);
-                           App0= App[Ai];
-                           xoff1 = hypre_BoxOffsetDistance(
-                               x_dbox, stencil_shape[offd[1]]);
-                           xoff0 = hypre_BoxOffsetDistance(
-                               x_dbox, stencil_shape[offd[0]]);
-                           break;
-                     }
-
-                     if (constant_coeff == 1)
-                     {
-                        AApd = 1/Ap[Ai];
-
-                        switch(stencil_size)
+                     case 7:
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
+                        for (kk = 0; kk < nk; kk++)
                         {
-                           case 7:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                              for (kk = 0; kk < nk; kk++)
+                           for (jj = 0; jj < nj; jj++)
+                           {
+                              ii = (kk + jj + redblack) % 2;
+                              bi = bstart + kk*bnj*bni + jj*bni + ii;
+                              xi = xstart + kk*xnj*xni + jj*xni + ii;
+                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
                               {
-                                 for (jj = 0; jj < nj; jj++)
-                                 {
-                                    ii = (kk + jj + redblack) % 2;
-                                    bi = bstart + kk*bnj*bni + jj*bni + ii;
-                                    xi = xstart + kk*xnj*xni + jj*xni + ii;
-                                    for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                                    {
-                                       xp[xi] =
-                                          (bp[bi] - 
-                                           App0*xp[xi + xoff0] -
-                                           App1*xp[xi + xoff1] -
-                                           App2*xp[xi + xoff2] -
-                                           App3*xp[xi + xoff3] -
-                                           App4*xp[xi + xoff4] -
-                                           App5*xp[xi + xoff5])*AApd;
-                                    }
-                                 }
+                                 xp[xi] =
+                                    (bp[bi] - 
+                                     App0*xp[xi + xoff0] -
+                                     App1*xp[xi + xoff1] -
+                                     App2*xp[xi + xoff2] -
+                                     App3*xp[xi + xoff3] -
+                                     App4*xp[xi + xoff4] -
+                                     App5*xp[xi + xoff5])*AApd;
                               }
-                           break;
-
-                           case 5:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                              for (kk = 0; kk < nk; kk++)
-                              {
-                                 for (jj = 0; jj < nj; jj++)
-                                 {
-                                    ii = (kk + jj + redblack) % 2;
-                                    bi = bstart + kk*bnj*bni + jj*bni + ii;
-                                    xi = xstart + kk*xnj*xni + jj*xni + ii;
-                                    for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                                    {
-                                       xp[xi] =
-                                          (bp[bi] -
-                                           App0*xp[xi + xoff0] -
-                                           App1*xp[xi + xoff1] -
-                                           App2*xp[xi + xoff2] -
-                                           App3*xp[xi + xoff3])*AApd;
-                                    }
-                                 }
-                              }
-                           break;
-
-                           case 3:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                              for (kk = 0; kk < nk; kk++)
-                              {
-                                 for (jj = 0; jj < nj; jj++)
-                                 {
-                                    ii = (kk + jj + redblack) % 2;
-                                    bi = bstart + kk*bnj*bni + jj*bni + ii;
-                                    xi = xstart + kk*xnj*xni + jj*xni + ii;
-                                    for (; ii < ni; ii+=2, bi+=2, xi+=2)
-                                    {
-                                       xp[xi] =
-                                          (bp[bi] -
-                                           App0*xp[xi + xoff0] -
-                                           App1*xp[xi + xoff1])*AApd;
-                                    }
-                                 }
-                              }
-                           break;
+                           }
                         }
+                        break;
 
-                     }  /* if (constant_coeff == 1) */
-
-                     else /* variable diagonal */
-                     {
-		        Astart = hypre_BoxIndexRank(A_dbox, start);
-                        Ani = hypre_BoxSizeX(A_dbox);
-                        Anj = hypre_BoxSizeY(A_dbox);
-
-                        switch(stencil_size)
+                     case 5:
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
+                        for (kk = 0; kk < nk; kk++)
                         {
-                           case 7:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                           for (kk = 0; kk < nk; kk++)
+                           for (jj = 0; jj < nj; jj++)
                            {
-                              for (jj = 0; jj < nj; jj++)
+                              ii = (kk + jj + redblack) % 2;
+                              bi = bstart + kk*bnj*bni + jj*bni + ii;
+                              xi = xstart + kk*xnj*xni + jj*xni + ii;
+                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
                               {
-                                 ii = (kk + jj + redblack) % 2;
-                                 Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                                 bi = bstart + kk*bnj*bni + jj*bni + ii;
-                                 xi = xstart + kk*xnj*xni + jj*xni + ii;
-                                 for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                                 {
-                                    xp[xi] =
-                                       (bp[bi] - 
-                                        App0*xp[xi + xoff0] -
-                                        App1*xp[xi + xoff1] -
-                                        App2*xp[xi + xoff2] -
-                                        App3*xp[xi + xoff3] -
-                                        App4*xp[xi + xoff4] -
-                                        App5*xp[xi + xoff5]) / Ap[Ai];
-                                 }
+                                 xp[xi] =
+                                    (bp[bi] -
+                                     App0*xp[xi + xoff0] -
+                                     App1*xp[xi + xoff1] -
+                                     App2*xp[xi + xoff2] -
+                                     App3*xp[xi + xoff3])*AApd;
                               }
                            }
-                           break;
+                        }
+                        break;
 
-                           case 5:
+                     case 3:
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
 #endif
-                           for (kk = 0; kk < nk; kk++)
+                        for (kk = 0; kk < nk; kk++)
+                        {
+                           for (jj = 0; jj < nj; jj++)
                            {
-                              for (jj = 0; jj < nj; jj++)
+                              ii = (kk + jj + redblack) % 2;
+                              bi = bstart + kk*bnj*bni + jj*bni + ii;
+                              xi = xstart + kk*xnj*xni + jj*xni + ii;
+                              for (; ii < ni; ii+=2, bi+=2, xi+=2)
                               {
-                                 ii = (kk + jj + redblack) % 2;
-                                 Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                                 bi = bstart + kk*bnj*bni + jj*bni + ii;
-                                 xi = xstart + kk*xnj*xni + jj*xni + ii;
-                                 for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                                 {
-                                    xp[xi] =
-                                       (bp[bi] - 
-                                        App0*xp[xi + xoff0] -
-                                        App1*xp[xi + xoff1] -
-                                        App2*xp[xi + xoff2] -
-                                        App3*xp[xi + xoff3]) / Ap[Ai]; 
-                                 }
+                                 xp[xi] =
+                                    (bp[bi] -
+                                     App0*xp[xi + xoff0] -
+                                     App1*xp[xi + xoff1])*AApd;
                               }
                            }
-                           break;
-
-                           case 3:
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
-#endif
-                           for (kk = 0; kk < nk; kk++)
-                           {
-                              for (jj = 0; jj < nj; jj++)
-                              {
-                                 ii = (kk + jj + redblack) % 2;
-                                 Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                                 bi = bstart + kk*bnj*bni + jj*bni + ii;
-                                 xi = xstart + kk*xnj*xni + jj*xni + ii;
-                                 for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                                 {
-                                    xp[xi] =
-                                       (bp[bi] -
-                                        App0*xp[xi + xoff0] -
-                                        App1*xp[xi + xoff1]) / Ap[Ai]; 
-                                 }
-                              }
-                           }
-                           break;
-
-                        }  /* switch(stencil_size) */
-                     }     /* else */
+                        }
+                        break;
                   }
+
+               }  /* if (constant_coeff == 1) */
+
+               else /* variable diagonal */
+               {
+                  Astart = hypre_BoxIndexRank(A_dbox, start);
+                  Ani = hypre_BoxSizeX(A_dbox);
+                  Anj = hypre_BoxSizeY(A_dbox);
+
+                  switch(stencil_size)
+                  {
+                     case 7:
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
+                        for (kk = 0; kk < nk; kk++)
+                        {
+                           for (jj = 0; jj < nj; jj++)
+                           {
+                              ii = (kk + jj + redblack) % 2;
+                              Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
+                              bi = bstart + kk*bnj*bni + jj*bni + ii;
+                              xi = xstart + kk*xnj*xni + jj*xni + ii;
+                              for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
+                              {
+                                 xp[xi] =
+                                    (bp[bi] - 
+                                     App0*xp[xi + xoff0] -
+                                     App1*xp[xi + xoff1] -
+                                     App2*xp[xi + xoff2] -
+                                     App3*xp[xi + xoff3] -
+                                     App4*xp[xi + xoff4] -
+                                     App5*xp[xi + xoff5]) / Ap[Ai];
+                              }
+                           }
+                        }
+                        break;
+
+                     case 5:
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
+                        for (kk = 0; kk < nk; kk++)
+                        {
+                           for (jj = 0; jj < nj; jj++)
+                           {
+                              ii = (kk + jj + redblack) % 2;
+                              Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
+                              bi = bstart + kk*bnj*bni + jj*bni + ii;
+                              xi = xstart + kk*xnj*xni + jj*xni + ii;
+                              for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
+                              {
+                                 xp[xi] =
+                                    (bp[bi] - 
+                                     App0*xp[xi + xoff0] -
+                                     App1*xp[xi + xoff1] -
+                                     App2*xp[xi + xoff2] -
+                                     App3*xp[xi + xoff3]) / Ap[Ai]; 
+                              }
+                           }
+                        }
+                        break;
+
+                     case 3:
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#endif
+                        for (kk = 0; kk < nk; kk++)
+                        {
+                           for (jj = 0; jj < nj; jj++)
+                           {
+                              ii = (kk + jj + redblack) % 2;
+                              Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
+                              bi = bstart + kk*bnj*bni + jj*bni + ii;
+                              xi = xstart + kk*xnj*xni + jj*xni + ii;
+                              for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
+                              {
+                                 xp[xi] =
+                                    (bp[bi] -
+                                     App0*xp[xi + xoff0] -
+                                     App1*xp[xi + xoff1]) / Ap[Ai]; 
+                              }
+                           }
+                        }
+                        break;
+
+                  }  /* switch(stencil_size) */
+               }     /* else */
             }
+         }
       }
 
       rb = (rb + 1) % 2;
@@ -518,7 +512,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    hypre_IncFLOPCount(relax_data -> flops);
    hypre_EndTiming(relax_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 

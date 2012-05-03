@@ -10,19 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGCreateInterpOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
@@ -64,22 +55,20 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGSetupInterpOp
+ * This routine uses SMGRelax to set up the interpolation operator.
  *
- *    This routine uses SMGRelax to set up the interpolation operator.
+ * To illustrate how it proceeds, consider setting up the the {0, 0, -1}
+ * stencil coefficient of P^T.  This coefficient corresponds to the
+ * {0, 0, 1} coefficient of P.  Do one sweep of plane relaxation on the
+ * fine grid points for the system, A_mask x = b, with initial guess
+ * x_0 = all ones and right-hand-side b = all zeros.  The A_mask matrix
+ * contains all coefficients of A except for those in the same direction
+ * as {0, 0, -1}.
  *
- *    To illustrate how it proceeds, consider setting up the the {0, 0, -1}
- *    stencil coefficient of P^T.  This coefficient corresponds to the
- *    {0, 0, 1} coefficient of P.  Do one sweep of plane relaxation on the
- *    fine grid points for the system, A_mask x = b, with initial guess
- *    x_0 = all ones and right-hand-side b = all zeros.  The A_mask matrix
- *    contains all coefficients of A except for those in the same direction
- *    as {0, 0, -1}.
- *
- *    The relaxation data for the multigrid algorithm is passed in and used.
- *    When this routine returns, the only modified relaxation parameters
- *    are MaxIter, RegSpace and PreSpace info, the right-hand-side and
- *    solution info.
+ * The relaxation data for the multigrid algorithm is passed in and used.
+ * When this routine returns, the only modified relaxation parameters
+ * are MaxIter, RegSpace and PreSpace info, the right-hand-side and
+ * solution info.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -136,8 +125,6 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    HYPRE_Int             compute_i, i, j;
    HYPRE_Int             loopi, loopj, loopk;
                         
-   HYPRE_Int             ierr = 0;
-
    /*--------------------------------------------------------
     * Initialize some things
     *--------------------------------------------------------*/
@@ -245,47 +232,47 @@ hypre_SMGSetupInterpOp( void               *relax_data,
          }
 
          hypre_ForBoxArrayI(i, compute_box_aa)
-            {
-               compute_box_a =
-                  hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+         {
+            compute_box_a =
+               hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-               x_data_box  =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-               PT_data_box =
-                  hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
+            x_data_box  =
+               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            PT_data_box =
+               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(PT), i);
  
-               xp  = hypre_StructVectorBoxData(x, i);
-               PTp = hypre_StructMatrixBoxData(PT, i, si);
+            xp  = hypre_StructVectorBoxData(x, i);
+            PTp = hypre_StructMatrixBoxData(PT, i, si);
 
-               hypre_ForBoxI(j, compute_box_a)
-                  {
-                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
+            hypre_ForBoxI(j, compute_box_a)
+            {
+               compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-                     hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-                     hypre_StructMapFineToCoarse(start, cindex, stride,
-                                                 startc);
+               hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+               hypre_StructMapFineToCoarse(start, cindex, stride,
+                                           startc);
 
-                     /* shift start index to appropriate F-point */
-                     for (d = 0; d < 3; d++)
-                     {
-                        hypre_IndexD(start, d) +=
-                           hypre_IndexD(PT_stencil_shape[si], d);
-                     }
+               /* shift start index to appropriate F-point */
+               for (d = 0; d < 3; d++)
+               {
+                  hypre_IndexD(start, d) +=
+                     hypre_IndexD(PT_stencil_shape[si], d);
+               }
 
-                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                     hypre_BoxLoop2Begin(loop_size,
-                                         x_data_box,  start,  stride,  xi,
-                                         PT_data_box, startc, stridec, PTi);
+               hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+               hypre_BoxLoop2Begin(loop_size,
+                                   x_data_box,  start,  stride,  xi,
+                                   PT_data_box, startc, stridec, PTi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,PTi) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop2For(loopi, loopj, loopk, xi, PTi)
-                        {
-                           PTp[PTi] = xp[xi];
-                        }
-                     hypre_BoxLoop2End(xi, PTi);
-                  }
+               hypre_BoxLoop2For(loopi, loopj, loopk, xi, PTi)
+               {
+                  PTp[PTi] = xp[xi];
+               }
+               hypre_BoxLoop2End(xi, PTi);
             }
+         }
       }
 
       /*-----------------------------------------------------
@@ -306,6 +293,6 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_StructInterpAssemble(A, PT, 1, cdir, cindex, stride);
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 

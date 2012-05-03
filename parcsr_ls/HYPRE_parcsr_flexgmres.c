@@ -40,8 +40,12 @@ HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
 
+   if (!solver)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
    *solver = ( (HYPRE_Solver) hypre_FlexGMRESCreate( fgmres_functions ) );
-   if (!solver) hypre_error_in_arg(2);
 
    return hypre_error_flag;
 }

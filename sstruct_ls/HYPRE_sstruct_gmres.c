@@ -10,20 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
-/******************************************************************************
- *
- * HYPRE_SStructGMRES interface
- *
- *****************************************************************************/
-
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -44,11 +33,10 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
 
    *solver = ( (HYPRE_SStructSolver) hypre_GMRESCreate( gmres_functions ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -58,7 +46,6 @@ HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -74,7 +61,6 @@ HYPRE_SStructGMRESSetup( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -90,7 +76,6 @@ HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -101,7 +86,6 @@ HYPRE_SStructGMRESSetKDim( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -111,7 +95,6 @@ HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
    return( HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -121,7 +104,6 @@ HYPRE_SStructGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
    return( HYPRE_GMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -132,7 +114,6 @@ HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -143,7 +124,6 @@ HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetStopCrit
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -154,7 +134,6 @@ HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -170,7 +149,6 @@ HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -181,7 +159,6 @@ HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -192,7 +169,6 @@ HYPRE_SStructGMRESSetPrintLevel( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -203,7 +179,6 @@ HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -214,7 +189,6 @@ HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGMRESGetResidual
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

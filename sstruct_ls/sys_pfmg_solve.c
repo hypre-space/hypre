@@ -10,21 +10,12 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -67,7 +58,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                     
    HYPRE_Int             i, l;
                     
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -107,7 +97,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       }
 
       hypre_EndTiming(sys_pfmg_data -> time_index);
-      return ierr;
+      return hypre_error_flag;
    }
 
    /* part of convergence check */
@@ -128,7 +118,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          }
 
          hypre_EndTiming(sys_pfmg_data -> time_index);
-         return ierr;
+         return hypre_error_flag;
       }
    }
 
@@ -153,7 +143,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       /* compute fine grid residual (b - Ax) */
       hypre_SStructPCopy(b_l[0], r_l[0]);
       hypre_SStructPMatvecCompute(matvec_data_l[0],
-                                 -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+                                  -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
 
       /* convergence check */
       if (tol > 0.0)
@@ -209,7 +199,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                /* compute residual (b - Ax) */
                hypre_SStructPCopy(b_l[l], r_l[l]);
                hypre_SStructPMatvecCompute(matvec_data_l[l],
-                                          -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+                                           -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
             }
             else
             {
@@ -220,7 +210,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
             /* restrict residual */
             hypre_SysSemiRestrict(restrict_data_l[l],
-                                   RT_l[l], r_l[l], b_l[l+1]);
+                                  RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
             hypre_sprintf(filename, "zout_xdown.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
@@ -312,6 +302,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
    hypre_EndTiming(sys_pfmg_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 

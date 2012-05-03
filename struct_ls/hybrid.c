@@ -10,14 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
@@ -103,14 +95,13 @@ HYPRE_Int
 hypre_HybridDestroy( void  *hybrid_vdata )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int ierr = 0;
 
    if (hybrid_data)
    {
       hypre_TFree(hybrid_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -122,11 +113,10 @@ hypre_HybridSetTol( void   *hybrid_vdata,
                     double  tol       )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> tol) = tol;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -138,11 +128,10 @@ hypre_HybridSetConvergenceTol( void   *hybrid_vdata,
                                double  cf_tol       )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> cf_tol) = cf_tol;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -154,11 +143,10 @@ hypre_HybridSetDSCGMaxIter( void   *hybrid_vdata,
                             HYPRE_Int     dscg_max_its )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> dscg_max_its) = dscg_max_its;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -170,11 +158,10 @@ hypre_HybridSetPCGMaxIter( void   *hybrid_vdata,
                            HYPRE_Int     pcg_max_its  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> pcg_max_its) = pcg_max_its;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -186,11 +173,10 @@ hypre_HybridSetPCGAbsoluteTolFactor( void   *hybrid_vdata,
                                      double  pcg_atolf  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> pcg_atolf) = pcg_atolf;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -202,11 +188,10 @@ hypre_HybridSetTwoNorm( void *hybrid_vdata,
                         HYPRE_Int   two_norm  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> two_norm) = two_norm;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -215,14 +200,13 @@ hypre_HybridSetTwoNorm( void *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetStopCrit( void *hybrid_vdata,
-                        HYPRE_Int   stop_crit  )
+                         HYPRE_Int   stop_crit  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> stop_crit) = stop_crit;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -234,11 +218,10 @@ hypre_HybridSetRelChange( void *hybrid_vdata,
                           HYPRE_Int   rel_change  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> rel_change) = rel_change;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -247,14 +230,13 @@ hypre_HybridSetRelChange( void *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetSolverType( void *hybrid_vdata,
-                          HYPRE_Int   solver_type  )
+                           HYPRE_Int   solver_type  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> solver_type) = solver_type;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -263,14 +245,13 @@ hypre_HybridSetSolverType( void *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetKDim( void *hybrid_vdata,
-                          HYPRE_Int   k_dim  )
+                     HYPRE_Int   k_dim  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> k_dim) = k_dim;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -284,14 +265,13 @@ hypre_HybridSetPrecond( void  *pcg_vdata,
                         void  *pcg_precond          )
 {
    hypre_HybridData *pcg_data = pcg_vdata;
-   HYPRE_Int         ierr = 0;
  
    (pcg_data -> pcg_default)       = 0;
    (pcg_data -> pcg_precond_solve) = pcg_precond_solve;
    (pcg_data -> pcg_precond_setup) = pcg_precond_setup;
    (pcg_data -> pcg_precond)       = pcg_precond;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -303,11 +283,10 @@ hypre_HybridSetLogging( void *hybrid_vdata,
                         HYPRE_Int   logging  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> logging) = logging;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -316,14 +295,13 @@ hypre_HybridSetLogging( void *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetPrintLevel( void *hybrid_vdata,
-                        HYPRE_Int   print_level  )
+                           HYPRE_Int   print_level  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    (hybrid_data -> print_level) = print_level;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -335,11 +313,10 @@ hypre_HybridGetNumIterations( void   *hybrid_vdata,
                               HYPRE_Int    *num_its      )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    *num_its = (hybrid_data -> dscg_num_its) + (hybrid_data -> pcg_num_its);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -351,11 +328,10 @@ hypre_HybridGetDSCGNumIterations( void   *hybrid_vdata,
                                   HYPRE_Int    *dscg_num_its )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    *dscg_num_its = (hybrid_data -> dscg_num_its);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -367,11 +343,10 @@ hypre_HybridGetPCGNumIterations( void   *hybrid_vdata,
                                  HYPRE_Int    *pcg_num_its  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    *pcg_num_its = (hybrid_data -> pcg_num_its);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -383,11 +358,10 @@ hypre_HybridGetFinalRelativeResidualNorm( void   *hybrid_vdata,
                                           double *final_rel_res_norm )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-   HYPRE_Int         ierr = 0;
 
    *final_rel_res_norm = (hybrid_data -> final_rel_res_norm);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -400,9 +374,7 @@ hypre_HybridSetup( void               *hybrid_vdata,
                    hypre_StructVector *b,
                    hypre_StructVector *x            )
 {
-   HYPRE_Int ierr = 0;
-    
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -456,9 +428,6 @@ hypre_HybridSolve( void               *hybrid_vdata,
    double             res_norm;
    HYPRE_Int          myid;
 
-   HYPRE_Int          ierr = 0;
-
-
    if (solver_type == 1)
    {
       /*--------------------------------------------------------------------
@@ -466,15 +435,15 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       pcg_functions =
          hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
-         hypre_StructKrylovCommInfo,
-         hypre_StructKrylovCreateVector,
-         hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
-         hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
-         hypre_StructKrylovClearVector,
-         hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
-         hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+            hypre_CAlloc, hypre_StructKrylovFree,
+            hypre_StructKrylovCommInfo,
+            hypre_StructKrylovCreateVector,
+            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+            hypre_StructKrylovClearVector,
+            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
       pcg_solver = hypre_PCGCreate( pcg_functions );
 
       hypre_PCGSetMaxIter(pcg_solver, dscg_max_its);
@@ -490,9 +459,9 @@ hypre_HybridSolve( void               *hybrid_vdata,
       pcg_precond = NULL;
 
       hypre_PCGSetPrecond(pcg_solver,
-                       HYPRE_StructDiagScale,
-                       HYPRE_StructDiagScaleSetup,
-                       pcg_precond);
+                          HYPRE_StructDiagScale,
+                          HYPRE_StructDiagScaleSetup,
+                          pcg_precond);
       hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
 
@@ -530,16 +499,16 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       gmres_functions =
          hypre_GMRESFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree,
-         hypre_StructKrylovCommInfo,
-         hypre_StructKrylovCreateVector,
-         hypre_StructKrylovCreateVectorArray,
-         hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
-         hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
-         hypre_StructKrylovClearVector,
-         hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
-         hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+            hypre_CAlloc, hypre_StructKrylovFree,
+            hypre_StructKrylovCommInfo,
+            hypre_StructKrylovCreateVector,
+            hypre_StructKrylovCreateVectorArray,
+            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+            hypre_StructKrylovClearVector,
+            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
       pcg_solver = hypre_GMRESCreate( gmres_functions );
 
       hypre_GMRESSetMaxIter(pcg_solver, dscg_max_its);
@@ -555,9 +524,9 @@ hypre_HybridSolve( void               *hybrid_vdata,
       pcg_precond = NULL;
 
       hypre_GMRESSetPrecond(pcg_solver,
-                       HYPRE_StructDiagScale,
-                       HYPRE_StructDiagScaleSetup,
-                       pcg_precond);
+                            HYPRE_StructDiagScale,
+                            HYPRE_StructDiagScaleSetup,
+                            pcg_precond);
       hypre_GMRESSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
 
@@ -586,14 +555,14 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       bicgstab_functions =
          hypre_BiCGSTABFunctionsCreate(
-         hypre_StructKrylovCreateVector,
-         hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
-         hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
-         hypre_StructKrylovClearVector,
-         hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
-         hypre_StructKrylovCommInfo,
-         hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+            hypre_StructKrylovCreateVector,
+            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+            hypre_StructKrylovClearVector,
+            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+            hypre_StructKrylovCommInfo,
+            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
       pcg_solver = hypre_BiCGSTABCreate( bicgstab_functions );
 
       hypre_BiCGSTABSetMaxIter(pcg_solver, dscg_max_its);
@@ -606,9 +575,9 @@ hypre_HybridSolve( void               *hybrid_vdata,
       pcg_precond = NULL;
 
       hypre_BiCGSTABSetPrecond(pcg_solver,
-                       HYPRE_StructDiagScale,
-                       HYPRE_StructDiagScaleSetup,
-                       pcg_precond);
+                               HYPRE_StructDiagScale,
+                               HYPRE_StructDiagScaleSetup,
+                               pcg_precond);
       hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
 
@@ -658,16 +627,16 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_PCGDestroy(pcg_solver);
 
          pcg_functions =
-         hypre_PCGFunctionsCreate(
-            hypre_CAlloc, hypre_StructKrylovFree,
-            hypre_StructKrylovCommInfo,
-            hypre_StructKrylovCreateVector,
-            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
-            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
-            hypre_StructKrylovClearVector,
-            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
-            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+            hypre_PCGFunctionsCreate(
+               hypre_CAlloc, hypre_StructKrylovFree,
+               hypre_StructKrylovCommInfo,
+               hypre_StructKrylovCreateVector,
+               hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+               hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+               hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+               hypre_StructKrylovClearVector,
+               hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+               hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
          pcg_solver = hypre_PCGCreate( pcg_functions );
 
          hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
@@ -684,17 +653,17 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_GMRESDestroy(pcg_solver);
 
          gmres_functions =
-         hypre_GMRESFunctionsCreate(
-            hypre_CAlloc, hypre_StructKrylovFree,
-            hypre_StructKrylovCommInfo,
-            hypre_StructKrylovCreateVector,
-            hypre_StructKrylovCreateVectorArray,
-            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
-            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
-            hypre_StructKrylovClearVector,
-            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
-            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+            hypre_GMRESFunctionsCreate(
+               hypre_CAlloc, hypre_StructKrylovFree,
+               hypre_StructKrylovCommInfo,
+               hypre_StructKrylovCreateVector,
+               hypre_StructKrylovCreateVectorArray,
+               hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+               hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+               hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+               hypre_StructKrylovClearVector,
+               hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+               hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
          pcg_solver = hypre_GMRESCreate( gmres_functions );
 
          hypre_GMRESSetMaxIter(pcg_solver, pcg_max_its);
@@ -711,15 +680,15 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_BiCGSTABDestroy(pcg_solver);
 
          bicgstab_functions =
-         hypre_BiCGSTABFunctionsCreate(
-            hypre_StructKrylovCreateVector,
-            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
-            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
-            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
-            hypre_StructKrylovClearVector,
-            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
-            hypre_StructKrylovCommInfo,
-            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+            hypre_BiCGSTABFunctionsCreate(
+               hypre_StructKrylovCreateVector,
+               hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+               hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+               hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+               hypre_StructKrylovClearVector,
+               hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+               hypre_StructKrylovCommInfo,
+               hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
          pcg_solver = hypre_BiCGSTABCreate( bicgstab_functions );
 
          hypre_BiCGSTABSetMaxIter(pcg_solver, pcg_max_its);
@@ -730,7 +699,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, 0.0);
       }
 
-         /* Setup preconditioner */
+      /* Setup preconditioner */
       if (pcg_default)
       {
          pcg_precond = hypre_SMGCreate(comm);
@@ -753,7 +722,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       if (solver_type == 1)
       {
          hypre_PCGSetPrecond(pcg_solver,
-                          pcg_precond_solve, pcg_precond_setup, pcg_precond);
+                             pcg_precond_solve, pcg_precond_setup, pcg_precond);
          hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Solve */
@@ -781,7 +750,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
       else if (solver_type == 2)
       {
          hypre_GMRESSetPrecond(pcg_solver,
-                          pcg_precond_solve, pcg_precond_setup, pcg_precond);
+                               pcg_precond_solve, pcg_precond_setup, pcg_precond);
          hypre_GMRESSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Solve */
@@ -798,8 +767,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
       }
       else
       {
-         hypre_BiCGSTABSetPrecond(pcg_solver,
-                          pcg_precond_solve, pcg_precond_setup, pcg_precond);
+         hypre_BiCGSTABSetPrecond(pcg_solver, pcg_precond_solve,
+                                  pcg_precond_setup, pcg_precond);
          hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Solve */
@@ -821,7 +790,6 @@ hypre_HybridSolve( void               *hybrid_vdata,
       }
    }
 
-   return ierr;
-   
+   return hypre_error_flag;
 }
 

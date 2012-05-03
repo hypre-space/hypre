@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * HYPRE_StructGrid interface
@@ -29,11 +27,9 @@ HYPRE_StructGridCreate( MPI_Comm          comm,
                         HYPRE_Int         dim,
                         HYPRE_StructGrid *grid )
 {
-   HYPRE_Int ierr;
+   hypre_StructGridCreate(comm, dim, grid);
 
-   ierr = hypre_StructGridCreate(comm, dim, grid);
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -99,9 +95,7 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
 HYPRE_Int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
-
- return ( hypre_StructGridAssemble(grid) );
-
+   return ( hypre_StructGridAssemble(grid) );
 }
 
 /*---------------------------------------------------------------------------
@@ -113,5 +107,5 @@ HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 HYPRE_Int
 HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid, HYPRE_Int *num_ghost )
 {
-  return ( hypre_StructGridSetNumGhost(grid, num_ghost) );
+   return ( hypre_StructGridSetNumGhost(grid, num_ghost) );
 }

@@ -888,7 +888,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
 /*   HYPRE_Int *S_i = hypre_CSRMatrixI(S_diag); */
 /*   HYPRE_Int *S_j = hypre_CSRMatrixJ(S_diag); */
   HYPRE_Int *S_offd_i = hypre_CSRMatrixI(S_offd);
-  HYPRE_Int *S_offd_j;
+  HYPRE_Int *S_offd_j = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
@@ -1298,7 +1298,7 @@ HYPRE_Int AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HYPRE_In
   HYPRE_Int *S_i = hypre_CSRMatrixI(S_diag);
   HYPRE_Int *S_j = hypre_CSRMatrixJ(S_diag);
   HYPRE_Int *S_offd_i = hypre_CSRMatrixI(S_offd);
-  HYPRE_Int *S_offd_j;
+  HYPRE_Int *S_offd_j = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int added_cpts=0;

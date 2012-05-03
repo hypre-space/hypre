@@ -9,10 +9,6 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-/******************************************************************************
- *
- *
- *****************************************************************************/
 
 #include "_hypre_struct_ls.h"
 #include "smg.h"
@@ -20,7 +16,6 @@
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
- * hypre_SMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -86,7 +81,6 @@ hypre_SMGSetup( void               *smg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -433,6 +427,6 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 

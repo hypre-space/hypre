@@ -118,7 +118,7 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    HYPRE_Int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int             *S_offd_j;
+   HYPRE_Int             *S_offd_j = NULL;
 
    HYPRE_Int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int              i, j, ig, jS, jj;

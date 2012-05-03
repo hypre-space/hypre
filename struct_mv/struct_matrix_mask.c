@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Member functions for hypre_StructMatrix class.
@@ -93,13 +91,13 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    data_indices = hypre_StructMatrixDataIndices(matrix);
    mask_data_indices = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space));
    hypre_ForBoxI(i, data_space)
+   {
+      mask_data_indices[i] = hypre_TAlloc(HYPRE_Int, num_stencil_indices);
+      for (j = 0; j < num_stencil_indices; j++)
       {
-         mask_data_indices[i] = hypre_TAlloc(HYPRE_Int, num_stencil_indices);
-         for (j = 0; j < num_stencil_indices; j++)
-         {
-            mask_data_indices[i][j] = data_indices[i][stencil_indices[j]];
-         }
+         mask_data_indices[i][j] = data_indices[i][stencil_indices[j]];
       }
+   }
    hypre_StructMatrixDataIndices(mask) = mask_data_indices;
 
    hypre_StructMatrixSymmetric(mask) = hypre_StructMatrixSymmetric(matrix);

@@ -27,8 +27,12 @@
 HYPRE_Int
 HYPRE_ParCSRHybridCreate( HYPRE_Solver *solver )
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
    *solver = ( (HYPRE_Solver) hypre_AMGHybridCreate( ) );
-   if (!solver) hypre_error_in_arg(1);
    return hypre_error_flag;
 }
 

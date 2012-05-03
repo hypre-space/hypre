@@ -10,11 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 
 /* this currently cannot be greater than 7 */
@@ -28,7 +23,6 @@
 #define USE_ONESTRIDE
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -65,7 +59,6 @@ typedef struct
 } hypre_PointRelaxData;
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxCreate
  *--------------------------------------------------------------------------*/
 
 void *
@@ -108,7 +101,6 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -116,7 +108,6 @@ hypre_PointRelaxDestroy( void *relax_vdata )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
    HYPRE_Int             i;
-   HYPRE_Int             ierr = 0;
 
    if (relax_data)
    {
@@ -145,11 +136,10 @@ hypre_PointRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -191,7 +181,6 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    HYPRE_Int              frac;
 
    HYPRE_Int              i, j, k, p, m, compute_i;
-   HYPRE_Int              ierr = 0;
                        
    /*----------------------------------------------------------
     * Set up the temp vector
@@ -318,11 +307,10 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    (relax_data -> flops) = scale * (hypre_StructMatrixGlobalSize(A) +
                                     hypre_StructVectorGlobalSize(x));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -379,7 +367,6 @@ hypre_PointRelax( void               *relax_vdata,
    HYPRE_Int              loopi, loopj, loopk;
    HYPRE_Int              pointset;
 
-   HYPRE_Int              ierr = 0;
    double                 bsumsq, rsumsq;
 
    /*----------------------------------------------------------
@@ -407,12 +394,13 @@ hypre_PointRelax( void               *relax_vdata,
       }
 
       hypre_EndTiming(relax_data -> time_index);
-      return ierr;
+      return hypre_error_flag;
    }
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(x, 0);
 
+   rsumsq = 0.0;
    if ( tol>0.0 )
       bsumsq = hypre_StructInnerProd( b, b );
 
@@ -595,24 +583,22 @@ hypre_PointRelax( void               *relax_vdata,
 
                if ( constant_coefficient==1 || constant_coefficient==2 )
                {
-                  ierr +=
-                     hypre_PointRelax_core12(
-                        relax_vdata, A, constant_coefficient,
-                        compute_box, bp, xp, tp, i,
-                        A_data_box, b_data_box, x_data_box, t_data_box,
-                        stride
-                        );
+                  hypre_PointRelax_core12(
+                     relax_vdata, A, constant_coefficient,
+                     compute_box, bp, xp, tp, i,
+                     A_data_box, b_data_box, x_data_box, t_data_box,
+                     stride
+                     );
                }
 
                else
                {
-                  ierr +=
-                     hypre_PointRelax_core0(
-                        relax_vdata, A, constant_coefficient,
-                        compute_box, bp, xp, tp, i,
-                        A_data_box, b_data_box, x_data_box, t_data_box,
-                        stride
-                        );
+                  hypre_PointRelax_core0(
+                     relax_vdata, A, constant_coefficient,
+                     compute_box, bp, xp, tp, i,
+                     A_data_box, b_data_box, x_data_box, t_data_box,
+                     stride
+                     );
                }
 
                Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
@@ -683,7 +669,7 @@ hypre_PointRelax( void               *relax_vdata,
    hypre_IncFLOPCount(relax_data -> flops);
    hypre_EndTiming(relax_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for constant_coefficient==0, all coefficients may vary ...*/
@@ -734,8 +720,6 @@ hypre_PointRelax_core0( void               *relax_vdata,
    HYPRE_Int              bi;
    HYPRE_Int              xi;
    HYPRE_Int              ti;
-
-   HYPRE_Int              ierr = 0;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -955,7 +939,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
@@ -1027,8 +1011,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
    HYPRE_Int              bi;
    HYPRE_Int              xi;
    HYPRE_Int              ti;
-
-   HYPRE_Int              ierr = 0;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -1475,13 +1457,10 @@ hypre_PointRelax_core12( void               *relax_vdata,
 
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
-
-
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1489,15 +1468,13 @@ hypre_PointRelaxSetTol( void   *relax_vdata,
                         double  tol         )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    (relax_data -> tol) = tol;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxGetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1505,15 +1482,13 @@ hypre_PointRelaxGetTol( void   *relax_vdata,
                         double *tol         )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    *tol = (relax_data -> tol);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1521,15 +1496,13 @@ hypre_PointRelaxSetMaxIter( void *relax_vdata,
                             HYPRE_Int   max_iter    )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    (relax_data -> max_iter) = max_iter;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxGetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1537,15 +1510,13 @@ hypre_PointRelaxGetMaxIter( void *relax_vdata,
                             HYPRE_Int * max_iter    )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    *max_iter = (relax_data -> max_iter);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetZeroGuess
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1553,15 +1524,13 @@ hypre_PointRelaxSetZeroGuess( void *relax_vdata,
                               HYPRE_Int   zero_guess  )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    (relax_data -> zero_guess) = zero_guess;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxGetZeroGuess
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1569,15 +1538,13 @@ hypre_PointRelaxGetZeroGuess( void *relax_vdata,
                               HYPRE_Int * zero_guess  )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    *zero_guess = (relax_data -> zero_guess);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1585,15 +1552,13 @@ hypre_PointRelaxGetNumIterations( void *relax_vdata,
                                   HYPRE_Int * num_iterations  )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    *num_iterations = (relax_data -> num_iterations);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetWeight
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1601,15 +1566,13 @@ hypre_PointRelaxSetWeight( void    *relax_vdata,
                            double   weight      )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    (relax_data -> weight) = weight;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetNumPointsets
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1618,7 +1581,6 @@ hypre_PointRelaxSetNumPointsets( void *relax_vdata,
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
    HYPRE_Int             i;
-   HYPRE_Int             ierr = 0;
 
    /* free up old pointset memory */
    for (i = 0; i < (relax_data -> num_pointsets); i++)
@@ -1644,11 +1606,10 @@ hypre_PointRelaxSetNumPointsets( void *relax_vdata,
       (relax_data -> pointset_indices[i]) = NULL;
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetPointset
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1660,7 +1621,6 @@ hypre_PointRelaxSetPointset( void        *relax_vdata,
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
    HYPRE_Int             i;
-   HYPRE_Int             ierr = 0;
 
    /* free up old pointset memory */
    hypre_TFree(relax_data -> pointset_indices[pointset]);
@@ -1678,11 +1638,10 @@ hypre_PointRelaxSetPointset( void        *relax_vdata,
                       (relax_data -> pointset_indices[pointset][i]));
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetPointsetRank
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1691,15 +1650,13 @@ hypre_PointRelaxSetPointsetRank( void *relax_vdata,
                                  HYPRE_Int   pointset_rank )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    (relax_data -> pointset_ranks[pointset]) = pointset_rank;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxSetTempVec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1707,18 +1664,16 @@ hypre_PointRelaxSetTempVec( void               *relax_vdata,
                             hypre_StructVector *t           )
 {
    hypre_PointRelaxData *relax_data = relax_vdata;
-   HYPRE_Int             ierr = 0;
 
    hypre_StructVectorDestroy(relax_data -> t);
    (relax_data -> t) = hypre_StructVectorRef(t);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
 
 /*--------------------------------------------------------------------------
- * hypre_PointRelaxGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_PointRelaxGetFinalRelativeResidualNorm( void * relax_vdata, double * norm )
@@ -1730,7 +1685,6 @@ HYPRE_Int hypre_PointRelaxGetFinalRelativeResidualNorm( void * relax_vdata, doub
 }
 
 /*--------------------------------------------------------------------------
- * hypre_relax_wtx
  * Special vector operation for use in hypre_PointRelax -
  * convex combination of vectors on specified pointsets.
  *--------------------------------------------------------------------------*/
@@ -1753,7 +1707,6 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
    double weightc = 1 - weight;
    double *xp, *tp;
    HYPRE_Int compute_i, i, j, loopi, loopj, loopk, xi, ti;
-   HYPRE_Int ierr = 0;
 
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
@@ -1815,11 +1768,10 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_relax_copy
  * Special vector operation for use in hypre_PointRelax -
  * vector copy on specified pointsets.
  *--------------------------------------------------------------------------*/
@@ -1839,7 +1791,6 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
 
    double *xp, *tp;
    HYPRE_Int compute_i, i, j, loopi, loopj, loopk, xi, ti;
-   HYPRE_Int ierr = 0;
 
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
@@ -1901,5 +1852,5 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }

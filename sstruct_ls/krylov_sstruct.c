@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * SStruct matrix-vector implementation of Krylov interface routines.
@@ -23,32 +19,27 @@
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovCAlloc
  *--------------------------------------------------------------------------*/
 
 char *
 hypre_SStructKrylovCAlloc( HYPRE_Int count,
-                    HYPRE_Int elt_size )
+                           HYPRE_Int elt_size )
 {
    return( hypre_CAlloc( count, elt_size ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovFree
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructKrylovFree( char *ptr )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_Free( ptr );
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovCreateVector
  *--------------------------------------------------------------------------*/
 
 void *
@@ -101,7 +92,6 @@ hypre_SStructKrylovCreateVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovCreateVectorArray
  *--------------------------------------------------------------------------*/
 
 void *
@@ -160,7 +150,6 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovDestroyVector
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -172,12 +161,11 @@ hypre_SStructKrylovDestroyVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovMatvecCreate
  *--------------------------------------------------------------------------*/
 
 void *
 hypre_SStructKrylovMatvecCreate( void   *A,
-                          void   *x )
+                                 void   *x )
 {
    void *matvec_data;
 
@@ -190,16 +178,15 @@ hypre_SStructKrylovMatvecCreate( void   *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovMatvec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructKrylovMatvec( void   *matvec_data,
-                    double  alpha,
-                    void   *A,
-                    void   *x,
-                    double  beta,
-                    void   *y )
+                           double  alpha,
+                           void   *A,
+                           void   *x,
+                           double  beta,
+                           void   *y )
 {
    return ( hypre_SStructMatvec( alpha,
                                  (hypre_SStructMatrix *) A,
@@ -209,7 +196,6 @@ hypre_SStructKrylovMatvec( void   *matvec_data,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -219,12 +205,11 @@ hypre_SStructKrylovMatvecDestroy( void *matvec_data )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovInnerProd
  *--------------------------------------------------------------------------*/
 
 double
 hypre_SStructKrylovInnerProd( void *x, 
-                       void *y )
+                              void *y )
 {
    double result;
 
@@ -236,19 +221,17 @@ hypre_SStructKrylovInnerProd( void *x,
 
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovCopyVector
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructKrylovCopyVector( void *x, 
-                        void *y )
+                               void *y )
 {
    return ( hypre_SStructCopy( (hypre_SStructVector *) x,
                                (hypre_SStructVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovClearVector
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -259,41 +242,38 @@ hypre_SStructKrylovClearVector( void *x )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovScaleVector
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructKrylovScaleVector( double  alpha,
-                         void   *x )
+                                void   *x )
 {
    return ( hypre_SStructScale( alpha, (hypre_SStructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovAxpy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructKrylovAxpy( double alpha,
-                  void   *x,
-                  void   *y )
+                         void   *x,
+                         void   *y )
 {
    return ( hypre_SStructAxpy( alpha, (hypre_SStructVector *) x,
-                                     (hypre_SStructVector *) y ) );
+                               (hypre_SStructVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructKrylovCommInfo
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SStructKrylovCommInfo( void  *A,
-                      HYPRE_Int   *my_id,
-                      HYPRE_Int   *num_procs )
+                             HYPRE_Int   *my_id,
+                             HYPRE_Int   *num_procs )
 {
    MPI_Comm comm = hypre_SStructMatrixComm((hypre_SStructMatrix *) A);
    hypre_MPI_Comm_size(comm,num_procs);
    hypre_MPI_Comm_rank(comm,my_id);
-   return 0;
+   return hypre_error_flag;
 }
 

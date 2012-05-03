@@ -10,27 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_struct_ls.h"
 
 /*==========================================================================*/
-/** Creates a new PCG solver object.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param comm [IN]
-  MPI communicator
-@param solver [OUT]
-  solver structure
-
-@see HYPRE_StructPCGDestroy */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
@@ -54,23 +36,10 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 
    *solver = ( (HYPRE_StructSolver) hypre_PCGCreate( pcg_functions ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Destroys a PCG solver object.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-
-@see HYPRE_StructPCGCreate */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
@@ -79,28 +48,6 @@ HYPRE_StructPCGDestroy( HYPRE_StructSolver solver )
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Precomputes tasks necessary for doing the solve.  This routine
-ensures that the setup for the preconditioner is also called.
-
-NOTE: This is supposed to be an optional call, but currently is required.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructPCGSolve */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
@@ -115,25 +62,6 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Performs the PCG linear solve.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
@@ -148,21 +76,6 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the stopping tolerance.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param tol [IN]
-  PCG solver tolerance
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup   */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
@@ -171,45 +84,15 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
    return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
 }
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the absolute stopping tolerance.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param tol [IN]
-  PCG solver tolerance
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup   */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetAbsoluteTol( HYPRE_StructSolver solver,
-                       double             tol    )
+                               double             tol    )
 {
    return( HYPRE_PCGSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the maximum number of iterations.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param max_iter [IN]
-  PCG solver maximum number of iterations
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
@@ -219,23 +102,6 @@ HYPRE_StructPCGSetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the type of norm to use in the stopping criteria.
-If parameter two\_norm is set to 0, the preconditioner norm is used.
-If set to 1, the two-norm is used.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param two_norm [IN]
-  boolean indicating whether or not to use the two-norm
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
@@ -245,23 +111,6 @@ HYPRE_StructPCGSetTwoNorm( HYPRE_StructSolver solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set whether or not to do an additional relative change
-stopping test.  If parameter rel\_change is set to 0, no additional
-stopping test is done.  If set to 1, the additional test is done.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param rel_change [IN]
-  boolean indicating whether or not to do relative change test
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
@@ -271,26 +120,6 @@ HYPRE_StructPCGSetRelChange( HYPRE_StructSolver solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Sets the precondioner to use in PCG.  The Default is no
-preconditioner, i.e. the solver is just conjugate gradients (CG).
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param precond [IN]
-  pointer to the preconditioner solve function
-@param precond_setup [IN]
-  pointer to the preconditioner setup function
-@param precond_solver [IN/OUT]
-  preconditioner solver structure
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup*/
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetPrecond( HYPRE_StructSolver         solver,
@@ -305,23 +134,6 @@ HYPRE_StructPCGSetPrecond( HYPRE_StructSolver         solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the type of logging to do.  Currently, if parameter
-logging is set to 0, no logging is done.  If set to 1, the norms and
-relative norms for each iteration are saved.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param logging [IN]
-  integer indicating what type of logging to do
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
@@ -330,45 +142,14 @@ HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional)  Currently, if parameter print_level is set to 0, no printing 
-is allowed.  If set to 1, printing takes place.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param logging [IN]
-  integer allowing printing to take place
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver,
-                               HYPRE_Int      print_level )
+                              HYPRE_Int      print_level )
 {
    return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Gets the number of iterations done in the solve.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN]
-  solver structure
-@param num_iterations [OUT]
-  number of iterations
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
@@ -378,21 +159,6 @@ HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Gets the final relative residual norm for the solve.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN]
-  solver structure
-@param norm [OUT]
-  final relative residual norm
-
-@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
@@ -402,25 +168,6 @@ HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Setup routine for diagonally scaling a vector.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructDiagScale */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
@@ -428,32 +175,10 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
                             HYPRE_StructVector y,
                             HYPRE_StructVector x      )
 {
-   return 0;
+   return hypre_error_flag;
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Diagonally scale a vector.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructDiagScaleSetup */
-/*--------------------------------------------------------------------------*/
-/*--------------------------------------------------------------------------
- * HYPRE_StructDiagScale
- *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructDiagScale( HYPRE_StructSolver solver,
@@ -488,42 +213,40 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    HYPRE_Int             i;
    HYPRE_Int             loopi, loopj, loopk;
 
-   HYPRE_Int             ierr = 0;
-  
    /* x = D^{-1} y */
    hypre_SetIndex(stride, 1, 1, 1);
    boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
+   {
+      box = hypre_BoxArrayBox(boxes, i);
 
-         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-         y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
-         hypre_SetIndex(index, 0, 0, 0);
-         Ap = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-         xp = hypre_StructVectorBoxData(x, i);
-         yp = hypre_StructVectorBoxData(y, i);
+      hypre_SetIndex(index, 0, 0, 0);
+      Ap = hypre_StructMatrixExtractPointerByIndex(A, i, index);
+      xp = hypre_StructVectorBoxData(x, i);
+      yp = hypre_StructVectorBoxData(y, i);
 
-         start  = hypre_BoxIMin(box);
+      start  = hypre_BoxIMin(box);
 
-         hypre_BoxGetSize(box, loop_size);
+      hypre_BoxGetSize(box, loop_size);
 
-         hypre_BoxLoop3Begin(loop_size,
-                             A_data_box, start, stride, Ai,
-                             x_data_box, start, stride, xi,
-                             y_data_box, start, stride, yi);
+      hypre_BoxLoop3Begin(loop_size,
+                          A_data_box, start, stride, Ai,
+                          x_data_box, start, stride, xi,
+                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-            {
-               xp[xi] = yp[yi] / Ap[Ai];
-            }
-         hypre_BoxLoop3End(Ai, xi, yi);
+      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+      {
+         xp[xi] = yp[yi] / Ap[Ai];
       }
+      hypre_BoxLoop3End(Ai, xi, yi);
+   }
 
-   return ierr;
+   return hypre_error_flag;
 }
 

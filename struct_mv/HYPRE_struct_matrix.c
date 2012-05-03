@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * HYPRE_StructMatrix interface
@@ -191,10 +189,8 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int      *stencil_indices,
                                      double         *values )
 {
-   return hypre_StructMatrixSetConstantValues( matrix,
-                                               num_stencil_indices,
-                                               stencil_indices,
-                                               values, 0 );
+   return hypre_StructMatrixSetConstantValues(
+      matrix, num_stencil_indices, stencil_indices, values, 0 );
 }
 
 /*--------------------------------------------------------------------------
@@ -270,10 +266,8 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Int      *stencil_indices,
                                        double         *values )
 {
-   return hypre_StructMatrixSetConstantValues( matrix,
-                                               num_stencil_indices,
-                                               stencil_indices,
-                                               values, 1 );
+   return hypre_StructMatrixSetConstantValues(
+      matrix, num_stencil_indices, stencil_indices, values, 1 );
 }
 
 /*--------------------------------------------------------------------------

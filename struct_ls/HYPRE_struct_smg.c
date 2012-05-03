@@ -10,19 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * HYPRE_StructSMG interface
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -30,11 +20,10 @@ HYPRE_StructSMGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    *solver = ( (HYPRE_StructSolver) hypre_SMGCreate( comm ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -44,7 +33,6 @@ HYPRE_StructSMGDestroy( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -60,7 +48,6 @@ HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -76,7 +63,6 @@ HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetMemoryUse, HYPRE_StructSMGGetMemoryUse
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -94,7 +80,6 @@ HYPRE_StructSMGGetMemoryUse( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetTol, HYPRE_StructSMGGetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -112,7 +97,6 @@ HYPRE_StructSMGGetTol( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetMaxIter, HYPRE_StructSMGGetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -130,7 +114,6 @@ HYPRE_StructSMGGetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetRelChange, HYPRE_StructSMGGetRelChange
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -148,7 +131,6 @@ HYPRE_StructSMGGetRelChange( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetZeroGuess, HYPRE_StructSMGGetZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -165,7 +147,6 @@ HYPRE_StructSMGGetZeroGuess( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetNonZeroGuess,  also see HYPRE_StructSMGGetZeroGuess above
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -175,8 +156,6 @@ HYPRE_StructSMGSetNonZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetNumPreRelax, HYPRE_StructSMGGetNumPreRelax
- *
  * Note that we require at least 1 pre-relax sweep. 
  *--------------------------------------------------------------------------*/
 
@@ -195,7 +174,6 @@ HYPRE_StructSMGGetNumPreRelax( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetNumPostRelax, HYPRE_StructSMGGetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -213,7 +191,6 @@ HYPRE_StructSMGGetNumPostRelax( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetLogging, HYPRE_StructSMGGetLogging
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -231,25 +208,23 @@ HYPRE_StructSMGGetLogging( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGSetPrintLevel, HYPRE_StructSMGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructSMGSetPrintLevel( HYPRE_StructSolver solver,
-                           HYPRE_Int  print_level )
+                              HYPRE_Int  print_level )
 {
    return( hypre_SMGSetPrintLevel( (void *) solver, print_level) );
 }
 
 HYPRE_Int
 HYPRE_StructSMGGetPrintLevel( HYPRE_StructSolver solver,
-                           HYPRE_Int      * print_level )
+                              HYPRE_Int      * print_level )
 {
    return( hypre_SMGGetPrintLevel( (void *) solver, print_level) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -260,7 +235,6 @@ HYPRE_StructSMGGetNumIterations( HYPRE_StructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructSMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

@@ -10,18 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -74,7 +65,6 @@ typedef struct
 } hypre_SMGRelaxData;
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxCreate
  *--------------------------------------------------------------------------*/
 
 void *
@@ -118,23 +108,20 @@ hypre_SMGRelaxCreate( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxDestroyTempVec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SMGRelaxDestroyTempVec( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
-   HYPRE_Int            ierr = 0;
 
    hypre_StructVectorDestroy(relax_data -> temp_vec);
    (relax_data -> setup_temp_vec) = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxDestroyARem
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -142,7 +129,6 @@ hypre_SMGRelaxDestroyARem( void *relax_vdata )
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    HYPRE_Int            i;
-   HYPRE_Int            ierr = 0;
 
    if (relax_data -> A_rem)
    {
@@ -156,11 +142,10 @@ hypre_SMGRelaxDestroyARem( void *relax_vdata )
    }
    (relax_data -> setup_a_rem) = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxDestroyASol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -169,7 +154,6 @@ hypre_SMGRelaxDestroyASol( void *relax_vdata )
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    HYPRE_Int            stencil_dim;
    HYPRE_Int            i;
-   HYPRE_Int            ierr = 0;
 
    if (relax_data -> A_sol)
    {
@@ -187,18 +171,16 @@ hypre_SMGRelaxDestroyASol( void *relax_vdata )
    }
    (relax_data -> setup_a_sol) = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SMGRelaxDestroy( void *relax_vdata )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    if (relax_data)
    {
@@ -220,11 +202,10 @@ hypre_SMGRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -253,8 +234,6 @@ hypre_SMGRelax( void               *relax_vdata,
                     
    HYPRE_Int             i, j, k, is;
                     
-   HYPRE_Int             ierr = 0;
-
    /*----------------------------------------------------------
     * Note: The zero_guess stuff is not handled correctly
     * for general relaxation parameters.  It is correct when
@@ -293,8 +272,7 @@ hypre_SMGRelax( void               *relax_vdata,
    {
       base_stride = (relax_data -> base_stride);
       base_box_a = (relax_data -> base_box_array);
-      ierr = hypre_SMGSetStructVectorConstantValues(x, zero, base_box_a,
-                                                    base_stride); 
+      hypre_SMGSetStructVectorConstantValues(x, zero, base_box_a, base_stride); 
    }
 
    /*----------------------------------------------------------
@@ -307,17 +285,17 @@ hypre_SMGRelax( void               *relax_vdata,
       {
          /* Do pre-relaxation iterations */
          case 0:
-         max_iter    = 1;
-         num_spaces  = (relax_data -> num_pre_spaces);
-         space_ranks = (relax_data -> pre_space_ranks);
-         break;
+            max_iter    = 1;
+            num_spaces  = (relax_data -> num_pre_spaces);
+            space_ranks = (relax_data -> pre_space_ranks);
+            break;
 
-         /* Do regular relaxation iterations */
+            /* Do regular relaxation iterations */
          case 1:
-         max_iter    = (relax_data -> max_iter);
-         num_spaces  = (relax_data -> num_reg_spaces);
-         space_ranks = (relax_data -> reg_space_ranks);
-         break;
+            max_iter    = (relax_data -> max_iter);
+            num_spaces  = (relax_data -> num_reg_spaces);
+            space_ranks = (relax_data -> reg_space_ranks);
+            break;
       }
 
       for (i = 0; i < max_iter; i++)
@@ -349,11 +327,10 @@ hypre_SMGRelax( void               *relax_vdata,
 
    hypre_EndTiming(relax_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -365,7 +342,6 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    HYPRE_Int            stencil_dim;
    HYPRE_Int            a_sol_test;
-   HYPRE_Int            ierr = 0;
 
    stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
@@ -399,30 +375,29 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
 
    if ((relax_data -> setup_temp_vec) > 0)
    {
-      ierr = hypre_SMGRelaxSetupTempVec(relax_vdata, A, b, x);
+      hypre_SMGRelaxSetupTempVec(relax_vdata, A, b, x);
    }
 
    if ((relax_data -> setup_a_rem) > 0)
    {
-      ierr = hypre_SMGRelaxSetupARem(relax_vdata, A, b, x);
+      hypre_SMGRelaxSetupARem(relax_vdata, A, b, x);
    }
 
    if ((relax_data -> setup_a_sol) > a_sol_test)
    {
-      ierr = hypre_SMGRelaxSetupASol(relax_vdata, A, b, x);
+      hypre_SMGRelaxSetupASol(relax_vdata, A, b, x);
    }
 
    if ((relax_data -> base_box_array) == NULL)
    {
-      ierr = hypre_SMGRelaxSetupBaseBoxArray(relax_vdata, A, b, x);
+      hypre_SMGRelaxSetupBaseBoxArray(relax_vdata, A, b, x);
    }
    
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetupTempVec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -433,7 +408,6 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
 {
    hypre_SMGRelaxData  *relax_data = relax_vdata;
    hypre_StructVector  *temp_vec   = (relax_data -> temp_vec);
-   HYPRE_Int            ierr = 0;
 
    /*----------------------------------------------------------
     * Set up data
@@ -450,7 +424,7 @@ hypre_SMGRelaxSetupTempVec( void               *relax_vdata,
    }
    (relax_data -> setup_temp_vec) = 0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -485,8 +459,6 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
    HYPRE_Int            *stencil_indices;
                        
    HYPRE_Int             i;
-
-   HYPRE_Int             ierr = 0;
 
    /*----------------------------------------------------------
     * Free up old data before putting new data into structure
@@ -532,11 +504,10 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
 
    (relax_data -> setup_a_rem) = 0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetupASol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -570,8 +541,6 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
    HYPRE_Int            *stencil_indices;
                        
    HYPRE_Int             i;
-
-   HYPRE_Int             ierr = 0;
 
    /*----------------------------------------------------------
     * Free up old data before putting new data into structure
@@ -632,11 +601,10 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
 
    (relax_data -> setup_a_sol) = 0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetTempVec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -644,7 +612,6 @@ hypre_SMGRelaxSetTempVec( void               *relax_vdata,
                           hypre_StructVector *temp_vec    )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    hypre_SMGRelaxDestroyTempVec(relax_vdata);
    (relax_data -> temp_vec) = hypre_StructVectorRef(temp_vec);
@@ -653,11 +620,10 @@ hypre_SMGRelaxSetTempVec( void               *relax_vdata,
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetMemoryUse
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -665,15 +631,13 @@ hypre_SMGRelaxSetMemoryUse( void *relax_vdata,
                             HYPRE_Int   memory_use  )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int         ierr = 0;
 
    (relax_data -> memory_use) = memory_use;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -681,15 +645,13 @@ hypre_SMGRelaxSetTol( void   *relax_vdata,
                       double  tol         )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> tol) = tol;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -697,15 +659,13 @@ hypre_SMGRelaxSetMaxIter( void *relax_vdata,
                           HYPRE_Int   max_iter    )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> max_iter) = max_iter;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetZeroGuess
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -713,15 +673,13 @@ hypre_SMGRelaxSetZeroGuess( void *relax_vdata,
                             HYPRE_Int   zero_guess  )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> zero_guess) = zero_guess;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNumSpaces
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -730,7 +688,6 @@ hypre_SMGRelaxSetNumSpaces( void *relax_vdata,
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
    HYPRE_Int           i;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> num_spaces) = num_spaces;
 
@@ -756,11 +713,10 @@ hypre_SMGRelaxSetNumSpaces( void *relax_vdata,
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNumPreSpaces
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -769,7 +725,6 @@ hypre_SMGRelaxSetNumPreSpaces( void *relax_vdata,
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
    HYPRE_Int           i;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> num_pre_spaces) = num_pre_spaces;
 
@@ -779,11 +734,10 @@ hypre_SMGRelaxSetNumPreSpaces( void *relax_vdata,
    for (i = 0; i < num_pre_spaces; i++)
       (relax_data -> pre_space_ranks[i]) = 0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNumRegSpaces
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -792,7 +746,6 @@ hypre_SMGRelaxSetNumRegSpaces( void *relax_vdata,
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
    HYPRE_Int           i;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> num_reg_spaces) = num_reg_spaces;
 
@@ -802,11 +755,10 @@ hypre_SMGRelaxSetNumRegSpaces( void *relax_vdata,
    for (i = 0; i < num_reg_spaces; i++)
       (relax_data -> reg_space_ranks[i]) = 0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetSpace
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -816,7 +768,6 @@ hypre_SMGRelaxSetSpace( void *relax_vdata,
                         HYPRE_Int   space_stride )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> space_indices[i]) = space_index;
    (relax_data -> space_strides[i]) = space_stride;
@@ -825,11 +776,10 @@ hypre_SMGRelaxSetSpace( void *relax_vdata,
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetRegSpaceRank
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -838,15 +788,13 @@ hypre_SMGRelaxSetRegSpaceRank( void *relax_vdata,
                                HYPRE_Int   reg_space_rank )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> reg_space_ranks[i]) = reg_space_rank;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetPreSpaceRank
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -855,15 +803,13 @@ hypre_SMGRelaxSetPreSpaceRank( void *relax_vdata,
                                HYPRE_Int   pre_space_rank  )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> pre_space_ranks[i]) = pre_space_rank;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetBase
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -873,7 +819,6 @@ hypre_SMGRelaxSetBase( void        *relax_vdata,
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
    HYPRE_Int           d;
-   HYPRE_Int           ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
@@ -893,11 +838,10 @@ hypre_SMGRelaxSetBase( void        *relax_vdata,
    (relax_data -> setup_a_rem)    = 1;
    (relax_data -> setup_a_sol)    = 1;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNumPreRelax
  * Note that we require at least 1 pre-relax sweep.
  *--------------------------------------------------------------------------*/
 
@@ -906,15 +850,13 @@ hypre_SMGRelaxSetNumPreRelax( void *relax_vdata,
                               HYPRE_Int   num_pre_relax )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> num_pre_relax) = hypre_max(num_pre_relax,1);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -922,15 +864,13 @@ hypre_SMGRelaxSetNumPostRelax( void *relax_vdata,
                                HYPRE_Int   num_post_relax )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
-   HYPRE_Int           ierr = 0;
 
    (relax_data -> num_post_relax) = num_post_relax;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNewMatrixStencil
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -945,8 +885,6 @@ hypre_SMGRelaxSetNewMatrixStencil( void                *relax_vdata,
                          
    HYPRE_Int           i;
                      
-   HYPRE_Int           ierr = 0;
-
    for (i = 0; i < stencil_size; i++)
    {
       if (hypre_IndexD(stencil_shape[i], (stencil_dim - 1)) != 0)
@@ -959,7 +897,7 @@ hypre_SMGRelaxSetNewMatrixStencil( void                *relax_vdata,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
@@ -979,8 +917,6 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
    hypre_BoxArray      *boxes;
    hypre_BoxArray      *base_box_array;
                        
-   HYPRE_Int            ierr = 0;
-
    grid  = hypre_StructVectorGrid(x);
    boxes = hypre_StructGridBoxes(grid);
 
@@ -991,6 +927,6 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
 
    (relax_data -> base_box_array) = base_box_array;
 
-   return ierr;
+   return hypre_error_flag;
 }
 

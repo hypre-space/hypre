@@ -31,10 +31,13 @@ HYPRE_ParVectorCreate( MPI_Comm comm,
                        HYPRE_Int     *partitioning,
 		       HYPRE_ParVector *vector )
 {
-   *vector = (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
-                                                    partitioning) ;
-   if (!vector) hypre_error_in_arg(4);
-
+   if (!vector)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+   *vector = (HYPRE_ParVector)
+      hypre_ParVectorCreate(comm, global_size, partitioning) ;
    return hypre_error_flag;
 }
 
@@ -49,11 +52,13 @@ HYPRE_ParMultiVectorCreate( MPI_Comm comm,
                             HYPRE_Int      number_vectors,
                             HYPRE_ParVector *vector )
 {
-   *vector = (HYPRE_ParVector) hypre_ParMultiVectorCreate
-      (comm, global_size, partitioning, number_vectors );
-
-   if (!vector) hypre_error_in_arg(5);
-
+   if (!vector)
+   {
+      hypre_error_in_arg(5);
+      return hypre_error_flag;
+   }
+   *vector = (HYPRE_ParVector)
+      hypre_ParMultiVectorCreate( comm, global_size, partitioning, number_vectors );
    return hypre_error_flag;
 }
 
@@ -86,8 +91,12 @@ HYPRE_ParVectorRead( MPI_Comm         comm,
                      const char      *file_name, 
 		     HYPRE_ParVector *vector)
 {
+   if (!vector)
+   {
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
    *vector = (HYPRE_ParVector) hypre_ParVectorRead( comm, file_name ) ;
-   if (!vector) hypre_error_in_arg(3);
    return hypre_error_flag;
 }
 
@@ -201,8 +210,12 @@ HYPRE_Int
 HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, HYPRE_Int *partitioning,
 			 HYPRE_ParVector *vector)
 {
-   *vector = (HYPRE_ParVector) hypre_VectorToParVector (comm, 
-		(hypre_Vector *) b, partitioning );
-   if (!vector) hypre_error_in_arg(4);
+   if (!vector)
+   {
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+   *vector = (HYPRE_ParVector)
+      hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
    return hypre_error_flag;
 }

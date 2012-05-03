@@ -1512,16 +1512,12 @@ hypre_SStructGridFindBoxManEntry( hypre_SStructGrid  *grid,
                                   HYPRE_Int           var,
                                   hypre_BoxManEntry **entry_ptr )
 {
-
    HYPRE_Int nentries;
 
    hypre_BoxManEntry **entries;
    
    hypre_BoxManIntersect (  hypre_SStructGridBoxManager(grid, part, var),
-                            index, 
-                            index,
-                            &entries, 
-                            &nentries);
+                            index, index, &entries, &nentries);
 
    /* we should only get a single entry returned */
    if (nentries > 1)
@@ -1536,9 +1532,10 @@ hypre_SStructGridFindBoxManEntry( hypre_SStructGrid  *grid,
    else
    {
       *entry_ptr = entries[0];
-      /* remove the entries array (allocated in the intersect routine) */
-      hypre_TFree(entries); 
    }
+
+   /* remove the entries array (NULL or allocated in the intersect routine) */
+   hypre_TFree(entries); 
    
    return hypre_error_flag;
 }
@@ -1553,17 +1550,12 @@ hypre_SStructGridFindNborBoxManEntry( hypre_SStructGrid  *grid,
                                       HYPRE_Int           var,
                                       hypre_BoxManEntry **entry_ptr )
 {
-
    HYPRE_Int nentries;
 
    hypre_BoxManEntry **entries;
-   
 
    hypre_BoxManIntersect (  hypre_SStructGridNborBoxManager(grid, part, var),
-                            index, 
-                            index,
-                            &entries, 
-                            &nentries);
+                            index, index, &entries, &nentries);
 
    /* we should only get a single entry returned */
    if (nentries >  1)
@@ -1578,8 +1570,10 @@ hypre_SStructGridFindNborBoxManEntry( hypre_SStructGrid  *grid,
    else
    {
       *entry_ptr = entries[0];
-      hypre_TFree(entries); 
    }
+
+   /* remove the entries array (NULL or allocated in the intersect routine) */
+   hypre_TFree(entries); 
    
    return hypre_error_flag;
 }
@@ -1770,7 +1764,6 @@ HYPRE_Int
 hypre_SStructBoxManEntryGetProcess( hypre_BoxManEntry *entry,
                                     HYPRE_Int         *proc_ptr )
 {
-
    *proc_ptr = hypre_BoxManEntryProc(entry);
 
    return hypre_error_flag;
@@ -1785,7 +1778,6 @@ HYPRE_Int
 hypre_SStructBoxManEntryGetBoxnum( hypre_BoxManEntry *entry,
                                    HYPRE_Int         *id_ptr )
 {
-
    hypre_SStructBoxManNborInfo *info;
 
    hypre_BoxManEntryGetInfo(entry, (void **) &info);
@@ -1953,6 +1945,7 @@ hypre_SStructVarToNborVar( hypre_SStructGrid  *grid,
 /*--------------------------------------------------------------------------
  * GEC0902 a function that will set the ghost in each of the sgrids
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructGridSetNumGhost( hypre_SStructGrid  *grid, HYPRE_Int *num_ghost )
 {
@@ -2010,7 +2003,7 @@ hypre_SStructBoxManEntryGetGlobalRank( hypre_BoxManEntry *entry,
 HYPRE_Int
 hypre_SStructBoxManEntryGetStrides(hypre_BoxManEntry   *entry,
                                    hypre_Index          strides,
-                                   HYPRE_Int           type)
+                                   HYPRE_Int            type)
 {
    if (type == HYPRE_PARCSR)
    {

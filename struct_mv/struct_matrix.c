@@ -336,7 +336,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       else
       {
          hypre_assert( constant_coefficient == 2 );
-         data_size += stencil_size;  /* all constant coefficients at the beginning */
+         data_size += stencil_size;  /* all constant coeffs at the beginning */
          /* ... this allocates a little more space than is absolutely necessary */
          hypre_ForBoxI(i, data_space)
          {
@@ -353,7 +353,8 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
                   if (
                      hypre_IndexX(stencil_shape[j])==0 &&
                      hypre_IndexY(stencil_shape[j])==0 &&
-                     hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable coefficient */
+                     hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable
+                                                           * coefficient */
                   {
                      data_indices[i][j] = data_size;
                      data_size += data_box_volume;
@@ -373,7 +374,8 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
                   if (
                      hypre_IndexX(stencil_shape[j])==0 &&
                      hypre_IndexY(stencil_shape[j])==0 &&
-                     hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable coefficient */
+                     hypre_IndexZ(stencil_shape[j])==0 )  /* diagonal, variable
+                                                           * coefficient */
                   {
                      data_indices[i][j] = data_indices[i][symm_elements[j]] +
                         hypre_BoxOffsetDistance(data_box, stencil_shape[j]);
@@ -653,7 +655,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
       hypre_IntersectBoxes(set_box, grid_box, int_box);
 
       /* if there was an intersection */
-      if (int_box)
+      if (hypre_BoxVolume(int_box))
       {
          data_start = hypre_BoxIMin(int_box);
          hypre_CopyIndex(data_start, dval_start);
@@ -769,7 +771,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
 
    return hypre_error_flag;
 }
-
 
 /*--------------------------------------------------------------------------
  * (action > 0): add-to values
@@ -991,8 +992,7 @@ hypre_StructMatrixClearValues( hypre_StructMatrix *matrix,
       {
          for (s = 0; s < num_stencil_indices; s++)
          {
-            matp = hypre_StructMatrixBoxDataValue(matrix, i,
-                                                  stencil_indices[s],
+            matp = hypre_StructMatrixBoxDataValue(matrix, i, stencil_indices[s],
                                                   grid_index);
             *matp = 0.0;
          }
@@ -1075,7 +1075,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
       hypre_IntersectBoxes(clear_box, grid_box, int_box);
 
       /* if there was an intersection */
-      if (int_box)
+      if (hypre_BoxVolume(int_box))
       {
          data_start = hypre_BoxIMin(int_box);
 
@@ -1353,7 +1353,6 @@ hypre_StructMatrixSetConstantCoefficient( hypre_StructMatrix *matrix,
  * In the present version, if this function is called more than once, only
  * the last call will take effect.
  *--------------------------------------------------------------------------*/
-
 
 HYPRE_Int  hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
                                                  HYPRE_Int           nentries,
@@ -1689,6 +1688,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
                                      &comm_handle );
       hypre_FinalizeCommunication( comm_handle );
    }
+   hypre_CommPkgDestroy(comm_pkg);
 
    return hypre_error_flag;
 }

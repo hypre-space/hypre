@@ -28,9 +28,12 @@
 HYPRE_Int
 HYPRE_BoomerAMGCreate( HYPRE_Solver *solver)
 {
-   *solver = (HYPRE_Solver) hypre_BoomerAMGCreate( ) ;
    if (!solver)
+   {
       hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   *solver = (HYPRE_Solver) hypre_BoomerAMGCreate( ) ;
 
    return hypre_error_flag;
 }

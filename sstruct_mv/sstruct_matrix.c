@@ -693,16 +693,16 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
    /* GEC1002 the ghlocalsize is used to set the number of rows   */
- 
-   if (matrix_type == HYPRE_PARCSR)
-   {
-      rowstart = hypre_SStructGridStartRank(grid);
-      nrows = hypre_SStructGridLocalSize(grid);
-   }
+
    if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
       rowstart = hypre_SStructGridGhstartRank(grid);
       nrows = hypre_SStructGridGhlocalSize(grid) ;
+   }
+   else /* matrix_type == HYPRE_PARCSR */
+   {
+      rowstart = hypre_SStructGridStartRank(grid);
+      nrows = hypre_SStructGridLocalSize(grid);
    }
 
    /* set row sizes */

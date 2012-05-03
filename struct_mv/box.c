@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Member functions for hypre_Box class:
@@ -48,12 +46,10 @@ hypre_BoxSetExtents( hypre_Box  *box,
                      hypre_Index imin,
                      hypre_Index imax )
 {
-   HYPRE_Int  ierr = 0;
-
    hypre_CopyIndex(imin, hypre_BoxIMin(box));
    hypre_CopyIndex(imax, hypre_BoxIMax(box));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -82,7 +78,6 @@ HYPRE_Int
 hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
                        HYPRE_Int        size      )
 {
-   HYPRE_Int  ierr  = 0;
    HYPRE_Int  alloc_size;
 
    alloc_size = hypre_BoxArrayAllocSize(box_array);
@@ -100,7 +95,7 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
 
    hypre_BoxArraySize(box_array) = size;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -134,8 +129,6 @@ hypre_BoxArrayArrayCreate( HYPRE_Int size )
 HYPRE_Int 
 hypre_BoxDestroy( hypre_Box *box )
 {
-   HYPRE_Int ierr = 0;
-
    if (box)
    {
 #if 1
@@ -145,7 +138,7 @@ hypre_BoxDestroy( hypre_Box *box )
 #endif
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -155,15 +148,13 @@ hypre_BoxDestroy( hypre_Box *box )
 HYPRE_Int 
 hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
 {
-   HYPRE_Int  ierr = 0;
-
    if (box_array)
    {
       hypre_TFree(hypre_BoxArrayBoxes(box_array));
       hypre_TFree(box_array);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -173,7 +164,6 @@ hypre_BoxArrayDestroy( hypre_BoxArray *box_array )
 HYPRE_Int
 hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
 {
-   HYPRE_Int  ierr = 0;
    HYPRE_Int  i;
  
    if (box_array_array)
@@ -186,7 +176,7 @@ hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
       hypre_TFree(box_array_array);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -219,10 +209,10 @@ hypre_BoxArrayDuplicate( hypre_BoxArray *box_array )
 
    new_box_array = hypre_BoxArrayCreate(hypre_BoxArraySize(box_array));
    hypre_ForBoxI(i, box_array)
-      {
-         hypre_CopyBox(hypre_BoxArrayBox(box_array, i),
-                       hypre_BoxArrayBox(new_box_array, i));
-      }
+   {
+      hypre_CopyBox(hypre_BoxArrayBox(box_array, i),
+                    hypre_BoxArrayBox(new_box_array, i));
+   }
 
    return new_box_array;
 }
@@ -269,14 +259,13 @@ HYPRE_Int
 hypre_AppendBox( hypre_Box      *box,
                  hypre_BoxArray *box_array )
 {
-   HYPRE_Int  ierr  = 0;
    HYPRE_Int  size;
 
    size = hypre_BoxArraySize(box_array);
    hypre_BoxArraySetSize(box_array, (size + 1));
    hypre_CopyBox(box, hypre_BoxArrayBox(box_array, size));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -288,7 +277,6 @@ HYPRE_Int
 hypre_DeleteBox( hypre_BoxArray *box_array,
                  HYPRE_Int       index     )
 {
-   HYPRE_Int  ierr  = 0;
    HYPRE_Int  i;
 
    for (i = index; i < hypre_BoxArraySize(box_array) - 1; i++)
@@ -299,7 +287,7 @@ hypre_DeleteBox( hypre_BoxArray *box_array,
 
    hypre_BoxArraySize(box_array) --;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -312,7 +300,6 @@ HYPRE_Int
 hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
                       hypre_BoxArray *box_array_1 )
 {
-   HYPRE_Int  ierr  = 0;
    HYPRE_Int  size, size_0;
    HYPRE_Int  i;
 
@@ -327,7 +314,7 @@ hypre_AppendBoxArray( hypre_BoxArray *box_array_0,
                     hypre_BoxArrayBox(box_array_1, size + i));
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -342,7 +329,7 @@ hypre_BoxGetSize( hypre_Box   *box,
    hypre_IndexD(size, 1) = hypre_BoxSizeD(box, 1);
    hypre_IndexD(size, 2) = hypre_BoxSizeD(box, 2);
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -366,7 +353,7 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
       hypre_IndexD(size, d) = s;
    }
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -393,7 +380,7 @@ hypre_BoxGetStrideVolume( hypre_Box   *box,
 
    *volume_ptr = volume;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -402,28 +389,24 @@ hypre_BoxGetStrideVolume( hypre_Box   *box,
  *
  * even components of numexp shift negatively the imin of the box
  * odd  components of numexp shift positively the imax of the box
- * 
- * 
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_BoxExpand( hypre_Box   *box,
                  HYPRE_Int   *numexp)
 { 
-  HYPRE_Int   ierr = 0;
-  HYPRE_Int  *imin = hypre_BoxIMin(box);
-  HYPRE_Int  *imax = hypre_BoxIMax(box);
-  HYPRE_Int  d; 
+   HYPRE_Int  *imin = hypre_BoxIMin(box);
+   HYPRE_Int  *imax = hypre_BoxIMax(box);
+   HYPRE_Int  d; 
 
-  for (d = 0; d < 3; d++)
-  {
-    imin[d] -= numexp[2*d];
-    imax[d] += numexp[2*d+1];
-  }
+   for (d = 0; d < 3; d++)
+   {
+      imin[d] -= numexp[2*d];
+      imax[d] += numexp[2*d+1];
+   }
   
-  return ierr;
+   return hypre_error_flag;
 }
-        
 
 /*--------------------------------------------------------------------------
  * hypre_DeleteMultipleBoxes:
@@ -435,12 +418,12 @@ HYPRE_Int
 hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
                            HYPRE_Int*  indices , HYPRE_Int num )
 {
-   HYPRE_Int  ierr  = 0;
    HYPRE_Int  i, j, start, array_size;
 
-
-   if (num < 1) return ierr;
-
+   if (num < 1)
+   {
+      return hypre_error_flag;
+   }
 
    array_size =  hypre_BoxArraySize(box_array);   
    start = indices[0];
@@ -459,18 +442,14 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
             
       if ( (i+j) < array_size)  /* if deleting the last item then no moving */
       {
-         
          hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
                        hypre_BoxArrayBox(box_array, i));
       }
-      
-      
    }
-
 
    hypre_BoxArraySize(box_array) = array_size - num;
    
-   return ierr;
+   return hypre_error_flag;
 }
 
 
@@ -482,7 +461,6 @@ hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
 HYPRE_Int
 hypre_MaxIndexPosition(hypre_Index index, HYPRE_Int *position)
 {
-   HYPRE_Int  ierr = 0;
    HYPRE_Int  i, value;
 
    value = hypre_IndexD(index, 0);
@@ -497,7 +475,7 @@ hypre_MaxIndexPosition(hypre_Index index, HYPRE_Int *position)
       }
    }
    
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -508,7 +486,6 @@ hypre_MaxIndexPosition(hypre_Index index, HYPRE_Int *position)
 HYPRE_Int
 hypre_MinIndexPosition(hypre_Index index, HYPRE_Int *position)
 {
-   HYPRE_Int  ierr = 0;
    HYPRE_Int  i, value;
 
    value = hypre_IndexD(index, 0);
@@ -523,7 +500,7 @@ hypre_MinIndexPosition(hypre_Index index, HYPRE_Int *position)
       }
    }
    
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -535,18 +512,17 @@ HYPRE_Int
 hypre_BoxExpandConstant( hypre_Box   *box,
                          HYPRE_Int   expand)
 { 
-  HYPRE_Int   ierr = 0;
-  HYPRE_Int  *imin = hypre_BoxIMin(box);
-  HYPRE_Int  *imax = hypre_BoxIMax(box);
-  HYPRE_Int  d; 
+   HYPRE_Int  *imin = hypre_BoxIMin(box);
+   HYPRE_Int  *imax = hypre_BoxIMax(box);
+   HYPRE_Int  d; 
 
-  for (d = 0; d < 3; d++)
-  {
-    imin[d] -= expand;
-    imax[d] += expand;
-  }
+   for (d = 0; d < 3; d++)
+   {
+      imin[d] -= expand;
+      imax[d] += expand;
+   }
   
-  return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -556,20 +532,19 @@ hypre_BoxExpandConstant( hypre_Box   *box,
 
 HYPRE_Int
 hypre_BoxExpandConstantDim( hypre_Box   *box,
-                         HYPRE_Int   *expand)
+                            HYPRE_Int   *expand)
 { 
-  HYPRE_Int   ierr = 0;
-  HYPRE_Int  *imin = hypre_BoxIMin(box);
-  HYPRE_Int  *imax = hypre_BoxIMax(box);
-  HYPRE_Int  d; 
+   HYPRE_Int  *imin = hypre_BoxIMin(box);
+   HYPRE_Int  *imax = hypre_BoxIMax(box);
+   HYPRE_Int  d; 
 
-  for (d = 0; d < 3; d++)
-  {
-    imin[d] -= expand[d];
-    imax[d] += expand[d];
-  }
+   for (d = 0; d < 3; d++)
+   {
+      imin[d] -= expand[d];
+      imax[d] += expand[d];
+   }
   
-  return ierr;
+   return hypre_error_flag;
 }
 
   

@@ -10,44 +10,33 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiInterpData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
    HYPRE_Int           nvars;
    void              **sinterp_data;
+
 } hypre_SysSemiInterpData;
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiInterpCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SysSemiInterpCreate( void **sys_interp_vdata_ptr )
 {
-   HYPRE_Int                ierr = 0;
    hypre_SysSemiInterpData *sys_interp_data;
 
    sys_interp_data = hypre_CTAlloc(hypre_SysSemiInterpData, 1);
    *sys_interp_vdata_ptr = (void *) sys_interp_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiInterpSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -60,8 +49,6 @@ hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
                           hypre_Index           findex,
                           hypre_Index           stride       )
 {
-   HYPRE_Int                ierr = 0;
-
    hypre_SysSemiInterpData  *sys_interp_data = sys_interp_vdata;
    void                    **sinterp_data;
 
@@ -89,11 +76,10 @@ hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
    (sys_interp_data -> nvars)        = nvars;
    (sys_interp_data -> sinterp_data) = sinterp_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiInterp:
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -102,8 +88,6 @@ hypre_SysSemiInterp( void                 *sys_interp_vdata,
                      hypre_SStructPVector *xc,
                      hypre_SStructPVector *e            )
 {
-   HYPRE_Int                 ierr = 0;
-   
    hypre_SysSemiInterpData  *sys_interp_data = sys_interp_vdata;
    void                    **sinterp_data = (sys_interp_data -> sinterp_data);
    HYPRE_Int                 nvars = (sys_interp_data -> nvars);
@@ -124,18 +108,15 @@ hypre_SysSemiInterp( void                 *sys_interp_vdata,
       hypre_SemiInterp(sdata, P_s, xc_s, e_s);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiInterpDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
 {
-   HYPRE_Int             ierr = 0;
-
    hypre_SysSemiInterpData *sys_interp_data = sys_interp_vdata;
 
    HYPRE_Int             nvars;
@@ -156,6 +137,7 @@ hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
       hypre_TFree(sinterp_data);
       hypre_TFree(sys_interp_data);
    }
-   return ierr;
+
+   return hypre_error_flag;
 }
 

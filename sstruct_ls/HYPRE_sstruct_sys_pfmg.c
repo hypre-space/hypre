@@ -10,19 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * HYPRE_SStructSysPFMG interface
- *
- *****************************************************************************/
-
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -30,11 +20,10 @@ HYPRE_SStructSysPFMGCreate( MPI_Comm comm, HYPRE_SStructSolver *solver )
 {
    *solver = ( (HYPRE_SStructSolver) hypre_SysPFMGCreate( comm ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -44,7 +33,6 @@ HYPRE_SStructSysPFMGDestroy( HYPRE_SStructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -60,7 +48,6 @@ HYPRE_SStructSysPFMGSetup( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -76,7 +63,6 @@ HYPRE_SStructSysPFMGSolve( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -87,7 +73,6 @@ HYPRE_SStructSysPFMGSetTol( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -98,7 +83,6 @@ HYPRE_SStructSysPFMGSetMaxIter( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetRelChange
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -109,7 +93,6 @@ HYPRE_SStructSysPFMGSetRelChange( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -119,7 +102,6 @@ HYPRE_SStructSysPFMGSetZeroGuess( HYPRE_SStructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetNonZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -129,7 +111,6 @@ HYPRE_SStructSysPFMGSetNonZeroGuess( HYPRE_SStructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetRelaxType
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -140,7 +121,6 @@ HYPRE_SStructSysPFMGSetRelaxType( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetSetJacobiWeight
  *--------------------------------------------------------------------------*/
                                                                                                                                                                
 HYPRE_Int
@@ -151,7 +131,6 @@ HYPRE_SStructSysPFMGSetJacobiWeight(HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -162,7 +141,6 @@ HYPRE_SStructSysPFMGSetNumPreRelax( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -173,7 +151,6 @@ HYPRE_SStructSysPFMGSetNumPostRelax( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetSkipRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -184,7 +161,6 @@ HYPRE_SStructSysPFMGSetSkipRelax( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetDxyz
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -195,7 +171,6 @@ HYPRE_SStructSysPFMGSetDxyz( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGSetLogging
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -206,7 +181,6 @@ HYPRE_SStructSysPFMGSetLogging( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
-HYPRE_SStructSysPFMGSetPrintLevel
 *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -217,7 +191,6 @@ HYPRE_SStructSysPFMGSetPrintLevel( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -228,7 +201,6 @@ HYPRE_SStructSysPFMGGetNumIterations( HYPRE_SStructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

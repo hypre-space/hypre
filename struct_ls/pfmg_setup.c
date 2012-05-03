@@ -33,9 +33,7 @@
       hypre_IndexD(stride, cdir) = 2;           \
    }
 
-
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -106,7 +104,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -132,13 +129,13 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    (pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
+   dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
       mean = hypre_CTAlloc(double, 3);
       deviation = hypre_CTAlloc(double, 3);
       hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
         
-      dxyz_flag= 0;
       for (d = 0; d < dim; d++)
       {
          deviation[d] -= mean[d]*mean[d];
@@ -582,11 +579,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGComputeDxyz
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -623,7 +619,6 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    HYPRE_Int              i, si, d;
    HYPRE_Int              loopi, loopj, loopk;
 
-   HYPRE_Int              ierr = 0;
    double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz;
 
    /*----------------------------------------------------------
@@ -826,16 +821,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
    }
 
-   /*-----------------------------------------------------------------------
-    * Return
-    *-----------------------------------------------------------------------*/
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ZeroDiagonal
- *
  * Returns 1 if there is a diagonal coefficient that is zero,
  * otherwise returns 0.
  *--------------------------------------------------------------------------*/

@@ -28,8 +28,12 @@
 HYPRE_Int
 HYPRE_SchwarzCreate( HYPRE_Solver *solver)
 {
+   if (!solver)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
    *solver = (HYPRE_Solver) hypre_SchwarzCreate( ) ;
-   if (!solver) hypre_error_in_arg(1);
    return hypre_error_flag;
 }
 

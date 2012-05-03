@@ -10,15 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * Member functions for hypre_SStructStencil class.
- *
- *****************************************************************************/
-
 #include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
@@ -32,6 +23,6 @@ hypre_SStructStencilRef( hypre_SStructStencil  *stencil,
    hypre_SStructStencilRefCount(stencil) ++;
    *stencil_ref = stencil;
 
-   return 0;
+   return hypre_error_flag;
 }
 

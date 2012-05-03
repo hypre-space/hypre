@@ -10,19 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
-
-/*--------------------------------------------------------------------------
- * hypre_JacobiData data structure
- *--------------------------------------------------------------------------*/
 
 typedef struct
 {
@@ -31,7 +19,6 @@ typedef struct
 } hypre_JacobiData;
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiCreate
  *--------------------------------------------------------------------------*/
 
 void *
@@ -55,14 +42,12 @@ hypre_JacobiCreate( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_JacobiDestroy( void *jacobi_vdata )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
    if (jacobi_data)
    {
@@ -70,11 +55,10 @@ hypre_JacobiDestroy( void *jacobi_vdata )
       hypre_TFree(jacobi_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -84,15 +68,13 @@ hypre_JacobiSetup( void               *jacobi_vdata,
                    hypre_StructVector *x            )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxSetup((jacobi_data -> relax_data), A, b, x);
+   hypre_PointRelaxSetup((jacobi_data -> relax_data), A, b, x);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -102,15 +84,13 @@ hypre_JacobiSolve( void               *jacobi_vdata,
                    hypre_StructVector *x            )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelax((jacobi_data -> relax_data), A, b, x);
+   hypre_PointRelax((jacobi_data -> relax_data), A, b, x);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -118,15 +98,13 @@ hypre_JacobiSetTol( void   *jacobi_vdata,
                     double  tol          )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxSetTol((jacobi_data -> relax_data), tol);
+   hypre_PointRelaxSetTol((jacobi_data -> relax_data), tol);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiGetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -134,15 +112,13 @@ hypre_JacobiGetTol( void   *jacobi_vdata,
                     double *tol          )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxGetTol((jacobi_data -> relax_data), tol);
+   hypre_PointRelaxGetTol((jacobi_data -> relax_data), tol);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -150,16 +126,13 @@ hypre_JacobiSetMaxIter( void  *jacobi_vdata,
                         HYPRE_Int    max_iter     )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxSetMaxIter((jacobi_data -> relax_data),
-                                     max_iter);
+   hypre_PointRelaxSetMaxIter((jacobi_data -> relax_data), max_iter);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiGetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -167,16 +140,13 @@ hypre_JacobiGetMaxIter( void  *jacobi_vdata,
                         HYPRE_Int  * max_iter     )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxGetMaxIter((jacobi_data -> relax_data),
-                                     max_iter);
+   hypre_PointRelaxGetMaxIter((jacobi_data -> relax_data), max_iter);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiSetZeroGuess
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -184,16 +154,13 @@ hypre_JacobiSetZeroGuess( void  *jacobi_vdata,
                           HYPRE_Int    zero_guess   )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxSetZeroGuess((jacobi_data -> relax_data),
-                                       zero_guess);
+   hypre_PointRelaxSetZeroGuess((jacobi_data -> relax_data), zero_guess);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiGetZeroGuess
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -201,16 +168,13 @@ hypre_JacobiGetZeroGuess( void  *jacobi_vdata,
                           HYPRE_Int  * zero_guess   )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxGetZeroGuess((jacobi_data -> relax_data),
-                                       zero_guess);
+   hypre_PointRelaxGetZeroGuess((jacobi_data -> relax_data), zero_guess);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -218,16 +182,13 @@ hypre_JacobiGetNumIterations( void  *jacobi_vdata,
                               HYPRE_Int  * num_iterations   )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxGetNumIterations((jacobi_data -> relax_data),
-                                           num_iterations );
+   hypre_PointRelaxGetNumIterations((jacobi_data -> relax_data), num_iterations );
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiSetTempVec
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -235,22 +196,21 @@ hypre_JacobiSetTempVec( void               *jacobi_vdata,
                         hypre_StructVector *t            )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   HYPRE_Int         ierr = 0;
 
-   ierr = hypre_PointRelaxSetTempVec((jacobi_data -> relax_data), t);
+   hypre_PointRelaxSetTempVec((jacobi_data -> relax_data), t);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
 /*--------------------------------------------------------------------------
- * hypre_JacobiGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm( void * jacobi_vdata, double * norm )
+HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm( void * jacobi_vdata,
+                                                    double * norm )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
    void *relax_data = jacobi_data -> relax_data;
 
-   return hypre_PointRelaxGetFinalRelativeResidualNorm( relax_data, norm);
+   return hypre_PointRelaxGetFinalRelativeResidualNorm( relax_data, norm );
 }

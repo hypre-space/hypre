@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * Member functions for hypre_SStructVector class.
@@ -584,7 +583,6 @@ hypre_SStructVectorRef( hypre_SStructVector  *vector,
    *vector_ref = vector;
 
    return hypre_error_flag;
-   return 0;
 }
 
 /*--------------------------------------------------------------------------

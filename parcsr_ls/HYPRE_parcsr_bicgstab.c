@@ -39,9 +39,12 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
 
-   *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
    if (!solver)
+   {
       hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
     
    return hypre_error_flag;
 }

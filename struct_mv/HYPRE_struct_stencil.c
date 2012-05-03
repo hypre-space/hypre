@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * HYPRE_StructStencil interface
@@ -35,7 +33,7 @@ HYPRE_StructStencilCreate( HYPRE_Int            dim,
  
    *stencil = hypre_StructStencilCreate(dim, size, shape);
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -47,8 +45,6 @@ HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
                                HYPRE_Int            element_index,
                                HYPRE_Int           *offset )
 {
-   HYPRE_Int     ierr = 0;
-                
    hypre_Index  *shape;
    HYPRE_Int     d;
  
@@ -59,7 +55,7 @@ HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
       hypre_IndexD(shape[element_index], d) = offset[d];
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

@@ -29,7 +29,6 @@ hypre_IntersectBoxes( hypre_Box *box1,
                       hypre_Box *box2,
                       hypre_Box *ibox )
 {
-   HYPRE_Int ierr = 0;
    HYPRE_Int d;
 
    /* find x, y, and z bounds */
@@ -41,7 +40,7 @@ hypre_IntersectBoxes( hypre_Box *box1,
          hypre_min(hypre_BoxIMaxD(box1, d), hypre_BoxIMaxD(box2, d));
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -53,8 +52,6 @@ hypre_SubtractBoxes( hypre_Box      *box1,
                      hypre_Box      *box2,
                      hypre_BoxArray *box_array )
 {
-   HYPRE_Int ierr = 0;
-              
    hypre_Box  *box;
    hypre_Box  *rembox;
    HYPRE_Int   d, size;
@@ -109,7 +106,7 @@ hypre_SubtractBoxes( hypre_Box      *box1,
    }
    hypre_BoxArraySetSize(box_array, size);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -121,8 +118,6 @@ hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
                          hypre_BoxArray *box_array2,
                          hypre_BoxArray *tmp_box_array )
 {
-   HYPRE_Int ierr = 0;
-              
    hypre_BoxArray *diff_boxes     = box_array1;
    hypre_BoxArray *new_diff_boxes = tmp_box_array;
    hypre_BoxArray  box_array;
@@ -131,24 +126,24 @@ hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
    HYPRE_Int       i, k;
 
    hypre_ForBoxI(i, box_array2)
+   {
+      box2 = hypre_BoxArrayBox(box_array2, i);
+
+      /* compute new_diff_boxes = (diff_boxes - box2) */
+      hypre_BoxArraySetSize(new_diff_boxes, 0);
+      hypre_ForBoxI(k, diff_boxes)
       {
-         box2 = hypre_BoxArrayBox(box_array2, i);
-
-         /* compute new_diff_boxes = (diff_boxes - box2) */
-         hypre_BoxArraySetSize(new_diff_boxes, 0);
-         hypre_ForBoxI(k, diff_boxes)
-            {
-               box1 = hypre_BoxArrayBox(diff_boxes, k);
-               hypre_SubtractBoxes(box1, box2, new_diff_boxes);
-            }
-
-         /* swap internals of diff_boxes and new_diff_boxes */
-         box_array       = *new_diff_boxes;
-         *new_diff_boxes = *diff_boxes;
-         *diff_boxes     = box_array;
+         box1 = hypre_BoxArrayBox(diff_boxes, k);
+         hypre_SubtractBoxes(box1, box2, new_diff_boxes);
       }
 
-   return ierr;
+      /* swap internals of diff_boxes and new_diff_boxes */
+      box_array       = *new_diff_boxes;
+      *new_diff_boxes = *diff_boxes;
+      *diff_boxes     = box_array;
+   }
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -193,8 +188,6 @@ hypre_SubtractBoxArrays( hypre_BoxArray *box_array1,
 HYPRE_Int
 hypre_UnionBoxes( hypre_BoxArray *boxes )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_Box       *box;
 
    HYPRE_Int       *block_index[3];
@@ -219,7 +212,7 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
 
    if (hypre_BoxArraySize(boxes) < 2)
    {
-      return ierr;
+      return hypre_error_flag;
    }
       
    /*------------------------------------------------------
@@ -236,39 +229,39 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
    }
       
    hypre_ForBoxI(bi, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, bi);
+
+      for (d = 0; d < 3; d++)
       {
-         box = hypre_BoxArrayBox(boxes, bi);
+         iminmax[0] = hypre_BoxIMinD(box, d);
+         iminmax[1] = hypre_BoxIMaxD(box, d) + 1;
 
-         for (d = 0; d < 3; d++)
+         for (i = 0; i < 2; i++)
          {
-            iminmax[0] = hypre_BoxIMinD(box, d);
-            iminmax[1] = hypre_BoxIMaxD(box, d) + 1;
-
-            for (i = 0; i < 2; i++)
+            /* find the new index position in the block_index array */
+            index_not_there = 1;
+            for (j = 0; j < block_sz[d]; j++)
             {
-               /* find the new index position in the block_index array */
-               index_not_there = 1;
-               for (j = 0; j < block_sz[d]; j++)
+               if (iminmax[i] <= block_index[d][j])
                {
-                  if (iminmax[i] <= block_index[d][j])
-                  {
-                     if (iminmax[i] == block_index[d][j])
-                        index_not_there = 0;
-                     break;
-                  }
+                  if (iminmax[i] == block_index[d][j])
+                     index_not_there = 0;
+                  break;
                }
+            }
 
-               /* if the index is already there, don't add it again */
-               if (index_not_there)
-               {
-                  for (k = block_sz[d]; k > j; k--)
-                     block_index[d][k] = block_index[d][k-1];
-                  block_index[d][j] = iminmax[i];
-                  block_sz[d]++;
-               }
+            /* if the index is already there, don't add it again */
+            if (index_not_there)
+            {
+               for (k = block_sz[d]; k > j; k--)
+                  block_index[d][k] = block_index[d][k-1];
+               block_index[d][j] = iminmax[i];
+               block_sz[d]++;
             }
          }
       }
+   }
 
    for (d = 0; d < 3; d++)
       block_sz[d]--;
@@ -289,37 +282,37 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
    block = hypre_CTAlloc(HYPRE_Int, block_volume);
       
    hypre_ForBoxI(bi, boxes)
+   {
+      box = hypre_BoxArrayBox(boxes, bi);
+
+      /* find the block_index indices corresponding to the current box */
+      for (d = 0; d < 3; d++)
       {
-         box = hypre_BoxArrayBox(boxes, bi);
+         j = 0;
 
-         /* find the block_index indices corresponding to the current box */
-         for (d = 0; d < 3; d++)
+         while (hypre_BoxIMinD(box, d) != block_index[d][j])
+            j++;
+         imin[d] = j;
+
+         while (hypre_BoxIMaxD(box, d) + 1 != block_index[d][j])
+            j++;
+         imax[d] = j;
+      }
+
+      /* note: boxes of size zero will not be added to block */
+      for (k = imin[2]; k < imax[2]; k++)
+      {
+         for (j = imin[1]; j < imax[1]; j++)
          {
-            j = 0;
-
-            while (hypre_BoxIMinD(box, d) != block_index[d][j])
-               j++;
-            imin[d] = j;
-
-            while (hypre_BoxIMaxD(box, d) + 1 != block_index[d][j])
-               j++;
-            imax[d] = j;
-         }
-
-         /* note: boxes of size zero will not be added to block */
-         for (k = imin[2]; k < imax[2]; k++)
-         {
-            for (j = imin[1]; j < imax[1]; j++)
+            for (i = imin[0]; i < imax[0]; i++)
             {
-               for (i = imin[0]; i < imax[0]; i++)
-               {
-                  index = ((k) * block_sz[1] + j) * block_sz[0] + i;
+               index = ((k) * block_sz[1] + j) * block_sz[0] + i;
 
-                  block[index] = factor[2] + factor[1] + factor[0];
-               }
+               block[index] = factor[2] + factor[1] + factor[0];
             }
          }
       }
+   }
       
    /*------------------------------------------------------
     * Join block array in x, then y, then z
@@ -336,22 +329,22 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
       switch(d)
       {
          case 0: /* join in x */
-         dd[0] = 0;
-         dd[1] = 1;
-         dd[2] = 2;
-         break;
+            dd[0] = 0;
+            dd[1] = 1;
+            dd[2] = 2;
+            break;
 
          case 1: /* join in y */
-         dd[0] = 1;
-         dd[1] = 0;
-         dd[2] = 2;
-         break;
+            dd[0] = 1;
+            dd[1] = 0;
+            dd[2] = 2;
+            break;
 
          case 2: /* join in z */
-         dd[0] = 2;
-         dd[1] = 1;
-         dd[2] = 0;
-         break;
+            dd[0] = 2;
+            dd[1] = 1;
+            dd[2] = 0;
+            break;
       }
 
       for (ii[dd[2]] = 0; ii[dd[2]] < block_sz[dd[2]]; ii[dd[2]]++)
@@ -433,7 +426,7 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
    hypre_TFree(block_index[0]);
    hypre_TFree(block);
    
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -442,11 +435,10 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
  * taking the union that has the least no. of boxes. The six calls union in
  * the order   xzy, yzx, yxz, zxy, zyx, xyz
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_MinUnionBoxes( hypre_BoxArray *boxes )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_BoxArrayArray     *rotated_array;
    hypre_BoxArray          *rotated_boxes;
    hypre_Box               *box, *rotated_box;
@@ -468,23 +460,23 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             {
                box= hypre_BoxArrayBox(boxes, j);
                hypre_SetIndex(lower, hypre_BoxIMin(box)[0],  hypre_BoxIMin(box)[2],
-                                     hypre_BoxIMin(box)[1]);
+                              hypre_BoxIMin(box)[1]);
                hypre_SetIndex(upper, hypre_BoxIMax(box)[0],  hypre_BoxIMax(box)[2],
-                                     hypre_BoxIMax(box)[1]);
+                              hypre_BoxIMax(box)[1]);
                hypre_BoxSetExtents(rotated_box, lower, upper);
                hypre_AppendBox(rotated_box, rotated_boxes);
             }
             hypre_UnionBoxes(rotated_boxes);
             break;
 
-        case 1:
+         case 1:
             for (j= 0; j< size; j++)
             {
                box= hypre_BoxArrayBox(boxes, j);
                hypre_SetIndex(lower, hypre_BoxIMin(box)[1],  hypre_BoxIMin(box)[2],
-                                     hypre_BoxIMin(box)[0]);
+                              hypre_BoxIMin(box)[0]);
                hypre_SetIndex(upper, hypre_BoxIMax(box)[1],  hypre_BoxIMax(box)[2],
-                                     hypre_BoxIMax(box)[0]);
+                              hypre_BoxIMax(box)[0]);
                hypre_BoxSetExtents(rotated_box, lower, upper);
                hypre_AppendBox(rotated_box, rotated_boxes);
             }
@@ -496,9 +488,9 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             {
                box= hypre_BoxArrayBox(boxes, j);
                hypre_SetIndex(lower, hypre_BoxIMin(box)[1],  hypre_BoxIMin(box)[0],
-                                     hypre_BoxIMin(box)[2]);
+                              hypre_BoxIMin(box)[2]);
                hypre_SetIndex(upper, hypre_BoxIMax(box)[1],  hypre_BoxIMax(box)[0],
-                                     hypre_BoxIMax(box)[2]);
+                              hypre_BoxIMax(box)[2]);
                hypre_BoxSetExtents(rotated_box, lower, upper);
                hypre_AppendBox(rotated_box, rotated_boxes);
             }
@@ -510,9 +502,9 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             {
                box= hypre_BoxArrayBox(boxes, j);
                hypre_SetIndex(lower, hypre_BoxIMin(box)[2],  hypre_BoxIMin(box)[0],
-                                     hypre_BoxIMin(box)[1]);
+                              hypre_BoxIMin(box)[1]);
                hypre_SetIndex(upper, hypre_BoxIMax(box)[2],  hypre_BoxIMax(box)[0],
-                                     hypre_BoxIMax(box)[1]);
+                              hypre_BoxIMax(box)[1]);
                hypre_BoxSetExtents(rotated_box, lower, upper);
                hypre_AppendBox(rotated_box, rotated_boxes);
             }
@@ -524,9 +516,9 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             {
                box= hypre_BoxArrayBox(boxes, j);
                hypre_SetIndex(lower, hypre_BoxIMin(box)[2],  hypre_BoxIMin(box)[1],
-                                     hypre_BoxIMin(box)[0]);
+                              hypre_BoxIMin(box)[0]);
                hypre_SetIndex(upper, hypre_BoxIMax(box)[2],  hypre_BoxIMax(box)[1],
-                                     hypre_BoxIMax(box)[0]);
+                              hypre_BoxIMax(box)[0]);
                hypre_BoxSetExtents(rotated_box, lower, upper);
                hypre_AppendBox(rotated_box, rotated_boxes);
             }
@@ -564,10 +556,12 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             for (j= 0; j< min_size; j++)
             {
                rotated_box= hypre_BoxArrayBox(rotated_boxes, j);
-               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[0], hypre_BoxIMin(rotated_box)[2],
-                                     hypre_BoxIMin(rotated_box)[1]);
-               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[0], hypre_BoxIMax(rotated_box)[2],
-                                     hypre_BoxIMax(rotated_box)[1]);
+               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[0],
+                              hypre_BoxIMin(rotated_box)[2],
+                              hypre_BoxIMin(rotated_box)[1]);
+               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[0],
+                              hypre_BoxIMax(rotated_box)[2],
+                              hypre_BoxIMax(rotated_box)[1]);
 
                hypre_BoxSetExtents( hypre_BoxArrayBox(boxes, j), lower, upper);
             }
@@ -577,10 +571,12 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             for (j= 0; j< min_size; j++)
             {
                rotated_box= hypre_BoxArrayBox(rotated_boxes, j);
-               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[2], hypre_BoxIMin(rotated_box)[0],
-                                     hypre_BoxIMin(rotated_box)[1]);
-               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[2], hypre_BoxIMax(rotated_box)[0],
-                                     hypre_BoxIMax(rotated_box)[1]);
+               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[2],
+                              hypre_BoxIMin(rotated_box)[0],
+                              hypre_BoxIMin(rotated_box)[1]);
+               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[2],
+                              hypre_BoxIMax(rotated_box)[0],
+                              hypre_BoxIMax(rotated_box)[1]);
 
                hypre_BoxSetExtents( hypre_BoxArrayBox(boxes, j), lower, upper);
             }
@@ -590,10 +586,12 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             for (j= 0; j< min_size; j++)
             {
                rotated_box= hypre_BoxArrayBox(rotated_boxes, j);
-               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[1], hypre_BoxIMin(rotated_box)[0],
-                                     hypre_BoxIMin(rotated_box)[2]);
-               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[1], hypre_BoxIMax(rotated_box)[0],
-                                     hypre_BoxIMax(rotated_box)[2]);
+               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[1],
+                              hypre_BoxIMin(rotated_box)[0],
+                              hypre_BoxIMin(rotated_box)[2]);
+               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[1],
+                              hypre_BoxIMax(rotated_box)[0],
+                              hypre_BoxIMax(rotated_box)[2]);
 
                hypre_BoxSetExtents( hypre_BoxArrayBox(boxes, j), lower, upper);
             }
@@ -603,10 +601,12 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             for (j= 0; j< min_size; j++)
             {
                rotated_box= hypre_BoxArrayBox(rotated_boxes, j);
-               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[1], hypre_BoxIMin(rotated_box)[2],
-                                     hypre_BoxIMin(rotated_box)[0]);
-               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[1], hypre_BoxIMax(rotated_box)[2],
-                                     hypre_BoxIMax(rotated_box)[0]);
+               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[1],
+                              hypre_BoxIMin(rotated_box)[2],
+                              hypre_BoxIMin(rotated_box)[0]);
+               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[1],
+                              hypre_BoxIMax(rotated_box)[2],
+                              hypre_BoxIMax(rotated_box)[0]);
 
                hypre_BoxSetExtents( hypre_BoxArrayBox(boxes, j), lower, upper);
             }
@@ -616,10 +616,12 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
             for (j= 0; j< min_size; j++)
             {
                rotated_box= hypre_BoxArrayBox(rotated_boxes, j);
-               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[2], hypre_BoxIMin(rotated_box)[1],
-                                     hypre_BoxIMin(rotated_box)[0]);
-               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[2], hypre_BoxIMax(rotated_box)[1],
-                                     hypre_BoxIMax(rotated_box)[0]);
+               hypre_SetIndex(lower, hypre_BoxIMin(rotated_box)[2],
+                              hypre_BoxIMin(rotated_box)[1],
+                              hypre_BoxIMin(rotated_box)[0]);
+               hypre_SetIndex(upper, hypre_BoxIMax(rotated_box)[2],
+                              hypre_BoxIMax(rotated_box)[1],
+                              hypre_BoxIMax(rotated_box)[0]);
 
                hypre_BoxSetExtents( hypre_BoxArrayBox(boxes, j), lower, upper);
             }
@@ -630,6 +632,5 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
 
    hypre_BoxArrayArrayDestroy(rotated_array);
 
-   return ierr;
+   return hypre_error_flag;
 }
-

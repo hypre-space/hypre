@@ -10,27 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_struct_ls.h"
 
 /*==========================================================================*/
-/** Creates a new FlexGMRES solver object.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param comm [IN]
-  MPI communicator
-@param solver [OUT]
-  solver structure
-
-@see HYPRE_StructFlexGMRESDestroy */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
@@ -50,23 +32,10 @@ HYPRE_StructFlexGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 
    *solver = ( (HYPRE_StructSolver) hypre_FlexGMRESCreate( fgmres_functions ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Destroys a FlexGMRES solver object.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-
-@see HYPRE_StructFlexGMRESCreate */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructFlexGMRESDestroy( HYPRE_StructSolver solver )
@@ -75,311 +44,127 @@ HYPRE_StructFlexGMRESDestroy( HYPRE_StructSolver solver )
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Precomputes tasks necessary for doing the solve.  This routine
-ensures that the setup for the preconditioner is also called.
-
-NOTE: This is supposed to be an optional call, but currently is required.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructFlexGMRESSolve */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructFlexGMRESSetup( HYPRE_StructSolver solver,
-                      HYPRE_StructMatrix A,
-                      HYPRE_StructVector b,
-                      HYPRE_StructVector x      )
+                            HYPRE_StructMatrix A,
+                            HYPRE_StructVector b,
+                            HYPRE_StructVector x      )
 {
    return( HYPRE_FlexGMRESSetup( (HYPRE_Solver) solver,
-                             (HYPRE_Matrix) A,
-                             (HYPRE_Vector) b,
-                             (HYPRE_Vector) x ) );
+                                 (HYPRE_Matrix) A,
+                                 (HYPRE_Vector) b,
+                                 (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** Performs the FlexGMRES linear solve.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param A [IN]
-  coefficient matrix
-@param b [IN]
-  right-hand-side vector
-@param x [IN]
-  unknown vector
-
-@see HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 HYPRE_StructFlexGMRESSolve( HYPRE_StructSolver solver,
-                      HYPRE_StructMatrix A,
-                      HYPRE_StructVector b,
-                      HYPRE_StructVector x      )
+                            HYPRE_StructMatrix A,
+                            HYPRE_StructVector b,
+                            HYPRE_StructVector x      )
 {
    return( HYPRE_FlexGMRESSolve( (HYPRE_Solver) solver,
-                             (HYPRE_Matrix) A,
-                             (HYPRE_Vector) b,
-                             (HYPRE_Vector) x ) );
+                                 (HYPRE_Matrix) A,
+                                 (HYPRE_Vector) b,
+                                 (HYPRE_Vector) x ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the stopping tolerance.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param tol [IN]
-  FlexGMRES solver tolerance
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup   */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetTol( HYPRE_StructSolver solver,
-                       double             tol    )
+                             double             tol    )
 {
    return( HYPRE_FlexGMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
+
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the absolute stopping tolerance.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param tol [IN]
-  FlexGMRES solver tolerance
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup   */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
-                       double             atol    )
+                                     double             atol    )
 {
    return( HYPRE_FlexGMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
 }
+
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the maximum number of iterations.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param max_iter [IN]
-  FlexGMRES solver maximum number of iterations
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetMaxIter( HYPRE_StructSolver solver,
-                           HYPRE_Int          max_iter )
+                                 HYPRE_Int          max_iter )
 {
    return( HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Sets the dimension of the Krylov subspace.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param k_dim [IN]
-  FlexGMRES dimension of the Krylov subspace
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetKDim( HYPRE_StructSolver solver,
-                           HYPRE_Int          k_dim )
+                              HYPRE_Int          k_dim )
 {
    return( HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
+
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Sets the precondioner to use in FlexGMRES.  The Default is no
-preconditioner, i.e. the solver is just conjugate gradients (CG).
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param precond [IN]
-  pointer to the preconditioner solve function
-@param precond_setup [IN]
-  pointer to the preconditioner setup function
-@param precond_solver [IN/OUT]
-  preconditioner solver structure
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup*/
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetPrecond( HYPRE_StructSolver         solver,
-                           HYPRE_PtrToStructSolverFcn precond,
-                           HYPRE_PtrToStructSolverFcn precond_setup,
-                           HYPRE_StructSolver         precond_solver )
+                                 HYPRE_PtrToStructSolverFcn precond,
+                                 HYPRE_PtrToStructSolverFcn precond_setup,
+                                 HYPRE_StructSolver         precond_solver )
 {
    return( HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver) solver,
-                                (HYPRE_PtrToSolverFcn) precond,
-                                (HYPRE_PtrToSolverFcn) precond_setup,
-                                (HYPRE_Solver) precond_solver ) );
+                                      (HYPRE_PtrToSolverFcn) precond,
+                                      (HYPRE_PtrToSolverFcn) precond_setup,
+                                      (HYPRE_Solver) precond_solver ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Set the type of logging to do.  Currently, if parameter
-logging is set to 0, no logging is done.  If set to 1, the norms and
-relative norms for each iteration are saved.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param logging [IN]
-  integer indicating what type of logging to do
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetLogging( HYPRE_StructSolver solver,
-                           HYPRE_Int          logging )
+                                 HYPRE_Int          logging )
 {
    return( HYPRE_FlexGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Currently, if parameter print_level is set to 0, no printing 
-is allowed.  If set to 1, printing takes place.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN/OUT]
-  solver structure
-@param logging [IN]
-  integer allowing printing to take place
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESSetPrintLevel( HYPRE_StructSolver solver,
-                           HYPRE_Int          print_level )
+                                    HYPRE_Int          print_level )
 {
    return( HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Gets the number of iterations done in the solve.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN]
-  solver structure
-@param num_iterations [OUT]
-  number of iterations
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESGetNumIterations( HYPRE_StructSolver  solver,
-                                 HYPRE_Int          *num_iterations )
+                                       HYPRE_Int          *num_iterations )
 {
-   return( HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
+   return( HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver) solver,
+                                            num_iterations ) );
 }
 
 /*==========================================================================*/
-/*==========================================================================*/
-/** (Optional) Gets the final relative residual norm for the solve.
-
-{\bf Input files:}
-_hypre_struct_ls.h
-
-@return Error code.
-
-@param solver [IN]
-  solver structure
-@param norm [OUT]
-  final relative residual norm
-
-@see HYPRE_StructFlexGMRESSolve, HYPRE_StructFlexGMRESSetup */
-/*--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                             double             *norm   )
+                                                   double             *norm   )
 {
-   return( HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
+   return( HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver,
+                                                        norm ) );
 }
 
-
-/*--------------------------------------------------------------------------
- * HYPRE_FlexGMRESSetModifyPC
- *--------------------------------------------------------------------------*/
- 
+/*==========================================================================*/
 
 HYPRE_Int HYPRE_StructFlexGMRESSetModifyPC( HYPRE_StructSolver  solver,
-                                      HYPRE_PtrToModifyPCFcn modify_pc)
-
+                                            HYPRE_PtrToModifyPCFcn modify_pc)
 {
-   return ( HYPRE_FlexGMRESSetModifyPC( (HYPRE_Solver) solver,  (HYPRE_PtrToModifyPCFcn) modify_pc));
-   
+   return ( HYPRE_FlexGMRESSetModifyPC( (HYPRE_Solver) solver,
+                                        (HYPRE_PtrToModifyPCFcn) modify_pc));
 }
 

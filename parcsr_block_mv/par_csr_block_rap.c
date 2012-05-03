@@ -51,7 +51,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    HYPRE_Int     *RAP_ext_j = NULL;
    double  *RAP_ext_data = NULL;
 
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle = NULL;
    hypre_ParCSRCommPkg *tmp_comm_pkg;
 
    HYPRE_Int *jdata_recv_vec_starts;

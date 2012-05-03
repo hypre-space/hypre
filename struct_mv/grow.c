@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Routines for "growing" boxes.
@@ -90,13 +88,13 @@ hypre_GrowBoxArrayByStencil( hypre_BoxArray      *box_array,
       hypre_BoxArrayArrayCreate(hypre_BoxArraySize(box_array));
 
    hypre_ForBoxI(i, box_array)
-      {
-         hypre_BoxArrayDestroy(
-            hypre_BoxArrayArrayBoxArray(grow_box_array_array, i));
-         hypre_BoxArrayArrayBoxArray(grow_box_array_array, i) =
-            hypre_GrowBoxByStencil(hypre_BoxArrayBox(box_array, i),
-                                   stencil, transpose);
-      }
+   {
+      hypre_BoxArrayDestroy(
+         hypre_BoxArrayArrayBoxArray(grow_box_array_array, i));
+      hypre_BoxArrayArrayBoxArray(grow_box_array_array, i) =
+         hypre_GrowBoxByStencil(hypre_BoxArrayBox(box_array, i),
+                                stencil, transpose);
+   }
 
    return grow_box_array_array;
 }

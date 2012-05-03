@@ -10,19 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SMGCreateRestrictOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
@@ -36,7 +27,6 @@ hypre_SMGCreateRestrictOp( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGSetupRestrictOp
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -47,7 +37,5 @@ hypre_SMGSetupRestrictOp( hypre_StructMatrix *A,
                           hypre_Index         cindex,
                           hypre_Index         cstride  )
 {
-   HYPRE_Int ierr = 0;
-
-   return ierr;
+   return hypre_error_flag;
 }

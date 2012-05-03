@@ -69,7 +69,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
 
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -101,7 +100,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       hypre_EndTiming(pfmg_data -> time_index);
-      return ierr;
+      return hypre_error_flag;
    }
 
    /* part of convergence check */
@@ -122,7 +121,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          hypre_EndTiming(pfmg_data -> time_index);
-         return ierr;
+         return hypre_error_flag;
       }
    }
 
@@ -324,6 +323,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    hypre_EndTiming(pfmg_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
