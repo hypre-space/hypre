@@ -10,15 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
-/******************************************************************************
- *
- * HYPRE_ParCSRGMRES interface
- *
- *****************************************************************************/
 #include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
@@ -28,7 +19,14 @@
 HYPRE_Int
 HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   hypre_GMRESFunctions * gmres_functions =
+   hypre_GMRESFunctions * gmres_functions;
+
+   if (!solver)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   gmres_functions =
       hypre_GMRESFunctionsCreate(
          hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
@@ -39,12 +37,6 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
-
-   if (!solver)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   }
    *solver = ( (HYPRE_Solver) hypre_GMRESCreate( gmres_functions ) );
 
    return hypre_error_flag;
@@ -119,7 +111,7 @@ HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRGMRESSetAbsoluteTol( HYPRE_Solver solver,
-                         double             a_tol    )
+                                 double             a_tol    )
 {
    return( HYPRE_GMRESSetAbsoluteTol( solver, a_tol ) );
 }
@@ -201,7 +193,7 @@ HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRGMRESSetPrintLevel( HYPRE_Solver solver,
-                             HYPRE_Int print_level)
+                                HYPRE_Int print_level)
 {
    return( HYPRE_GMRESSetPrintLevel( solver, print_level ) );
 }
@@ -212,7 +204,7 @@ HYPRE_ParCSRGMRESSetPrintLevel( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRGMRESGetNumIterations( HYPRE_Solver  solver,
-                                   HYPRE_Int                *num_iterations )
+                                   HYPRE_Int    *num_iterations )
 {
    return( HYPRE_GMRESGetNumIterations( solver, num_iterations ) );
 }
@@ -223,7 +215,7 @@ HYPRE_ParCSRGMRESGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                               double       *norm   )
 {
    return( HYPRE_GMRESGetFinalRelativeResidualNorm( solver, norm ) );
 }

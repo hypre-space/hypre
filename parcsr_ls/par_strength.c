@@ -102,7 +102,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   double             *A_offd_data;
+   double             *A_offd_data = NULL;
    HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
@@ -526,7 +526,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   double             *A_offd_data;
+   double             *A_offd_data = NULL;
    HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
