@@ -18,14 +18,14 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the zeus cluster ****
+   **** Only run this script on rzcereal3 ****
 
    $0 [-h|-help] {src_dir}
 
    where: {src_dir}  is the hypre source directory
           -h|-help   prints this usage information and exits
 
-      This script runs a number of tests suitable for the zeus cluster.
+      This script mainly runs the klocwork static analysis tool.
 
       Example usage: $0 ..
 
@@ -44,7 +44,7 @@ shift
 
 # Run Klocwork test
 ./test.sh klocwork.sh $src_dir
-mv -f default.??? $output_dir
+mv -f klocwork.??? $output_dir
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
