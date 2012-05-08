@@ -118,7 +118,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    max_levels = 25;
    max_coarse_size = 9;
-   min_coarse_size = 1;
+   min_coarse_size = 0;
    seq_threshold = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
@@ -687,7 +687,7 @@ hypre_BoomerAMGSetMinCoarseSize( void *data,
       return hypre_error_flag;
    } 
 
-   if (min_coarse_size < 1)
+   if (min_coarse_size < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

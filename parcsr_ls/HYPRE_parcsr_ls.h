@@ -2607,7 +2607,7 @@ HYPRE_ParCSRHybridSetMaxCoarseSize(HYPRE_Solver solver,
 
 /**
  * (Optional) Defines the minimal coarse grid size.
- * The default is 1.
+ * The default is 0.
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetMinCoarseSize(HYPRE_Solver solver,
