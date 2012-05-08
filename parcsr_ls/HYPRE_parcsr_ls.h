@@ -169,6 +169,13 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxCoarseSize(HYPRE_Solver solver,
                                     HYPRE_Int          max_coarse_size);
 
 /**
+ * (Optional) Sets minimum size of coarsest grid.
+ * The default is 1.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetMinCoarseSize(HYPRE_Solver solver,
+                                    HYPRE_Int          min_coarse_size);
+
+/**
  * (Optional) Sets maximal size for redundant coarse grid solve. 
  * When the system is smaller than this threshold, sequential AMG is used 
  * on all remaining active processors.
@@ -2597,6 +2604,14 @@ HYPRE_ParCSRHybridSetLevelOuterWt(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_ParCSRHybridSetMaxCoarseSize(HYPRE_Solver solver,
                                HYPRE_Int        max_coarse_size);
+
+/**
+ * (Optional) Defines the minimal coarse grid size.
+ * The default is 1.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetMinCoarseSize(HYPRE_Solver solver,
+                               HYPRE_Int        min_coarse_size);
 
 /**
  * (Optional) enables redundant coarse grid size. If the system size becomes

@@ -10,16 +10,12 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifndef hypre_PARCSR_LS_HEADER
-#define hypre_PARCSR_LS_HEADER
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
 #include <HYPRE_config.h>
 
 #include "HYPRE_parcsr_ls.h"
+
+#ifndef hypre_PARCSR_LS_HEADER
+#define hypre_PARCSR_LS_HEADER
 
 #include "_hypre_utilities.h"
 #include "krylov.h"
@@ -93,6 +89,7 @@ typedef struct
    HYPRE_Int      CR_use_CG;
    HYPRE_Int      cgc_its;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      min_coarse_size;
    HYPRE_Int      seq_threshold;
 
    /* solve params */
@@ -264,6 +261,7 @@ typedef struct
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
  #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
  #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+ #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
  #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
@@ -410,6 +408,7 @@ HYPRE_Int hypre_ADSDestroy ( void *solver );
 HYPRE_Int hypre_ADSSetDiscreteCurl ( void *solver , hypre_ParCSRMatrix *C );
 HYPRE_Int hypre_ADSSetDiscreteGradient ( void *solver , hypre_ParCSRMatrix *G );
 HYPRE_Int hypre_ADSSetCoordinateVectors ( void *solver , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z );
+HYPRE_Int hypre_ADSSetInterpolations ( void *solver , hypre_ParCSRMatrix *RT_Pi , hypre_ParCSRMatrix *RT_Pix , hypre_ParCSRMatrix *RT_Piy , hypre_ParCSRMatrix *RT_Piz , hypre_ParCSRMatrix *ND_Pi , hypre_ParCSRMatrix *ND_Pix , hypre_ParCSRMatrix *ND_Piy , hypre_ParCSRMatrix *ND_Piz );
 HYPRE_Int hypre_ADSSetMaxIter ( void *solver , HYPRE_Int maxit );
 HYPRE_Int hypre_ADSSetTol ( void *solver , double tol );
 HYPRE_Int hypre_ADSSetCycleType ( void *solver , HYPRE_Int cycle_type );
@@ -478,6 +477,7 @@ HYPRE_Int hypre_AMGHybridSetRelaxType ( void *AMGhybrid_vdata , HYPRE_Int relax_
 HYPRE_Int hypre_AMGHybridSetCycleRelaxType ( void *AMGhybrid_vdata , HYPRE_Int relax_type , HYPRE_Int k );
 HYPRE_Int hypre_AMGHybridSetRelaxOrder ( void *AMGhybrid_vdata , HYPRE_Int relax_order );
 HYPRE_Int hypre_AMGHybridSetMaxCoarseSize ( void *AMGhybrid_vdata , HYPRE_Int max_coarse_size );
+HYPRE_Int hypre_AMGHybridSetMinCoarseSize ( void *AMGhybrid_vdata , HYPRE_Int min_coarse_size );
 HYPRE_Int hypre_AMGHybridSetSeqThreshold ( void *AMGhybrid_vdata , HYPRE_Int seq_threshold );
 HYPRE_Int hypre_AMGHybridSetNumGridSweeps ( void *AMGhybrid_vdata , HYPRE_Int *num_grid_sweeps );
 HYPRE_Int hypre_AMGHybridSetGridRelaxType ( void *AMGhybrid_vdata , HYPRE_Int *grid_relax_type );
@@ -516,7 +516,7 @@ HYPRE_Int hypre_AMSSetDimension ( void *solver , HYPRE_Int dim );
 HYPRE_Int hypre_AMSSetDiscreteGradient ( void *solver , hypre_ParCSRMatrix *G );
 HYPRE_Int hypre_AMSSetCoordinateVectors ( void *solver , hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector *z );
 HYPRE_Int hypre_AMSSetEdgeConstantVectors ( void *solver , hypre_ParVector *Gx , hypre_ParVector *Gy , hypre_ParVector *Gz );
-HYPRE_Int hypre_AMSSetInterpolations ( void *solver , hypre_ParCSRMatrix *Pi , hypre_ParCSRMatrix *Pix , hypre_ParCSRMatrix *Piy , hypre_ParCSRMatrix *Piz);
+HYPRE_Int hypre_AMSSetInterpolations ( void *solver , hypre_ParCSRMatrix *Pi , hypre_ParCSRMatrix *Pix , hypre_ParCSRMatrix *Piy , hypre_ParCSRMatrix *Piz );
 HYPRE_Int hypre_AMSSetAlphaPoissonMatrix ( void *solver , hypre_ParCSRMatrix *A_Pi );
 HYPRE_Int hypre_AMSSetBetaPoissonMatrix ( void *solver , hypre_ParCSRMatrix *A_G );
 HYPRE_Int hypre_AMSSetInteriorNodes ( void *solver , hypre_ParVector *interior_nodes );
@@ -587,7 +587,7 @@ HYPRE_Int HYPRE_ADSSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_Pa
 HYPRE_Int HYPRE_ADSSetDiscreteCurl ( HYPRE_Solver solver , HYPRE_ParCSRMatrix C );
 HYPRE_Int HYPRE_ADSSetDiscreteGradient ( HYPRE_Solver solver , HYPRE_ParCSRMatrix G );
 HYPRE_Int HYPRE_ADSSetCoordinateVectors ( HYPRE_Solver solver , HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_ParVector z );
-HYPRE_Int hypre_ADSSetInterpolations ( void *solver , hypre_ParCSRMatrix *RT_Pi , hypre_ParCSRMatrix *RT_Pix , hypre_ParCSRMatrix *RT_Piy , hypre_ParCSRMatrix *RT_Piz , hypre_ParCSRMatrix *ND_Pi , hypre_ParCSRMatrix *ND_Pix , hypre_ParCSRMatrix *ND_Piy , hypre_ParCSRMatrix *ND_Piz );
+HYPRE_Int HYPRE_ADSSetInterpolations ( HYPRE_Solver solver , HYPRE_ParCSRMatrix RT_Pi , HYPRE_ParCSRMatrix RT_Pix , HYPRE_ParCSRMatrix RT_Piy , HYPRE_ParCSRMatrix RT_Piz , HYPRE_ParCSRMatrix ND_Pi , HYPRE_ParCSRMatrix ND_Pix , HYPRE_ParCSRMatrix ND_Piy , HYPRE_ParCSRMatrix ND_Piz );
 HYPRE_Int HYPRE_ADSSetMaxIter ( HYPRE_Solver solver , HYPRE_Int maxit );
 HYPRE_Int HYPRE_ADSSetTol ( HYPRE_Solver solver , double tol );
 HYPRE_Int HYPRE_ADSSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
@@ -622,6 +622,7 @@ HYPRE_Int HYPRE_AMSSetDimension ( HYPRE_Solver solver , HYPRE_Int dim );
 HYPRE_Int HYPRE_AMSSetDiscreteGradient ( HYPRE_Solver solver , HYPRE_ParCSRMatrix G );
 HYPRE_Int HYPRE_AMSSetCoordinateVectors ( HYPRE_Solver solver , HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_ParVector z );
 HYPRE_Int HYPRE_AMSSetEdgeConstantVectors ( HYPRE_Solver solver , HYPRE_ParVector Gx , HYPRE_ParVector Gy , HYPRE_ParVector Gz );
+HYPRE_Int HYPRE_AMSSetInterpolations ( HYPRE_Solver solver , HYPRE_ParCSRMatrix Pi , HYPRE_ParCSRMatrix Pix , HYPRE_ParCSRMatrix Piy , HYPRE_ParCSRMatrix Piz );
 HYPRE_Int HYPRE_AMSSetAlphaPoissonMatrix ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A_alpha );
 HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A_beta );
 HYPRE_Int HYPRE_AMSSetInteriorNodes ( HYPRE_Solver solver , HYPRE_ParVector interior_nodes );
@@ -652,6 +653,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels ( HYPRE_Solver solver , HYPRE_Int max_leve
 HYPRE_Int HYPRE_BoomerAMGGetMaxLevels ( HYPRE_Solver solver , HYPRE_Int *max_levels );
 HYPRE_Int HYPRE_BoomerAMGSetMaxCoarseSize ( HYPRE_Solver solver , HYPRE_Int max_coarse_size );
 HYPRE_Int HYPRE_BoomerAMGGetMaxCoarseSize ( HYPRE_Solver solver , HYPRE_Int *max_coarse_size );
+HYPRE_Int HYPRE_BoomerAMGSetMinCoarseSize ( HYPRE_Solver solver , HYPRE_Int min_coarse_size );
+HYPRE_Int HYPRE_BoomerAMGGetMinCoarseSize ( HYPRE_Solver solver , HYPRE_Int *min_coarse_size );
 HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int seq_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int *seq_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver , double strong_threshold );
@@ -900,6 +903,7 @@ HYPRE_Int HYPRE_ParCSRHybridSetRelaxType ( HYPRE_Solver solver , HYPRE_Int relax
 HYPRE_Int HYPRE_ParCSRHybridSetCycleRelaxType ( HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int k );
 HYPRE_Int HYPRE_ParCSRHybridSetRelaxOrder ( HYPRE_Solver solver , HYPRE_Int relax_order );
 HYPRE_Int HYPRE_ParCSRHybridSetMaxCoarseSize ( HYPRE_Solver solver , HYPRE_Int max_coarse_size );
+HYPRE_Int HYPRE_ParCSRHybridSetMinCoarseSize ( HYPRE_Solver solver , HYPRE_Int min_coarse_size );
 HYPRE_Int HYPRE_ParCSRHybridSetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int seq_threshold );
 HYPRE_Int HYPRE_ParCSRHybridSetRelaxWt ( HYPRE_Solver solver , double relax_wt );
 HYPRE_Int HYPRE_ParCSRHybridSetLevelRelaxWt ( HYPRE_Solver solver , double relax_wt , HYPRE_Int level );
@@ -1033,6 +1037,8 @@ HYPRE_Int hypre_BoomerAMGSetMaxLevels ( void *data , HYPRE_Int max_levels );
 HYPRE_Int hypre_BoomerAMGGetMaxLevels ( void *data , HYPRE_Int *max_levels );
 HYPRE_Int hypre_BoomerAMGSetMaxCoarseSize ( void *data , HYPRE_Int max_coarse_size );
 HYPRE_Int hypre_BoomerAMGGetMaxCoarseSize ( void *data , HYPRE_Int *max_coarse_size );
+HYPRE_Int hypre_BoomerAMGSetMinCoarseSize ( void *data , HYPRE_Int min_coarse_size );
+HYPRE_Int hypre_BoomerAMGGetMinCoarseSize ( void *data , HYPRE_Int *min_coarse_size );
 HYPRE_Int hypre_BoomerAMGSetSeqThreshold ( void *data , HYPRE_Int seq_threshold );
 HYPRE_Int hypre_BoomerAMGGetSeqThreshold ( void *data , HYPRE_Int *seq_threshold );
 HYPRE_Int hypre_BoomerAMGSetStrongThreshold ( void *data , double strong_threshold );

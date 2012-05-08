@@ -429,6 +429,17 @@ HYPRE_ParCSRHybridSetMaxCoarseSize( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetMinCoarseSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRHybridSetMinCoarseSize( HYPRE_Solver solver,
+                                    HYPRE_Int    min_coarse_size    )
+{
+   return( hypre_AMGHybridSetMinCoarseSize( (void *) solver, min_coarse_size ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetSeqThreshold
  *--------------------------------------------------------------------------*/
 

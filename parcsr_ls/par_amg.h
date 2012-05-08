@@ -58,6 +58,7 @@ typedef struct
    HYPRE_Int      CR_use_CG;
    HYPRE_Int      cgc_its;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      min_coarse_size;
    HYPRE_Int      seq_threshold;
 
    /* solve params */
@@ -229,6 +230,7 @@ typedef struct
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
  #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
  #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+ #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
  #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */

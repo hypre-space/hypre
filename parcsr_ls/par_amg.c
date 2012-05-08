@@ -36,6 +36,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    HYPRE_Int      max_levels;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      min_coarse_size;
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
@@ -117,6 +118,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    max_levels = 25;
    max_coarse_size = 9;
+   min_coarse_size = 1;
    seq_threshold = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
@@ -208,6 +210,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataUserRelaxWeight(amg_data) = 1.0;
    hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
+   hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
@@ -667,6 +670,48 @@ hypre_BoomerAMGGetMaxCoarseSize( void *data,
    } 
 
    *max_coarse_size = hypre_ParAMGDataMaxCoarseSize(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetMinCoarseSize( void *data,
+                          HYPRE_Int   min_coarse_size )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (min_coarse_size < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataMinCoarseSize(amg_data) = min_coarse_size;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetMinCoarseSize( void *data,
+                             HYPRE_Int *  min_coarse_size )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
 
    return hypre_error_flag;
 }

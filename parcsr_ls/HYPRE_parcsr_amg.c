@@ -139,6 +139,24 @@ HYPRE_BoomerAMGGetMaxCoarseSize( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMinCoarseSize, HYPRE_BoomerAMGGetMinCoarseSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetMinCoarseSize( HYPRE_Solver solver,
+                                 HYPRE_Int          min_coarse_size  )
+{
+   return( hypre_BoomerAMGSetMinCoarseSize( (void *) solver, min_coarse_size ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetMinCoarseSize( HYPRE_Solver solver,
+                                 HYPRE_Int        * min_coarse_size  )
+{
+   return( hypre_BoomerAMGGetMinCoarseSize( (void *) solver, min_coarse_size ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSeqThreshold, HYPRE_BoomerAMGGetSeqThreshold
  *--------------------------------------------------------------------------*/
 
