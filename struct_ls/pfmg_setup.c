@@ -616,10 +616,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_IndexRef         start;
    hypre_Index            stride;
                         
-   HYPRE_Int              i, si, d;
+   HYPRE_Int              i, si, d, sdiag;
    HYPRE_Int              loopi, loopj, loopk;
 
-   double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz;
+   double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz, diag;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -649,6 +649,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    tot_size= hypre_StructGridGlobalSize(hypre_StructMatrixGrid(A));
 
+   /* find diagonal stencil entry */
+   for (si = 0; si < stencil_size; si++)
+   {
+      if ((hypre_IndexD(stencil_shape[si], 0) == 0) &&
+          (hypre_IndexD(stencil_shape[si], 1) == 0) &&
+          (hypre_IndexD(stencil_shape[si], 2) == 0))
+      {
+         sdiag = si;
+         break;
+      }
+   }
+
    hypre_ForBoxI(i, compute_boxes)
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
@@ -668,6 +680,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          tcy = 0.0;
          tcz = 0.0;
 
+         /* get sign of diagonal */
+         Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+         diag = 1.0;
+         if (Ap[Ai] < 0)
+         {
+            diag = -1.0;
+         }
+
          for (si = 0; si < stencil_size; si++)
          {
             Ap = hypre_StructMatrixBoxData(A, i, si);
@@ -676,21 +696,21 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             Astenc = hypre_IndexD(stencil_shape[si], 0);
             if (Astenc)
             {
-               tcx -= Ap[Ai];
+               tcx -= Ap[Ai]*diag;
             }
 
             /* y-direction */
             Astenc = hypre_IndexD(stencil_shape[si], 1);
             if (Astenc)
             {
-               tcy -= Ap[Ai];
+               tcy -= Ap[Ai]*diag;
             }
 
             /* z-direction */
             Astenc = hypre_IndexD(stencil_shape[si], 2);
             if (Astenc)
             {
-               tcz -= Ap[Ai];
+               tcz -= Ap[Ai]*diag;
             }
          }
 
@@ -716,6 +736,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             tcy = 0.0;
             tcz = 0.0;
 
+            /* get sign of diagonal */
+            Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
+
             for (si = 0; si < stencil_size; si++)
             {
                Ap = hypre_StructMatrixBoxData(A, i, si);
@@ -724,21 +752,21 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                Astenc = hypre_IndexD(stencil_shape[si], 0);
                if (Astenc)
                {
-                  tcx -= Ap[Ai];
+                  tcx -= Ap[Ai]*diag;
                }
 
                /* y-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 1);
                if (Astenc)
                {
-                  tcy -= Ap[Ai];
+                  tcy -= Ap[Ai]*diag;
                }
 
                /* z-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 2);
                if (Astenc)
                {
-                  tcz -= Ap[Ai];
+                  tcz -= Ap[Ai]*diag;
                }
             }
 
