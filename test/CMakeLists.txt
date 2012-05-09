@@ -5,6 +5,9 @@ project (hypre-test)
 set (HYPRE_INSTALL_DIR "${PROJECT_SOURCE_DIR}/../hypre" CACHE PATH
   "Installation directory for HYPRE")
 
+# Set default compile optimization flag
+set (CMAKE_BUILD_TYPE "RELEASE" CACHE INTERNAL "" FORCE)
+
 # Include directories
 set (HYPRE_INCLUDE_DIRS "")
 list (APPEND HYPRE_INCLUDE_DIRS
@@ -28,6 +31,16 @@ endif (UNIX)
 # CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 # CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 # -lstdc++ -lm
+
+# Set MPI compile flags
+if (NOT HYPRE_SEQUENTIAL)
+  find_package (MPI)
+  if ((MPI_C_FOUND) AND (NOT CMAKE_C_COMPILER STREQUAL MPI_C_COMPILER))
+    include_directories (${MPI_C_INCLUDE_PATH})
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${MPI_C_COMPILE_FLAGS}")
+    list (APPEND HYPRE_LIBS ${MPI_C_LIBRARIES})
+  endif ()
+endif (NOT HYPRE_SEQUENTIAL)
 
 include_directories (${HYPRE_INCLUDE_DIRS})
 link_directories (${HYPRE_LIB_DIRS})
