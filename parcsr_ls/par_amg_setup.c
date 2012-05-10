@@ -90,11 +90,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int                 *CF2_marker;
    hypre_ParCSRMatrix  *S = NULL;
    hypre_ParCSRMatrix  *S2;
-   hypre_ParCSRMatrix  *SN;
+   hypre_ParCSRMatrix  *SN = NULL;
    hypre_ParCSRMatrix  *SCR;
    hypre_ParCSRMatrix  *P = NULL;
    hypre_ParCSRMatrix  *A_H;
-   hypre_ParCSRMatrix  *AN;
+   hypre_ParCSRMatrix  *AN = NULL;
    hypre_ParCSRMatrix  *P1;
    hypre_ParCSRMatrix  *P2;
    double              *SmoothVecs = NULL;
