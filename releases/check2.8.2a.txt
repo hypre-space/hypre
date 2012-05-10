@@ -16,30 +16,30 @@ the responsible project member before the release is made available to users.
 
 - Copy this file to 'check{release number}.txt'.
 
-  []
+  [rdf 4/24/2012]
 
 - Create a tracker issue "New hypre release {number}" advising project personnel
   of release decision and tentative date with a request to not disrupt the
   repository until the release is complete.
 
-  []
+  [rdf 5/8/2012]
 
 - Update 'CHANGELOG' file with information regarding contents of this release.
 
-  []
+  [rdf 5/9/2012]
 
 - Verify that all agreed-upon changes have been committed.
 
-  []
+  [rdf 5/10/2012]
 
 - Project Lead review and/or concurrence to release.
 
-  []
+  [rdf 5/10/2012]
 
 - Update 'config/configure.in' and 'CMakeLists.txt' with release number and
   date, then run 'config/bootstrap' and commit changes to the repository.
 
-  []
+  [rdf 5/10/2012]
 
 - Tag repository with release number.
 

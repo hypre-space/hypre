@@ -15,7 +15,7 @@
 # recent release.
 #=============================================================================
 
-Version 2.8.2a released 2012/05/11
+Version 2.8.2a released 2012/05/10
 
 - Added threading to multipass interpolation in BoomerAMG.
 
