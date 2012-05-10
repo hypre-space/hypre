@@ -46,7 +46,7 @@ the responsible project member before the release is made available to users.
 
   []
 
-- Tag repository with release number.
+- Tag repository with release number (e.g., 'cvs rtag V2-8-0b linear_solvers').
 
   []
 
