@@ -25,7 +25,7 @@ do
 
    $0 [options] {release}
 
-   where: {release}  is a hypre release tar file (gzipped)
+   where: {release}  is a hypre release tar file (gzipped, absolute path)
 
    with options:
       -xterm         run the tests in parallel using multiple xterm windows
@@ -40,6 +40,8 @@ do
    have to be re-run after their completion to generate the verification file.
 
    Example usage: $0 /usr/casc/hypre/hypre-2.0.0.tar.gz
+
+   NOTE: The absolute path for the release is required.
 
    NOTE: Because of ssh restrictions at LLNL, run this script on an LC machine.
    You may need to change the default tux platform at the top of this file to
