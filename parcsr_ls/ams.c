@@ -1968,6 +1968,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G0, ams_data -> B_G_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_G0, ams_data -> B_G_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G0, ams_data -> B_G_Pmax);
+      HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_G0, 2); /* don't coarsen to 0 */
       HYPRE_BoomerAMGSetup(ams_data -> B_G0,
                            (HYPRE_ParCSRMatrix)ams_data -> A_G0,
                            0, 0);
@@ -2145,6 +2146,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G, ams_data -> B_G_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_G, ams_data -> B_G_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G, ams_data -> B_G_Pmax);
+      HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_G, 2); /* don't coarsen to 0 */
 
       if (ams_data -> cycle_type == 0)
          HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_G, 2);
@@ -2197,6 +2199,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pix, ams_data -> B_Pi_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pix, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pix, ams_data -> B_Pi_Pmax);
+      HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_Pix, 2);
 
       HYPRE_BoomerAMGCreate(&ams_data -> B_Piy);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Piy, ams_data -> B_Pi_coarsen_type);
@@ -2209,6 +2212,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piy, ams_data -> B_Pi_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piy, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piy, ams_data -> B_Pi_Pmax);
+      HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_Piy, 2);
 
       HYPRE_BoomerAMGCreate(&ams_data -> B_Piz);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Piz, ams_data -> B_Pi_coarsen_type);
@@ -2221,6 +2225,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piz, ams_data -> B_Pi_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piz, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piz, ams_data -> B_Pi_Pmax);
+      HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_Piz, 2);
 
       if (ams_data -> beta_is_zero)
       {
@@ -2294,6 +2299,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pi, ams_data -> B_Pi_theta);
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pi, ams_data -> B_Pi_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pi, ams_data -> B_Pi_Pmax);
+      HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_Pi, 2); /* don't coarsen to 0 */
 
       if (ams_data -> cycle_type == 0)
          HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Pi, 2);
