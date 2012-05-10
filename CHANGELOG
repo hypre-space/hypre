@@ -15,6 +15,16 @@
 # recent release.
 #=============================================================================
 
+Version 2.8.2a released 2012/05/11
+
+- Added threading to multipass interpolation in BoomerAMG.
+
+- Fixed a coarsening problem in PFMG when the diagonal is negative.
+
+- Added a new option to BoomerAMG to specify a minimum coarse grid size.
+
+#====================================
+
 Version 2.8.1a released 2012/03/19
 
 - For non-cell data, fixed a memory problem with SStructGraphAddEntries() and an
