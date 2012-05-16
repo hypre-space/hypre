@@ -17,9 +17,9 @@
 # Rob's crontab (on rzcereal2)
 
 40 0 * * * source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -checkout
-00 1 * * 1 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -rzcereal3 >> autotest-rzcereal3-cron.out 2>> autotest-rzcereal3-cron.err
 00 1 * * 2 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -rzdawndev >> autotest-rzdawndev-cron.out 2>> autotest-rzdawndev-cron.err
 00 1 * * 3 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -hera      >> autotest-hera-cron.out      2>> autotest-hera-cron.err
+00 3 * * 3 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -rzcereal3 >> autotest-rzcereal3-cron.out 2>> autotest-rzcereal3-cron.err
 00 1 * * 4 source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -rzzeus    >> autotest-rzzeus-cron.out    2>> autotest-rzzeus-cron.err
 00 5 * * * source /etc/profile; source .profile; cd $HOME/hypre/testing/AUTOTEST; ./autotest.sh -summary-copy tux339:/usr/casc/hypre/testing
 
