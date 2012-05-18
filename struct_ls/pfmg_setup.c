@@ -617,7 +617,6 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_Index            stride;
                         
    HYPRE_Int              i, si, d, sdiag;
-   HYPRE_Int              loopi, loopj, loopk;
 
    double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz, diag;
 
@@ -726,11 +725,12 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-         hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
+         hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
+                             A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,diag,si,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+         hypre_BoxLoop1For(Ai)
          {
             tcx = 0.0;
             tcy = 0.0;
@@ -872,7 +872,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Int              Ai;
 
    HYPRE_Int              i;
-   HYPRE_Int              loopi, loopj, loopk;
 
    hypre_Index            diag_index;
    double                 diag_product = 1.0;
@@ -906,11 +905,12 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-         hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
+         hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
+                             A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+         hypre_BoxLoop1For(Ai)
          {
             diag_product *= Ap[Ai];
          }

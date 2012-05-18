@@ -308,7 +308,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    hypre_Index           loop_size;
 
    HYPRE_Int             fi, ci;
-   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -483,12 +482,12 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          if (coarse_symm_elements[RAPloop] == -1)
          {
             rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
-            hypre_BoxLoop1Begin(loop_size,
+            hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+            hypre_BoxLoop1For(iAc)
             {
                rap_ptrS[iAc] = zero;
             }
@@ -556,15 +555,15 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * the (up,up) path contributes to a non-stored entry
                          * in RAP.
                          *--------------------------------------------------*/
-                        hypre_BoxLoop4Begin(loop_size,
+                        hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                                             P_dbox, cstart, stridec, iP,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
 #endif
-                        hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+                        hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
@@ -592,15 +591,15 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * If A stencil index is not (0,0,0) or RAP is
                          * nonsymmetric, all 5 paths are calculated.
                          *--------------------------------------------------*/
-                        hypre_BoxLoop4Begin(loop_size,
+                        hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                                             P_dbox, cstart, stridec, iP,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
 #endif
-                        hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+                        hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
@@ -665,15 +664,15 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-                     hypre_BoxLoop4Begin(loop_size,
+                     hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                                          P_dbox, cstart, stridec, iP,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+                     hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
                         /* Path 1 : (stay,up) & symmetric path  */
                         iPp = iP + AOffsetP; 
@@ -734,15 +733,15 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-                     hypre_BoxLoop4Begin(loop_size,
+                     hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                                          P_dbox, cstart, stridec, iP,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+                     hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
                         /* Path 1 : (stay,up) */
                         iPp = iP + COffsetP + AOffsetP; 
@@ -845,12 +844,12 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-                     hypre_BoxLoop1Begin(loop_size,
+                     hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
                                          RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+                     hypre_BoxLoop1For(iAc)
                      {
                         rap_ptrS[iAc] += symm_path_multiplier *
                            (rap_ptrD[iAc]);

@@ -589,10 +589,9 @@ hypre_NodeRelax(  void               *relax_vdata,
    HYPRE_Int              stencil_size;
                         
    HYPRE_Int              iter, p, compute_i, i, j, si;
-   HYPRE_Int              loopi, loopj, loopk;
    HYPRE_Int              nodeset;
 
-   HYPRE_Int              nvars;
+   HYPRE_Int              nvars, ndim;
    HYPRE_Int              vi, vj;
 
    /*----------------------------------------------------------
@@ -631,6 +630,7 @@ hypre_NodeRelax(  void               *relax_vdata,
    iter = 0;
 
    nvars = hypre_SStructPMatrixNVars(relax_data -> A);
+   ndim = hypre_SStructPMatrixNDim(relax_data -> A);
 
    if (zero_guess)
    {
@@ -697,14 +697,14 @@ hypre_NodeRelax(  void               *relax_vdata,
                start  = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               hypre_BoxLoop3Begin(loop_size,
+               hypre_BoxLoop3Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,bi,xi,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,bi,xi,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
+               hypre_BoxLoop3For(Ai, bi, xi)
                {
                   A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                   x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
@@ -830,13 +830,13 @@ hypre_NodeRelax(  void               *relax_vdata,
                start  = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(ndim, loop_size,
                                    b_data_box, start, stride, bi,
                                    t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,bi,ti,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti,vi) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
+               hypre_BoxLoop2For(bi, ti)
                {
                   /* Copy rhs into temp vector */ 
                   for (vi = 0; vi < nvars; vi++)
@@ -867,14 +867,14 @@ hypre_NodeRelax(  void               *relax_vdata,
                                  + hypre_BoxOffsetDistance(
                                     x_data_box, stencil_shape[si]);
 
-                              hypre_BoxLoop3Begin(loop_size,
+                              hypre_BoxLoop3Begin(ndim, loop_size,
                                                   A_data_box, start, stride, Ai,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
 #endif
-                              hypre_BoxLoop3For(loopi,loopj,loopk,Ai,xi,ti)
+                              hypre_BoxLoop3For(Ai,xi,ti)
                               {
                                  tp[vi][ti] -= Ap[vi][vj][Ai] * xp[vj][xi];
                               }
@@ -898,13 +898,13 @@ hypre_NodeRelax(  void               *relax_vdata,
                   }
                }
 
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,ti,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,ti,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
+               hypre_BoxLoop2For(Ai, ti)
                {
                   A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                   x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];

@@ -10,12 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-/******************************************************************************
- *
- * Routine for computing residuals in the SMG code
- *
- *****************************************************************************/
-
 #include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
@@ -163,7 +157,6 @@ hypre_SMGResidual( void               *residual_vdata,
    HYPRE_Int               stencil_size;
 
    HYPRE_Int               compute_i, i, j, si;
-   HYPRE_Int               loopi, loopj, loopk;
 
    hypre_BeginTiming(residual_data -> time_index);
 
@@ -204,13 +197,13 @@ hypre_SMGResidual( void               *residual_vdata,
                rp = hypre_StructVectorBoxData(r, i);
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,bi,ri) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ri) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(loopi, loopj, loopk, bi, ri)
+               hypre_BoxLoop2For(bi, ri)
                {
                   rp[ri] = bp[bi];
                }
@@ -255,14 +248,14 @@ hypre_SMGResidual( void               *residual_vdata,
 
                hypre_BoxGetStrideSize(compute_box, base_stride,
                                       loop_size);
-               hypre_BoxLoop3Begin(loop_size,
+               hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
                                    A_data_box, start, base_stride, Ai,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+               hypre_BoxLoop3For(Ai, xi, ri)
                {
                   rp[ri] -= Ap[Ai] * xp[xi];
                }

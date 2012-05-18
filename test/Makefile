@@ -65,6 +65,7 @@ BABELLIBFLAGS =\
 ##################################################################
 
 HYPRE_DRIVERS =\
+ zboxloop.c\
  ij.c\
  ij_mv.c\
  new_ij.c\
@@ -156,6 +157,10 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
+
+zboxloop: zboxloop.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 struct: struct.o
 	@echo  "Building" $@ "... "

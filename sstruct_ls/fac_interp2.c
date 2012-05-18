@@ -59,7 +59,7 @@ hypre_FacSemiInterpCreate2( void **fac_interp_vdata_ptr )
    hypre_FacSemiInterpData2  *fac_interp_data;
 
    fac_interp_data = hypre_CTAlloc(hypre_FacSemiInterpData2, 1);
-  *fac_interp_vdata_ptr= (void *) fac_interp_data;
+   *fac_interp_vdata_ptr= (void *) fac_interp_data;
 
    return ierr;
 }
@@ -212,31 +212,31 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       hypre_CommInfoDestroy(comm_info);
    }
 
-  (fac_interp_data -> ndim)           = ndim;
-  (fac_interp_data -> nvars)          = nvars;
-  (fac_interp_data -> gnodes_comm_pkg)= gnodes_comm_pkg;
+   (fac_interp_data -> ndim)           = ndim;
+   (fac_interp_data -> nvars)          = nvars;
+   (fac_interp_data -> gnodes_comm_pkg)= gnodes_comm_pkg;
    hypre_CopyIndex(rfactors, (fac_interp_data -> stride));
 
-  /*------------------------------------------------------------------------
-   * Interlevel communication structures. 
-   *
-   * Algorithm for identity_boxes: For each cbox on this processor, refine 
-   * it and intersect it with the fmap. 
-   *    (cbox - all coarsened fmap_intersect boxes)= identity chunks
-   * for cbox.
-   *
-   * Algorithm for own_boxes (fullwgted boxes on this processor): For each
-   * fbox, coarsen it and boxmap intersect it with cmap. 
-   *   (cmap_intersect boxes on myproc)= ownboxes
-   * for this fbox.
-   *
-   * Algorithm for recv_box: For each fbox, coarsen it and boxmap intersect 
-   * it with cmap.
-   *   (cmap_intersect boxes off_proc)= unstretched recv_boxes.
-   * These boxes are stretched by one in each direction so that the ghostlayer
-   * is also communicated. However, the recv_grid will consists of the 
-   * unstretched boxes so that overlapping does not occur.
-   *--------------------------------------------------------------------------*/
+   /*------------------------------------------------------------------------
+    * Interlevel communication structures. 
+    *
+    * Algorithm for identity_boxes: For each cbox on this processor, refine 
+    * it and intersect it with the fmap. 
+    *    (cbox - all coarsened fmap_intersect boxes)= identity chunks
+    * for cbox.
+    *
+    * Algorithm for own_boxes (fullwgted boxes on this processor): For each
+    * fbox, coarsen it and boxmap intersect it with cmap. 
+    *   (cmap_intersect boxes on myproc)= ownboxes
+    * for this fbox.
+    *
+    * Algorithm for recv_box: For each fbox, coarsen it and boxmap intersect 
+    * it with cmap.
+    *   (cmap_intersect boxes off_proc)= unstretched recv_boxes.
+    * These boxes are stretched by one in each direction so that the ghostlayer
+    * is also communicated. However, the recv_grid will consists of the 
+    * unstretched boxes so that overlapping does not occur.
+    *--------------------------------------------------------------------------*/
    identity_arrayboxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
 
    pgrid= hypre_SStructPVectorPGrid(ec);
@@ -250,7 +250,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    for (vars= 0; vars< nvars; vars++)
    {
       boxman1= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(e),
-                                        part_fine, vars);
+                                           part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       identity_arrayboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
 
@@ -258,7 +258,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       {
          box= *hypre_BoxArrayBox(boxarray, ci);
          hypre_AppendBox(&box,
-                          hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
+                         hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
 
          hypre_StructMapCoarseToFine(hypre_BoxIMin(&box), zero_index,
                                      rfactors, hypre_BoxIMin(&scaled_box));
@@ -326,7 +326,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    for (vars= 0; vars< nvars; vars++)
    {
       boxman1= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(e),
-                                        part_crse, vars);
+                                           part_crse, vars);
       pgrid= hypre_SStructPVectorPGrid(ef);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
@@ -340,10 +340,10 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       {
          box= *hypre_BoxArrayBox(boxarray, fi);
 
-        /*--------------------------------------------------------------------
-         * Adjust this box so that only the coarse nodes inside the fine box
-         * are extracted.
-         *--------------------------------------------------------------------*/
+         /*--------------------------------------------------------------------
+          * Adjust this box so that only the coarse nodes inside the fine box
+          * are extracted.
+          *--------------------------------------------------------------------*/
          for (j= 0; j< ndim; j++)
          {
             k= hypre_BoxIMin(&box)[j] % rfactors[j];
@@ -390,19 +390,19 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
             if (proc == myproc)
             {
                hypre_AppendBox(&box,
-                                hypre_BoxArrayArrayBoxArray(ownboxes[vars], fi));
+                               hypre_BoxArrayArrayBoxArray(ownboxes[vars], fi));
                hypre_SStructBoxManEntryGetBoxnum(boxman_entries[i],
-                                              &own_cboxnums[vars][fi][cnt1]);
+                                                 &own_cboxnums[vars][fi][cnt1]);
                cnt1++;
             }
             else
             {
-              /* extend the box so all the required data for interpolation is recvd. */
+               /* extend the box so all the required data for interpolation is recvd. */
                hypre_SubtractIndex(hypre_BoxIMin(&box), index, hypre_BoxIMin(&box));
                hypre_AddIndex(hypre_BoxIMax(&box), index, hypre_BoxIMax(&box));
                   
                hypre_AppendBox(&box,
-                                hypre_BoxArrayArrayBoxArray(recv_boxes[vars], fi));
+                               hypre_BoxArrayArrayBoxArray(recv_boxes[vars], fi));
                recv_processes[vars][fi][cnt2]= proc;
                cnt2++;
             }
@@ -411,8 +411,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       }  /* hypre_ForBoxI(fi, boxarray) */
    }     /* for (vars= 0; vars< nvars; vars++) */
 
-  (fac_interp_data -> ownboxes)= ownboxes;
-  (fac_interp_data -> own_cboxnums)= own_cboxnums;
+   (fac_interp_data -> ownboxes)= ownboxes;
+   (fac_interp_data -> own_cboxnums)= own_cboxnums;
 
    /*--------------------------------------------------------------------------
     * With the recv'ed boxes form a SStructPGrid and a SStructGrid. The
@@ -450,7 +450,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
          {
             box= *hypre_BoxArrayBox(boxarray, j);
 
-           /* contract the box its actual size. */
+            /* contract the box its actual size. */
             hypre_AddIndex(hypre_BoxIMin(&box), index, hypre_BoxIMin(&box));
             hypre_SubtractIndex(hypre_BoxIMax(&box), index, hypre_BoxIMax(&box));
 
@@ -469,11 +469,11 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       }
    }
 
-  /*------------------------------------------------------------------------
-   * When there are no boxes to communicate, set the temp_grid to have a
-   * box of size zero. This is needed so that this SStructGrid can be
-   * assembled. This is done only when this only one processor.
-   *------------------------------------------------------------------------*/
+   /*------------------------------------------------------------------------
+    * When there are no boxes to communicate, set the temp_grid to have a
+    * box of size zero. This is needed so that this SStructGrid can be
+    * assembled. This is done only when this only one processor.
+    *------------------------------------------------------------------------*/
    if (cnt2 == 0)
    {
       /* min_index > max_index so that the box has volume zero. */
@@ -496,7 +496,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    hypre_SStructPGridAssemble(recv_cgrid);
 
    hypre_SStructPVectorCreate(hypre_SStructPGridComm(recv_cgrid), recv_cgrid,
-                             &recv_cvectors);
+                              &recv_cvectors);
    hypre_SStructPVectorInitialize(recv_cvectors);
    hypre_SStructPVectorAssemble(recv_cvectors);
 
@@ -506,16 +506,16 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    /* pgrid recv_cgrid no longer needed. */
    hypre_SStructPGridDestroy(recv_cgrid);
 
-  /*------------------------------------------------------------------------
-   * Send_boxes.
-   * Algorithm for send_boxes: For each cbox on this processor, box_map
-   * intersect it with temp_grid's map. 
-   *   (intersection boxes off-proc)= send_boxes for this cbox.
-   * Note that the send_boxes will be stretched to include the ghostlayers.
-   * This guarantees that all the data required for linear interpolation
-   * will be on the processor. Also, note that the remote_boxnums are
-   * with respect to the recv_cgrid box numbering.
-   *--------------------------------------------------------------------------*/
+   /*------------------------------------------------------------------------
+    * Send_boxes.
+    * Algorithm for send_boxes: For each cbox on this processor, box_map
+    * intersect it with temp_grid's map. 
+    *   (intersection boxes off-proc)= send_boxes for this cbox.
+    * Note that the send_boxes will be stretched to include the ghostlayers.
+    * This guarantees that all the data required for linear interpolation
+    * will be on the processor. Also, note that the remote_boxnums are
+    * with respect to the recv_cgrid box numbering.
+    *--------------------------------------------------------------------------*/
    send_boxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
    send_processes= hypre_CTAlloc(HYPRE_Int **, nvars);
    send_remote_boxnums= hypre_CTAlloc(HYPRE_Int **, nvars);
@@ -532,59 +532,59 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
        * These local box_nums may not be the same as the local box_nums of
        * the coarse grid.
        *-------------------------------------------------------------------*/
-       boxman1= hypre_SStructGridBoxManager(temp_grid, 0, vars);
-       pgrid= hypre_SStructPVectorPGrid(ec);
-       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
+      boxman1= hypre_SStructGridBoxManager(temp_grid, 0, vars);
+      pgrid= hypre_SStructPVectorPGrid(ec);
+      boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
-       send_boxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
-       send_processes[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
-       send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
+      send_boxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
+      send_processes[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
+      send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
 
-       hypre_ForBoxI(ci, boxarray)
-       {
-          box= *hypre_BoxArrayBox(boxarray, ci);
-          hypre_BoxSetExtents(&scaled_box, hypre_BoxIMin(&box), hypre_BoxIMax(&box));
+      hypre_ForBoxI(ci, boxarray)
+      {
+         box= *hypre_BoxArrayBox(boxarray, ci);
+         hypre_BoxSetExtents(&scaled_box, hypre_BoxIMin(&box), hypre_BoxIMax(&box));
       
-          hypre_BoxManIntersect(boxman1, hypre_BoxIMin(&scaled_box),
-                                hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
+         hypre_BoxManIntersect(boxman1, hypre_BoxIMin(&scaled_box),
+                               hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
 
-          cnt1= 0;
-          for (i= 0; i< nboxman_entries; i++)
-          {
-             hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
-             if (proc != myproc)
-             {
-                cnt1++;
-             }
-          }
-          send_processes[vars][ci]     = hypre_CTAlloc(HYPRE_Int, cnt1);
-          send_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int, cnt1);
+         cnt1= 0;
+         for (i= 0; i< nboxman_entries; i++)
+         {
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
+            if (proc != myproc)
+            {
+               cnt1++;
+            }
+         }
+         send_processes[vars][ci]     = hypre_CTAlloc(HYPRE_Int, cnt1);
+         send_remote_boxnums[vars][ci]= hypre_CTAlloc(HYPRE_Int, cnt1);
 
-          cnt1= 0;
-          for (i= 0; i< nboxman_entries; i++)
-          {
-             hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
-             hypre_BoxSetExtents(&box, ilower, iupper);
-             hypre_IntersectBoxes(&box, &scaled_box, &box);
+         cnt1= 0;
+         for (i= 0; i< nboxman_entries; i++)
+         {
+            hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
+            hypre_BoxSetExtents(&box, ilower, iupper);
+            hypre_IntersectBoxes(&box, &scaled_box, &box);
 
-             hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
-             if (proc != myproc)
-             {
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
+            if (proc != myproc)
+            {
                /* strech the box */
-                hypre_SubtractIndex(hypre_BoxIMin(&box), index, hypre_BoxIMin(&box));
-                hypre_AddIndex(hypre_BoxIMax(&box), index, hypre_BoxIMax(&box));
+               hypre_SubtractIndex(hypre_BoxIMin(&box), index, hypre_BoxIMin(&box));
+               hypre_AddIndex(hypre_BoxIMax(&box), index, hypre_BoxIMax(&box));
 
-                hypre_AppendBox(&box,
-                                 hypre_BoxArrayArrayBoxArray(send_boxes[vars], ci));
+               hypre_AppendBox(&box,
+                               hypre_BoxArrayArrayBoxArray(send_boxes[vars], ci));
 
-                send_processes[vars][ci][cnt1]= proc;
-                hypre_SStructBoxManEntryGetBoxnum(
-                   boxman_entries[i], &send_remote_boxnums[vars][ci][cnt1]);
-                cnt1++;
-             }
-          }
+               send_processes[vars][ci][cnt1]= proc;
+               hypre_SStructBoxManEntryGetBoxnum(
+                  boxman_entries[i], &send_remote_boxnums[vars][ci][cnt1]);
+               cnt1++;
+            }
+         }
 
-          hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries);
       }  /* hypre_ForBoxI(ci, boxarray) */
    }    /* for (vars= 0; vars< nvars; vars++) */
 
@@ -619,53 +619,53 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                           hypre_StructVectorComm(s_rc),
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
-  }
-  hypre_TFree(send_boxes);
-  hypre_TFree(recv_boxes);
-  hypre_TFree(send_processes);
-  hypre_TFree(recv_processes);
-  hypre_TFree(send_remote_boxnums);
-  hypre_TFree(recv_remote_boxnums);
+   }
+   hypre_TFree(send_boxes);
+   hypre_TFree(recv_boxes);
+   hypre_TFree(send_processes);
+   hypre_TFree(recv_processes);
+   hypre_TFree(send_remote_boxnums);
+   hypre_TFree(recv_remote_boxnums);
 
-  (fac_interp_data -> interlevel_comm)= interlevel_comm;
+   (fac_interp_data -> interlevel_comm)= interlevel_comm;
 
-  /* interpolation weights */
-  weights= hypre_TAlloc(double *, ndim);
-  for (i= 0; i< ndim; i++)
-  {
-     weights[i]= hypre_CTAlloc(double, rfactors[i]+1);
-  }
+   /* interpolation weights */
+   weights= hypre_TAlloc(double *, ndim);
+   for (i= 0; i< ndim; i++)
+   {
+      weights[i]= hypre_CTAlloc(double, rfactors[i]+1);
+   }
 
-  hypre_ClearIndex(refine_factors_half);
-  hypre_ClearIndex(refine_factors_2recp);
-  for (i= 0; i< ndim; i++)
-  {
-     refine_factors_half[i] = rfactors[i]/2;
-     refine_factors_2recp[i]= 1.0/(2.0*rfactors[i]);
-  }
+   hypre_ClearIndex(refine_factors_half);
+   hypre_ClearIndex(refine_factors_2recp);
+   for (i= 0; i< ndim; i++)
+   {
+      refine_factors_half[i] = rfactors[i]/2;
+      refine_factors_2recp[i]= 1.0/(2.0*rfactors[i]);
+   }
  
-  for (i= 0; i< ndim; i++)
-  {
-     for (j= 0; j<= refine_factors_half[i]; j++)
-     {
-        weights[i][j]= refine_factors_2recp[i]*(rfactors[i] + 2*j - 1.0);
-     }     
+   for (i= 0; i< ndim; i++)
+   {
+      for (j= 0; j<= refine_factors_half[i]; j++)
+      {
+         weights[i][j]= refine_factors_2recp[i]*(rfactors[i] + 2*j - 1.0);
+      }     
 
-     for (j= (refine_factors_half[i]+1); j<= rfactors[i]; j++)
-     {
-        weights[i][j]= refine_factors_2recp[i]*(2*j - rfactors[i] - 1.0);
-     }
-  }
-  (fac_interp_data -> weights)= weights;
+      for (j= (refine_factors_half[i]+1); j<= rfactors[i]; j++)
+      {
+         weights[i][j]= refine_factors_2recp[i]*(2*j - rfactors[i] - 1.0);
+      }
+   }
+   (fac_interp_data -> weights)= weights;
  
 
-  return ierr;
+   return ierr;
 }
 
 HYPRE_Int
 hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
-                         hypre_SStructPVector *  xc,
-                         hypre_SStructVector  *  e)
+                          hypre_SStructPVector *  xc,
+                          hypre_SStructVector  *  e)
 {
    hypre_FacSemiInterpData2 *interp_data= fac_interp_vdata;
    hypre_BoxArrayArray     **identity_boxes= interp_data-> identity_arrayboxes; 
@@ -674,10 +674,10 @@ hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
 
    HYPRE_Int               ierr     = 0;
 
-  /*-----------------------------------------------------------------------
-   * Compute e at coarse points (injection).
-   * The pgrid of xc is the same as the part_csre pgrid of e.
-   *-----------------------------------------------------------------------*/
+   /*-----------------------------------------------------------------------
+    * Compute e at coarse points (injection).
+    * The pgrid of xc is the same as the part_csre pgrid of e.
+    *-----------------------------------------------------------------------*/
    hypre_SStructPartialPCopy(xc,
                              hypre_SStructVectorPVector(e, part_crse), 
                              identity_boxes);
@@ -692,8 +692,8 @@ hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
  *-------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
-                         hypre_SStructPVector  *xc,
-                         hypre_SStructVector   *e_parts)
+                          hypre_SStructPVector  *xc,
+                          hypre_SStructVector   *e_parts)
 {
    HYPRE_Int ierr = 0;
 
@@ -739,7 +739,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    double               ***xcp;
    double               ***ep;
 
-   hypre_Index             loop_size;
+   hypre_Index             loop_size, lindex;
    hypre_Index             start, start_offset;
    hypre_Index             startc;
    hypre_Index             stridec;
@@ -749,7 +749,6 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_Index             zero_index, temp_index1, temp_index2;
 
    HYPRE_Int               fi, bi;
-   HYPRE_Int               loopi, loopj, loopk;
    HYPRE_Int               nvars, var;
 
    HYPRE_Int               i, j, k, offset_ip1, offset_jp1, offset_kp1;
@@ -778,7 +777,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_SetIndex(stridec, 1, 1, 1);
    for (i= 0; i< ndim; i++)
    {
-       refine_factors_half[i]= refine_factors[i]/2;
+      refine_factors_half[i]= refine_factors[i]/2;
    }
 
    /*-----------------------------------------------------------------------
@@ -793,7 +792,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       hypre_InitializeCommunication(comm_pkg[var],
                                     hypre_StructVectorData(xc_var),
                                     hypre_StructVectorData(xc_var), 0, 0,
-                                   &comm_handle);
+                                    &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
 
       if (recv_cvectors != NULL)
@@ -802,7 +801,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
          hypre_InitializeCommunication(interlevel_comm[var],
                                        hypre_StructVectorData(xc_var),
                                        hypre_StructVectorData(recv_var), 0, 0,
-                                      &comm_handle);
+                                       &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
       }
    }
@@ -847,344 +846,345 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
    for (var= 0; var< nvars; var++)
    {
-       xc_var= hypre_SStructPVectorSVector(xc, var);
-       e_var = hypre_SStructPVectorSVector(e, var);
+      xc_var= hypre_SStructPVectorSVector(xc, var);
+      e_var = hypre_SStructPVectorSVector(e, var);
 
-       fgrid      = hypre_StructVectorGrid(e_var);
-       fgrid_boxes= hypre_StructGridBoxes(fgrid);
+      fgrid      = hypre_StructVectorGrid(e_var);
+      fgrid_boxes= hypre_StructGridBoxes(fgrid);
 
-       own_cboxes = ownboxes[var];
-       var_boxnums= own_cboxnums[var];
+      own_cboxes = ownboxes[var];
+      var_boxnums= own_cboxnums[var];
 
       /*--------------------------------------------------------------------
        * Interpolate the own_box coarse grid values.
        *--------------------------------------------------------------------*/
-       hypre_ForBoxI(fi, fgrid_boxes)
-       {
-          fbox= hypre_BoxArrayBox(fgrid_boxes, fi);
+      hypre_ForBoxI(fi, fgrid_boxes)
+      {
+         fbox= hypre_BoxArrayBox(fgrid_boxes, fi);
 
-          e_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(e_var), fi);
-          own_abox= hypre_BoxArrayArrayBoxArray(own_cboxes, fi);
-          cboxnums= var_boxnums[fi];
+         e_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(e_var), fi);
+         own_abox= hypre_BoxArrayArrayBoxArray(own_cboxes, fi);
+         cboxnums= var_boxnums[fi];
 
          /*--------------------------------------------------------------------
           * Get the ptrs for the fine struct_vectors.
           *--------------------------------------------------------------------*/
-          for (k= 0; k< refine_factors[2]; k++)
-          {
-             for (j=0; j< refine_factors[1]; j++)
-             {
-                hypre_SetIndex(temp_index1, 0, j, k);
-                ep[k][j]= hypre_StructVectorBoxData(e_var, fi) +
-                          hypre_BoxOffsetDistance(e_dbox, temp_index1);
-             }
-          }
+         for (k= 0; k< refine_factors[2]; k++)
+         {
+            for (j=0; j< refine_factors[1]; j++)
+            {
+               hypre_SetIndex(temp_index1, 0, j, k);
+               ep[k][j]= hypre_StructVectorBoxData(e_var, fi) +
+                  hypre_BoxOffsetDistance(e_dbox, temp_index1);
+            }
+         }
 
-          hypre_ForBoxI(bi, own_abox)
-          {
-              ownbox= hypre_BoxArrayBox(own_abox, bi);
-              hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
-                                          refine_factors, hypre_BoxIMin(&refined_box));
-              hypre_ClearIndex(temp_index1);
-              for (j= 0; j< ndim; j++)
-              {
-                 temp_index1[j]= refine_factors[j]-1;
-              }
-              hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
-                                          refine_factors, hypre_BoxIMax(&refined_box));
-              hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
+         hypre_ForBoxI(bi, own_abox)
+         {
+            ownbox= hypre_BoxArrayBox(own_abox, bi);
+            hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
+                                        refine_factors, hypre_BoxIMin(&refined_box));
+            hypre_ClearIndex(temp_index1);
+            for (j= 0; j< ndim; j++)
+            {
+               temp_index1[j]= refine_factors[j]-1;
+            }
+            hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
+                                        refine_factors, hypre_BoxIMax(&refined_box));
+            hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
 
-              xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_var),
-                                          cboxnums[bi]); 
+            xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_var),
+                                        cboxnums[bi]); 
 
-             /*-----------------------------------------------------------------
-              * Get ptrs for the crse struct_vectors. For linear interpolation
-              * and arbitrary refinement factors, we need to point to the correct
-              * coarse grid nodes. Note that the ownboxes were created so that 
-              * only the coarse nodes inside a fbox are contained in ownbox. 
-              * Since we loop over the fine intersect box, we need to refine
-              * ownbox.
-              *-----------------------------------------------------------------*/
-              hypre_CopyIndex(hypre_BoxIMin(&intersect_box), start);
-              hypre_CopyIndex(hypre_BoxIMax(&intersect_box), intersect_size);
-              for (i= 0; i< 3; i++)
-              {
-                 intersect_size[i]-= (start[i]-1);
-              }
+            /*-----------------------------------------------------------------
+             * Get ptrs for the crse struct_vectors. For linear interpolation
+             * and arbitrary refinement factors, we need to point to the correct
+             * coarse grid nodes. Note that the ownboxes were created so that 
+             * only the coarse nodes inside a fbox are contained in ownbox. 
+             * Since we loop over the fine intersect box, we need to refine
+             * ownbox.
+             *-----------------------------------------------------------------*/
+            hypre_CopyIndex(hypre_BoxIMin(&intersect_box), start);
+            hypre_CopyIndex(hypre_BoxIMax(&intersect_box), intersect_size);
+            for (i= 0; i< 3; i++)
+            {
+               intersect_size[i]-= (start[i]-1);
+            }
 
-             /*------------------------------------------------------------------
-              * The fine intersection box may not be divisible by the refinement
-              * factor. This means that the interpolated coarse nodes and their 
-              * wieghts must be carefully determined. We accomplish this using the 
-              * offset away from a fine index that is divisible by the factor.
-              * Because the ownboxes were created so that only coarse nodes
-              * completely in the fbox are included, start is always divisible 
-              * by refine_factors. We do the calculation anyways for future changes.
-              *------------------------------------------------------------------*/
-              hypre_ClearIndex(start_offset);
-              for (i= 0; i< ndim; i++)
-              {
-                 start_offset[i]= start[i] % refine_factors[i];
-              }
+            /*------------------------------------------------------------------
+             * The fine intersection box may not be divisible by the refinement
+             * factor. This means that the interpolated coarse nodes and their 
+             * wieghts must be carefully determined. We accomplish this using the 
+             * offset away from a fine index that is divisible by the factor.
+             * Because the ownboxes were created so that only coarse nodes
+             * completely in the fbox are included, start is always divisible 
+             * by refine_factors. We do the calculation anyways for future changes.
+             *------------------------------------------------------------------*/
+            hypre_ClearIndex(start_offset);
+            for (i= 0; i< ndim; i++)
+            {
+               start_offset[i]= start[i] % refine_factors[i];
+            }
 
-              ptr_kshift= 0;
-              if ( (start[2]%refine_factors[2] < refine_factors_half[2]) && ndim == 3 )
-              {
-                 ptr_kshift= -1;
-              }
+            ptr_kshift= 0;
+            if ( (start[2]%refine_factors[2] < refine_factors_half[2]) && ndim == 3 )
+            {
+               ptr_kshift= -1;
+            }
 
-              ptr_jshift= 0;
-              if ( start[1]%refine_factors[1] < refine_factors_half[1] && ndim >= 2 ) 
-              {
-                 ptr_jshift= -1;
-              }
+            ptr_jshift= 0;
+            if ( start[1]%refine_factors[1] < refine_factors_half[1] && ndim >= 2 ) 
+            {
+               ptr_jshift= -1;
+            }
 
-              ptr_ishift= 0;
-              if ( start[0]%refine_factors[0] < refine_factors_half[0] ) 
-              {
-                 ptr_ishift= -1;
-              }
+            ptr_ishift= 0;
+            if ( start[0]%refine_factors[0] < refine_factors_half[0] ) 
+            {
+               ptr_ishift= -1;
+            }
 
-              for (k= 0; k< ksize; k++)
-              {
-                 for (j=0; j< jsize; j++)
-                 {
-                    hypre_SetIndex(temp_index2, ptr_ishift, j+ptr_jshift, k+ptr_kshift);
-                    xcp[k][j]= hypre_StructVectorBoxData(xc_var, cboxnums[bi]) +
-                               hypre_BoxOffsetDistance(xc_dbox, temp_index2);
-                 }
-              }
+            for (k= 0; k< ksize; k++)
+            {
+               for (j=0; j< jsize; j++)
+               {
+                  hypre_SetIndex(temp_index2, ptr_ishift, j+ptr_jshift, k+ptr_kshift);
+                  xcp[k][j]= hypre_StructVectorBoxData(xc_var, cboxnums[bi]) +
+                     hypre_BoxOffsetDistance(xc_dbox, temp_index2);
+               }
+            }
                  
-              hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
-              hypre_BoxGetSize(ownbox, loop_size);
+            hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
+            hypre_BoxGetSize(ownbox, loop_size);
 
-              hypre_BoxLoop2Begin(loop_size,
-                                  e_dbox,  start,  stride,  ei,
-                                  xc_dbox, startc, stridec, xci);
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                e_dbox,  start,  stride,  ei,
+                                xc_dbox, startc, stridec, xci);
 #if 1
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,xci,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci,lindex,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
 #endif
 #else
-              hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoopSetOneBlock();
 #endif
-              hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
-              {
-                 /*--------------------------------------------------------
-                  * Linear interpolation. Determine the weights and the
-                  * correct coarse grid values to be weighted. All fine 
-                  * values in an agglomerated coarse cell or in the remainder
-                  * agglomerated coarse cells are determined. The upper 
-                  * extents are needed.
-                  *--------------------------------------------------------*/
-                  imax= hypre_min( (intersect_size[0]-loopi*stride[0]),
-                                    refine_factors[0] );
-                  jmax= hypre_min( (intersect_size[1]-loopj*stride[1]),
-                                    refine_factors[1]);
-                  kmax= hypre_min( (intersect_size[2]-loopk*stride[2]),
-                                    refine_factors[2]);
+            hypre_BoxLoop2For(ei, xci)
+            {
+               /*--------------------------------------------------------
+                * Linear interpolation. Determine the weights and the
+                * correct coarse grid values to be weighted. All fine 
+                * values in an agglomerated coarse cell or in the remainder
+                * agglomerated coarse cells are determined. The upper 
+                * extents are needed.
+                *--------------------------------------------------------*/
+               hypre_BoxLoopGetIndex(lindex);
+               imax= hypre_min( (intersect_size[0]-lindex[0]*stride[0]),
+                                refine_factors[0] );
+               jmax= hypre_min( (intersect_size[1]-lindex[1]*stride[1]),
+                                refine_factors[1]);
+               kmax= hypre_min( (intersect_size[2]-lindex[2]*stride[2]),
+                                refine_factors[2]);
 
-                  for (k= 0; k< kmax; k++)
+               for (k= 0; k< kmax; k++)
+               {
+                  if (ndim == 3)
                   {
-                      if (ndim == 3)
-                      {
-                         offset_kp1= start_offset[2]+k+1;
+                     offset_kp1= start_offset[2]+k+1;
 
-                         if (ptr_kshift == -1)
-                         {
-                            if (offset_kp1 <= refine_factors_half[2])
-                            {
-                               zweight2= weights[2][offset_kp1];
-                               kshift= 0;
-                            }
-                            else
-                            {
-                               kshift= 1;
-                               if (offset_kp1 >  refine_factors_half[2] && 
-                                   offset_kp1 <= refine_factors[2])
-                               {
-                                  zweight2= weights[2][offset_kp1];
-                               }
-                               else
-                               {
-                                  zweight2= weights[2][offset_kp1-refine_factors[2]];
-                               }
-                            }
-                            zweight1= 1.0 - zweight2;
-                         }
+                     if (ptr_kshift == -1)
+                     {
+                        if (offset_kp1 <= refine_factors_half[2])
+                        {
+                           zweight2= weights[2][offset_kp1];
+                           kshift= 0;
+                        }
+                        else
+                        {
+                           kshift= 1;
+                           if (offset_kp1 >  refine_factors_half[2] && 
+                               offset_kp1 <= refine_factors[2])
+                           {
+                              zweight2= weights[2][offset_kp1];
+                           }
+                           else
+                           {
+                              zweight2= weights[2][offset_kp1-refine_factors[2]];
+                           }
+                        }
+                        zweight1= 1.0 - zweight2;
+                     }
 
-                         else
-                         {
-                            if (offset_kp1 > refine_factors_half[2] && 
-                                offset_kp1 <= refine_factors[2])
-                            {
-                               zweight2= weights[2][offset_kp1];
-                               kshift= 0;
-                            }
-                            else
-                            {
-                               kshift= 0;
-                               offset_kp1-= refine_factors[2];
-                               if (offset_kp1 > 0 && offset_kp1 <= refine_factors_half[2])
-                               {
-                                  zweight2= weights[2][offset_kp1];
-                               }
-                               else
-                               {
-                                  zweight2= weights[2][offset_kp1];
-                                  kshift  = 1;
-                               }
-                            }
-                            zweight1= 1.0 - zweight2;
-                         }
-                      }     /* if (ndim == 3) */
+                     else
+                     {
+                        if (offset_kp1 > refine_factors_half[2] && 
+                            offset_kp1 <= refine_factors[2])
+                        {
+                           zweight2= weights[2][offset_kp1];
+                           kshift= 0;
+                        }
+                        else
+                        {
+                           kshift= 0;
+                           offset_kp1-= refine_factors[2];
+                           if (offset_kp1 > 0 && offset_kp1 <= refine_factors_half[2])
+                           {
+                              zweight2= weights[2][offset_kp1];
+                           }
+                           else
+                           {
+                              zweight2= weights[2][offset_kp1];
+                              kshift  = 1;
+                           }
+                        }
+                        zweight1= 1.0 - zweight2;
+                     }
+                  }     /* if (ndim == 3) */
 
-                      for (j= 0; j< jmax; j++)
-                      {
-                         if (ndim >= 2)
-                         {
-                            offset_jp1= start_offset[1]+j+1;
+                  for (j= 0; j< jmax; j++)
+                  {
+                     if (ndim >= 2)
+                     {
+                        offset_jp1= start_offset[1]+j+1;
 
-                            if (ptr_jshift == -1)
-                            {
-                               if (offset_jp1 <= refine_factors_half[1])
-                               {
-                                  yweight2= weights[1][offset_jp1];
-                                  jshift= 0;
-                               }
-                               else
-                               {
-                                  jshift= 1;
-                                  if (offset_jp1 >  refine_factors_half[1] &&
-                                      offset_jp1 <= refine_factors[1])
-                                  {
-                                     yweight2= weights[1][offset_jp1];
-                                  }
-                                  else
-                                  {
-                                     yweight2= weights[1][offset_jp1-refine_factors[1]];
-                                  }
-                               }
-                               yweight1= 1.0 - yweight2;
-                            }
+                        if (ptr_jshift == -1)
+                        {
+                           if (offset_jp1 <= refine_factors_half[1])
+                           {
+                              yweight2= weights[1][offset_jp1];
+                              jshift= 0;
+                           }
+                           else
+                           {
+                              jshift= 1;
+                              if (offset_jp1 >  refine_factors_half[1] &&
+                                  offset_jp1 <= refine_factors[1])
+                              {
+                                 yweight2= weights[1][offset_jp1];
+                              }
+                              else
+                              {
+                                 yweight2= weights[1][offset_jp1-refine_factors[1]];
+                              }
+                           }
+                           yweight1= 1.0 - yweight2;
+                        }
 
-                            else
-                            {
-                               if (offset_jp1 > refine_factors_half[1] && 
-                                   offset_jp1 <= refine_factors[1])
-                               {
-                                  yweight2= weights[1][offset_jp1];
-                                  jshift= 0;
-                               }
-                               else
-                               {
-                                  jshift= 0;
-                                  offset_jp1-= refine_factors[1];
-                                  if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
-                                  {
-                                     yweight2= weights[1][offset_jp1];
-                                  }
-                                  else
-                                  {
-                                     yweight2= weights[1][offset_jp1];
-                                     jshift  = 1;
-                                  }
-                               }
-                               yweight1= 1.0 - yweight2;
-                            }
-                         }     /* if (ndim >= 2) */
+                        else
+                        {
+                           if (offset_jp1 > refine_factors_half[1] && 
+                               offset_jp1 <= refine_factors[1])
+                           {
+                              yweight2= weights[1][offset_jp1];
+                              jshift= 0;
+                           }
+                           else
+                           {
+                              jshift= 0;
+                              offset_jp1-= refine_factors[1];
+                              if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
+                              {
+                                 yweight2= weights[1][offset_jp1];
+                              }
+                              else
+                              {
+                                 yweight2= weights[1][offset_jp1];
+                                 jshift  = 1;
+                              }
+                           }
+                           yweight1= 1.0 - yweight2;
+                        }
+                     }     /* if (ndim >= 2) */
 
-                         for (i= 0; i< imax; i++)
-                         {
-                            offset_ip1= start_offset[0]+i+1;
+                     for (i= 0; i< imax; i++)
+                     {
+                        offset_ip1= start_offset[0]+i+1;
 
-                            if (ptr_ishift == -1)
-                            {
-                               if (offset_ip1 <= refine_factors_half[0])
-                               {
-                                  xweight2= weights[0][offset_ip1];
-                                  ishift= 0;
-                               }
-                               else
-                               {
-                                  ishift= 1;
-                                  if (offset_ip1 >  refine_factors_half[0] &&
-                                      offset_ip1 <= refine_factors[0])
-                                  {
-                                     xweight2= weights[0][offset_ip1];
-                                  }
-                                  else
-                                  {
-                                     xweight2= weights[0][offset_ip1-refine_factors[0]];
-                                  }
-                               }
-                               xweight1= 1.0 - xweight2;
-                            }
+                        if (ptr_ishift == -1)
+                        {
+                           if (offset_ip1 <= refine_factors_half[0])
+                           {
+                              xweight2= weights[0][offset_ip1];
+                              ishift= 0;
+                           }
+                           else
+                           {
+                              ishift= 1;
+                              if (offset_ip1 >  refine_factors_half[0] &&
+                                  offset_ip1 <= refine_factors[0])
+                              {
+                                 xweight2= weights[0][offset_ip1];
+                              }
+                              else
+                              {
+                                 xweight2= weights[0][offset_ip1-refine_factors[0]];
+                              }
+                           }
+                           xweight1= 1.0 - xweight2;
+                        }
 
-                            else
-                            {
-                               if (offset_ip1 > refine_factors_half[0] &&
-                                            offset_ip1 <= refine_factors[0])
-                               {
-                                  xweight2= weights[0][offset_ip1];
-                                  ishift= 0;
-                               }
-                               else
-                               {
-                                  ishift= 0;
-                                  offset_ip1-= refine_factors[0];
-                                  if (offset_ip1 > 0 && offset_ip1 <= refine_factors_half[0])
-                                  {
-                                     xweight2= weights[0][offset_ip1];
-                                  }
-                                  else
-                                  {
-                                     xweight2= weights[0][offset_ip1];
-                                     ishift  = 1;
-                                  }
-                               }
-                               xweight1= 1.0 - xweight2;
-                            }
+                        else
+                        {
+                           if (offset_ip1 > refine_factors_half[0] &&
+                               offset_ip1 <= refine_factors[0])
+                           {
+                              xweight2= weights[0][offset_ip1];
+                              ishift= 0;
+                           }
+                           else
+                           {
+                              ishift= 0;
+                              offset_ip1-= refine_factors[0];
+                              if (offset_ip1 > 0 && offset_ip1 <= refine_factors_half[0])
+                              {
+                                 xweight2= weights[0][offset_ip1];
+                              }
+                              else
+                              {
+                                 xweight2= weights[0][offset_ip1];
+                                 ishift  = 1;
+                              }
+                           }
+                           xweight1= 1.0 - xweight2;
+                        }
 
-                            if (ndim == 3)
-                            {
-                               ep[k][j][ei+i]= zweight1*(
-                                               yweight1*(
-                                                xweight1*xcp[kshift][jshift][ishift+xci]+
-                                                xweight2*xcp[kshift][jshift][ishift+xci+1])
-                                              +yweight2*(
-                                                xweight1*xcp[kshift][jshift+1][ishift+xci]+
-                                                xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
-                                         + zweight2*(
-                                               yweight1*(
-                                                xweight1*xcp[kshift+1][jshift][ishift+xci]+
-                                                xweight2*xcp[kshift+1][jshift][ishift+xci+1])
-                                              +yweight2*(
-                                                xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
-                                                xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
-                            }
-                            else if (ndim == 2)
-                            {
-                                ep[0][j][ei+i] = yweight1*( 
-                                                 xweight1*xcp[0][jshift][ishift+xci]+
-                                                 xweight2*xcp[0][jshift][ishift+xci+1]);
-                                ep[0][j][ei+i]+= yweight2*( 
-                                                 xweight1*xcp[0][jshift+1][ishift+xci]+
-                                                 xweight2*xcp[0][jshift+1][ishift+xci+1]);
-                            }
-                            else
-                            {
-                                ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
-                                                 xweight2*xcp[0][0][ishift+xci+1];
-                            }
-                        }      /* for (i= 0; i< imax; i++) */
-                     }         /* for (j= 0; j< jmax; j++) */
-                  }            /* for (k= 0; k< kmax; k++) */ 
-              }
-              hypre_BoxLoop2End(ei, xci);
+                        if (ndim == 3)
+                        {
+                           ep[k][j][ei+i]= zweight1*(
+                              yweight1*(
+                                 xweight1*xcp[kshift][jshift][ishift+xci]+
+                                 xweight2*xcp[kshift][jshift][ishift+xci+1])
+                              +yweight2*(
+                                 xweight1*xcp[kshift][jshift+1][ishift+xci]+
+                                 xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
+                              + zweight2*(
+                                 yweight1*(
+                                    xweight1*xcp[kshift+1][jshift][ishift+xci]+
+                                    xweight2*xcp[kshift+1][jshift][ishift+xci+1])
+                                 +yweight2*(
+                                    xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
+                                    xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
+                        }
+                        else if (ndim == 2)
+                        {
+                           ep[0][j][ei+i] = yweight1*( 
+                              xweight1*xcp[0][jshift][ishift+xci]+
+                              xweight2*xcp[0][jshift][ishift+xci+1]);
+                           ep[0][j][ei+i]+= yweight2*( 
+                              xweight1*xcp[0][jshift+1][ishift+xci]+
+                              xweight2*xcp[0][jshift+1][ishift+xci+1]);
+                        }
+                        else
+                        {
+                           ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
+                              xweight2*xcp[0][0][ishift+xci+1];
+                        }
+                     }      /* for (i= 0; i< imax; i++) */
+                  }         /* for (j= 0; j< jmax; j++) */
+               }            /* for (k= 0; k< kmax; k++) */ 
+            }
+            hypre_BoxLoop2End(ei, xci);
 
-          }/* hypre_ForBoxI(bi, own_abox) */
-       }   /* hypre_ForBoxArray(fi, fgrid_boxes) */
+         }/* hypre_ForBoxI(bi, own_abox) */
+      }   /* hypre_ForBoxArray(fi, fgrid_boxes) */
 
       /*--------------------------------------------------------------------
        * Interpolate the off-processor coarse grid values. These are the
@@ -1192,47 +1192,47 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
        * recv_vector is non-null even when it has a grid with zero-volume
        * boxes.
        *--------------------------------------------------------------------*/
-       recv_var = hypre_SStructPVectorSVector(recv_cvectors, var);
-       own_abox = hypre_StructGridBoxes(hypre_StructVectorGrid(recv_var));
-       cboxnums = recv_boxnum_map[var];
+      recv_var = hypre_SStructPVectorSVector(recv_cvectors, var);
+      own_abox = hypre_StructGridBoxes(hypre_StructVectorGrid(recv_var));
+      cboxnums = recv_boxnum_map[var];
 
-       hypre_ForBoxI(bi, own_abox)
-       {
-          ownbox= hypre_BoxArrayBox(own_abox, bi);
+      hypre_ForBoxI(bi, own_abox)
+      {
+         ownbox= hypre_BoxArrayBox(own_abox, bi);
 
-          /*check for boxes of volume zero- i.e., recv_cvectors is really null.*/
-          if (hypre_BoxVolume(ownbox))
-          {
-             xc_dbox= hypre_BoxArrayBox(
-                                 hypre_StructVectorDataSpace(recv_var), bi);
+         /*check for boxes of volume zero- i.e., recv_cvectors is really null.*/
+         if (hypre_BoxVolume(ownbox))
+         {
+            xc_dbox= hypre_BoxArrayBox(
+               hypre_StructVectorDataSpace(recv_var), bi);
 
-             fi= cboxnums[bi];
-             fbox  = hypre_BoxArrayBox(fgrid_boxes, fi);
-             e_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(e_var), fi);
+            fi= cboxnums[bi];
+            fbox  = hypre_BoxArrayBox(fgrid_boxes, fi);
+            e_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(e_var), fi);
 
             /*------------------------------------------------------------------
              * Get the ptrs for the fine struct_vectors.
              *------------------------------------------------------------------*/
-             for (k= 0; k< refine_factors[2]; k++)
-             {
-                for (j=0; j< refine_factors[1]; j++)
-                {
-                   hypre_SetIndex(temp_index1, 0, j, k);
-                   ep[k][j]= hypre_StructVectorBoxData(e_var, fi) +
-                             hypre_BoxOffsetDistance(e_dbox, temp_index1);
-                }
-             }
+            for (k= 0; k< refine_factors[2]; k++)
+            {
+               for (j=0; j< refine_factors[1]; j++)
+               {
+                  hypre_SetIndex(temp_index1, 0, j, k);
+                  ep[k][j]= hypre_StructVectorBoxData(e_var, fi) +
+                     hypre_BoxOffsetDistance(e_dbox, temp_index1);
+               }
+            }
 
-             hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
-                                    refine_factors, hypre_BoxIMin(&refined_box));
-             hypre_ClearIndex(temp_index1);
-             for (j= 0; j< ndim; j++)
-             {
-                temp_index1[j]= refine_factors[j]-1;
-             }
-             hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
-                                    refine_factors, hypre_BoxIMax(&refined_box));
-             hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
+            hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
+                                        refine_factors, hypre_BoxIMin(&refined_box));
+            hypre_ClearIndex(temp_index1);
+            for (j= 0; j< ndim; j++)
+            {
+               temp_index1[j]= refine_factors[j]-1;
+            }
+            hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
+                                        refine_factors, hypre_BoxIMax(&refined_box));
+            hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
 
             /*-----------------------------------------------------------------
              * Get ptrs for the crse struct_vectors. For linear interpolation
@@ -1242,12 +1242,12 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
              * Since we loop over the fine intersect box, we need to refine
              * ownbox.
              *-----------------------------------------------------------------*/
-             hypre_CopyIndex(hypre_BoxIMin(&intersect_box), start);
-             hypre_CopyIndex(hypre_BoxIMax(&intersect_box), intersect_size);
-             for (i= 0; i< 3; i++)
-             {
-                intersect_size[i]-= (start[i]-1);
-             }
+            hypre_CopyIndex(hypre_BoxIMin(&intersect_box), start);
+            hypre_CopyIndex(hypre_BoxIMax(&intersect_box), intersect_size);
+            for (i= 0; i< 3; i++)
+            {
+               intersect_size[i]-= (start[i]-1);
+            }
 
             /*------------------------------------------------------------------
              * The fine intersection box may not be divisible by the refinement
@@ -1258,274 +1258,275 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
              * completely in the fbox are included, start is always divisible
              * by refine_factors. We do the calculation anyways for future changes.
              *------------------------------------------------------------------*/
-             hypre_ClearIndex(start_offset);
-             for (i= 0; i< ndim; i++)
-             {
-                start_offset[i]= start[i] % refine_factors[i];
-             }
+            hypre_ClearIndex(start_offset);
+            for (i= 0; i< ndim; i++)
+            {
+               start_offset[i]= start[i] % refine_factors[i];
+            }
 
-             ptr_kshift= 0;
-             if ((start[2]%refine_factors[2]<refine_factors_half[2]) && ndim==3)
-             {
-                ptr_kshift= -1;
-             }
+            ptr_kshift= 0;
+            if ((start[2]%refine_factors[2]<refine_factors_half[2]) && ndim==3)
+            {
+               ptr_kshift= -1;
+            }
 
-             ptr_jshift= 0;
-             if ((start[1]%refine_factors[1]<refine_factors_half[1]) && ndim>=2)
-             {
-                ptr_jshift= -1;
-             }
+            ptr_jshift= 0;
+            if ((start[1]%refine_factors[1]<refine_factors_half[1]) && ndim>=2)
+            {
+               ptr_jshift= -1;
+            }
 
-             ptr_ishift= 0;
-             if ( start[0]%refine_factors[0] < refine_factors_half[0] )
-             {
-                ptr_ishift= -1;
-             }
+            ptr_ishift= 0;
+            if ( start[0]%refine_factors[0] < refine_factors_half[0] )
+            {
+               ptr_ishift= -1;
+            }
 
-             for (k= 0; k< ksize; k++)
-             {
-                for (j=0; j< jsize; j++)
-                {
-                   hypre_SetIndex(temp_index2, 
-                                  ptr_ishift, j+ptr_jshift, k+ptr_kshift);
-                   xcp[k][j]= hypre_StructVectorBoxData(recv_var, bi) +
-                              hypre_BoxOffsetDistance(xc_dbox, temp_index2);
-                }
-             }
+            for (k= 0; k< ksize; k++)
+            {
+               for (j=0; j< jsize; j++)
+               {
+                  hypre_SetIndex(temp_index2, 
+                                 ptr_ishift, j+ptr_jshift, k+ptr_kshift);
+                  xcp[k][j]= hypre_StructVectorBoxData(recv_var, bi) +
+                     hypre_BoxOffsetDistance(xc_dbox, temp_index2);
+               }
+            }
 
-             hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
-             hypre_BoxGetSize(ownbox, loop_size);
+            hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
+            hypre_BoxGetSize(ownbox, loop_size);
 
-             hypre_BoxLoop2Begin(loop_size,
-                                 e_dbox,  start,  stride,  ei,
-                                 xc_dbox, startc, stridec, xci);
+            hypre_BoxLoop2Begin(ndim, loop_size,
+                                e_dbox,  start,  stride,  ei,
+                                xc_dbox, startc, stridec, xci);
 #if 1
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,xci,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci,lindex,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
 #endif
 #else
-             hypre_BoxLoopSetOneBlock();
+            hypre_BoxLoopSetOneBlock();
 #endif
-             hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
-             {
-                /*--------------------------------------------------------
-                 * Linear interpolation. Determine the weights and the
-                 * correct coarse grid values to be weighted. All fine
-                 * values in an agglomerated coarse cell or in the remainder
-                 * agglomerated coarse cells are determined. The upper
-                 * extents are needed.
-                 *--------------------------------------------------------*/
-                 imax= hypre_min( (intersect_size[0]-loopi*stride[0]),
-                                   refine_factors[0] );
-                 jmax= hypre_min( (intersect_size[1]-loopj*stride[1]),
-                                   refine_factors[1]);
-                 kmax= hypre_min( (intersect_size[2]-loopk*stride[2]),
-                                   refine_factors[2]);
+            hypre_BoxLoop2For(ei, xci)
+            {
+               /*--------------------------------------------------------
+                * Linear interpolation. Determine the weights and the
+                * correct coarse grid values to be weighted. All fine
+                * values in an agglomerated coarse cell or in the remainder
+                * agglomerated coarse cells are determined. The upper
+                * extents are needed.
+                *--------------------------------------------------------*/
+               hypre_BoxLoopGetIndex(lindex);
+               imax= hypre_min( (intersect_size[0]-lindex[0]*stride[0]),
+                                refine_factors[0] );
+               jmax= hypre_min( (intersect_size[1]-lindex[1]*stride[1]),
+                                refine_factors[1]);
+               kmax= hypre_min( (intersect_size[2]-lindex[2]*stride[2]),
+                                refine_factors[2]);
 
-                 for (k= 0; k< kmax; k++)
-                 {
-                    if (ndim == 3)
-                    {
-                       offset_kp1= start_offset[2]+k+1;
+               for (k= 0; k< kmax; k++)
+               {
+                  if (ndim == 3)
+                  {
+                     offset_kp1= start_offset[2]+k+1;
 
-                       if (ptr_kshift == -1)
-                       {
-                          if (offset_kp1 <= refine_factors_half[2])
-                          {
-                             zweight2= weights[2][offset_kp1];
-                             kshift= 0;
-                          }
-                          else
-                          {
-                             kshift= 1;
-                             if (offset_kp1 >  refine_factors_half[2] &&
-                                 offset_kp1 <= refine_factors[2])
-                             {
-                                zweight2= weights[2][offset_kp1];
-                             }
-                             else
-                             {
-                                zweight2= weights[2][offset_kp1-refine_factors[2]];
-                             }
-                          }
-                          zweight1= 1.0 - zweight2;
-                       }
+                     if (ptr_kshift == -1)
+                     {
+                        if (offset_kp1 <= refine_factors_half[2])
+                        {
+                           zweight2= weights[2][offset_kp1];
+                           kshift= 0;
+                        }
+                        else
+                        {
+                           kshift= 1;
+                           if (offset_kp1 >  refine_factors_half[2] &&
+                               offset_kp1 <= refine_factors[2])
+                           {
+                              zweight2= weights[2][offset_kp1];
+                           }
+                           else
+                           {
+                              zweight2= weights[2][offset_kp1-refine_factors[2]];
+                           }
+                        }
+                        zweight1= 1.0 - zweight2;
+                     }
 
-                       else
-                       {
-                          if (offset_kp1 > refine_factors_half[2] &&
-                              offset_kp1 <= refine_factors[2])
-                          {
-                             zweight2= weights[2][offset_kp1];
-                             kshift= 0;
-                          }
-                          else
-                          {
-                             kshift= 0;
-                             offset_kp1-= refine_factors[2];
-                             if (offset_kp1 > 0 && offset_kp1 <= refine_factors_half[2])
-                             {
-                                zweight2= weights[2][offset_kp1];
-                             }
-                             else
-                             {
-                                zweight2= weights[2][offset_kp1];
-                                kshift  = 1;
-                             }
-                          }
-                          zweight1= 1.0 - zweight2;
-                       }
-                    }     /* if (ndim == 3) */
+                     else
+                     {
+                        if (offset_kp1 > refine_factors_half[2] &&
+                            offset_kp1 <= refine_factors[2])
+                        {
+                           zweight2= weights[2][offset_kp1];
+                           kshift= 0;
+                        }
+                        else
+                        {
+                           kshift= 0;
+                           offset_kp1-= refine_factors[2];
+                           if (offset_kp1 > 0 && offset_kp1 <= refine_factors_half[2])
+                           {
+                              zweight2= weights[2][offset_kp1];
+                           }
+                           else
+                           {
+                              zweight2= weights[2][offset_kp1];
+                              kshift  = 1;
+                           }
+                        }
+                        zweight1= 1.0 - zweight2;
+                     }
+                  }     /* if (ndim == 3) */
 
-                    for (j= 0; j< jmax; j++)
-                    {
-                       if (ndim >= 2)
-                       {
-                          offset_jp1= start_offset[1]+j+1;
+                  for (j= 0; j< jmax; j++)
+                  {
+                     if (ndim >= 2)
+                     {
+                        offset_jp1= start_offset[1]+j+1;
 
-                          if (ptr_jshift == -1)
-                          {
-                             if (offset_jp1 <= refine_factors_half[1])
-                             {
-                                yweight2= weights[1][offset_jp1];
-                                jshift= 0;
-                             }
-                             else
-                             {
-                                jshift= 1;
-                                if (offset_jp1 >  refine_factors_half[1] &&
-                                    offset_jp1 <= refine_factors[1])
-                                {
-                                   yweight2= weights[1][offset_jp1];
-                                }
-                                else
-                                {
-                                   yweight2= weights[1][offset_jp1-refine_factors[1]];
-                                }
-                             }
-                             yweight1= 1.0 - yweight2;
-                          }
+                        if (ptr_jshift == -1)
+                        {
+                           if (offset_jp1 <= refine_factors_half[1])
+                           {
+                              yweight2= weights[1][offset_jp1];
+                              jshift= 0;
+                           }
+                           else
+                           {
+                              jshift= 1;
+                              if (offset_jp1 >  refine_factors_half[1] &&
+                                  offset_jp1 <= refine_factors[1])
+                              {
+                                 yweight2= weights[1][offset_jp1];
+                              }
+                              else
+                              {
+                                 yweight2= weights[1][offset_jp1-refine_factors[1]];
+                              }
+                           }
+                           yweight1= 1.0 - yweight2;
+                        }
 
-                          else
-                          {
-                             if (offset_jp1 > refine_factors_half[1] &&
-                                 offset_jp1 <= refine_factors[1])
-                             {
-                                yweight2= weights[1][offset_jp1];
-                                jshift= 0;
-                             }
-                             else
-                             {
-                                jshift= 0;
-                                offset_jp1-= refine_factors[1];
-                                if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
-                                {
-                                   yweight2= weights[1][offset_jp1];
-                                }
-                                else
-                                {
-                                   yweight2= weights[1][offset_jp1];
-                                   jshift  = 1;
-                                }
-                             }
-                             yweight1= 1.0 - yweight2;
-                          }
-                       }  /* if (ndim >= 2) */
+                        else
+                        {
+                           if (offset_jp1 > refine_factors_half[1] &&
+                               offset_jp1 <= refine_factors[1])
+                           {
+                              yweight2= weights[1][offset_jp1];
+                              jshift= 0;
+                           }
+                           else
+                           {
+                              jshift= 0;
+                              offset_jp1-= refine_factors[1];
+                              if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
+                              {
+                                 yweight2= weights[1][offset_jp1];
+                              }
+                              else
+                              {
+                                 yweight2= weights[1][offset_jp1];
+                                 jshift  = 1;
+                              }
+                           }
+                           yweight1= 1.0 - yweight2;
+                        }
+                     }  /* if (ndim >= 2) */
 
-                       for (i= 0; i< imax; i++)
-                       {
-                          offset_ip1= start_offset[0]+i+1;
+                     for (i= 0; i< imax; i++)
+                     {
+                        offset_ip1= start_offset[0]+i+1;
 
-                          if (ptr_ishift == -1)
-                          {
-                             if (offset_ip1 <= refine_factors_half[0])
-                             {
-                                xweight2= weights[0][offset_ip1];
-                                ishift= 0;
-                             }
-                             else
-                             {
-                                ishift= 1;
-                                if (offset_ip1 >  refine_factors_half[0] &&
-                                    offset_ip1 <= refine_factors[0])
-                                {
-                                   xweight2= weights[0][offset_ip1];
-                                }
-                                else
-                                {
-                                   xweight2= weights[0][offset_ip1-refine_factors[0]];
-                                }
-                             }
-                             xweight1= 1.0 - xweight2;
-                          }
+                        if (ptr_ishift == -1)
+                        {
+                           if (offset_ip1 <= refine_factors_half[0])
+                           {
+                              xweight2= weights[0][offset_ip1];
+                              ishift= 0;
+                           }
+                           else
+                           {
+                              ishift= 1;
+                              if (offset_ip1 >  refine_factors_half[0] &&
+                                  offset_ip1 <= refine_factors[0])
+                              {
+                                 xweight2= weights[0][offset_ip1];
+                              }
+                              else
+                              {
+                                 xweight2= weights[0][offset_ip1-refine_factors[0]];
+                              }
+                           }
+                           xweight1= 1.0 - xweight2;
+                        }
 
-                          else
-                          {
-                             if (offset_ip1 > refine_factors_half[0] &&
-                                 offset_ip1 <= refine_factors[0])
-                             {
-                                xweight2= weights[0][offset_ip1];
-                                ishift= 0;
-                             }
-                             else
-                             {
-                                ishift= 0;
-                                offset_ip1-= refine_factors[0];
-                                if (offset_ip1 > 0 && offset_ip1 <= refine_factors_half[0])
-                                {
-                                   xweight2= weights[0][offset_ip1];
-                                }
-                                else
-                                {
-                                   xweight2= weights[0][offset_ip1];
-                                   ishift  = 1;
-                                }
-                             }
-                             xweight1= 1.0 - xweight2;
-                          }
+                        else
+                        {
+                           if (offset_ip1 > refine_factors_half[0] &&
+                               offset_ip1 <= refine_factors[0])
+                           {
+                              xweight2= weights[0][offset_ip1];
+                              ishift= 0;
+                           }
+                           else
+                           {
+                              ishift= 0;
+                              offset_ip1-= refine_factors[0];
+                              if (offset_ip1 > 0 && offset_ip1 <= refine_factors_half[0])
+                              {
+                                 xweight2= weights[0][offset_ip1];
+                              }
+                              else
+                              {
+                                 xweight2= weights[0][offset_ip1];
+                                 ishift  = 1;
+                              }
+                           }
+                           xweight1= 1.0 - xweight2;
+                        }
 
 
-                          if (ndim == 3)
-                          {
-                             ep[k][j][ei+i]= zweight1*(
-                                          yweight1*(
-                                           xweight1*xcp[kshift][jshift][ishift+xci]+
-                                           xweight2*xcp[kshift][jshift][ishift+xci+1])
-                                         +yweight2*(
-                                           xweight1*xcp[kshift][jshift+1][ishift+xci]+
-                                           xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
-                                     + zweight2*(
-                                          yweight1*(
-                                           xweight1*xcp[kshift+1][jshift][ishift+xci]+
-                                           xweight2*xcp[kshift+1][jshift][ishift+xci+1])
-                                         +yweight2*(
-                                           xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
-                                           xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
-                          }
-                          else if (ndim == 2)
-                          {
-                             ep[0][j][ei+i] = yweight1*(
-                                           xweight1*xcp[0][jshift][ishift+xci]+
-                                           xweight2*xcp[0][jshift][ishift+xci+1]);
-                             ep[0][j][ei+i]+= yweight2*(
-                                           xweight1*xcp[0][jshift+1][ishift+xci]+
-                                           xweight2*xcp[0][jshift+1][ishift+xci+1]);
-                          }
+                        if (ndim == 3)
+                        {
+                           ep[k][j][ei+i]= zweight1*(
+                              yweight1*(
+                                 xweight1*xcp[kshift][jshift][ishift+xci]+
+                                 xweight2*xcp[kshift][jshift][ishift+xci+1])
+                              +yweight2*(
+                                 xweight1*xcp[kshift][jshift+1][ishift+xci]+
+                                 xweight2*xcp[kshift][jshift+1][ishift+xci+1]) )
+                              + zweight2*(
+                                 yweight1*(
+                                    xweight1*xcp[kshift+1][jshift][ishift+xci]+
+                                    xweight2*xcp[kshift+1][jshift][ishift+xci+1])
+                                 +yweight2*(
+                                    xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
+                                    xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
+                        }
+                        else if (ndim == 2)
+                        {
+                           ep[0][j][ei+i] = yweight1*(
+                              xweight1*xcp[0][jshift][ishift+xci]+
+                              xweight2*xcp[0][jshift][ishift+xci+1]);
+                           ep[0][j][ei+i]+= yweight2*(
+                              xweight1*xcp[0][jshift+1][ishift+xci]+
+                              xweight2*xcp[0][jshift+1][ishift+xci+1]);
+                        }
 
-                          else
-                          {
-                             ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
-                                              xweight2*xcp[0][0][ishift+xci+1];
-                          }
+                        else
+                        {
+                           ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
+                              xweight2*xcp[0][0][ishift+xci+1];
+                        }
 
-                       }      /* for (i= 0; i< imax; i++) */
-                    }         /* for (j= 0; j< jmax; j++) */
-                 }            /* for (k= 0; k< kmax; k++) */
-             }
-             hypre_BoxLoop2End(ei, xci);
+                     }      /* for (i= 0; i< imax; i++) */
+                  }         /* for (j= 0; j< jmax; j++) */
+               }            /* for (k= 0; k< kmax; k++) */
+            }
+            hypre_BoxLoop2End(ei, xci);
 
-          }  /* if (hypre_BoxVolume(ownbox)) */
-       }     /* hypre_ForBoxI(bi, own_abox) */
+         }  /* if (hypre_BoxVolume(ownbox)) */
+      }     /* hypre_ForBoxI(bi, own_abox) */
    }         /* for (var= 0; var< nvars; var++)*/
 
    for (k= 0; k< ksize; k++)

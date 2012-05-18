@@ -140,7 +140,6 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
-   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
@@ -245,13 +244,13 @@ hypre_SemiRestrict( void               *restrict_vdata,
             {
                Ri = hypre_CCBoxIndexRank( R_dbox, startc );
 
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ri,rci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ri,rci) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(loopi, loopj, loopk, ri, rci)
+               hypre_BoxLoop2For(ri, rci)
                {
                   rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
                                        Rp1[Ri] * rp1[ri]);
@@ -260,14 +259,14 @@ hypre_SemiRestrict( void               *restrict_vdata,
             }
             else
             {
-               hypre_BoxLoop3Begin(loop_size,
+               hypre_BoxLoop3Begin(hypre_StructMatrixDim(R), loop_size,
                                    R_dbox,  startc, stridec, Ri,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ri,ri,rci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ri,ri,rci) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
+               hypre_BoxLoop3For(Ri, ri, rci)
                {
                   rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
                                        Rp1[Ri] * rp1[ri]);

@@ -244,20 +244,19 @@ hypre_PFMGSetupInterpOp_CC0
    double                *Ap;
    double                 center;
    HYPRE_Int              Astenc;
-   HYPRE_Int              loopi, loopj, loopk;
    HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
-   hypre_BoxLoop2Begin(loop_size,
+   hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
 #endif
-   hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
+   hypre_BoxLoop2For(Ai, Pi)
    {
       center  = 0.0;
       Pp0[Pi] = 0.0;
@@ -452,7 +451,6 @@ hypre_PFMGSetupInterpOp_CC2
    double                 P0, P1;
    double                 center, center_offd;
    HYPRE_Int              Astenc;
-   HYPRE_Int              loopi, loopj, loopk;
    HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
@@ -514,13 +512,13 @@ hypre_PFMGSetupInterpOp_CC2
       }
 
       si = diag_rank;
-      hypre_BoxLoop2Begin(loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Ai,Pi,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
+      hypre_BoxLoop2For(Ai, Pi)
       {
          Pp0[Pi] = P0;
          Pp1[Pi] = P1;

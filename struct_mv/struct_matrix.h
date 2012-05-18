@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Header info for the hypre_StructMatrix structures
@@ -84,6 +82,9 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
+
+#define hypre_StructMatrixDim(matrix) \
+hypre_StructGridDim(hypre_StructMatrixGrid(matrix))
 
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)

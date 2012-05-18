@@ -29,7 +29,6 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Index         unit_stride;
 
    HYPRE_Int           i;
-   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -51,12 +50,12 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
  
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+      hypre_BoxLoop1For(vi)
       {
          vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
       }

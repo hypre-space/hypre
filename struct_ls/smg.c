@@ -471,7 +471,6 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
    hypre_Index         loop_size;
    hypre_IndexRef      start;
 
-   HYPRE_Int           loopi, loopj, loopk;
    HYPRE_Int           i;
 
    /*-----------------------------------------------------------------------
@@ -489,12 +488,12 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetStrideSize(box, stride, loop_size);
 
-      hypre_BoxLoop1Begin(loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorDim(vector), loop_size,
                           v_data_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+      hypre_BoxLoop1For(vi)
       {
          vp[vi] = values;
       }

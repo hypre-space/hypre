@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Header info for the hypre_StructVector structures
@@ -66,6 +64,9 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
+#define hypre_StructVectorDim(vector) \
+hypre_StructGridDim(hypre_StructVectorGrid(vector))
+
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
  

@@ -142,7 +142,6 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
-   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -198,13 +197,13 @@ hypre_SemiInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
                           e_dbox, start, stride, ei,
                           xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei,xci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
+      hypre_BoxLoop2For(ei, xci)
       {
          ep[ei] = xcp[xci];
       }
@@ -278,12 +277,12 @@ hypre_SemiInterp( void               *interp_vdata,
             if ( constant_coefficient )
             {
                Pi = hypre_CCBoxIndexRank( P_dbox, startc );
-               hypre_BoxLoop1Begin(loop_size,
+               hypre_BoxLoop1Begin(hypre_StructMatrixDim(P), loop_size,
                                    e_dbox, start, stride, ei);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,ei) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop1For(loopi, loopj, loopk, ei)
+               hypre_BoxLoop1For(ei)
                {
                   ep[ei] =  (Pp0[Pi] * ep0[ei] +
                              Pp1[Pi] * ep1[ei]);
@@ -292,13 +291,13 @@ hypre_SemiInterp( void               *interp_vdata,
             }
             else
             {
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,Pi,ei) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
+               hypre_BoxLoop2For(Pi, ei)
                {
                   ep[ei] =  (Pp0[Pi] * ep0[ei] +
                              Pp1[Pi] * ep1[ei]);

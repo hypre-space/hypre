@@ -38,7 +38,6 @@ hypre_StructScale( double              alpha,
    hypre_Index      unit_stride;
                    
    HYPRE_Int        i;
-   HYPRE_Int        loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
@@ -53,12 +52,12 @@ hypre_StructScale( double              alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorDim(y), loop_size,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+      hypre_BoxLoop1For(yi)
       {
          yp[yi] *= alpha;
       }

@@ -50,7 +50,6 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    hypre_Index      unit_stride;
                    
    HYPRE_Int        i;
-   HYPRE_Int        loopi, loopj, loopk;
 #ifdef HYPRE_USE_PTHREADS
    HYPRE_Int        threadid = hypre_GetThreadID();
 #endif
@@ -78,13 +77,13 @@ hypre_StructInnerProd(  hypre_StructVector *x,
       local_result_ref[threadid] = &local_result;
 #endif
 
-      hypre_BoxLoop2Begin(loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) reduction(+:local_result) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) reduction(+:local_result) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+      hypre_BoxLoop2For(xi, yi)
       {
          local_result += xp[xi] * yp[yi];
       }

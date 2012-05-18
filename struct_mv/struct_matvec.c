@@ -124,7 +124,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    double                   temp;
    HYPRE_Int                compute_i, i;
-   HYPRE_Int                loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -154,12 +153,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
          hypre_BoxGetSize(box, loop_size);
 
-         hypre_BoxLoop1Begin(loop_size,
+         hypre_BoxLoop1Begin(hypre_StructVectorDim(x), loop_size,
                              y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+         hypre_BoxLoop1For(yi)
          {
             yp[yi] *= beta;
          }
@@ -213,12 +212,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   {
                      hypre_BoxGetSize(box, loop_size);
 
-                     hypre_BoxLoop1Begin(loop_size,
+                     hypre_BoxLoop1Begin(hypre_StructVectorDim(x), loop_size,
                                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                     hypre_BoxLoop1For(yi)
                      {
                         yp[yi] = 0.0;
                      }
@@ -228,12 +227,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   {
                      hypre_BoxGetSize(box, loop_size);
 
-                     hypre_BoxLoop1Begin(loop_size,
+                     hypre_BoxLoop1Begin(hypre_StructVectorDim(x), loop_size,
                                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
-                     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                     hypre_BoxLoop1For(yi)
                      {
                         yp[yi] *= temp;
                      }
@@ -325,13 +324,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
    double                  *yp;
    HYPRE_Int                depth;
    hypre_Index              loop_size;
-   HYPRE_Int                loopi, loopj, loopk;
    hypre_IndexRef           start;
    HYPRE_Int                yi;
+   HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
+   ndim          = hypre_StructVectorDim(x);
 
    hypre_ForBoxArrayI(i, compute_box_aa)
    {
@@ -381,14 +381,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+6]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -424,14 +424,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+5]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -463,14 +463,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+4]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -498,14 +498,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+3]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -529,14 +529,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+2]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -556,14 +556,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+1]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0] +
@@ -579,14 +579,14 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
 
-                  hypre_BoxLoop3Begin(loop_size,
+                  hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, start, stride, Ai,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+                  hypre_BoxLoop3For(Ai, xi, yi)
                   {
                      yp[yi] +=
                         Ap0[Ai] * xp[xi + xoff0];
@@ -599,12 +599,12 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
 
          if (alpha != 1.0)
          {
-            hypre_BoxLoop1Begin(loop_size,
+            hypre_BoxLoop1Begin(ndim, loop_size,
                                 y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+            hypre_BoxLoop1For(yi)
             {
                yp[yi] *= alpha;
             }
@@ -668,13 +668,14 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
    double                  *yp;
    HYPRE_Int                depth;
    hypre_Index              loop_size;
-   HYPRE_Int                loopi, loopj, loopk;
    hypre_IndexRef           start;
    HYPRE_Int                yi;
+   HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
+   ndim          = hypre_StructVectorDim(x);
 
    hypre_ForBoxArrayI(i, compute_box_aa)
    {
@@ -733,13 +734,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+6]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -780,13 +781,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+5]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -822,13 +823,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+4]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -859,13 +860,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+3]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -891,13 +892,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+2]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -918,13 +919,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+1]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -940,13 +941,13 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0];
@@ -1014,14 +1015,14 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
    double                  *yp;
    HYPRE_Int                depth;
    hypre_Index              loop_size;
-   HYPRE_Int                loopi, loopj, loopk;
    hypre_IndexRef           start;
    HYPRE_Int                yi;
+   HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
-
+   ndim          = hypre_StructVectorDim(x);
 
    hypre_ForBoxArrayI(i, compute_box_aa)
    {
@@ -1104,13 +1105,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff6 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+6]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1164,13 +1165,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff5 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+5]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1217,13 +1218,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff4 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+4]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1264,13 +1265,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff3 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+3]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1305,13 +1306,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff2 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+2]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1340,13 +1341,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff1 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+1]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0] +
@@ -1366,13 +1367,13 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                   xoff0 = hypre_BoxOffsetDistance(x_data_box,
                                                   stencil_shape[si+0]);
 
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(ndim, loop_size,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+                  hypre_BoxLoop2For(xi, yi)
                   {
                      yp[yi] +=
                         AAp0 * xp[xi + xoff0];
@@ -1388,14 +1389,14 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
                                          stencil_shape[si_center]);
          if (alpha!= 1.0 )
          {
-            hypre_BoxLoop3Begin(loop_size,
+            hypre_BoxLoop3Begin(ndim, loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+            hypre_BoxLoop3For(Ai, xi, yi)
             {
                yp[yi] = alpha * ( yp[yi] +
                                   Ap0[Ai] * xp[xi + xoff0] );
@@ -1404,20 +1405,21 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
          }
          else
          {
-            hypre_BoxLoop3Begin(loop_size,
+            hypre_BoxLoop3Begin(ndim, loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+            hypre_BoxLoop3For(Ai, xi, yi)
             {
                yp[yi] +=
                   Ap0[Ai] * xp[xi + xoff0];
             }
             hypre_BoxLoop3End(Ai, xi, yi);
          }
+
       }
    }
 

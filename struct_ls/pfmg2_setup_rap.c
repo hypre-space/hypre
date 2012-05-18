@@ -297,8 +297,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    HYPRE_Int             constant_coefficient_A;
 
-   HYPRE_Int             loopi, loopj, loopk;
-
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *R_dbox;
@@ -482,15 +480,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA;
          iAp1 = iA + yOffsetA;
@@ -536,15 +534,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
       a_cw_offdm1 = a_cw[iA_offdm1];
       a_ce_offdm1 = a_ce[iA_offdm1];
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA_diag;
          iAp1 = iA + yOffsetA_diag;
@@ -841,8 +839,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    HYPRE_Int             constant_coefficient_A;
 
-   HYPRE_Int             loopi, loopj, loopk;
-
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *R_dbox;
@@ -1047,15 +1043,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA;
          iAp1 = iA + yOffsetA;
@@ -1118,15 +1114,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
       a_cnw_offdm1 = a_cnw[iA_offdm1];
 
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA_diag;
          iAp1 = iA + yOffsetA_diag;
@@ -1577,7 +1573,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int             loopi, loopj, loopk;
    HYPRE_Int             constant_coefficient_A;
 
    hypre_Box            *A_dbox;
@@ -1751,15 +1746,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    if ( constant_coefficient_A == 0 )
    {
       /*hypre_printf("nosym 5.0.0\n");*/
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA;
          iAp1 = iA + yOffsetA;
@@ -1797,15 +1792,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       a_ce_offdm1 = a_ce[iA_offdm1];
       a_ce_offdp1 = a_ce[iA_offdp1];
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAp1 = iA + yOffsetA_diag;
 
@@ -2070,7 +2065,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int             loopi, loopj, loopk;
    HYPRE_Int             constant_coefficient_A;
 
    hypre_Box            *A_dbox;
@@ -2272,15 +2266,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    if ( constant_coefficient_A==0 )
    {
       /*hypre_printf("nosym 9.0.0\n");*/
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA;
          iAp1 = iA + yOffsetA;
@@ -2333,15 +2327,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
       a_cnw_offd = a_cnw[iA_offd];
       a_cnw_offdp1 = a_cnw[iA_offdp1];
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          iAm1 = iA - yOffsetA_diag;
          iAp1 = iA + yOffsetA_diag;

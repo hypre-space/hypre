@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Header info for the hypre_SStructMatrix structures
@@ -117,6 +114,8 @@ typedef struct hypre_SStructMatrix_struct
 
 #define hypre_SStructPMatrixComm(pmat)              ((pmat) -> comm)
 #define hypre_SStructPMatrixPGrid(pmat)             ((pmat) -> pgrid)
+#define hypre_SStructPMatrixNDim(pmat) \
+hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 #define hypre_SStructPMatrixStencils(pmat)          ((pmat) -> stencils)
 #define hypre_SStructPMatrixNVars(pmat)             ((pmat) -> nvars)
 #define hypre_SStructPMatrixStencil(pmat, var)      ((pmat) -> stencils[var])

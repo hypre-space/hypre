@@ -380,16 +380,19 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
       return hypre_error_flag;
    }
 
+   for (d = ndim; d < 3; d++)
+   {
+      num_ghost[2*d] = num_ghost[2*d+1] = 0;
+   }
    for (var = 0; var < nvars; var++)
    {
       if (vartypes[var] > 0)
       {
          sgrid = hypre_StructVectorGrid(svectors[var]);
          hypre_SStructVariableGetOffset(vartypes[var], ndim, varoffset);
-         for (d = 0; d < 3; d++)
+         for (d = 0; d < ndim; d++)
          {
-            num_ghost[2*d]   = hypre_IndexD(varoffset, d);
-            num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
+            num_ghost[2*d]   = num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
          }
          
          hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
@@ -646,7 +649,6 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_SetIndex(stride, 1, 1, 1);
 
@@ -673,13 +675,13 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(box, loop_size);
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,bi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,bi) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
+               hypre_BoxLoop2For(yi, bi)
                   {
                      pardata[pari+bi] = yp[yi];
                   }
@@ -715,7 +717,7 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
 
 HYPRE_Int
 hypre_SStructVectorParRestore( hypre_SStructVector *vector,
-                            hypre_ParVector     *parvector )
+                               hypre_ParVector     *parvector )
 {
    double               *pardata;
    HYPRE_Int             pari;
@@ -734,7 +736,6 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-   HYPRE_Int             loopi, loopj, loopk;
 
    if (parvector != NULL)
    {
@@ -763,13 +764,13 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                   yp = hypre_StructVectorBoxData(y, i);
 
                   hypre_BoxGetSize(box, loop_size);
-                  hypre_BoxLoop2Begin(loop_size,
+                  hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                       y_data_box, start, stride, yi,
                                       box,        start, stride, bi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,bi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,bi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
+                  hypre_BoxLoop2For(yi, bi)
                      {
                         yp[yi] = pardata[pari+bi];
                      }

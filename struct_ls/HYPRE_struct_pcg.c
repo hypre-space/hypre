@@ -83,6 +83,7 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
 {
    return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
 }
+
 /*==========================================================================*/
 
 HYPRE_Int
@@ -141,6 +142,7 @@ HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
 {
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
+
 /*==========================================================================*/
 
 HYPRE_Int
@@ -149,6 +151,7 @@ HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver,
 {
    return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
+
 /*==========================================================================*/
 
 HYPRE_Int
@@ -211,7 +214,6 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    hypre_Index           loop_size;
                      
    HYPRE_Int             i;
-   HYPRE_Int             loopi, loopj, loopk;
 
    /* x = D^{-1} y */
    hypre_SetIndex(stride, 1, 1, 1);
@@ -233,14 +235,14 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop3Begin(loop_size,
+      hypre_BoxLoop3Begin(hypre_StructVectorDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
                           x_data_box, start, stride, xi,
                           y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+      hypre_BoxLoop3For(Ai, xi, yi)
       {
          xp[xi] = yp[yi] / Ap[Ai];
       }

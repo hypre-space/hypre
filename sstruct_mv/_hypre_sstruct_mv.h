@@ -21,7 +21,6 @@
 #include "_hypre_utilities.h"
 #include "_hypre_struct_mv.h"
 #include "_hypre_IJ_mv.h"
-#include "HYPRE.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +37,6 @@ extern "C" {
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -338,9 +336,6 @@ typedef struct hypre_SStructGrid_struct
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Header info for hypre_SStructStencil data structures
@@ -393,7 +388,6 @@ hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -569,9 +563,6 @@ typedef struct hypre_SStructGraph_struct
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Header info for the hypre_SStructMatrix structures
@@ -676,6 +667,8 @@ typedef struct hypre_SStructMatrix_struct
 
 #define hypre_SStructPMatrixComm(pmat)              ((pmat) -> comm)
 #define hypre_SStructPMatrixPGrid(pmat)             ((pmat) -> pgrid)
+#define hypre_SStructPMatrixNDim(pmat) \
+hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 #define hypre_SStructPMatrixStencils(pmat)          ((pmat) -> stencils)
 #define hypre_SStructPMatrixNVars(pmat)             ((pmat) -> nvars)
 #define hypre_SStructPMatrixStencil(pmat, var)      ((pmat) -> stencils[var])
@@ -706,9 +699,6 @@ typedef struct hypre_SStructMatrix_struct
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *

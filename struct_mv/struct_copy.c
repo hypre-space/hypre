@@ -42,7 +42,6 @@ hypre_StructCopy( hypre_StructVector *x,
    hypre_Index      unit_stride;
                    
    HYPRE_Int        i;
-   HYPRE_Int        loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
@@ -60,13 +59,13 @@ hypre_StructCopy( hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop2Begin(loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+      hypre_BoxLoop2For(xi, yi)
       {
          yp[yi] = xp[xi];
       }
@@ -103,7 +102,6 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
    hypre_Index      unit_stride;
 
    HYPRE_Int        i, j ;
-   HYPRE_Int        loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
@@ -125,13 +123,13 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
          start = hypre_BoxIMin(box);
          hypre_BoxGetSize(box, loop_size);
 
-         hypre_BoxLoop2Begin(loop_size,
+         hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
                              x_data_box, start, unit_stride, xi,
                              y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,loopk,loopi,loopj,xi,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+         hypre_BoxLoop2For(xi, yi)
          {
             yp[yi] = xp[xi];
          }
