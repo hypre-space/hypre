@@ -595,11 +595,11 @@ HYPRE_Int  hypre__d, hypre__ndim;\
 HYPRE_Int  hypre__dir, hypre__max;\
 HYPRE_Int  hypre__div, hypre__mod;\
 HYPRE_Int  hypre__block, hypre__num_blocks;\
-HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN;
+HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN
 
 #define zypre_BoxLoopDeclareK(k) \
 HYPRE_Int  hypre__sk[k][HYPRE_MAXDIM];\
-HYPRE_Int  hypre__ikstart[k], hypre__ikinc[k][HYPRE_MAXDIM+1], hypre__i0inc[k];
+HYPRE_Int  hypre__ikstart[k], hypre__ikinc[k][HYPRE_MAXDIM+1], hypre__i0inc[k]
 
 #define zypre_BoxLoopInit(ndim, loop_size) \
 hypre__ndim = ndim;\
@@ -639,7 +639,7 @@ for (hypre__d = 0; hypre__d < hypre__ndim; hypre__d++)\
 {\
    hypre__sk[k][hypre__d] = hypre__sk[k][hypre__d]*stridek[hypre__d];\
 }\
-hypre__ikstart[k] = hypre_BoxIndexRank(dboxk, startk);
+hypre__ikstart[k] = hypre_BoxIndexRank(dboxk, startk)
 
 #define zypre_BoxLoopSet() \
 for (hypre__d = 0; hypre__d < hypre__ndim; hypre__d++)\
@@ -671,7 +671,7 @@ for (hypre__d = 2; hypre__d < hypre__ndim; hypre__d++)\
    hypre__ikinc[k][hypre__d] = hypre__ikinc[k][hypre__d-1] +\
       hypre__sk[k][hypre__d] - hypre__n[hypre__d-1]*hypre__sk[k][hypre__d-1];\
 }\
-hypre__ikinc[k][hypre__ndim] = 0;
+hypre__ikinc[k][hypre__ndim] = 0
 
 #define zypre_BoxLoopSetLoop() \
 hypre__IN = hypre__n[0];\
@@ -683,14 +683,14 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    hypre__n[hypre__d] -= 2; /* this produces a simpler comparison below */\
 }\
 hypre__i[hypre__ndim] = 0;\
-hypre__n[hypre__ndim] = 0;
+hypre__n[hypre__ndim] = 0
 
 #define zypre_BoxLoopIncLoop() \
 for (hypre__d = 1; hypre__i[hypre__d] > hypre__n[hypre__d]; hypre__d++)\
 {\
    hypre__i[hypre__d] = 0;\
 }\
-hypre__i[hypre__d]++;
+hypre__i[hypre__d]++
 
 #define zypre_BoxLoopGetIndex(index) \
 index[0] = hypre__I;\
