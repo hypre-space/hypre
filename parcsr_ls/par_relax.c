@@ -3308,6 +3308,7 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       hypre_ParAMGDataCommInfo(amg_data) = comm_info;
       hypre_TFree(mat_info);
       hypre_TFree(mat_displs);
+      hypre_TFree(A_mat_local);
    }
    return hypre_error_flag;
 }
