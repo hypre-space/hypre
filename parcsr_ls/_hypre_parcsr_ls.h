@@ -223,6 +223,11 @@ typedef struct
    hypre_ParVector  *u_coarse;
    MPI_Comm   new_comm;
 
+ /* store matrix, vector and communication info for Gaussian elimination */
+   double *A_mat;
+   double *b_vec;
+   HYPRE_Int *comm_info;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -396,6 +401,10 @@ typedef struct
 #define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
 #define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
 #define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
+
+#define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
+#define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
+#define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 
 #endif
 
@@ -578,6 +587,8 @@ HYPRE_Int BuildParLaplacian27pt ( HYPRE_Int argc , char *argv [], HYPRE_Int arg_
 /* gen_redcs_mat.c */
 HYPRE_Int hypre_seqAMGSetup ( hypre_ParAMGData *amg_data , HYPRE_Int p_level , HYPRE_Int coarse_threshold );
 HYPRE_Int hypre_seqAMGCycle ( hypre_ParAMGData *amg_data , HYPRE_Int p_level , hypre_ParVector **Par_F_array , hypre_ParVector **Par_U_array );
+HYPRE_Int hypre_GenerateSubComm ( MPI_Comm comm , HYPRE_Int participate , MPI_Comm *new_comm_ptr );
+void merge_lists ( HYPRE_Int *list1 , HYPRE_Int *list2 , hypre_int *np1 , hypre_MPI_Datatype *dptr );
 
 /* HYPRE_ads.c */
 HYPRE_Int HYPRE_ADSCreate ( HYPRE_Solver *solver );
@@ -1302,6 +1313,8 @@ HYPRE_Int hypre_GenerateSendMapAndCommPkg ( MPI_Comm comm , HYPRE_Int num_sends 
 
 /* par_relax.c */
 HYPRE_Int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_type , HYPRE_Int relax_points , double relax_weight , double omega , double *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *Ztemp );
+HYPRE_Int hypre_GaussElimSetup ( hypre_ParAMGData *amg_data , HYPRE_Int level , HYPRE_Int relax_type );
+HYPRE_Int hypre_GaussElimSolve ( void *amg_vdata , HYPRE_Int level , HYPRE_Int relax_type );
 HYPRE_Int gselim ( double *A , double *x , HYPRE_Int n );
 
 /* par_relax_interface.c */

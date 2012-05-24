@@ -622,11 +622,11 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt ( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , HYPRE_Int data , HYPRE_Int **pA_ext_row_map );
 
 /* par_csr_assumed_part.c */
-HYPRE_Int hypre_LocateAssummedPartition ( HYPRE_Int row_start , HYPRE_Int row_end , HYPRE_Int global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
+HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_Int row_start , HYPRE_Int row_end , HYPRE_Int global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
 HYPRE_Int hypre_ParCSRMatrixCreateAssumedPartition ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixDestroyAssumedPartition ( hypre_ParCSRMatrix *matrix );
-HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( HYPRE_Int row , HYPRE_Int global_num_rows , HYPRE_Int *proc_id );
-HYPRE_Int hypre_GetAssumedPartitionRowRange ( HYPRE_Int proc_id , HYPRE_Int global_num_rows , HYPRE_Int *row_start , HYPRE_Int *row_end );
+HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( MPI_Comm comm , HYPRE_Int row , HYPRE_Int global_num_rows , HYPRE_Int *proc_id );
+HYPRE_Int hypre_GetAssumedPartitionRowRange ( MPI_Comm comm , HYPRE_Int proc_id , HYPRE_Int global_num_rows , HYPRE_Int *row_start , HYPRE_Int *row_end );
 HYPRE_Int hypre_ParVectorCreateAssumedPartition ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorDestroyAssumedPartition ( hypre_ParVector *vector );
 

@@ -32,7 +32,8 @@
 
 
 HYPRE_Int 
-hypre_LocateAssummedPartition(HYPRE_Int row_start, HYPRE_Int row_end, HYPRE_Int global_num_rows, 
+hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_Int row_start, HYPRE_Int row_end, 
+			HYPRE_Int global_num_rows, 
                         hypre_IJAssumedPart *part, HYPRE_Int myid)
 {  
 
@@ -122,9 +123,9 @@ hypre_LocateAssummedPartition(HYPRE_Int row_start, HYPRE_Int row_end, HYPRE_Int 
    {
   
       /*get start and end row owners */
-      hypre_GetAssumedPartitionProcFromRow(contact_row_start[i], global_num_rows, 
+      hypre_GetAssumedPartitionProcFromRow(comm, contact_row_start[i], global_num_rows, 
                                             &owner_start);
-      hypre_GetAssumedPartitionProcFromRow(contact_row_end[i], global_num_rows, 
+      hypre_GetAssumedPartitionProcFromRow(comm, contact_row_end[i], global_num_rows, 
                                              &owner_end);
 
       if (owner_start == owner_end) /* same processor owns the whole range */
@@ -146,7 +147,7 @@ hypre_LocateAssummedPartition(HYPRE_Int row_start, HYPRE_Int row_end, HYPRE_Int 
         complete = 0;
         while (!complete) 
         {
-            hypre_GetAssumedPartitionRowRange(owner_start, global_num_rows, 
+            hypre_GetAssumedPartitionRowRange(comm, owner_start, global_num_rows, 
                                          &tmp_row_start, &tmp_row_end); 
            
             if (tmp_row_end >= contact_row_end[i])
@@ -184,7 +185,8 @@ hypre_LocateAssummedPartition(HYPRE_Int row_start, HYPRE_Int row_end, HYPRE_Int 
    for (i=0; i< contact_list_length; i++) 
    {
       hypre_MPI_Isend(&CONTACT(i,1) ,2, HYPRE_MPI_INT, CONTACT(i,0), flag1 , 
-                 hypre_MPI_COMM_WORLD, &requests[i]);
+                 comm, &requests[i]);
+                 /*hypre_MPI_COMM_WORLD, &requests[i]);*/
    }
 
    /*-----------------------------------------------------------
@@ -264,7 +266,8 @@ hypre_LocateAssummedPartition(HYPRE_Int row_start, HYPRE_Int row_end, HYPRE_Int 
    while (rows_found != locate_row_count) {
   
       hypre_MPI_Recv( tmp_range, 2 , HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, 
-                flag1 , hypre_MPI_COMM_WORLD, &status0);
+                flag1 , comm, &status0);
+                /*flag1 , hypre_MPI_COMM_WORLD, &status0);*/
      
       if (part->length==part->storage_length)
       {
@@ -350,7 +353,7 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 
   /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   hypre_GetAssumedPartitionRowRange( myid, global_num_cols, &(apart->row_start), 
+   hypre_GetAssumedPartitionRowRange( comm, myid, global_num_cols, &(apart->row_start), 
                                              &(apart->row_end));
 
   /*allocate some space for the partition of the assumed partition */
@@ -363,7 +366,7 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
-    hypre_LocateAssummedPartition(col_start, col_end, global_num_cols, apart, myid);
+    hypre_LocateAssummedPartition(comm, col_start, col_end, global_num_cols, apart, myid);
 
     /* this partition will be saved in the matrix data structure until the matrix is destroyed */
     hypre_ParCSRMatrixAssumedPartition(matrix) = apart;
@@ -407,14 +410,16 @@ hypre_ParCSRMatrixDestroyAssumedPartition(hypre_ParCSRMatrix *matrix )
 
 
 HYPRE_Int
-hypre_GetAssumedPartitionProcFromRow( HYPRE_Int row, HYPRE_Int global_num_rows, HYPRE_Int *proc_id)
+hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm, 
+		HYPRE_Int row, HYPRE_Int global_num_rows, HYPRE_Int *proc_id)
 {
 
    HYPRE_Int     num_procs;
    HYPRE_Int     size, switch_row, extra;
    
   
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_size(comm, &num_procs );
+   /*hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );*/
  
    /* j = floor[(row*p/N]  - this overflows*/
    /* *proc_id = (row*num_procs)/global_num_rows;*/
@@ -449,7 +454,7 @@ hypre_GetAssumedPartitionProcFromRow( HYPRE_Int row, HYPRE_Int global_num_rows, 
 
 
 HYPRE_Int
-hypre_GetAssumedPartitionRowRange( HYPRE_Int proc_id, HYPRE_Int global_num_rows, 
+hypre_GetAssumedPartitionRowRange( MPI_Comm comm, HYPRE_Int proc_id, HYPRE_Int global_num_rows, 
                              HYPRE_Int *row_start, HYPRE_Int* row_end) 
 {
 
@@ -457,7 +462,8 @@ hypre_GetAssumedPartitionRowRange( HYPRE_Int proc_id, HYPRE_Int global_num_rows,
    HYPRE_Int    size, extra;
    
 
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_size(comm, &num_procs );
+   /*hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );*/
 
 
   /* this may look non-intuitive, but we have to be very careful that
@@ -520,7 +526,7 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
 
   /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   hypre_GetAssumedPartitionRowRange( myid, global_num, &(apart->row_start), 
+   hypre_GetAssumedPartitionRowRange( comm, myid, global_num, &(apart->row_start), 
                                              &(apart->row_end));
 
   /*allocate some space for the partition of the assumed partition */
@@ -533,7 +539,7 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
-    hypre_LocateAssummedPartition(start, end, global_num, apart, myid);
+    hypre_LocateAssummedPartition(comm, start, end, global_num, apart, myid);
 
     /* this partition will be saved in the vector data structure until the vector is destroyed */
     hypre_ParVectorAssumedPartition(vector) = apart;

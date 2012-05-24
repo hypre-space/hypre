@@ -192,6 +192,11 @@ typedef struct
    hypre_ParVector  *u_coarse;
    MPI_Comm   new_comm;
 
+ /* store matrix, vector and communication info for Gaussian elimination */
+   double *A_mat;
+   double *b_vec;
+   HYPRE_Int *comm_info;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -365,6 +370,10 @@ typedef struct
 #define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
 #define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
 #define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
+
+#define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
+#define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
+#define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 
 #endif
 

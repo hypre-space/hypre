@@ -190,6 +190,9 @@ extern "C" {
 #define MPI_Type_struct     hypre_MPI_Type_struct      
 #define MPI_Type_commit     hypre_MPI_Type_commit
 #define MPI_Type_free       hypre_MPI_Type_free        
+#define MPI_Op_free         hypre_MPI_Op_free        
+#define MPI_Op_create       hypre_MPI_Op_create
+#define MPI_User_function   hypre_MPI_User_function
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -200,6 +203,7 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
+typedef HYPRE_Int hypre_MPI_User_function;
 
 typedef struct
 {
@@ -244,6 +248,7 @@ typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
+typedef MPI_User_function     hypre_MPI_User_function;
 
 #define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
@@ -330,6 +335,8 @@ HYPRE_Int hypre_MPI_Type_hvector( HYPRE_Int count , HYPRE_Int blocklength , hypr
 HYPRE_Int hypre_MPI_Type_struct( HYPRE_Int count , HYPRE_Int *array_of_blocklengths , hypre_MPI_Aint *array_of_displacements , hypre_MPI_Datatype *array_of_types , hypre_MPI_Datatype *newtype );
 HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
+HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
 
 #ifdef __cplusplus
 }

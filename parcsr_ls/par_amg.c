@@ -342,6 +342,11 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataUCoarse(amg_data) = NULL;
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
+   /* for Gaussian elimination coarse grid solve */
+   hypre_ParAMGDataAMat(amg_data) = NULL;
+   hypre_ParAMGDataBVec(amg_data) = NULL;
+   hypre_ParAMGDataCommInfo(amg_data) = NULL;
+
    return (void *) amg_data;
 }
 
@@ -559,6 +564,10 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataFCoarse(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
+
+   if (hypre_ParAMGDataAMat(amg_data)) hypre_TFree(hypre_ParAMGDataAMat(amg_data));
+   if (hypre_ParAMGDataBVec(amg_data)) hypre_TFree(hypre_ParAMGDataBVec(amg_data));
+   if (hypre_ParAMGDataCommInfo(amg_data)) hypre_TFree(hypre_ParAMGDataCommInfo(amg_data));
 
    if (new_comm != hypre_MPI_COMM_NULL) 
    {

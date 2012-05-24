@@ -1743,7 +1743,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       hypre_seqAMGSetup( amg_data, level, coarse_threshold);
    }
-
+   else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99)  /*use of Gaussian elimination on coarsest level */
+   {
+      hypre_GaussElimSetup(amg_data, level, grid_relax_type[3]);
+   }
 
    if (level > 0)
    {

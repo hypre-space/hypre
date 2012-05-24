@@ -374,6 +374,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
             hypre_MPI_Isend(post_array[post_array_size], size,
                             hypre_MPI_BYTE, proc, post_tag, 
                             hypre_MPI_COMM_WORLD,
+                            /*comm,*/
                             &post_send_requests[post_array_size]); 
 
             post_array_size++;
