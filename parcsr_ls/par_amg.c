@@ -571,7 +571,7 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (new_comm != hypre_MPI_COMM_NULL) 
    {
-       MPI_Comm_free (&new_comm);
+       hypre_MPI_Comm_free (&new_comm);
    }
    hypre_TFree(amg_data);
    return hypre_error_flag;

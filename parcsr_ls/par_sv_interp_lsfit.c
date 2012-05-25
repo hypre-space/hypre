@@ -247,7 +247,7 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
 
    comm      = hypre_ParCSRCommPkgComm(comm_pkg);
 
-   MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_size(comm, &num_procs);
 
    num_nonzeros = hypre_CSRMatrixNumNonzeros(P_diag)
       + hypre_CSRMatrixNumNonzeros(P_offd);

@@ -48,6 +48,6 @@ find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
   egrep -v '/hypre/include' > check-mpi.files
 
 egrep '(^|[^[:alnum:]_]+)MPI_' `cat check-mpi.files` |
-  egrep -v 'MPI_Comm' >&2
+  egrep -v 'MPI_Comm([^_]|$)' >&2
 
 rm -f check-mpi.files

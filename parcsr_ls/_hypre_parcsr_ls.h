@@ -588,7 +588,7 @@ HYPRE_Int BuildParLaplacian27pt ( HYPRE_Int argc , char *argv [], HYPRE_Int arg_
 HYPRE_Int hypre_seqAMGSetup ( hypre_ParAMGData *amg_data , HYPRE_Int p_level , HYPRE_Int coarse_threshold );
 HYPRE_Int hypre_seqAMGCycle ( hypre_ParAMGData *amg_data , HYPRE_Int p_level , hypre_ParVector **Par_F_array , hypre_ParVector **Par_U_array );
 HYPRE_Int hypre_GenerateSubComm ( MPI_Comm comm , HYPRE_Int participate , MPI_Comm *new_comm_ptr );
-void merge_lists ( HYPRE_Int *list1 , HYPRE_Int *list2 , hypre_int *np1 , hypre_MPI_Datatype *dptr );
+void hypre_merge_lists ( HYPRE_Int *list1 , HYPRE_Int *list2 , hypre_int *np1 , hypre_MPI_Datatype *dptr );
 
 /* HYPRE_ads.c */
 HYPRE_Int HYPRE_ADSCreate ( HYPRE_Solver *solver );

@@ -417,7 +417,7 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
 
       list_len[0] = new_num_procs + 2;
 
-      hypre_MPI_Op_create((hypre_MPI_User_function *)merge_lists, 0, &hypre_MPI_MERGE);
+      hypre_MPI_Op_create((hypre_MPI_User_function *)hypre_merge_lists, 0, &hypre_MPI_MERGE);
 
       hypre_MPI_Allreduce(info, ranks, list_len[0], HYPRE_MPI_INT, hypre_MPI_MERGE, comm);
 
@@ -440,7 +440,7 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
 }
 
 
-void merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1, hypre_MPI_Datatype *dptr)
+void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1, hypre_MPI_Datatype *dptr)
 {
    HYPRE_Int i, len1, len2, indx1, indx2;
 
