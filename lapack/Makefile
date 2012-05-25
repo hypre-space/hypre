@@ -97,10 +97,8 @@ OBJS = ${LAPACK_FILES:.c=.o}
 #################################################################
 
 all: ${OBJS} dlamch.o
-	cp -fp *.o ${HYPRE_SRC_TOP_DIR}/utilities
 
 install: all
-	cp -fp *.h ${HYPRE_INC_INSTALL}/include
 
 clean:
 	rm -rf *.o

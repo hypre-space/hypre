@@ -81,46 +81,46 @@ HEADERS =\
  ../vector/mli_vector.h
 
 FILES =\
- mli_utils.c\
- mli_amgsa_calib.cxx\
- mli_amgsa_coarsen1.cxx\
- mli_amgsa_dd_fedata.cxx\
- mli_amgsa_dd_sfei.cxx\
- mli_method.cxx\
- mli_method_amgcr.cxx\
- mli_method_amgrs.cxx\
- mli_method_amgsa.cxx\
- mli.cxx\
- mli_oneLevel.cxx\
- cmli.cxx\
- mli_febase.cxx\
- mli_fedata.cxx\
- mli_fedata_utils.cxx\
- mli_sfei.cxx\
- mli_mapper.cxx\
- mli_matrix.cxx\
- mli_matrix_mult.cxx\
- mli_matrix_utils.cxx\
- mli_solver.cxx\
- mli_solver_jacobi.cxx\
- mli_solver_bjacobi.cxx\
- mli_solver_gs.cxx\
- mli_solver_sgs.cxx\
- mli_solver_bsgs.cxx\
- mli_solver_hsgs.cxx\
- mli_solver_hschwarz.cxx\
- mli_solver_parasails.cxx\
- mli_solver_mls.cxx\
- mli_solver_mli.cxx\
- mli_solver_amg.cxx\
- mli_solver_chebyshev.cxx\
- mli_solver_cg.cxx\
- mli_solver_gmres.cxx\
- mli_solver_kaczmarz.cxx\
- mli_solver_superlu.cxx\
- mli_solver_seqsuperlu.cxx\
- mli_solver_arpacksuperlu.cxx\
- mli_vector.cxx
+ ../util/mli_utils.c\
+ ../amgs/mli_amgsa_calib.cxx\
+ ../amgs/mli_amgsa_coarsen1.cxx\
+ ../amgs/mli_amgsa_dd_fedata.cxx\
+ ../amgs/mli_amgsa_dd_sfei.cxx\
+ ../amgs/mli_method.cxx\
+ ../amgs/mli_method_amgcr.cxx\
+ ../amgs/mli_method_amgrs.cxx\
+ ../amgs/mli_method_amgsa.cxx\
+ ../base/mli.cxx\
+ ../base/mli_oneLevel.cxx\
+ ../cintface/cmli.cxx\
+ ../fedata/mli_febase.cxx\
+ ../fedata/mli_fedata.cxx\
+ ../fedata/mli_fedata_utils.cxx\
+ ../fedata/mli_sfei.cxx\
+ ../mapper/mli_mapper.cxx\
+ ../matrix/mli_matrix.cxx\
+ ../matrix/mli_matrix_mult.cxx\
+ ../matrix/mli_matrix_utils.cxx\
+ ../solver/mli_solver.cxx\
+ ../solver/mli_solver_jacobi.cxx\
+ ../solver/mli_solver_bjacobi.cxx\
+ ../solver/mli_solver_gs.cxx\
+ ../solver/mli_solver_sgs.cxx\
+ ../solver/mli_solver_bsgs.cxx\
+ ../solver/mli_solver_hsgs.cxx\
+ ../solver/mli_solver_hschwarz.cxx\
+ ../solver/mli_solver_parasails.cxx\
+ ../solver/mli_solver_mls.cxx\
+ ../solver/mli_solver_mli.cxx\
+ ../solver/mli_solver_amg.cxx\
+ ../solver/mli_solver_chebyshev.cxx\
+ ../solver/mli_solver_cg.cxx\
+ ../solver/mli_solver_gmres.cxx\
+ ../solver/mli_solver_kaczmarz.cxx\
+ ../solver/mli_solver_superlu.cxx\
+ ../solver/mli_solver_seqsuperlu.cxx\
+ ../solver/mli_solver_arpacksuperlu.cxx\
+ ../vector/mli_vector.cxx
 
 OBJSC = ${FILES:.c=.o}
 OBJSCXX = ${OBJSC:.cxx=.o}
@@ -140,7 +140,7 @@ install: libHYPRE_mli${HYPRE_LIB_SUFFIX}
 	@echo  " "
 
 clean:
-	rm -f *.o *.h *.c *.f *.cxx libHYPRE*
+	rm -f *.o libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -151,12 +151,12 @@ distclean: clean
 
 libHYPRE_mli.a: ${OBJS}
 	@echo  "Building $@ ... "
-	${AR} $@ ${OBJS}
+	${AR} $@ *.o
 	${RANLIB} $@
 
 libHYPRE_mli.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	${BUILD_CC_SHARED} -o ${SONAME} *.o ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
