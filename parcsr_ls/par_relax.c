@@ -3238,7 +3238,6 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
    /* Generate sub communicator */
    hypre_GenerateSubComm(comm, num_rows, &new_comm);
-   hypre_ParAMGDataNewComm(amg_data) = new_comm;
 
    if (num_rows)
    {
@@ -3306,10 +3305,12 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       else
          hypre_ParAMGDataAMat(amg_data) = A_mat;
       hypre_ParAMGDataCommInfo(amg_data) = comm_info;
+      hypre_ParAMGDataNewComm(amg_data) = new_comm;
       hypre_TFree(mat_info);
       hypre_TFree(mat_displs);
       hypre_TFree(A_mat_local);
    }
+   
    return hypre_error_flag;
 }
 
