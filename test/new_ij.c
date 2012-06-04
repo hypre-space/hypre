@@ -1475,6 +1475,15 @@ main( hypre_int argc,
    parcsr_A = (HYPRE_ParCSRMatrix) object;
      /*HYPRE_ParCSRMatrixPrint(parcsr_A,"rot60");*/
 
+#if 0 /* print the matrix in Harwell-Boeing format and exit */
+{
+   hypre_CSRMatrix *csr_A;
+   csr_A = hypre_ParCSRMatrixDiag((hypre_ParCSRMatrix *)parcsr_A);
+   hypre_CSRMatrixPrintHB(csr_A, "new_ij_matrix.hb");
+   exit(0);
+}
+#endif
+
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
