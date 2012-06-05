@@ -319,15 +319,17 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%-70s  Key     \n", "Title");
+   hypre_fprintf(fp, "%-70s  Key     \n", "Title");
    ptrcrd = num_rows;
    indcrd = matrix_i[num_rows];
    valcrd = matrix_i[num_rows];
    rhscrd = 0;
    totcrd = ptrcrd + indcrd + valcrd + rhscrd;
-   fprintf (fp, "%14d%14d%14d%14d%14d\n", totcrd, ptrcrd, indcrd, valcrd, rhscrd);
-   fprintf (fp, "%-14s%14i%14i%14i%14i\n", "RUA", num_rows, num_rows, valcrd, 0);
-   fprintf (fp, "%-16s%-16s%-16s%26s\n", "(1I8)", "(1I8)", "(1E16.8)", "");
+   hypre_fprintf (fp, "%14d%14d%14d%14d%14d\n",
+                  totcrd, ptrcrd, indcrd, valcrd, rhscrd);
+   hypre_fprintf (fp, "%-14s%14i%14i%14i%14i\n", "RUA",
+                  num_rows, num_rows, valcrd, 0);
+   hypre_fprintf (fp, "%-16s%-16s%-16s%26s\n", "(1I8)", "(1I8)", "(1E16.8)", "");
 
    for (j = 0; j <= num_rows; j++)
    {
