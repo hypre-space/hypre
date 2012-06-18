@@ -83,7 +83,7 @@ hypre_SchwarzDestroy( void *data )
    if (hypre_SchwarzDataDofFunc(schwarz_data))
       hypre_TFree (hypre_SchwarzDataDofFunc(schwarz_data));
    hypre_CSRMatrixDestroy(hypre_SchwarzDataDomainStructure(schwarz_data));
-   if (hypre_SchwarzDataVariant(schwarz_data) == 3);
+   if (hypre_SchwarzDataVariant(schwarz_data) == 3)
       hypre_CSRMatrixDestroy(hypre_SchwarzDataABoundary(schwarz_data));
    hypre_ParVectorDestroy(hypre_SchwarzDataVtemp(schwarz_data));
 
