@@ -75,4 +75,12 @@ build_name=`echo $build_list | awk '{print $1}'`
 kwinspectreport --license-host swordfish --host rzcereal3 --port 8066 --text hyprenew.txt --state new --project hypre --build $build_name
 cat hyprenew.txt >&2
 
-# TODO: add lines to delete old builds (e.g., keep the latest 5 builds)
+# Delete all but the most recent 5 builds
+count=0
+for build in $build_list
+do
+   count=`expr $count + 1`
+   if [ $count -gt 5 ]; then
+      kwadmin delete-build hypre $build
+   fi
+done
