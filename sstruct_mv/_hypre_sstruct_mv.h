@@ -457,6 +457,7 @@ typedef struct hypre_SStructGraph_struct
    HYPRE_Int              *iUventries; /* rank indexes into Uventries */
    hypre_SStructUVEntry  **Uventries;
    HYPRE_Int               Uvesize;    /* size of Uventries array */
+   HYPRE_Int               Uemaxsize;  /* max size of Uentries */
    HYPRE_Int             **Uveoffsets; /* offsets for computing rank indexes */
 
    HYPRE_Int               ref_count;
@@ -501,6 +502,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphUVEntries(graph)      ((graph) -> Uventries)
 #define hypre_SStructGraphUVEntry(graph, i)     ((graph) -> Uventries[i])
 #define hypre_SStructGraphUVESize(graph)        ((graph) -> Uvesize)
+#define hypre_SStructGraphUEMaxSize(graph)      ((graph) -> Uemaxsize)
 #define hypre_SStructGraphUVEOffsets(graph)     ((graph) -> Uveoffsets)
 #define hypre_SStructGraphUVEOffset(graph, p, v)((graph) -> Uveoffsets[p][v])
 

@@ -129,9 +129,10 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
          size = hypre_max(size, hypre_SStructStencilSize(stencils[part][vi]));
       }
    }
-   hypre_SStructMatrixEntriesSize(matrix) = size;
    hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
+   size += hypre_SStructGraphUEMaxSize(graph);
    hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructMatrixEntriesSize(matrix) = size;
    hypre_SStructMatrixTmpColCoords(matrix) = NULL;
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
 

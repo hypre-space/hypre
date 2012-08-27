@@ -74,6 +74,7 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphIUVEntries(graph) = NULL;
    hypre_SStructGraphUVEntries(graph)  = NULL;
    hypre_SStructGraphUVESize(graph)    = 0;
+   hypre_SStructGraphUEMaxSize(graph)  = 0;
    hypre_SStructGraphUVEOffsets(graph) = NULL;
 
    hypre_SStructGraphRefCount(graph)   = 1;
@@ -605,6 +606,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          }
          hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
          hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
+         hypre_SStructGraphUEMaxSize(graph) =
+            hypre_max(hypre_SStructGraphUEMaxSize(graph), nUentries);
 
          i = nUentries - 1;
          hypre_SStructUVEntryToPart(Uventry, i) = to_part;
