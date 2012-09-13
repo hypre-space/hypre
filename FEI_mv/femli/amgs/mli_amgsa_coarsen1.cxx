@@ -218,7 +218,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     * create global P 
     *-----------------------------------------------------------------*/
 
-   if ( initAggr == NULL & numSmoothVec_ == 0 ) 
+   if ( (initAggr == NULL) & (numSmoothVec_ == 0) ) 
    {
       if ( GGlobalNRows <= minAggrSize_*numProcs ) 
       {
