@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /****************************************************************************/ 
 /* HYPRE_LSI_MLI interface                                                  */
 /*--------------------------------------------------------------------------*/
@@ -70,9 +67,9 @@
 /*--------------------------------------------------------------------------*/
 
 #ifdef HAVE_MLI
-#include "base/mli.h"
-#include "util/mli_utils.h"
-#include "amgs/mli_method.h"
+#include "mli.h"
+#include "mli_utils.h"
+#include "mli_method.h"
 #endif
 #include "HYPRE_LSI_mli.h"
 
