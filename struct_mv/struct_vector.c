@@ -26,7 +26,6 @@ hypre_StructVectorCreate( MPI_Comm          comm,
                           hypre_StructGrid *grid )
 {
    hypre_StructVector  *vector;
-   HYPRE_Int            ndim   = hypre_StructGridDim(grid);
    HYPRE_Int            i;
 
    vector = hypre_CTAlloc(hypre_StructVector, 1);
@@ -40,12 +39,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    /* set defaults */
    for (i = 0; i < 6; i++)
    {
-      hypre_StructVectorNumGhost(vector)[i] = 0;
-   }
-   for (i = 0; i < ndim; i++)
-   {
-      hypre_StructVectorNumGhost(vector)[2*i] = 1;
-      hypre_StructVectorNumGhost(vector)[2*i+1] = 1;
+      hypre_StructVectorNumGhost(vector)[i] = hypre_StructGridNumGhost(grid)[i];
    }
 
    return vector;
