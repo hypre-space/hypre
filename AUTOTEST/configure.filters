@@ -1,7 +1,2 @@
 configure: WARNING: Disabling F90 Support
 configure: WARNING: Configuration for Python failed.  Support for Python disabled!
-configure: WARNING: The Java compiler javac failed
-configure: WARNING: Disabling Java support
-configure: WARNING: Cannot find jni.h, Java support will be disabled
-configure: WARNING: Try setting JNI_INCLUDES and rerunning configure
-configure: WARNING: Cannot find JVM shared library, Java support will be disabled
