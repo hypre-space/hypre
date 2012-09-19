@@ -750,7 +750,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
    hypre_StructGrid            *sgrid;
 
    hypre_BoxManager          ***nbor_managers;
-   hypre_SStructBoxManNborInfo *nbor_info;
+   hypre_SStructBoxManNborInfo *nbor_info, *peri_info;
    hypre_SStructBoxManInfo     *entry_info;
    hypre_BoxManEntry          **entries, *all_entries, *entry;
    HYPRE_Int                    nentries;
@@ -785,6 +785,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
    ghbox = hypre_BoxCreate();
    /* nbor_info is copied into the box manager */
    nbor_info = hypre_TAlloc(hypre_SStructBoxManNborInfo, 1);
+   peri_info = hypre_CTAlloc(hypre_SStructBoxManNborInfo, 1);
 
    nbor_managers = hypre_TAlloc(hypre_BoxManager **, nparts);
 
@@ -1035,6 +1036,12 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
                proc = hypre_BoxManEntryProc(entry);
                
                hypre_BoxManEntryGetInfo(entry, (void **) &entry_info);
+               hypre_SStructBoxManInfoType(peri_info) =
+                  hypre_SStructBoxManInfoType(entry_info);
+               hypre_SStructBoxManInfoOffset(peri_info) =
+                  hypre_SStructBoxManInfoOffset(entry_info);
+               hypre_SStructBoxManInfoGhoffset(peri_info) =
+                  hypre_SStructBoxManInfoGhoffset(entry_info);
                   
                for (k = 1; k < num_periods; k++) /* k = 0 is original box */
                {
@@ -1048,7 +1055,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
                   {
                      hypre_BoxManAddEntry(nbor_managers[part][var],
                                           hypre_BoxIMin(box), hypre_BoxIMax(box),
-                                          proc, -1, entry_info);
+                                          proc, -1, peri_info);
                   }
                }
             }
@@ -1063,6 +1070,7 @@ hypre_SStructGridAssembleNborBoxManagers( hypre_SStructGrid *grid )
    hypre_SStructGridNborBoxManagers(grid) = nbor_managers;
 
    hypre_TFree(nbor_info);
+   hypre_TFree(peri_info);
    hypre_BoxDestroy(nbor_box);
    hypre_BoxDestroy(box);
    hypre_BoxDestroy(int_box);
