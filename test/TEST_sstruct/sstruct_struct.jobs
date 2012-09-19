@@ -1,4 +1,4 @@
-#!/bin/ksh 
+#!/bin/sh 
 
 #=============================================================================
 # Compare the struct solvers called from sstruct & struct interfaces

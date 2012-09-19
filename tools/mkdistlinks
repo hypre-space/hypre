@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 # Create symbolic links to the hypre distribution tar file
 # executed in /usr/casc/hypre and /usr/gapps/hypre
 #  usage: ./mkdistlinks HypreArchiveFile
