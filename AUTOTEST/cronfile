@@ -10,9 +10,9 @@
 
 # Rob's crontab (on tux339)
 
-30 0 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -checkout
-00 1 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -tux339  >> autotest-tux-cron.out     2>> autotest-tux-cron.err
-00 6 * * * source /etc/profile; source .profile; source .bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -summary-email
+30 0 * * * source /etc/profile; source $HOME/.bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -checkout
+00 1 * * * source /etc/profile; source $HOME/.bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -tux339  >> autotest-tux-cron.out     2>> autotest-tux-cron.err
+00 6 * * * source /etc/profile; source $HOME/.bashrc; cd /usr/casc/hypre/testing/AUTOTEST; ./autotest.sh -summary-email
 
 # Rob's crontab (on rzcereal2)
 
