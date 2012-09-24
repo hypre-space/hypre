@@ -84,5 +84,9 @@ platforms) or Visual Studio (Windows).  Here are the basic steps:
 Optional Features:
 
 Various configuration options can be set from within CMake.  Change these as
-appropriate, then click on 'Configure' then 'Generate' again before re-building
-in the native build system.
+appropriate, then reconfigure/generate:
+
+- Unix: From the 'src/cmbuild' directory, type 'ccmake ..', change options, then
+  type 'c' then 'q'.
+
+- Windows VS: Change options, then click on 'Configure' then 'Generate'.
