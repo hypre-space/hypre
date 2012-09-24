@@ -8,10 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ *********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -49,8 +46,8 @@ HYPRE_SuperLU;
 #endif
 
 #ifdef HAVE_SUPERLU
-#include "SRC/slu_ddefs.h"
-#include "SRC/slu_util.h"
+#include "slu_ddefs.h"
+#include "slu_util.h"
 
 typedef struct HYPRE_SuperLU_Struct
 {

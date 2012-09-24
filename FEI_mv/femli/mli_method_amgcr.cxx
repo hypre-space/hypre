@@ -10,8 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
+#endif
 #endif
 
 #include <string.h>

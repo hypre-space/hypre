@@ -8,10 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
+ *********************************************************************EHEADER*/
 
 /**************************************************************************
   Module:  LLNL_FEI_Solver.cxx
@@ -32,8 +29,8 @@
 #include "superlu_util.h"
 #endif
 #if HAVE_SUPERLU
-#include "SRC/slu_ddefs.h"
-#include "SRC/slu_util.h"
+#include "slu_ddefs.h"
+#include "slu_util.h"
 #endif
 
 /**************************************************************************

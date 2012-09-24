@@ -8,11 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ *********************************************************************EHEADER*/
 
 //***************************************************************************
 // This file holds the other functions for HYPRE_LinSysCore
@@ -32,16 +28,16 @@
 #include <assert.h>
 #include <math.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
+#endif
 #endif
 
 //#define HAVE_SYSPDE 
 
 //#define HAVE_DSUPERLU 
 #include "dsuperlu_include.h"
-
-#define HAVE_MLI 
 
 //---------------------------------------------------------------------------
 // HYPRE include files
@@ -75,8 +71,8 @@
 //---------------------------------------------------------------------------
 
 #ifdef HAVE_SUPERLU
-#include "SRC/slu_ddefs.h"
-#include "SRC/slu_util.h"
+#include "slu_ddefs.h"
+#include "slu_util.h"
 #endif
 
 //---------------------------------------------------------------------------
@@ -901,7 +897,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // amg preconditoner : coarsening type 
       //----------------------------------------------------------------
 
-      else if ( !strcmp(param1, "amgMaxLevels") )
+      if ( !strcmp(param1, "amgMaxLevels") )
       {
          sscanf(params[i],"%s %d", param, &amgMaxLevels_);
          if ( amgMaxLevels_ <= 0 ) amgMaxLevels_ = 30;
@@ -1213,7 +1209,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // parasails preconditoner : threshold ( >= 0.0 )
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "parasailsThreshold") )
+      if ( !strcmp(param1, "parasailsThreshold") )
       {
          sscanf(params[i],"%s %lg", param, &parasailsThreshold_);
          if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.1;
@@ -1292,7 +1288,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // Euclid preconditoner : fill-in 
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "euclidNlevels") )
+      if ( !strcmp(param1, "euclidNlevels") )
       {
          sscanf(params[i],"%s %d", param, &olevel);
          if ( olevel < 0 ) olevel = 0;
@@ -1381,7 +1377,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // mlpack preconditoner : no of relaxation sweeps per level
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "mlNumPresweeps") )
+      if ( !strcmp(param1, "mlNumPresweeps") )
       {
          sscanf(params[i],"%s %d", param, &nsweeps);
          if ( nsweeps < 1 ) nsweeps = 1;
@@ -1557,7 +1553,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // ams preconditoner : no of PDEs (block size)
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "amsNumPDEs") )
+      if ( !strcmp(param1, "amsNumPDEs") )
       {
          sscanf(params[i],"%s %d", param, &amsNumPDEs_);
          if ( amsNumPDEs_ < 1 ) amsNumPDEs_ = 1;

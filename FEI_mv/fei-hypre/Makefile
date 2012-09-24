@@ -15,7 +15,7 @@ include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
-SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
+SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
@@ -165,10 +165,10 @@ all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
 	cp -fpPR $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
 	cp -fpPR $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
 #	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
@@ -178,10 +178,10 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fpPR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
 	cp -fpPR $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
 	cp -fpPR $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
 #	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  ""
 

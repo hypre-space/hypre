@@ -1,5 +1,9 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.8)
 project (hypre-test)
+
+if (${hypre-test_SOURCE_DIR} STREQUAL ${hypre-test_BINARY_DIR})
+  message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
+endif ()
 
 # Set the installation directory for hypre
 set (HYPRE_INSTALL_DIR "${PROJECT_SOURCE_DIR}/../hypre" CACHE PATH
@@ -9,16 +13,10 @@ set (HYPRE_INSTALL_DIR "${PROJECT_SOURCE_DIR}/../hypre" CACHE PATH
 set (CMAKE_BUILD_TYPE "RELEASE" CACHE INTERNAL "" FORCE)
 
 # Include directories
-set (HYPRE_INCLUDE_DIRS "")
-list (APPEND HYPRE_INCLUDE_DIRS
-  ${HYPRE_INSTALL_DIR}/include
-)
+set (HYPRE_INCLUDE_DIRS "${HYPRE_INSTALL_DIR}/include")
 
 # Library directories
-set (HYPRE_LIB_DIRS "")
-list (APPEND HYPRE_LIB_DIRS
-  ${HYPRE_INSTALL_DIR}/lib
-)
+set (HYPRE_LIB_DIRS "${HYPRE_INSTALL_DIR}/lib")
 
 # Link libraries
 set (HYPRE_LIBS HYPRE)
@@ -45,6 +43,10 @@ endif (NOT HYPRE_SEQUENTIAL)
 include_directories (${HYPRE_INCLUDE_DIRS})
 link_directories (${HYPRE_LIB_DIRS})
 add_definitions (-DHYPRE_TIMING)
+
+if (MSVC)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif ()
 
 add_executable (ij ij.c)
 target_link_libraries (ij ${HYPRE_LIBS})

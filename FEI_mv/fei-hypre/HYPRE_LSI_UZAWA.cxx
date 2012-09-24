@@ -8,11 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ *********************************************************************EHEADER*/
 
 //***************************************************************************
 // Date : Apr 26, 2002 
@@ -25,11 +21,11 @@
 #include <stdio.h>
 #include <assert.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
 #endif
-
-#define HAVE_MLI
+#endif
 
 //***************************************************************************
 // local includes

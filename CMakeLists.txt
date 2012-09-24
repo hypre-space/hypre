@@ -1,6 +1,6 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
- 
+
 # The version number.
 set (HYPRE_VERSION 2.8.2a)
 set (HYPRE_DATE    2012/5/10)
@@ -8,14 +8,18 @@ set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
 
+if (${hypre_SOURCE_DIR} STREQUAL ${hypre_BINARY_DIR})
+  message(FATAL_ERROR "In-place build not allowed! Please use a separate build directory. See the Users Manual or INSTALL file for details.")
+endif ()
+
 # Set default installation directory, but provide a means for users to change
 set (HYPRE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/hypre" CACHE PATH
   "Installation directory for HYPRE")
 set (CMAKE_INSTALL_PREFIX "${HYPRE_INSTALL_PREFIX}" CACHE INTERNAL "" FORCE)
 
 # Set default compile optimization flag
-set (HYPRE_BUILD_TYPE "RELEASE" CACHE STRING
-  "Optimization flags: set to DEBUG, RELEASE, RELWITHDEBINFO, or MINSIZEREL")
+set (HYPRE_BUILD_TYPE "Release" CACHE STRING
+  "Optimization flags: set to Debug, Release, RelWithDebInfo, or MinSizeRel")
 set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 
 # Configuration options
@@ -28,6 +32,12 @@ option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
 option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" OFF)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
+option(HYPRE_USING_FEI            "Use FEI" ON)
+
+if (HYPRE_BIGINT)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+  # In the future, also turn off babel
+endif ()
 
 #   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
@@ -40,7 +50,7 @@ set (HYPRE_SOURCES "")
 
 # Headers and sources: .
 list (APPEND HYPRE_HEADERS
-  HYPRE_config.h
+  "${PROJECT_BINARY_DIR}/HYPRE_config.h"
   HYPREf.h
   HYPRE.h
 )
@@ -693,37 +703,31 @@ list (APPEND HYPRE_SOURCES
   sstruct_ls/sys_semi_restrict.c
 )
 
-# # Headers and sources: FEI
-# list (APPEND HYPRE_HEADERS
-#   template/template.h
-# )
-# list (APPEND HYPRE_SOURCES
-#   template/template.c
-# )
-
 # Configure a header file to pass CMake settings to the source code
 configure_file (
   "${PROJECT_SOURCE_DIR}/config/HYPRE_config.h.cmake.in"
   "${PROJECT_BINARY_DIR}/HYPRE_config.h"
   )
 
-include_directories (${PROJECT_BINARY_DIR}
-  "${PROJECT_SOURCE_DIR}/utilities"
-  "${PROJECT_SOURCE_DIR}/multivector"
-  "${PROJECT_SOURCE_DIR}/krylov"
-  "${PROJECT_SOURCE_DIR}/seq_mv"
-  "${PROJECT_SOURCE_DIR}/parcsr_mv"
-  "${PROJECT_SOURCE_DIR}/parcsr_block_mv"
-  "${PROJECT_SOURCE_DIR}/distributed_matrix"
-  "${PROJECT_SOURCE_DIR}/IJ_mv"
-  "${PROJECT_SOURCE_DIR}/matrix_matrix"
-  "${PROJECT_SOURCE_DIR}/distributed_ls/Euclid"
-  "${PROJECT_SOURCE_DIR}/parcsr_ls"
-  "${PROJECT_SOURCE_DIR}/struct_mv"
-  "${PROJECT_SOURCE_DIR}/struct_ls"
-  "${PROJECT_SOURCE_DIR}/sstruct_mv"
-  "${PROJECT_SOURCE_DIR}/sstruct_ls"
-)
+include_directories(${hypre_SOURCE_DIR})
+include_directories(${hypre_BINARY_DIR})
+include_directories(utilities)
+include_directories(multivector)
+include_directories(krylov)
+include_directories(seq_mv)
+include_directories(parcsr_mv)
+include_directories(parcsr_block_mv)
+include_directories(distributed_matrix)
+include_directories(IJ_mv)
+include_directories(matrix_matrix)
+include_directories(distributed_ls)
+include_directories(distributed_ls/Euclid)
+include_directories(distributed_ls/ParaSails)
+include_directories(parcsr_ls)
+include_directories(struct_mv)
+include_directories(struct_ls)
+include_directories(sstruct_mv)
+include_directories(sstruct_ls)
 
 # Set library build type
 if (HYPRE_SHARED)
@@ -757,7 +761,15 @@ endif (HYPRE_USING_OPENMP)
 # Turn optimization off for this file
 set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS -O0)
 
-add_library (HYPRE ${HYPRE_SOURCES})
+if (MSVC)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif ()
+
+if (HYPRE_USING_FEI)
+  add_subdirectory(FEI_mv)
+endif ()
+
+add_library (HYPRE ${HYPRE_SOURCES} ${FEI_LIBS})
 
 install (TARGETS HYPRE DESTINATION lib)
 install (FILES ${HYPRE_HEADERS} DESTINATION include)

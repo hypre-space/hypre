@@ -8,7 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
+ *********************************************************************EHEADER*/
 
 /****************************************************************************/ 
 /* HYPRE_LSI_MLI interface                                                  */
@@ -56,11 +56,11 @@
 #include <assert.h>
 #include <math.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
 #endif
-
-#define HAVE_MLI 
+#endif
 
 /****************************************************************************/ 
 /* MLI include files                                                        */

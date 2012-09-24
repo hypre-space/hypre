@@ -8,11 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
-
-
-
+ *********************************************************************EHEADER*/
 
 //***************************************************************************
 // system includes
@@ -35,8 +31,6 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "HYPRE_LinSysCore.h"
 #include "HYPRE_LSI_mli.h"
-
-#define HAVE_MLI
 
 //***************************************************************************
 // local defines and external functions

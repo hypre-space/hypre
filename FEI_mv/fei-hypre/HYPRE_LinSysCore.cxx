@@ -8,8 +8,7 @@
  * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
- ***********************************************************************EHEADER*/
-
+ *********************************************************************EHEADER*/
 
 //***************************************************************************
 // system includes
@@ -22,8 +21,10 @@
 #include <assert.h>
 #include <math.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
+#endif
 #endif
 
 //***************************************************************************
@@ -120,7 +121,6 @@ extern "C" {
    void  qsort1(int *, double *, int, int);
 }
 
-#define HAVE_MLI
 #define habs(x)  ( ( (x) > 0 ) ? x : -(x))
 
 //***************************************************************************

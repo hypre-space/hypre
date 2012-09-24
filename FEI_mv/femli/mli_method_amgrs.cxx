@@ -14,8 +14,10 @@
 #define MU      0.5
 #define pruneFactor 0.1
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
+#endif
 #endif
 
 /* #define MLI_USE_HYPRE_MATMATMULT */
