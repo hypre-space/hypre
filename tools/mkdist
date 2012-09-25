@@ -172,6 +172,7 @@ HYPRE_FILES="\
   $HYPRE_DIR/src/IJ_mv \
   $HYPRE_DIR/src/Makefile \
   $HYPRE_DIR/src/blas \
+  $HYPRE_DIR/src/cmbuild \
   $HYPRE_DIR/src/config \
   $HYPRE_DIR/src/configure \
   $HYPRE_DIR/src/distributed_ls \
