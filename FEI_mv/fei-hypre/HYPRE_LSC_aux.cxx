@@ -163,6 +163,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    int    solver_override=0, solver_index=-1, precon_index=-1;
    double weight, dtemp;
    char   param[256], param1[256], param2[80], param3[80];
+   int    recognized;
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
@@ -239,6 +240,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // help menu 
       //----------------------------------------------------------------
 
+      recognized = 1;
       if ( !strcmp(param1, "help") )
       {
          printf("%4d : HYPRE_LinSysCore::parameters - available ones : \n",
@@ -893,10 +895,15 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    param2);
       }
 
+      else recognized = 0;
+
       //----------------------------------------------------------------
       // amg preconditoner : coarsening type 
       //----------------------------------------------------------------
 
+      if (!recognized)
+      {
+      recognized = 1;
       if ( !strcmp(param1, "amgMaxLevels") )
       {
          sscanf(params[i],"%s %d", param, &amgMaxLevels_);
@@ -1205,10 +1212,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    amgGSMGNSamples_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // parasails preconditoner : threshold ( >= 0.0 )
       //---------------------------------------------------------------
 
+      if (!recognized)
+      {
+      recognized = 1;
       if ( !strcmp(param1, "parasailsThreshold") )
       {
          sscanf(params[i],"%s %lg", param, &parasailsThreshold_);
@@ -1284,10 +1297,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    parasailsReuse_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // Euclid preconditoner : fill-in 
       //---------------------------------------------------------------
 
+      if (!recognized)
+      {
+      recognized = 1;
       if ( !strcmp(param1, "euclidNlevels") )
       {
          sscanf(params[i],"%s %d", param, &olevel);
@@ -1373,10 +1392,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             HYPRE_LSI_UzawaSetParams(HYPrecon_, params[i]); 
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // mlpack preconditoner : no of relaxation sweeps per level
       //---------------------------------------------------------------
 
+      if (!recognized)
+      {
+      recognized = 1;
       if ( !strcmp(param1, "mlNumPresweeps") )
       {
          sscanf(params[i],"%s %d", param, &nsweeps);
@@ -1549,10 +1574,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    mlNumPDEs_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // ams preconditoner : no of PDEs (block size)
       //---------------------------------------------------------------
 
+      if (!recognized)
+      {
+      recognized = 1;
       if ( !strcmp(param1, "amsNumPDEs") )
       {
          sscanf(params[i],"%s %d", param, &amsNumPDEs_);
@@ -1861,11 +1892,14 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    sysPDENVars_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // error 
       //---------------------------------------------------------------
 
-      else
+      if (!recognized)
       {
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
             printf("HYPRE_LSC::parameters WARNING : %s not recognized\n",
