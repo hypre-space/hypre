@@ -15,6 +15,17 @@
 # recent release.
 #=============================================================================
 
+Version 2.8.3a released 2012/09/27
+
+- Fixed some memory allocation problems in SStruct, including code related to
+  the SetPeriodic() routine.
+
+- Updated the CMake build system to build the FEI component of hypre also.
+
+- Flattened the directory structure for the FEI code.
+
+#====================================
+
 Version 2.8.2a released 2012/05/10
 
 - Added threading to multipass interpolation in BoomerAMG.
