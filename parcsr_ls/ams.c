@@ -3270,7 +3270,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    }
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,ii,j,k,ns,ne,rest,size,diag) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i,ii,j,k,ns,ne,rest,size,diag,cf_diag) HYPRE_SMP_SCHEDULE
 #endif
    for (k = 0; k < num_threads; k++)
    {
@@ -3350,7 +3350,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                {
                   ii = A_diag_J[j];
                   if ((ii == i || ii < ns || ii >= ne) &&
-                      (cf_diag == cf_marker_offd[A_offd_J[j]]))
+                      (cf_diag == cf_marker[A_diag_J[j]]))
                      l1_norm[i] += fabs(A_diag_data[j]);
                }
                /* Add the CF l1 norm of the offd part of the ith row */
@@ -3412,7 +3412,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
                {
                   ii = A_diag_J[j];
                   if ((ii == i || ii < ns || ii >= ne) &&
-                      (cf_diag == cf_marker_offd[A_offd_J[j]]))
+                      (cf_diag == cf_marker[A_diag_J[j]]))
                   {
                      if (ii == i)
                      {

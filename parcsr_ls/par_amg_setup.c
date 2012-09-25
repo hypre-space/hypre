@@ -513,7 +513,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
        * using threading */
       for (j = 0; j < 4; j++)
       {
-         if (grid_relax_type[j] ==3 || grid_relax_type[j] == 6)
+         if (grid_relax_type[j] == 3 || grid_relax_type[j] == 6 || grid_relax_type[j] == 8)
          {
             Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                           hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
