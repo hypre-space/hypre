@@ -10,6 +10,10 @@ set(HYPRE_fei_HEADERS
   LLNL_FEI_LSCore.h
   LLNL_FEI_Matrix.h
   LLNL_FEI_Solver.h
+  ../fei-base/base/Data.h
+  ../fei-base/base/Lookup.h
+  ../fei-base/base/LinearSystemCore.h
+  ../fei-base/fei_defs.h
 )
 
 set(HYPRE_fei_SRCS 
