@@ -137,6 +137,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
 
    hypre_SStructMatrixNSSymmetric(matrix) = 0;
+   hypre_SStructMatrixIsComplex(matrix)   = 0;
    hypre_SStructMatrixGlobalSize(matrix)  = 0;
    hypre_SStructMatrixRefCount(matrix)    = 1;
   

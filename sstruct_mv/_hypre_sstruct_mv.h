@@ -596,7 +596,7 @@ typedef struct
    HYPRE_Int              *sentries;
 
    HYPRE_Int               accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               iscomplex;    /* Matrix complex? */
 
    HYPRE_Int               ref_count;
 
@@ -627,7 +627,7 @@ typedef struct hypre_SStructMatrix_struct
    double                 *tmp_coeffs;
 
    HYPRE_Int               ns_symmetric; /* Non-stencil entries symmetric? */
-   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               iscomplex;    /* Matrix complex? */
    HYPRE_Int               global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int               ref_count;
@@ -658,7 +658,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
 #define hypre_SStructMatrixTmpCoeffs(mat)      ((mat) -> tmp_coeffs)
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
-#define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
+#define hypre_SStructMatrixIsComplex(mat)      ((mat) -> iscomplex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
 #define hypre_SStructMatrixObjectType(mat)       ((mat) -> object_type)
@@ -686,7 +686,7 @@ hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 #define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
-#define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
+#define hypre_SStructPMatrixIsComplex(pmat)         ((pmat) -> iscomplex)
 #define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif
@@ -725,7 +725,7 @@ typedef struct
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
    HYPRE_Int               accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int               complex;      /* Is the vector complex */
+   HYPRE_Int               iscomplex;    /* Is the vector complex */
 
    HYPRE_Int               ref_count;
 
@@ -761,7 +761,7 @@ typedef struct hypre_SStructVector_struct
                                           of vector data for the part=partx    */
    HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
 
-   HYPRE_Int               complex;      /* Is the vector complex */
+   HYPRE_Int               iscomplex;    /* Is the vector complex */
    HYPRE_Int               global_size;  /* Total number coefficients */
 
    HYPRE_Int               ref_count;
@@ -782,7 +782,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
 #define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
 #define hypre_SStructVectorNborNComms(vec)     ((vec) -> nbor_ncomms)
-#define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
+#define hypre_SStructVectorIsComplex(vec)      ((vec) -> iscomplex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
 #define hypre_SStructVectorData(vec)           ((vec) -> data )
@@ -802,7 +802,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
-#define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
+#define hypre_SStructPVectorIsComplex(pvec)   ((pvec) -> iscomplex)
 #define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
 #define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )
 #define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize  )

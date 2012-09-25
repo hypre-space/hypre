@@ -65,6 +65,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 
    hypre_SStructVectorIJVector(vector)   = NULL;
    hypre_SStructVectorParVector(vector)  = NULL;
+   hypre_SStructVectorIsComplex(vector)  = 0;
    hypre_SStructVectorGlobalSize(vector) = 0;
    hypre_SStructVectorRefCount(vector)   = 1;
    hypre_SStructVectorDataSize(vector)   = 0;
