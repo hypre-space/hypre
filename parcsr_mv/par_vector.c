@@ -948,6 +948,8 @@ hypre_ParVectorReadIJ( MPI_Comm             comm,
    {
       hypre_fscanf(file, "%d", partitioning+i);
    }
+   /* This is not yet implemented correctly! */
+   base_j = 0;
 #else
    partitioning = hypre_CTAlloc(HYPRE_Int,num_procs+1);
 

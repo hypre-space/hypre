@@ -1740,8 +1740,11 @@ void hypre_ParCSRMatrixExtractSubmatrices(hypre_ParCSRMatrix *A_csr, HYPRE_Int *
    nnz_offd   = 0;
    nnz_diag   = nnz11;
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-
-
+   /* This case is not yet implemented! */
+   global_nrows = 0;
+   global_ncols = 0;
+   row_starts = NULL;
+   col_starts = NULL;
 #else
    global_nrows = proc_offsets1[nprocs];
    global_ncols = proc_offsets1[nprocs];
