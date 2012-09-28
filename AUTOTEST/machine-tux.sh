@@ -68,7 +68,7 @@ fi
 # temporarily change word delimeter in order to have spaces in options
 tmpIFS=$IFS
 IFS=:
-configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition: "
+configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition --enable-debug: "
 for opt in $configure_opts
 do
    # only use first part of $opt for subdir name
