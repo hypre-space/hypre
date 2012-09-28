@@ -360,12 +360,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_BoxManager          *new_boxman;
    
    HYPRE_Int                  global_n_add_entries;
-   HYPRE_Int                  is_gather;
+   HYPRE_Int                  is_gather, k;
    
    hypre_BoxManEntry         *all_entries, *entry;
    HYPRE_Int                  num_entries;
    void                      *info;
    hypre_Box                 *bbox, *new_box;
+   hypre_Box               ***new_gboxes, *new_gbox;
    HYPRE_Int                 *num_ghost;
 
    /*---------------------------------------------------------
@@ -383,6 +384,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    {
       /* create new managers */
       new_managers = hypre_TAlloc(hypre_BoxManager **, nparts);
+      new_gboxes = hypre_TAlloc(hypre_Box **, nparts);
 
       for (part = 0; part < nparts; part++)
       {
@@ -390,19 +392,25 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          nvars = hypre_SStructPGridNVars(pgrid);
          
          new_managers[part] = hypre_TAlloc(hypre_BoxManager *, nvars);
+         new_gboxes[part] = hypre_TAlloc(hypre_Box *, nvars);
          
          for (var = 0; var < nvars; var++)
          {
             sgrid = hypre_SStructPGridSGrid(pgrid, var);
        
             orig_boxman = managers[part][var];
+            bbox =  hypre_BoxManBoundingBox(orig_boxman);
             
             hypre_BoxManCreate(hypre_BoxManNEntries(orig_boxman), 
                                hypre_BoxManEntryInfoSize(orig_boxman), 
-                               hypre_StructGridDim(sgrid),
-                               hypre_BoxManBoundingBox(orig_boxman),  
+                               hypre_StructGridDim(sgrid), bbox,
                                hypre_StructGridComm(sgrid),
                                &new_managers[part][var]);
+            /* create gather box with flipped bounding box extents */
+            new_gboxes[part][var] = hypre_BoxCreate();
+            hypre_BoxSetExtents(new_gboxes[part][var],
+                                hypre_BoxIMax(bbox), hypre_BoxIMin(bbox));
+
 
             /* need to set the num ghost for new manager also */
             num_ghost = hypre_StructGridNumGhost(sgrid);
@@ -415,37 +423,42 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       {
          new_entry = add_entries[j];
 
-         /* check part, var, index */
-         part =  hypre_SStructGraphEntryPart(new_entry);
-         var = hypre_SStructGraphEntryVar(new_entry);
-         index = hypre_SStructGraphEntryIndex(new_entry);
-
-         /* if the index is not within the bounds of the struct grid
-            bounding box (which has been set in the box manager) then
-            there should noit be a coupling here (doens't make
-            sense */
-
-         new_boxman = new_managers[part][var];
-
-         bbox =  hypre_BoxManBoundingBox(new_boxman);
-         
-         if (hypre_IndexInBoxP(index,bbox) != 0)
+         /* check part, var, index, to_part, to_var, to_index */
+         for (k = 0; k < 2; k++)
          {
-            hypre_BoxManGatherEntries(new_boxman,index, index);
-         }
-         
-         /* now repeat the check for to_part, to_var, to_index */
-         to_part =  hypre_SStructGraphEntryToPart(new_entry) ;
-         to_var =  hypre_SStructGraphEntryToVar(new_entry);
-         to_index = hypre_SStructGraphEntryToIndex(new_entry);
+            switch(k)
+            {
+               case 0:
+                  part =  hypre_SStructGraphEntryPart(new_entry);
+                  var = hypre_SStructGraphEntryVar(new_entry);
+                  index = hypre_SStructGraphEntryIndex(new_entry);
+                  break;
+               case 1:
+                  part =  hypre_SStructGraphEntryToPart(new_entry) ;
+                  var =  hypre_SStructGraphEntryToVar(new_entry);
+                  index = hypre_SStructGraphEntryToIndex(new_entry);
+                  break;
+            }
 
-         new_boxman = new_managers[to_part][to_var];
- 
-         bbox =  hypre_BoxManBoundingBox(new_boxman);
-         
-         if (hypre_IndexInBoxP(to_index, bbox) != 0)
-         {
-            hypre_BoxManGatherEntries(new_boxman, to_index, to_index);
+            /* if the index is not within the bounds of the struct grid bounding
+               box (which has been set in the box manager) then there should not
+               be a coupling here (doesn't make sense) */
+            
+            new_boxman = new_managers[part][var];
+            new_gbox = new_gboxes[part][var];
+            bbox =  hypre_BoxManBoundingBox(new_boxman);
+            
+            if (hypre_IndexInBoxP(index,bbox) != 0)
+            {
+               /* compute new gather box extents based on index */
+               for (d = 0; d < ndim; d++)
+               {
+                  hypre_BoxIMinD(new_gbox, d) =
+                     hypre_min(hypre_BoxIMinD(new_gbox, d), hypre_IndexD(index, d));
+                  hypre_BoxIMaxD(new_gbox, d) =
+                     hypre_max(hypre_BoxIMaxD(new_gbox, d), hypre_IndexD(index, d));
+               }
+            }
          }
       }
       
@@ -460,11 +473,20 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          for (var = 0; var < nvars; var++)
          {
             new_boxman = new_managers[part][var];
+            new_gbox = new_gboxes[part][var];
+
+            /* call gather if non-empty gather box */
+            if (hypre_BoxVolume(new_gbox) > 0)
+            {
+               hypre_BoxManGatherEntries(
+                  new_boxman, hypre_BoxIMin(new_gbox), hypre_BoxIMax(new_gbox));
+            }
+
+            /* check to see if gather was called by some processor */
             hypre_BoxManGetGlobalIsGatherCalled(new_boxman, comm, &is_gather);
             if (is_gather)
             {
-               /* Gather has been called on at least 1 proc - copy
-                * orig boxman information to the new boxman*/
+               /* copy orig boxman information to the new boxman*/
                
                orig_boxman = managers[part][var];
 
@@ -506,10 +528,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                new_managers[part][var] = managers[part][var];
             }
             
+            hypre_BoxDestroy(new_gboxes[part][var]);
          } /* end of var loop */
          hypre_TFree(managers[part]);
+         hypre_TFree(new_gboxes[part]);
       } /* end of part loop */
       hypre_TFree(managers);
+      hypre_TFree(new_gboxes);
    
       /* assign the new ones */
       hypre_SStructGridBoxManagers(grid) = new_managers;
