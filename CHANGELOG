@@ -15,7 +15,7 @@
 # recent release.
 #=============================================================================
 
-Version 2.8.3a released 2012/09/27
+Version 2.8.3a released 2012/09/28
 
 - Fixed some memory allocation problems in SStruct, including code related to
   the SetPeriodic() routine.
