@@ -2241,7 +2241,7 @@ hypre_SStructGridIntersect( hypre_SStructGrid   *grid,
       {
          boxman = hypre_SStructGridBoxManager(grid, part, var);
       }
-      else if (action == 1)
+      else
       {
          boxman = hypre_SStructGridNborBoxManager(grid, part, var);
       }

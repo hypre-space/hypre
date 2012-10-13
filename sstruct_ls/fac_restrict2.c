@@ -908,12 +908,13 @@ hypre_FacSemiRestrictDestroy2( void *fac_restrict_vdata )
 {
    HYPRE_Int                   ierr = 0;
    hypre_FacSemiRestrictData2 *fac_restrict_data = fac_restrict_vdata;
-   HYPRE_Int                   nvars= (fac_restrict_data-> nvars); 
+   HYPRE_Int                   nvars;
    HYPRE_Int                   i, j;
 
 
    if (fac_restrict_data)
    {
+      nvars= (fac_restrict_data-> nvars); 
       hypre_SStructPVectorDestroy(fac_restrict_data-> fgrid_cvectors);
 
       for (i= 0; i< nvars; i++)

@@ -5500,6 +5500,7 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
    marker= hypre_TAlloc(HYPRE_Int, max_ranksize);
 
    cnt= 0;
+   centre= 0;
    for (j= -1; j<= 1; j++)
    {
       hypre_CopyIndex(pt_location, index1);

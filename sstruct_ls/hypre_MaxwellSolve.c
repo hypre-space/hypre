@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
@@ -86,8 +83,8 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    HYPRE_Int              Solve_err_flag;
    HYPRE_Int              relax_local, cycle_param;
 
-   double                 b_dot_b, r_dot_r, eps;
-   double                 e_dot_e, x_dot_x;
+   double                 b_dot_b = 0, r_dot_r, eps = 0;
+   double                 e_dot_e = 0, x_dot_x = 1;
 
    HYPRE_Int              i, j;
    HYPRE_Int              level;

@@ -63,7 +63,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    double               *rel_norms       = (pfmg_data -> rel_norms);
    HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
-   double                b_dot_b, r_dot_r, eps;
+   double                b_dot_b = 0, r_dot_r, eps = 0;
    double                e_dot_e, x_dot_x;
                     
    HYPRE_Int             i, l;

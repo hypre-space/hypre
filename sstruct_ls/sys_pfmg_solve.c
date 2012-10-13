@@ -53,8 +53,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    double               *rel_norms       = (sys_pfmg_data -> rel_norms);
    HYPRE_Int            *active_l        = (sys_pfmg_data -> active_l);
 
-   double                b_dot_b, r_dot_r, eps;
-   double                e_dot_e, x_dot_x;
+   double                b_dot_b, r_dot_r, eps = 0;
+   double                e_dot_e = 0, x_dot_x = 1;
                     
    HYPRE_Int             i, l;
                     
@@ -275,11 +275,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          {
             hypre_SStructPInnerProd(e_l[0], e_l[0], &e_dot_e);
             hypre_SStructPInnerProd(x_l[0], x_l[0], &x_dot_x);
-         }
-         else
-         {
-            e_dot_e = 0.0;
-            x_dot_x = 1.0;
          }
       }
 

@@ -85,12 +85,13 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    HYPRE_Int              nparts;
    hypre_SStructPVector **pvectors;
    HYPRE_Int              part;
-   HYPRE_Int              vector_type = hypre_SStructVectorObjectType(vector);
+   HYPRE_Int              vector_type;
 
-   /* GEC1002 destroying dataindices and data in vector  */
+   /* GEC1002 destroying data indices and data in vector  */
 
    if (vector)
    {
+      vector_type = hypre_SStructVectorObjectType(vector);
       hypre_SStructVectorRefCount(vector) --;
       if (hypre_SStructVectorRefCount(vector) == 0)
       {

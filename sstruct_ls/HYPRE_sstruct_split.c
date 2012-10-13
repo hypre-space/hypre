@@ -229,6 +229,12 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
          syH = (HYPRE_StructVector) sy;
          switch(ssolver)
          {
+            default:
+               /* If no solver is matched, use Jacobi, but throw and error */
+               if (ssolver != HYPRE_Jacobi)
+               {
+                  hypre_error(HYPRE_ERROR_GENERIC);
+               } /* don't break */
             case HYPRE_Jacobi:
                HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructJacobiSetMaxIter(sdata, 1);
@@ -331,7 +337,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_ParVector         *pary;
 
    HYPRE_Int                iter, part, vi, vj;
-   double                   b_dot_b, r_dot_r;
+   double                   b_dot_b = 0, r_dot_r;
 
 
 
