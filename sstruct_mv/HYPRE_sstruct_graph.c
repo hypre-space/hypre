@@ -371,6 +371,20 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    /*---------------------------------------------------------
     *  If AP, then may need to redo the box managers
+    *
+    *  Currently using bounding boxes based on the indexes in add_entries to
+    *  determine which boxes to gather in the box managers.  We refer to these
+    *  bounding boxes as "gather boxes" here (new_gboxes).  This should work
+    *  well in most cases, but it does have the potential to cause lots of grid
+    *  boxes to be gathered (hence lots of communication).
+    *
+    *  A better algorithm would use more care in computing gather boxes that
+    *  aren't "too big", while not computing "too many" either (which can also
+    *  be slow).  One approach might be to compute an octree with leaves that
+    *  have the same volume as the maximum grid box volume.  The leaves would
+    *  then serve as the gather boxes.  The number of gather boxes would then be
+    *  on the order of the number of local grid boxes (assuming the add_entries
+    *  are local, which is generally how they should be used).
     *---------------------------------------------------------*/
 
    new_box = hypre_BoxCreate();
