@@ -10,14 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
-
 
 #define DEBUG 0
 #define PRINT_CF 0
@@ -2087,7 +2082,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
   }
 
 /* print out matrices on all levels  */
-#if 0
+#if DEBUG
 {
    char  filename[256];
 
@@ -2112,6 +2107,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          hypre_sprintf(filename, "BoomerAMG.out.A.%02d.ij", level);
          hypre_ParCSRMatrixPrintIJ(A_array[level], 0, 0, filename);
+      }
+      for (level = 0; level < (num_levels-1); level++)
+      {
+         hypre_sprintf(filename, "BoomerAMG.out.P.%02d.ij", level);
+         hypre_ParCSRMatrixPrintIJ(P_array[level], 0, 0, filename);
       }
    }
 }
