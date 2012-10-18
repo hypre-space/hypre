@@ -71,6 +71,10 @@ the responsible project member before the release is made available to users.
 
   []
 
+- On the RZ, copy tar file to '/usr/gapps/hypre' (for backup reasons).
+
+  []
+
 - Put release on download page, and inform project team and other appropriate
   users of availability.
 
