@@ -876,19 +876,27 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
          if (diagonal == 0.0)
          {
-	   if (print_level)
-	      hypre_printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
-           diagonal = A_diag_data[A_diag_i[i]];
+            if (print_level)
+               hypre_printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
+            for (jj = jj_begin_row; jj < jj_end_row; jj++)
+            {
+               P_diag_data[jj] = 0.0;
+            }
+            for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
+            {
+               P_offd_data[jj] = 0.0;
+            }
          }
-
-         for (jj = jj_begin_row; jj < jj_end_row; jj++)
+         else
          {
-            P_diag_data[jj] /= -diagonal;
-         }
-
-         for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
-         {
-            P_offd_data[jj] /= -diagonal;
+            for (jj = jj_begin_row; jj < jj_end_row; jj++)
+            {
+               P_diag_data[jj] /= -diagonal;
+            }
+            for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
+            {
+               P_offd_data[jj] /= -diagonal;
+            }
          }
            
       }
@@ -4057,21 +4065,28 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
          if (diagonal == 0.0)
          {
-           if (print_level)
-	      hypre_printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
-           diagonal = A_diag_data[A_diag_i[i]];
+            if (print_level)
+               hypre_printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
+            for (jj = jj_begin_row; jj < jj_end_row; jj++)
+            {
+               P_diag_data[jj] = 0.0;
+            }
+            for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
+            {
+               P_offd_data[jj] = 0.0;
+            }
          }
-
-         for (jj = jj_begin_row; jj < jj_end_row; jj++)
+         else
          {
-            P_diag_data[jj] /= -diagonal;
+            for (jj = jj_begin_row; jj < jj_end_row; jj++)
+            {
+               P_diag_data[jj] /= -diagonal;
+            }
+            for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
+            {
+               P_offd_data[jj] /= -diagonal;
+            }
          }
-
-         for (jj = jj_begin_row_offd; jj < jj_end_row_offd; jj++)
-         {
-            P_offd_data[jj] /= -diagonal;
-         }
-           
       }
 
       strong_f_marker--; 
