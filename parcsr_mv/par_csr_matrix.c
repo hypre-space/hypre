@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Member functions for hypre_ParCSRMatrix class.
@@ -571,8 +568,8 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
    HYPRE_Int               myid, num_procs, i, j, I, J;
    char              new_filename[255];
    FILE             *file;
-   HYPRE_Int num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
-   HYPRE_Int num_cols, row, col;
+   HYPRE_Int num_cols, num_cols_offd, num_nonzeros_diag, num_nonzeros_offd;
+   HYPRE_Int ilower, iupper, jlower, jupper;
 
    if (!matrix)
    {
@@ -617,6 +614,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
       offd_j    = hypre_CSRMatrixJ(offd);
    }
 
+#if 0 /* OLD CODE: This header code isn't consistent with IJPrint() */
    hypre_fprintf(file, "%d %d\n", global_num_rows, global_num_cols);
    hypre_fprintf(file, "%d %d %d\n", num_rows, num_cols, num_cols_offd);
    hypre_fprintf(file, "%d %d\n", num_nonzeros_diag, num_nonzeros_offd);
@@ -636,6 +634,21 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
         hypre_fprintf(file, "%d %d\n", row, col);
    }
 #endif
+#endif /* OLD CODE */
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   ilower = row_starts[0]+base_i;
+   iupper = row_starts[1]+base_i - 1;
+   jlower = col_starts[0]+base_j;
+   jupper = col_starts[1]+base_j - 1;
+#else
+   ilower = row_starts[myid]  +base_i;
+   iupper = row_starts[myid+1]+base_i - 1;
+   jlower = col_starts[myid]  +base_j;
+   jupper = col_starts[myid+1]+base_j - 1;
+#endif
+   hypre_fprintf(file, "%d %d %d %d\n", ilower, iupper, jlower, jupper);
+
    for (i = 0; i < num_rows; i++)
    {
       I = first_row_index + i + base_i;
