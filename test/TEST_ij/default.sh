@@ -11,10 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
 TNAME=`basename $0 .sh`
 
 #=============================================================================
@@ -47,7 +43,7 @@ FILES="\
 for i in $FILES
 do
   echo "# Output file: $i"
-  tail -17 $i | head -6
+  tail -21 $i | head -6
 done > ${TNAME}.out
 
 # Make sure that the output files are reasonable

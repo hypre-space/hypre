@@ -11,10 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
 TNAME=`basename $0 .sh`
 
 #=============================================================================
@@ -26,6 +22,15 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.2\
  ${TNAME}.out.3\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -21 $i | head -6
+done > ${TNAME}.out
+
+FILES="\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
@@ -34,8 +39,8 @@ FILES="\
 for i in $FILES
 do
   echo "# Output file: $i"
-  tail -17 $i | head -6
-done > ${TNAME}.out
+  tail -3 $i
+done >> ${TNAME}.out
 
 # Make sure that the output files are reasonable
 CHECK_LINE="Complexity"
