@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
 
 # Echo usage information
@@ -68,7 +65,7 @@ fi
 # temporarily change word delimeter in order to have spaces in options
 tmpIFS=$IFS
 IFS=:
-configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition --enable-debug: "
+configure_opts="--without-MPI:--with-strict-checking:--enable-shared: "
 for opt in $configure_opts
 do
    # only use first part of $opt for subdir name
@@ -76,7 +73,7 @@ do
    mkdir -p $output_subdir
    ./test.sh configure.sh $src_dir $opt
    mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
+   ./test.sh make.sh $src_dir -j test
    mv -f make.??? $output_subdir
 done
 IFS=$tmpIFS
@@ -91,13 +88,24 @@ do
    mv -f link.??? $output_subdir
 done
 
+# Run tests with --no-global-partition configured
+opt="--with-no-global-partition --with-insure"
+output_subdir="$output_dir/run--with-no-global-partition"
+mkdir -p $output_subdir
+./test.sh configure.sh $src_dir $opt
+mv -f configure.??? $output_subdir
+./test.sh make.sh $src_dir -j test
+mv -f make.??? $output_subdir
+./test.sh run.sh -ij -sstruct -struct $src_dir
+mv -f run.??? $output_subdir
+
 # Run tests with --enable-bigint configured
 opt="--enable-bigint --enable-debug"
 output_subdir="$output_dir/run--enable-bigint"
 mkdir -p $output_subdir
 ./test.sh configure.sh $src_dir $opt
 mv -f configure.??? $output_subdir
-./test.sh make.sh $src_dir test
+./test.sh make.sh $src_dir -j test
 mv -f make.??? $output_subdir
 ./test.sh run.sh $src_dir
 mv -f run.??? $output_subdir

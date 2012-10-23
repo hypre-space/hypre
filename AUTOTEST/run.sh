@@ -11,29 +11,52 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
+tests=""
 
 # Echo usage information
-case $1 in
-   -h|-help)
-      cat <<EOF
+while [ "$*" ]
+do
+   case $1 in
+      -h|-help)
+         cat <<EOF
 
-   $0 [-h] {src_dir} [options for 'runtest.sh']
+   $0 [options] {src_dir} [options for 'runtest.sh']
 
    where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+
+   with options (more than one set of tests can be specified):
+
+      -all       run ams, fac, ij, sstruct, struct (default behavior)
+      -<test>    run <test>
+      -h|-help   prints this usage information and exits
 
    This script runs runtest.sh in {src_dir}/test with optional parameters.
 
    Example usage: $0 .. -D HYPRE_NO_SAVED
 
 EOF
-      exit
-      ;;
-esac
+         exit
+         ;;
+
+      -all)
+         shift
+         ;;
+      -*)
+         tname=`echo $1 | sed 's/-//'`
+         tests="$tests $tname"
+         shift
+         ;;
+      *)
+         break
+         ;;
+   esac
+done
+
+# If no tests were specified, run all tests
+if [ "$tests" = "" ]; then
+   tests="ams fac ij sstruct struct"
+fi
 
 # Setup
 output_dir=`pwd`/$testname.dir
@@ -45,11 +68,10 @@ shift
 # Run the test drivers
 cd $src_dir/test
 ./cleantest.sh
-./runtest.sh $@ TEST_ams/*.sh
-./runtest.sh $@ TEST_fac/*.sh
-./runtest.sh $@ TEST_ij/*.sh
-./runtest.sh $@ TEST_sstruct/*.sh
-./runtest.sh $@ TEST_struct/*.sh
+for tname in $tests
+do
+   ./runtest.sh $@ TEST_$tname/*.sh
+done
 
 # Collect all error files from the tests
 for errfile in $( find . -name "*.err" -o -name "*.fil" -o -name "*.out*" )
