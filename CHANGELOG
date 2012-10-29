@@ -15,6 +15,13 @@
 # recent release.
 #=============================================================================
 
+Version 2.9.0b released 2012/10/30
+
+- Changed the behavior of the BoomerAMG interpolation routines when a zero
+  diagonal is encountered to avoid divide-by-zero issues.
+
+#====================================
+
 Version 2.8.3a released 2012/09/28
 
 - Fixed some memory allocation problems in SStruct, including code related to
