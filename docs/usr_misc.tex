@@ -16,10 +16,13 @@ general and beta distributions as well as documentation.
 
 \section{Building the Library}
 
-In this, and the following several sections we discuss the steps to install
-and use \hypre{} on a Unix-like operating system, such as Linux, AIX and Mac
-OS X. Information on using \hypre{} under Windows is given in Section
-\ref{sec-windows}.
+In this, and the following several sections we discuss the steps to install and
+use \hypre{} on a Unix-like operating system, such as Linux, AIX, and
+Mac~OS~X. Information on building \hypre{} under Windows using this same
+Unix-based approach is given in Section \ref{sec-windows}.  Alternatively, the
+CMake build system \cite{CMakeWebPage} can also be used, and is a better method
+for building \hypre{} on Windows systems in particular (see the \file{INSTALL}
+file for details).
 
 After unpacking the \hypre{} tar file, the source code will be in the ``src''
 sub-directory of a directory named hypre-VERSION, where VERSION is the current
@@ -181,8 +184,11 @@ flags are defined in the \file{Makefile.config} file by \file{configure}.
 \section{Building and Using the Library Under Windows} \label{sec-windows}
 
 The \hypre{} installation system is based on Makefiles, which are not
-straightforward to use under Windows. Nevertheless, the library can be built and
-linked to in a Windows environment with the help of the following tools:
+straightforward to use under Windows.  As mentioned earlier, a better approach
+for building on Windows systems is to use CMake \cite{CMakeWebPage} (see the
+\file{INSTALL} file for details).  Nevertheless, the library can be built and
+linked to in a Windows environment using the Makefile system with the help of
+the following tools:
 
 \begin{itemize}
 \item Cygwin {\bf (required)} - a Unix-like environment for Windows that can be

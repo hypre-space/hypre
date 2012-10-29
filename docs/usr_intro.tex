@@ -76,7 +76,7 @@ computing system. Options include debug and optimized modes, the
 ability to change required libraries such as MPI and BLAS, a
 sequential mode, and modes enabling threads for certain solvers.  On
 most systems, however, \hypre{} can be built by simply typing
-\kbd{configure} followed by \kbd{make}.
+\kbd{configure} followed by \kbd{make}, or by using CMake \cite{CMakeWebPage}.
 
 \item
 {\bf Interfaces in multiple languages provide greater flexibility for
@@ -133,10 +133,11 @@ be posted to by users.
 \subsection{Installing \hypre{}}
 
 As previously noted, on most systems \hypre{} can be built by simply typing
-\kbd{configure} followed by \kbd{make} in the top-level source directory. For
-more detailed instructions read the \file{INSTALL} file provided with the
-\hypre{} distribution or refer to the last chapter in this manual. Note the
-following requirements:
+\kbd{configure} followed by \kbd{make} in the top-level source directory.
+Alternatively, the CMake system \cite{CMakeWebPage} can also be used.  For more
+detailed instructions read the \file{INSTALL} file provided with the \hypre{}
+distribution or refer to the last chapter in this manual.  Note the following
+requirements:
 
 \begin{itemize}
 

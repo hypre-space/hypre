@@ -1,18 +1,16 @@
 \documentclass[11pt]{book}
 
-%\usepackage{epsfig}
-%\usepackage{html}
 \usepackage{hypre}
-%\usepackage{makeidx}
 \usepackage{graphicx}
 \usepackage[
 pdftex,
-linktocpage,       % make page numbers be the link on TOC, LOF and LOT
-pagebackref,       % adds backlink to the bibliography
-plainpages=false,  % page anchors are named by their formatted form
-pdfstartview=Fit,  % startup page view
-bookmarksopen,     % show bookmarks with all the subtrees expanded
-bookmarksnumbered  % include section numbers in bookmarks
+linktocpage,          % make page numbers be the link on TOC, LOF and LOT
+pagebackref,          % adds backlink to the bibliography
+plainpages=false,     % page anchors are named by their formatted form
+pdfstartview=Fit,     % startup page view
+bookmarksopen,        % show bookmarks with all the subtrees expanded
+bookmarksopenlevel=0, % open bookmarks only to a certain depth
+bookmarksnumbered     % include section numbers in bookmarks
 ]{hyperref}
 
 % set margins
