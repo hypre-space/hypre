@@ -615,9 +615,11 @@ LIBOBJS
 AR
 LAPACKLIBS
 LAPACKLIBDIRS
+HYPRE_LAPACK_FILES
 HYPRE_LAPACK_SRC_DIR
 BLASLIBS
 BLASLIBDIRS
+HYPRE_BLAS_FILES
 HYPRE_BLAS_SRC_DIR
 HYPRE_FEI_SUPERLU_FILES
 HYPRE_FEI_FEMLI_FILES
@@ -6714,6 +6716,7 @@ $as_echo "$as_me: WARNING: ***************************************" >&2;}
    if test "$hypre_using_hypre_blas" = "yes"
    then
       HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
+      HYPRE_BLAS_FILES="$HYPRE_SRCDIR/blas/*.o"
       BLASLIBDIRS=""
       BLASLIBS=""
 
@@ -6944,6 +6947,7 @@ $as_echo "$as_me: WARNING: ***************************************" >&2;}
    if test "$hypre_using_hypre_lapack" = "yes"
    then
       HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
+      HYPRE_LAPACK_FILES="$HYPRE_SRCDIR/lapack/*.o"
       LAPACKLIBDIRS=""
       LAPACKLIBS=""
 
@@ -7551,6 +7555,8 @@ _ACEOF
          fi
          ;;
    esac
+
+
 
 
 
