@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
 
 # Echo usage information
@@ -60,16 +57,21 @@ do
 done
 
 # Test other builds
-configure_opts="--enable-debug --enable-bigint"
+configure_opts="--enable-debug:--enable-bigint:--with-blas --with-lapack --with-blas-lib-dirs=/usr/lib64 --with-lapack-lib-dirs=/usr/lib64 --with-blas-libs=blas --with-lapack-libs=lapack"
+# temporarily change word delimeter in order to have spaces in options
+tmpIFS=$IFS
+IFS=:
 for opt in $configure_opts
 do
-   ./test.sh configure.sh $src_dir $opt 
-   output_subdir=$output_dir/build$opt
+   # only use first part of $opt for subdir name
+   output_subdir=$output_dir/build`echo $opt | awk '{print $1}'`
    mkdir -p $output_subdir
+   ./test.sh configure.sh $src_dir $opt 
    mv -f configure.??? $output_subdir
    ./test.sh make.sh $src_dir test
    mv -f make.??? $output_subdir
 done
+IFS=$tmpIFS
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )
