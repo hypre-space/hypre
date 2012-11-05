@@ -767,6 +767,23 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
 	  }
       }
     }
+    for (j = Sop_i[i]; j < Sop_i[i+1]; j++)
+    {
+      i1 = Sop_j[j];
+      if(i1 < col_1 || i1 >= col_n)
+      {
+	  ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
+	  if(ifound == -1)
+	  {
+	      tmp_found[newoff]=i1;
+	      newoff++;
+	  }
+	  else
+	  {
+	      Sop_j[j] = -ifound-1;
+	  }
+      }
+    }
    }
   }
   /* Put found in monotone increasing order */
@@ -789,46 +806,21 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
   full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
-  for(i = 0; i < num_cols_S_offd; i++)
+  for(i = 0; i < num_cols_A_offd; i++)
   {
    if (CF_marker_offd[i] < 0)
    {
      for(kk = Sop_i[i]; kk < Sop_i[i+1]; kk++)
      {
        k1 = Sop_j[kk];
-       if(k1 < col_1 || k1 >= col_n)
+       if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        { 
-	 if(newoff < num_cols_A_offd)
-	 {  
-	   got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
-	   if(got_loc > -1)
-	     loc_col = got_loc + num_cols_A_offd;
-	   else
-	     loc_col = hypre_BinarySearch(col_map_offd,k1,
-					  num_cols_A_offd);
-	 }
-	 else
-	 {
-	   loc_col = hypre_BinarySearch(col_map_offd,k1,
-					num_cols_A_offd);
-	   if(loc_col == -1)
-	     loc_col = hypre_BinarySearch(tmp_found,k1,newoff) +
-	       num_cols_A_offd;
-	 }
-	 if(loc_col < 0)
-	 {
-	   hypre_printf("Could not find node: STOP\n");
-	   return(-1);
-	 }
+	 got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
+	 if(got_loc > -1)
+	   loc_col = got_loc + num_cols_A_offd;
 	 Sop_j[kk] = -loc_col - 1;
        }
      }
-   }
-  }
-  for(i = 0; i < num_cols_A_offd; i++)
-  {
-   if (CF_marker_offd[i] < 0)
-   {
      for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
      {
        k1 = A_ext_j[kk];
