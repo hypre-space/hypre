@@ -1820,3 +1820,79 @@ hypre_StructMatrixRead( MPI_Comm    comm,
 
    return matrix;
 }
+/*--------------------------------------------------------------------------
+ * clears matrix stencil coefficients reaching outside of the physical boundaries
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
+{
+   double              *data;
+   hypre_BoxArray      *grid_boxes;
+   hypre_BoxArray      *data_space;
+   /*hypre_Box           *box;*/
+   hypre_Box           *grid_box;
+   hypre_Box           *data_box;
+   hypre_Box           *tmp_box;
+   hypre_Index         *shape;
+   hypre_Index          stencil_element;
+   hypre_Index          loop_size;
+   hypre_IndexRef       start;
+   hypre_Index          stride;
+   hypre_StructGrid    *grid;
+   hypre_StructStencil *stencil;
+   hypre_BoxArray      *boundary;
+
+   HYPRE_Int           i, i2, ixyz, j;
+   HYPRE_Int           dim;
+
+   /*-----------------------------------------------------------------------
+    * Set the matrix coefficients
+    *-----------------------------------------------------------------------*/
+
+   grid = hypre_StructMatrixGrid(matrix);
+   stencil = hypre_StructMatrixStencil(matrix);
+   grid_boxes = hypre_StructGridBoxes(grid);
+   dim = hypre_StructStencilDim(stencil);
+   data_space = hypre_StructMatrixDataSpace(matrix);
+   hypre_SetIndex(stride, 1, 1, 1);
+   shape = hypre_StructStencilShape(stencil);
+
+   for (j = 0; j < hypre_StructStencilSize(stencil); j++)
+   {
+      hypre_CopyIndex(shape[j],stencil_element);
+      if (hypre_IndexX(stencil_element) || hypre_IndexY(stencil_element)
+                || hypre_IndexZ(stencil_element))
+      {
+         hypre_ForBoxI(i, grid_boxes)
+         {
+            grid_box = hypre_BoxArrayBox(grid_boxes, i);
+            data_box = hypre_BoxArrayBox(data_space, i);
+            boundary = hypre_BoxArrayCreate( 0 );
+            hypre_GeneralBoxBoundaryIntersect(grid_box, grid, stencil_element,
+                boundary);
+            data = hypre_StructMatrixBoxData(matrix, i, j);
+            hypre_ForBoxI(i2, boundary)
+            {
+               tmp_box = hypre_BoxArrayBox(boundary, i2);
+               hypre_BoxGetSize(tmp_box, loop_size);
+               start = hypre_BoxIMin(tmp_box);
+               hypre_BoxLoop1Begin(dim, loop_size, data_box, start, stride, ixyz);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ixyz) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop1For(ixyz)
+               {
+                  data[ixyz] = 0.0;
+               }
+               hypre_BoxLoop1End(ixyz);
+            }
+            hypre_BoxArrayDestroy(boundary);
+         }
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+

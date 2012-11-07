@@ -2376,6 +2376,7 @@ HYPRE_Int hypre_BoxFree ( hypre_Box *box );
 HYPRE_Int hypre_BoxBoundaryIntersect ( hypre_Box *box , hypre_StructGrid *grid , HYPRE_Int d , HYPRE_Int dir , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryDG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , HYPRE_Int d );
+HYPRE_Int hypre_GeneralBoxBoundaryIntersect( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_element, hypre_BoxArray *boundary );
 
 /* box.c */
 hypre_Box *hypre_BoxCreate ( void );
@@ -2488,6 +2489,7 @@ HYPRE_Int HYPRE_StructMatrixSetSymmetric ( HYPRE_StructMatrix matrix , HYPRE_Int
 HYPRE_Int HYPRE_StructMatrixSetConstantEntries ( HYPRE_StructMatrix matrix , HYPRE_Int nentries , HYPRE_Int *entries );
 HYPRE_Int HYPRE_StructMatrixPrint ( const char *filename , HYPRE_StructMatrix matrix , HYPRE_Int all );
 HYPRE_Int HYPRE_StructMatrixMatvec ( double alpha , HYPRE_StructMatrix A , HYPRE_StructVector x , double beta , HYPRE_StructVector y );
+HYPRE_Int HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix );
 
 /* HYPRE_struct_stencil.c */
 HYPRE_Int HYPRE_StructStencilCreate ( HYPRE_Int dim , HYPRE_Int size , HYPRE_StructStencil *stencil );
@@ -2584,6 +2586,7 @@ HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *matrix , HYPRE_Int all );
 HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix);
 
 /* struct_matrix_mask.c */
 hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices );
