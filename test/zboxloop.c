@@ -212,7 +212,7 @@ main( hypre_int argc,
       {
          hypre_BoxLoopGetIndex(index);
          hypre_printf("*(%d,%d,%d) = %d\n",
-                      index[0], index[1], index[2], (int) xp1[xi1]);
+                      index[0], index[1], index[2], (HYPRE_Int) xp1[xi1]);
          fail = 1;
       }
    }
