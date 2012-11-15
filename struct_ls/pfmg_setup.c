@@ -728,7 +728,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
                              A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(Ai)
          {
