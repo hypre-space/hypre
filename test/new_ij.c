@@ -169,6 +169,8 @@ main( hypre_int argc,
    HYPRE_Int      coarse_threshold = 9;
    HYPRE_Int      min_coarse_size = 0;
    HYPRE_Int      seq_threshold = 0;
+   HYPRE_Int      redundant = 0;
+
    double   relax_wt; 
    double   relax_wt_level; 
    double   outer_wt;
@@ -749,6 +751,11 @@ main( hypre_int argc,
       {
          arg_index++;
          seq_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-red") == 0 )
+      {
+         arg_index++;
+         redundant  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-th") == 0 )
       {
@@ -2036,6 +2043,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
+      HYPRE_BoomerAMGSetRedundant(amg_solver, redundant);
       HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
       HYPRE_BoomerAMGSetMinCoarseSize(amg_solver, min_coarse_size);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
@@ -2172,6 +2180,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);
+      HYPRE_BoomerAMGSetRedundant(amg_solver, redundant);
       HYPRE_BoomerAMGSetMaxCoarseSize(amg_solver, coarse_threshold);
       HYPRE_BoomerAMGSetMinCoarseSize(amg_solver, min_coarse_size);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
@@ -2313,6 +2322,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -2442,6 +2452,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -2641,6 +2652,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -2759,6 +2771,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -2961,6 +2974,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3115,6 +3129,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3275,6 +3290,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
@@ -3484,6 +3500,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
+         HYPRE_BoomerAMGSetRedundant(pcg_precond, redundant);
          HYPRE_BoomerAMGSetMaxCoarseSize(pcg_precond, coarse_threshold);
          HYPRE_BoomerAMGSetMinCoarseSize(pcg_precond, min_coarse_size);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
