@@ -163,7 +163,9 @@ extern "C" {
 #define MPI_Allgather       hypre_MPI_Allgather        
 #define MPI_Allgatherv      hypre_MPI_Allgatherv       
 #define MPI_Gather          hypre_MPI_Gather       
+#define MPI_Gatherv         hypre_MPI_Gatherv       
 #define MPI_Scatter         hypre_MPI_Scatter       
+#define MPI_Scatterv        hypre_MPI_Scatterv       
 #define MPI_Bcast           hypre_MPI_Bcast            
 #define MPI_Send            hypre_MPI_Send             
 #define MPI_Recv            hypre_MPI_Recv             
@@ -308,7 +310,9 @@ HYPRE_Int hypre_MPI_Alltoall( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Da
 HYPRE_Int hypre_MPI_Allgather( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Allgatherv( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Gather( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Gatherv( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Scatter( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Scatterv( void *sendbuf , HYPRE_Int *sendcounts , HYPRE_Int *displs, hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Bcast( void *buffer , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int root , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Send( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Recv( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Status *status );
@@ -574,7 +578,9 @@ HYPRE_Int MPI_Alltoall( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendt
 HYPRE_Int MPI_Allgather( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , MPI_Comm comm );
 HYPRE_Int MPI_Allgatherv( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , MPI_Datatype recvtype , MPI_Comm comm );
 HYPRE_Int MPI_Gather( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
+HYPRE_Int MPI_Gatherv( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
 HYPRE_Int MPI_Scatter( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
+HYPRE_Int MPI_Scatterv( void *sendbuf , HYPRE_Int *sendcounts , HYPRE_Int *displs , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
 HYPRE_Int MPI_Bcast( void *buffer , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int root , MPI_Comm comm );
 HYPRE_Int MPI_Send( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , MPI_Comm comm );
 HYPRE_Int MPI_Recv( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , MPI_Comm comm , MPI_Status *status );
