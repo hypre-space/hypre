@@ -175,6 +175,24 @@ HYPRE_BoomerAMGGetSeqThreshold( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRedundant, HYPRE_BoomerAMGGetRedundant
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetRedundant( HYPRE_Solver solver,
+                                HYPRE_Int          redundant  )
+{
+   return( hypre_BoomerAMGSetRedundant( (void *) solver, redundant ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetRedundant( HYPRE_Solver solver,
+                                HYPRE_Int        * redundant  )
+{
+   return( hypre_BoomerAMGGetRedundant( (void *) solver, redundant ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetStrongThreshold, HYPRE_BoomerAMGGetStrongThreshold
  *--------------------------------------------------------------------------*/
 

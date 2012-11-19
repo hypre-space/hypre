@@ -157,7 +157,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels);
 
-   if (hypre_ParAMGDataACoarse(amg_data)) seq_cg = 1;
+   if (hypre_ParAMGDataParticipate(amg_data)) seq_cg = 1;
 
    /* Initialize */
 

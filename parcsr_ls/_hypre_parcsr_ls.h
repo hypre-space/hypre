@@ -91,6 +91,8 @@ typedef struct
    HYPRE_Int      max_coarse_size;
    HYPRE_Int      min_coarse_size;
    HYPRE_Int      seq_threshold;
+   HYPRE_Int      redundant;
+   HYPRE_Int      participate;
 
    /* solve params */
    HYPRE_Int      max_iter;
@@ -401,6 +403,8 @@ typedef struct
 #define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
 #define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
 #define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
+#define hypre_ParAMGDataRedundant(amg_data) ((amg_data)->redundant)
+#define hypre_ParAMGDataParticipate(amg_data) ((amg_data)->participate)
 
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
@@ -668,6 +672,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMinCoarseSize ( HYPRE_Solver solver , HYPRE_Int min_
 HYPRE_Int HYPRE_BoomerAMGGetMinCoarseSize ( HYPRE_Solver solver , HYPRE_Int *min_coarse_size );
 HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int seq_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetSeqThreshold ( HYPRE_Solver solver , HYPRE_Int *seq_threshold );
+HYPRE_Int HYPRE_BoomerAMGSetRedundant ( HYPRE_Solver solver , HYPRE_Int redundant );
+HYPRE_Int HYPRE_BoomerAMGGetRedundant ( HYPRE_Solver solver , HYPRE_Int *redundant );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver , double strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetStrongThreshold ( HYPRE_Solver solver , double *strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum ( HYPRE_Solver solver , double max_row_sum );
@@ -1052,6 +1058,8 @@ HYPRE_Int hypre_BoomerAMGSetMinCoarseSize ( void *data , HYPRE_Int min_coarse_si
 HYPRE_Int hypre_BoomerAMGGetMinCoarseSize ( void *data , HYPRE_Int *min_coarse_size );
 HYPRE_Int hypre_BoomerAMGSetSeqThreshold ( void *data , HYPRE_Int seq_threshold );
 HYPRE_Int hypre_BoomerAMGGetSeqThreshold ( void *data , HYPRE_Int *seq_threshold );
+HYPRE_Int hypre_BoomerAMGSetRedundant ( void *data , HYPRE_Int redundant );
+HYPRE_Int hypre_BoomerAMGGetRedundant ( void *data , HYPRE_Int *redundant );
 HYPRE_Int hypre_BoomerAMGSetStrongThreshold ( void *data , double strong_threshold );
 HYPRE_Int hypre_BoomerAMGGetStrongThreshold ( void *data , double *strong_threshold );
 HYPRE_Int hypre_BoomerAMGSetMaxRowSum ( void *data , double max_row_sum );

@@ -60,6 +60,8 @@ typedef struct
    HYPRE_Int      max_coarse_size;
    HYPRE_Int      min_coarse_size;
    HYPRE_Int      seq_threshold;
+   HYPRE_Int      redundant;
+   HYPRE_Int      participate;
 
    /* solve params */
    HYPRE_Int      max_iter;
@@ -370,6 +372,8 @@ typedef struct
 #define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
 #define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
 #define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
+#define hypre_ParAMGDataRedundant(amg_data) ((amg_data)->redundant)
+#define hypre_ParAMGDataParticipate(amg_data) ((amg_data)->participate)
 
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)

@@ -176,12 +176,18 @@ HYPRE_Int HYPRE_BoomerAMGSetMinCoarseSize(HYPRE_Solver solver,
                                     HYPRE_Int          min_coarse_size);
 
 /**
- * (Optional) Sets maximal size for redundant coarse grid solve. 
+ * (Optional) Sets maximal size for agglomeration or redundant coarse grid solve. 
  * When the system is smaller than this threshold, sequential AMG is used 
- * on all remaining active processors.
+ * on process 0 or on all remaining active processes (if redundant = 1 ).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
                                     HYPRE_Int          seq_threshold);
+/**
+ * (Optional) operates switch for redundancy. Needs to be used with
+ * HYPRE_BoomerAMGSetSeqThreshold. Default is 0, i.e. no redundancy.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
+                                    HYPRE_Int          redundant);
 
 /**
  * (Optional) Sets AMG strength threshold. The default is 0.25.

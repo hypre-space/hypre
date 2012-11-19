@@ -65,6 +65,8 @@ hypre_BoomerAMGCreate()
    HYPRE_Int 	    CR_use_CG;
    HYPRE_Int 	    cgc_its;
    HYPRE_Int 	    seq_threshold;
+   HYPRE_Int        redundant;
+   HYPRE_Int        participate;
 
    /* solve params */
    HYPRE_Int      min_iter;
@@ -120,6 +122,8 @@ hypre_BoomerAMGCreate()
    max_coarse_size = 9;
    min_coarse_size = 0;
    seq_threshold = 0;
+   redundant = 1;
+   participate = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
@@ -763,6 +767,48 @@ hypre_BoomerAMGGetSeqThreshold( void *data,
    } 
 
    *seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetRedundant( void *data,
+                          HYPRE_Int   redundant )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (redundant < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataRedundant(amg_data) = redundant;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetRedundant( void *data,
+                             HYPRE_Int *  redundant )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   *redundant = hypre_ParAMGDataRedundant(amg_data);
 
    return hypre_error_flag;
 }
