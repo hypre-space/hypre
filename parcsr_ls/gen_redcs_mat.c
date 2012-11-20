@@ -437,7 +437,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
                        u_data, n, hypre_MPI_DOUBLE, 0, new_comm );
          /*if (my_id == 0)
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(F_coarse));
-         MPI_Scatterv ( local_data, info, displs, hypre_MPI_DOUBLE,
+         hypre_ MPI_Scatterv ( local_data, info, displs, hypre_MPI_DOUBLE,
                        f_data, n, hypre_MPI_DOUBLE, 0, new_comm );*/
          if (my_id == 0) hypre_TFree(displs);
          hypre_TFree(info);
