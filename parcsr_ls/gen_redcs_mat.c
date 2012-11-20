@@ -244,14 +244,15 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        hypre_MPI_DOUBLE, 0, new_comm );
          }
 
+         hypre_TFree(info);
+         hypre_TFree(displs);
+         hypre_TFree(A_tmp_i);
+         hypre_TFree(A_tmp_j);
+         hypre_TFree(A_tmp_data);
+
          if (redundant || my_id == 0)
          {
-            hypre_TFree(info);
-            hypre_TFree(displs);
             hypre_TFree(displs2);
-            hypre_TFree(A_tmp_i);
-            hypre_TFree(A_tmp_j);
-            hypre_TFree(A_tmp_data);
    
             row_starts = hypre_CTAlloc(HYPRE_Int,2);
             row_starts[0] = 0; 
