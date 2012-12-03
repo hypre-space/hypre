@@ -873,10 +873,10 @@ HYPRE_IJMatrixRead( const char     *filename,
 		    HYPRE_IJMatrix *matrix_ptr )
 {
    HYPRE_IJMatrix  matrix;
-   HYPRE_Int             ilower, iupper, jlower, jupper;
-   HYPRE_Int             ncols, I, J;
+   HYPRE_Int       ilower, iupper, jlower, jupper;
+   HYPRE_Int       ncols, I, J;
    double          value;
-   HYPRE_Int             myid;
+   HYPRE_Int       myid, ret;
    char            new_filename[255];
    FILE           *file;
 
@@ -898,9 +898,16 @@ HYPRE_IJMatrixRead( const char     *filename,
    HYPRE_IJMatrixSetObjectType(matrix, type);
    HYPRE_IJMatrixInitialize(matrix);
 
+   /* It is important to ensure that whitespace follows the index value to help
+    * catch mistakes in the input file.  See comments in IJVectorRead(). */
    ncols = 1;
-   while ( hypre_fscanf(file, "%d %d %le", &I, &J, &value) != EOF )
+   while ( (ret = hypre_fscanf(file, "%d %d%*[ \t]%le", &I, &J, &value)) != EOF )
    {
+      if (ret != 3)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in IJ matrix input file.");
+         return hypre_error_flag;
+      }
       HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
    }
 

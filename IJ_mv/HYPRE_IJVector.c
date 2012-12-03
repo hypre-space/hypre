@@ -612,9 +612,9 @@ HYPRE_IJVectorRead( const char     *filename,
                     HYPRE_IJVector *vector_ptr )
 {
    HYPRE_IJVector  vector;
-   HYPRE_Int             jlower, jupper, j;
+   HYPRE_Int       jlower, jupper, j;
    double          value;
-   HYPRE_Int             myid;
+   HYPRE_Int       myid, ret;
    char            new_filename[255];
    FILE           *file;
 
@@ -635,8 +635,17 @@ HYPRE_IJVectorRead( const char     *filename,
    HYPRE_IJVectorSetObjectType(vector, type);
    HYPRE_IJVectorInitialize(vector);
 
-   while ( hypre_fscanf(file, "%d %le", &j, &value) != EOF )
+   /* It is important to ensure that whitespace follows the index value to help
+    * catch mistakes in the input file.  This is done with %*[ \t].  Using a
+    * space here causes an input line with a single decimal value on it to be
+    * read as if it were an integer followed by a decimal value. */
+   while ( (ret = hypre_fscanf(file, "%d%*[ \t]%le", &j, &value)) != EOF )
    {
+      if (ret != 2)
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in IJ vector input file.");
+         return hypre_error_flag;
+      }
       HYPRE_IJVectorSetValues(vector, 1, &j, &value);
    }
 

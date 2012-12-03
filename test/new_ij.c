@@ -1236,8 +1236,13 @@ main( hypre_int argc,
 
    if ( build_matrix_type == -1 )
    {
-      HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
-                          HYPRE_PARCSR, &ij_A );
+      ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
+                                 HYPRE_PARCSR, &ij_A );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the system matrix!\n");
+         exit(1);
+      }
    }
    else if ( build_matrix_type == 0 )
    {
@@ -1509,6 +1514,11 @@ main( hypre_int argc,
 /* RHS */
       ierr = HYPRE_IJVectorRead( argv[build_rhs_arg_index], hypre_MPI_COMM_WORLD, 
                                  HYPRE_PARCSR, &ij_b );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
+         exit(1);
+      }
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
@@ -1748,7 +1758,11 @@ main( hypre_int argc,
 
       ierr = HYPRE_IJVectorRead( argv[build_src_arg_index], hypre_MPI_COMM_WORLD, 
                                  HYPRE_PARCSR, &ij_b );
-
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in the right-hand-side!\n");
+         exit(1);
+      }
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
 
