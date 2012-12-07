@@ -296,11 +296,10 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
             }
          }
       }
-      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1;
-      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
+      if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
       {
          /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
@@ -682,11 +681,10 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                row_sum += fabs(A_offd_data[jA]);
             }
       }
-      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1;
-      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
+      if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
       {
          /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
