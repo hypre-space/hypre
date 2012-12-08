@@ -1795,7 +1795,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * Setup of special smoothers when needed
     *-----------------------------------------------------------------------*/
 
-   if (grid_relax_type[1] == 8 )
+   if (grid_relax_type[0] == 8 || grid_relax_type[1] == 8 || grid_relax_type[2] == 8 || grid_relax_type[3] == 8)
    {
       l1_norms = hypre_CTAlloc(double *, num_levels);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
