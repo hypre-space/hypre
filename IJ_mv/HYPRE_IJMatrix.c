@@ -65,24 +65,28 @@ HYPRE_Int HYPRE_IJMatrixCreate( MPI_Comm comm, HYPRE_Int ilower, HYPRE_Int iuppe
    if (ilower > iupper+1 || ilower < 0)
    {
       hypre_error_in_arg(2);
+      hypre_TFree(ijmatrix);
       return hypre_error_flag;
    }
 
    if (iupper < -1)
    {
       hypre_error_in_arg(3);
+      hypre_TFree(ijmatrix);
       return hypre_error_flag;
    }
 
    if (jlower > jupper+1 || jlower < 0)
    {
       hypre_error_in_arg(4);
+      hypre_TFree(ijmatrix);
       return hypre_error_flag;
    }
 
    if (jupper < -1)
    {
       hypre_error_in_arg(5);
+      hypre_TFree(ijmatrix);
       return hypre_error_flag;
    }
 
@@ -160,6 +164,10 @@ HYPRE_Int HYPRE_IJMatrixCreate( MPI_Comm comm, HYPRE_Int ilower, HYPRE_Int iuppe
       {
          /*hypre_printf("Warning -- row partitioning does not line up! Partitioning incomplete!\n");*/
          hypre_error(HYPRE_ERROR_GENERIC);
+         hypre_TFree(ijmatrix);
+         hypre_TFree(info);
+         hypre_TFree(recv_buf);
+         hypre_TFree(row_partitioning);
    	 return hypre_error_flag;
       }
       else
@@ -190,6 +198,11 @@ HYPRE_Int HYPRE_IJMatrixCreate( MPI_Comm comm, HYPRE_Int ilower, HYPRE_Int iuppe
          {
            /*hypre_printf("Warning -- col partitioning does not line up! Partitioning incomplete!\n");*/
            hypre_error(HYPRE_ERROR_GENERIC);
+           hypre_TFree(ijmatrix);
+           hypre_TFree(info);
+           hypre_TFree(recv_buf);
+           hypre_TFree(row_partitioning);
+           hypre_TFree(col_partitioning);
    	   return hypre_error_flag;
          }
          else
@@ -929,7 +942,7 @@ HYPRE_Int
 HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
                      const char     *filename )
 {
-   MPI_Comm  comm = hypre_IJMatrixComm(matrix);
+   MPI_Comm  comm;
    HYPRE_Int      *row_partitioning;
    HYPRE_Int      *col_partitioning;
    HYPRE_Int       ilower, iupper, jlower, jupper;
@@ -955,6 +968,7 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
       return hypre_error_flag;
    }
 
+   comm = hypre_IJMatrixComm(matrix);
    hypre_MPI_Comm_rank(comm, &myid);
    
    hypre_sprintf(new_filename,"%s.%05d", filename, myid);

@@ -58,6 +58,7 @@ HYPRE_Int HYPRE_IJVectorCreate( MPI_Comm comm,
    if (jlower > jupper+1 || jlower < 0)
    {
       hypre_error_in_arg(2);
+      hypre_TFree(vec);
       return hypre_error_flag;
    }
    if (jupper < -1)
@@ -113,6 +114,10 @@ HYPRE_Int HYPRE_IJVectorCreate( MPI_Comm comm,
       {
          /*hypre_printf("Inconsistent partitioning -- HYPRE_IJVectorCreate\n");  */
 	 hypre_error(HYPRE_ERROR_GENERIC);
+         hypre_TFree(info);
+         hypre_TFree(recv_buf);
+         hypre_TFree(partitioning);
+         hypre_TFree(vec);
          return hypre_error_flag;
       }
       else
@@ -666,7 +671,7 @@ HYPRE_Int
 HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
                      const char     *filename )
 {
-   MPI_Comm  comm = hypre_IJVectorComm(vector);
+   MPI_Comm  comm;
    HYPRE_Int      *partitioning;
    HYPRE_Int       jlower, jupper, j;
    double    value;
@@ -681,6 +686,7 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
       return hypre_error_flag;
    } 
 
+   comm = hypre_IJVectorComm(vector);
    hypre_MPI_Comm_rank(comm, &myid);
    
    hypre_sprintf(new_filename,"%s.%05d", filename, myid);
