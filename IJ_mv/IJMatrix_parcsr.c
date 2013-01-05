@@ -2021,8 +2021,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    					 double *off_proc_data)
 {
    MPI_Comm comm = hypre_IJMatrixComm(matrix);
-   hypre_MPI_Request *requests;
-   hypre_MPI_Status *status;
+   hypre_MPI_Request *requests = NULL;
+   hypre_MPI_Status *status = NULL;
    HYPRE_Int i, ii, j, j2, jj, n, row;
    HYPRE_Int iii, iid, indx, ip;
    HYPRE_Int proc_id, num_procs, my_id;
@@ -2240,10 +2240,10 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    if (num_requests)
    {
       hypre_MPI_Waitall(num_requests, requests, status);
-      hypre_TFree(requests);
-      hypre_TFree(status);
    }
 
+   hypre_TFree(requests);
+   hypre_TFree(status);
    hypre_TFree(send_i);
    hypre_TFree(send_data);
    hypre_TFree(send_procs);
