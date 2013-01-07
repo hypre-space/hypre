@@ -890,7 +890,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int             *ST_j;
                  
    HYPRE_Int             *CF_marker;
-   HYPRE_Int             *CF_marker_offd;
+   HYPRE_Int             *CF_marker_offd = NULL;
    HYPRE_Int              ci_tilde = -1;
    HYPRE_Int              ci_tilde_mark = -1;
    HYPRE_Int              ci_tilde_offd = -1;
@@ -898,8 +898,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    HYPRE_Int             *measure_array;
    HYPRE_Int             *graph_array;
-   HYPRE_Int 	           *int_buf_data;
-   HYPRE_Int 	           *ci_array;
+   HYPRE_Int 	           *int_buf_data = NULL;
+   HYPRE_Int 	           *ci_array = NULL;
 
    HYPRE_Int              i, j, k, jS;
    HYPRE_Int		    ji, jj, jk, jm, index;
@@ -962,6 +962,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
+   first_col = hypre_ParCSRMatrixFirstColDiag(S);
+   col_0 = first_col-1;
+   col_n = col_0+num_variables; 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
 
@@ -1058,9 +1061,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
-      first_col = hypre_ParCSRMatrixFirstColDiag(S);
+      /*first_col = hypre_ParCSRMatrixFirstColDiag(S);
       col_0 = first_col-1;
-      col_n = col_0+num_variables;
+      col_n = col_0+num_variables; */
       if (meas_type)
       {
 	 for (i=0; i < num_nonzeros; i++)
@@ -1885,12 +1888,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     * Clean up and return
     *---------------------------------------------------*/
 
-   if (coarsen_type != 1)
-   {   
+   /*if (coarsen_type != 1)
+   { */  
       hypre_TFree(CF_marker_offd);
       hypre_TFree(int_buf_data);
       hypre_TFree(ci_array);
-   }   
+   /*} */   
    hypre_TFree(graph_array);
    if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)

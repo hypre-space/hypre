@@ -72,14 +72,14 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    double   total_variables;
    double  *num_coeffs;
    double  *num_variables;
-   double   cycle_cmplxty;
+   double   cycle_cmplxty = 0.0;
    double   operat_cmplxty;
    double   grid_cmplxty;
-   double   conv_factor;
+   double   conv_factor = 0.0;
    double   resid_nrm;
    double   resid_nrm_init;
    double   relative_resid;
-   double   rhs_norm;
+   double   rhs_norm = 0.0;
    double   old_resid;
    double   ieee_check = 0.;
 

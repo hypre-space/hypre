@@ -42,8 +42,8 @@ GenerateLaplacian( MPI_Comm comm,
    double *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   double *offd_data;
+   HYPRE_Int    *offd_j = NULL;
+   double *offd_data = NULL;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;

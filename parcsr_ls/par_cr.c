@@ -82,7 +82,8 @@ HYPRE_Int cr(HYPRE_Int *A_i, HYPRE_Int *A_j, double *A_data, HYPRE_Int n, HYPRE_
        HYPRE_Int rlx, double omega, double tg, HYPRE_Int mu)
 { 
    HYPRE_Int i,nstages=0;  
-   double nc,rho,rho0,rho1,*e0,*e1;
+   double rho,rho0,rho1,*e0,*e1;
+   double nc= 0.0;
 
    e0=hypre_CTAlloc(double, n); e1=hypre_CTAlloc(double, n);    
 
@@ -2631,11 +2632,13 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    HYPRE_Int              ierr = 0;
    HYPRE_Int 		    i,j, jj, j2, nstages=0;  
    HYPRE_Int              num_procs, my_id, num_threads;
-   HYPRE_Int              num_nodes;
-   double 	    rho,rho0,rho1,*e0,*e1, *sum;
+   HYPRE_Int              num_nodes = num_variables/num_functions;
+   double 	    rho = 1.0;
+   double 	    gamma = 0.0;
+   double 	    rho0,rho1,*e0,*e1, *sum = NULL;
    double 	    rho_old, relrho;
    double           *e2;
-   double           alpha, beta, gamma, gammaold;
+   double           alpha, beta, gammaold;
    HYPRE_Int		    num_coarse, global_num_variables, global_nc = 0;
    double candmeas=0.0e0, local_max=0.0e0, global_max = 0;
    /*double thresh=1-rho;*/
@@ -2650,9 +2653,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    
    num_threads = hypre_NumThreads();
 
-
-   if (AN) AN_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN));
-   if (AN) AN_offd_i     = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AN));
 
    global_num_variables = hypre_ParCSRMatrixGlobalNumRows(A);
    /*if(CRaddCpoints == 0)
@@ -2973,6 +2973,9 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
          }
          else
          {
+      	    AN_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN));
+      	    AN_offd_i     = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(AN));
+
             for (i=0;i<num_nodes;i++)
 	    {
                /*if (CFN_marker[i] == fpt)*/
@@ -3089,7 +3092,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    /*if(CRaddCpoints) hypre_TFree(CFN_marker);*/
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
-                                                                                                             
+   hypre_TFree(sum);                                                                                                          
    return (ierr);
 }
 

@@ -124,7 +124,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double  *num_variables;
    double   total_variables; 
    double   operat_cmplxty;
-   double   grid_cmplxty;
+   double   grid_cmplxty = 0;
 
    /* amg solve params */
    HYPRE_Int      max_iter;

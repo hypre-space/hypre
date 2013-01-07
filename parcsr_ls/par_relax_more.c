@@ -112,8 +112,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    hypre_ParVector    *u;
 
 
-   double   *tridiag;
-   double   *trioffd;
+   double   *tridiag = NULL;
+   double   *trioffd = NULL;
 
    double lambda_max , max_row_sum;
    
@@ -303,6 +303,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
     /* hypre_printf("linpack max eig est = %g\n", lambda_max);*/
     /* hypre_printf("linpack min eig est = %g\n", lambda_min);*/
   
+    hypre_TFree(tridiag);
+    hypre_TFree(trioffd);
 
     hypre_ParVectorDestroy(r);
     hypre_ParVectorDestroy(s);

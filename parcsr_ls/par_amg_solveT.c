@@ -68,7 +68,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    double   alpha = 1.0;
    double   beta = -1.0;
-   double   cycle_cmplxty;
+   double   cycle_cmplxty = 0.0;
    double   operat_cmplxty;
    double   grid_cmplxty;
    double   conv_factor;
@@ -493,7 +493,11 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
         
          
          if (Solve_err_flag != 0)
+         {
+            hypre_TFree(lev_counter);
+            hypre_TFree(num_coeffs);
             return(Solve_err_flag);
+         }
       }
 
 

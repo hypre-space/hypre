@@ -90,7 +90,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    HYPRE_Int		       num_recvs;
    HYPRE_Int		      *send_procs;
    HYPRE_Int		      *send_map_starts;
-   HYPRE_Int		      *send_map_elmts;
+   HYPRE_Int		      *send_map_elmts = NULL;
    HYPRE_Int		      *new_send_map_elmts;
    HYPRE_Int		      *recv_procs;
    HYPRE_Int		      *recv_vec_starts;
@@ -862,7 +862,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    hypre_CSRMatrix    *SN_offd = hypre_ParCSRMatrixOffd(SN);
    HYPRE_Int		      *SN_offd_i = hypre_CSRMatrixI(SN_offd);
    HYPRE_Int		      *SN_offd_j = hypre_CSRMatrixJ(SN_offd);
-   double	      *SN_offd_data;
+   double	      *SN_offd_data = NULL;
    HYPRE_Int		      *CF_marker;
    HYPRE_Int		      *col_map_offd_SN = hypre_ParCSRMatrixColMapOffd(SN);
    HYPRE_Int		      *col_map_offd_S;

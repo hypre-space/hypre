@@ -263,7 +263,12 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 	 }
  
          if (Solve_err_flag != 0)
+         {
+            hypre_ParVectorDestroy(Ptemp);
+            hypre_TFree(tridiag);
+            hypre_TFree(trioffd);
             return(Solve_err_flag);
+         }
       }
       gammaold = gamma;
       gamma = hypre_ParVectorInnerProd(Rtemp,Ztemp);

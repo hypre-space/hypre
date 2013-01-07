@@ -1892,13 +1892,13 @@ hypre_BoomerAMGSetLevelRelaxWt( void    *data,
 {
    HYPRE_Int i, num_levels;
    hypre_ParAMGData  *amg_data = data;
-   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (!amg_data)
    {
       hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1 || level < 0) 
    {
       hypre_printf (" Warning! Invalid level! Relax weight not set!\n");
