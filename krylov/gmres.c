@@ -118,11 +118,11 @@ HYPRE_Int
 hypre_GMRESDestroy( void *gmres_vdata )
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
-   hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
    HYPRE_Int i;
  
    if (gmres_data)
    {
+      hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
       if ( (gmres_data->logging>0) || (gmres_data->print_level) > 0 )
       {
          if ( (gmres_data -> norms) != NULL )

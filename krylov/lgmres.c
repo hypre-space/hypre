@@ -122,11 +122,11 @@ HYPRE_Int
 hypre_LGMRESDestroy( void *lgmres_vdata )
 {
    hypre_LGMRESData *lgmres_data = lgmres_vdata;
-   hypre_LGMRESFunctions *lgmres_functions = lgmres_data->functions;
    HYPRE_Int i;
  
    if (lgmres_data)
    {
+      hypre_LGMRESFunctions *lgmres_functions = lgmres_data->functions;
       if ( (lgmres_data->logging>0) || (lgmres_data->print_level) > 0 )
       {
          if ( (lgmres_data -> norms) != NULL )
@@ -311,7 +311,8 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    HYPRE_Int            *aug_order      = (lgmres_data->aug_order);
    HYPRE_Int             aug_dim        = (lgmres_data -> aug_dim);
    HYPRE_Int             approx_constant=  (lgmres_data ->approx_constant);
-   HYPRE_Int             it_arnoldi, aug_ct, it_total, ii, order, spot, it_aug;
+   HYPRE_Int             it_arnoldi, aug_ct, it_total, ii, order, it_aug;
+   HYPRE_Int             spot = 0;
    double          tmp_norm, r_norm_last;
    /*---*/
 

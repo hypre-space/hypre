@@ -108,11 +108,11 @@ HYPRE_Int
 hypre_BiCGSTABDestroy( void *bicgstab_vdata )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
-   hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
 
  
    if (bicgstab_data)
    {
+      hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
       if ( (bicgstab_data -> norms) != NULL )
             hypre_TFree(bicgstab_data -> norms);
  

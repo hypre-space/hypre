@@ -151,9 +151,9 @@ HYPRE_Int
 hypre_LOBPCGDestroy( void *pcg_vdata )
 {
    hypre_LOBPCGData      *pcg_data      = pcg_vdata;
-   HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
 
    if (pcg_data) {
+      HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
       if ( pcg_data->matvecData != NULL ) {
          (*(mv->MatvecDestroy))(pcg_data->matvecData);
          pcg_data->matvecData = NULL;

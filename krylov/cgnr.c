@@ -106,12 +106,12 @@ HYPRE_Int
 hypre_CGNRDestroy( void *cgnr_vdata )
 {
    hypre_CGNRData *cgnr_data = cgnr_vdata;
-   hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
 
    HYPRE_Int ierr = 0;
 
    if (cgnr_data)
    {
+      hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
       if ((cgnr_data -> logging) > 0)
       {
          hypre_TFree(cgnr_data -> norms);

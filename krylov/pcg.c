@@ -128,10 +128,10 @@ HYPRE_Int
 hypre_PCGDestroy( void *pcg_vdata )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   hypre_PCGFunctions *pcg_functions = pcg_data->functions;
 
    if (pcg_data)
    {
+      hypre_PCGFunctions *pcg_functions = pcg_data->functions;
       if ( (pcg_data -> norms) != NULL )
       {
          hypre_TFreeF( pcg_data -> norms, pcg_functions );
@@ -299,11 +299,12 @@ hypre_PCGSolve( void *pcg_vdata,
                 
    double          alpha, beta;
    double          gamma, gamma_old;
-   double          bi_prod, i_prod, eps;
+   double          bi_prod, eps;
    double          pi_prod, xi_prod;
    double          ieee_check = 0.;
                 
-   double          i_prod_0;
+   double          i_prod = 0.0;
+   double          i_prod_0 = 0.0;
    double          cf_ave_0 = 0.0;
    double          cf_ave_1 = 0.0;
    double          weight;

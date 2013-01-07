@@ -123,11 +123,11 @@ HYPRE_Int
 hypre_FlexGMRESDestroy( void *fgmres_vdata )
 {
    hypre_FlexGMRESData *fgmres_data = fgmres_vdata;
-   hypre_FlexGMRESFunctions *fgmres_functions = fgmres_data->functions;
    HYPRE_Int i;
  
    if (fgmres_data)
    {
+      hypre_FlexGMRESFunctions *fgmres_functions = fgmres_data->functions;
       if ( (fgmres_data->logging>0) || (fgmres_data->print_level) > 0 )
       {
          if ( (fgmres_data -> norms) != NULL )
