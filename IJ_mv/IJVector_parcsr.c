@@ -110,6 +110,7 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
          hypre_printf("hypre_IJVectorInitializePar\n"); 
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -183,6 +184,7 @@ hypre_IJVectorDistributePar(hypre_IJVector *vector,
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
    par_vector = hypre_VectorToParVector(hypre_ParVectorComm(old_vector),
@@ -222,8 +224,8 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   HYPRE_Int *partitioning = hypre_ParVectorPartitioning(par_vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
+   HYPRE_Int *partitioning;
+   hypre_Vector *local_vector;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -240,7 +242,10 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
+   partitioning = hypre_ParVectorPartitioning(par_vector);
+   local_vector = hypre_ParVectorLocalVector(par_vector);
    if (!partitioning)
    {
       if (print_level)
@@ -250,6 +255,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
          hypre_printf("**** Vector partitioning is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
    if (!local_vector)
    {
@@ -260,6 +266,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
          hypre_printf("**** Vector local data is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -280,6 +287,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
          hypre_printf("**** This vector partitioning should not occur ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    
    }
 
@@ -313,7 +321,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
+   hypre_Vector *local_vector;
 
 /* If no components are to be set, perform no checking and return */
    if (num_values < 1) return 0;
@@ -332,7 +340,9 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
+   local_vector = hypre_ParVectorLocalVector(par_vector);
    if (!IJpartitioning)
    {
       if (print_level)
@@ -342,6 +352,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
          hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
    if (!local_vector)
    {
@@ -352,6 +363,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
          hypre_printf("**** Vector local data is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -371,6 +383,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
          hypre_printf("**** This vector partitioning should not occur ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 /* Determine whether indices points to local indices only,
@@ -487,7 +500,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
+   hypre_Vector *local_vector;
 
 /* If no components are to be retrieved, perform no checking and return */
    if (num_values < 1) return 0;
@@ -506,7 +519,9 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
          hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
+   local_vector = hypre_ParVectorLocalVector(par_vector);
    if (!IJpartitioning)
    {
       if (print_level)
@@ -516,6 +531,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
          hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
    if (!local_vector)
    {
@@ -526,6 +542,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
          hypre_printf("**** Vector local data is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -545,6 +562,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
          hypre_printf("**** This vector partitioning should not occur ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 /* Determine whether indices points to local indices only,
@@ -654,7 +672,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
    HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
-   HYPRE_Int *partitioning = hypre_ParVectorPartitioning(par_vector);
+   HYPRE_Int *partitioning;
    MPI_Comm comm = hypre_IJVectorComm(vector);
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
@@ -668,6 +686,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
       }
       hypre_error_in_arg(1);
    } 
+   partitioning = hypre_ParVectorPartitioning(par_vector);
    if (!IJpartitioning)
    { 
       if (print_level)
@@ -753,7 +772,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
    HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
+   hypre_Vector *local_vector;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
 /* If no components are to be retrieved, perform no checking and return */
@@ -773,7 +792,9 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_printf("**** Vector storage is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
+   local_vector = hypre_ParVectorLocalVector(par_vector);
    if (!IJpartitioning)
    {
       if (print_level)
@@ -783,6 +804,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
    if (!local_vector)
    {
@@ -793,6 +815,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_printf("**** Vector local data is either unallocated or orphaned ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -812,6 +835,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_printf("**** This vector partitioning should not occur ****\n");
       }
       hypre_error_in_arg(1);
+      return hypre_error_flag;
    }
 
 /* Determine whether indices points to local indices only,
@@ -837,6 +861,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       hypre_printf("**** Indices specified are unusable ****\n");
       }
       hypre_error_in_arg(3);
+      return hypre_error_flag;
    }
     
    data = hypre_VectorData(local_vector);
@@ -879,8 +904,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
-   hypre_MPI_Request *requests;
-   hypre_MPI_Status *status;
+   hypre_MPI_Request *requests = NULL;
+   hypre_MPI_Status *status = NULL;
    HYPRE_Int i, j, j2, row;
    HYPRE_Int iii, indx, ip, first_index;
    HYPRE_Int proc_id, num_procs, my_id;
@@ -1068,10 +1093,10 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    if (num_requests)
    {
       hypre_MPI_Waitall(num_requests, requests, status);
-      hypre_TFree(requests);
-      hypre_TFree(status);
    }
 
+   hypre_TFree(requests);
+   hypre_TFree(status);
    hypre_TFree(send_i);
    hypre_TFree(send_data);
    hypre_TFree(send_procs);
