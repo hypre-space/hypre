@@ -630,7 +630,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   HYPRE_Int j,/*p,*/mpisize,mpirank,/*rstart,rend,*/choice,*coarse,ierr=0;
   HYPRE_Int *vertexrange = NULL;
   HYPRE_Int *vertexrange_all = NULL;
-  HYPRE_Int *CF_marker_offd = NULL;;
+  HYPRE_Int *CF_marker_offd = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (hypre_ParCSRMatrixDiag(S));
 /*   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (hypre_ParCSRMatrixOffd (S)); */
 /*   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S); */
