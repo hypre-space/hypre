@@ -7489,7 +7489,7 @@ $as_echo "$as_me: WARNING: architecture is unknown" >&2;}
 $as_echo "$HYPRE_ARCH" >&6; }
          fi
       else
-         HYPRE_ARCH = $ARCH
+         HYPRE_ARCH=$ARCH
          { $as_echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
 $as_echo "$HYPRE_ARCH" >&6; }
       fi

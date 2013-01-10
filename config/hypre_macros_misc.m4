@@ -410,7 +410,7 @@ AC_DEFUN([AC_HYPRE_SET_ARCH],
             AC_MSG_RESULT($HYPRE_ARCH)
          fi
       else
-         HYPRE_ARCH = $ARCH
+         HYPRE_ARCH=$ARCH
          AC_MSG_RESULT($HYPRE_ARCH)
       fi
 
