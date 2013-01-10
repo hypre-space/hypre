@@ -60,16 +60,16 @@ SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
-#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fa $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fa $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
+	cp -fa $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
+#	cp -fa libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
-#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fa $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fa $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
+	cp -fa $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
+#	cp -fa libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*

@@ -53,16 +53,16 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	@cp -fpPR HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_BUILD_DIR)/include/.
-#	@cp -fpPR libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
+	@cp -fa HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_BUILD_DIR)/include/.
+#	@cp -fa libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
 
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
 
 install: all
-	@cp -fpPR HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_INC_INSTALL)/.
-#	@cp -fpPR libHYPRE_* $(HYPRE_LIB_INSTALL)/.
+	@cp -fa HYPRE_*.h parcsr_matrix_vector.h $(HYPRE_INC_INSTALL)/.
+#	@cp -fa libHYPRE_* $(HYPRE_LIB_INSTALL)/.
 
 clean:
 	@rm -f *.o lib* driver

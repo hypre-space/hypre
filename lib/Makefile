@@ -69,10 +69,10 @@ SOLIBS = ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
 ##################################################################
 
 all: libHYPRE${HYPRE_LIB_SUFFIX}
-	cp -fpPR libHYPRE* ${HYPRE_BUILD_DIR}/lib
+	cp -fa libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
-	cp -fpPR libHYPRE* ${HYPRE_LIB_INSTALL}
+	cp -fa libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
 	rm -f *.o libHYPRE*

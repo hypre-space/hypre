@@ -65,12 +65,12 @@ SIDL_OBJS = $(BASICMODULESRC:.F90=.o) $(MORE_ARRAYMODULESRCS:.F90=.o) \
 ##################################################################
 
 all: libbHYPREClient-F90.a
-	cp -fpPR $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
-	cp -fpPR libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
+	cp -fa $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
+	cp -fa libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
-	cp -fpPR $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
-	cp -fpPR libbHYPRE* ${HYPRE_LIB_INSTALL}/.
+	cp -fa $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
+	cp -fa libbHYPRE* ${HYPRE_LIB_INSTALL}/.
  
 clean:
 	rm -f *.o libbHYPRE*

@@ -60,9 +60,9 @@ all:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
-	cp -fpPR ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
-	cp -fpPR hypre_babel_exception_handler.h ${HYPRE_BUILD_DIR}/include
-	cp -fpPR ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs*${HYPRE_LIB_SUFFIX} ${HYPRE_BUILD_DIR}/lib
+	cp -fa ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
+	cp -fa hypre_babel_exception_handler.h ${HYPRE_BUILD_DIR}/include
+	cp -fa ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs*${HYPRE_LIB_SUFFIX} ${HYPRE_BUILD_DIR}/lib
 
 install:
 	@ \
@@ -74,9 +74,9 @@ install:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
-	cp -fpPR ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
-	cp -fpPR hypre_babel_exception_handler.h ${HYPRE_INC_INSTALL}
-	cp -fpPR ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs*${HYPRE_LIB_SUFFIX} ${HYPRE_LIB_INSTALL}
+	cp -fa ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
+	cp -fa hypre_babel_exception_handler.h ${HYPRE_INC_INSTALL}
+	cp -fa ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs*${HYPRE_LIB_SUFFIX} ${HYPRE_LIB_INSTALL}
 
 clean:
 	@ \

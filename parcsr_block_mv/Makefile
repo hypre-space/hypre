@@ -66,9 +66,9 @@ SONAME = libHYPRE_parcsr_block_mv-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include	
-	cp -fpPR $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
-#	cp -fpPR libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
+	cp -fa $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include	
+	cp -fa $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
+#	cp -fa libHYPRE_* $(HYPRE_BUILD_DIR)/lib/.
 
 driver: driver.o libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
@@ -95,9 +95,9 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
 install: libHYPRE_parcsr_block_mv${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-	cp -fpPR $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
-#	cp -fpPR libHYPRE_* $(HYPRE_LIB_INSTALL)/.
+	cp -fa $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
+	cp -fa $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
+#	cp -fa libHYPRE_* $(HYPRE_LIB_INSTALL)/.
 
 clean:
 	rm -rf *.o libHYPRE_*

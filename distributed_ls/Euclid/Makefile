@@ -94,10 +94,10 @@ SONAME = libHYPRE_Euclid-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_Euclid${HYPRE_LIB_SUFFIX}
-#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+#	cp -fa libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_Euclid${HYPRE_LIB_SUFFIX}
-#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+#	cp -fa libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
