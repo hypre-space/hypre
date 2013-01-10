@@ -86,9 +86,9 @@ all:
 	@ \
 	mkdir -p ${HYPRE_BUILD_DIR}/include; \
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
-	cp -fa HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fa $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fa $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fR HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fR $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
 	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
@@ -165,14 +165,14 @@ install: all
 	cd ${HYPRE_LIB_INSTALL};   HYPRE_TODIR=`pwd`; \
 	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
 	then \
-	  cp -fa $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
+	  cp -fR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
 	fi; \
 	cd ${HYPRE_BUILD_DIR}/include; HYPRE_FROMDIR=`pwd`; \
 	cd $$HYPRE_PWD; \
 	cd ${HYPRE_INC_INSTALL};       HYPRE_TODIR=`pwd`; \
 	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
 	then \
-	  cp -fa $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
+	  cp -fR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
 	fi; \
 	cd $$HYPRE_PWD; \
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}; \

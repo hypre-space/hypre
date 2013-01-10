@@ -56,12 +56,12 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libbHYPREClient-C.a
-	cp -fa $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
-	cp -fa libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
+	cp -fR $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
+	cp -fR libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
-	cp -fa $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
-	cp -fa libbHYPRE* ${HYPRE_LIB_INSTALL}/.
+	cp -fR $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
+	cp -fR libbHYPRE* ${HYPRE_LIB_INSTALL}/.
  
 clean:
 	rm -f *.o libbHYPRE*

@@ -116,14 +116,14 @@ SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
-	cp -fa $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fa $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_BUILD_DIR)/include
-#	cp -fa libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
-	cp -fa $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fa $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_INC_INSTALL)
-#	cp -fa libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_INC_INSTALL)
+#	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
