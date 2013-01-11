@@ -446,7 +446,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (hypre_ParAMGDataL1Norms(amg_data))
       {
-         for (i=0; i < num_levels; i++)
+         for (i=0; i < old_num_levels; i++)
             if (hypre_ParAMGDataL1Norms(amg_data)[i])
               hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i]);
          hypre_TFree(hypre_ParAMGDataL1Norms(amg_data));
