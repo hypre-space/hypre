@@ -453,8 +453,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (smooth_num_levels && smoother)
       {
-         if (smooth_num_levels > num_levels-1)
-           smooth_num_levels = num_levels -1;
+         if (smooth_num_levels > old_num_levels-1)
+           smooth_num_levels = old_num_levels -1;
          if (hypre_ParAMGDataSmoothType(amg_data) == 7)
          {
             for (i=0; i < smooth_num_levels; i++)
