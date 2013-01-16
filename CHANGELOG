@@ -15,6 +15,19 @@
 # recent release.
 #=============================================================================
 
+Version 2.9.1a released 2013/01/16
+
+- Added a HYPRE_BoomerAMGSetRedundant() switch to allow for an agglomeration
+  approach for solving the coarsest grid system.
+
+- Changed how BoomerAMG handles zero diagonal entries.
+
+- Made a few minor bug fixes in BoomerAMG.
+
+- Fixed a configuration problem with external blas and lapack.
+
+#====================================
+
 Version 2.9.0b released 2012/10/30
 
 - Changed the behavior of the BoomerAMG interpolation routines when a zero

@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.9.0b)
-set (HYPRE_DATE    2012/10/30)
+set (HYPRE_VERSION 2.9.1a)
+set (HYPRE_DATE    2013/1/16)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
