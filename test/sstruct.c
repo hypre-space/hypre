@@ -2874,8 +2874,13 @@ main( hypre_int argc,
                      k = index[i] - pdata.graph_ilowers[box][i];
                      k /= pdata.graph_strides[box][i];
                      k *= pdata.graph_index_signs[box][i];
+#if 0 /* the following does not work with some Intel compilers with -O2 */
                      to_index[j] = pdata.graph_to_ilowers[box][j] +
                         k * pdata.graph_to_strides[box][j];
+#else
+                     to_index[j] = pdata.graph_to_ilowers[box][j];
+                     to_index[j] += k * pdata.graph_to_strides[box][j];
+#endif
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[box],
