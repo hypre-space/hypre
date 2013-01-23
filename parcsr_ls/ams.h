@@ -96,6 +96,7 @@ typedef struct
    HYPRE_Int B_G_coarsen_type;
    HYPRE_Int B_G_agg_levels;
    HYPRE_Int B_G_relax_type;
+   HYPRE_Int B_G_coarse_relax_type;
    double B_G_theta;
    HYPRE_Int B_G_interp_type;
    HYPRE_Int B_G_Pmax;
@@ -104,6 +105,7 @@ typedef struct
    HYPRE_Int B_Pi_coarsen_type;
    HYPRE_Int B_Pi_agg_levels;
    HYPRE_Int B_Pi_relax_type;
+   HYPRE_Int B_Pi_coarse_relax_type;
    double B_Pi_theta;
    HYPRE_Int B_Pi_interp_type;
    HYPRE_Int B_Pi_Pmax;

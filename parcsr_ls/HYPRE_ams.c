@@ -235,7 +235,7 @@ HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ARTSSetChebyOptions
+ * HYPRE_AMSSetChebyOptions
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetChebySmoothingOptions(HYPRE_Solver solver,
@@ -269,6 +269,17 @@ HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMSSetAlphaAMGCoarseRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_AMSSetAlphaAMGCoarseRelaxType(HYPRE_Solver solver,
+                                              HYPRE_Int alpha_coarse_relax_type)
+{
+   return hypre_AMSSetAlphaAMGCoarseRelaxType((void *) solver,
+                                              alpha_coarse_relax_type);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSSetBetaAMGOptions
  *--------------------------------------------------------------------------*/
 
@@ -287,6 +298,17 @@ HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      beta_strength_threshold,
                                      beta_interp_type,
                                      beta_Pmax);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSSetBetaAMGCoarseRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_AMSSetBetaAMGCoarseRelaxType(HYPRE_Solver solver,
+                                             HYPRE_Int beta_coarse_relax_type)
+{
+   return hypre_AMSSetBetaAMGCoarseRelaxType((void *) solver,
+                                             beta_coarse_relax_type);
 }
 
 /*--------------------------------------------------------------------------

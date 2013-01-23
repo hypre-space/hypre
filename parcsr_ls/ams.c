@@ -797,6 +797,10 @@ void * hypre_AMSCreate()
    ams_data -> B_Pi_Pmax = 0;          /* max nonzero elements in interp. rows */
    ams_data -> beta_is_zero = 0;       /* the problem has a mass term */
 
+   /* By default, do l1-GS smoothing on the coarsest grid */
+   ams_data -> B_G_coarse_relax_type  = 8;
+   ams_data -> B_Pi_coarse_relax_type = 8;
+
    /* The rest of the fields are initialized using the Set functions */
 
    ams_data -> A    = NULL;
@@ -1282,6 +1286,20 @@ HYPRE_Int hypre_AMSSetAlphaAMGOptions(void *solver,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMSSetAlphaAMGCoarseRelaxType
+ *
+ * Set the AMG coarsest level relaxation for B_Pi. Default value: 8.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMSSetAlphaAMGCoarseRelaxType(void *solver,
+                                              HYPRE_Int B_Pi_coarse_relax_type)
+{
+   hypre_AMSData *ams_data = solver;
+   ams_data -> B_Pi_coarse_relax_type = B_Pi_coarse_relax_type;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMSSetBetaAMGOptions
  *
  * Set AMG parameters for B_G. Default values: 10, 1, 3, 0.25, 0, 0.
@@ -1302,6 +1320,20 @@ HYPRE_Int hypre_AMSSetBetaAMGOptions(void *solver,
    ams_data -> B_G_theta = B_G_theta;
    ams_data -> B_G_interp_type = B_G_interp_type;
    ams_data -> B_G_Pmax = B_G_Pmax;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSSetBetaAMGCoarseRelaxType
+ *
+ * Set the AMG coarsest level relaxation for B_G. Default value: 8.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMSSetBetaAMGCoarseRelaxType(void *solver,
+                                             HYPRE_Int B_G_coarse_relax_type)
+{
+   hypre_AMSData *ams_data = solver;
+   ams_data -> B_G_coarse_relax_type = B_G_coarse_relax_type;
    return hypre_error_flag;
 }
 
@@ -1969,6 +2001,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetInterpType(ams_data -> B_G0, ams_data -> B_G_interp_type);
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G0, ams_data -> B_G_Pmax);
       HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_G0, 2); /* don't coarsen to 0 */
+      /* Generally, don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G0, ams_data -> B_G_coarse_relax_type, 3);
       HYPRE_BoomerAMGSetup(ams_data -> B_G0,
                            (HYPRE_ParCSRMatrix)ams_data -> A_G0,
                            0, 0);
@@ -2148,13 +2182,11 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G, ams_data -> B_G_Pmax);
       HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_G, 2); /* don't coarsen to 0 */
 
+      /* Generally, don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G, ams_data -> B_G_coarse_relax_type, 3);
+
       if (ams_data -> cycle_type == 0)
          HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_G, 2);
-
-      /* don't use exact solve on the coarsest level (matrix may be singular) */
-      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G,
-                                       ams_data -> B_G_relax_type,
-                                       3);
 
       /* If not given, construct the coarse space matrix by RAP */
       if (!ams_data -> A_G)
@@ -2227,16 +2259,10 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piz, ams_data -> B_Pi_Pmax);
       HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_Piz, 2);
 
-      if (ams_data -> beta_is_zero)
-      {
-         /* don't use exact solve on the coarsest level (matrices may be singular) */
-         HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pix,
-                                          ams_data -> B_Pi_relax_type, 3);
-         HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Piy,
-                                          ams_data -> B_Pi_relax_type, 3);
-         HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Piz,
-                                          ams_data -> B_Pi_relax_type, 3);
-      }
+      /* Generally, don't use exact solve on the coarsest level (matrices may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pix, ams_data -> B_Pi_coarse_relax_type, 3);
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Piy, ams_data -> B_Pi_coarse_relax_type, 3);
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Piz, ams_data -> B_Pi_coarse_relax_type, 3);
 
       if (ams_data -> cycle_type == 0)
       {
@@ -2301,13 +2327,11 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pi, ams_data -> B_Pi_Pmax);
       HYPRE_BoomerAMGSetMinCoarseSize(ams_data -> B_Pi, 2); /* don't coarsen to 0 */
 
+      /* Generally, don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi, ams_data -> B_Pi_coarse_relax_type, 3);
+
       if (ams_data -> cycle_type == 0)
          HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Pi, 2);
-
-      /* don't use exact solve on the coarsest level (matrix may be singular) */
-      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi,
-                                       ams_data -> B_Pi_relax_type,
-                                       3);
 
       /* If not given, construct the coarse space matrix by RAP and
          notify BoomerAMG that this is a dim x dim block system. */

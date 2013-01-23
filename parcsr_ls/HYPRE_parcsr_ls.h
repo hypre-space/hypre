@@ -1563,6 +1563,13 @@ HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                       HYPRE_Int    alpha_Pmax);
 
 /**
+ * (Optional) Sets the coarsest level relaxation in the AMG solver for $B_\Pi$.
+ * The default is $8$ (l1-GS). Use $9$ to get a direct solver.
+ **/
+HYPRE_Int HYPRE_AMSSetAlphaAMGCoarseRelaxType(HYPRE_Solver solver,
+                                              HYPRE_Int    alpha_coarse_relax_type);
+
+/**
  * (Optional) Sets AMG parameters for $B_G$.
  * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
@@ -1573,6 +1580,13 @@ HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      double       beta_strength_threshold,
                                      HYPRE_Int    beta_interp_type,
                                      HYPRE_Int    beta_Pmax);
+
+/**
+ * (Optional) Sets the coarsest level relaxation in the AMG solver for $B_G$.
+ * The default is $8$ (l1-GS). Use $9$ to get a direct solver.
+ **/
+HYPRE_Int HYPRE_AMSSetBetaAMGCoarseRelaxType(HYPRE_Solver solver,
+                                             HYPRE_Int    beta_coarse_relax_type);
 
 /**
  * Returns the number of iterations taken.
