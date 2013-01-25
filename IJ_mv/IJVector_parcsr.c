@@ -1289,6 +1289,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    hypre_TFree(ex_contact_vec_starts);
 
    hypre_TFree(a_proc_id);
+   a_proc_id = NULL;
 
 
    /*how many ranges were returned?*/
@@ -1320,7 +1321,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       {
          num_real_procs++;
       }
-      prev_id = tmp_id;
+      if (counter != 0) prev_id = tmp_id;
    }
 
 
