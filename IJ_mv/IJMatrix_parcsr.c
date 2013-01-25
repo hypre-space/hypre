@@ -2501,7 +2501,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          num_real_procs++;
       }
 
-      prev_id = tmp_id;
+     if (counter != 0)  prev_id = tmp_id;
       
    }
 
