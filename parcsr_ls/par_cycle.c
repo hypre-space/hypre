@@ -384,7 +384,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
               }
               else if (relax_type == 18)
               {   /* L1 - Jacobi*/
-                 if (relax_order == 1 && cycle_type < 3)
+                 if (relax_order == 1 && cycle_param < 3)
                  {
                     /* need to do CF - so can't use the AMS one */
                     HYPRE_Int i;
