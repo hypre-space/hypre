@@ -1160,7 +1160,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    void *recv_data_ptr;
 
    double tmp_double;
-   double *ex_contact_buf=NULL;
+   HYPRE_Int *ex_contact_buf=NULL;
    double *vector_data;
    double value;
    
@@ -1229,7 +1229,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
 
    ex_contact_procs = hypre_CTAlloc(HYPRE_Int, ex_num_contacts);
    ex_contact_vec_starts =  hypre_CTAlloc(HYPRE_Int, ex_num_contacts+1);
-   ex_contact_buf =  hypre_CTAlloc(double, ex_num_contacts*2);
+   ex_contact_buf =  hypre_CTAlloc(HYPRE_Int, ex_num_contacts*2);
 
    counter = 0;
    range_end = -1;
@@ -1321,7 +1321,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       {
          num_real_procs++;
       }
-      if (counter != 0) prev_id = tmp_id;
+      prev_id = tmp_id;
    }
 
 
