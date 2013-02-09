@@ -921,7 +921,10 @@ HYPRE_IJMatrixRead( const char     *filename,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in IJ matrix input file.");
          return hypre_error_flag;
       }
-      HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
+      if (I < ilower || I > iupper)
+         HYPRE_IJMatrixAddToValues(matrix, 1, &ncols, &I, &J, &value);
+      else
+         HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
    }
 
    HYPRE_IJMatrixAssemble(matrix);

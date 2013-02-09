@@ -651,7 +651,10 @@ HYPRE_IJVectorRead( const char     *filename,
          hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Error in IJ vector input file.");
          return hypre_error_flag;
       }
-      HYPRE_IJVectorSetValues(vector, 1, &j, &value);
+      if (j < jlower || j > jupper)
+	 HYPRE_IJVectorAddToValues(vector, 1, &j, &value);
+      else
+	 HYPRE_IJVectorSetValues(vector, 1, &j, &value);
    }
 
    HYPRE_IJVectorAssemble(vector);
