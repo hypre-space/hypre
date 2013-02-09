@@ -19,3 +19,10 @@
                 operator = 5.803438
                    cycle = 11.601250
 
+# Output file: matrix.out.3
+ Average Convergence Factor = 0.000000
+
+     Complexity:    grid = 1.000000
+                operator = 1.000000
+                   cycle = 1.000000
+
