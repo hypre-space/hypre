@@ -225,6 +225,10 @@ with a description of all errors in a given error flag, use
 \begin{display} \begin{verbatim}
 HYPRE_DescribeError(int hypre_ierr, char *descr);
 \end{verbatim} \end{display}
+The global error flag can be cleared manually by calling
+\code{HYPRE\_ClearAllErrors()}, which will essentially ignore all previous
+\hypre{} errors. To only clear a specific error code, the user can call
+\code{HYPRE\_ClearError(HYPRE\_ERROR\_CODE)}.
 Finally, if \hypre{} was configured with \code{--with-print-errors}, additional
 error information will be printed to the standard error during execution.
 
