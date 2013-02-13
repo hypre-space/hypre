@@ -55,8 +55,5 @@ set(HYPRE_superlu_SRCS
 
 add_definitions(-DNO_TIMER)
 add_library(HYPRE_superlu OBJECT ${HYPRE_superlu_SRCS})
-if(BUILD_SHARED_LIBS)
-  set_target_properties(HYPRE_superlu PROPERTIES COMPILE_FLAGS "-fPIC")
-endif()
 
 install (FILES ${HYPRE_superlu_HEADERS} DESTINATION include)

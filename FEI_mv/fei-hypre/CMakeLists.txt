@@ -62,8 +62,5 @@ set(HYPRE_fei_SRCS
 )
 
 add_library(HYPRE_fei OBJECT ${HYPRE_fei_SRCS})
-if(BUILD_SHARED_LIBS)
-  set_target_properties(HYPRE_fei PROPERTIES COMPILE_FLAGS "-fPIC")
-endif()
 
 install (FILES ${HYPRE_fei_HEADERS} DESTINATION include)
