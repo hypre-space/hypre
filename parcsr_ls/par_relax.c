@@ -127,8 +127,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 6 -> hybrid: SSOR-J mix off-processor, SSOR on-processor
     *     		    with outer relaxation parameters 
     *     relax_type = 7 -> Jacobi (uses Matvec), only needed in CGNR
-    *     relax_type = 9 -> Direct Solve
-    *     relax_type = 99-> Direct solve: use gaussian elimination & BLAS (with pivoting)
+    *     relax_type = 19-> Direct Solve, (old version)
+    *     relax_type = 29-> Direct solve: use gaussian elimination & BLAS 
+    *			    (with pivoting) (old version)
     *-----------------------------------------------------------------------*/
    switch (relax_type)
    {            
@@ -3049,7 +3050,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       }
       break;
 
-      case 9: /* Direct solve: use gaussian elimination */
+      case 19: /* Direct solve: use gaussian elimination */
       {
 
          /*-----------------------------------------------------------------
@@ -3118,7 +3119,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       }
       break;   
-      case 99: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
+      case 29: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
       {
 
          HYPRE_Int info;
