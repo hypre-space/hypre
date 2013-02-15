@@ -15,6 +15,21 @@
 # recent release.
 #=============================================================================
 
+Version 2.9.2a released 2013/02/15
+
+- Added HYPRE_AMSSet*AMGCoarseRelaxType for specifying the coarsest level
+  relaxation for the AMG subspace solvers in AMS.  Since the subspace matrices
+  are often singular, the default value uses l1-GS on the coarsest level, which
+  is different from BoomerAMG's default (exact solve).
+
+- Fixed a bug in the IJ interface related to setting off-processor values when
+  hypre is configured to use the assumed partition.
+
+- Fixed a bug in BoomerAMG when using C-F L1-Jacobi on coarsest grid, and fixed
+  a memory bug related to interpolation.
+
+#====================================
+
 Version 2.9.1a released 2013/01/16
 
 - Added a HYPRE_BoomerAMGSetRedundant() switch to allow for an agglomeration
