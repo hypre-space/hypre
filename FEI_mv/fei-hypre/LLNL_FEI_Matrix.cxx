@@ -1281,8 +1281,6 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
 
 /************************************************************************
  * Function  : BinarySearch2
- * Purpose   : The algorithm was taken from Numerical Recipes in C, 
- *             Second Edition.
  ************************************************************************/
 int LLNL_FEI_Matrix::BinarySearch2(int *map, int start, int mapSize, int num)
 {
