@@ -312,7 +312,7 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  * 9 & Gaussian elimination (only on coarsest level) \\
  * 15 & CG (warning - not a fixed smoother - may require FGMRES)\\
  * 16 & Chebyshev\\
- * 17 & FCF-Jacobi\\                              
+ * 17 & FCF-Jacobi\\
  * 18 & $\ell_1$-scaled jacobi\\
  * \hline
  * \end{tabular}
