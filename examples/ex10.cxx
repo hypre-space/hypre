@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
          printf("                        6 - AMG-GMRES\n");
          printf("                        7 - AMGSA-GMRES\n");
          printf("                        8 - Euclid-GMRES\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
       }
 

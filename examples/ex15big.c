@@ -34,6 +34,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "HYPRE.h"
 
+#include "vis.c"
 
 int optionAlpha, optionBeta;
 
@@ -179,7 +180,7 @@ int main (int argc, char *argv[])
    int myid, num_procs;
    int n, N, pi, pj, pk;
    double h;
-   int print_solution;
+   int vis;
 
    double tol, theta;
    int maxit, cycle_type;
@@ -210,7 +211,7 @@ int main (int argc, char *argv[])
 
    /* Set default parameters */
    n                = 10;
-   print_solution   = 0;
+   vis              = 0;
    optionAlpha      = 0;
    optionBeta       = 0;
    maxit            = 100;
@@ -250,10 +251,10 @@ int main (int argc, char *argv[])
             arg_index++;
             optionBeta = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-maxit") == 0 )
          {
@@ -343,9 +344,9 @@ int main (int argc, char *argv[])
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
          printf("  -n <n>              : problem size per processor (default: 10)\n");
-         printf("  -a <alpha_opt>      : choice for the curl-curl coefficient (default: 1.0)\n");
-         printf("  -b <beta_opt>       : choice for the mass coefficient (default: 1.0)\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -a <alpha_opt>      : choice for the curl-curl coefficient (default: 1)\n");
+         printf("  -b <beta_opt>       : choice for the mass coefficient (default: 1)\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
          printf("PCG-AMS solver options:                                     \n");
          printf("  -maxit <num>        : maximum number of iterations (100)  \n");
@@ -393,7 +394,7 @@ int main (int argc, char *argv[])
    hypre_BeginTiming(time_index);
 
    /* 1. Set up the edge and nodal grids.  Note that we do this simultaneously
-         to make sure that they have the same extends.  For simplicity we use
+         to make sure that they have the same extents.  For simplicity we use
          only one part to represent the unit cube. */
    {
       HYPRE_Int ndim = 3;
@@ -928,8 +929,8 @@ int main (int argc, char *argv[])
       /* Gather the solution vector */
       HYPRE_SStructVectorGather(x);
 
-      /* Print the solution with replicated shared data */
-      if (print_solution)
+      /* Save the solution for GLVis visualization, see vis/glvis-ex15.sh */
+      if (vis)
       {
          FILE *file;
          char  filename[255];
@@ -967,7 +968,7 @@ int main (int argc, char *argv[])
                                             var, zvalues);
          }
 
-         sprintf(filename, "sstruct.out.x.00.00.%05d", myid);
+         sprintf(filename, "%s.%06d", "vis/ex15.sol", myid);
          if ((file = fopen(filename, "w")) == NULL)
          {
             printf("Error: can't open output file %s\n", filename);
@@ -975,8 +976,14 @@ int main (int argc, char *argv[])
             exit(1);
          }
 
-         /* Save the edge values, element by element, using the same numbering
-            as the local finite element degrees of freedom. */
+         /* Finite element space header */
+         fprintf(file, "FiniteElementSpace\n");
+         fprintf(file, "FiniteElementCollection: Local_Hex_ND1\n");
+         fprintf(file, "VDim: 1\n");
+         fprintf(file, "Ordering: 0\n\n");
+
+         /* Save solution with replicated shared data, i.e., element by element,
+            using the same numbering as the local finite element unknowns. */
          {
             int i, j, k, s;
 
@@ -1009,10 +1016,23 @@ int main (int argc, char *argv[])
 
          fflush(file);
          fclose(file);
-
          free(xvalues);
          free(yvalues);
          free(zvalues);
+
+         /* Save local finite element mesh */
+         GLVis_PrintLocalCubicMesh("vis/ex15.mesh", n, n, n, h,
+                                   pi*h*n, pj*h*n, pk*h*n, myid);
+
+         /* Additional visualization data */
+         if (myid == 0)
+         {
+            sprintf(filename, "%s", "vis/ex15.data");
+            file = fopen(filename, "w");
+            fprintf(file, "np %d\n", num_procs);
+            fflush(file);
+            fclose(file);
+         }
       }
 
       if (myid == 0)

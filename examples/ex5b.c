@@ -25,6 +25,8 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 
+#include "vis.c"
+
 /* Babel interface headers */
 #include "bHYPRE.h"
 #include "bHYPRE_Vector.h"
@@ -44,7 +46,7 @@ int main (int argc, char *argv[])
    int local_size, extra;
 
    int solver_id;
-   int print_solution;
+   int vis;
 
    double h, h2;
    MPI_Comm mpicommworld = MPI_COMM_WORLD;
@@ -78,7 +80,7 @@ int main (int argc, char *argv[])
    /* Default problem parameters */
    n = 33;
    solver_id = 0;
-   print_solution  = 0;
+   vis = 0;
 
    /* Parse command line */
    {
@@ -97,10 +99,10 @@ int main (int argc, char *argv[])
             arg_index++;
             solver_id = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -124,7 +126,7 @@ int main (int argc, char *argv[])
          printf("                        1  - AMG-PCG\n");
          printf("                        8  - ParaSails-PCG\n");
          printf("                        50 - PCG\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
       }
 
@@ -463,9 +465,44 @@ int main (int argc, char *argv[])
       if (myid ==0) printf("Invalid solver id specified.\n");
    }
 
-   /* Print the solution */
-   if (print_solution)
-      bHYPRE_IJParCSRVector_Print( par_x, "ij.out.x", &_ex );
+   /* Save the solution for GLVis visualization, see vis/glvis-ex5.sh */
+   if (vis)
+   {
+      FILE *file;
+      char filename[255];
+
+      int nvalues = local_size;
+      int *rows = calloc(nvalues, sizeof(int));
+      double *values = calloc(nvalues, sizeof(double));
+
+      for (i = 0; i < nvalues; i++)
+         rows[i] = ilower + i;
+
+      /* get the local solution */
+      HYPRE_IJVectorGetValues(x, nvalues, rows, values);
+
+      sprintf(filename, "%s.%06d", "vis/ex5.sol", myid);
+      if ((file = fopen(filename, "w")) == NULL)
+      {
+         printf("Error: can't open output file %s\n", filename);
+         MPI_Finalize();
+         exit(1);
+      }
+
+      /* save solution */
+      for (i = 0; i < nvalues; i++)
+         fprintf(file, "%.14e\n", values[i]);
+
+      fflush(file);
+      fclose(file);
+
+      free(rows);
+      free(values);
+
+      /* save global finite element mesh */
+      if (myid == 0)
+         GLVis_PrintGlobalSquareMesh("vis/ex5.mesh", n-1);
+   }
 
    /* Clean up */
    bHYPRE_Operator_deleteRef( op_A, &_ex );
