@@ -2280,6 +2280,11 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                          &ams_data -> A_Pix);
       hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Pix) = 0;
       hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Pix) = 0;
+
+      /* Make sure that A_Pix has no zero rows (this can happen
+         for some kinds of boundary conditions with contact). */
+      hypre_ParCSRMatrixFixZeroRows(ams_data -> A_Pix);
+
       HYPRE_BoomerAMGSetup(ams_data -> B_Pix,
                            (HYPRE_ParCSRMatrix)ams_data -> A_Pix,
                            0, 0);
@@ -2292,6 +2297,11 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                          &ams_data -> A_Piy);
       hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piy) = 0;
       hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piy) = 0;
+
+      /* Make sure that A_Piy has no zero rows (this can happen
+         for some kinds of boundary conditions with contact). */
+      hypre_ParCSRMatrixFixZeroRows(ams_data -> A_Piy);
+
       HYPRE_BoomerAMGSetup(ams_data -> B_Piy,
                            (HYPRE_ParCSRMatrix)ams_data -> A_Piy,
                            0, 0);
@@ -2306,6 +2316,11 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                             &ams_data -> A_Piz);
          hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piz) = 0;
          hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piz) = 0;
+
+         /* Make sure that A_Piz has no zero rows (this can happen
+            for some kinds of boundary conditions with contact). */
+         hypre_ParCSRMatrixFixZeroRows(ams_data -> A_Piz);
+
          HYPRE_BoomerAMGSetup(ams_data -> B_Piz,
                               (HYPRE_ParCSRMatrix)ams_data -> A_Piz,
                               0, 0);
@@ -2476,6 +2491,10 @@ HYPRE_Int hypre_AMSSetup(void *solver,
             HYPRE_BoomerAMGSetNumFunctions(ams_data -> B_Pi, ams_data -> dim + 1);
          /* HYPRE_BoomerAMGSetNodal(ams_data -> B_Pi, 1); */
       }
+
+      /* Make sure that A_Pi has no zero rows (this can happen for
+         some kinds of boundary conditions with contact). */
+      hypre_ParCSRMatrixFixZeroRows(ams_data -> A_Pi);
 
       HYPRE_BoomerAMGSetup(ams_data -> B_Pi,
                            (HYPRE_ParCSRMatrix)ams_data -> A_Pi,
