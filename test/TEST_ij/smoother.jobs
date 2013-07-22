@@ -26,6 +26,8 @@
 #    5: hybrid SOR on 4 procs, determine a weight automatically
 #    6: use Schwarz smoothing
 #    7: use Schwarz smoothing with automatic weight determination
+#    8: use 3 level Schwarz smoothing with automatic weight determination
+#       followed by SSOR with automatic weight determination
 #=============================================================================
 
 mpirun -np 3 ./new_ij -rhsrand -n 15 30 10 -w 1.1 -owl 1.0 0 \
@@ -43,9 +45,13 @@ mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 \
 mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 -CF 0 \
 -w -10 > smoother.out.4
 
-mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 CF 0 \
+mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
 -sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 > smoother.out.5
 
-mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 CF 0 \
+mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
 -sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 -ow -10 -sw -10 \
 > smoother.out.6
+
+mpirun -np 4 ./new_ij -rlx 6 -n 20 20 10 -P 2 2 1 -sysL 3 -nf 3 -smlv 3 \
+-smtype 6 -dom 1 -ov 0 -w -10 -sw -10 \
+> smoother.out.7
