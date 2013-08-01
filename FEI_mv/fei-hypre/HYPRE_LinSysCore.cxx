@@ -4786,13 +4786,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_PCGSetRecomputeResidual(HYSolver_, pcgRecomputeRes_);
            if ( normAbsRel_ == 0 )
            {
-              HYPRE_PCGSetStopCrit(HYSolver_,0);
               HYPRE_PCGSetTol(HYSolver_, tolerance_);
            }
            else
            {
-              HYPRE_PCGSetStopCrit(HYSolver_,1);
               HYPRE_PCGSetAbsoluteTol(HYSolver_, tolerance_);
+              HYPRE_PCGSetTol(HYSolver_, 0.0);
            }
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
@@ -5029,13 +5028,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
            if ( normAbsRel_ == 0 )
            {
-              HYPRE_GMRESSetStopCrit(HYSolver_,0);
               HYPRE_GMRESSetTol(HYSolver_, tolerance_);
            }
            else
            {
-              HYPRE_GMRESSetStopCrit(HYSolver_,1);
               HYPRE_GMRESSetAbsoluteTol(HYSolver_, tolerance_);
+              HYPRE_GMRESSetTol(HYSolver_, 0.0);
            }
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
