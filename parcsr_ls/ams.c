@@ -1409,6 +1409,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
          HYPRE_Int *G_diag_I = hypre_CSRMatrixI(G_diag);
          HYPRE_Int *G_diag_J = hypre_CSRMatrixJ(G_diag);
+         double *G_diag_data = hypre_CSRMatrixData(G_diag);
 
          HYPRE_Int G_diag_nrows = hypre_CSRMatrixNumRows(G_diag);
          HYPRE_Int G_diag_nnz = hypre_CSRMatrixNumNonzeros(G_diag);
@@ -1428,10 +1429,10 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          for (i = 0; i < G_diag_nrows; i++)
             for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
             {
-               *Pi_diag_data++ = 0.5 * Gx_data[i];
-               *Pi_diag_data++ = 0.5 * Gy_data[i];
+               *Pi_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gx_data[i];
+               *Pi_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gy_data[i];
                if (dim == 3)
-                  *Pi_diag_data++ = 0.5 * Gz_data[i];
+                  *Pi_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gz_data[i];
             }
       }
 
@@ -1440,6 +1441,7 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *G_offd = hypre_ParCSRMatrixOffd(G);
          HYPRE_Int *G_offd_I = hypre_CSRMatrixI(G_offd);
          HYPRE_Int *G_offd_J = hypre_CSRMatrixJ(G_offd);
+         double *G_offd_data = hypre_CSRMatrixData(G_offd);
 
          HYPRE_Int G_offd_nrows = hypre_CSRMatrixNumRows(G_offd);
          HYPRE_Int G_offd_ncols = hypre_CSRMatrixNumCols(G_offd);
@@ -1464,10 +1466,10 @@ HYPRE_Int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
          for (i = 0; i < G_offd_nrows; i++)
             for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
             {
-               *Pi_offd_data++ = 0.5 * Gx_data[i];
-               *Pi_offd_data++ = 0.5 * Gy_data[i];
+               *Pi_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gx_data[i];
+               *Pi_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gy_data[i];
                if (dim == 3)
-                  *Pi_offd_data++ = 0.5 * Gz_data[i];
+                  *Pi_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gz_data[i];
             }
 
          for (i = 0; i < G_offd_ncols; i++)
@@ -1574,6 +1576,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
          HYPRE_Int *G_diag_I = hypre_CSRMatrixI(G_diag);
          HYPRE_Int *G_diag_J = hypre_CSRMatrixJ(G_diag);
+         double *G_diag_data = hypre_CSRMatrixData(G_diag);
 
          HYPRE_Int G_diag_nrows = hypre_CSRMatrixNumRows(G_diag);
          HYPRE_Int G_diag_nnz = hypre_CSRMatrixNumNonzeros(G_diag);
@@ -1610,9 +1613,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          for (i = 0; i < G_diag_nrows; i++)
             for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
             {
-               *Pix_diag_data++ = 0.5 * Gx_data[i];
-               *Piy_diag_data++ = 0.5 * Gy_data[i];
-               *Piz_diag_data++ = 0.5 * Gz_data[i];
+               *Pix_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gx_data[i];
+               *Piy_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gy_data[i];
+               *Piz_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gz_data[i];
             }
       }
       else
@@ -1620,6 +1623,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
          HYPRE_Int *G_diag_I = hypre_CSRMatrixI(G_diag);
          HYPRE_Int *G_diag_J = hypre_CSRMatrixJ(G_diag);
+         double *G_diag_data = hypre_CSRMatrixData(G_diag);
 
          HYPRE_Int G_diag_nrows = hypre_CSRMatrixNumRows(G_diag);
          HYPRE_Int G_diag_nnz = hypre_CSRMatrixNumNonzeros(G_diag);
@@ -1649,8 +1653,8 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          for (i = 0; i < G_diag_nrows; i++)
             for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
             {
-               *Pix_diag_data++ = 0.5 * Gx_data[i];
-               *Piy_diag_data++ = 0.5 * Gy_data[i];
+               *Pix_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gx_data[i];
+               *Piy_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gy_data[i];
             }
       }
 
@@ -1661,6 +1665,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *G_offd = hypre_ParCSRMatrixOffd(G);
          HYPRE_Int *G_offd_I = hypre_CSRMatrixI(G_offd);
          HYPRE_Int *G_offd_J = hypre_CSRMatrixJ(G_offd);
+         double *G_offd_data = hypre_CSRMatrixData(G_offd);
 
          HYPRE_Int G_offd_nrows = hypre_CSRMatrixNumRows(G_offd);
          HYPRE_Int G_offd_ncols = hypre_CSRMatrixNumCols(G_offd);
@@ -1704,9 +1709,9 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          for (i = 0; i < G_offd_nrows; i++)
             for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
             {
-               *Pix_offd_data++ = 0.5 * Gx_data[i];
-               *Piy_offd_data++ = 0.5 * Gy_data[i];
-               *Piz_offd_data++ = 0.5 * Gz_data[i];
+               *Pix_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gx_data[i];
+               *Piy_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gy_data[i];
+               *Piz_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gz_data[i];
             }
 
          for (i = 0; i < G_offd_ncols; i++)
@@ -1721,6 +1726,7 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *G_offd = hypre_ParCSRMatrixOffd(G);
          HYPRE_Int *G_offd_I = hypre_CSRMatrixI(G_offd);
          HYPRE_Int *G_offd_J = hypre_CSRMatrixJ(G_offd);
+         double *G_offd_data = hypre_CSRMatrixData(G_offd);
 
          HYPRE_Int G_offd_nrows = hypre_CSRMatrixNumRows(G_offd);
          HYPRE_Int G_offd_ncols = hypre_CSRMatrixNumCols(G_offd);
@@ -1756,8 +1762,8 @@ HYPRE_Int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
          for (i = 0; i < G_offd_nrows; i++)
             for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
             {
-               *Pix_offd_data++ = 0.5 * Gx_data[i];
-               *Piy_offd_data++ = 0.5 * Gy_data[i];
+               *Pix_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gx_data[i];
+               *Piy_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gy_data[i];
             }
 
          for (i = 0; i < G_offd_ncols; i++)
@@ -1869,10 +1875,10 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
             for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
             {
                *GPi_diag_data++ = G_diag_data[j];
-               *GPi_diag_data++ = 0.5 * Gx_data[i];
-               *GPi_diag_data++ = 0.5 * Gy_data[i];
+               *GPi_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gx_data[i];
+               *GPi_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gy_data[i];
                if (dim == 4)
-                  *GPi_diag_data++ = 0.5 * Gz_data[i];
+                  *GPi_diag_data++ = fabs(G_diag_data[j]) * 0.5 * Gz_data[i];
             }
       }
 
@@ -1907,10 +1913,10 @@ HYPRE_Int hypre_AMSComputeGPi(hypre_ParCSRMatrix *A,
             for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
             {
                *GPi_offd_data++ = G_offd_data[j];
-               *GPi_offd_data++ = 0.5 * Gx_data[i];
-               *GPi_offd_data++ = 0.5 * Gy_data[i];
+               *GPi_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gx_data[i];
+               *GPi_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gy_data[i];
                if (dim == 4)
-                  *GPi_offd_data++ = 0.5 * Gz_data[i];
+                  *GPi_offd_data++ = fabs(G_offd_data[j]) * 0.5 * Gz_data[i];
             }
 
          for (i = 0; i < G_offd_ncols; i++)
