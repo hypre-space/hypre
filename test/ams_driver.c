@@ -74,7 +74,7 @@ hypre_int main (hypre_int argc, char *argv[])
    singular_problem = 0;
    rlx_type = 2; rlx_sweeps = 1;
    rlx_weight = 1.0; rlx_omega = 1.0;
-   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 6;       /* HMIS-1 */
+   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8;       /* HMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 0; amg_rlx_type = 3; */ /* HMIS-0 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
