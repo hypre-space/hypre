@@ -2,6 +2,8 @@ slu_util.c:
 autoconf has been disabled
 automake has been disabled
 autoheader has been disabled
+warning: [options] bootstrap class path not set in conjunction with
+1 warning
 configure: WARNING: Disabling F90 Support
 configure: WARNING: Configuration for Python failed.
 warning: warning: feupdateenv is not implemented and will always fail
