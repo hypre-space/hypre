@@ -22,6 +22,7 @@ hypre_SMGAxpy( double              alpha,
                hypre_Index         base_index,
                hypre_Index         base_stride )
 {
+   HYPRE_Int         ndim = hypre_StructVectorNDim(x);
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
                  
@@ -38,7 +39,7 @@ hypre_SMGAxpy( double              alpha,
                     
    HYPRE_Int         i;
 
-   box = hypre_BoxCreate();
+   box = hypre_BoxCreate(ndim);
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
@@ -53,7 +54,7 @@ hypre_SMGAxpy( double              alpha,
       yp = hypre_StructVectorBoxData(y, i);
 
       hypre_BoxGetStrideSize(box, base_stride, loop_size);
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, base_stride, xi,
                           y_data_box, start, base_stride, yi);
 #ifdef HYPRE_USING_OPENMP

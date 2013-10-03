@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * HYPRE_SStructVector interface
@@ -309,6 +308,8 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* ONLY3D */
+
 HYPRE_Int
 HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
                                  HYPRE_Int            part,
@@ -367,6 +368,8 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* ONLY3D */
+
 HYPRE_Int
 HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
                                  HYPRE_Int            part,
@@ -381,7 +384,7 @@ HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
    hypre_Index          *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
    HYPRE_Int             i, d, vindex[3];
 
-   hypre_ClearIndex(vindex);
+   hypre_SetIndex(vindex, 0);
    for (i = 0; i < fem_nvars; i++)
    {
       for (d = 0; d < ndim; d++)

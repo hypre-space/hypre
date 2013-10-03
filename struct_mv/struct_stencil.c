@@ -33,7 +33,7 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
 
    hypre_StructStencilShape(stencil)    = shape;
    hypre_StructStencilSize(stencil)     = size;
-   hypre_StructStencilDim(stencil)      = dim;
+   hypre_StructStencilNDim(stencil)      = dim;
    hypre_StructStencilRefCount(stencil) = 1;
 
    return stencil;
@@ -83,15 +83,14 @@ hypre_StructStencilElementRank( hypre_StructStencil *stencil,
 {
    hypre_Index  *stencil_shape;
    HYPRE_Int     rank;
-   HYPRE_Int     i;
+   HYPRE_Int     i, ndim;
 
    rank = -1;
+   ndim = hypre_StructStencilNDim(stencil);
    stencil_shape = hypre_StructStencilShape(stencil);
    for (i = 0; i < hypre_StructStencilSize(stencil); i++)
    {
-      if ((hypre_IndexX(stencil_shape[i]) == hypre_IndexX(stencil_element)) &&
-          (hypre_IndexY(stencil_shape[i]) == hypre_IndexY(stencil_element)) &&
-          (hypre_IndexZ(stencil_shape[i]) == hypre_IndexZ(stencil_element))   )
+      if (hypre_IndexesEqual(stencil_shape[i], stencil_element, ndim))
       {
          rank = i;
          break;
@@ -124,13 +123,14 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
    HYPRE_Int             symm_stencil_size;
    HYPRE_Int            *symm_elements;
 
-   HYPRE_Int             no_symmetric_stencil_element;
-   HYPRE_Int             i, j, d;
+   HYPRE_Int             no_symmetric_stencil_element, symmetric;
+   HYPRE_Int             i, j, d, ndim;
                        
    /*------------------------------------------------------
     * Copy stencil elements into `symm_stencil_shape'
     *------------------------------------------------------*/
 
+   ndim = hypre_StructStencilNDim(stencil);
    symm_stencil_shape = hypre_CTAlloc(hypre_Index, 2*stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
@@ -154,16 +154,23 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
          no_symmetric_stencil_element = 1;
          for (j = i; j < stencil_size; j++)
          {
-            if ( (hypre_IndexX(symm_stencil_shape[j]) ==
-                  -hypre_IndexX(symm_stencil_shape[i])  ) &&
-                 (hypre_IndexY(symm_stencil_shape[j]) ==
-                  -hypre_IndexY(symm_stencil_shape[i])  ) &&
-                 (hypre_IndexZ(symm_stencil_shape[j]) ==
-                  -hypre_IndexZ(symm_stencil_shape[i])  )   )
+            symmetric = 1;
+            for (d = 0; d < ndim; d++)
+            {
+               if (hypre_IndexD(symm_stencil_shape[j], d) !=
+                   -hypre_IndexD(symm_stencil_shape[i], d))
+               {
+                  symmetric = 0;
+                  break;
+               }
+            }
+            if (symmetric)
             {
                /* only "off-center" elements have symmetric entries */
                if (i != j)
+               {
                   symm_elements[j] = i;
+               }
                no_symmetric_stencil_element = 0;
             }
          }
@@ -171,7 +178,7 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
          if (no_symmetric_stencil_element)
          {
             /* add symmetric stencil element to `symm_stencil' */
-            for (d = 0; d < 3; d++)
+            for (d = 0; d < ndim; d++)
             {
                hypre_IndexD(symm_stencil_shape[symm_stencil_size], d) =
                   -hypre_IndexD(symm_stencil_shape[i], d);
@@ -183,7 +190,7 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
       }
    }
 
-   symm_stencil = hypre_StructStencilCreate(hypre_StructStencilDim(stencil),
+   symm_stencil = hypre_StructStencilCreate(hypre_StructStencilNDim(stencil),
                                             symm_stencil_size,
                                             symm_stencil_shape);
 

@@ -89,7 +89,7 @@ hypre_SMGSetup( void               *smg_vdata,
     * Set up coarsening direction
     *-----------------------------------------------------*/
 
-   cdir = hypre_StructStencilDim(hypre_StructMatrixStencil(A)) - 1;
+   cdir = hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) - 1;
    (smg_data -> cdir) = cdir;
 
    /*-----------------------------------------------------
@@ -413,7 +413,7 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
 #if DEBUG
-   if(hypre_StructGridDim(grid_l[0]) == 3)
+   if(hypre_StructGridNDim(grid_l[0]) == 3)
    {
       for (l = 0; l < (num_levels - 1); l++)
       {

@@ -34,7 +34,7 @@
  *   replication.
  *--------------------------------------------------------------------------*/
 
-typedef HYPRE_Int  hypre_Index[3];
+typedef HYPRE_Int  hypre_Index[HYPRE_MAXDIM];
 typedef HYPRE_Int *hypre_IndexRef;
 
 /*--------------------------------------------------------------------------
@@ -45,12 +45,14 @@ typedef struct hypre_Box_struct
 {
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
+   HYPRE_Int   ndim;           /* number of dimensions */
 
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArray:
  *   An array of boxes.
+ *   Since size can be zero, need to store ndim separately.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_BoxArray_struct
@@ -58,6 +60,7 @@ typedef struct hypre_BoxArray_struct
    hypre_Box  *boxes;         /* Array of boxes */
    HYPRE_Int   size;          /* Size of box array */
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
+   HYPRE_Int   ndim;          /* number of dimensions */
 
 } hypre_BoxArray;
 
@@ -66,15 +69,16 @@ typedef struct hypre_BoxArray_struct
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
  *   An array of box arrays.
+ *   Since size can be zero, need to store ndim separately.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    HYPRE_Int         size;          /* Size of box array array */
+   HYPRE_Int         ndim;          /* number of dimensions */
 
 } hypre_BoxArrayArray;
-
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Index
@@ -82,6 +86,7 @@ typedef struct hypre_BoxArrayArray_struct
 
 #define hypre_IndexD(index, d)  (index[d])
 
+/* Avoid using these macros */
 #define hypre_IndexX(index)     hypre_IndexD(index, 0)
 #define hypre_IndexY(index)     hypre_IndexD(index, 1)
 #define hypre_IndexZ(index)     hypre_IndexD(index, 2)
@@ -90,38 +95,14 @@ typedef struct hypre_BoxArrayArray_struct
  * Member functions: hypre_Index
  *--------------------------------------------------------------------------*/
 
-#define hypre_SetIndex(index, ix, iy, iz) \
-( hypre_IndexX(index) = ix,\
-  hypre_IndexY(index) = iy,\
-  hypre_IndexZ(index) = iz )
+/*----- Avoid using these Index macros -----*/
 
-#define hypre_ClearIndex(index)  hypre_SetIndex(index, 0, 0, 0)
+#define hypre_SetIndex3(index, ix, iy, iz) \
+( hypre_IndexD(index, 0) = ix,\
+  hypre_IndexD(index, 1) = iy,\
+  hypre_IndexD(index, 2) = iz )
 
-#define hypre_IndexZero(index)\
-   (hypre_IndexX(index) == 0 &&  hypre_IndexY(index) == 0 \
-    && hypre_IndexZ(index) == 0)
-
-#define hypre_IndexGTESize(index, size) \
-(hypre_IndexX(index) >= size &&  hypre_IndexY(index) >= size \
-    && hypre_IndexZ(index) >= size)
-
-#define hypre_CopyIndex(index1, index2) \
-( hypre_IndexX(index2) = hypre_IndexX(index1),\
-  hypre_IndexY(index2) = hypre_IndexY(index1),\
-  hypre_IndexZ(index2) = hypre_IndexZ(index1) )
-
-#define hypre_CopyToCleanIndex(in_index, ndim, out_index) \
-{\
-   HYPRE_Int d;\
-   for (d = 0; d < ndim; d++)\
-   {\
-      hypre_IndexD(out_index, d) = hypre_IndexD(in_index, d);\
-   }\
-   for (d = ndim; d < 3; d++)\
-   {\
-      hypre_IndexD(out_index, d) = 0;\
-   }\
-}
+#define hypre_ClearIndex(index)  hypre_SetIndex(index, 0)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Box
@@ -129,104 +110,29 @@ typedef struct hypre_BoxArrayArray_struct
 
 #define hypre_BoxIMin(box)     ((box) -> imin)
 #define hypre_BoxIMax(box)     ((box) -> imax)
-
-#define hypre_AddIndex(index1, index2, index3) \
-( hypre_IndexX(index3) = hypre_IndexX(index2) + hypre_IndexX(index1),\
-  hypre_IndexY(index3) = hypre_IndexY(index2) + hypre_IndexY(index1),\
-  hypre_IndexZ(index3) = hypre_IndexZ(index2) + hypre_IndexZ(index1) )
-
-#define hypre_SubtractIndex(index1, index2, index3) \
-( hypre_IndexX(index3) = hypre_IndexX(index1) - hypre_IndexX(index2),\
-  hypre_IndexY(index3) = hypre_IndexY(index1) - hypre_IndexY(index2),\
-  hypre_IndexZ(index3) = hypre_IndexZ(index1) - hypre_IndexZ(index2) )
+#define hypre_BoxNDim(box)     ((box) -> ndim)
 
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
 hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 
-#define hypre_BoxIMinX(box)    hypre_BoxIMinD(box, 0)
-#define hypre_BoxIMinY(box)    hypre_BoxIMinD(box, 1)
-#define hypre_BoxIMinZ(box)    hypre_BoxIMinD(box, 2)
+#define hypre_IndexDInBox(index, d, box) \
+( hypre_IndexD(index, d) >= hypre_BoxIMinD(box, d) && \
+  hypre_IndexD(index, d) <= hypre_BoxIMaxD(box, d) )
 
-#define hypre_BoxIMaxX(box)    hypre_BoxIMaxD(box, 0)
-#define hypre_BoxIMaxY(box)    hypre_BoxIMaxD(box, 1)
-#define hypre_BoxIMaxZ(box)    hypre_BoxIMaxD(box, 2)
+/* The first hypre_CCBoxIndexRank is better style because it is similar to
+   hypre_BoxIndexRank.  The second one sometimes avoids compiler warnings. */
+#define hypre_CCBoxIndexRank(box, index) 0
+#define hypre_CCBoxIndexRank_noargs() 0
+#define hypre_CCBoxOffsetDistance(box, index) 0
+  
+/*----- Avoid using these Box macros -----*/
 
 #define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
-#define hypre_BoxEqualP( box1, box2 ) (\
- hypre_BoxIMinX(box1)==hypre_BoxIMinX(box2) &&\
- hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box2) &&\
- hypre_BoxIMinY(box1)==hypre_BoxIMinY(box2) &&\
- hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box2) &&\
- hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box2) &&\
- hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box2) )
-
-#define hypre_IndexInBoxP( index, box ) (\
- hypre_IndexX(index)>=hypre_BoxIMinX(box) &&\
- hypre_IndexX(index)<=hypre_BoxIMaxX(box) &&\
- hypre_IndexY(index)>=hypre_BoxIMinY(box) &&\
- hypre_IndexY(index)<=hypre_BoxIMaxY(box) &&\
- hypre_IndexZ(index)>=hypre_BoxIMinZ(box) &&\
- hypre_IndexZ(index)<=hypre_BoxIMaxZ(box) )
-
-
-#define hypre_IndexDInBoxP( index, d, box ) (\
- hypre_IndexD(index, d)>=hypre_BoxIMinD(box, d) &&\
- hypre_IndexD(index, d)<=hypre_BoxIMaxD(box, d) )
-
-#define hypre_CopyBox(box1, box2) \
-( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
-  hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
-
-#define hypre_BoxVolume(box) \
-(hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
-
-#define hypre_BoxShiftPos(box, shift) \
-{\
-   hypre_BoxIMinX(box) += hypre_IndexX(shift);\
-   hypre_BoxIMinY(box) += hypre_IndexY(shift);\
-   hypre_BoxIMinZ(box) += hypre_IndexZ(shift);\
-   hypre_BoxIMaxX(box) += hypre_IndexX(shift);\
-   hypre_BoxIMaxY(box) += hypre_IndexY(shift);\
-   hypre_BoxIMaxZ(box) += hypre_IndexZ(shift);\
-}
-
-#define hypre_BoxShiftNeg(box, shift) \
-{\
-   hypre_BoxIMinX(box) -= hypre_IndexX(shift);\
-   hypre_BoxIMinY(box) -= hypre_IndexY(shift);\
-   hypre_BoxIMinZ(box) -= hypre_IndexZ(shift);\
-   hypre_BoxIMaxX(box) -= hypre_IndexX(shift);\
-   hypre_BoxIMaxY(box) -= hypre_IndexY(shift);\
-   hypre_BoxIMaxZ(box) -= hypre_IndexZ(shift);\
-}
-
-#define hypre_BoxIndexRank(box, index) \
-((hypre_IndexX(index) - hypre_BoxIMinX(box)) + \
- ((hypre_IndexY(index) - hypre_BoxIMinY(box)) + \
-   ((hypre_IndexZ(index) - hypre_BoxIMinZ(box)) * \
-    hypre_BoxSizeY(box))) * \
-  hypre_BoxSizeX(box))
-
-/* The first hypre_CCBoxIndexRank is better style because it keeps
-   its similarity to the variable coefficient hypre_BoxIndexRank.
-   The second one sometimes avoids compiler warnings...*/
-#define hypre_CCBoxIndexRank(box, index) 0
-#define hypre_CCBoxIndexRank_noargs() 0
-
-#define hypre_BoxOffsetDistance(box, index) \
-(hypre_IndexX(index) + \
- (hypre_IndexY(index) + \
-  (hypre_IndexZ(index) * \
-   hypre_BoxSizeY(box))) * \
- hypre_BoxSizeX(box))
-
-#define hypre_CCBoxOffsetDistance(box, index) 0
-  
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArray
  *--------------------------------------------------------------------------*/
@@ -235,6 +141,7 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxArrayBox(box_array, i)    &((box_array) -> boxes[(i)])
 #define hypre_BoxArraySize(box_array)      ((box_array) -> size)
 #define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
+#define hypre_BoxArrayNDim(box_array)      ((box_array) -> ndim)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArrayArray
@@ -246,6 +153,8 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 ((box_array_array) -> box_arrays[(i)])
 #define hypre_BoxArrayArraySize(box_array_array) \
 ((box_array_array) -> size)
+#define hypre_BoxArrayArrayNDim(box_array_array) \
+((box_array_array) -> ndim)
 
 /*--------------------------------------------------------------------------
  * Looping macros:
@@ -259,12 +168,9 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
- *
- * NOTE: PThreads version of BoxLoop looping macros are in `box_pthreads.h'.
  *--------------------------------------------------------------------------*/
 
-#if 1 /* set to 0 to use the new box loops */
-#ifndef HYPRE_USE_PTHREADS
+#if 0 /* set to 0 to use the new box loops */
 
 #define HYPRE_BOX_PRIVATE hypre__nx,hypre__ny,hypre__nz,hypre__i,hypre__j,hypre__k
 
@@ -545,8 +451,6 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 
 /*-----------------------------------*/
 
-#endif  /* ifndef HYPRE_USE_PTHREADS */
-
 #else
 
 #define HYPRE_BOX_PRIVATE        ZYPRE_BOX_PRIVATE
@@ -680,6 +584,9 @@ while (hypre__d > 1)\
    hypre__i[hypre__d] = 0;\
 }
 
+/* This returns the loop index (of type hypre_Index) for the current iteration,
+ * where the numbering starts at 0.  It works even when threading is turned on,
+ * as long as 'index' is declared to be private. */
 #define zypre_BoxLoopGetIndex(index) \
 index[0] = hypre__I;\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
@@ -687,10 +594,10 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    index[hypre__d] = hypre__i[hypre__d];\
 }
 
-/* TODO: Use this before the For macros below to force only one block */
+/* Use this before the For macros below to force only one block */
 #define zypre_BoxLoopSetOneBlock() hypre__num_blocks = 1
 
-/* TODO: Use this to get the block iteration inside a BoxLoop */
+/* Use this to get the block iteration inside a BoxLoop */
 #define zypre_BoxLoopBlock() hypre__block
 
 /*-----------------------------------*/
@@ -880,9 +787,11 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 
 
 
-#if 0
+/*--------------------------------------------------------------------------
+ * NOTES - Keep these for reference here and elsewhere in the code
+ *--------------------------------------------------------------------------*/
 
-/*- NOTES ------------------------------*/
+#if 0
 
 #define hypre_BoxLoop2Begin(loop_size,
                             dbox1, start1, stride1, i1,
@@ -926,9 +835,9 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    }
 }
 
-/*-----------------------------------*/
-
-/* Idea 2 */
+/*----------------------------------------
+ * Idea 2: Simple version of Idea 3 below
+ *----------------------------------------*/
 
 N = 1;
 for (d = 0; d < ndim; d++)
@@ -952,9 +861,9 @@ for (I = 0; I < N; I++)
    i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
 }
 
-/*-----------------------------------*/
-
-/* Idea 3 */
+/*----------------------------------------
+ * Idea 3: Approach used in the box loops
+ *----------------------------------------*/
 
 N = 1;
 for (d = 1; d < ndim; d++)

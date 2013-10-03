@@ -3320,14 +3320,7 @@ main( HYPRE_Int   argc,
       else if (solver_id == 218)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif /* HYPRE_USE_PTHREADS */
          HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3591,14 +3584,7 @@ main( HYPRE_Int   argc,
       else if (solver_id == 238)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif /* HYPRE_USE_PTHREADS */
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3740,14 +3726,7 @@ main( HYPRE_Int   argc,
       else if (solver_id == 248)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif /* HYPRE_USE_PTHREADS */
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,

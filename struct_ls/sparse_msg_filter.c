@@ -76,18 +76,18 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
     * Compute encoding digit and strides
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
 
    l = lx + ly + lz;
    if ((l >= 1) && (l <= jump))
    {
       k = 1 >> l;
-      hypre_SetIndex(stridev, (1 >> lx), (1 >> ly), (1 >> lz));
+      hypre_SetIndex3(stridev, (1 >> lx), (1 >> ly), (1 >> lz));
    }
    else
    {
       k = 1;
-      hypre_SetIndex(stridev, 1, 1, 1);
+      hypre_SetIndex3(stridev, 1, 1, 1);
 
       hypre_StructVectorSetConstantValues(visitx, 0.0);
       hypre_StructVectorSetConstantValues(visity, 0.0);
@@ -98,7 +98,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
     * Compute visit vectors
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(cindex, 0, 0, 0);
+   hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
@@ -116,7 +116,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
 #ifdef HYPRE_USING_OPENMP
@@ -246,25 +246,25 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
     * Compute encoding digit and strides
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
 
    l = lx + ly + lz;
    if ((l >= 1) && (l <= jump))
    {
       k = 1 >> l;
-      hypre_SetIndex(stridev, (1 >> lx), (1 >> ly), (1 >> lz));
+      hypre_SetIndex3(stridev, (1 >> lx), (1 >> ly), (1 >> lz));
    }
    else
    {
       k = 1;
-      hypre_SetIndex(stridev, 1, 1, 1);
+      hypre_SetIndex3(stridev, 1, 1, 1);
    }
 
    /*-----------------------------------------------------
     * Filter interpolated error
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(cindex, 0, 0, 0);
+   hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(e));
    hypre_ForBoxI(i, compute_boxes)
@@ -281,7 +281,7 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(e), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
 #ifdef HYPRE_USING_OPENMP
@@ -363,14 +363,14 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
     * Compute encoding digit and strides
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
-   hypre_SetIndex(stridev, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
+   hypre_SetIndex3(stridev, 1, 1, 1);
 
    /*-----------------------------------------------------
     * Compute visit vectors
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(cindex, 0, 0, 0);
+   hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
@@ -388,7 +388,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
 #ifdef HYPRE_USING_OPENMP
@@ -491,14 +491,14 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
     * Compute encoding digit and strides
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
-   hypre_SetIndex(stridev, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
+   hypre_SetIndex3(stridev, 1, 1, 1);
 
    /*-----------------------------------------------------
     * Filter interpolated error
     *-----------------------------------------------------*/
 
-   hypre_SetIndex(cindex, 0, 0, 0);
+   hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(e));
    hypre_ForBoxI(i, compute_boxes)
@@ -515,7 +515,7 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(e), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
 #ifdef HYPRE_USING_OPENMP

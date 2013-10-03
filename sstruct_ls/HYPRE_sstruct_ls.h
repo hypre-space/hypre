@@ -381,7 +381,7 @@ HYPRE_SStructFACDestroy2(HYPRE_SStructSolver solver);
  **/
 HYPRE_Int
 HYPRE_SStructFACAMR_RAP(HYPRE_SStructMatrix  A,
-                        HYPRE_Int          (*rfactors)[3],
+                        HYPRE_Int          (*rfactors)[HYPRE_MAXDIM],
                         HYPRE_SStructMatrix *fac_A);
 
 /**
@@ -415,7 +415,7 @@ HYPRE_SStructFACSetPLevels(HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_SStructFACSetPRefinements(HYPRE_SStructSolver  solver,
                                 HYPRE_Int            nparts,
-                                HYPRE_Int          (*rfactors)[3] );
+                                HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] );
 
 /**
  * (Optional, but user must make sure that they do this function otherwise.)
@@ -425,7 +425,7 @@ HYPRE_Int
 HYPRE_SStructFACZeroCFSten(HYPRE_SStructMatrix  A,
                            HYPRE_SStructGrid    grid,
                            HYPRE_Int            part,
-                           HYPRE_Int            rfactors[3]);
+                           HYPRE_Int            rfactors[HYPRE_MAXDIM]);
 
 /**
  * (Optional, but user must make sure that they do this function otherwise.)
@@ -444,7 +444,7 @@ HYPRE_SStructFACZeroFCSten(HYPRE_SStructMatrix  A,
 HYPRE_Int
 HYPRE_SStructFACZeroAMRMatrixData(HYPRE_SStructMatrix  A,
                                   HYPRE_Int            part_crse,
-                                  HYPRE_Int            rfactors[3]);
+                                  HYPRE_Int            rfactors[HYPRE_MAXDIM]);
 
 /**
  * (Optional, but user must make sure that they do this function otherwise.)
@@ -454,7 +454,7 @@ HYPRE_SStructFACZeroAMRMatrixData(HYPRE_SStructMatrix  A,
 HYPRE_Int
 HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
                                   HYPRE_Int           *plevels,
-                                  HYPRE_Int          (*rfactors)[3] );
+                                  HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] );
 
 /**
  * (Optional) Set maximum number of FAC levels.
@@ -629,7 +629,7 @@ HYPRE_SStructMaxwellSetGrad(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
-                                HYPRE_Int           rfactors[3]);
+                                HYPRE_Int           rfactors[HYPRE_MAXDIM]);
 
 /**
  * Finds the physical boundary row ranks on all levels.
@@ -637,7 +637,7 @@ HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_SStructMaxwellPhysBdy(HYPRE_SStructGrid  *grid_l,
                             HYPRE_Int           num_levels,
-                            HYPRE_Int           rfactors[3],
+                            HYPRE_Int           rfactors[HYPRE_MAXDIM],
                             HYPRE_Int        ***BdryRanks_ptr,
                             HYPRE_Int         **BdryRanksCnt_ptr );
 

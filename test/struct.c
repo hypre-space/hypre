@@ -185,10 +185,6 @@ main( hypre_int argc,
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_InitPthreads(4);
-#endif  
-
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -1000,7 +996,7 @@ main( hypre_int argc,
             }
             if ( solver_id == 4 || solver_id == 14)
             {
-               hypre_SetIndex(diag_index, 0, 0, 0);
+               hypre_SetIndex3(diag_index, 0, 0, 0);
                diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
                hypre_assert( stencil_size>=1 );
                if ( diag_rank==0 ) stencil_entries[diag_rank]=1;
@@ -1625,14 +1621,7 @@ main( hypre_int argc,
          else if (solver_id == 18)
          {
             /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-            for (i = 0; i < hypre_NumThreads; i++)
-            {
-               precond[i] = NULL;
-            }
-#else
             precond = NULL;
-#endif
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -1791,14 +1780,7 @@ main( hypre_int argc,
             else if (solver_id == 18)
             {
                /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-               for (i = 0; i < hypre_NumThreads; i++)
-               {
-                  precond[i] = NULL;
-               }
-#else
                precond = NULL;
-#endif
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -2026,14 +2008,7 @@ main( hypre_int argc,
             else if (solver_id == 18)
             {
                /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-               for (i = 0; i < hypre_NumThreads; i++)
-               {
-                  precond[i] = NULL;
-               }
-#else
                precond = NULL;
-#endif
                HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -2389,14 +2364,7 @@ main( hypre_int argc,
          else if (solver_id == 38)
          {
             /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-            for (i = 0; i < hypre_NumThreads; i++)
-            {
-               precond[i] = NULL;
-            }
-#else
             precond = NULL;
-#endif
             HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -2541,14 +2509,7 @@ main( hypre_int argc,
          else if (solver_id == 48)
          {
             /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-            for (i = 0; i < hypre_NumThreads; i++)
-            {
-               precond[i] = NULL;
-            }
-#else
             precond = NULL;
-#endif
             HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                       (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                       (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -2854,10 +2815,6 @@ main( hypre_int argc,
    /* Finalize MPI */
    hypre_MPI_Finalize();
 
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_DestroyPthreads();
-#endif  
-
    return (0);
 }
 
@@ -2883,7 +2840,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    HYPRE_Int          volume,dim;
 
    gridboxes =  hypre_StructGridBoxes(gridvector);
-   dim       =  hypre_StructGridDim(gridvector);
+   dim       =  hypre_StructGridNDim(gridvector);
 
    ib=0;
    hypre_ForBoxI(ib, gridboxes)
@@ -2960,7 +2917,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
    HYPRE_Int           constant_coefficient;
 
    gridboxes =  hypre_StructGridBoxes(gridmatrix);
-   dim       =  hypre_StructGridDim(gridmatrix);
+   dim       =  hypre_StructGridNDim(gridmatrix);
    sym       =  hypre_StructMatrixSymmetric(A);
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
@@ -3309,7 +3266,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    istart          = hypre_BoxIMin(boundingbox);
    iend            = hypre_BoxIMax(boundingbox);
    size            = hypre_StructGridNumBoxes(gridmatrix);
-   dim             = hypre_StructGridDim(gridmatrix);
+   dim             = hypre_StructGridNDim(gridmatrix);
    stencil_indices = hypre_CTAlloc(HYPRE_Int, 1);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
@@ -3331,7 +3288,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    ib = 0;
    hypre_ForBoxI(i, gridboxes)
    {
-      dummybox = hypre_BoxCreate( );
+      dummybox = hypre_BoxCreate(dim);
       box      = hypre_BoxArrayBox(gridboxes, i);
       volume   =  hypre_BoxVolume(box);
       vol[i]   = volume;

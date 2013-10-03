@@ -154,16 +154,19 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
    HYPRE_Int              ierr= 0;
 
+   hypre_BoxInit(&vbox, ndim);
+   hypre_BoxInit(&boxman_entry_box, ndim);
+
    hypre_MPI_Comm_rank(A_comm, &myproc);
    hypre_MPI_Comm_size(grid_comm, &nprocs);
 
    start_rank= hypre_ParCSRMatrixFirstRowIndex(A);
    end_rank  = hypre_ParCSRMatrixLastRowIndex(A);
 
-   hypre_SetIndex(ishift, 1, 0, 0);
-   hypre_SetIndex(jshift, 0, 1, 0);
-   hypre_SetIndex(kshift, 0, 0, 1);
-   hypre_SetIndex(zero_index, 0, 0, 0);
+   hypre_SetIndex3(ishift, 1, 0, 0);
+   hypre_SetIndex3(jshift, 0, 1, 0);
+   hypre_SetIndex3(kshift, 0, 0, 1);
+   hypre_SetIndex3(zero_index, 0, 0, 0);
 
    /* need a cellgrid boxman to determine the send boxes -> only the cell dofs
       are unique so a boxman intersect can be used to get the edges that
@@ -237,8 +240,8 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
             /* form the variable cellbox */
             hypre_CopyBox(cellbox, &vbox);
-            hypre_SubtractIndex(hypre_BoxIMin(&vbox), varoffset,
-                                hypre_BoxIMin(&vbox));
+            hypre_SubtractIndexes(hypre_BoxIMin(&vbox), varoffset, 3,
+                                  hypre_BoxIMin(&vbox));
 
             /* boundary layer box depends on variable type */
             switch(var)
@@ -246,7 +249,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 1:  /* node based */
                {
                   nbdry_slabs= 6;
-                  recv_slabs = hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs = hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- i,j,k directions */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -295,7 +298,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */ 
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
    
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -355,7 +358,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 2:  /* x-face based */
                {
                   nbdry_slabs= 2;
-                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- i direction */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -368,7 +371,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */ 
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
    
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -386,7 +389,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 3:  /* y-face based */
                {
                   nbdry_slabs= 2;
-                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- j direction */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -399,7 +402,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -417,7 +420,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 4:  /* z-face based */
                {
                   nbdry_slabs= 2;
-                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- k direction */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -430,7 +433,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -448,7 +451,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 5:  /* x-edge based */
                {
                   nbdry_slabs= 4;
-                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- j & k direction */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -477,7 +480,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -511,7 +514,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 6:  /* y-edge based */
                {
                   nbdry_slabs= 4;
-                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- i & k direction */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -540,7 +543,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -574,7 +577,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                case 7:  /* z-edge based */
                {
                   nbdry_slabs= 4;
-                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  recv_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   /* slab in the +/- i & j direction */
                   box= hypre_BoxArrayBox(recv_slabs, 0);
@@ -603,7 +606,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
                   /* send boxes are cell-based stretching out of cellbox - i.e., cells
                      that have these edges as boundary */
-                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs);
+                  send_slabs= hypre_BoxArrayCreate(nbdry_slabs, ndim);
 
                   box= hypre_BoxArrayBox(send_slabs, 0);
                   hypre_CopyBox(cellbox, box);
@@ -674,8 +677,9 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      /* not correct box piece right now. Need to determine 
                         the correct var box - extend to var_box and then intersect
                         with vbox */
-                     hypre_SubtractIndex(hypre_BoxIMin(&boxman_entry_box), varoffset,
-                                         hypre_BoxIMin(&boxman_entry_box));
+                     hypre_SubtractIndexes(hypre_BoxIMin(&boxman_entry_box),
+                                           varoffset, 3,
+                                           hypre_BoxIMin(&boxman_entry_box));
                      hypre_IntersectBoxes(&boxman_entry_box, &vbox, &boxman_entry_box);
 
                      SendToProcs[proc]+= 2*hypre_BoxVolume(&boxman_entry_box);
@@ -702,8 +706,8 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      hypre_BoxLoop0For()
                      {
                         hypre_BoxLoopGetIndex(lindex);
-                        hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                        hypre_AddIndex(index, start, index);
+                        hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                        hypre_AddIndexes(index, start, 3, index);
 
                         hypre_SStructGridFindBoxManEntry(grid, part, index, t,
                                                          &entry);

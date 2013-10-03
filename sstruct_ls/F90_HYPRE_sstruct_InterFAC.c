@@ -56,7 +56,7 @@ hypre_F90_IFACE(hypre_sstructfacdestroy2, HYPRE_SSTRUCTFACDESTROY2)
 void
 hypre_F90_IFACE(hypre_sstructfacamrrap, HYPRE_SSTRUCTFACAMRRAP)
    (hypre_F90_Obj *A,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Obj *facA,
     hypre_F90_Int *ierr)
 {
@@ -150,7 +150,7 @@ hypre_F90_IFACE(hypre_sstructfaczerocfsten, HYPRE_SSTRUCTFACZEROCFSTEN)
    (hypre_F90_Obj *A,
     hypre_F90_Obj *grid,
     hypre_F90_Int *part,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -158,7 +158,7 @@ hypre_F90_IFACE(hypre_sstructfaczerocfsten, HYPRE_SSTRUCTFACZEROCFSTEN)
            hypre_F90_PassObj (HYPRE_SStructMatrix, A),
            hypre_F90_PassObj (HYPRE_SStructGrid, grid),
            hypre_F90_PassInt (part),
-           rfactors[3] ));
+           rfactors[HYPRE_MAXDIM] ));
 }
 
 /*--------------------------------------------------------------------------
@@ -187,14 +187,14 @@ void
 hypre_F90_IFACE(hypre_sstructfaczeroamrmatrixdata, HYPRE_SSTRUCTFACZEROAMRMATRIXDATA)
    (hypre_F90_Obj *A,
     hypre_F90_Int *part_crse,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_SStructFACZeroAMRMatrixData(
            hypre_F90_PassObj (HYPRE_SStructMatrix, A),
            hypre_F90_PassInt (part_crse),
-           rfactors[3] ));
+           rfactors[HYPRE_MAXDIM] ));
 }
 
 /*--------------------------------------------------------------------------
@@ -205,7 +205,7 @@ void
 hypre_F90_IFACE(hypre_sstructfaczeroamrvectordata, HYPRE_SSTRUCTFACZEROAMRVECTORDATA)
    (hypre_F90_Obj *b,
     hypre_F90_IntArray *plevels,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -224,7 +224,7 @@ void
 hypre_F90_IFACE(hypre_sstructfacsetprefinements, HYPRE_SSTRUCTFACSETPREFINEMENTS)
    (hypre_F90_Obj *solver,
     hypre_F90_Int *nparts,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)

@@ -32,7 +32,7 @@
 
 char infile_default[50] = "sstruct_default.in";
 
-typedef HYPRE_Int Index[3];
+typedef HYPRE_Int Index[HYPRE_MAXDIM];
 typedef HYPRE_Int ProblemIndex[9];  /* last 3 digits are shifts */
 
 typedef struct

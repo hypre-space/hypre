@@ -94,6 +94,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_MPI_Comm_rank(comm, &myid);
    hypre_ClearIndex(zero_index);
 
+   hypre_BoxInit(&scaled_box, ndim);
+
    hypre_SStructGraphRef(graph, &fac_graph);
    fac_grid= hypre_SStructGraphGrid(fac_graph);
    HYPRE_SStructMatrixCreate(comm, fac_graph, &fac_A);
@@ -168,7 +170,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       }
    }
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
    for (part= (nparts-1); part> 0; part--)
    {
       f_pgrid= hypre_SStructGridPGrid(fac_grid, part);

@@ -21,12 +21,6 @@ typedef long int          hypre_longint;
 typedef unsigned int      hypre_uint;
 typedef unsigned long int hypre_ulongint;
 
-#ifdef HYPRE_USE_PTHREADS
-#ifndef hypre_MAX_THREADS
-#define hypre_MAX_THREADS 128
-#endif
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -66,6 +60,10 @@ extern "C" {
 
 #ifndef hypre_round
 #define hypre_round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
+#endif
+
+#ifndef hypre_pow2
+#define hypre_pow2(i)  ( 1 << (i) )
 #endif
 
 #endif
@@ -442,32 +440,10 @@ extern "C" {
 
 #endif
 
-
-#ifdef HYPRE_USE_PTHREADS
-
-#define hypre_SharedTAlloc(type, count) \
-( (type *)hypre_SharedMAlloc((size_t)(sizeof(type) * (count))) )
-
-
-#define hypre_SharedCTAlloc(type, count) \
-( (type *)hypre_SharedCAlloc((size_t)(count),\
-                             (size_t)sizeof(type)) )
-
-#define hypre_SharedTReAlloc(ptr, type, count) \
-( (type *)hypre_SharedReAlloc((char *)ptr,\
-                              (size_t)(sizeof(type) * (count))) )
-
-#define hypre_SharedTFree(ptr) \
-( hypre_SharedFree((char *)ptr), ptr = NULL )
-
-#else
-
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
 #define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count))
 #define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
 #define hypre_SharedTFree(ptr) hypre_TFree(ptr)
-
-#endif
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -510,122 +486,6 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-/******************************************************************************
- *
- *  Fake mpi stubs to generate serial codes without mpi
- *
- *****************************************************************************/
-/*just a test comment*/
-#ifndef hypre_thread_MPISTUBS
-#define hypre_thread_MPISTUBS
-
-#ifdef HYPRE_USE_PTHREADS
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifndef HYPRE_USING_THREAD_MPISTUBS
-
-#define MPI_Init           hypre_thread_MPI_Init             
-#define MPI_Wtime          hypre_thread_MPI_Wtime            
-#define MPI_Wtick          hypre_thread_MPI_Wtick            
-#define MPI_Barrier        hypre_thread_MPI_Barrier          
-#define MPI_Finalize       hypre_thread_MPI_Finalize         
-#define MPI_Comm_group     hypre_thread_MPI_Comm_group       
-#define MPI_Comm_dup       hypre_thread_MPI_Comm_dup         
-#define MPI_Group_incl     hypre_thread_MPI_Group_incl       
-#define MPI_Comm_create    hypre_thread_MPI_Comm_create      
-#define MPI_Allgather      hypre_thread_MPI_Allgather        
-#define MPI_Allgatherv     hypre_thread_MPI_Allgatherv       
-#define MPI_Bcast          hypre_thread_MPI_Bcast            
-#define MPI_Send           hypre_thread_MPI_Send             
-#define MPI_Recv           hypre_thread_MPI_Recv             
-
-#define MPI_Isend          hypre_thread_MPI_Isend            
-#define MPI_Irecv          hypre_thread_MPI_Irecv            
-#define MPI_Wait           hypre_thread_MPI_Wait             
-#define MPI_Waitall        hypre_thread_MPI_Waitall          
-#define MPI_Waitany        hypre_thread_MPI_Waitany          
-#define MPI_Comm_size      hypre_thread_MPI_Comm_size        
-#define MPI_Comm_rank      hypre_thread_MPI_Comm_rank        
-#define MPI_Allreduce      hypre_thread_MPI_Allreduce        
-#define MPI_Type_hvector   hypre_thread_MPI_Type_hvector     
-#define MPI_Type_struct    hypre_thread_MPI_Type_struct      
-#define MPI_Type_free      hypre_thread_MPI_Type_free        
-#define MPI_Type_commit    hypre_thread_MPI_Type_commit        
-
-#endif
-
-/*--------------------------------------------------------------------------
- * Prototypes
- *--------------------------------------------------------------------------*/
-
-/* mpistubs.c */
-HYPRE_Int MPI_Init( HYPRE_Int *argc , char ***argv );
-double MPI_Wtime( void );
-double MPI_Wtick( void );
-HYPRE_Int MPI_Barrier( MPI_Comm comm );
-HYPRE_Int MPI_Finalize( void );
-HYPRE_Int MPI_Abort( MPI_Comm comm , HYPRE_Int errorcode );
-HYPRE_Int MPI_Comm_group( MPI_Comm comm , MPI_Group *group );
-HYPRE_Int MPI_Comm_dup( MPI_Comm comm , MPI_Comm *newcomm );
-HYPRE_Int MPI_Group_incl( MPI_Group group , HYPRE_Int n , HYPRE_Int *ranks , MPI_Group *newgroup );
-HYPRE_Int MPI_Comm_create( MPI_Comm comm , MPI_Group group , MPI_Comm *newcomm );
-HYPRE_Int MPI_Get_count( MPI_Status *status , MPI_Datatype datatype , HYPRE_Int *count );
-HYPRE_Int MPI_Alltoall( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , MPI_Comm comm );
-HYPRE_Int MPI_Allgather( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , MPI_Comm comm );
-HYPRE_Int MPI_Allgatherv( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , MPI_Datatype recvtype , MPI_Comm comm );
-HYPRE_Int MPI_Gather( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
-HYPRE_Int MPI_Gatherv( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
-HYPRE_Int MPI_Scatter( void *sendbuf , HYPRE_Int sendcount , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
-HYPRE_Int MPI_Scatterv( void *sendbuf , HYPRE_Int *sendcounts , HYPRE_Int *displs , MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , MPI_Datatype recvtype , HYPRE_Int root , MPI_Comm comm );
-HYPRE_Int MPI_Bcast( void *buffer , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int root , MPI_Comm comm );
-HYPRE_Int MPI_Send( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , MPI_Comm comm );
-HYPRE_Int MPI_Recv( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , MPI_Comm comm , MPI_Status *status );
-HYPRE_Int MPI_Isend( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , MPI_Comm comm , MPI_Request *request );
-HYPRE_Int MPI_Irecv( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , MPI_Comm comm , MPI_Request *request );
-HYPRE_Int MPI_Wait( MPI_Request *request , MPI_Status *status );
-HYPRE_Int MPI_Waitall( HYPRE_Int count , MPI_Request *array_of_requests , MPI_Status *array_of_statuses );
-HYPRE_Int MPI_Waitany( HYPRE_Int count , MPI_Request *array_of_requests , HYPRE_Int *index , MPI_Status *status );
-HYPRE_Int MPI_Comm_size( MPI_Comm comm , HYPRE_Int *size );
-HYPRE_Int MPI_Comm_rank( MPI_Comm comm , HYPRE_Int *rank );
-HYPRE_Int MPI_Allreduce( void *sendbuf , void *recvbuf , HYPRE_Int count , MPI_Datatype datatype , MPI_Op op , MPI_Comm comm );
-HYPRE_Int MPI_Address( void *location , MPI_Aint *address );
-HYPRE_Int MPI_Type_contiguous( HYPRE_Int count , MPI_Datatype oldtype , MPI_Datatype *newtype );
-HYPRE_Int MPI_Type_vector( HYPRE_Int count , HYPRE_Int blocklength , HYPRE_Int stride , MPI_Datatype oldtype , MPI_Datatype *newtype );
-HYPRE_Int MPI_Type_hvector( HYPRE_Int count , HYPRE_Int blocklength , MPI_Aint stride , MPI_Datatype oldtype , MPI_Datatype *newtype );
-HYPRE_Int MPI_Type_struct( HYPRE_Int count , HYPRE_Int *array_of_blocklengths , MPI_Aint *array_of_displacements , MPI_Datatype *array_of_types , MPI_Datatype *newtype );
-HYPRE_Int MPI_Type_free( MPI_Datatype *datatype );
-HYPRE_Int MPI_Type_commit( MPI_Datatype *datatype );
-HYPRE_Int MPI_Request_free( MPI_Request *request );
-HYPRE_Int MPI_Send_init( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , MPI_Comm comm , MPI_Request *request );
-HYPRE_Int MPI_Recv_init( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , MPI_Comm comm , MPI_Request *request );
-HYPRE_Int MPI_Startall( HYPRE_Int count , MPI_Request *array_of_requests );
-HYPRE_Int MPI_Iprobe( HYPRE_Int source , HYPRE_Int tag , MPI_Comm comm , HYPRE_Int *flag , MPI_Status *status );
-HYPRE_Int MPI_Probe( HYPRE_Int source , HYPRE_Int tag , MPI_Comm comm , MPI_Status *status );
-HYPRE_Int MPI_Irsend( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , MPI_Comm comm , MPI_Request *request );
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
-
-#endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
@@ -643,63 +503,6 @@ HYPRE_Int hypre_GetThreadNum( void );
 
 #endif
 
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-/* The pthreads stuff needs to be reworked */
-
-#ifdef HYPRE_USE_PTHREADS
-
-#ifndef MAX_QUEUE
-#define MAX_QUEUE 256
-#endif
-
-#include <pthread.h>
-
-/* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
-   argument and a void return type */
-typedef void (*hypre_work_proc_t)(void *);
-
-typedef struct hypre_workqueue_struct {
-   pthread_mutex_t lock;
-   pthread_cond_t work_wait;
-   pthread_cond_t finish_wait;
-   hypre_work_proc_t worker_proc_queue[MAX_QUEUE];
-   HYPRE_Int n_working;
-   HYPRE_Int n_waiting;
-   HYPRE_Int n_queue;
-   HYPRE_Int inp;
-   HYPRE_Int outp;
-   void *argqueue[MAX_QUEUE];
-} *hypre_workqueue_t;
-
-void hypre_work_put( hypre_work_proc_t funcptr, void *argptr );
-void hypre_work_wait( void );
-HYPRE_Int HYPRE_InitPthreads( HYPRE_Int num_threads );
-void HYPRE_DestroyPthreads( void );
-void hypre_pthread_worker( HYPRE_Int threadid );
-HYPRE_Int ifetchadd( HYPRE_Int *w, pthread_mutex_t *mutex_fetchadd );
-HYPRE_Int hypre_fetch_and_add( HYPRE_Int *w );
-void hypre_barrier(pthread_mutex_t *mpi_mtx, HYPRE_Int unthreaded);
-HYPRE_Int hypre_GetThreadID( void );
-
-pthread_t initial_thread;
-pthread_t hypre_thread[hypre_MAX_THREADS];
-pthread_mutex_t hypre_mutex_boxloops;
-pthread_mutex_t talloc_mtx;
-pthread_mutex_t worker_mtx;
-hypre_workqueue_t hypre_qptr;
-pthread_mutex_t mpi_mtx;
-pthread_mutex_t time_mtx;
-volatile HYPRE_Int hypre_thread_release;
-
-#ifdef HYPRE_THREAD_GLOBALS
-HYPRE_Int hypre_NumThreads = 4;
-#else
-extern HYPRE_Int hypre_NumThreads;
-#endif
-
-#endif
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
 #endif
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -712,8 +515,6 @@ extern HYPRE_Int hypre_NumThreads;
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -793,7 +594,6 @@ extern hypre_TimingType *hypre_global_timing;
  * Accessor functions
  *-------------------------------------------------------*/
 
-#ifndef HYPRE_USE_PTHREADS
 #define hypre_TimingWallTime(i) (hypre_global_timing -> wall_time[(i)])
 #define hypre_TimingCPUTime(i)  (hypre_global_timing -> cpu_time[(i)])
 #define hypre_TimingFLOPS(i)    (hypre_global_timing -> flops[(i)])
@@ -803,18 +603,6 @@ extern hypre_TimingType *hypre_global_timing;
 #define hypre_TimingWallCount   (hypre_global_timing -> wall_count)
 #define hypre_TimingCPUCount    (hypre_global_timing -> CPU_count)
 #define hypre_TimingFLOPCount   (hypre_global_timing -> FLOP_count)
-#else
-#define hypre_TimingWallTime(i) (hypre_global_timing[threadid].wall_time[(i)])
-#define hypre_TimingCPUTime(i)  (hypre_global_timing[threadid].cpu_time[(i)])
-#define hypre_TimingFLOPS(i)    (hypre_global_timing[threadid].flops[(i)])
-#define hypre_TimingName(i)     (hypre_global_timing[threadid].name[(i)])
-#define hypre_TimingState(i)    (hypre_global_timing[threadid].state[(i)])
-#define hypre_TimingNumRegs(i)  (hypre_global_timing[threadid].num_regs[(i)])
-#define hypre_TimingWallCount   (hypre_global_timing[threadid].wall_count)
-#define hypre_TimingCPUCount    (hypre_global_timing[threadid].CPU_count)
-#define hypre_TimingFLOPCount   (hypre_global_timing[threadid].FLOP_count)
-#define hypre_TimingAllFLOPS    (hypre_global_timing[hypre_NumThreads].FLOP_count)
-#endif
 
 /*-------------------------------------------------------
  * Prototypes

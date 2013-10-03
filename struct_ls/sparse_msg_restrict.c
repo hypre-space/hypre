@@ -163,7 +163,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    stencil       = hypre_StructMatrixStencil(R);
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*--------------------------------------------------------------------
     * Restrict the residual.
@@ -226,7 +226,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
             hypre_StructMapCoarseToFine(startc, cindex, strideR, startR);
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-            hypre_BoxLoop3Begin(hypre_StructMatrixDim(R), loop_size,
+            hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                 R_dbox,  startR, strideR, Ri,
                                 r_dbox,  start,  stride,  ri,
                                 rc_dbox, startc, stridec, rci);

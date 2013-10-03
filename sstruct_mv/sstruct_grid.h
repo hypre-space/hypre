@@ -99,8 +99,8 @@ typedef struct
    HYPRE_Int    type;
    HYPRE_Int    offset;   /* minimum offset for this box */
    HYPRE_Int    ghoffset; /* minimum offset ghost for this box */
-   HYPRE_Int    proc;      /* redundant with the proc in the entry, but
-                              makes some coding easier */
+   HYPRE_Int    proc;     /* redundant with the proc in the entry, but
+                             makes some coding easier */
    HYPRE_Int    boxnum;   /* this is different from the entry id */ 
    HYPRE_Int    part;     /* part the box lives on */
    hypre_Index  ilower;   /* box ilower, but on the neighbor index-space */

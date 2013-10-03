@@ -36,8 +36,8 @@ hypre_SMGCreate( MPI_Comm  comm )
    (smg_data -> num_pre_relax)  = 1;
    (smg_data -> num_post_relax) = 1;
    (smg_data -> cdir) = 2;
-   hypre_SetIndex((smg_data -> base_index), 0, 0, 0);
-   hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex3((smg_data -> base_index), 0, 0, 0);
+   hypre_SetIndex3((smg_data -> base_stride), 1, 1, 1);
    (smg_data -> logging) = 0;
    (smg_data -> print_level) = 0;
 
@@ -488,7 +488,7 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetStrideSize(box, stride, loop_size);
 
-      hypre_BoxLoop1Begin(hypre_StructVectorDim(vector), loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi) HYPRE_SMP_SCHEDULE

@@ -17,19 +17,19 @@
 
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \
-      hypre_SetIndex(cindex, 0, 0, 0);          \
+      hypre_SetIndex3(cindex, 0, 0, 0);          \
       hypre_IndexD(cindex, cdir) = 0;           \
    }
 
 #define hypre_PFMGSetFIndex(cdir, findex)       \
    {                                            \
-      hypre_SetIndex(findex, 0, 0, 0);          \
+      hypre_SetIndex3(findex, 0, 0, 0);          \
       hypre_IndexD(findex, cdir) = 1;           \
    }
 
 #define hypre_PFMGSetStride(cdir, stride)       \
    {                                            \
-      hypre_SetIndex(stride, 1, 1, 1);          \
+      hypre_SetIndex3(stride, 1, 1, 1);          \
       hypre_IndexD(stride, cdir) = 2;           \
    }
 
@@ -137,7 +137,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    grid  = hypre_SStructPMatrixPGrid(A);
    sgrid = hypre_SStructPGridSGrid(grid, 0);
-   dim   = hypre_StructGridDim(sgrid);
+   dim   = hypre_StructGridNDim(sgrid);
 
    /* Compute a new max_levels value based on the grid */
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(sgrid));
@@ -196,7 +196,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
    active_l = hypre_TAlloc(HYPRE_Int, max_levels);
    relax_weights = hypre_CTAlloc(double, max_levels);
-   hypre_SetIndex(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
+   hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
       /* determine cdir */
@@ -289,7 +289,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          /* coarsened previously in this direction, relax level l */
          active_l[l] = 1;
-         hypre_SetIndex(coarsen, 0, 0, 0);
+         hypre_SetIndex3(coarsen, 0, 0, 0);
          hypre_IndexD(coarsen, cdir) = 1;
       }
       else
@@ -624,7 +624,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
 
    hypre_SStructPGridSetCellSGrid(cgrid, scgrid);
 
-   hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0);
+   hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0, ndim);
    hypre_SStructPGridPNborOffsets(cgrid) = NULL;
 
    hypre_SStructPGridLocalSize(cgrid)  = 0;

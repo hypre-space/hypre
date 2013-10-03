@@ -94,8 +94,8 @@ hypre_SMGRelaxCreate( MPI_Comm  comm )
    (relax_data -> pre_space_ranks)    = NULL;
    (relax_data -> reg_space_ranks)    = hypre_TAlloc(HYPRE_Int, 1);
    (relax_data -> reg_space_ranks[0]) = 0;
-   hypre_SetIndex((relax_data -> base_index), 0, 0, 0);
-   hypre_SetIndex((relax_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex3((relax_data -> base_index), 0, 0, 0);
+   hypre_SetIndex3((relax_data -> base_stride), 1, 1, 1);
    (relax_data -> A)                  = NULL;
    (relax_data -> b)                  = NULL;
    (relax_data -> x)                  = NULL;
@@ -343,7 +343,7 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
    HYPRE_Int            stencil_dim;
    HYPRE_Int            a_sol_test;
 
-   stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
+   stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
    hypre_StructMatrixDestroy(relax_data -> A);
    hypre_StructVectorDestroy(relax_data -> b);
@@ -447,7 +447,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
    hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);     
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
-   HYPRE_Int             stencil_dim   = hypre_StructStencilDim(stencil);
+   HYPRE_Int             stencil_dim   = hypre_StructStencilNDim(stencil);
                        
    hypre_StructMatrix   *A_rem;
    void                **residual_data;
@@ -529,7 +529,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
    hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);     
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
-   HYPRE_Int             stencil_dim   = hypre_StructStencilDim(stencil);
+   HYPRE_Int             stencil_dim   = hypre_StructStencilNDim(stencil);
                        
    hypre_StructMatrix   *A_sol;
    void                **solve_data;
@@ -566,7 +566,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
       }
    }
    A_sol = hypre_StructMatrixCreateMask(A, num_stencil_indices, stencil_indices);
-   hypre_StructStencilDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
+   hypre_StructStencilNDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
    hypre_TFree(stencil_indices);
 
    /* Set up solve_data */
@@ -881,7 +881,7 @@ hypre_SMGRelaxSetNewMatrixStencil( void                *relax_vdata,
 
    hypre_Index        *stencil_shape = hypre_StructStencilShape(diff_stencil);
    HYPRE_Int           stencil_size  = hypre_StructStencilSize(diff_stencil); 
-   HYPRE_Int           stencil_dim   = hypre_StructStencilDim(diff_stencil);
+   HYPRE_Int           stencil_dim   = hypre_StructStencilNDim(diff_stencil);
                          
    HYPRE_Int           i;
                      

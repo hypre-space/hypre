@@ -33,6 +33,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
    HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
+   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
    hypre_CommHandle      *comm_handle;
                         
@@ -176,6 +177,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                xni = hypre_BoxSizeX(x_dbox);
                bnj = hypre_BoxSizeY(b_dbox);
                xnj = hypre_BoxSizeY(x_dbox);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
                if (constant_coeff == 1)
                {
@@ -294,6 +303,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                bnj= hypre_BoxSizeY(b_dbox);
                xnj= hypre_BoxSizeY(x_dbox);
                Ai = hypre_CCBoxIndexRank(A_dbox, start);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
                switch(stencil_size)
                {

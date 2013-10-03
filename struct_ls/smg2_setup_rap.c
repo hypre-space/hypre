@@ -62,7 +62,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
              *--------------------------------------------------------------*/
-            hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
+            hypre_SetIndex3(RAP_stencil_shape[stencil_rank],i,j,0);
             stencil_rank++;
          }
       }
@@ -93,7 +93,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
              *--------------------------------------------------------------*/
             if( i+j <=0 )
             {
-               hypre_SetIndex(RAP_stencil_shape[stencil_rank],i,j,0);
+               hypre_SetIndex3(RAP_stencil_shape[stencil_rank],i,j,0);
                stencil_rank++;
             }
          }
@@ -199,7 +199,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -232,10 +232,10 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
        * pb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       pa = hypre_StructMatrixExtractPointerByIndex(PT, fi, index);
 
-      hypre_SetIndex(index,0,-1,0);
+      hypre_SetIndex3(index,0,-1,0);
       pb = hypre_StructMatrixExtractPointerByIndex(PT, fi, index);
  
       /*-----------------------------------------------------------------
@@ -244,10 +244,10 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
        * rb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-      hypre_SetIndex(index,0,-1,0);
+      hypre_SetIndex3(index,0,-1,0);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
  
       /*-----------------------------------------------------------------
@@ -260,19 +260,19 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
        * a_cn is pointer for north coefficient
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,0,0);
+      hypre_SetIndex3(index,0,0,0);
       a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,-1,0,0);
+      hypre_SetIndex3(index,-1,0,0);
       a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,1,0,0);
+      hypre_SetIndex3(index,1,0,0);
       a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,0,-1,0);
+      hypre_SetIndex3(index,0,-1,0);
       a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
       /*-----------------------------------------------------------------
@@ -286,13 +286,13 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 
       if(fine_stencil_size > 5)
       {
-         hypre_SetIndex(index,-1,-1,0);
+         hypre_SetIndex3(index,-1,-1,0);
          a_csw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,1,-1,0);
+         hypre_SetIndex3(index,1,-1,0);
          a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,-1,1,0);
+         hypre_SetIndex3(index,-1,1,0);
          a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
       }
 
@@ -304,19 +304,19 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
        * rap_cc is pointer for center coefficient (etc.)
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,0,0);
+      hypre_SetIndex3(index,0,0,0);
       rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,-1,0,0);
+      hypre_SetIndex3(index,-1,0,0);
       rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,0,-1,0);
+      hypre_SetIndex3(index,0,-1,0);
       rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,-1,-1,0);
+      hypre_SetIndex3(index,-1,-1,0);
       rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,1,-1,0);
+      hypre_SetIndex3(index,1,-1,0);
       rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
       /*-----------------------------------------------------------------
@@ -327,10 +327,10 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
        * Offsets are used in refering to data associated with other points. 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       yOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
       yOffsetP = hypre_BoxOffsetDistance(PT_dbox,index); 
-      hypre_SetIndex(index,1,0,0);
+      hypre_SetIndex3(index,1,0,0);
       xOffsetP = hypre_BoxOffsetDistance(PT_dbox,index); 
 
       /*-----------------------------------------------------------------
@@ -351,7 +351,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
          case 5:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
                                 A_dbox,   fstart, stridef, iA,
@@ -403,7 +403,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
          default:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
                                 A_dbox,   fstart, stridef, iA,
@@ -519,7 +519,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -552,10 +552,10 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
        * pb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       pa = hypre_StructMatrixExtractPointerByIndex(PT, fi, index);
 
-      hypre_SetIndex(index,0,-1,0);
+      hypre_SetIndex3(index,0,-1,0);
       pb = hypre_StructMatrixExtractPointerByIndex(PT, fi, index);
  
       /*-----------------------------------------------------------------
@@ -564,10 +564,10 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
        * rb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-      hypre_SetIndex(index,0,-1,0);
+      hypre_SetIndex3(index,0,-1,0);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
  
       /*-----------------------------------------------------------------
@@ -580,16 +580,16 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
        * a_cn is pointer for north coefficient
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,0,0);
+      hypre_SetIndex3(index,0,0,0);
       a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,-1,0,0);
+      hypre_SetIndex3(index,-1,0,0);
       a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,1,0,0);
+      hypre_SetIndex3(index,1,0,0);
       a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
       /*-----------------------------------------------------------------
@@ -603,13 +603,13 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
       if(fine_stencil_size > 5)
       {
-         hypre_SetIndex(index,1,-1,0);
+         hypre_SetIndex3(index,1,-1,0);
          a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,-1,1,0);
+         hypre_SetIndex3(index,-1,1,0);
          a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index,1,1,0);
+         hypre_SetIndex3(index,1,1,0);
          a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
       }
@@ -622,16 +622,16 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
        * rap_ce is pointer for east coefficient (etc.)
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,1,0,0);
+      hypre_SetIndex3(index,1,0,0);
       rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,1,1,0);
+      hypre_SetIndex3(index,1,1,0);
       rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index,-1,1,0);
+      hypre_SetIndex3(index,-1,1,0);
       rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
       /*-----------------------------------------------------------------
@@ -642,10 +642,10 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
        * Offsets are used in refering to data associated with other points. 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index,0,1,0);
+      hypre_SetIndex3(index,0,1,0);
       yOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
       yOffsetP = hypre_BoxOffsetDistance(PT_dbox,index); 
-      hypre_SetIndex(index,1,0,0);
+      hypre_SetIndex3(index,1,0,0);
       xOffsetP = hypre_BoxOffsetDistance(PT_dbox,index); 
 
       /*-----------------------------------------------------------------
@@ -665,7 +665,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
          case 5:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
                                 A_dbox,   fstart, stridef, iA,
@@ -708,7 +708,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
          default:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
                                 A_dbox,   fstart, stridef, iA,
@@ -792,7 +792,7 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 
    double               zero = 0.0;
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -809,31 +809,31 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
          RAP_dbox =
             hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
-         hypre_SetIndex(index,1,0,0);
+         hypre_SetIndex3(index,1,0,0);
          xOffset = hypre_BoxOffsetDistance(RAP_dbox,index); 
 
          /*-----------------------------------------------------------------
           * Extract pointers for coarse grid operator - always 9-point:
           *-----------------------------------------------------------------*/
-         hypre_SetIndex(index,0,0,0);
+         hypre_SetIndex3(index,0,0,0);
          rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,-1,0,0);
+         hypre_SetIndex3(index,-1,0,0);
          rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,0,-1,0);
+         hypre_SetIndex3(index,0,-1,0);
          rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,-1,-1,0);
+         hypre_SetIndex3(index,-1,-1,0);
          rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,1,-1,0);
+         hypre_SetIndex3(index,1,-1,0);
          rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
 
-         hypre_BoxLoop1Begin(hypre_StructMatrixDim(RAP), loop_size,
+         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc,iAcm1) HYPRE_SMP_SCHEDULE
@@ -847,7 +847,7 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
          }
          hypre_BoxLoop1End(iAc);
 
-         hypre_BoxLoop1Begin(hypre_StructMatrixDim(RAP), loop_size,
+         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
@@ -899,7 +899,7 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
    double               zero = 0.0;
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -917,37 +917,37 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          /*-----------------------------------------------------------------
           * Extract pointers for coarse grid operator - always 9-point:
           *-----------------------------------------------------------------*/
-         hypre_SetIndex(index,0,0,0);
+         hypre_SetIndex3(index,0,0,0);
          rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,-1,0,0);
+         hypre_SetIndex3(index,-1,0,0);
          rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,0,-1,0);
+         hypre_SetIndex3(index,0,-1,0);
          rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,-1,-1,0);
+         hypre_SetIndex3(index,-1,-1,0);
          rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,1,-1,0);
+         hypre_SetIndex3(index,1,-1,0);
          rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,1,0,0);
+         hypre_SetIndex3(index,1,0,0);
          rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,0,1,0);
+         hypre_SetIndex3(index,0,1,0);
          rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,1,1,0);
+         hypre_SetIndex3(index,1,1,0);
          rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-         hypre_SetIndex(index,-1,1,0);
+         hypre_SetIndex3(index,-1,1,0);
          rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-         hypre_BoxLoop1Begin(hypre_StructMatrixDim(RAP), loop_size,
+         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE

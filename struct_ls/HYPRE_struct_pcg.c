@@ -216,7 +216,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    HYPRE_Int             i;
 
    /* x = D^{-1} y */
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
    boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, boxes)
    {
@@ -226,7 +226,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
       x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
       y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
-      hypre_SetIndex(index, 0, 0, 0);
+      hypre_SetIndex(index, 0);
       Ap = hypre_StructMatrixExtractPointerByIndex(A, i, index);
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);
@@ -235,7 +235,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop3Begin(hypre_StructVectorDim(Hx), loop_size,
+      hypre_BoxLoop3Begin(hypre_StructVectorNDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
                           x_data_box, start, stride, xi,
                           y_data_box, start, stride, yi);

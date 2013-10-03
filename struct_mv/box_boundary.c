@@ -45,6 +45,7 @@ hypre_BoxBoundaryIntersect( hypre_Box *box,
                             HYPRE_Int dir,
                             hypre_BoxArray *boundary )
 {
+   HYPRE_Int           ndim = hypre_BoxNDim(box);
    hypre_BoxManager   *boxman;
    hypre_BoxManEntry **entries;
    hypre_BoxArray     *int_boxes, *tmp_boxes;
@@ -74,8 +75,8 @@ hypre_BoxBoundaryIntersect( hypre_Box *box,
    hypre_BoxIMaxD(bbox, d) -= dir;
 
    /* shift intersected boxes in direction -dir and subtract from bbox */
-   int_boxes  = hypre_BoxArrayCreate(nentries);
-   tmp_boxes  = hypre_BoxArrayCreate(0);
+   int_boxes  = hypre_BoxArrayCreate(nentries, ndim);
+   tmp_boxes  = hypre_BoxArrayCreate(0, ndim);
    for (i = 0; i < nentries; i++)
    {
       ibox = hypre_BoxArrayBox(int_boxes, i);
@@ -104,11 +105,12 @@ hypre_BoxBoundaryG( hypre_Box *box,
                     hypre_StructGrid *g,
                     hypre_BoxArray *boundary )
 {
+   HYPRE_Int       ndim = hypre_BoxNDim(box);
    hypre_BoxArray *boundary_d;
    HYPRE_Int       d;
  
-   boundary_d = hypre_BoxArrayCreate(0);
-   for (d = 0; d < 3; d++)
+   boundary_d = hypre_BoxArrayCreate(0, ndim);
+   for (d = 0; d < ndim; d++)
    {
       hypre_BoxBoundaryIntersect(box, g, d, -1, boundary_d);
       hypre_AppendBoxArray(boundary_d, boundary);
@@ -161,12 +163,12 @@ hypre_GeneralBoxBoundaryIntersect( hypre_Box *box,
    hypre_Box          *bbox, *ibox;
    HYPRE_Int           nentries, i, j;
    HYPRE_Int          *dd;
-   HYPRE_Int           dim;
+   HYPRE_Int           ndim;
 
-   dim = hypre_StructGridDim(grid);
-   dd = hypre_CTAlloc(HYPRE_Int, dim);
+   ndim = hypre_StructGridNDim(grid);
+   dd = hypre_CTAlloc(HYPRE_Int, ndim);
 
-   for (i=0; i < dim; i++)
+   for (i=0; i < ndim; i++)
      dd[i] = hypre_IndexD(stencil_element, i);
 
    /* set bbox to the box surface of interest */
@@ -175,7 +177,7 @@ hypre_GeneralBoxBoundaryIntersect( hypre_Box *box,
    hypre_CopyBox(box, bbox);
 
    /* temporarily shift bbox in direction dir and intersect with the grid */
-   for (i=0; i < dim; i++)
+   for (i=0; i < ndim; i++)
    {
       hypre_BoxIMinD(bbox, i) += dd[i];
       hypre_BoxIMaxD(bbox, i) += dd[i];
@@ -184,21 +186,21 @@ hypre_GeneralBoxBoundaryIntersect( hypre_Box *box,
    boxman = hypre_StructGridBoxMan(grid);
    hypre_BoxManIntersect(boxman, hypre_BoxIMin(bbox), hypre_BoxIMax(bbox),
                          &entries, &nentries);
-   for (i=0; i < dim; i++)
+   for (i=0; i < ndim; i++)
    {
       hypre_BoxIMinD(bbox, i) -= dd[i];
       hypre_BoxIMaxD(bbox, i) -= dd[i];
    }
 
    /* shift intersected boxes in direction -dir and subtract from bbox */
-   int_boxes  = hypre_BoxArrayCreate(nentries);
-   tmp_boxes  = hypre_BoxArrayCreate(0);
+   int_boxes  = hypre_BoxArrayCreate(nentries, ndim);
+   tmp_boxes  = hypre_BoxArrayCreate(0, ndim);
    for (i = 0; i < nentries; i++)
    {
       ibox = hypre_BoxArrayBox(int_boxes, i);
       hypre_BoxManEntryGetExtents(
          entries[i], hypre_BoxIMin(ibox), hypre_BoxIMax(ibox));
-      for (j=0; j < dim; j++)
+      for (j=0; j < ndim; j++)
       {
          hypre_BoxIMinD(ibox, j) -= dd[j];
          hypre_BoxIMaxD(ibox, j) -= dd[j];

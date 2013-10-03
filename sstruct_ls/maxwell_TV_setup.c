@@ -231,7 +231,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       {
          for (i= -1; i< 2; i++)
          {
-            hypre_SetIndex(shape, i, j, k);
+            hypre_SetIndex3(shape, i, j, k);
             HYPRE_SStructStencilSetEntry(Ann_stencils[0], m, shape, vars);
             m++;
          }
@@ -375,7 +375,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          hypre_BoxManGetEntry(node_boxman, myproc, j, &entry);
          i= hypre_BoxVolume(box);
 
-         tmp_box_array= hypre_BoxArrayCreate(0);
+         tmp_box_array= hypre_BoxArrayCreate(0, ndim);
          ierr        += hypre_BoxBoundaryG(box, sgrid, tmp_box_array);
 
          for (m= 0; m< hypre_BoxArraySize(tmp_box_array); m++)
@@ -395,8 +395,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_BoxLoop0For()
                {
                   hypre_BoxLoopGetIndex(lindex);
-                  hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                  hypre_AddIndex(index, start, index);
+                  hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                  hypre_AddIndexes(index, start, 3, index);
 
                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                         &rank, matrix_type);
@@ -575,7 +575,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * scheme to semi-coarsen. That is, coarsen wrt to rfactor, with
     * rfactor[i] > 1 for i < ndim.
     * Determine the number of levels for the edge problem */
-   cboxes= hypre_BoxArrayCreate(0);
+   cboxes= hypre_BoxArrayCreate(0, ndim);
    coarsen= hypre_CTAlloc(HYPRE_Int, nparts);
    edge_maxlevels= 0;
    for (part= 0; part< nparts; part++)
@@ -725,7 +725,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * of the level egrid. After each coarsening, the bounding boxes are 
     * replaced by the generated coarse egrid cell bounding boxes.
     *--------------------------------------------------------------------------*/
-   hypre_SetIndex(cindex, 0, 0, 0);
+   hypre_SetIndex3(cindex, 0, 0, 0);
    j= 0; /* j tracks the number of parts that have been coarsened away */
    edge_numlevels= 1;
 
@@ -1436,7 +1436,7 @@ hypre_BoxContraction( hypre_Box           *box,
    hypre_Box           *shifted_box;
    hypre_Box            intersect_box;
 
-   HYPRE_Int            ndim= hypre_StructGridDim(sgrid);
+   HYPRE_Int            ndim= hypre_StructGridNDim(sgrid);
 
    hypre_Index          remainder, box_width;
    HYPRE_Int            i, j, k, p;
@@ -1444,11 +1444,12 @@ hypre_BoxContraction( hypre_Box           *box,
 
 
    /* get the boxes out of the box manager - use these as the neighbor boxes */
-   neighbor_boxes = hypre_BoxArrayCreate(0);
+   neighbor_boxes = hypre_BoxArrayCreate(0, ndim);
    hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
 
+   hypre_BoxInit(&intersect_box, ndim);
 
-   contracted_box= hypre_BoxCreate();
+   contracted_box= hypre_BoxCreate(ndim);
 
    hypre_ClearIndex(remainder);
    p= 0;
@@ -1468,7 +1469,7 @@ hypre_BoxContraction( hypre_Box           *box,
    hypre_CopyBox(box, contracted_box);
    if (p)
    {
-      shifted_box= hypre_BoxCreate();
+      shifted_box= hypre_BoxCreate(ndim);
       for (i= 0; i< ndim; i++)
       {
          if (remainder[i])   /* non-divisible in the i'th direction */

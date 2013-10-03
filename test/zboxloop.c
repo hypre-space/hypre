@@ -148,16 +148,16 @@ main( hypre_int argc,
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
-   hypre_SetIndex(start, 1, 1, 1);
-   hypre_SetIndex(loop_size, nx, ny, nz);
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex3(start, 1, 1, 1);
+   hypre_SetIndex3(loop_size, nx, ny, nz);
+   hypre_SetIndex3(unit_stride, 1, 1, 1);
 
-   x1_data_box = hypre_BoxCreate();
-   x2_data_box = hypre_BoxCreate();
-   x3_data_box = hypre_BoxCreate();
-   x4_data_box = hypre_BoxCreate();
-   hypre_SetIndex(hypre_BoxIMin(x1_data_box), 0, 0, 0);
-   hypre_SetIndex(hypre_BoxIMax(x1_data_box), nx+1, ny+1, nz+1);
+   x1_data_box = hypre_BoxCreate(dim);
+   x2_data_box = hypre_BoxCreate(dim);
+   x3_data_box = hypre_BoxCreate(dim);
+   x4_data_box = hypre_BoxCreate(dim);
+   hypre_SetIndex3(hypre_BoxIMin(x1_data_box), 0, 0, 0);
+   hypre_SetIndex3(hypre_BoxIMax(x1_data_box), nx+1, ny+1, nz+1);
    hypre_CopyBox(x1_data_box, x2_data_box);
    hypre_CopyBox(x1_data_box, x3_data_box);
    hypre_CopyBox(x1_data_box, x4_data_box);

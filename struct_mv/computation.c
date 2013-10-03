@@ -33,7 +33,7 @@ hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
    hypre_ComputeInfoIndtBoxes(compute_info) = indt_boxes;
    hypre_ComputeInfoDeptBoxes(compute_info) = dept_boxes;
 
-   hypre_SetIndex(hypre_ComputeInfoStride(compute_info), 1, 1, 1);
+   hypre_SetIndex(hypre_ComputeInfoStride(compute_info), 1);
 
    *compute_info_ptr = compute_info;
 
@@ -110,6 +110,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
+   HYPRE_Int                ndim = hypre_StructGridNDim(grid);
    hypre_CommInfo          *comm_info;
    hypre_BoxArrayArray     *indt_boxes;
    hypre_BoxArrayArray     *dept_boxes;
@@ -124,7 +125,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
 #ifdef HYPRE_OVERLAP_COMM_COMP
    hypre_Box               *rembox;
    hypre_Index             *stencil_shape;
-   HYPRE_Int                border[3][2] = {{0, 0}, {0, 0}, {0, 0}};
+   hypre_Index              lborder, rborder;
    HYPRE_Int                cbox_array_size;
    HYPRE_Int                s, d;
 #endif
@@ -147,19 +148,21 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Compute border info
     *------------------------------------------------------*/
 
+   hypre_SetIndex(lborder, 0);
+   hypre_SetIndex(rborder, 0);
    stencil_shape = hypre_StructStencilShape(stencil);
    for (s = 0; s < hypre_StructStencilSize(stencil); s++)
    {
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < ndim; d++)
       {
          i = hypre_IndexD(stencil_shape[s], d);
          if (i < 0)
          {
-            border[d][0] = hypre_max(border[d][0], -i);
+            lborder[d] = hypre_max(lborder[d], -i);
          }
          else if (i > 0)
          {
-            border[d][1] = hypre_max(border[d][1], i);
+            rborder[d] = hypre_max(rborder[d], i);
          }
       }
    }
@@ -168,36 +171,36 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Set up the dependent boxes
     *------------------------------------------------------*/
 
-   dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
+   dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes), ndim);
 
-   rembox = hypre_BoxCreate();
+   rembox = hypre_BoxCreate(hypre_StructGridNDim(grid));
    hypre_ForBoxI(i, boxes)
    {
       cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-      hypre_BoxArraySetSize(cbox_array, 6);
+      hypre_BoxArraySetSize(cbox_array, 2*ndim);
 
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), rembox);
       cbox_array_size = 0;
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < ndim; d++)
       {
-         if ( (hypre_BoxVolume(rembox)) && (border[d][0]) )
+         if ( (hypre_BoxVolume(rembox)) && lborder[d] )
          {
             cbox = hypre_BoxArrayBox(cbox_array, cbox_array_size);
             hypre_CopyBox(rembox, cbox);
             hypre_BoxIMaxD(cbox, d) =
-               hypre_BoxIMinD(cbox, d) + border[d][0] - 1;
+               hypre_BoxIMinD(cbox, d) + lborder[d] - 1;
             hypre_BoxIMinD(rembox, d) =
-               hypre_BoxIMinD(cbox, d) + border[d][0];
+               hypre_BoxIMinD(cbox, d) + lborder[d];
             cbox_array_size++;
          }
-         if ( (hypre_BoxVolume(rembox)) && (border[d][1]) )
+         if ( (hypre_BoxVolume(rembox)) && rborder[d] )
          {
             cbox = hypre_BoxArrayBox(cbox_array, cbox_array_size);
             hypre_CopyBox(rembox, cbox);
             hypre_BoxIMinD(cbox, d) =
-               hypre_BoxIMaxD(cbox, d) - border[d][1] + 1;
+               hypre_BoxIMaxD(cbox, d) - rborder[d] + 1;
             hypre_BoxIMaxD(rembox, d) =
-               hypre_BoxIMaxD(cbox, d) - border[d][1];
+               hypre_BoxIMaxD(cbox, d) - rborder[d];
             cbox_array_size++;
          }
       }
@@ -209,7 +212,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Set up the independent boxes
     *------------------------------------------------------*/
 
-   indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
+   indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes), ndim);
 
    hypre_ForBoxI(i, boxes)
    {
@@ -218,15 +221,15 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
       cbox = hypre_BoxArrayBox(cbox_array, 0);
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
 
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < ndim; d++)
       {
-         if ( (border[d][0]) )
+         if ( lborder[d] )
          {
-            hypre_BoxIMinD(cbox, d) += border[d][0];
+            hypre_BoxIMinD(cbox, d) += lborder[d];
          }
-         if ( (border[d][1]) )
+         if ( rborder[d] )
          {
-            hypre_BoxIMaxD(cbox, d) -= border[d][1];
+            hypre_BoxIMaxD(cbox, d) -= rborder[d];
          }
       }
    }
@@ -237,13 +240,13 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Set up the independent boxes
     *------------------------------------------------------*/
 
-   indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
+   indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes), ndim);
 
    /*------------------------------------------------------
     * Set up the dependent boxes
     *------------------------------------------------------*/
 
-   dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
+   dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes), ndim);
 
    hypre_ForBoxI(i, boxes)
    {

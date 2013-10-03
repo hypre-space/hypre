@@ -43,7 +43,7 @@ hypre_MaxwellTVCreate( MPI_Comm  comm )
    (maxwell_data -> logging)        = 0;
 
    maxwell_rfactor= hypre_TAlloc(hypre_Index, 1);
-   hypre_SetIndex(maxwell_rfactor[0], 2, 2, 2);
+   hypre_SetIndex3(maxwell_rfactor[0], 2, 2, 2);
    (maxwell_data -> rfactor)= maxwell_rfactor;
                                          
 

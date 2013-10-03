@@ -38,7 +38,6 @@ extern "C" {
 HYPRE_Int hypre_StructMapFineToCoarse ( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
 HYPRE_Int hypre_StructMapCoarseToFine ( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );
 HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid , hypre_Index index , hypre_Index stride , HYPRE_Int prune , hypre_StructGrid **cgrid_ptr );
-HYPRE_Int hypre_Merge ( HYPRE_Int **arrays , HYPRE_Int *sizes , HYPRE_Int size , HYPRE_Int **mergei_ptr , HYPRE_Int **mergej_ptr );
 
 /* cyclic_reduction.c */
 void *hypre_CyclicReductionCreate ( MPI_Comm comm );

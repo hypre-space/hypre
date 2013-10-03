@@ -46,7 +46,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
 
    if (rap_type == 0)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             RAP = hypre_PFMG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
@@ -60,7 +60,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
 
    else if (rap_type == 1)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             RAP =  hypre_PFMGCreateCoarseOp5(R ,A, P, coarse_grid, cdir);
@@ -126,7 +126,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    if (rap_type == 0)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             /*--------------------------------------------------------------------
@@ -161,7 +161,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    else if (rap_type == 1)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             hypre_PFMGBuildCoarseOp5(A, P, R, cdir, cindex, cstride, Ac);

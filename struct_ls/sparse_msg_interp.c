@@ -166,7 +166,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    stencil       = hypre_StructMatrixStencil(P);
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*-----------------------------------------------------------------------
     * Compute e at coarse points (injection)
@@ -199,7 +199,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox,  start,  stride,  ei,
                           xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
@@ -259,7 +259,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-            hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+            hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                 P_dbox, startP, strideP, Pi,
                                 e_dbox, start,  stride,  ei);
 #ifdef HYPRE_USING_OPENMP

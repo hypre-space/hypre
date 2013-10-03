@@ -727,6 +727,7 @@ enable_option_checking
 enable_debug
 enable_shared
 enable_bigint
+enable_maxdim
 enable_fortran
 enable_python
 enable_java
@@ -1402,6 +1403,8 @@ Optional Features:
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
   --enable-bigint         Use long long int for HYPRE_Int (default is NO).
+  --enable-maxdim=MAXDIM  Change max dimension size to MAXDIM (default is 3).
+                          Currently must be at least 3.
   --enable-fortran        Require a working Fortran compiler (default is YES).
   --enable-python=PYTHON  Build interface to specified instance of Python
                           (turns on shared libraries, requires Babel; default
@@ -2218,6 +2221,20 @@ then
 _ACEOF
 
 fi
+
+# Check whether --enable-maxdim was given.
+if test "${enable_maxdim+set}" = set; then
+  enableval=$enable_maxdim; hypre_maxdim=${enableval}
+else
+  hypre_maxdim=3
+
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_MAXDIM $hypre_maxdim
+_ACEOF
+
 
 # Check whether --enable-fortran was given.
 if test "${enable_fortran+set}" = set; then

@@ -33,6 +33,7 @@ hypre_CommInfoCreate( hypre_BoxArrayArray  *send_boxes,
 
    comm_info = hypre_TAlloc(hypre_CommInfo, 1);
 
+   hypre_CommInfoNDim(comm_info)          = hypre_BoxArrayArrayNDim(send_boxes);
    hypre_CommInfoSendBoxes(comm_info)     = send_boxes;
    hypre_CommInfoRecvBoxes(comm_info)     = recv_boxes;
    hypre_CommInfoSendProcesses(comm_info) = send_procs;
@@ -49,8 +50,8 @@ hypre_CommInfoCreate( hypre_BoxArrayArray  *send_boxes,
    hypre_CommInfoRecvTransforms(comm_info) = NULL;
 
    hypre_CommInfoBoxesMatch(comm_info)    = boxes_match;
-   hypre_SetIndex(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
-   hypre_SetIndex(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
+   hypre_SetIndex(hypre_CommInfoSendStride(comm_info), 1);
+   hypre_SetIndex(hypre_CommInfoRecvStride(comm_info), 1);
 
    *comm_info_ptr = comm_info;
 
@@ -297,7 +298,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                                  hypre_StructStencil   *stencil,
                                  hypre_CommInfo       **comm_info_ptr )
 {
-   HYPRE_Int              i,j,k, d, m, s;   
+   HYPRE_Int              ndim = hypre_StructGridNDim(grid);
+   HYPRE_Int              i,j,k, d, m, s, si;
 
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
@@ -327,8 +329,9 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_Box             *int_box;
    hypre_Box             *periodic_box;
    
-   HYPRE_Int              stencil_grid[3][3][3];
-   HYPRE_Int              grow[3][2];
+   hypre_Box             *stencil_box, *sbox; /* extents of the stencil grid */
+   HYPRE_Int             *stencil_grid;
+   HYPRE_Int              grow[HYPRE_MAXDIM][2];
                        
    hypre_BoxManEntry    **entries;
    hypre_BoxManEntry     *entry;
@@ -353,8 +356,9 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    HYPRE_Int             *cboxes_neighbor_location;
    HYPRE_Int              num_cboxes, cbox_alloc;
                        
-   HYPRE_Int              istart[3], istop[3];
-   HYPRE_Int              sgindex[3];               
+   hypre_Index            istart, istop, sgindex;
+   hypre_IndexRef         start;
+   hypre_Index            loop_size, stride;
 
    HYPRE_Int              num_periods, loc, box_id, id, proc_id;
    HYPRE_Int              myid;
@@ -365,34 +369,33 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
     * Initializations
     *------------------------------------------------------*/
 
-   local_boxes  = hypre_StructGridBoxes(grid);
-   local_ids    = hypre_StructGridIDs(grid);
-   num_boxes    = hypre_BoxArraySize(local_boxes);
-   num_periods  = hypre_StructGridNumPeriods(grid);
+   local_boxes = hypre_StructGridBoxes(grid);
+   local_ids   = hypre_StructGridIDs(grid);
+   num_boxes   = hypre_BoxArraySize(local_boxes);
+   num_periods = hypre_StructGridNumPeriods(grid);
    
-   boxman    = hypre_StructGridBoxMan(grid);
-   comm      =  hypre_StructGridComm(grid);
+   boxman = hypre_StructGridBoxMan(grid);
+   comm   = hypre_StructGridComm(grid);
    
    hypre_MPI_Comm_rank(comm, &myid);
-  
-   for (k = 0; k < 3; k++)
-   {
-      for (j = 0; j < 3; j++)
-      {
-         for (i = 0; i < 3; i++)
-         {
-            stencil_grid[i][j][k] = 0;
-         }
-      }
-   }
 
+   stencil_box = hypre_BoxCreate(ndim);
+   hypre_SetIndex(hypre_BoxIMin(stencil_box), 0);
+   hypre_SetIndex(hypre_BoxIMax(stencil_box), 2);
+
+   /* Set initial values to zero */
+   stencil_grid = hypre_CTAlloc(HYPRE_Int, hypre_BoxVolume(stencil_box));
+
+   sbox = hypre_BoxCreate(ndim);
+   hypre_SetIndex(stride, 1);
+   
    /*------------------------------------------------------
     * Compute the "grow" information from the stencil
     *------------------------------------------------------*/
 
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   for (d = 0; d < 3; d++)
+   for (d = 0; d < ndim; d++)
    {
       grow[d][0] = 0;
       grow[d][1] = 0;
@@ -402,7 +405,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    {
       stencil_offset = stencil_shape[s];
 
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < ndim; d++)
       {
          m = stencil_offset[d];
 
@@ -422,16 +425,17 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       }
 
       /* update stencil grid from the grow_stencil */
-      for (k = istart[2]; k <= istop[2]; k++)
+      hypre_BoxSetExtents(sbox, istart, istop);
+      start = hypre_BoxIMin(sbox);
+      hypre_BoxGetSize(sbox, loop_size);
+      hypre_BoxLoop1Begin(ndim, loop_size,
+                          stencil_box, start, stride, si);
+      hypre_BoxLoopSetOneBlock();
+      hypre_BoxLoop1For(si)
       {
-         for (j = istart[1]; j <= istop[1]; j++)
-         {
-            for (i = istart[0]; i <= istop[0]; i++)
-            {
-               stencil_grid[i][j][k] = 1;
-            }
-         }
+         stencil_grid[si] = 1;
       }
+      hypre_BoxLoop1End(si);
    }
 
    /*------------------------------------------------------
@@ -440,8 +444,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
    /* initialize: for each local box, we create an array of send/recv info */
 
-   send_boxes = hypre_BoxArrayArrayCreate(num_boxes);
-   recv_boxes = hypre_BoxArrayArrayCreate(num_boxes);
+   send_boxes = hypre_BoxArrayArrayCreate(num_boxes, ndim);
+   recv_boxes = hypre_BoxArrayArrayCreate(num_boxes, ndim);
    send_procs = hypre_CTAlloc(HYPRE_Int *, num_boxes);
    recv_procs = hypre_CTAlloc(HYPRE_Int *, num_boxes);
 
@@ -449,18 +453,18 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       shifting of boxes is needed below for periodic neighbor boxes.  Remote box
       info is also needed for receives to allow for reverse communication. */
    send_rboxnums = hypre_CTAlloc(HYPRE_Int *, num_boxes);
-   send_rboxes   = hypre_BoxArrayArrayCreate(num_boxes);
+   send_rboxes   = hypre_BoxArrayArrayCreate(num_boxes, ndim);
    recv_rboxnums = hypre_CTAlloc(HYPRE_Int *, num_boxes);
-   recv_rboxes   = hypre_BoxArrayArrayCreate(num_boxes);
+   recv_rboxes   = hypre_BoxArrayArrayCreate(num_boxes, ndim);
 
-   grow_box = hypre_BoxCreate();
-   extend_box = hypre_BoxCreate();
-   int_box  = hypre_BoxCreate();
-   periodic_box =  hypre_BoxCreate();
+   grow_box = hypre_BoxCreate(hypre_StructGridNDim(grid));
+   extend_box = hypre_BoxCreate(hypre_StructGridNDim(grid));
+   int_box  = hypre_BoxCreate(hypre_StructGridNDim(grid));
+   periodic_box =  hypre_BoxCreate(hypre_StructGridNDim(grid));
  
    /* storage we will use and keep track of the neighbors */
    neighbor_alloc = 30; /* initial guess at max size */
-   neighbor_boxes = hypre_BoxArrayCreate(neighbor_alloc);
+   neighbor_boxes = hypre_BoxArrayCreate(neighbor_alloc, ndim);
    neighbor_procs = hypre_CTAlloc(HYPRE_Int, neighbor_alloc);
    neighbor_ids = hypre_CTAlloc(HYPRE_Int, neighbor_alloc);
    neighbor_shifts = hypre_CTAlloc(HYPRE_Int, neighbor_alloc);
@@ -486,7 +490,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       
       /* grow box local i according to the stencil*/
       hypre_CopyBox(box, grow_box);
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(grow_box, d) -= grow[d][0];
          hypre_BoxIMaxD(grow_box, d) += grow[d][1];
@@ -496,7 +500,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
          the local box a bit differently in case, for example, the stencil grows
          in one dimension [0] and not the other [1] */
       hypre_CopyBox(box, extend_box);
-      for (d = 0; d < 3; d++)
+      for (d = 0; d < ndim; d++)
       { 
          hypre_BoxIMinD(extend_box, d) -= hypre_max(grow[d][0],grow[d][1]);
          hypre_BoxIMaxD(extend_box, d) += hypre_max(grow[d][0],grow[d][1]);
@@ -609,7 +613,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       {
          hood_box = hypre_BoxArrayBox(neighbor_boxes, k);
          /* check the stencil grid to see if it makes sense to intersect */
-         for (d = 0; d < 3; d++)
+         for (d = 0; d < ndim; d++)
          {
             sgindex[d] = 1;
                
@@ -625,7 +629,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
             }
          }
          /* it makes sense only if we have at least one non-zero entry */   
-         if (stencil_grid[sgindex[0]][sgindex[1]][sgindex[2]])
+         si = hypre_BoxIndexRank(stencil_box, sgindex); 
+         if (stencil_grid[si])
          {
             /* intersect - result is int_box */
             hypre_IntersectBoxes(grow_box, hood_box, int_box);
@@ -682,7 +687,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       {
          hood_box = hypre_BoxArrayBox(neighbor_boxes, k);
          /* check the stencil grid to see if it makes sense to intersect */
-         for (d = 0; d < 3; d++)
+         for (d = 0; d < ndim; d++)
          {
             sgindex[d] = 1;
             
@@ -698,11 +703,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
             }
          }
          /* it makes sense only if we have at least one non-zero entry */   
-         if (stencil_grid[sgindex[0]][sgindex[1]][sgindex[2]])
+         si = hypre_BoxIndexRank(stencil_box, sgindex); 
+         if (stencil_grid[si])
          {
             /* grow the neighbor box and intersect */
             hypre_CopyBox(hood_box, grow_box);
-            for (d = 0; d < 3; d++)
+            for (d = 0; d < ndim; d++)
             {
                hypre_BoxIMinD(grow_box, d) -= grow[d][0];
                hypre_BoxIMaxD(grow_box, d) += grow[d][1];
@@ -763,6 +769,10 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_BoxDestroy(periodic_box);
    hypre_BoxDestroy(extend_box);
    
+   hypre_BoxDestroy(stencil_box);
+   hypre_BoxDestroy(sbox);
+   hypre_TFree(stencil_grid);
+
    /*------------------------------------------------------
     * Return
     *------------------------------------------------------*/
@@ -785,41 +795,51 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                   HYPRE_Int             *num_ghost,
                                   hypre_CommInfo       **comm_info_ptr )
 {
+   HYPRE_Int             ndim = hypre_StructGridNDim(grid);
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   HYPRE_Int             startstop[6], ii[3], i, d, size;
+   hypre_Box            *box;
+   hypre_Index           ii, loop_size;
+   hypre_IndexRef        start;
+   HYPRE_Int             i, d, size;
 
-   stencil_shape = hypre_CTAlloc(hypre_Index, 27);
-   for (i = 0; i < 6; i++)
+   size = (HYPRE_Int)(pow(3, ndim) + 0.5);
+   stencil_shape = hypre_CTAlloc(hypre_Index, size);
+   box = hypre_BoxCreate(ndim);
+   for (d = 0; d < ndim; d++)
    {
-      startstop[i] = num_ghost[i] ? 1 : 0;
+      hypre_BoxIMinD(box, d) = -(num_ghost[2*d]   ? 1 : 0);
+      hypre_BoxIMaxD(box, d) =  (num_ghost[2*d+1] ? 1 : 0);
    }
+
    size = 0;
-   for (ii[2] = -startstop[4]; ii[2] <= startstop[5]; ii[2]++)
+   start = hypre_BoxIMin(box);
+   hypre_BoxGetSize(box, loop_size);
+   hypre_BoxLoop0Begin(ndim, loop_size);
+   hypre_BoxLoopSetOneBlock();
+   hypre_BoxLoop0For()
    {
-      for (ii[1] = -startstop[2]; ii[1] <= startstop[3]; ii[1]++)
+      hypre_BoxLoopGetIndex(ii);
+      for (d = 0; d < ndim; d++)
       {
-         for (ii[0] = -startstop[0]; ii[0] <= startstop[1]; ii[0]++)
+         i = ii[d]+start[d];
+         if (i < 0)
          {
-            for (d = 0; d < 3; d++)
-            {
-               if (ii[d] < 0)
-               {
-                  stencil_shape[size][d] = -num_ghost[2*d];
-               }
-               else if (ii[d] > 0)
-               {
-                  stencil_shape[size][d] =  num_ghost[2*d+1];
-               }
-            }
-            size++;
+            stencil_shape[size][d] = -num_ghost[2*d];
+         }
+         else if (i > 0)
+         {
+            stencil_shape[size][d] =  num_ghost[2*d+1];
          }
       }
+      size++;
    }
-   stencil = hypre_StructStencilCreate(3, size, stencil_shape);
+   hypre_BoxLoop0End();
 
+   hypre_BoxDestroy(box);
+
+   stencil = hypre_StructStencilCreate(ndim, size, stencil_shape);
    hypre_CreateCommInfoFromStencil(grid, stencil, comm_info_ptr);
-   
    hypre_StructStencilDestroy(stencil);
 
    return hypre_error_flag;
@@ -863,12 +883,14 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
    hypre_Box               *local_box;
    hypre_Box               *remote_box;
 
-   HYPRE_Int                i, j, k, r;
+   HYPRE_Int                i, j, k, r, ndim;
 
    /*------------------------------------------------------
     * Set up communication info
     *------------------------------------------------------*/
  
+   ndim = hypre_StructGridNDim(from_grid);
+
    for (r = 0; r < 2; r++)
    {
       switch(r)
@@ -890,18 +912,18 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
 
       local_boxes  = hypre_StructGridBoxes(local_grid);
       remote_boxes = hypre_StructGridBoxes(remote_grid);
-      hypre_GatherAllBoxes(hypre_StructGridComm(remote_grid), remote_boxes,
+      hypre_GatherAllBoxes(hypre_StructGridComm(remote_grid), remote_boxes, ndim,
                            &remote_all_boxes,
                            &remote_all_procs,
                            &remote_first_local);
       hypre_ComputeBoxnums(remote_all_boxes, remote_all_procs,
                            &remote_all_boxnums);
 
-      comm_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(local_boxes));
+      comm_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(local_boxes), ndim);
       comm_procs = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(local_boxes));
       comm_boxnums = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(local_boxes));
 
-      comm_box = hypre_BoxCreate();
+      comm_box = hypre_BoxCreate(ndim);
       hypre_ForBoxI(i, local_boxes)
       {
          local_box = hypre_BoxArrayBox(local_boxes, i);

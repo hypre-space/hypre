@@ -72,6 +72,9 @@ hypre_FacZeroCData( void                 *fac_vdata,
  
    HYPRE_Int              ierr = 0;
 
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
+
    for (level= max_level; level> 0; level--)
    {
       level_pmatrix = hypre_SStructMatrixPMatrix(fac_data -> A_level[level], part_crse);

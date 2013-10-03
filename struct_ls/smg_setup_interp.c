@@ -34,11 +34,11 @@ hypre_SMGCreateInterpOp( hypre_StructMatrix *A,
 
    /* set up stencil */
    stencil_size = 2;
-   stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
+   stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      hypre_SetIndex(stencil_shape[i], 0, 0, 0);
+      hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
    }
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
@@ -128,7 +128,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
     * Initialize some things
     *--------------------------------------------------------*/
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    
@@ -259,7 +259,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                }
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-               hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    x_data_box,  start,  stride,  xi,
                                    PT_data_box, startc, stridec, PTi);
 #ifdef HYPRE_USING_OPENMP

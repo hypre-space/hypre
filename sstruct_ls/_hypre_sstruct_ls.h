@@ -336,7 +336,7 @@ void *hypre_FACCreate ( MPI_Comm comm );
 HYPRE_Int hypre_FACDestroy2 ( void *fac_vdata );
 HYPRE_Int hypre_FACSetTol ( void *fac_vdata , double tol );
 HYPRE_Int hypre_FACSetPLevels ( void *fac_vdata , HYPRE_Int nparts , HYPRE_Int *plevels );
-HYPRE_Int hypre_FACSetPRefinements ( void *fac_vdata , HYPRE_Int nparts , HYPRE_Int (*prefinements )[3 ]);
+HYPRE_Int hypre_FACSetPRefinements ( void *fac_vdata , HYPRE_Int nparts , hypre_Index *prefinements);
 HYPRE_Int hypre_FACSetMaxLevels ( void *fac_vdata , HYPRE_Int nparts );
 HYPRE_Int hypre_FACSetMaxIter ( void *fac_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_FACSetRelChange ( void *fac_vdata , HYPRE_Int rel_change );
@@ -463,16 +463,16 @@ HYPRE_Int HYPRE_SStructSetupMatvec ( HYPRE_MatvecFunctions *mv );
 /* HYPRE_sstruct_InterFAC.c */
 HYPRE_Int HYPRE_SStructFACCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 HYPRE_Int HYPRE_SStructFACDestroy2 ( HYPRE_SStructSolver solver );
-HYPRE_Int HYPRE_SStructFACAMR_RAP ( HYPRE_SStructMatrix A , HYPRE_Int (*rfactors )[3 ], HYPRE_SStructMatrix *fac_A );
+HYPRE_Int HYPRE_SStructFACAMR_RAP ( HYPRE_SStructMatrix A , HYPRE_Int (*rfactors )[HYPRE_MAXDIM] , HYPRE_SStructMatrix *fac_A );
 HYPRE_Int HYPRE_SStructFACSetup2 ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 HYPRE_Int HYPRE_SStructFACSolve3 ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 HYPRE_Int HYPRE_SStructFACSetTol ( HYPRE_SStructSolver solver , double tol );
 HYPRE_Int HYPRE_SStructFACSetPLevels ( HYPRE_SStructSolver solver , HYPRE_Int nparts , HYPRE_Int *plevels );
-HYPRE_Int HYPRE_SStructFACZeroCFSten ( HYPRE_SStructMatrix A , HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int rfactors [3 ]);
+HYPRE_Int HYPRE_SStructFACZeroCFSten ( HYPRE_SStructMatrix A , HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int rfactors [HYPRE_MAXDIM]);
 HYPRE_Int HYPRE_SStructFACZeroFCSten ( HYPRE_SStructMatrix A , HYPRE_SStructGrid grid , HYPRE_Int part );
-HYPRE_Int HYPRE_SStructFACZeroAMRMatrixData ( HYPRE_SStructMatrix A , HYPRE_Int part_crse , HYPRE_Int rfactors [3 ]);
-HYPRE_Int HYPRE_SStructFACZeroAMRVectorData ( HYPRE_SStructVector b , HYPRE_Int *plevels , HYPRE_Int (*rfactors )[3 ]);
-HYPRE_Int HYPRE_SStructFACSetPRefinements ( HYPRE_SStructSolver solver , HYPRE_Int nparts , HYPRE_Int (*rfactors )[3 ]);
+HYPRE_Int HYPRE_SStructFACZeroAMRMatrixData ( HYPRE_SStructMatrix A , HYPRE_Int part_crse , HYPRE_Int rfactors [HYPRE_MAXDIM]);
+HYPRE_Int HYPRE_SStructFACZeroAMRVectorData ( HYPRE_SStructVector b , HYPRE_Int *plevels , HYPRE_Int (*rfactors )[HYPRE_MAXDIM]);
+HYPRE_Int HYPRE_SStructFACSetPRefinements ( HYPRE_SStructSolver solver , HYPRE_Int nparts , HYPRE_Int (*rfactors )[HYPRE_MAXDIM]);
 HYPRE_Int HYPRE_SStructFACSetMaxLevels ( HYPRE_SStructSolver solver , HYPRE_Int max_levels );
 HYPRE_Int HYPRE_SStructFACSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
 HYPRE_Int HYPRE_SStructFACSetRelChange ( HYPRE_SStructSolver solver , HYPRE_Int rel_change );
@@ -513,7 +513,7 @@ HYPRE_Int HYPRE_SStructMaxwellSolve ( HYPRE_SStructSolver solver , HYPRE_SStruct
 HYPRE_Int HYPRE_SStructMaxwellSolve2 ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 HYPRE_Int HYPRE_MaxwellGrad ( HYPRE_SStructGrid grid , HYPRE_ParCSRMatrix *T );
 HYPRE_Int HYPRE_SStructMaxwellSetGrad ( HYPRE_SStructSolver solver , HYPRE_ParCSRMatrix T );
-HYPRE_Int HYPRE_SStructMaxwellSetRfactors ( HYPRE_SStructSolver solver , HYPRE_Int rfactors [3 ]);
+HYPRE_Int HYPRE_SStructMaxwellSetRfactors ( HYPRE_SStructSolver solver , HYPRE_Int rfactors [HYPRE_MAXDIM]);
 HYPRE_Int HYPRE_SStructMaxwellSetTol ( HYPRE_SStructSolver solver , double tol );
 HYPRE_Int HYPRE_SStructMaxwellSetConstantCoef ( HYPRE_SStructSolver solver , HYPRE_Int constant_coef );
 HYPRE_Int HYPRE_SStructMaxwellSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
@@ -525,7 +525,7 @@ HYPRE_Int HYPRE_SStructMaxwellSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE
 HYPRE_Int HYPRE_SStructMaxwellPrintLogging ( HYPRE_SStructSolver solver , HYPRE_Int myid );
 HYPRE_Int HYPRE_SStructMaxwellGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_SStructMaxwellGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
-HYPRE_Int HYPRE_SStructMaxwellPhysBdy ( HYPRE_SStructGrid *grid_l , HYPRE_Int num_levels , HYPRE_Int rfactors [3 ], HYPRE_Int ***BdryRanks_ptr , HYPRE_Int **BdryRanksCnt_ptr );
+HYPRE_Int HYPRE_SStructMaxwellPhysBdy ( HYPRE_SStructGrid *grid_l , HYPRE_Int num_levels , HYPRE_Int rfactors [HYPRE_MAXDIM], HYPRE_Int ***BdryRanks_ptr , HYPRE_Int **BdryRanksCnt_ptr );
 HYPRE_Int HYPRE_SStructMaxwellEliminateRowsCols ( HYPRE_ParCSRMatrix parA , HYPRE_Int nrows , HYPRE_Int *rows );
 HYPRE_Int HYPRE_SStructMaxwellZeroVector ( HYPRE_ParVector v , HYPRE_Int *rows , HYPRE_Int nrows );
 
@@ -625,7 +625,7 @@ HYPRE_Int hypre_TriDiagSolve ( double *diag , double *upper , double *lower , do
 /* maxwell_TV.c */
 void *hypre_MaxwellTVCreate ( MPI_Comm comm );
 HYPRE_Int hypre_MaxwellTVDestroy ( void *maxwell_vdata );
-HYPRE_Int hypre_MaxwellSetRfactors ( void *maxwell_vdata , HYPRE_Int rfactor [3 ]);
+HYPRE_Int hypre_MaxwellSetRfactors ( void *maxwell_vdata , HYPRE_Int rfactor [HYPRE_MAXDIM]);
 HYPRE_Int hypre_MaxwellSetGrad ( void *maxwell_vdata , hypre_ParCSRMatrix *T );
 HYPRE_Int hypre_MaxwellSetConstantCoef ( void *maxwell_vdata , HYPRE_Int constant_coef );
 HYPRE_Int hypre_MaxwellSetTol ( void *maxwell_vdata , double tol );

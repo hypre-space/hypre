@@ -117,8 +117,8 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
          hypre_NodeRelaxSetWeight(relax_data, 1.0);
          hypre_NodeRelaxSetNumNodesets(relax_data, 1);
 
-         hypre_SetIndex(stride, 1, 1, 1);
-         hypre_SetIndex(indices[0], 0, 0, 0);
+         hypre_SetIndex3(stride, 1, 1, 1);
+         hypre_SetIndex3(indices[0], 0, 0, 0);
          hypre_NodeRelaxSetNodeset(relax_data, 0, 1, stride, indices);
       }
       break;
@@ -130,20 +130,20 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
 
          hypre_NodeRelaxSetNumNodesets(relax_data, 2);
 
-         hypre_SetIndex(stride, 2, 2, 2);
+         hypre_SetIndex3(stride, 2, 2, 2);
 
          /* define red points (point set 0) */
-         hypre_SetIndex(indices[0], 1, 0, 0);
-         hypre_SetIndex(indices[1], 0, 1, 0);
-         hypre_SetIndex(indices[2], 0, 0, 1);
-         hypre_SetIndex(indices[3], 1, 1, 1);
+         hypre_SetIndex3(indices[0], 1, 0, 0);
+         hypre_SetIndex3(indices[1], 0, 1, 0);
+         hypre_SetIndex3(indices[2], 0, 0, 1);
+         hypre_SetIndex3(indices[3], 1, 1, 1);
          hypre_NodeRelaxSetNodeset(relax_data, 0, 4, stride, indices);
 
          /* define black points (point set 1) */
-         hypre_SetIndex(indices[0], 0, 0, 0);
-         hypre_SetIndex(indices[1], 1, 1, 0);
-         hypre_SetIndex(indices[2], 1, 0, 1);
-         hypre_SetIndex(indices[3], 0, 1, 1);
+         hypre_SetIndex3(indices[0], 0, 0, 0);
+         hypre_SetIndex3(indices[1], 1, 1, 0);
+         hypre_SetIndex3(indices[2], 1, 0, 1);
+         hypre_SetIndex3(indices[3], 0, 1, 1);
          hypre_NodeRelaxSetNodeset(relax_data, 1, 4, stride, indices);
       }
       break;

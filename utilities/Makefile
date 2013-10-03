@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -33,7 +32,6 @@ HEADERS =\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
- thread_mpistubs.h\
  timing.h\
  umalloc_local.h\
  _hypre_utilities.h
@@ -52,7 +50,6 @@ FILES =\
  qsplit.c\
  random.c\
  threading.c\
- thread_mpistubs.c\
  timer.c\
  timing.c\
  umalloc_local.c\

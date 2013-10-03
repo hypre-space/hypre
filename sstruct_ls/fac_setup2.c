@@ -437,7 +437,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
     *-----------------------------------------------------------*/
 
    A_level= hypre_TAlloc(hypre_SStructMatrix *, max_level+1);
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
    for (level= 0; level <= max_level; level++)
    {
       HYPRE_SStructMatrixCreate(comm, graph_level[level], &A_level[level]);

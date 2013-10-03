@@ -57,6 +57,9 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
  
    HYPRE_Int              ierr = 0;
 
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
+
    levels        = hypre_CTAlloc(HYPRE_Int, npart);
    refine_factors= hypre_CTAlloc(hypre_Index, npart);
    for (part= 0; part< npart; part++)
@@ -198,6 +201,9 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
    double                *values1, *values2;
  
    HYPRE_Int              ierr = 0;
+
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
 
    p_cgrid= hypre_SStructGridPGrid(grid, part_crse);
    nvars  = hypre_SStructPGridNVars(p_cgrid);

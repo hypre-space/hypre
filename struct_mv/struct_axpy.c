@@ -44,7 +44,7 @@ hypre_StructAxpy( double              alpha,
                     
    HYPRE_Int         i;
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
@@ -60,7 +60,7 @@ hypre_StructAxpy( double              alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP

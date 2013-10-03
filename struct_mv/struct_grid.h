@@ -29,7 +29,7 @@ typedef struct hypre_StructGrid_struct
 {
    MPI_Comm             comm;
                       
-   HYPRE_Int            dim;          /* Number of grid dimensions */
+   HYPRE_Int            ndim;         /* Number of grid dimensions */
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    HYPRE_Int           *ids;          /* Unique IDs for boxes */
@@ -49,11 +49,10 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            ref_count;
 
 
-   HYPRE_Int           ghlocal_size;   /* Number of vars in box including ghosts */
-   HYPRE_Int           num_ghost[6];   /* ghost layer size for each box  */  
+   HYPRE_Int            ghlocal_size; /* Number of vars in box including ghosts */
+   HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
-   hypre_BoxManager   *box_man;
-   
+   hypre_BoxManager    *boxman;
 
 } hypre_StructGrid;
 
@@ -62,7 +61,7 @@ typedef struct hypre_StructGrid_struct
  *--------------------------------------------------------------------------*/
 
 #define hypre_StructGridComm(grid)          ((grid) -> comm)
-#define hypre_StructGridDim(grid)           ((grid) -> dim)
+#define hypre_StructGridNDim(grid)          ((grid) -> ndim)
 #define hypre_StructGridBoxes(grid)         ((grid) -> boxes)
 #define hypre_StructGridIDs(grid)           ((grid) -> ids)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
@@ -76,7 +75,7 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
 #define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
 #define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
-#define hypre_StructGridBoxMan(grid)        ((grid) -> box_man) 
+#define hypre_StructGridBoxMan(grid)        ((grid) -> boxman) 
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))

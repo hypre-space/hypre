@@ -72,6 +72,7 @@ BABELPROGS = ex5b ex5b77 ex5bxx ex6b ex6b77
 # ... ex5bp and ex5b90 are not in BABELPROGS because they require a
 # software environment which many people haven't set up.
 FORTRANPROGS = ex5f ex12f
+4DPROGS = ex17 ex18
 
 all: $(ALLPROGS)
 
@@ -80,6 +81,8 @@ all: $(ALLPROGS)
 babel: $(BABELPROGS)
 
 fortran: $(FORTRANPROGS)
+
+4D: $(4DPROGS)
 
 ########################################################################
 # Example 1
@@ -238,6 +241,18 @@ ex16: ex16.o
 	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
+# Example 17
+########################################################################
+ex17: ex17.o
+	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
+# Example 18
+########################################################################
+ex18: ex18.o
+	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
 # Clean up
 ########################################################################
 clean:
@@ -245,10 +260,12 @@ clean:
 	rm -f $(64BITPROGS:=.o)
 	rm -f $(BABELPROGS:=.o)
 	rm -f $(FORTRANPROGS:=.o)
+	rm -f $(4DPROGS:=.o)
 	cd vis; make clean
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
 	rm -f $(64BITPROGS) $(64BITPROGS:=*~)
 	rm -f $(BABELPROGS) $(BABELPROGS:=*~)
 	rm -f $(FORTRANLPROGS) $(FORTRANPROGS:=*~)
+	rm -f $(4DPROGS) $(4DPROGS:=*~)
 	rm -rf $(BABELPROGS:=*-pp.f90)

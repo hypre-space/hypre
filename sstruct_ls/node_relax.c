@@ -104,8 +104,8 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
    (relax_data -> svec_compute_pkgs)= NULL;
    (relax_data -> compute_pkgs)     = NULL;
 
-   hypre_SetIndex(stride, 1, 1, 1);
-   hypre_SetIndex(indices[0], 0, 0, 0);
+   hypre_SetIndex3(stride, 1, 1, 1);
+   hypre_SetIndex3(indices[0], 0, 0, 0);
    hypre_NodeRelaxSetNumNodesets((void *) relax_data, 1);
    hypre_NodeRelaxSetNodeset((void *) relax_data, 0, 1, stride, indices);
 
@@ -183,6 +183,8 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    HYPRE_Int             *nodeset_sizes   = (relax_data -> nodeset_sizes);
    hypre_Index           *nodeset_strides = (relax_data -> nodeset_strides);
    hypre_Index          **nodeset_indices = (relax_data -> nodeset_indices);
+   HYPRE_Int              ndim = hypre_SStructPMatrixNDim(A);
+
    hypre_SStructPVector  *t;
    HYPRE_Int            **diag_rank;
    double               **A_loc;
@@ -260,7 +262,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
          {
             sstencil = hypre_SStructPMatrixSStencil(A, vi, vj);
-            hypre_SetIndex(diag_index, 0, 0, 0);
+            hypre_SetIndex3(diag_index, 0, 0, 0);
             diag_rank[vi][vj] = 
                hypre_StructStencilElementRank(sstencil, diag_index);
          }
@@ -298,7 +300,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     *----------------------------------------------------------*/
 
    sgrid = hypre_StructMatrixGrid(hypre_SStructPMatrixSMatrix(A, 0, 0));
-   dim = hypre_StructStencilDim(
+   dim = hypre_StructStencilNDim(
       hypre_SStructPMatrixSStencil(A, 0, 0));
 
    compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_nodesets);
@@ -422,7 +424,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                   break;
             }
             box_aa_size = hypre_BoxArrayArraySize(box_aa);
-            new_box_aa = hypre_BoxArrayArrayCreate(box_aa_size);
+            new_box_aa = hypre_BoxArrayArrayCreate(box_aa_size, ndim);
 
             for (i = 0; i < box_aa_size; i++)
             {

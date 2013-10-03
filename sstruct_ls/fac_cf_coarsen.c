@@ -48,7 +48,7 @@
          jj= -1;                                \
       if (kk==2)                                \
          kk= -1;                                \
-      hypre_SetIndex(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);      \
    }
 
 
@@ -148,7 +148,10 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               myid;
 
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_SetIndex(zero_index, 0, 0, 0);
+   hypre_SetIndex3(zero_index, 0, 0, 0);
+
+   hypre_BoxInit(&refined_box, ndim);
+   hypre_BoxInit(&boxman_entry_box, ndim);
    
    /*--------------------------------------------------------------------------
     *  Task: Coarsen the CF interface connections of A into fac_A so that 
@@ -168,7 +171,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    /*--------------------------------------------------------------------------
     * Fine grid strides by the refinement factors.
     *--------------------------------------------------------------------------*/
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
    for (i= 0; i< ndim; i++)
    {
       stridef[i]= refine_factors[i];
@@ -215,7 +218,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
          hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), zero_index,
                                      refine_factors, hypre_BoxIMin(&refined_box));
-         hypre_SetIndex(index1, refine_factors[0]-1, refine_factors[1]-1,
+         hypre_SetIndex3(index1, refine_factors[0]-1, refine_factors[1]-1,
                         refine_factors[2]-1);
          hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), index1,
                                      refine_factors, hypre_BoxIMax(&refined_box));
@@ -234,7 +237,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                hypre_BoxIMax(&refined_box), &boxman_entries,
                                &nboxman_entries);
 
-         fgrid_cinterface_extents[var1][ci]= hypre_BoxArrayArrayCreate(nboxman_entries);
+         fgrid_cinterface_extents[var1][ci]= hypre_BoxArrayArrayCreate(nboxman_entries, ndim);
 
          /*------------------------------------------------------------------------
           * Get the  fgrid_cinterface_extents using var1-var1 stencil (only like-
@@ -425,7 +428,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                               hypre_StructMapFineToCoarse(
                                  hypre_SStructUVEntryToIndex(Uventry, temp1[i]),
                                  zero_index, stridef, index2);
-                              hypre_SubtractIndex(index2, index_temp, index1);
+                              hypre_SubtractIndexes(index2, index_temp,
+                                                    ndim, index1);
                               MapStencilRank(index1, temp2[i]);
 
                               /* zero off this stencil connection into the fbox */

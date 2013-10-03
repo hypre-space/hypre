@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
@@ -52,7 +49,14 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    HYPRE_Int              i, remainder, intersect_size;
 
    hypre_ClearIndex(temp_index);
-   stenbox = hypre_BoxCreate();
+   stenbox = hypre_BoxCreate(ndim);
+
+   hypre_BoxInit(&coarsen_box, ndim);
+   hypre_BoxInit(&contracted_box, ndim);
+   hypre_BoxInit(&extended_box, ndim); 
+   hypre_BoxInit(&intersect_box, ndim);
+   hypre_BoxInit(&shift_cbox, ndim);
+   hypre_BoxInit(&shift_ibox, ndim);
 
   /*--------------------------------------------------------------------------
    * Coarsen the fine box, extend it, and shift it to determine if there
@@ -120,20 +124,20 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    * To find the box extents that must be loop over, we need to take the
    * "opposite" stencil_shape and shift the coarsen and extended boxes.
    *---------------------------------------------------------------------*/
-   hypre_SetIndex(shift_index,
+   hypre_SetIndex3(shift_index,
                  -size_ibox[0]*stencil_shape[0],
                  -size_ibox[1]*stencil_shape[1],
                  -size_ibox[2]*stencil_shape[2]);
-   hypre_AddIndex(shift_index, hypre_BoxIMin(&intersect_box), hypre_BoxIMin(&shift_ibox));
-   hypre_AddIndex(shift_index, hypre_BoxIMax(&intersect_box), hypre_BoxIMax(&shift_ibox));
+   hypre_AddIndexes(shift_index, hypre_BoxIMin(&intersect_box), 3, hypre_BoxIMin(&shift_ibox));
+   hypre_AddIndexes(shift_index, hypre_BoxIMax(&intersect_box), 3, hypre_BoxIMax(&shift_ibox));
    hypre_IntersectBoxes(&shift_ibox, &intersect_box, &shift_ibox);
 
-   hypre_SetIndex(shift_index,
+   hypre_SetIndex3(shift_index,
                  -size_cbox[0]*stencil_shape[0],
                  -size_cbox[1]*stencil_shape[1],
                  -size_cbox[2]*stencil_shape[2]);
-   hypre_AddIndex(shift_index, hypre_BoxIMin(&coarsen_box), hypre_BoxIMin(&shift_cbox));
-   hypre_AddIndex(shift_index, hypre_BoxIMax(&coarsen_box), hypre_BoxIMax(&shift_cbox));
+   hypre_AddIndexes(shift_index, hypre_BoxIMin(&coarsen_box), 3, hypre_BoxIMin(&shift_cbox));
+   hypre_AddIndexes(shift_index, hypre_BoxIMax(&coarsen_box), 3, hypre_BoxIMax(&shift_cbox));
    hypre_IntersectBoxes(&shift_cbox, &coarsen_box, &shift_cbox);
 
   /*---------------------------------------------------------------------
@@ -141,9 +145,9 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    * shift_cbox by -stencil_shape and then intersecting with shift_ibox
    * gives the exact extents.
    *---------------------------------------------------------------------*/
-   hypre_SetIndex(shift_index, -stencil_shape[0], -stencil_shape[1], -stencil_shape[2]);
-   hypre_AddIndex(shift_index, hypre_BoxIMin(&shift_cbox), hypre_BoxIMin(&shift_cbox));
-   hypre_AddIndex(shift_index, hypre_BoxIMax(&shift_cbox), hypre_BoxIMax(&shift_cbox));
+   hypre_SetIndex3(shift_index, -stencil_shape[0], -stencil_shape[1], -stencil_shape[2]);
+   hypre_AddIndexes(shift_index, hypre_BoxIMin(&shift_cbox), 3, hypre_BoxIMin(&shift_cbox));
+   hypre_AddIndexes(shift_index, hypre_BoxIMax(&shift_cbox), 3, hypre_BoxIMax(&shift_cbox));
    hypre_IntersectBoxes(&shift_cbox, &shift_ibox, stenbox);
 
    return stenbox;

@@ -38,7 +38,7 @@ hypre_SparseMSGCreateRAPOp( hypre_StructMatrix *R,
 
    stencil = hypre_StructMatrixStencil(A);
 
-   switch (hypre_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil)) 
    {
       case 2:
       RAP = hypre_SparseMSG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
@@ -75,7 +75,7 @@ hypre_SparseMSGSetupRAPOp( hypre_StructMatrix *R,
 
    stencil = hypre_StructMatrixStencil(A);
 
-   switch (hypre_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil)) 
    {
 
       case 2:

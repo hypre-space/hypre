@@ -35,4 +35,8 @@
 #define hypre_round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
 #endif
 
+#ifndef hypre_pow2
+#define hypre_pow2(i)  ( 1 << (i) )
+#endif
+
 #endif

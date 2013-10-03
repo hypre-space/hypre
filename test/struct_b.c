@@ -1310,7 +1310,7 @@ HYPRE_Int SetStencilBndry
   istart          = hypre_BoxIMin(boundingbox);
   iend            = hypre_BoxIMax(boundingbox);
   size            = hypre_StructGridNumBoxes(gridmatrix);
-  dim             = hypre_StructGridDim(gridmatrix);
+  dim             = hypre_StructGridNDim(gridmatrix);
   stencil_indices = hypre_CTAlloc(HYPRE_Int, 1);
 
   bHYPRE_StructMatrix_GetIntValue( A_b, "ConstantCoefficient",
@@ -1333,7 +1333,7 @@ HYPRE_Int SetStencilBndry
   ib = 0;
   hypre_ForBoxI(i, gridboxes)
      {
-        dummybox = hypre_BoxCreate( );
+        dummybox = hypre_BoxCreate(dim);
         box      = hypre_BoxArrayBox(gridboxes, i);
         volume   =  hypre_BoxVolume(box);
         vol[i]   = volume;

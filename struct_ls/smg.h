@@ -86,7 +86,7 @@ typedef struct
 #define hypre_SMGSetBIndex(base_index, base_stride, level, bindex) \
 {\
    if (level > 0)\
-      hypre_SetIndex(bindex, 0, 0, 0);\
+      hypre_SetIndex3(bindex, 0, 0, 0);\
    else\
       hypre_CopyIndex(base_index, bindex);\
 }
@@ -94,7 +94,7 @@ typedef struct
 #define hypre_SMGSetBStride(base_index, base_stride, level, bstride) \
 {\
    if (level > 0)\
-      hypre_SetIndex(bstride, 1, 1, 1);\
+      hypre_SetIndex3(bstride, 1, 1, 1);\
    else\
       hypre_CopyIndex(base_stride, bstride);\
 }

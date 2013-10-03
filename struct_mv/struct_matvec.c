@@ -153,7 +153,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
          hypre_BoxGetSize(box, loop_size);
 
-         hypre_BoxLoop1Begin(hypre_StructVectorDim(x), loop_size,
+         hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                              y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
@@ -212,7 +212,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   {
                      hypre_BoxGetSize(box, loop_size);
 
-                     hypre_BoxLoop1Begin(hypre_StructVectorDim(x), loop_size,
+                     hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
@@ -227,7 +227,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   {
                      hypre_BoxGetSize(box, loop_size);
 
-                     hypre_BoxLoop1Begin(hypre_StructVectorDim(x), loop_size,
+                     hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
@@ -331,7 +331,7 @@ HYPRE_Int hypre_StructMatvecCC0( double              alpha,
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
-   ndim          = hypre_StructVectorDim(x);
+   ndim          = hypre_StructVectorNDim(x);
 
    hypre_ForBoxArrayI(i, compute_box_aa)
    {
@@ -675,7 +675,7 @@ HYPRE_Int hypre_StructMatvecCC1( double              alpha,
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
-   ndim          = hypre_StructVectorDim(x);
+   ndim          = hypre_StructVectorNDim(x);
 
    hypre_ForBoxArrayI(i, compute_box_aa)
    {
@@ -1022,7 +1022,7 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
-   ndim          = hypre_StructVectorDim(x);
+   ndim          = hypre_StructVectorNDim(x);
 
    hypre_ForBoxArrayI(i, compute_box_aa)
    {
@@ -1047,7 +1047,7 @@ HYPRE_Int hypre_StructMatvecCC2( double              alpha,
          /* Find the stencil index for the center of the stencil, which
             makes the matrix diagonal.  This is the variable coefficient
             part of the matrix, so will get different treatment...*/
-         hypre_SetIndex(center_index, 0, 0, 0);
+         hypre_SetIndex(center_index, 0);
          center_rank = hypre_StructStencilElementRank( stencil, center_index );
          si_center = center_rank;
 

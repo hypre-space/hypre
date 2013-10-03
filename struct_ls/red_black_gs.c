@@ -99,7 +99,7 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex(diag_index, 0, 0, 0);
+   hypre_SetIndex3(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
    /*----------------------------------------------------------
@@ -139,6 +139,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
    HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
+   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
    hypre_CommHandle      *comm_handle;
                         
@@ -279,6 +280,14 @@ hypre_RedBlackGS( void               *relax_vdata,
                Anj = hypre_BoxSizeY(A_dbox);
                bnj = hypre_BoxSizeY(b_dbox);
                xnj = hypre_BoxSizeY(x_dbox);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
@@ -367,6 +376,14 @@ hypre_RedBlackGS( void               *relax_vdata,
                Anj = hypre_BoxSizeY(A_dbox);
                bnj = hypre_BoxSizeY(b_dbox);
                xnj = hypre_BoxSizeY(x_dbox);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
                switch(stencil_size)
                {

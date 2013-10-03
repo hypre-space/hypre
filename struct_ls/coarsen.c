@@ -112,7 +112,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_StructGrid *cgrid;
 
    MPI_Comm          comm;
-   HYPRE_Int         dim;
+   HYPRE_Int         ndim;
 
    hypre_BoxArray   *my_boxes;
 
@@ -156,14 +156,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    fids = hypre_StructGridIDs(fgrid);
    fboxman = hypre_StructGridBoxMan(fgrid);
    comm  = hypre_StructGridComm(fgrid);
-   dim   = hypre_StructGridDim(fgrid);
+   ndim  = hypre_StructGridNDim(fgrid);
    max_distance = hypre_StructGridMaxDistance(fgrid);
    
    /* initial */
    hypre_MPI_Comm_rank(comm, &myid );
 
    /* create new coarse grid */
-   hypre_StructGridCreate(comm, dim, &cgrid);
+   hypre_StructGridCreate(comm, ndim, &cgrid);
 
    /* coarsen my boxes and create the coarse grid ids (same as fgrid) */
    my_boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(fgrid));
@@ -201,7 +201,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* adjust periodicity and set for the coarse grid */
    hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);
-   for (i = 0; i < dim; i++)
+   for (i = 0; i < ndim; i++)
    {
       hypre_IndexD(periodic,i) /= hypre_IndexD(stride,i);
    }
@@ -215,12 +215,12 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       Note: if all global info is already known for a grid, the we do not need
       to re-gather regardless of the max_distance values. */
 
-   for (i = 0; i < dim; i++)
+   for (i = 0; i < ndim; i++)
    {
       coarsen_factor = hypre_IndexD(stride,i); 
       hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
    }
-   for (i = dim; i < 3; i++)
+   for (i = ndim; i < 3; i++)
    {
       hypre_IndexD(new_dist, i) = 2;
    }
@@ -228,8 +228,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_BoxManGetAllGlobalKnown (fboxman, &known );
 
 
-   if ( hypre_IndexGTESize(new_dist, 2) || known) /* large enough - don't need
-                                                   * to re-gather */
+   /* large enough - don't need to re-gather */
+   if ( (hypre_IndexMin(new_dist, ndim) > 1) || known )
    {
       /* update new max distance value */  
       if (!known) /* only need to change if global info is not known */
@@ -238,7 +238,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    else  /* not large enough - set max_distance to 0 - neighbor info will be
             collected during the assemble */
    {
-      hypre_ClearIndex(new_dist);
+      hypre_SetIndex(new_dist, 0);
       hypre_StructGridSetMaxDistance(cgrid, new_dist);
    }
 
@@ -251,7 +251,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* create a box manager for the coarse grid */ 
    info_size = hypre_BoxManEntryInfoSize(fboxman);
    max_nentries =  hypre_BoxManMaxNEntries(fboxman);
-   hypre_BoxManCreate(max_nentries, info_size, dim, bounding_box, 
+   hypre_BoxManCreate(max_nentries, info_size, ndim, bounding_box, 
                       comm, &cboxman);
    
    hypre_BoxDestroy(bounding_box);
@@ -264,7 +264,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    
    hypre_BoxManGetAllEntries( fboxman , &num_entries, &entries); 
 
-   new_box = hypre_BoxCreate();
+   new_box = hypre_BoxCreate(ndim);
    num = 0;
    last_proc = -1;
 
@@ -366,137 +366,3 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 }
 
 #undef hypre_StructCoarsenBox
-
-/*--------------------------------------------------------------------------
- * hypre_Merge
- *
- * Merge the integers in the sorted 'arrays'.  The routine returns the
- * (array, array_index) pairs for each entry in the merged list.  The
- * end of the pairs is indicated by the first '-1' entry in 'mergei'.
- *
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_Merge( HYPRE_Int   **arrays,
-             HYPRE_Int    *sizes,
-             HYPRE_Int     size,
-             HYPRE_Int   **mergei_ptr,
-             HYPRE_Int   **mergej_ptr )
-{
-   HYPRE_Int  *mergei;
-   HYPRE_Int  *mergej;
-
-   HYPRE_Int   num, i;
-   HYPRE_Int   lastval;
-
-   struct linkstruct
-   {
-      HYPRE_Int  i;
-      HYPRE_Int  j;
-      struct linkstruct  *next;
-
-   } *list, *first, *link, *next;
-
-   num = 0;
-   for (i = 0; i < size; i++)
-   {
-      num += sizes[i];
-   }
-   mergei = hypre_TAlloc(HYPRE_Int, num+1);
-   mergej = hypre_TAlloc(HYPRE_Int, num+1);
-
-   list = NULL;
-   if (num > 0)
-   {
-      /* Create the sorted linked list (temporarily use merge arrays) */
-
-      num = 0;
-      for (i = 0; i < size; i++)
-      {
-         if (sizes[i] > 0)
-         {
-            mergei[num] = arrays[i][0];
-            mergej[num] = i;
-            num++;
-         }
-      }
-
-      hypre_qsort2i(mergei, mergej, 0, (num-1));
-
-      list = hypre_TAlloc(struct linkstruct, num);
-      first = list;
-      link = &first[0];
-      link->i = mergej[0];
-      link->j = 0;
-      for (i = 1; i < num; i++)
-      {
-         link->next = &first[i];
-         link       = (link -> next);
-         link->i    = mergej[i];
-         link->j    = 0;
-      }
-      link->next = NULL;
-
-      /* merge the arrays using the sorted linked list */
-
-      num = 0;
-      lastval = arrays[first->i][first->j] - 1;
-      while (first != NULL)
-      {
-         /* put unique values in the merged list */
-         if ( arrays[first->i][first->j] > lastval )
-         {
-            mergei[num] = first->i;
-            mergej[num] = first->j;
-            lastval = arrays[first->i][first->j];
-            num++;
-         }
-
-         /* find the next value, while keeping the list sorted */
-         first->j += 1;
-         next = first->next;
-         if ( !((first->j) < sizes[first->i]) )
-         {
-            /* pop 'first' from the list */
-            first = first->next;
-         }
-         else if (next != NULL)
-         {
-            if ( arrays[first->i][first->j] > 
-                 arrays[next ->i][next ->j] )
-            {
-               /* find new place in the list for 'first' */
-               link = next;
-               next = link->next;
-               while (next != NULL)
-               {
-                  if ( arrays[first->i][first->j] <
-                       arrays[next ->i][next ->j] )
-                  {
-                     break;
-                  }
-                  link = next;
-                  next = link->next;
-               }
-
-               /* put 'first' after 'link' and reset 'first' */
-               next = first;
-               first = first->next;
-               next->next = link->next;
-               link->next = next;
-            }
-         }
-      }
-   }
-
-   mergei[num] = -1;
-   mergej[num] = -1;
-
-   hypre_TFree(list);
-   
-   *mergei_ptr = mergei;
-   *mergej_ptr = mergej;
-
-   return hypre_error_flag;
-}
-

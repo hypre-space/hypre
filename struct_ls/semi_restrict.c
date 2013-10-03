@@ -160,7 +160,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
    if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(r, 0);
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*--------------------------------------------------------------------
     * Restrict the residual.
@@ -244,7 +244,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
             {
                Ri = hypre_CCBoxIndexRank( R_dbox, startc );
 
-               hypre_BoxLoop2Begin(hypre_StructMatrixDim(R), loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
 #ifdef HYPRE_USING_OPENMP
@@ -259,7 +259,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
             }
             else
             {
-               hypre_BoxLoop3Begin(hypre_StructMatrixDim(R), loop_size,
+               hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                    R_dbox,  startc, stridec, Ri,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);

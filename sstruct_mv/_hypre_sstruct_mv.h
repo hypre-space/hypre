@@ -127,8 +127,8 @@ typedef struct
    HYPRE_Int    type;
    HYPRE_Int    offset;   /* minimum offset for this box */
    HYPRE_Int    ghoffset; /* minimum offset ghost for this box */
-   HYPRE_Int    proc;      /* redundant with the proc in the entry, but
-                              makes some coding easier */
+   HYPRE_Int    proc;     /* redundant with the proc in the entry, but
+                             makes some coding easier */
    HYPRE_Int    boxnum;   /* this is different from the entry id */ 
    HYPRE_Int    part;     /* part the box lives on */
    hypre_Index  ilower;   /* box ilower, but on the neighbor index-space */
@@ -372,7 +372,7 @@ hypre_StructStencilShape( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilSize(stencil) \
 hypre_StructStencilSize( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilNDim(stencil) \
-hypre_StructStencilDim( hypre_SStructStencilSStencil(stencil) )
+hypre_StructStencilNDim( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilEntry(stencil, i) \
 hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
 

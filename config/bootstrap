@@ -11,6 +11,11 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+if [ -f "configure.in" ]; then
+  echo "File configure.in already exists!"
+  echo "Make sure this script is being run from the root source directory."
+  exit
+fi
 
 ln -s config/configure.in .
 

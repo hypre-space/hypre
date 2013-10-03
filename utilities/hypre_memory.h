@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * Header file for memory management utilities
@@ -75,32 +74,10 @@ extern "C" {
 
 #endif
 
-
-#ifdef HYPRE_USE_PTHREADS
-
-#define hypre_SharedTAlloc(type, count) \
-( (type *)hypre_SharedMAlloc((size_t)(sizeof(type) * (count))) )
-
-
-#define hypre_SharedCTAlloc(type, count) \
-( (type *)hypre_SharedCAlloc((size_t)(count),\
-                             (size_t)sizeof(type)) )
-
-#define hypre_SharedTReAlloc(ptr, type, count) \
-( (type *)hypre_SharedReAlloc((char *)ptr,\
-                              (size_t)(sizeof(type) * (count))) )
-
-#define hypre_SharedTFree(ptr) \
-( hypre_SharedFree((char *)ptr), ptr = NULL )
-
-#else
-
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
 #define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count))
 #define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
 #define hypre_SharedTFree(ptr) hypre_TFree(ptr)
-
-#endif
 
 /*--------------------------------------------------------------------------
  * Prototypes

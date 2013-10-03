@@ -18,8 +18,8 @@
 /*--------------------------------------------------------------------------
  * This is the main solve routine for the Schaffer multigrid method.
  * This solver works for 1D, 2D, or 3D linear systems.  The dimension
- * is determined by the hypre_StructStencilDim argument of the matrix
- * stencil.  The hypre_StructGridDim argument of the matrix grid is
+ * is determined by the hypre_StructStencilNDim argument of the matrix
+ * stencil.  The hypre_StructGridNDim argument of the matrix grid is
  * allowed to be larger than the dimension of the solver, and in fact,
  * this feature is used in the smaller-dimensional solves required
  * in the relaxation method for both the 2D and 3D algorithms.  This
@@ -198,7 +198,7 @@ hypre_SMGSolve( void               *smg_vdata,
          /* restrict fine grid residual */
          hypre_SemiRestrict(restrict_data_l[0], R_l[0], r_l[0], b_l[1]);
 #if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_xdown.%02d", 0);
             hypre_StructVectorPrint(filename, x_l[0], 0);
@@ -224,7 +224,7 @@ hypre_SMGSolve( void               *smg_vdata,
             /* restrict residual */
             hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-            if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+            if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
                hypre_sprintf(filename, "zout_xdown.%02d", l);
                hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -243,7 +243,7 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_xbottom.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -260,7 +260,7 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+            if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
                hypre_sprintf(filename, "zout_eup.%02d", l);
                hypre_StructVectorPrint(filename, e_l[l], 0);
@@ -280,7 +280,7 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SemiInterp(interp_data_l[0], PT_l[0], x_l[1], e_l[0]);
          hypre_SMGAxpy(1.0, e_l[0], x_l[0], base_index, base_stride);
 #if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_eup.%02d", 0);
             hypre_StructVectorPrint(filename, e_l[0], 0);

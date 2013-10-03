@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
@@ -51,22 +48,22 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
    HYPRE_Int             *flag;
    HYPRE_Int              i, j, k, t, nboxes, bdy;
 
-   hypre_SetIndex(ishift, 1, 0, 0);
-   hypre_SetIndex(jshift, 0, 1, 0);
-   hypre_SetIndex(kshift, 0, 0, 1);
+   hypre_SetIndex3(ishift, 1, 0, 0);
+   hypre_SetIndex3(jshift, 0, 1, 0);
+   hypre_SetIndex3(kshift, 0, 0, 1);
 
    cell_boxes= hypre_StructGridBoxes(cell_grid);
    nboxes    = hypre_BoxArraySize(cell_boxes);
 
    bdry= hypre_TAlloc(hypre_BoxArrayArray **, nboxes);
-   shifted_box= hypre_BoxCreate();
+   shifted_box= hypre_BoxCreate(ndim);
 
    hypre_ForBoxI(j, cell_boxes)
    {
       box= hypre_BoxArrayBox(cell_boxes, j);
 
      /* find the cellgrid boundaries of box if there are any. */
-      cellgrid_bdry= hypre_BoxArrayArrayCreate(2*ndim); 
+      cellgrid_bdry= hypre_BoxArrayArrayCreate(2*ndim, ndim);
       flag= hypre_CTAlloc(HYPRE_Int, 2*ndim);
       bdy = 0;
 
@@ -100,7 +97,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
          k= 2*(ndim-1);  /* 3-d requires 4 boundary faces to be checked */
          for (i= 0; i< nvars; i++)
          {
-            bdry[j][i+1]= hypre_BoxArrayArrayCreate(k); /* one for +/- directions */
+            bdry[j][i+1]= hypre_BoxArrayArrayCreate(k, ndim); /* one for +/- directions */
          }
    
          for (i= 0; i< nvars; i++)
@@ -123,8 +120,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, varoffset, lower);
-                        hypre_SubtractIndex(upper, varoffset, upper);
+                        hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                        hypre_SubtractIndexes(upper, varoffset, ndim, upper);
   
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -164,8 +161,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, varoffset, lower);
-                        hypre_SubtractIndex(upper, varoffset, upper);
+                        hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                        hypre_SubtractIndexes(upper, varoffset, ndim, upper);
   
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -205,8 +202,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, varoffset, lower);
-                        hypre_SubtractIndex(upper, kshift, upper);
+                        hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                        hypre_SubtractIndexes(upper, kshift, ndim, upper);
   
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -224,7 +221,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, jshift, lower);
+                        hypre_SubtractIndexes(lower, jshift, ndim, lower);
   
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -242,8 +239,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, varoffset, lower);
-                        hypre_SubtractIndex(upper, jshift, upper);
+                        hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                        hypre_SubtractIndexes(upper, jshift, ndim, upper);
                                                                                                                         
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -261,7 +258,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, kshift, lower);
+                        hypre_SubtractIndexes(lower, kshift, ndim, lower);
                                                                                                                         
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -283,8 +280,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, varoffset, lower);
-                        hypre_SubtractIndex(upper, kshift, upper);
+                        hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                        hypre_SubtractIndexes(upper, kshift, ndim, upper);
                                                                                                                         
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -302,7 +299,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, ishift, lower);
+                        hypre_SubtractIndexes(lower, ishift, ndim, lower);
                                                                                                                         
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -320,8 +317,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, varoffset, lower);
-                        hypre_SubtractIndex(upper, ishift, upper);
+                        hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                        hypre_SubtractIndexes(upper, ishift, ndim, upper);
                                                                                                                         
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -339,7 +336,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                        /* bdry boxes */
                         hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                         hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                        hypre_SubtractIndex(lower, kshift, lower);
+                        hypre_SubtractIndexes(lower, kshift, ndim, lower);
 
                         hypre_BoxSetExtents(shifted_box, lower, upper);
                         hypre_AppendBox(shifted_box, box_array2);
@@ -362,8 +359,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         /* bdry boxes */
                          hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                          hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                         hypre_SubtractIndex(lower, varoffset, lower);
-                         hypre_SubtractIndex(upper, jshift, upper);
+                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                         hypre_SubtractIndexes(upper, jshift, ndim, upper);
 
                          hypre_BoxSetExtents(shifted_box, lower, upper);
                          hypre_AppendBox(shifted_box, box_array2);
@@ -381,7 +378,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         /* bdry boxes */
                          hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                          hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                         hypre_SubtractIndex(lower, ishift, lower);
+                         hypre_SubtractIndexes(lower, ishift, ndim, lower);
 
                          hypre_BoxSetExtents(shifted_box, lower, upper);
                          hypre_AppendBox(shifted_box, box_array2);
@@ -399,8 +396,8 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         /* bdry boxes */
                          hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                          hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                         hypre_SubtractIndex(lower, varoffset, lower);
-                         hypre_SubtractIndex(upper, ishift, upper);
+                         hypre_SubtractIndexes(lower, varoffset, ndim, lower);
+                         hypre_SubtractIndexes(upper, ishift, ndim, upper);
 
                          hypre_BoxSetExtents(shifted_box, lower, upper);
                          hypre_AppendBox(shifted_box, box_array2);
@@ -418,7 +415,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
                         /* bdry boxes */
                          hypre_CopyIndex(hypre_BoxIMin(bdy_box), lower);
                          hypre_CopyIndex(hypre_BoxIMax(bdy_box), upper);
-                         hypre_SubtractIndex(lower, jshift, lower);
+                         hypre_SubtractIndexes(lower, jshift, ndim, lower);
 
                          hypre_BoxSetExtents(shifted_box, lower, upper);
                          hypre_AppendBox(shifted_box, box_array2);
@@ -438,7 +435,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
          bdry[j]= hypre_TAlloc(hypre_BoxArrayArray *, nvars+1); 
          for (i= 0; i< nvars+1; i++)
          {
-            bdry[j][i]= hypre_BoxArrayArrayCreate(0);
+            bdry[j][i]= hypre_BoxArrayArrayCreate(0, ndim);
          }
       }
 

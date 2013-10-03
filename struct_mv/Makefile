@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -28,7 +27,6 @@ HEADERS =\
  assumed_part.h\
  box.h\
  box_manager.h\
- box_pthreads.h\
  computation.h\
  struct_communication.h\
  struct_grid.h\
@@ -39,7 +37,6 @@ HEADERS =\
 FILES =\
  assumed_part.c\
  box_algebra.c\
- box_alloc.c\
  box_boundary.c\
  box.c\
  box_manager.c\
@@ -49,7 +46,6 @@ FILES =\
  F90_HYPRE_struct_matrix.c\
  F90_HYPRE_struct_stencil.c\
  F90_HYPRE_struct_vector.c\
- grow.c\
  HYPRE_struct_grid.c\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\
@@ -64,7 +60,6 @@ FILES =\
  struct_matrix.c\
  struct_matrix_mask.c\
  struct_matvec.c\
- struct_overlap_innerprod.c\
  struct_scale.c\
  struct_stencil.c\
  struct_vector.c

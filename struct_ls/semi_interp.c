@@ -164,7 +164,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
    if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*-----------------------------------------------------------------------
     * Compute e at coarse points (injection)
@@ -197,7 +197,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox, start, stride, ei,
                           xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
@@ -277,7 +277,7 @@ hypre_SemiInterp( void               *interp_vdata,
             if ( constant_coefficient )
             {
                Pi = hypre_CCBoxIndexRank( P_dbox, startc );
-               hypre_BoxLoop1Begin(hypre_StructMatrixDim(P), loop_size,
+               hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei) HYPRE_SMP_SCHEDULE
@@ -291,7 +291,7 @@ hypre_SemiInterp( void               *interp_vdata,
             }
             else
             {
-               hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
 #ifdef HYPRE_USING_OPENMP

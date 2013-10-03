@@ -51,7 +51,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    HYPRE_Int              P_stored_as_transpose = 0;
 
-   ndim = hypre_StructStencilDim(hypre_SStructPMatrixSStencil(A, 0, 0));
+   ndim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
    nvars = hypre_SStructPMatrixNVars(A);
 
    vartype = hypre_SStructPGridVarType(coarse_grid, 0);

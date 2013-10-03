@@ -26,19 +26,19 @@
 
 #define hypre_SparseMSGSetCIndex(cdir, cindex) \
 {\
-   hypre_SetIndex(cindex, 0, 0, 0);\
+   hypre_SetIndex3(cindex, 0, 0, 0);\
    hypre_IndexD(cindex, cdir) = 0;\
 }
 
 #define hypre_SparseMSGSetFIndex(cdir, findex) \
 {\
-   hypre_SetIndex(findex, 0, 0, 0);\
+   hypre_SetIndex3(findex, 0, 0, 0);\
    hypre_IndexD(findex, cdir) = 1;\
 }
 
 #define hypre_SparseMSGSetStride(cdir, stride) \
 {\
-   hypre_SetIndex(stride, 1, 1, 1);\
+   hypre_SetIndex3(stride, 1, 1, 1);\
    hypre_IndexD(stride, cdir) = 2;\
 }
 
@@ -128,7 +128,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
     *-----------------------------------------------------*/
 
    grid  = hypre_StructMatrixGrid(A);
-   dim   = hypre_StructGridDim(grid);
+   dim   = hypre_StructGridNDim(grid);
 
    /* Determine num_grids[] and num_levels */
    num_levels = 1;
@@ -371,7 +371,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                   hypre_SparseMSGCreateRAPOp(RTx_a[lx], A_a[fi], Px_a[lx],
                                              grid_a[ci], 0);
                hypre_StructMatrixInitialize(A_a[ci]);
-               hypre_SetIndex(stridePR, 1, pow(2, ly), pow(2, lz));
+               hypre_SetIndex3(stridePR, 1, pow(2, ly), pow(2, lz));
                hypre_SparseMSGSetupRAPOp(RTx_a[lx], A_a[fi], Px_a[lx],
                                          0, cindex, stride, stridePR, A_a[ci]);
             }
@@ -417,7 +417,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             A_a[ci] = hypre_SparseMSGCreateRAPOp(RTy_a[ly], A_a[fi], Py_a[ly],
                                                  grid_a[ci], 1);
             hypre_StructMatrixInitialize(A_a[ci]);
-            hypre_SetIndex(stridePR, 1, 1, pow(2, lz));
+            hypre_SetIndex3(stridePR, 1, 1, pow(2, lz));
             hypre_SparseMSGSetupRAPOp(RTy_a[ly], A_a[fi], Py_a[ly],
                                       1, cindex, stride, stridePR, A_a[ci]);
          }
@@ -458,7 +458,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
          A_a[ci] = hypre_SparseMSGCreateRAPOp(RTz_a[lz], A_a[fi], Pz_a[lz],
                                               grid_a[ci], 2);
          hypre_StructMatrixInitialize(A_a[ci]);
-         hypre_SetIndex(stridePR, 1, 1, 1);
+         hypre_SetIndex3(stridePR, 1, 1, 1);
          hypre_SparseMSGSetupRAPOp(RTz_a[lz], A_a[fi], Pz_a[lz],
                                    2, cindex, stride, stridePR, A_a[ci]);
       }
@@ -637,7 +637,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
             hypre_SparseMSGMapIndex(lx+1, ly, lz, num_grids, ci);
 
-            hypre_SetIndex(stridePR, 1, pow(2, ly), pow(2, lz));
+            hypre_SetIndex3(stridePR, 1, pow(2, ly), pow(2, lz));
 
             interpx_a[fi] = hypre_SparseMSGInterpCreate();
             hypre_SparseMSGInterpSetup(interpx_a[fi], Px_a[lx],
@@ -666,7 +666,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
             hypre_SparseMSGMapIndex(lx, ly+1, lz, num_grids, ci);
 
-            hypre_SetIndex(stridePR, pow(2, lx), 1, pow(2, lz));
+            hypre_SetIndex3(stridePR, pow(2, lx), 1, pow(2, lz));
 
             interpy_a[fi] = hypre_SparseMSGInterpCreate();
             hypre_SparseMSGInterpSetup(interpy_a[fi], Py_a[ly],
@@ -695,7 +695,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
             hypre_SparseMSGMapIndex(lx, ly, lz+1, num_grids, ci);
 
-            hypre_SetIndex(stridePR, pow(2, lx), pow(2, ly), 1);
+            hypre_SetIndex3(stridePR, pow(2, lx), pow(2, ly), 1);
 
             interpz_a[fi] = hypre_SparseMSGInterpCreate();
             hypre_SparseMSGInterpSetup(interpz_a[fi], Pz_a[lz],

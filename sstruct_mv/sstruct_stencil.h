@@ -46,7 +46,7 @@ hypre_StructStencilShape( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilSize(stencil) \
 hypre_StructStencilSize( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilNDim(stencil) \
-hypre_StructStencilDim( hypre_SStructStencilSStencil(stencil) )
+hypre_StructStencilNDim( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilEntry(stencil, i) \
 hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
 

@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_sstruct_ls.h"
 
 HYPRE_Int
@@ -62,7 +59,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    hypre_SStructOwnInfoData *owninfo_data;
 
    MPI_Comm                  comm= hypre_SStructVectorComm(fgrid);
-   HYPRE_Int                 ndim= hypre_StructGridDim(fgrid);
+   HYPRE_Int                 ndim= hypre_StructGridNDim(fgrid);
 
    hypre_BoxArray           *grid_boxes;
    hypre_BoxArray           *intersect_boxes;
@@ -86,6 +83,9 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    HYPRE_Int                 cnt;
    HYPRE_Int                 i, j, k, mod;
 
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&boxman_entry_box, ndim);
+
    hypre_ClearIndex(index); 
    hypre_MPI_Comm_rank(comm, &myproc);
 
@@ -100,7 +100,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
     *------------------------------------------------------------------------*/
    grid_boxes    = hypre_StructGridBoxes(fgrid);
 
-   own_boxes   = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
+   own_boxes   = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
    own_cboxnums= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
 
    hypre_ForBoxI(i, grid_boxes)
@@ -165,10 +165,10 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
     *   own_composite_cboxes.
     *------------------------------------------------------------------------*/
    grid_boxes= hypre_StructGridBoxes(cgrid);
-   own_composite_cboxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
+   own_composite_cboxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
   (owninfo_data -> own_composite_size)= hypre_BoxArraySize(grid_boxes);
 
-   tmp_boxarray = hypre_BoxArrayCreate(0);
+   tmp_boxarray = hypre_BoxArrayCreate(0, ndim);
    hypre_ForBoxI(i, grid_boxes)
    {
        grid_box= hypre_BoxArrayBox(grid_boxes, i);
@@ -178,7 +178,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
        hypre_ClearIndex(index); 
        hypre_SStructIndexScaleC_F(hypre_BoxIMin(grid_box), index,
                                   rfactor, hypre_BoxIMin(&scaled_box));
-       hypre_SetIndex(index, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1); 
+       hypre_SetIndex3(index, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1); 
        hypre_SStructIndexScaleC_F(hypre_BoxIMax(grid_box), index,
                                   rfactor, hypre_BoxIMax(&scaled_box));
 
@@ -187,7 +187,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
                             &nboxman_entries);
        
        hypre_ClearIndex(index); 
-       intersect_boxes= hypre_BoxArrayCreate(0);
+       intersect_boxes= hypre_BoxArrayCreate(0, ndim);
        for (j= 0; j< nboxman_entries; j++)
        {
           hypre_BoxManEntryGetExtents(boxman_entries[j], ilower, iupper);

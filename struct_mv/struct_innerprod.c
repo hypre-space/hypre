@@ -22,10 +22,6 @@
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
 
-#ifdef HYPRE_USE_PTHREADS
-double          *local_result_ref[hypre_MAX_THREADS];
-#endif
-
 double
 hypre_StructInnerProd(  hypre_StructVector *x,
                         hypre_StructVector *y )
@@ -50,14 +46,11 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    hypre_Index      unit_stride;
                    
    HYPRE_Int        i;
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_Int        threadid = hypre_GetThreadID();
-#endif
 
    local_result = 0.0;
    process_result = 0.0;
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
@@ -73,11 +66,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
-#ifdef HYPRE_USE_PTHREADS
-      local_result_ref[threadid] = &local_result;
-#endif
-
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
@@ -89,28 +78,12 @@ hypre_StructInnerProd(  hypre_StructVector *x,
       }
       hypre_BoxLoop2End(xi, yi);
    }
-
-#ifdef HYPRE_USE_PTHREADS
-   if (threadid != hypre_NumThreads)
-   {
-      for (i = 0; i < hypre_NumThreads; i++)
-         process_result += *local_result_ref[i];
-   }
-   else
-      process_result = *local_result_ref[threadid];
-#else
    process_result = local_result;
-#endif
-
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
-
-#ifdef HYPRE_USE_PTHREADS
-   if (threadid == 0 || threadid == hypre_NumThreads)
-#endif
-      hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
+   hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
    return final_innerprod_result;
 }

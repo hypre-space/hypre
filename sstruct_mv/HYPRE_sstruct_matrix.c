@@ -354,6 +354,8 @@ HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* ONLY3D */
+
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            part,
@@ -405,6 +407,8 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+/* ONLY3D */
 
 HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
@@ -500,6 +504,7 @@ HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
 HYPRE_Int 
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
+   HYPRE_Int               ndim           = hypre_SStructMatrixNDim(matrix);
    hypre_SStructGraph     *graph          = hypre_SStructMatrixGraph(matrix);
    HYPRE_Int               nparts         = hypre_SStructMatrixNParts(matrix);
    hypre_SStructPMatrix  **pmatrices      = hypre_SStructMatrixPMatrices(matrix);
@@ -586,7 +591,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
             {
                si = v_to_s[i];
                sentry0 = hypre_StructStencilElement(recv_stencil, si);
-               for (j = 0; j < 3; j++)
+               for (j = 0; j < ndim; j++)
                {
                   hypre_IndexD(sentry1, hypre_IndexD(coords[ti], j)) = 
                      hypre_IndexD(sentry0, j) * hypre_IndexD(dirs[ti], j);
