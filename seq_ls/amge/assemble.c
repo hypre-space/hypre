@@ -32,7 +32,7 @@ HYPRE_Int hypre_AMGeMatrixAssemble(hypre_CSRMatrix     **A_pointer,
 
 			     HYPRE_Int *i_element_chord,
 			     HYPRE_Int *j_element_chord,
-			     double *a_element_chord,
+			     HYPRE_Real *a_element_chord,
 
 			     HYPRE_Int *i_chord_dof, 
 			     HYPRE_Int *j_chord_dof,
@@ -51,11 +51,11 @@ HYPRE_Int hypre_AMGeMatrixAssemble(hypre_CSRMatrix     **A_pointer,
   HYPRE_Int dof_counter, dof_dof_counter;
   
   HYPRE_Int *i_chord_element, *j_chord_element;
-  double *a_chord_element;
-  double *chord_data;
+  HYPRE_Real *a_chord_element;
+  HYPRE_Real *chord_data;
 
 
-  chord_data = hypre_CTAlloc(double, num_chords);
+  chord_data = hypre_CTAlloc(HYPRE_Real, num_chords);
 
   for (i=0; i < num_chords; i++)
     chord_data[i] = 0.e0;

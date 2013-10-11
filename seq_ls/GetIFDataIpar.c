@@ -44,7 +44,7 @@ HYPRE_Int *GetINCFACTDataIpar( void * data )
  * GetINCFACTDataRpar
  *--------------------------------------------------------------------------*/
 
-double *GetINCFACTDataRpar( void * data )
+HYPRE_Real *GetINCFACTDataRpar( void * data )
      /* Returns a pointer to the beginning of the vector of doubles that holds
         floating point parameters (some optional) to the incomplete factorization
         and solve codes.

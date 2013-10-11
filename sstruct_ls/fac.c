@@ -139,7 +139,7 @@ hypre_FACDestroy2(void *fac_vdata)
 
 HYPRE_Int
 hypre_FACSetTol( void   *fac_vdata,
-                 double  tol       )
+                 HYPRE_Real  tol       )
 {
    hypre_FACData *fac_data = fac_vdata;
    HYPRE_Int          ierr = 0;
@@ -284,7 +284,7 @@ hypre_FACSetRelaxType( void *fac_vdata,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_FACSetJacobiWeight( void  *fac_vdata,
-                          double weight )
+                          HYPRE_Real weight )
 {
    hypre_FACData *fac_data = fac_vdata;
                                                                                                                                             
@@ -387,8 +387,8 @@ hypre_FACPrintLogging( void *fac_vdata,
    HYPRE_Int          i;
    HYPRE_Int          num_iterations  = (fac_data -> num_iterations);
    HYPRE_Int          logging   = (fac_data -> logging);
-   double            *norms     = (fac_data -> norms);
-   double            *rel_norms = (fac_data -> rel_norms);
+   HYPRE_Real        *norms     = (fac_data -> norms);
+   HYPRE_Real        *rel_norms = (fac_data -> rel_norms);
 
    if (myid == 0)
    {
@@ -411,14 +411,14 @@ hypre_FACPrintLogging( void *fac_vdata,
 
 HYPRE_Int
 hypre_FACGetFinalRelativeResidualNorm( void   *fac_vdata,
-                                       double *relative_residual_norm )
+                                       HYPRE_Real *relative_residual_norm )
 {
    hypre_FACData *fac_data = fac_vdata;
 
    HYPRE_Int          max_iter        = (fac_data -> max_cycles);
    HYPRE_Int          num_iterations  = (fac_data -> num_iterations);
    HYPRE_Int          logging         = (fac_data -> logging);
-   double            *rel_norms       = (fac_data -> rel_norms);
+   HYPRE_Real        *rel_norms       = (fac_data -> rel_norms);
 
    HYPRE_Int          ierr = 0;
 

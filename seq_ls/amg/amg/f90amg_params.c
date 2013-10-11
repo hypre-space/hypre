@@ -42,7 +42,7 @@ HYPRE_Int      *data;
 }
 
 void      hypre_NAME_C_FOR_FORTRAN(amg_setecg)(ecg, data)
-double   *ecg;
+HYPRE_Real   *ecg;
 HYPRE_Int      *data;
 {
    HYPRE_AMGSetECG(*ecg, (void *) *data);
@@ -56,7 +56,7 @@ HYPRE_Int      *data;
 }
 
 void      hypre_NAME_C_FOR_FORTRAN(amg_setewt)(ewt, data)
-double   *ewt;
+HYPRE_Real   *ewt;
 HYPRE_Int      *data;
 {
    HYPRE_AMGSetEWT(*ewt, (void *) *data);

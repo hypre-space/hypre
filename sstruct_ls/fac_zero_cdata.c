@@ -68,7 +68,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
 
    HYPRE_Int              ci, i, j, rem, intersect_size;
 
-   double                *values;
+   HYPRE_Real            *values;
  
    HYPRE_Int              ierr = 0;
 
@@ -143,7 +143,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                   values= hypre_CTAlloc(double, intersect_size);
+                   values= hypre_CTAlloc(HYPRE_Real, intersect_size);
 
                    for (j= 0; j< stencil_size; j++)
                    {

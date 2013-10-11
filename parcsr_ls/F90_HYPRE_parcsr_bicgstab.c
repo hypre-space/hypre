@@ -96,13 +96,13 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsolve, HYPRE_PARCSRBICGSTABSOLVE)
 void
 hypre_F90_IFACE(hypre_parcsrbicgstabsettol, HYPRE_PARCSRBICGSTABSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRBiCGSTABSetTol(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassDbl (tol)     ) );
+           hypre_F90_PassReal (tol)     ) );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABSetAbsoluteTol
@@ -111,13 +111,13 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsettol, HYPRE_PARCSRBICGSTABSETTOL)
 void
 hypre_F90_IFACE(hypre_parcsrbicgstabsetatol, HYPRE_PARCSRBICGSTABSETATOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRBiCGSTABSetAbsoluteTol(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassDbl (tol)     ) );
+           hypre_F90_PassReal (tol)     ) );
 }
 
 
@@ -318,11 +318,11 @@ hypre_F90_IFACE(hypre_parcsrbicgstabgetnumiter, HYPRE_PARCSRBICGSTABGETNUMITER)
 void
 hypre_F90_IFACE(hypre_parcsrbicgstabgetfinalrel, HYPRE_PARCSRBICGSTABGETFINALREL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassDblRef (norm)    ) );
+           hypre_F90_PassRealRef (norm)    ) );
 }

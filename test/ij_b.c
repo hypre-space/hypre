@@ -40,7 +40,7 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 #include "sidl_Exception.h"
 
-const double dt_inf = 1.e40;
+const HYPRE_Real dt_inf = 1.e40;
 typedef struct
 {
    /* Parameters which the user may set through the command line
@@ -68,30 +68,30 @@ typedef struct
    HYPRE_Int		       num_functions;
    HYPRE_Int                 num_sweep;
    HYPRE_Int                 smooth_num_sweep;
-   double              dt;
-   double              strong_threshold;
-   double              trunc_factor;
+   HYPRE_Real          dt;
+   HYPRE_Real          strong_threshold;
+   HYPRE_Real          trunc_factor;
    HYPRE_Int                 cycle_type;
    HYPRE_Int                 ioutdat;
    HYPRE_Int                 poutdat;
    HYPRE_Int                 k_dim; /* for GMRES */
-   double              drop_tol;  /* for PILUT */
+   HYPRE_Real          drop_tol;  /* for PILUT */
    HYPRE_Int                 nonzeros_to_keep; /* for PILUT */
-   double              schwarz_rlx_weight; /* for Schwarz and BoomerAMG */
+   HYPRE_Real          schwarz_rlx_weight; /* for Schwarz and BoomerAMG */
    HYPRE_Int                 variant; /* multiplicative; for Schwarz */
    HYPRE_Int                 overlap; /* 1 layer overlap; for Schwarz */
    HYPRE_Int                 domain_type; /* through agglomeration; for Schwarz */
-   double              max_row_sum; /* for BoomerAMG */
-   double              tol;
-   double              pc_tol; /* for BoomerAMG, not yet user-settable */
-   double              sai_threshold; /* for ParaSAILS */
-   double              sai_filter; /* for ParaSAILS */
+   HYPRE_Real          max_row_sum; /* for BoomerAMG */
+   HYPRE_Real          tol;
+   HYPRE_Real          pc_tol; /* for BoomerAMG, not yet user-settable */
+   HYPRE_Real          sai_threshold; /* for ParaSAILS */
+   HYPRE_Real          sai_filter; /* for ParaSAILS */
    /* Scalar command-line arguments provide some control over array values. */
-   double             *relax_weight;  /* for BoomerAMG */
+   HYPRE_Real         *relax_weight;  /* for BoomerAMG */
    HYPRE_Int                *num_grid_sweeps;   /* for BoomerAMG */
    HYPRE_Int                *grid_relax_type;   /* for BoomerAMG */
    HYPRE_Int               **grid_relax_points; /* for BoomerAMG; not user-settable */
-   double             *omega;  /* for BoomerAMG; not presently referenced or user-settable */
+   HYPRE_Real         *omega;  /* for BoomerAMG; not presently referenced or user-settable */
    HYPRE_Int                 gsmg_samples;  /* for AMG-GSMG */
    HYPRE_Int                 interp_type;   /* for AMG-GSMG */
 
@@ -143,9 +143,9 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 ierr = 0;
    HYPRE_Int                 i,j; 
    HYPRE_Int                 num_iterations; 
-   /*double              norm;*/
-   double tmp;
-   double              final_res_norm;
+   /*HYPRE_Real          norm;*/
+   HYPRE_Real tmp;
+   HYPRE_Real          final_res_norm;
 
    bHYPRE_MPICommunicator bmpicomm;
    bHYPRE_IJParCSRMatrix  bH_parcsr_A;
@@ -176,7 +176,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int M, N;
    HYPRE_Int first_local_row, last_local_row, local_num_rows;
    HYPRE_Int first_local_col, last_local_col, local_num_cols;
-   double *values;
+   HYPRE_Real *values;
    struct sidl_int__array* bH_grid_relax_points=NULL;
 
    HYPRE_Int dimsl[2], dimsu[2];
@@ -352,7 +352,7 @@ main( HYPRE_Int   argc,
       ierr += bHYPRE_IJParCSRVector_Initialize( bH_b, &_ex );
 
 
-      values = hypre_CTAlloc(double, local_num_rows);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows);
       for (i = 0; i < local_num_rows; i++)
          values[i] = 1.0;
       bHYPRE_IJParCSRVector_SetValues( bH_b, local_num_rows, NULL, values, &_ex );
@@ -368,7 +368,7 @@ main( HYPRE_Int   argc,
 
       ierr += bHYPRE_IJParCSRVector_Initialize( bH_x, &_ex );
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for ( i=0; i<local_num_cols; ++i )
          values[i] = 0.;
       bHYPRE_IJParCSRVector_SetValues( bH_x, local_num_cols,
@@ -1644,13 +1644,13 @@ bBuildParLaplacian( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
 
    bHYPRE_IJParCSRMatrix  bA;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
    HYPRE_Int                 nvalues = 4;
    MPI_Comm mpi_comm = bHYPRE_MPICommunicator__get_data(bmpi_comm)->mpi_comm;
    sidl_BaseInterface _ex = NULL;
@@ -1746,7 +1746,7 @@ bBuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -1786,13 +1786,13 @@ BuildParLaplacian( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1885,7 +1885,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -1932,15 +1932,15 @@ BuildParDifConv( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
-   double              ax, ay, az;
-   double              hinx,hiny,hinz;
+   HYPRE_Real          cx, cy, cz;
+   HYPRE_Real          ax, ay, az;
+   HYPRE_Real          hinx,hiny,hinz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2050,7 +2050,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 7);
+   values = hypre_CTAlloc(HYPRE_Real, 7);
 
    values[1] = -cx/(hinx*hinx);
    values[2] = -cy/(hiny*hiny);
@@ -2360,7 +2360,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2436,7 +2436,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[1] = -1.;
 
@@ -2481,7 +2481,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2562,7 +2562,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
@@ -3039,8 +3039,8 @@ void BoomerAMG_DefaultParameters( CommandLineParameters *clp )
       clp->num_grid_sweeps   = hypre_CTAlloc(HYPRE_Int,4);
       clp->grid_relax_type   = hypre_CTAlloc(HYPRE_Int,4);
       clp->grid_relax_points = hypre_CTAlloc(HYPRE_Int *,4);
-      clp->relax_weight      = hypre_CTAlloc(double, clp->max_levels);
-      clp->omega      = hypre_CTAlloc(double, clp->max_levels);
+      clp->relax_weight      = hypre_CTAlloc(HYPRE_Real, clp->max_levels);
+      clp->omega      = hypre_CTAlloc(HYPRE_Real, clp->max_levels);
 
       for (i=0; i < clp->max_levels; i++)
       {
@@ -3271,8 +3271,8 @@ HYPRE_Int IJMatrixVectorDebug(
    bHYPRE_Vector  y;
    bHYPRE_Vector bH_Vector_x;
    HYPRE_Int *indices;
-   double *values;
-   double tmp;
+   HYPRE_Real *values;
+   HYPRE_Real tmp;
    HYPRE_Int ierr = 0;
    HYPRE_Int i;
    sidl_BaseInterface _ex = NULL;
@@ -3294,7 +3294,7 @@ HYPRE_Int IJMatrixVectorDebug(
 
    /* SetValues, x=1; result is all 1's */
    indices = hypre_CTAlloc(HYPRE_Int, local_num_cols);
-   values = hypre_CTAlloc(double, local_num_cols);
+   values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
    for ( i=0; i<local_num_cols; ++i )
    {
       indices[i] = i+first_local_col;
@@ -3343,7 +3343,7 @@ HYPRE_Int IJMatrixVectorDebug(
 
    /* Clear and AddToValues, b=1, which restores its initial value of 1 */
    indices = hypre_CTAlloc(HYPRE_Int, local_num_cols);
-   values = hypre_CTAlloc(double, local_num_cols);
+   values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
    for ( i=0; i<local_num_cols; ++i )
    {
       indices[i] = i+first_local_col;
@@ -3376,8 +3376,8 @@ HYPRE_Int Demo_Matrix_AddToValues(
    HYPRE_Int * ncols    = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
    HYPRE_Int * rows     = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
    HYPRE_Int * col_inds = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
-   double * values   = hypre_CTAlloc(double, last_local_row - first_local_row + 1);
-   double val;
+   HYPRE_Real * values   = hypre_CTAlloc(HYPRE_Real, last_local_row - first_local_row + 1);
+   HYPRE_Real val;
    HYPRE_Int i, j;
    HYPRE_Int ierr = 0;
    HYPRE_Int local_num_rows = last_local_row - first_local_row + 1;

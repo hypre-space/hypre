@@ -96,7 +96,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    hypre_Index             stencil_shape_i;
    hypre_Index             loop_size;
    hypre_Box               refined_box;
-   double                **a_ptrs;
+   HYPRE_Real            **a_ptrs;
    hypre_Box              *A_dbox;
 
    HYPRE_Int               part_crse= level-1;
@@ -128,7 +128,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               found;
    HYPRE_Int              *stencil_ranks, *rank_stencils;
    HYPRE_Int               rank, startrank;
-   double                 *vals;
+   HYPRE_Real             *vals;
 
    HYPRE_Int               i, j, iA;
    HYPRE_Int               nvars, var1; 
@@ -307,7 +307,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
          smatrix_var = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var1);
 
-         a_ptrs   = hypre_TAlloc(double *, stencil_size);
+         a_ptrs   = hypre_TAlloc(HYPRE_Real *, stencil_size);
          hypre_ForBoxI(ci, cgrid_boxes)
          {
             cgrid_box= hypre_BoxArrayBox(cgrid_boxes, ci);
@@ -416,7 +416,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                            rows = hypre_TAlloc(HYPRE_Int, cnt1);
                            cols = hypre_TAlloc(HYPRE_Int, cnt1);
                            temp2= hypre_TAlloc(HYPRE_Int, cnt1);
-                           vals = hypre_CTAlloc(double, cnt1);
+                           vals = hypre_CTAlloc(HYPRE_Real, cnt1);
 
                            for (i= 0; i< cnt1; i++)
                            {

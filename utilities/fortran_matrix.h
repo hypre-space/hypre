@@ -21,7 +21,7 @@ typedef struct
   hypre_longint	globalHeight;
   hypre_longint	height;
   hypre_longint	width;
-  double* value;
+  HYPRE_Real* value;
   HYPRE_Int		ownsValues;
 } utilities_FortranMatrix;
 
@@ -35,7 +35,7 @@ void
 utilities_FortranMatrixAllocateData( hypre_longint h, hypre_longint w, 
 				     utilities_FortranMatrix* mtx );
 void 
-utilities_FortranMatrixWrap( double*, hypre_longint gh, hypre_longint h, hypre_longint w, 
+utilities_FortranMatrixWrap( HYPRE_Real*, hypre_longint gh, hypre_longint h, hypre_longint w, 
 			     utilities_FortranMatrix* mtx );
 void 
 utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx );
@@ -46,7 +46,7 @@ hypre_longint
 utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx );
 hypre_longint
 utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx );
-double*
+HYPRE_Real*
 utilities_FortranMatrixValues( utilities_FortranMatrix* mtx );
 
 void 
@@ -76,7 +76,7 @@ void
 utilities_FortranMatrixGetDiagonal( utilities_FortranMatrix* mtx, 
 				    utilities_FortranMatrix* d );
 void 
-utilities_FortranMatrixAdd( double a, 
+utilities_FortranMatrixAdd( HYPRE_Real a, 
 			    utilities_FortranMatrix* mtxA, 
 			    utilities_FortranMatrix* mtxB, 
 			    utilities_FortranMatrix* mtxC );
@@ -90,16 +90,16 @@ void
 utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA, 
 				 utilities_FortranMatrix* mtxB, HYPRE_Int tB,
 				 utilities_FortranMatrix* mtxC );
-double 
+HYPRE_Real 
 utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx );
 
-double 
+HYPRE_Real 
 utilities_FortranMatrixValue( utilities_FortranMatrix* mtx, 
 			      hypre_longint i, hypre_longint j );
-double* 
+HYPRE_Real* 
 utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx, 
 				 hypre_longint i, hypre_longint j );
-double 
+HYPRE_Real 
 utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx );
 
 void 

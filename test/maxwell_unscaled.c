@@ -75,7 +75,7 @@ typedef struct
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
    HYPRE_Int                   *graph_entries;
-   double                *graph_values;
+   HYPRE_Real            *graph_values;
    HYPRE_Int                   *graph_boxsizes;
 
    HYPRE_Int                    matrix_nentries;
@@ -84,7 +84,7 @@ typedef struct
    Index                 *matrix_strides;
    HYPRE_Int                   *matrix_vars;
    HYPRE_Int                   *matrix_entries;
-   double                *matrix_values;
+   HYPRE_Real            *matrix_values;
 
    Index                  periodic;
 
@@ -101,7 +101,7 @@ typedef struct
    HYPRE_Int             *stencil_sizes;
    Index          **stencil_offsets;
    HYPRE_Int            **stencil_vars;
-   double         **stencil_values;
+   HYPRE_Real     **stencil_values;
 
    HYPRE_Int              symmetric_nentries;
    HYPRE_Int             *symmetric_parts;
@@ -420,7 +420,7 @@ ReadData( char         *filename,
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int, data.nstencils);
             data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
             data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *, data.nstencils);
-            data.stencil_values  = hypre_CTAlloc(double *, data.nstencils);
+            data.stencil_values  = hypre_CTAlloc(HYPRE_Real *, data.nstencils);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.nstencils, data.stencil_sizes);
             for (s = 0; s < data.nstencils; s++)
@@ -430,7 +430,7 @@ ReadData( char         *filename,
                data.stencil_vars[s] =
                   hypre_CTAlloc(HYPRE_Int, data.stencil_sizes[s]);
                data.stencil_values[s] =
-                  hypre_CTAlloc(double, data.stencil_sizes[s]);
+                  hypre_CTAlloc(HYPRE_Real, data.stencil_sizes[s]);
             }
          }
          else if ( strcmp(key, "StencilSetEntry:") == 0 )
@@ -491,7 +491,7 @@ ReadData( char         *filename,
                pdata.graph_entries =
                   hypre_TReAlloc(pdata.graph_entries, HYPRE_Int, size);
                pdata.graph_values =
-                  hypre_TReAlloc(pdata.graph_values, double, size);
+                  hypre_TReAlloc(pdata.graph_values, HYPRE_Real, size);
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes, HYPRE_Int, size);
             }
@@ -596,7 +596,7 @@ ReadData( char         *filename,
                pdata.matrix_entries =
                   hypre_TReAlloc(pdata.matrix_entries, HYPRE_Int, size);
                pdata.matrix_values =
-                  hypre_TReAlloc(pdata.matrix_values, double, size);
+                  hypre_TReAlloc(pdata.matrix_values, HYPRE_Real, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matrix_ilowers[pdata.matrix_nentries]);
@@ -1311,16 +1311,16 @@ main( hypre_int argc,
 
    HYPRE_StructGrid      cell_grid;
    hypre_Box            *bounding_box;
-   double                h;
+   HYPRE_Real            h;
 
    HYPRE_Int                 **bdryRanks, *bdryRanksCnt;
 
    Index                 ilower, iupper;
    Index                 index, to_index;
-   double               *values;
+   HYPRE_Real           *values;
 
    HYPRE_Int                   num_iterations;
-   double                final_res_norm;
+   HYPRE_Real            final_res_norm;
                          
    HYPRE_Int                   num_procs, myid;
    HYPRE_Int                   time_index;
@@ -1600,7 +1600,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(double, data.max_boxsize);
+   values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -1624,12 +1624,12 @@ main( hypre_int argc,
       cell_grid=  hypre_SStructPGridCellSGrid(hypre_SStructGridPGrid(grid, part));
       bounding_box= hypre_StructGridBoundingBox(cell_grid);
 
-      h= (double) (hypre_BoxIMax(bounding_box)[0]- hypre_BoxIMin(bounding_box)[0]);
+      h= (HYPRE_Real) (hypre_BoxIMax(bounding_box)[0]- hypre_BoxIMin(bounding_box)[0]);
       for (i= 1; i< data.ndim; i++)
       {
          if ((hypre_BoxIMax(bounding_box)[i]- hypre_BoxIMin(bounding_box)[i]) > h)
          {
-            h= (double) (hypre_BoxIMax(bounding_box)[i]- hypre_BoxIMin(bounding_box)[i]);
+            h= (HYPRE_Real) (hypre_BoxIMax(bounding_box)[i]- hypre_BoxIMin(bounding_box)[i]);
          }
       }
       h= 1.0/h;
@@ -1752,9 +1752,9 @@ main( hypre_int argc,
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
    {
-      values[j]= sin((double)(j+1));
-      values[j]= (double) rand()/RAND_MAX;
-      values[j]= (double) j;
+      values[j]= sin((HYPRE_Real)(j+1));
+      values[j]= (HYPRE_Real) rand()/RAND_MAX;
+      values[j]= (HYPRE_Real) j;
    }
    for (part = 0; part < data.nparts; part++)
    {

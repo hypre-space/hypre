@@ -38,12 +38,12 @@
  * beta - target load balance factor
  *--------------------------------------------------------------------------*/
 
-void LoadBalInit(MPI_Comm comm, double local_cost, double beta, 
-  HYPRE_Int *num_given, HYPRE_Int *donor_data_pe, double *donor_data_cost,
+void LoadBalInit(MPI_Comm comm, HYPRE_Real local_cost, HYPRE_Real beta, 
+  HYPRE_Int *num_given, HYPRE_Int *donor_data_pe, HYPRE_Real *donor_data_cost,
   HYPRE_Int *num_taken)
 {
     HYPRE_Int mype, npes;
-    double *cost, average, upper, move, accept;
+    HYPRE_Real *cost, average, upper, move, accept;
     HYPRE_Int i, jj, j;
 
     *num_given = 0;
@@ -55,7 +55,7 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
 
-    cost = (double *) malloc(npes * sizeof(double));
+    cost = (HYPRE_Real *) malloc(npes * sizeof(HYPRE_Real));
 
     hypre_MPI_Allgather(&local_cost, 1, hypre_MPI_DOUBLE, cost, 1, hypre_MPI_DOUBLE, comm);
 
@@ -136,16 +136,16 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
  *--------------------------------------------------------------------------*/
 
 void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, Numbering *numb,
-  HYPRE_Int num_given, const HYPRE_Int *donor_data_pe, const double *donor_data_cost, 
+  HYPRE_Int num_given, const HYPRE_Int *donor_data_pe, const HYPRE_Real *donor_data_cost, 
   DonorData *donor_data, HYPRE_Int *local_beg_row, hypre_MPI_Request *request)
 {
     HYPRE_Int send_beg_row, send_end_row;
     HYPRE_Int i, row;
-    double accum;
+    HYPRE_Real accum;
     HYPRE_Int buflen;
     HYPRE_Int *bufferp;
     HYPRE_Int len, *ind;
-    double *val;
+    HYPRE_Real *val;
 
     send_end_row = mat->beg_row - 1; /* imaginary end of previous block */
 
@@ -165,7 +165,7 @@ void LoadBalDonorSend(MPI_Comm comm, Matrix *mat, Numbering *numb,
             send_end_row++;
             assert(send_end_row <= mat->end_row);
             MatrixGetRow(mat, send_end_row - mat->beg_row, &len, &ind, &val);
-            accum += (double) len*len*len;
+            accum += (HYPRE_Real) len*len*len;
             buflen += (len+1); /* additional one for row length */
         }
         while (accum < donor_data_cost[i]);
@@ -255,10 +255,10 @@ void LoadBalRecipSend(MPI_Comm comm, HYPRE_Int num_taken,
   RecipData *recip_data, hypre_MPI_Request *request)
 {
     HYPRE_Int i, row, buflen;
-    double *bufferp;
+    HYPRE_Real *bufferp;
     Matrix *mat;
     HYPRE_Int len, *ind;
-    double *val;
+    HYPRE_Real *val;
 
     for (i=0; i<num_taken; i++)
     {
@@ -272,7 +272,7 @@ void LoadBalRecipSend(MPI_Comm comm, HYPRE_Int num_taken,
 	    buflen += len;
 	}
 
-	recip_data[i].buffer = (double *) malloc(buflen * sizeof(double));
+	recip_data[i].buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
 
 	/* Construct send buffer */
 
@@ -280,7 +280,7 @@ void LoadBalRecipSend(MPI_Comm comm, HYPRE_Int num_taken,
         for (row=0; row<=mat->end_row - mat->beg_row; row++)
         {
             MatrixGetRow(mat, row, &len, &ind, &val);
-            memcpy(bufferp, val, len*sizeof(double)); /* copy into buffer */
+            memcpy(bufferp, val, len*sizeof(HYPRE_Real)); /* copy into buffer */
             bufferp += len;
         }
 
@@ -303,9 +303,9 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
     HYPRE_Int i, j, row;
     HYPRE_Int source, count;
     hypre_MPI_Status status;
-    double *buffer, *bufferp;
+    HYPRE_Real *buffer, *bufferp;
     HYPRE_Int len, *ind;
-    double *val;
+    HYPRE_Real *val;
 
     for (i=0; i<num_given; i++)
     {
@@ -313,7 +313,7 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
         source = status.hypre_MPI_SOURCE;
         hypre_MPI_Get_count(&status, hypre_MPI_DOUBLE, &count);
 
-        buffer = (double *) malloc(count * sizeof(double));
+        buffer = (HYPRE_Real *) malloc(count * sizeof(HYPRE_Real));
         hypre_MPI_Recv(buffer, count, hypre_MPI_DOUBLE, source, LOADBAL_REP_TAG, 
            comm, &status);
 
@@ -330,7 +330,7 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
         for (row=donor_data[j].beg_row; row<=donor_data[j].end_row; row++)
         {
             MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
-	    memcpy(val, bufferp, len*sizeof(double)); /* copy into matrix */
+	    memcpy(val, bufferp, len*sizeof(HYPRE_Real)); /* copy into matrix */
             bufferp += len;
         }
 
@@ -343,12 +343,12 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
  *--------------------------------------------------------------------------*/
 
 LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
-  double local_cost, double beta)
+  HYPRE_Real local_cost, HYPRE_Real beta)
 {
     LoadBal *p;
     HYPRE_Int i, npes;
     HYPRE_Int    *donor_data_pe;
-    double *donor_data_cost;
+    HYPRE_Real *donor_data_cost;
     hypre_MPI_Request *requests = NULL;
     hypre_MPI_Status  *statuses = NULL;
 
@@ -357,7 +357,7 @@ LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
     hypre_MPI_Comm_size(comm, &npes);
 
     donor_data_pe   = (HYPRE_Int *)    malloc(npes * sizeof(HYPRE_Int));
-    donor_data_cost = (double *) malloc(npes * sizeof(double));
+    donor_data_cost = (HYPRE_Real *) malloc(npes * sizeof(HYPRE_Real));
 
     LoadBalInit(comm, local_cost, beta, &p->num_given, 
         donor_data_pe, donor_data_cost, &p->num_taken);

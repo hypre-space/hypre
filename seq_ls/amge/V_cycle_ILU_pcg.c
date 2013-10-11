@@ -29,10 +29,10 @@
  ****************************************************************************/
 
 
-HYPRE_Int hypre_VcycleILUpcg(double *x, double *rhs,
-		       double **v_cycle, double **w_cycle,
+HYPRE_Int hypre_VcycleILUpcg(HYPRE_Real *x, HYPRE_Real *rhs,
+		       HYPRE_Real **v_cycle, HYPRE_Real **w_cycle,
 
-		       double *reduction_factor_pointer,
+		       HYPRE_Real *reduction_factor_pointer,
 
 		       hypre_CSRMatrix **Matrix,
 
@@ -40,19 +40,19 @@ HYPRE_Int hypre_VcycleILUpcg(double *x, double *rhs,
 			  
 		       HYPRE_Int **i_ILUdof_ILUdof, 
 		       HYPRE_Int **j_ILUdof_ILUdof,
-		       double **LD_data,
+		       HYPRE_Real **LD_data,
 
 		       HYPRE_Int **i_ILUdof_ILUdof_t, 
 		       HYPRE_Int **j_ILUdof_ILUdof_t,
-		       double **U_data,
+		       HYPRE_Real **U_data,
 
 			     
 		       hypre_CSRMatrix **P,
 
-		       double *v_fine, double *w_fine, 
-		       double *v, double *w, double *d, HYPRE_Int max_iter, 
+		       HYPRE_Real *v_fine, HYPRE_Real *w_fine, 
+		       HYPRE_Real *v, HYPRE_Real *w, HYPRE_Real *d, HYPRE_Int max_iter, 
 		       
-		       double *v_coarse, double *w_coarse, double *d_coarse, 
+		       HYPRE_Real *v_coarse, HYPRE_Real *w_coarse, HYPRE_Real *d_coarse, 
 
 		       HYPRE_Int nu, 
 		       HYPRE_Int level, HYPRE_Int coarse_level, 
@@ -69,7 +69,7 @@ HYPRE_Int hypre_VcycleILUpcg(double *x, double *rhs,
   HYPRE_Int num_dofs = Ndofs[0];
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(Matrix[0]);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(Matrix[0]);
-  double *sparse_matrix = hypre_CSRMatrixData(Matrix[0]);
+  HYPRE_Real *sparse_matrix = hypre_CSRMatrixData(Matrix[0]);
 
 
   if (max_iter) max_iter = 1000;

@@ -52,16 +52,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int                 *dof_func;
    HYPRE_Int                 *col_offd_S_to_A;
    HYPRE_Int                 *col_offd_SN_to_AN;
-   double              *relax_weight;
-   double              *omega;
-   double               schwarz_relax_wt = 1;
-   double               strong_threshold;
-   double               CR_strong_th;
-   double               max_row_sum;
-   double               trunc_factor, jacobi_trunc_threshold;
-   double               agg_trunc_factor, agg_P12_trunc_factor;
-   double               S_commpkg_switch;
-   double      		CR_rate;
+   HYPRE_Real          *relax_weight;
+   HYPRE_Real          *omega;
+   HYPRE_Real           schwarz_relax_wt = 1;
+   HYPRE_Real           strong_threshold;
+   HYPRE_Real           CR_strong_th;
+   HYPRE_Real           max_row_sum;
+   HYPRE_Real           trunc_factor, jacobi_trunc_threshold;
+   HYPRE_Real           agg_trunc_factor, agg_P12_trunc_factor;
+   HYPRE_Real           S_commpkg_switch;
+   HYPRE_Real  		CR_rate;
    HYPRE_Int       relax_order;
    HYPRE_Int      max_levels; 
    HYPRE_Int      amg_logging;
@@ -92,8 +92,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *AN = NULL;
    hypre_ParCSRMatrix  *P1;
    hypre_ParCSRMatrix  *P2;
-   double              *SmoothVecs = NULL;
-   double             **l1_norms = NULL;
+   HYPRE_Real          *SmoothVecs = NULL;
+   HYPRE_Real         **l1_norms = NULL;
 
    HYPRE_Int       old_num_levels, num_levels;
    HYPRE_Int       level;
@@ -105,7 +105,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       setup_type;
    HYPRE_Int       fine_size;
    HYPRE_Int       rest, tms, indx;
-   double    size;
+   HYPRE_Real    size;
    HYPRE_Int       not_finished_coarsening = 1;
    HYPRE_Int       Setup_err_flag = 0;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
@@ -127,22 +127,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int	    *coarse_pnts_global1;
    HYPRE_Int       num_cg_sweeps;
 
-   double *max_eig_est = NULL;
-   double *min_eig_est = NULL;
+   HYPRE_Real *max_eig_est = NULL;
+   HYPRE_Real *min_eig_est = NULL;
 
    HYPRE_Solver *smoother = NULL;
    HYPRE_Int       smooth_type = hypre_ParAMGDataSmoothType(amg_data);
    HYPRE_Int       smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    HYPRE_Int	     sym;
    HYPRE_Int	     nlevel;
-   double    thresh;
-   double    filter;
-   double    drop_tol;
+   HYPRE_Real    thresh;
+   HYPRE_Real    filter;
+   HYPRE_Real    drop_tol;
    HYPRE_Int	     max_nz_per_row;
    char     *euclidfile;
    HYPRE_Int	     eu_level;
    HYPRE_Int	     eu_bj;
-   double    eu_sparse_A;
+   HYPRE_Real    eu_sparse_A;
 
    HYPRE_Int interp_type;
    HYPRE_Int post_interp_type;  /* what to do after computing the interpolation matrix
@@ -151,7 +151,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /*for fittting interp vectors */
    /*HYPRE_Int                smooth_interp_vectors= hypre_ParAMGSmoothInterpVectors(amg_data); */
-   double             abs_q_trunc= hypre_ParAMGInterpVecAbsQTrunc(amg_data);
+   HYPRE_Real         abs_q_trunc= hypre_ParAMGInterpVecAbsQTrunc(amg_data);
    HYPRE_Int                q_max = hypre_ParAMGInterpVecQMax(amg_data);
    HYPRE_Int                num_interp_vectors= hypre_ParAMGNumInterpVectors(amg_data);
    HYPRE_Int                num_levels_interp_vectors = hypre_ParAMGNumLevelsInterpVectors(amg_data);
@@ -160,14 +160,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int                interp_vec_variant= hypre_ParAMGInterpVecVariant(amg_data);
    HYPRE_Int                interp_refine= hypre_ParAMGInterpRefine(amg_data);
    HYPRE_Int                interp_vec_first_level= hypre_ParAMGInterpVecFirstLevel(amg_data);
-   double            *expandp_weights =  hypre_ParAMGDataExpandPWeights(amg_data);
+   HYPRE_Real        *expandp_weights =  hypre_ParAMGDataExpandPWeights(amg_data);
 
 
    hypre_ParCSRBlockMatrix *A_H_block;
 
    HYPRE_Int block_mode = 0;
 
-   double    wall_time;   /* for debugging instrumentation */
+   HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
    
    hypre_MPI_Comm_size(comm, &num_procs);   
@@ -1856,7 +1856,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          A_array[level] = A_H;
       }
       
-      size = ((double) fine_size )*.75;
+      size = ((HYPRE_Real) fine_size )*.75;
       if (coarsen_type > 0 && coarse_size >= (HYPRE_Int) size)
       {
 	coarsen_type = 0;      
@@ -1936,19 +1936,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (grid_relax_type[0] == 8 || grid_relax_type[1] == 8 || grid_relax_type[2] == 8 || grid_relax_type[3] == 8)
    {
-      l1_norms = hypre_CTAlloc(double *, num_levels);
+      l1_norms = hypre_CTAlloc(HYPRE_Real *, num_levels);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
    }
    if (grid_relax_type[1] == 18)
    {
-      l1_norms = hypre_CTAlloc(double *, num_levels);
+      l1_norms = hypre_CTAlloc(HYPRE_Real *, num_levels);
       hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
    }
    if (grid_relax_type[0] == 16 ||grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || grid_relax_type[3] == 16)
       /* Chebyshev */
    {
-      max_eig_est = hypre_CTAlloc(double, num_levels);
-      min_eig_est = hypre_CTAlloc(double, num_levels);
+      max_eig_est = hypre_CTAlloc(HYPRE_Real, num_levels);
+      min_eig_est = hypre_CTAlloc(HYPRE_Real, num_levels);
       hypre_ParAMGDataMaxEigEst(amg_data) = max_eig_est;
       hypre_ParAMGDataMinEigEst(amg_data) = min_eig_est;
    }
@@ -2015,7 +2015,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
          HYPRE_Int scale = 1;
-         double temp_d, temp_d2;
+         HYPRE_Real temp_d, temp_d2;
          hypre_ParCSRMaxEigEstimateCG(A_array[j], scale, 10, &temp_d, &temp_d2);
          max_eig_est[j] = temp_d;
          min_eig_est[j] = temp_d2;
@@ -2260,7 +2260,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #if 0
 {
    hypre_ParVector *u_vec, *f_vec;
-   double          *u, rho0, rho1, rho;
+   HYPRE_Real      *u, rho0, rho1, rho;
    HYPRE_Int              n;
 
    for (level = 0; level < (num_levels-1); level++)

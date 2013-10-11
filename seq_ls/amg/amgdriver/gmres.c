@@ -93,7 +93,7 @@ HYPRE_Int       lr_arg;
 void     GMRES(x_arg, b_arg, tol_arg, data_arg)
 hypre_Vector  *x_arg;
 hypre_Vector  *b_arg;
-double   tol_arg;
+HYPRE_Real   tol_arg;
 void    *data_arg;
 {
    GMRESData *gmres_data   = data_arg;
@@ -172,7 +172,7 @@ void     *data;
    SPGMRPData *P_data;
 
    HYPRE_Int         size;
-   double     *darray;
+   HYPRE_Real *darray;
 
 
    GMRESDataAData(gmres_data)    = (void *) A;
@@ -182,9 +182,9 @@ void     *data;
    P_data = hypre_CTAlloc(SPGMRPData, 1);
    (P_data -> precond)        = precond;
    (P_data -> precond_data)   = precond_data;
-   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   darray = hypre_CTAlloc(HYPRE_Real, hypre_NDIMU(size));
    (P_data -> s) = hypre_NewVector(darray, size);
-   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   darray = hypre_CTAlloc(HYPRE_Real, hypre_NDIMU(size));
    (P_data -> r) = hypre_NewVector(darray, size);
    GMRESDataPData(gmres_data) = (void *) P_data;
 

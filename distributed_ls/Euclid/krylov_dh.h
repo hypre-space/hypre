@@ -15,10 +15,10 @@
 
 /* #include "blas_dh.h" */
 
-extern void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, 
+extern void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, 
                                                               HYPRE_Int *itsOUT);
 
-extern void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, 
+extern void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, 
                                                               HYPRE_Int *itsOUT);
 
 #endif

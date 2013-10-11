@@ -32,11 +32,11 @@
 HYPRE_Int hypre_AMGeElementMatrixDof(HYPRE_Int *i_element_dof, HYPRE_Int *j_element_dof,
 
 
-			       double *element_data,
+			       HYPRE_Real *element_data,
 
 			       HYPRE_Int **i_element_chord_pointer,
 			       HYPRE_Int **j_element_chord_pointer,
-			       double **a_element_chord_pointer,
+			       HYPRE_Real **a_element_chord_pointer,
 
 			       HYPRE_Int **i_chord_dof_pointer, 
 			       HYPRE_Int **j_chord_dof_pointer,
@@ -57,7 +57,7 @@ HYPRE_Int hypre_AMGeElementMatrixDof(HYPRE_Int *i_element_dof, HYPRE_Int *j_elem
   HYPRE_Int *i_dof_chord, *j_dof_chord;
 
   HYPRE_Int *i_element_chord, *j_element_chord;
-  double *a_element_chord;
+  HYPRE_Real *a_element_chord;
 
   HYPRE_Int *i_chord_dof, *j_chord_dof;
 

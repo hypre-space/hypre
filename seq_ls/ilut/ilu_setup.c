@@ -56,7 +56,7 @@ HYPRE_Int ilu_setup ( void *input_data, Matrix *ILU_A )
 {
    ILUData *ilu_data = input_data;
    HYPRE_Int         i, ierr_ilut, ierr_gmres, ierr_input;
-   double     *ILU_b, *ILU_x;
+   HYPRE_Real *ILU_b, *ILU_x;
    HYPRE_Int         n, nnz, lenpmx;
    Matrix     *ILU_A_copy=NULL;
    Matrix     *FACTOR_A;
@@ -86,7 +86,7 @@ HYPRE_Int ilu_setup ( void *input_data, Matrix *ILU_A )
 
      MatrixJA(ILU_A_copy) = ctalloc( HYPRE_Int, MatrixNNZ(ILU_A) );
 
-     MatrixData(ILU_A_copy) = ctalloc( double, MatrixNNZ(ILU_A) );
+     MatrixData(ILU_A_copy) = ctalloc( HYPRE_Real, MatrixNNZ(ILU_A) );
      for ( i=0; i < MatrixNNZ(ILU_A); i++) 
      {
        MatrixJA(ILU_A_copy)[i] = MatrixJA(ILU_A)[i];
@@ -133,18 +133,18 @@ HYPRE_Int ilu_setup ( void *input_data, Matrix *ILU_A )
 #ifdef ILUFact
    if( (ILUDataIpar(ilu_data)[1] == 1) || (ILUDataIpar(ilu_data)[1] == 3) )
    {
-      ILUDataRscale(ilu_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      ILUDataRscale(ilu_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
    if( (ILUDataIpar(ilu_data)[1] == 2) || (ILUDataIpar(ilu_data)[1] == 3) )
    {
-      ILUDataCscale(ilu_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      ILUDataCscale(ilu_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
 
    ILUDataLIwork(ilu_data) = 3*MatrixSize(FACTOR_A);
 #elif defined ICFact
    if( ILUDataIpar(ilu_data)[1] != 0 )
    {
-      ILUDataScale(ilu_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      ILUDataScale(ilu_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
 
    ILUDataLIwork(ilu_data) = 3*MatrixSize(FACTOR_A) +
@@ -158,7 +158,7 @@ HYPRE_Int ilu_setup ( void *input_data, Matrix *ILU_A )
 #elif defined ICFact
    ILUDataLRwork(ilu_data) = 6*n; /* Note;2*n+1 for fact, 6*n for solve */
 #endif
-   ILUDataRwork(ilu_data) = ctalloc(double, ILUDataLRwork(ilu_data) );
+   ILUDataRwork(ilu_data) = ctalloc(HYPRE_Real, ILUDataLRwork(ilu_data) );
 
 
       /* Preconditioner */
@@ -185,7 +185,7 @@ HYPRE_Int ilu_setup ( void *input_data, Matrix *ILU_A )
      return(-10);
    }
 
-   MatrixData(ILUDataPreconditioner(ilu_data)) = ctalloc( double, 
+   MatrixData(ILUDataPreconditioner(ilu_data)) = ctalloc( HYPRE_Real, 
            lenpmx );
    if( MatrixData(ILUDataPreconditioner(ilu_data)) == NULL ) 
    {

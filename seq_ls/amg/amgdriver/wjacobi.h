@@ -30,7 +30,7 @@
 
 typedef struct
 {
-   double   weight;
+   HYPRE_Real   weight;
    HYPRE_Int      max_iter;
 
    hypre_Matrix  *A;

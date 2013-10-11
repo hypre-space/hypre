@@ -53,12 +53,12 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    A = Par_A_array[level];
 
    {
-      double *A_seq_data = NULL;
+      HYPRE_Real *A_seq_data = NULL;
       HYPRE_Int *A_seq_i = NULL;
       HYPRE_Int *A_seq_offd_i = NULL;
       HYPRE_Int *A_seq_j = NULL;
 
-      double *A_tmp_data = NULL;
+      HYPRE_Real *A_tmp_data = NULL;
       HYPRE_Int *A_tmp_i = NULL;
       HYPRE_Int *A_tmp_j = NULL;
 
@@ -74,8 +74,8 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int *A_offd_i = hypre_CSRMatrixI(A_offd);
       HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
       HYPRE_Int *A_offd_j = hypre_CSRMatrixJ(A_offd);
-      double *A_diag_data = hypre_CSRMatrixData(A_diag);
-      double *A_offd_data = hypre_CSRMatrixData(A_offd);
+      HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
+      HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
       HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
       HYPRE_Int new_num_procs, *row_starts;
@@ -160,7 +160,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          num_nonzeros = A_offd_i[num_rows]+A_diag_i[num_rows];
 
          A_tmp_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-         A_tmp_data = hypre_CTAlloc(double, num_nonzeros);
+         A_tmp_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros);
 
          cnt = 0;
          for (i=0; i < num_rows; i++)
@@ -221,7 +221,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
 
             total_nnz = displs2[new_num_procs];
             A_seq_j = hypre_CTAlloc(HYPRE_Int, total_nnz);
-            A_seq_data = hypre_CTAlloc(double, total_nnz);
+            A_seq_data = hypre_CTAlloc(HYPRE_Real, total_nnz);
          }
          if (redundant)
          {
@@ -317,7 +317,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    HYPRE_Int i;
    
    hypre_Vector   *u_local;
-   double         *u_data;
+   HYPRE_Real     *u_data;
    
    HYPRE_Int	   first_index;
    
@@ -341,13 +341,13 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    /*if (A_coarse)*/
    if (hypre_ParAMGDataParticipate(amg_data))
    {
-      double         *f_data;
+      HYPRE_Real     *f_data;
       hypre_Vector   *f_local;
       hypre_Vector   *tmp_vec;
       
       HYPRE_Int nf;
       HYPRE_Int local_info;
-      double *recv_buf;
+      HYPRE_Real *recv_buf;
       HYPRE_Int *displs = NULL;
       HYPRE_Int *info = NULL;
       HYPRE_Int size;
@@ -418,7 +418,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       /*copy my part of U to parallel vector */
       if (redundant)
       {
-         double *local_data;
+         HYPRE_Real *local_data;
 
          local_data =  hypre_VectorData(hypre_ParVectorLocalVector(U_coarse));
 
@@ -429,7 +429,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       }
       else
       {
-         double *local_data;
+         HYPRE_Real *local_data;
 
          if (my_id == 0)
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(U_coarse));

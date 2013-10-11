@@ -135,6 +135,6 @@ hypre_FreeDML( char *ptr,
 #else
 
 /* this is used only to eliminate compiler warnings */
-double hypre_memory_dmalloc_empty;
+char hypre_memory_dmalloc_empty;
 
 #endif

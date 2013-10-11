@@ -50,7 +50,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 				     HYPRE_Int **i_coarseelement_coarsechord_pointer,
 				     HYPRE_Int **j_coarseelement_coarsechord_pointer,
-				     double **a_coarseelement_coarsechord_pointer,
+				     HYPRE_Real **a_coarseelement_coarsechord_pointer,
 
 				     HYPRE_Int **i_coarsechord_coarsedof_pointer, 
 				     HYPRE_Int **j_coarsechord_coarsedof_pointer,
@@ -67,7 +67,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 				     HYPRE_Int *i_element_chord,
 				     HYPRE_Int *j_element_chord,
-				     double *a_element_chord,
+				     HYPRE_Real *a_element_chord,
 
 
 				     HYPRE_Int *i_aggregate_dof,
@@ -78,7 +78,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
 				     HYPRE_Int *i_chord_dof, HYPRE_Int *j_chord_dof,
 
-				     double tolerance,
+				     HYPRE_Real tolerance,
 
 				     HYPRE_Int num_chords,
 
@@ -104,7 +104,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   HYPRE_Int *i_AE_coarsedof, *j_AE_coarsedof;
   HYPRE_Int *i_AE_coarsedof_coarsedof;
-  double *AE_coarsedof_coarsedof;
+  HYPRE_Real *AE_coarsedof_coarsedof;
   HYPRE_Int AE_coarsedof_coarsedof_counter;
   
   
@@ -112,16 +112,16 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   HYPRE_Int *i_domain_element, *j_domain_element;
   HYPRE_Int *i_domain_chord, *j_domain_chord;
-  double *a_domain_chord;
+  HYPRE_Real *a_domain_chord;
 
   HYPRE_Int *i_AE_chord, *j_AE_chord;
-  double *a_AE_chord;
+  HYPRE_Real *a_AE_chord;
 
   HYPRE_Int *i_domain_dof, *j_domain_dof;
   HYPRE_Int *i_subdomain_dof, *j_subdomain_dof;
   HYPRE_Int *i_dof_subdomain, *j_dof_subdomain;
   HYPRE_Int *i_Schur_dof_dof;
-  double *a_Schur_dof_dof, *P_coeff;
+  HYPRE_Real *a_Schur_dof_dof, *P_coeff;
 
   hypre_CSRMatrix  *P;
 
@@ -129,7 +129,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   HYPRE_Int *i_dof_neighbor_coarsedof_0;
 
   HYPRE_Int *i_coarseelement_coarsechord, *j_coarseelement_coarsechord;
-  double *a_coarseelement_coarsechord;
+  HYPRE_Real *a_coarseelement_coarsechord;
 
   HYPRE_Int *i_coarsechord_coarsedof, *j_coarsechord_coarsedof;
   HYPRE_Int num_coarsechords;
@@ -148,22 +148,22 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
 
   HYPRE_Int local_boundary_coarsedof_counter, int_dof_counter;
 
-  double *AE, *QE, *W, *Aux1, *Aux2;
+  HYPRE_Real *AE, *QE, *W, *Aux1, *Aux2;
   
 
   HYPRE_Int subdomain_coarsedof_counter, 
     dof_neighbor_coarsedof_counter, coarsedof_counter, dof_coarsedof_counter;
 
-  double  row_sum;
+  HYPRE_Real  row_sum;
 
 
   HYPRE_Int *i_dof_index;
   
-  double *P_boundary;
+  HYPRE_Real *P_boundary;
 
   HYPRE_Int *i_boundary, *i_boundary_to_local, 
     *i_int, *i_interior_to_local;
-  /* double tolerance = 0.001; */
+  /* HYPRE_Real tolerance = 0.001; */
 
   /* ------------------------------------------------------------------ */
   /* building interior of domains associated with AEs: ---------------- */
@@ -359,12 +359,12 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
     }
   
 
-  AE = hypre_CTAlloc(double, max_local_dof_counter*max_local_dof_counter);
-  QE = hypre_CTAlloc(double, max_local_dof_counter*max_local_dof_counter);
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter*max_local_dof_counter);
+  QE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter*max_local_dof_counter);
 
-  W  = hypre_CTAlloc(double, max_local_dof_counter);
-  Aux1=hypre_CTAlloc(double, max_local_dof_counter);
-  Aux2=hypre_CTAlloc(double, max_local_dof_counter);
+  W  = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter);
+  Aux1=hypre_CTAlloc(HYPRE_Real, max_local_dof_counter);
+  Aux2=hypre_CTAlloc(HYPRE_Real, max_local_dof_counter);
 
   i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
   i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs);
@@ -538,7 +538,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   j_dof_neighbor_coarsedof = 
     hypre_CTAlloc(HYPRE_Int, dof_neighbor_coarsedof_counter);
 
-  P_coeff = hypre_CTAlloc(double, dof_neighbor_coarsedof_counter);
+  P_coeff = hypre_CTAlloc(HYPRE_Real, dof_neighbor_coarsedof_counter);
 
   /* identify coarse dofs: --------------------------------------------- */
   num_coarsedofs = coarsedof_counter;
@@ -757,7 +757,7 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   i_AE_coarsedof_coarsedof[num_AEs] = AE_coarsedof_coarsedof_counter;  
 
   AE_coarsedof_coarsedof = 
-    hypre_CTAlloc(double, AE_coarsedof_coarsedof_counter);
+    hypre_CTAlloc(HYPRE_Real, AE_coarsedof_coarsedof_counter);
 
 
 
@@ -775,14 +775,14 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
     i_global_to_local[i] = -1;
 
 
-  AE = hypre_CTAlloc(double, max_local_coarsedof_counter
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_coarsedof_counter
 		     *max_local_coarsedof_counter);
-  QE = hypre_CTAlloc(double, max_local_coarsedof_counter
+  QE = hypre_CTAlloc(HYPRE_Real, max_local_coarsedof_counter
 		     *max_local_coarsedof_counter);
 
-  W  = hypre_CTAlloc(double, max_local_coarsedof_counter);
-  Aux1=hypre_CTAlloc(double, max_local_coarsedof_counter);
-  Aux2=hypre_CTAlloc(double, max_local_coarsedof_counter);
+  W  = hypre_CTAlloc(HYPRE_Real, max_local_coarsedof_counter);
+  Aux1=hypre_CTAlloc(HYPRE_Real, max_local_coarsedof_counter);
+  Aux2=hypre_CTAlloc(HYPRE_Real, max_local_coarsedof_counter);
 
   for (i=0; i < num_AEs; i++)
     {
@@ -951,13 +951,13 @@ hypre_AMGeSpectralBuildInterpolation(hypre_CSRMatrix     **P_pointer,
  mat_inv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (generally non--symmetric);
  -----------------------------------------------------------------------------*/
       
-HYPRE_Int mat_inv(double *x, double *a, HYPRE_Int k)
+HYPRE_Int mat_inv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 {
   HYPRE_Int i,j,l, ierr =0;
-  double *b;
+  HYPRE_Real *b;
 
   if (k > 0)
-    b = hypre_CTAlloc(double, k*k);
+    b = hypre_CTAlloc(HYPRE_Real, k*k);
 
   for (l=0; l < k; l++)
     for (j=0; j < k; j++)

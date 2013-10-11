@@ -74,7 +74,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_Int             *inode, *jedge;
    HYPRE_Int              nrows, nnodes, *nflag, *eflag, *ncols;
-   double                *vals;
+   HYPRE_Real            *vals;
 
    hypre_Index            index;
    hypre_Index            loop_size, start, lindex;
@@ -505,7 +505,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    /* each row can have at most two columns */
    k= 2*nrows;
    jedge= hypre_CTAlloc(HYPRE_Int, k);
-   vals = hypre_TAlloc(double, k);
+   vals = hypre_TAlloc(HYPRE_Real, k);
    for (i= 0; i< k; i++)
    {
       vals[i]=-1.0;
@@ -772,7 +772,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_IJMatrixSetValues(T_grad, nrows, ncols,
                            (const HYPRE_Int*) inode, (const HYPRE_Int*) jedge,
-                           (const double*) vals);
+                           (const HYPRE_Real*) vals);
    HYPRE_IJMatrixAssemble(T_grad);
 
    hypre_TFree(eflag);

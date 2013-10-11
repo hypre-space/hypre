@@ -54,7 +54,7 @@
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-    double log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+    HYPRE_Real log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
     /* Local variables */
     static integer i__;
     static doublereal scale;

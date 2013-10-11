@@ -198,7 +198,7 @@ bool Parser_dhReadInt(Parser_dh p, char* in, HYPRE_Int* out)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhReadDouble"
-bool Parser_dhReadDouble(Parser_dh p, char* in, double *out)
+bool Parser_dhReadDouble(Parser_dh p, char* in, HYPRE_Real *out)
 {
   START_FUNC_DH_2
   bool optionExists = false;

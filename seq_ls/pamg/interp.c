@@ -29,7 +29,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
                    hypre_CSRMatrix     **P_ptr )
 {
    
-   double          *A_data;
+   HYPRE_Real      *A_data;
    HYPRE_Int             *A_i;
    HYPRE_Int             *A_j;
 
@@ -38,7 +38,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrix    *P; 
 
-   double          *P_data;
+   HYPRE_Real      *P_data;
    HYPRE_Int             *P_i;
    HYPRE_Int             *P_j;
 
@@ -66,12 +66,12 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    HYPRE_Int              jj,jj1;
    HYPRE_Int              sgn;
    
-   double           diagonal;
-   double           sum;
-   double           distribute;          
+   HYPRE_Real       diagonal;
+   HYPRE_Real       sum;
+   HYPRE_Real       distribute;          
    
-   double           zero = 0.0;
-   double           one  = 1.0;
+   HYPRE_Real       zero = 0.0;
+   HYPRE_Real       one  = 1.0;
    
    /*-----------------------------------------------------------------------
     *  Access the CSR vectors for A and S. Also get size of fine grid.
@@ -147,7 +147,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
 
    P_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
    P_j    = hypre_CTAlloc(HYPRE_Int, P_size);
-   P_data = hypre_CTAlloc(double, P_size);
+   P_data = hypre_CTAlloc(HYPRE_Real, P_size);
 
    P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
 
@@ -381,7 +381,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
                    hypre_CSRMatrix     **P_ptr )
 {
    
-   double          *A_data;
+   HYPRE_Real      *A_data;
    HYPRE_Int             *A_i;
    HYPRE_Int             *A_j;
 
@@ -390,7 +390,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrix    *P; 
 
-   double          *P_data;
+   HYPRE_Real      *P_data;
    HYPRE_Int             *P_i;
    HYPRE_Int             *P_j;
 
@@ -417,9 +417,9 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    HYPRE_Int             *elementsPerRowNew;
    HYPRE_Int              loopCount;
    HYPRE_Int              elem;
-   double           wsum;
-   double           rsum;
-   double           factor;
+   HYPRE_Real       wsum;
+   HYPRE_Real       rsum;
+   HYPRE_Real       factor;
    HYPRE_Int              jP;
    HYPRE_Int              found;
    HYPRE_Int              elemIndex;
@@ -431,10 +431,10 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    HYPRE_Int              jj,jj1;
 
    
-   double           diagonal;
+   HYPRE_Real       diagonal;
 
-   double           zero = 0.0;
-   double           one  = 1.0;
+   HYPRE_Real       zero = 0.0;
+   HYPRE_Real       one  = 1.0;
    
    hypre_printf("\n");
    hypre_printf("Multi-pass interpolation...\n");
@@ -579,7 +579,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    P_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
    P_j    = hypre_CTAlloc(HYPRE_Int, P_size);
-   P_data = hypre_CTAlloc(double, P_size);
+   P_data = hypre_CTAlloc(HYPRE_Real, P_size);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Define interpolation and fill in P_data, P_i, and P_j.
@@ -785,7 +785,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrixNumNonzeros(P) = jP;
 
-   hypre_printf("!!!!!!! compression factor %e \n",(100.0 *((double)(P_size-jP))/(double)P_size));
+   hypre_printf("!!!!!!! compression factor %e \n",(100.0 *((HYPRE_Real)(P_size-jP))/(HYPRE_Real)P_size));
 
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.
@@ -837,7 +837,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
                    hypre_CSRMatrix     **P_ptr )
 {
    
-   double          *A_data;
+   HYPRE_Real      *A_data;
    HYPRE_Int             *A_i;
    HYPRE_Int             *A_j;
 
@@ -846,11 +846,11 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrix *PJac; 
 
-   double          *P_data;
+   HYPRE_Real      *P_data;
    HYPRE_Int             *P_i;
    HYPRE_Int             *P_j;
 
-   double          *PJac_data;
+   HYPRE_Real      *PJac_data;
    HYPRE_Int             *PJac_i;
    HYPRE_Int             *PJac_j;
 
@@ -876,14 +876,14 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    HYPRE_Int             *elementsPerRowNew;
 
    HYPRE_Int              elem;
-   double           wsum;
-   double           rsum;
-   double           factor;
+   HYPRE_Real       wsum;
+   HYPRE_Real       rsum;
+   HYPRE_Real       factor;
    HYPRE_Int              jP;
    HYPRE_Int              found;
    HYPRE_Int              elemIndex;
    HYPRE_Int              jPStart;
-   double           eps = 0.00000001;
+   HYPRE_Real       eps = 0.00000001;
 
    HYPRE_Int              coarse_counter;
    
@@ -891,10 +891,10 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    HYPRE_Int              jj,jj1;
 
    
-   double           diagonal;
+   HYPRE_Real       diagonal;
    
-   double           zero = 0.0;
-   double           one  = 1.0;
+   HYPRE_Real       zero = 0.0;
+   HYPRE_Real       one  = 1.0;
    
    hypre_printf("\n");
    hypre_printf("Jacobi iteration...\n");
@@ -1002,7 +1002,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    PJac_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
    PJac_j    = hypre_CTAlloc(HYPRE_Int, PJac_size);
-   PJac_data = hypre_CTAlloc(double, PJac_size);
+   PJac_data = hypre_CTAlloc(HYPRE_Real, PJac_size);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Define interpolation and fill in PJac_data, PJac_i, and PJac_j.
@@ -1208,7 +1208,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrixNumNonzeros(PJac) = jP;
 
-   hypre_printf("!!!!!!! compression factor %e \n",100.*((double)(PJac_size-jP))/(double)PJac_size);
+   hypre_printf("!!!!!!! compression factor %e \n",100.*((HYPRE_Real)(PJac_size-jP))/(HYPRE_Real)PJac_size);
 
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.

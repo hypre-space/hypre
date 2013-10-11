@@ -24,7 +24,7 @@ HYPRE_Int CsrGen_to_CsrDiagFirst( Matrix *A, HYPRE_Int **diag_loc_ret )
 {
    HYPRE_Int i, j, k, itemp;
    HYPRE_Int *diag_loc;
-   double dtemp;
+   HYPRE_Real dtemp;
 
    /* allocate space for storing information for recovery */
    diag_loc = ctalloc( HYPRE_Int, MatrixSize( A ) );
@@ -69,7 +69,7 @@ HYPRE_Int CsrDiagFirst_backto_CsrGen( Matrix *A, HYPRE_Int *diag_loc )
         Information is stored for later restoral. */
 {
    HYPRE_Int i, j, itemp;
-   double dtemp;
+   HYPRE_Real dtemp;
 
    /* Variable i loops over the rows */
    for (i=1; i <= MatrixSize( A ); i++) {

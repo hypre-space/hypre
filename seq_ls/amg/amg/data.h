@@ -27,9 +27,9 @@ typedef struct
    /* setup params */
    HYPRE_Int      levmax;
    HYPRE_Int      ncg;
-   double   ecg;
+   HYPRE_Real   ecg;
    HYPRE_Int      nwt;
-   double   ewt;
+   HYPRE_Real   ewt;
    HYPRE_Int      nstr;
 
    /* solve params */
@@ -88,7 +88,7 @@ typedef struct
 
    /* data generated in the solve phase */
    hypre_Vector   *Vtemp;
-   double   *vtmp;
+   HYPRE_Real   *vtmp;
    HYPRE_Int       cycle_op_count;
 
 } hypre_AMGData;

@@ -56,7 +56,7 @@ HYPRE_Int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 {
    INCFACTData *incfact_data = input_data;
    HYPRE_Int         i, ierr_incfactt, ierr_ksp, ierr_input;
-   double     *INCFACT_b, *INCFACT_x;
+   HYPRE_Real *INCFACT_b, *INCFACT_x;
    HYPRE_Int         n, nnz, lenpmx;
    Matrix     *INCFACT_A_copy=NULL;
    Matrix     *FACTOR_A;
@@ -86,7 +86,7 @@ HYPRE_Int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 
      MatrixJA(INCFACT_A_copy) = ctalloc( HYPRE_Int, MatrixNNZ(INCFACT_A) );
 
-     MatrixData(INCFACT_A_copy) = ctalloc( double, MatrixNNZ(INCFACT_A) );
+     MatrixData(INCFACT_A_copy) = ctalloc( HYPRE_Real, MatrixNNZ(INCFACT_A) );
      for ( i=0; i < MatrixNNZ(INCFACT_A); i++) 
      {
        MatrixJA(INCFACT_A_copy)[i] = MatrixJA(INCFACT_A)[i];
@@ -133,18 +133,18 @@ HYPRE_Int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 #ifdef ILUFact
    if( (INCFACTDataIpar(incfact_data)[1] == 1) || (INCFACTDataIpar(incfact_data)[1] == 3) )
    {
-      INCFACTDataRscale(incfact_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      INCFACTDataRscale(incfact_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
    if( (INCFACTDataIpar(incfact_data)[1] == 2) || (INCFACTDataIpar(incfact_data)[1] == 3) )
    {
-      INCFACTDataCscale(incfact_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      INCFACTDataCscale(incfact_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
 
    INCFACTDataLIwork(incfact_data) = 3*MatrixSize(FACTOR_A);
 #elif defined ICFact
    if( INCFACTDataIpar(incfact_data)[1] != 0 )
    {
-      INCFACTDataScale(incfact_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      INCFACTDataScale(incfact_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
 
    INCFACTDataLIwork(incfact_data) = 3*MatrixSize(FACTOR_A) +
@@ -158,7 +158,7 @@ HYPRE_Int incfact_setup ( void *input_data, Matrix *INCFACT_A )
 #elif defined ICFact
    INCFACTDataLRwork(incfact_data) = 6*n; /* Note;2*n+1 for fact, 6*n for solve */
 #endif
-   INCFACTDataRwork(incfact_data) = ctalloc(double, INCFACTDataLRwork(incfact_data) );
+   INCFACTDataRwork(incfact_data) = ctalloc(HYPRE_Real, INCFACTDataLRwork(incfact_data) );
 
 
       /* Preconditioner */
@@ -185,7 +185,7 @@ HYPRE_Int incfact_setup ( void *input_data, Matrix *INCFACT_A )
      return(-10);
    }
 
-   MatrixData(INCFACTDataPreconditioner(incfact_data)) = ctalloc( double, 
+   MatrixData(INCFACTDataPreconditioner(incfact_data)) = ctalloc( HYPRE_Real, 
            lenpmx );
    if( MatrixData(INCFACTDataPreconditioner(incfact_data)) == NULL ) 
    {

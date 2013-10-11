@@ -23,13 +23,13 @@ HYPRE_Int hypre_AMGeDomainElementSparseAssemble(HYPRE_Int *i_domain_element,
 
 					  HYPRE_Int *i_element_chord,
 					  HYPRE_Int *j_element_chord,
-					  double *a_element_chord,
+					  HYPRE_Real *a_element_chord,
 
 					  HYPRE_Int *i_chord_dof, HYPRE_Int *j_chord_dof,
 
 					  HYPRE_Int **i_domain_chord_pointer, 
 					  HYPRE_Int **j_domain_chord_pointer,
-					  double **a_domain_chord_pointer,
+					  HYPRE_Real **a_domain_chord_pointer,
 
 					  HYPRE_Int num_elements, HYPRE_Int num_chords,
 					  HYPRE_Int num_dofs)
@@ -38,7 +38,7 @@ HYPRE_Int hypre_AMGeDomainElementSparseAssemble(HYPRE_Int *i_domain_element,
   HYPRE_Int ierr = 0;
   HYPRE_Int i,j,k,l;
   HYPRE_Int *i_domain_chord, *j_domain_chord;
-  double *a_domain_chord;
+  HYPRE_Real *a_domain_chord;
 
   HYPRE_Int *i_chord_domain_index;
 
@@ -53,7 +53,7 @@ HYPRE_Int hypre_AMGeDomainElementSparseAssemble(HYPRE_Int *i_domain_element,
 
   /* numeric multiplication: --------------------------------------------*/
 
-  a_domain_chord = hypre_CTAlloc(double, i_domain_chord[num_domains]);
+  a_domain_chord = hypre_CTAlloc(HYPRE_Real, i_domain_chord[num_domains]);
 
   for (i=0; i < num_chords; i++)
    i_chord_domain_index[i] = -1; 

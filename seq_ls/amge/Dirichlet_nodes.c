@@ -13,8 +13,8 @@ void main()
   HYPRE_Int num_nodes, num_elements;
   HYPRE_Int *i_node_on_boundary;
 
-  double *x_coord, *y_coord;
-  double eps = 1.e-4;
+  HYPRE_Real *x_coord, *y_coord;
+  HYPRE_Real eps = 1.e-4;
 
 
   f = fopen("element_node", "r");
@@ -23,8 +23,8 @@ void main()
   fclose(f);
  
 
-  x_coord = (double *) malloc(num_nodes * sizeof(double));
-  y_coord = (double *) malloc(num_nodes * sizeof(double));
+  x_coord = (HYPRE_Real *) malloc(num_nodes * sizeof(HYPRE_Real));
+  y_coord = (HYPRE_Real *) malloc(num_nodes * sizeof(HYPRE_Real));
 
   f = fopen("coordinates", "r");
 

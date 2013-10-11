@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 #ifndef HYPRE_SSTRUCT_MV_HEADER
 #define HYPRE_SSTRUCT_MV_HEADER
 
@@ -533,11 +532,6 @@ HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
  * stencil or non-stencil, but not both.  Also, if they are stencil entries,
  * they must all represent couplings to the same variable type (there are no
  * such restrictions for non-stencil entries).
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
@@ -546,7 +540,7 @@ HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
                              HYPRE_Int            var,
                              HYPRE_Int            nentries,
                              HYPRE_Int           *entries,
-                             double              *values);
+                             HYPRE_Complex       *values);
 
 /**
  * Add to matrix coefficients index by index.  The {\tt values} array is of
@@ -561,11 +555,6 @@ HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
  * NOTE: The entries in this routine must all be of the same type: either
  * stencil or non-stencil, but not both.  Also, if they are stencil entries,
  * they must all represent couplings to the same variable type.
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
@@ -574,24 +563,19 @@ HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
                                HYPRE_Int            var,
                                HYPRE_Int            nentries,
                                HYPRE_Int           *entries,
-                               double              *values);
+                               HYPRE_Complex       *values);
 
 /**
  * Add finite element stiffness matrix coefficients index by index.  The layout
  * of the data in {\tt values} is determined by the routines
  * \Ref{HYPRE_SStructGridSetFEMOrdering} and
  * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Int            part,
                                 HYPRE_Int           *index,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Get matrix coefficients index by index.  The {\tt values} array is of length
@@ -606,11 +590,6 @@ HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
  * stencil or non-stencil, but not both.  Also, if they are stencil entries,
  * they must all represent couplings to the same variable type (there are no
  * such restrictions for non-stencil entries).
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
@@ -619,24 +598,19 @@ HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
                              HYPRE_Int            var,
                              HYPRE_Int            nentries,
                              HYPRE_Int           *entries,
-                             double              *values);
+                             HYPRE_Complex       *values);
 
 /**
  * Get finite element stiffness matrix coefficients index by index.  The layout
  * of the data in {\tt values} is determined by the routines
  * \Ref{HYPRE_SStructGridSetFEMOrdering} and
  * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Int            part,
                                 HYPRE_Int           *index,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
@@ -661,11 +635,6 @@ HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
  * stencil or non-stencil, but not both.  Also, if they are stencil entries,
  * they must all represent couplings to the same variable type (there are no
  * such restrictions for non-stencil entries).
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
@@ -675,7 +644,7 @@ HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Int            var,
                                 HYPRE_Int            nentries,
                                 HYPRE_Int           *entries,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Add to matrix coefficients a box at a time.  The data in {\tt values} is
@@ -686,11 +655,6 @@ HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
  *
  * NOTE: The entries in this routine must all be of stencil type.  Also, they
  * must all represent couplings to the same variable type.
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
@@ -700,7 +664,7 @@ HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nentries,
                                   HYPRE_Int           *entries,
-                                  double              *values);
+                                  HYPRE_Complex       *values);
 
 /**
  * Get matrix coefficients a box at a time.  The data in {\tt values} is
@@ -710,11 +674,6 @@ HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
  *
  * NOTE: The entries in this routine must all be of stencil type.  Also, they
  * must all represent couplings to the same variable type.
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
@@ -724,7 +683,7 @@ HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
                                 HYPRE_Int            var,
                                 HYPRE_Int            nentries,
                                 HYPRE_Int           *entries,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Finalize the construction of the matrix before using.
@@ -779,12 +738,6 @@ HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
                              void                **object);
 
 /**
- * Set the matrix to be complex.
- **/
-HYPRE_Int
-HYPRE_SStructMatrixSetComplex(HYPRE_SStructMatrix matrix);
-
-/**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
 HYPRE_Int
@@ -836,18 +789,13 @@ HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
- *
- * If the vector is complex, then {\tt value} consists of a pair of doubles
- * representing the real and imaginary parts of the complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
                              HYPRE_Int            part,
                              HYPRE_Int           *index,
                              HYPRE_Int            var,
-                             double              *value);
+                             HYPRE_Complex       *value);
 
 /**
  * Add to vector coefficients index by index.
@@ -857,34 +805,24 @@ HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
- *
- * If the vector is complex, then {\tt value} consists of a pair of doubles
- * representing the real and imaginary parts of the complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
                                HYPRE_Int            part,
                                HYPRE_Int           *index,
                                HYPRE_Int            var,
-                               double              *value);
+                               HYPRE_Complex       *value);
 
 /**
  * Add finite element vector coefficients index by index.  The layout of the
  * data in {\tt values} is determined by the routine
  * \Ref{HYPRE_SStructGridSetFEMOrdering}.
- *
- * If the vector is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
                                 HYPRE_Int            part,
                                 HYPRE_Int           *index,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Get vector coefficients index by index.  Users must first call the routine
@@ -896,18 +834,13 @@ HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
  *
  * NOTE: Users may only get values on processes that own the associated
  * variables.
- *
- * If the vector is complex, then {\tt value} consists of a pair of doubles
- * representing the real and imaginary parts of the complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
                              HYPRE_Int            part,
                              HYPRE_Int           *index,
                              HYPRE_Int            var,
-                             double              *value);
+                             HYPRE_Complex       *value);
 
 /**
  * Get finite element vector coefficients index by index.  The layout of the
@@ -915,17 +848,12 @@ HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
  * \Ref{HYPRE_SStructGridSetFEMOrdering}.  Users must first call the routine
  * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
  * processes is correct.
- *
- * If the vector is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorGetFEMValues(HYPRE_SStructVector  vector,
                                 HYPRE_Int            part,
                                 HYPRE_Int           *index,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Set vector coefficients a box at a time.  The data in {\tt values} is ordered
@@ -944,11 +872,6 @@ HYPRE_SStructVectorGetFEMValues(HYPRE_SStructVector  vector,
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
- *
- * If the vector is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
@@ -956,7 +879,7 @@ HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Int           *ilower,
                                 HYPRE_Int           *iupper,
                                 HYPRE_Int            var,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Add to vector coefficients a box at a time.  The data in {\tt values} is
@@ -964,11 +887,6 @@ HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
  *
  * NOTE: Users are required to set values on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
- *
- * If the vector is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
@@ -976,7 +894,7 @@ HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
                                   HYPRE_Int           *ilower,
                                   HYPRE_Int           *iupper,
                                   HYPRE_Int            var,
-                                  double              *values);
+                                  HYPRE_Complex       *values);
 
 /**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
@@ -986,11 +904,6 @@ HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
  *
  * NOTE: Users may only get values on processes that own the associated
  * variables.
- *
- * If the vector is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
  **/
 HYPRE_Int
 HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
@@ -998,7 +911,7 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Int           *ilower,
                                 HYPRE_Int           *iupper,
                                 HYPRE_Int            var,
-                                double              *values);
+                                HYPRE_Complex       *values);
 
 /**
  * Finalize the construction of the vector before using.
@@ -1034,12 +947,6 @@ HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
 HYPRE_Int
 HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
                              void                **object);
-
-/**
- * Set the vector to be complex.
- **/
-HYPRE_Int
-HYPRE_SStructVectorSetComplex(HYPRE_SStructVector vector);
 
 /**
  * Print the vector to file.  This is mainly for debugging purposes.

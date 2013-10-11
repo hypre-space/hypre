@@ -89,7 +89,7 @@ HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
-                            double             tol    )
+                            HYPRE_Real         tol    )
 {
    return( HYPRE_BiCGSTABSetTol( solver, tol ) );
 }
@@ -99,7 +99,7 @@ HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
-                                    double             a_tol    )
+                                    HYPRE_Real         a_tol    )
 {
    return( HYPRE_BiCGSTABSetAbsoluteTol( solver, a_tol ) );
 }
@@ -202,7 +202,7 @@ HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                                  double             *norm   )
+                                                  HYPRE_Real         *norm   )
 {
    return( HYPRE_BiCGSTABGetFinalRelativeResidualNorm( solver, norm ) );
 }

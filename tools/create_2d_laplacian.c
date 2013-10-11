@@ -25,9 +25,9 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 symmetric;    /* =1 for symmetric matrix storage */
    HYPRE_Int                 nx, ny;       /* Number of points in x and y */
    HYPRE_Int                 stencil_size; /* size of the stencil */
-   double              del_x, del_y; /* Delta x and Delta y spacings */
-   double              xlength, ylength; /* Lengths of x and y grids */
-   double              data[3]; /* array to hold coefficients */
+   HYPRE_Real          del_x, del_y; /* Delta x and Delta y spacings */
+   HYPRE_Real          xlength, ylength; /* Lengths of x and y grids */
+   HYPRE_Real          data[3]; /* array to hold coefficients */
    HYPRE_Int                 stencil_shape[3][3];
    FILE               *file;
    HYPRE_Int                 ix, jy, i, j;

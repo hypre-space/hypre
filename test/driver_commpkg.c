@@ -51,7 +51,7 @@ HYPRE_Int myBuildParLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_ind
 HYPRE_Int myBuildParLaplacian27pt (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr, HYPRE_Int parmprint );
 
 
-void stats_mo(double*, HYPRE_Int, double *,double *);
+void stats_mo(HYPRE_Real*, HYPRE_Int, HYPRE_Real *,HYPRE_Real *);
 
 /*==========================================================================*/
 
@@ -101,14 +101,14 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
    HYPRE_Int                 p, q, r;
-   double              values[4];
+   HYPRE_Real          values[4];
 
    hypre_ParVector     *x_new;
    hypre_ParVector     *y_new, *y;
    HYPRE_Int                 *row_starts;
-   double              ans;
-   double              start_time, end_time, total_time, *loop_times;
-   double              T_avg, T_std;
+   HYPRE_Real          ans;
+   HYPRE_Real          start_time, end_time, total_time, *loop_times;
+   HYPRE_Real          T_avg, T_std;
    
    HYPRE_Int                   noparmprint = 0;
  
@@ -314,7 +314,7 @@ main( HYPRE_Int   argc,
    }
       
    
-   loop_times = hypre_CTAlloc(double, loop);
+   loop_times = hypre_CTAlloc(HYPRE_Real, loop);
    
 
 
@@ -735,12 +735,12 @@ main( HYPRE_Int   argc,
  *     throw away 1st timing       
  *------------------------------------*/
 
-void stats_mo(double array[], HYPRE_Int n, double *Tavg,double *Tstd)
+void stats_mo(HYPRE_Real array[], HYPRE_Int n, HYPRE_Real *Tavg,HYPRE_Real *Tstd)
 {
 
     HYPRE_Int i;
-    double atmp, tmp=0.0;
-    double avg = 0.0, std;
+    HYPRE_Real atmp, tmp=0.0;
+    HYPRE_Real avg = 0.0, std;
 
   
     for(i=1; i<n; i++) {
@@ -750,8 +750,8 @@ void stats_mo(double array[], HYPRE_Int n, double *Tavg,double *Tstd)
     }
 
     n = n-1;    
-    avg = avg/(double) n;
-    tmp = tmp/(double) n;
+    avg = avg/(HYPRE_Real) n;
+    tmp = tmp/(HYPRE_Real) n;
 
     tmp = fabs(tmp - avg*avg);
     std = sqrt(tmp);
@@ -783,7 +783,7 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -864,7 +864,7 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
@@ -898,13 +898,13 @@ myBuildParLaplacian( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -997,7 +997,7 @@ myBuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;

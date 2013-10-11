@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * Header info for Vector data structure
@@ -29,7 +25,7 @@
 
 typedef struct
 {
-   double  *data;
+   HYPRE_Complex  *data;
    HYPRE_Int      size;
 
    /* Does the Vector create/destroy `data'? */

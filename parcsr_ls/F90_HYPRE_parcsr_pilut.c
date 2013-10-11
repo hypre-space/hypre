@@ -112,13 +112,13 @@ hypre_F90_IFACE(hypre_parcsrpilutsetmaxiter, HYPRE_PARCSRPILUTSETMAXITER)
 void 
 hypre_F90_IFACE(hypre_parcsrpilutsetdroptoleran, HYPRE_PARCSRPILUTSETDROPTOLERAN)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRPilutSetDropTolerance(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDbl (tol)     ) );
+           hypre_F90_PassReal (tol)     ) );
 }
 
 /*--------------------------------------------------------------------------

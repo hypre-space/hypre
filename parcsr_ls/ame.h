@@ -40,11 +40,11 @@ typedef struct
    /* Eigensystem for A x = lambda M x, G^t x = 0 */
    HYPRE_Int block_size;
    void *eigenvectors;
-   double *eigenvalues;
+   HYPRE_Real *eigenvalues;
 
    /* Eigensolver (LOBPCG) options */
    HYPRE_Int maxit;
-   double tol;
+   HYPRE_Real tol;
    HYPRE_Int print_level;
 
    /* Matrix-vector interface interpreter */
@@ -57,8 +57,8 @@ typedef struct
 
 #include "fortran.h"
 
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(HYPRE_Int *, char *, char *, HYPRE_Int *, double *, HYPRE_Int *,
-                                       double *, HYPRE_Int *, double *, double *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(HYPRE_Int *, char *, char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *,
+                                       HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 
 #endif

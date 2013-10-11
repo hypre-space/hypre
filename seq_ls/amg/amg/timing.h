@@ -32,7 +32,7 @@ typedef clock_t amg_CPUClock_t;
 void HYPRE_AMGClock_init P((void ));
 amg_Clock_t HYPRE_AMGClock P((void ));
 amg_CPUClock_t HYPRE_AMGCPUClock P((void ));
-void HYPRE_AMGPrintTiming P((double time_ticks , double cpu_ticks ));
+void HYPRE_AMGPrintTiming P((HYPRE_Real time_ticks , HYPRE_Real cpu_ticks ));
  
 #undef P
 

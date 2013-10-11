@@ -63,10 +63,10 @@ HYPRE_Int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   HYPRE_Int i,j,k,l, i_dof, j_dof, i_loc, j_loc, k_loc;
 
   HYPRE_Int *i_dof_dof_a, *j_dof_dof_a;
-  double *a_dof_dof;
+  HYPRE_Real *a_dof_dof;
 
 
-  double *P_coeff;
+  HYPRE_Real *P_coeff;
   
   hypre_CSRMatrix  *P;
 
@@ -74,10 +74,10 @@ HYPRE_Int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   HYPRE_Int *coarsedof_function;
 
 
-  double delta; 
+  HYPRE_Real delta; 
 
 
-  double *AE, *XE;
+  HYPRE_Real *AE, *XE;
 
   HYPRE_Int local_dof_counter, int_dof_counter, boundary_dof_counter;
   HYPRE_Int coarsedof_counter;
@@ -143,7 +143,7 @@ HYPRE_Int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   j_dof_dof_a = hypre_CSRMatrixJ(Matrix);
   a_dof_dof   = hypre_CSRMatrixData(Matrix);
 
-  P_coeff = hypre_CTAlloc(double, i_dof_neighbor_coarsedof[num_dofs]);
+  P_coeff = hypre_CTAlloc(HYPRE_Real, i_dof_neighbor_coarsedof[num_dofs]);
 
   i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs); 
 
@@ -189,10 +189,10 @@ HYPRE_Int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
   i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
-  AE = hypre_CTAlloc(double, max_local_dof_counter *
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
-  XE = hypre_CTAlloc(double, max_local_dof_counter *
+  XE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
 
@@ -364,13 +364,13 @@ HYPRE_Int hypre_AMGeBuildInterpolation(hypre_CSRMatrix     **P_pointer,
  mat_inv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-HYPRE_Int mat_inv(double *x, double *a, HYPRE_Int k)
+HYPRE_Int mat_inv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 {
   HYPRE_Int i,j,l, ierr =0;
-  double *b;
+  HYPRE_Real *b;
 
   if (k > 0)
-    b = hypre_CTAlloc(double, k*k);
+    b = hypre_CTAlloc(HYPRE_Real, k*k);
 
   for (l=0; l < k; l++)
     for (j=0; j < k; j++)

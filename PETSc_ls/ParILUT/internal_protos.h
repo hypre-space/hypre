@@ -25,7 +25,7 @@ HYPRE_Int HYPRE_PETScSolverParILUTSetPreconditionerMatrix P((HYPRE_PETScSolverPa
 Mat HYPRE_PETScSolverParILUTGetSystemMatrix P((HYPRE_PETScSolverParILUT in_ptr ));
 Mat HYPRE_PETScSolverParILUTGetPreconditionerMatrix P((HYPRE_PETScSolverParILUT in_ptr ));
 HYPRE_Int HYPRE_PETScSolverParILUTSetFactorRowSize P((HYPRE_PETScSolverParILUT in_ptr , HYPRE_Int size ));
-HYPRE_Int HYPRE_PETScSolverParILUTSetDropTolerance P((HYPRE_PETScSolverParILUT in_ptr , double tol ));
+HYPRE_Int HYPRE_PETScSolverParILUTSetDropTolerance P((HYPRE_PETScSolverParILUT in_ptr , HYPRE_Real tol ));
 HYPRE_Int HYPRE_PETScSolverParILUTSolve P((HYPRE_PETScSolverParILUT in_ptr , Vec x , Vec b ));
 
 /* HYPRE_PETScSolverParILUTSetup.c */

@@ -51,7 +51,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParCSRMatrix    *transpose;
    hypre_ParCSRMatrix    *parcsr_mat;
    HYPRE_Int              size, *col_inds;
-   double                *values;
+   HYPRE_Real            *values;
 
    hypre_ParVector       *parvector_x;
    hypre_ParVector       *parvector_b;
@@ -70,8 +70,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParVector      **nVtemp_l;
    hypre_ParVector      **nVtemp2_l;
    HYPRE_Int            **nCF_marker_l;
-   double                *nrelax_weight;
-   double                *nomega;
+   HYPRE_Real            *nrelax_weight;
+   HYPRE_Real            *nomega;
    HYPRE_Int              nrelax_type;
    HYPRE_Int              node_numlevels;
 
@@ -84,8 +84,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParVector      **ee_l;
    hypre_ParVector      **eVtemp_l;
    hypre_ParVector      **eVtemp2_l;
-   double                *erelax_weight;
-   double                *eomega;
+   HYPRE_Real            *erelax_weight;
+   HYPRE_Real            *eomega;
    HYPRE_Int            **eCF_marker_l;
    HYPRE_Int              erelax_type;
 
@@ -133,7 +133,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    HYPRE_Int              nrows, rank, start_rank;
    HYPRE_Int             *flag, *flag2, *inode, *ncols, *jnode;
-   double                *vals;
+   HYPRE_Real            *vals;
 
    HYPRE_Int              i, j, k, l, m;
 
@@ -316,7 +316,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) parcsr_mat, 
                                i, &size, &col_inds, &values);
       HYPRE_IJMatrixSetValues(Aen, 1, &size, &i, (const HYPRE_Int *) col_inds,
-                              (const double *) values);
+                              (const HYPRE_Real *) values);
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat, 
                                    i, &size, &col_inds, &values);
    }
@@ -337,7 +337,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                i, &size, &col_inds, &values);
       HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
                               1, &size, &i, (const HYPRE_Int *) col_inds,
-                              (const double *) values);
+                              (const HYPRE_Real *) values);
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat, 
                                    i, &size, &col_inds, &values);
    }
@@ -423,7 +423,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    inode= hypre_CTAlloc(HYPRE_Int, j);
    ncols= hypre_CTAlloc(HYPRE_Int, j);
    jnode= hypre_CTAlloc(HYPRE_Int, j);
-   vals = hypre_TAlloc(double, j);
+   vals = hypre_TAlloc(HYPRE_Real, j);
 
    j= 0;
    for (i= 0; i< nrows; i++)
@@ -442,7 +442,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
                            j, ncols, (const HYPRE_Int*) inode,
-                           (const HYPRE_Int*) jnode, (const double*) vals);
+                           (const HYPRE_Int*) jnode, (const HYPRE_Real*) vals);
    hypre_TFree(ncols);
    hypre_TFree(inode);
    hypre_TFree(jnode);
@@ -505,8 +505,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
       /* relaxation parameters */
       nCF_marker_l = hypre_CTAlloc(HYPRE_Int *, node_numlevels);
-      nrelax_weight= hypre_CTAlloc(double , node_numlevels);
-      nomega       = hypre_CTAlloc(double , node_numlevels);
+      nrelax_weight= hypre_CTAlloc(HYPRE_Real , node_numlevels);
+      nomega       = hypre_CTAlloc(HYPRE_Real , node_numlevels);
       nrelax_type  = 6;  /* fast parallel hybrid */
 
       for (i= 0; i< node_numlevels; i++)
@@ -1295,8 +1295,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * Needed for quick parallel over/under-relaxation.
     *-----------------------------------------------------*/
    erelax_type  = 2;
-   erelax_weight= hypre_TAlloc(double, edge_numlevels);
-   eomega       = hypre_TAlloc(double, edge_numlevels);
+   erelax_weight= hypre_TAlloc(HYPRE_Real, edge_numlevels);
+   eomega       = hypre_TAlloc(HYPRE_Real, edge_numlevels);
    eCF_marker_l = hypre_TAlloc(HYPRE_Int *, edge_numlevels);
 
    relax_type= 6; /* SSOR */
@@ -1355,8 +1355,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    if ((maxwell_TV_data -> logging) > 0)
    {
       i= (maxwell_TV_data -> max_iter);
-      (maxwell_TV_data -> norms)     = hypre_TAlloc(double, i);
-      (maxwell_TV_data -> rel_norms) = hypre_TAlloc(double, i);
+      (maxwell_TV_data -> norms)     = hypre_TAlloc(HYPRE_Real, i);
+      (maxwell_TV_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, i);
    }
 
    return ierr;

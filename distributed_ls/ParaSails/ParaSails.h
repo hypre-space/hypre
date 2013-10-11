@@ -32,14 +32,14 @@
 typedef struct
 {
     HYPRE_Int        symmetric;
-    double     thresh;
+    HYPRE_Real thresh;
     HYPRE_Int        num_levels;
-    double     filter;
-    double     loadbal_beta;
+    HYPRE_Real filter;
+    HYPRE_Real loadbal_beta;
 
-    double     cost;          /* cost for this processor */
-    double     setup_pattern_time;
-    double     setup_values_time;
+    HYPRE_Real cost;          /* cost for this processor */
+    HYPRE_Real setup_pattern_time;
+    HYPRE_Real setup_values_time;
 
     Numbering *numb;
     Matrix    *M;             /* preconditioner */
@@ -55,13 +55,13 @@ ParaSails;
 ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row, HYPRE_Int sym);
 void ParaSailsDestroy(ParaSails *ps);
 void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
-  double thresh, HYPRE_Int num_levels);
+  HYPRE_Real thresh, HYPRE_Int num_levels);
 void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A, 
-  double thresh_global, double thresh_local, HYPRE_Int num_levels);
-HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
-void ParaSailsApply(ParaSails *ps, double *u, double *v);
-void ParaSailsApplyTrans(ParaSails *ps, double *u, double *v);
-double ParaSailsStatsPattern(ParaSails *ps, Matrix *A);
+  HYPRE_Real thresh_global, HYPRE_Real thresh_local, HYPRE_Int num_levels);
+HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter);
+void ParaSailsApply(ParaSails *ps, HYPRE_Real *u, HYPRE_Real *v);
+void ParaSailsApplyTrans(ParaSails *ps, HYPRE_Real *u, HYPRE_Real *v);
+HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A);
 void ParaSailsStatsValues(ParaSails *ps, Matrix *A);
 
 #endif /* _PARASAILS_H */

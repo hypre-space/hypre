@@ -65,16 +65,39 @@ fi
 # temporarily change word delimeter in order to have spaces in options
 tmpIFS=$IFS
 IFS=:
-configure_opts="--without-MPI:--with-strict-checking:--enable-shared: "
+configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition --with-insure:--enable-bigint --enable-debug:--enable-maxdim=4 --enable-debug:--enable-complex --enable-maxdim=4 --enable-debug: "
 for opt in $configure_opts
 do
    # only use first part of $opt for subdir name
-   output_subdir=$output_dir/build`echo $opt | awk '{print $1}'`
+   optpre=`echo $opt | awk '{print $1}'`
+   output_subdir=$output_dir/build$optpre
    mkdir -p $output_subdir
    ./test.sh configure.sh $src_dir $opt
    mv -f configure.??? $output_subdir
    ./test.sh make.sh $src_dir -j test
    mv -f make.??? $output_subdir
+   case $optpre in
+      --with-no-global-partition)
+         ./test.sh run.sh -ij -sstruct -struct $src_dir
+         mv -f run.??? $output_subdir
+      ;;
+      --enable-bigint)
+         ./test.sh run.sh $src_dir
+         mv -f run.??? $output_subdir
+         ./test.sh examples.sh -bigint $src_dir/examples
+         mv -f examples.??? $output_subdir
+      ;;
+      --enable-maxdim*)
+         ./test.sh examples.sh -maxdim $src_dir/examples
+         mv -f examples.??? $output_subdir
+      ;;
+      --enable-complex)
+         # ignore complex compiler output for now
+         rm -fr $output_subdir/make.???
+         ./test.sh examples.sh -complex $src_dir/examples
+         mv -f examples.??? $output_subdir
+      ;;
+   esac
 done
 IFS=$tmpIFS
 
@@ -88,37 +111,17 @@ do
    mv -f link.??? $output_subdir
 done
 
-# Run tests with --no-global-partition configured
-opt="--with-no-global-partition --with-insure"
-output_subdir="$output_dir/run--with-no-global-partition"
-mkdir -p $output_subdir
-./test.sh configure.sh $src_dir $opt
-mv -f configure.??? $output_subdir
-./test.sh make.sh $src_dir -j test
-mv -f make.??? $output_subdir
-./test.sh run.sh -ij -sstruct -struct $src_dir
-mv -f run.??? $output_subdir
-
-# Run tests with --enable-bigint configured
-opt="--enable-bigint --enable-debug"
-output_subdir="$output_dir/run--enable-bigint"
-mkdir -p $output_subdir
-./test.sh configure.sh $src_dir $opt
-mv -f configure.??? $output_subdir
-./test.sh make.sh $src_dir -j test
-mv -f make.??? $output_subdir
-./test.sh run.sh $src_dir
-mv -f run.??? $output_subdir
-
 # Test documentation build (only if 'docs_misc' directory is present)
 if [ -d $src_dir/docs_misc ]; then
    ./test.sh docs.sh $src_dir
    mv -f docs.??? $output_dir
 fi
 
-# Check for 'int' and 'MPI_'
+# Check for 'int', 'double', and 'MPI_'
 ./test.sh check-int.sh $src_dir
 mv -f check-int.??? $output_dir
+./test.sh check-double.sh $src_dir
+mv -f check-double.??? $output_dir
 ./test.sh check-mpi.sh $src_dir
 mv -f check-mpi.??? $output_dir
 

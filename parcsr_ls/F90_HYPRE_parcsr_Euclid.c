@@ -154,10 +154,10 @@ hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)
 void
 hypre_F90_IFACE(hypre_euclidsetsparsea, HYPRE_EUCLIDSETSPARSEA)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *spa,
+    hypre_F90_Real *spa,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_EuclidSetSparseA(
       hypre_F90_PassObj (HYPRE_Solver, solver),
-      hypre_F90_PassDbl (spa) );
+      hypre_F90_PassReal (spa) );
 }

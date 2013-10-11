@@ -28,13 +28,13 @@ hypre_MaxwellOffProcRowCreate(HYPRE_Int ncols)
 {
    hypre_MaxwellOffProcRow  *OffProcRow;
    HYPRE_Int                *cols;
-   double                   *data;
+   HYPRE_Real               *data;
 
    OffProcRow= hypre_CTAlloc(hypre_MaxwellOffProcRow, 1);
    (OffProcRow -> ncols)= ncols;
 
    cols= hypre_TAlloc(HYPRE_Int, ncols);
-   data= hypre_TAlloc(double, ncols);
+   data= hypre_TAlloc(HYPRE_Real, ncols);
 
    (OffProcRow -> cols)= cols;
    (OffProcRow -> data)= data;
@@ -138,15 +138,15 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    HYPRE_Int             *send_RowsNcols_alloc; 
    HYPRE_Int             *send_ColsData_alloc;
    HYPRE_Int             *tot_nsendRowsNcols, *tot_sendColsData;
-   double               **vals;  /* buffer for cols & data */
+   HYPRE_Real           **vals;  /* buffer for cols & data */
 
    HYPRE_Int             *col_inds;
-   double                *values;
+   HYPRE_Real            *values;
 
    hypre_MPI_Request           *requests;
    hypre_MPI_Status            *status;
    HYPRE_Int            **rbuffer_RowsNcols;
-   double               **rbuffer_ColsData;
+   HYPRE_Real           **rbuffer_ColsData;
    HYPRE_Int              num_sends, num_recvs;
 
    hypre_MaxwellOffProcRow **OffProcRows;
@@ -199,7 +199,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    send_RowsNcols      = hypre_TAlloc(HYPRE_Int *, nprocs);
    send_RowsNcols_alloc= hypre_TAlloc(HYPRE_Int , nprocs);
    send_ColsData_alloc = hypre_TAlloc(HYPRE_Int , nprocs);
-   vals                = hypre_TAlloc(double *, nprocs);
+   vals                = hypre_TAlloc(HYPRE_Real *, nprocs);
    tot_nsendRowsNcols  = hypre_CTAlloc(HYPRE_Int, nprocs);
    tot_sendColsData    = hypre_CTAlloc(HYPRE_Int, nprocs);
 
@@ -208,7 +208,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
       send_RowsNcols[i]= hypre_TAlloc(HYPRE_Int, 1000); /* initial allocation */
       send_RowsNcols_alloc[i]= 1000;
 
-      vals[i]= hypre_TAlloc(double, 2000); /* initial allocation */
+      vals[i]= hypre_TAlloc(HYPRE_Real, 2000); /* initial allocation */
       send_ColsData_alloc[i]= 2000;
    }
   
@@ -733,12 +733,12 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                               if ( (tot_sendColsData[proc]+2*n) > send_ColsData_alloc[proc] )
                               {
                                  send_ColsData_alloc[proc]+= 2000;
-                                 vals[proc]= hypre_TReAlloc(vals[proc], double,
+                                 vals[proc]= hypre_TReAlloc(vals[proc], HYPRE_Real,
                                                             send_ColsData_alloc[proc]);
                               }
                               for (k= 0; k< n; k++)
                               {
-                                 vals[proc][tot_sendColsData[proc]]= (double) col_inds[k];
+                                 vals[proc][tot_sendColsData[proc]]= (HYPRE_Real) col_inds[k];
                                  tot_sendColsData[proc]++;
                                  vals[proc][tot_sendColsData[proc]]= values[k];
                                  tot_sendColsData[proc]++;
@@ -792,7 +792,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    /* send row size data */
    j= 0; 
    rbuffer_RowsNcols= hypre_TAlloc(HYPRE_Int *, nprocs);
-   rbuffer_ColsData = hypre_TAlloc(double *, nprocs);
+   rbuffer_ColsData = hypre_TAlloc(HYPRE_Real *, nprocs);
 
    for (proc= 0; proc< nprocs; proc++)
    {
@@ -834,7 +834,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
             m+= 2;
          }
 
-         rbuffer_ColsData[proc]= hypre_TAlloc(double, 2*send_RowsNcols_alloc[proc]);
+         rbuffer_ColsData[proc]= hypre_TAlloc(HYPRE_Real, 2*send_RowsNcols_alloc[proc]);
          hypre_TFree(rbuffer_RowsNcols[proc]);
       }
    }

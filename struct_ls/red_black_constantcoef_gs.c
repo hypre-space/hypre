@@ -50,14 +50,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              xi, xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
-   double                *Ap;
-   double                *App;
-   double                *bp;
-   double                *xp;
+   HYPRE_Real            *Ap;
+   HYPRE_Real            *App;
+   HYPRE_Real            *bp;
+   HYPRE_Real            *xp;
 
    /* constant coefficient */
    HYPRE_Int              constant_coeff= hypre_StructMatrixConstantCoefficient(A);
-   double                 App0, App1, App2, App3, App4, App5, AApd;
+   HYPRE_Real             App0, App1, App2, App3, App4, App5, AApd;
                         
    hypre_IndexRef         start;
    hypre_Index            loop_size;

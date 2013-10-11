@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * Header file for HYPRE_utilities library
@@ -50,6 +49,21 @@ typedef long long int HYPRE_Int;
 #else 
 typedef int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_INT
+#endif
+
+/*--------------------------------------------------------------------------
+ * Complex stuff
+ *--------------------------------------------------------------------------*/
+
+typedef double HYPRE_Real;
+#define HYPRE_MPI_REAL MPI_DOUBLE
+
+#ifdef HYPRE_COMPLEX
+typedef double _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
+#else 
+typedef HYPRE_Real HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
 
 /*--------------------------------------------------------------------------

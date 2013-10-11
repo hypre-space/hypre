@@ -27,16 +27,16 @@
 
 #include "headers.h"  
 
-HYPRE_Int hypre_Schwarzpcg(double *x, double *rhs, 
-		     double *sparse_matrix, 
+HYPRE_Int hypre_Schwarzpcg(HYPRE_Real *x, HYPRE_Real *rhs, 
+		     HYPRE_Real *sparse_matrix, 
 
 		     HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 
 		     HYPRE_Int *i_domain_dof, HYPRE_Int *j_domain_dof,
-		     double *domain_matrixinverse,
+		     HYPRE_Real *domain_matrixinverse,
 		     HYPRE_Int num_domains,
 
-		     double *v, double *w, double *d, double *aux,
+		     HYPRE_Real *v, HYPRE_Real *w, HYPRE_Real *d, HYPRE_Real *aux,
 		     HYPRE_Int max_iter, 
 
 		     HYPRE_Int num_dofs)
@@ -205,9 +205,9 @@ loop:
 
 }
 
-HYPRE_Int sparse_matrix_vector_product(double *v,
-				 double *sparse_matrix, 
-				 double *w, 
+HYPRE_Int sparse_matrix_vector_product(HYPRE_Real *v,
+				 HYPRE_Real *sparse_matrix, 
+				 HYPRE_Real *w, 
 				 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 				 HYPRE_Int num_dofs)
 {

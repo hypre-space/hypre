@@ -25,7 +25,7 @@ static doublereal c_b72 = -1.;
     doublereal d__1, d__2, d__3, d__4;
 
     /* Builtin functions */
-    double pow_dd(doublereal *, doublereal *), sqrt(doublereal), d_sign(
+    HYPRE_Real pow_dd(doublereal *, doublereal *), sqrt(doublereal), d_sign(
 	    doublereal *, doublereal *);
 
     /* Local variables */

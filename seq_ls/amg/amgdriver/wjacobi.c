@@ -31,25 +31,25 @@
 HYPRE_Int    	 WJacobi(x, b, tol, data)
 hypre_Vector 	*x;
 hypre_Vector 	*b;
-double 	 tol;
+HYPRE_Real 	 tol;
 void    *data;
 {
    WJacobiData    *wjacobi_data = data;
 
-   double          weight   = WJacobiDataWeight(wjacobi_data);
+   HYPRE_Real      weight   = WJacobiDataWeight(wjacobi_data);
    HYPRE_Int         	   max_iter = WJacobiDataMaxIter(wjacobi_data);
 
    hypre_Matrix         *A        = WJacobiDataA(wjacobi_data);
    hypre_Vector      	  *t        = WJacobiDataT(wjacobi_data);
 
-   double         *a  = hypre_MatrixData(A);
+   HYPRE_Real     *a  = hypre_MatrixData(A);
    HYPRE_Int            *ia = hypre_MatrixIA(A);
    HYPRE_Int            *ja = hypre_MatrixJA(A);
    HYPRE_Int             n  = hypre_MatrixSize(A);
 	          
-   double         *xp = hypre_VectorData(x);
-   double         *bp = hypre_VectorData(b);
-   double         *tp = hypre_VectorData(t);
+   HYPRE_Real     *xp = hypre_VectorData(x);
+   HYPRE_Real     *bp = hypre_VectorData(b);
+   HYPRE_Real     *tp = hypre_VectorData(t);
 	          
    HYPRE_Int             i, j, jj;
    HYPRE_Int             iter = 0;
@@ -97,14 +97,14 @@ void     *data;
 {
    WJacobiData  *wjacobi_data = data;
 
-   double   *darray;
+   HYPRE_Real   *darray;
    HYPRE_Int       size;
 
 
    WJacobiDataA(wjacobi_data) = A;
 
    size = hypre_MatrixSize(A);
-   darray = hypre_CTAlloc(double, hypre_NDIMU(size));
+   darray = hypre_CTAlloc(HYPRE_Real, hypre_NDIMU(size));
    WJacobiDataT(wjacobi_data) = hypre_NewVector(darray, size);
 }
 

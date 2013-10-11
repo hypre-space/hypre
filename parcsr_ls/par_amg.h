@@ -31,15 +31,15 @@ typedef struct
 
    /* setup params */
    HYPRE_Int      max_levels;
-   double   strong_threshold;
-   double   max_row_sum;
-   double   trunc_factor;
-   double   agg_trunc_factor;
-   double   agg_P12_trunc_factor;
-   double   jacobi_trunc_threshold;
-   double   S_commpkg_switch;
-   double   CR_rate;
-   double   CR_strong_th;
+   HYPRE_Real   strong_threshold;
+   HYPRE_Real   max_row_sum;
+   HYPRE_Real   trunc_factor;
+   HYPRE_Real   agg_trunc_factor;
+   HYPRE_Real   agg_P12_trunc_factor;
+   HYPRE_Real   jacobi_trunc_threshold;
+   HYPRE_Real   S_commpkg_switch;
+   HYPRE_Real   CR_rate;
+   HYPRE_Real   CR_strong_th;
    HYPRE_Int      measure_type;
    HYPRE_Int      setup_type;
    HYPRE_Int      coarsen_type;
@@ -74,10 +74,10 @@ typedef struct
    HYPRE_Int      user_coarse_relax_type;   
    HYPRE_Int      user_relax_type;   
    HYPRE_Int      user_num_sweeps;   
-   double         user_relax_weight;   
-   double  *relax_weight; 
-   double  *omega;
-   double   tol;
+   HYPRE_Real     user_relax_weight;   
+   HYPRE_Real  *relax_weight; 
+   HYPRE_Real  *omega;
+   HYPRE_Real   tol;
 
    /* problem data */
    hypre_ParCSRMatrix  *A;
@@ -102,7 +102,7 @@ typedef struct
    HYPRE_Int                **dof_point_array;
    HYPRE_Int                **point_dof_map_array;
    HYPRE_Int                  num_levels;
-   double             **l1_norms;
+   HYPRE_Real         **l1_norms;
 
 
    /* Block data */
@@ -120,30 +120,30 @@ typedef struct
    HYPRE_Int                  schw_variant;
    HYPRE_Int                  schw_overlap;
    HYPRE_Int                  schw_domain_type;
-   double		schwarz_rlx_weight;
+   HYPRE_Real		schwarz_rlx_weight;
    HYPRE_Int                  schwarz_use_nonsymm;
    HYPRE_Int			ps_sym;
    HYPRE_Int			ps_level;
    HYPRE_Int			pi_max_nz_per_row;
    HYPRE_Int			eu_level;
    HYPRE_Int			eu_bj;
-   double		ps_threshold;
-   double		ps_filter;
-   double		pi_drop_tol;
-   double		eu_sparse_A;
+   HYPRE_Real		ps_threshold;
+   HYPRE_Real		ps_filter;
+   HYPRE_Real		pi_drop_tol;
+   HYPRE_Real		eu_sparse_A;
    char		       *euclidfile;
 
-   double              *max_eig_est;
-   double              *min_eig_est;
+   HYPRE_Real          *max_eig_est;
+   HYPRE_Real          *min_eig_est;
    HYPRE_Int                  cheby_order;
-   double               cheby_fraction;
+   HYPRE_Real           cheby_fraction;
 
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
-   double            *Vtemp_local_data;
-   double             cycle_op_count;
+   HYPRE_Real        *Vtemp_local_data;
+   HYPRE_Real         cycle_op_count;
    hypre_ParVector   *Rtemp;
    hypre_ParVector   *Ptemp;
    hypre_ParVector   *Ztemp;
@@ -158,7 +158,7 @@ typedef struct
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
-   double   rel_resid_norm;
+   HYPRE_Real   rel_resid_norm;
    hypre_ParVector *residual; /* available if logging>1 */
 
    /* output params */
@@ -181,11 +181,11 @@ typedef struct
    hypre_ParVector ***interp_vectors_array;   
    HYPRE_Int               interp_vec_variant;
    HYPRE_Int               interp_vec_first_level;
-   double            interp_vectors_abs_q_trunc;
+   HYPRE_Real        interp_vectors_abs_q_trunc;
    HYPRE_Int               interp_vectors_q_max;
    HYPRE_Int               interp_refine;
    HYPRE_Int               smooth_interp_vectors;
-   double           *expandp_weights; /* currently not set by user */
+   HYPRE_Real       *expandp_weights; /* currently not set by user */
 
  /* enable redundant coarse grid solve */
    HYPRE_Solver   coarse_solver;
@@ -195,8 +195,8 @@ typedef struct
    MPI_Comm   new_comm;
 
  /* store matrix, vector and communication info for Gaussian elimination */
-   double *A_mat;
-   double *b_vec;
+   HYPRE_Real *A_mat;
+   HYPRE_Real *b_vec;
    HYPRE_Int *comm_info;
 
 } hypre_ParAMGData;

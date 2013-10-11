@@ -49,7 +49,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
                     
-   double               *data;
+   HYPRE_Real           *data;
    HYPRE_Int             data_size = 0;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
@@ -62,8 +62,8 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVector  **tx_l;
    hypre_StructVector  **r_l;
    hypre_StructVector  **e_l;
-   double               *b_data;
-   double               *x_data;
+   HYPRE_Real           *b_data;
+   HYPRE_Real           *x_data;
    HYPRE_Int             b_data_alloced;
    HYPRE_Int             x_data_alloced;
 
@@ -226,7 +226,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   data = hypre_SharedCTAlloc(double, data_size);
+   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
    (smg_data -> data) = data;
 
    hypre_StructVectorInitializeData(tb_l[0], data);
@@ -408,8 +408,8 @@ hypre_SMGSetup( void               *smg_vdata,
    if ((smg_data -> logging) > 0)
    {
       max_iter = (smg_data -> max_iter);
-      (smg_data -> norms)     = hypre_TAlloc(double, max_iter);
-      (smg_data -> rel_norms) = hypre_TAlloc(double, max_iter);
+      (smg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
+      (smg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
    }
 
 #if DEBUG

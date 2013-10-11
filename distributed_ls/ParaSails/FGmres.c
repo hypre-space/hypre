@@ -25,14 +25,14 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-double hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, double *, double *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, double *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Real hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
 
-static double InnerProd(HYPRE_Int n, double *x, double *y, MPI_Comm comm)
+static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm comm)
 {
-    double local_result, result;
+    HYPRE_Real local_result, result;
 
     HYPRE_Int one = 1;
     local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
@@ -42,19 +42,19 @@ static double InnerProd(HYPRE_Int n, double *x, double *y, MPI_Comm comm)
     return result;
 }
 
-static void CopyVector(HYPRE_Int n, double *x, double *y)
+static void CopyVector(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y)
 {
     HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dcopy, DCOPY)(&n, x, &one, y, &one);
 }
 
-static void ScaleVector(HYPRE_Int n, double alpha, double *x)
+static void ScaleVector(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x)
 {
     HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dscal, DSCAL)(&n, &alpha, x, &one);
 }
 
-static void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
+static void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 {
     HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(daxpy, DAXPY)(&n, &alpha, x, &one, y, &one);
@@ -66,51 +66,51 @@ static void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
 #define H(i,j) (H[(j)*m1+(i)])
 
 static void
-GeneratePlaneRotation(double dx, double dy, double *cs, double *sn)
+GeneratePlaneRotation(HYPRE_Real dx, HYPRE_Real dy, HYPRE_Real *cs, HYPRE_Real *sn)
 {
   if (dy == 0.0) {
     *cs = 1.0;
     *sn = 0.0;
   } else if (ABS(dy) > ABS(dx)) {
-    double temp = dx / dy;
+    HYPRE_Real temp = dx / dy;
     *sn = 1.0 / sqrt( 1.0 + temp*temp );
     *cs = temp * *sn;
   } else {
-    double temp = dy / dx;
+    HYPRE_Real temp = dy / dx;
     *cs = 1.0 / sqrt( 1.0 + temp*temp );
     *sn = temp * *cs;
   }
 }
 
-static void ApplyPlaneRotation(double *dx, double *dy, double cs, double sn)
+static void ApplyPlaneRotation(HYPRE_Real *dx, HYPRE_Real *dy, HYPRE_Real cs, HYPRE_Real sn)
 {
-  double temp  =  cs * *dx + sn * *dy;
+  HYPRE_Real temp  =  cs * *dx + sn * *dy;
   *dy = -sn * *dx + cs * *dy;
   *dx = temp;
 }
 
-void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
-  HYPRE_Int dim, double tol, HYPRE_Int max_iter)
+void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
+  HYPRE_Int dim, HYPRE_Real tol, HYPRE_Int max_iter)
 {
     HYPRE_Int mype;
     HYPRE_Int iter;
-    double rel_resid;
+    HYPRE_Real rel_resid;
 
-    double *H  = (double *) malloc(dim*(dim+1) * sizeof(double));
+    HYPRE_Real *H  = (HYPRE_Real *) malloc(dim*(dim+1) * sizeof(HYPRE_Real));
 
     /* local problem size */
     HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
     HYPRE_Int m1 = dim+1; /* used inside H macro */
     HYPRE_Int i, j, k;
-    double beta, resid0;
+    HYPRE_Real beta, resid0;
 
-    double *s  = (double *) malloc((dim+1) * sizeof(double));
-    double *cs = (double *) malloc(dim * sizeof(double));
-    double *sn = (double *) malloc(dim * sizeof(double));
+    HYPRE_Real *s  = (HYPRE_Real *) malloc((dim+1) * sizeof(HYPRE_Real));
+    HYPRE_Real *cs = (HYPRE_Real *) malloc(dim * sizeof(HYPRE_Real));
+    HYPRE_Real *sn = (HYPRE_Real *) malloc(dim * sizeof(HYPRE_Real));
 
-    double *V  = (double *) malloc(n*(dim+1) * sizeof(double));
-    double *W  = (double *) malloc(n*dim * sizeof(double));
+    HYPRE_Real *V  = (HYPRE_Real *) malloc(n*(dim+1) * sizeof(HYPRE_Real));
+    HYPRE_Real *W  = (HYPRE_Real *) malloc(n*dim * sizeof(HYPRE_Real));
 
     MPI_Comm comm = mat->comm;
     hypre_MPI_Comm_rank(comm, &mype);

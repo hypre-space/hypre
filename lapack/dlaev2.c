@@ -70,7 +70,7 @@
     /* System generated locals */
     doublereal d__1;
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal acmn, acmx, ab, df, cs, ct, tb, sm, tn, rt, adf, acs;
     static integer sgn1, sgn2;

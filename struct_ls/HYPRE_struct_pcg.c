@@ -79,7 +79,7 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
-                       double             tol    )
+                       HYPRE_Real         tol    )
 {
    return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -88,7 +88,7 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPCGSetAbsoluteTol( HYPRE_StructSolver solver,
-                               double             tol    )
+                               HYPRE_Real         tol    )
 {
    return( HYPRE_PCGSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -165,7 +165,7 @@ HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
 
 HYPRE_Int
 HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                             double             *norm   )
+                                             HYPRE_Real         *norm   )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
@@ -200,9 +200,9 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    hypre_Box            *y_data_box;
    hypre_Box            *x_data_box;
                      
-   double               *Ap;
-   double               *yp;
-   double               *xp;
+   HYPRE_Real           *Ap;
+   HYPRE_Real           *yp;
+   HYPRE_Real           *xp;
                        
    HYPRE_Int             Ai;
    HYPRE_Int             yi;

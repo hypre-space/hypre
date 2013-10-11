@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * Header info for Auxiliary Parallel Vector data structures
@@ -32,12 +28,12 @@
 typedef struct
 {
    HYPRE_Int	    max_off_proc_elmts; /* length of off processor stash for
-					SetValues and AddToValues*/
+                                           SetValues and AddToValues*/
    HYPRE_Int	    current_num_elmts; /* current no. of elements stored in stash */
-   HYPRE_Int     *off_proc_i; /* contains column indices */
-   double  *off_proc_data; /* contains corresponding data */
+   HYPRE_Int       *off_proc_i; /* contains column indices */
+   HYPRE_Complex   *off_proc_data; /* contains corresponding data */
    HYPRE_Int	    cancel_indx; /* number of elements that have to be deleted due
-                           to setting values from another processor */
+                                    to setting values from another processor */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------

@@ -727,6 +727,7 @@ enable_option_checking
 enable_debug
 enable_shared
 enable_bigint
+enable_complex
 enable_maxdim
 enable_fortran
 enable_python
@@ -1403,6 +1404,7 @@ Optional Features:
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
   --enable-bigint         Use long long int for HYPRE_Int (default is NO).
+  --enable-complex        Use complex values (default is NO).
   --enable-maxdim=MAXDIM  Change max dimension size to MAXDIM (default is 3).
                           Currently must be at least 3.
   --enable-fortran        Require a working Fortran compiler (default is YES).
@@ -2218,6 +2220,30 @@ if test "$hypre_using_bigint" = "yes"
 then
    cat >>confdefs.h <<\_ACEOF
 #define HYPRE_BIGINT 1
+_ACEOF
+
+fi
+
+# Check whether --enable-complex was given.
+if test "${enable_complex+set}" = set; then
+  enableval=$enable_complex; case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_complex=yes ;;
+    no)  hypre_using_complex=no ;;
+    *)   { { $as_echo "$as_me:$LINENO: error: Bad value ${enableval} for --enable-complex" >&5
+$as_echo "$as_me: error: Bad value ${enableval} for --enable-complex" >&2;}
+   { (exit 1); exit 1; }; } ;;
+ esac
+else
+  hypre_using_complex=no
+
+fi
+
+if test "$hypre_using_complex" = "yes"
+then
+   cat >>confdefs.h <<\_ACEOF
+#define HYPRE_COMPLEX 1
 _ACEOF
 
 fi

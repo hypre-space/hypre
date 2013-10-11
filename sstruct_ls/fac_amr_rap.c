@@ -51,7 +51,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_SStructPMatrix        *pmatrix, *fac_pmatrix;
    hypre_StructMatrix          *smatrix, *fac_smatrix;
    hypre_Box                   *smatrix_dbox, *fac_smatrix_dbox;
-   double                      *smatrix_vals, *fac_smatrix_vals;
+   HYPRE_Real                  *smatrix_vals, *fac_smatrix_vals;
 
    hypre_SStructGrid           *fac_grid;
    hypre_SStructGraph          *fac_graph;
@@ -76,7 +76,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_BoxManEntry           *boxman_entry;
    hypre_Index                  ilower;
 
-   double                      *values;
+   HYPRE_Real                  *values;
    HYPRE_Int                   *ncols, *rows, *cols, tot_cols;
 
    hypre_SStructStencil        *stencils;
@@ -137,12 +137,12 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       }
    }
 
-   values= hypre_CTAlloc(double, tot_cols);
+   values= hypre_CTAlloc(HYPRE_Real, tot_cols);
    HYPRE_IJMatrixGetValues(ij_A, nUventries, ncols, rows, cols, values);
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(fac_A), nUventries,
                            ncols, (const HYPRE_Int *) rows, (const HYPRE_Int *) cols,
-                           (const double *) values);
+                           (const HYPRE_Real *) values);
    hypre_TFree(ncols);
    hypre_TFree(rows);
    hypre_TFree(cols);

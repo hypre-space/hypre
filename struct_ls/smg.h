@@ -28,7 +28,7 @@ typedef struct
    MPI_Comm              comm;
                       
    HYPRE_Int             memory_use;
-   double                tol;
+   HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
@@ -48,7 +48,7 @@ typedef struct
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
                     
-   double               *data;
+   HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -74,8 +74,8 @@ typedef struct
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
-   double               *norms;
-   double               *rel_norms;
+   HYPRE_Real           *norms;
+   HYPRE_Real           *rel_norms;
 
 } hypre_SMGData;
 

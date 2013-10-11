@@ -68,7 +68,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    HYPRE_Int              ndim;
 
    hypre_Box             *ac_dbox;
-   double                *ac_ptr;
+   HYPRE_Real            *ac_ptr;
    hypre_Index            loop_size;
 
    HYPRE_Int              iac;
@@ -255,7 +255,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    HYPRE_Int              ndim;
 
    hypre_Box             *a_dbox;
-   double                *a_ptr;
+   HYPRE_Real            *a_ptr;
    hypre_Index            loop_size;
 
    HYPRE_Int              ia;

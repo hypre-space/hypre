@@ -45,10 +45,10 @@
  *--------------------------------------------------------------------------*/
 
 PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale, 
-  double thresh)
+  HYPRE_Real thresh)
 {
     HYPRE_Int row, len, *ind, count, j, *data;
-    double *val, temp;
+    HYPRE_Real *val, temp;
 
     PrunedRows *p = (PrunedRows *) malloc(sizeof(PrunedRows));
 

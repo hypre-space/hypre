@@ -108,10 +108,10 @@ hypre_StructKrylovMatvecCreate( void   *A,
 
 HYPRE_Int
 hypre_StructKrylovMatvec( void   *matvec_data,
-                          double  alpha,
+                          HYPRE_Complex  alpha,
                           void   *A,
                           void   *x,
-                          double  beta,
+                          HYPRE_Complex  beta,
                           void   *y           )
 {
    return ( hypre_StructMatvecCompute( matvec_data,
@@ -134,7 +134,7 @@ hypre_StructKrylovMatvecDestroy( void *matvec_data )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-double
+HYPRE_Real
 hypre_StructKrylovInnerProd( void *x, 
                              void *y )
 {
@@ -168,7 +168,7 @@ hypre_StructKrylovClearVector( void *x )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructKrylovScaleVector( double  alpha,
+hypre_StructKrylovScaleVector( HYPRE_Complex  alpha,
                                void   *x     )
 {
    return ( hypre_StructScale( alpha, (hypre_StructVector *) x ) );
@@ -178,7 +178,7 @@ hypre_StructKrylovScaleVector( double  alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructKrylovAxpy( double alpha,
+hypre_StructKrylovAxpy( HYPRE_Complex alpha,
                         void   *x,
                         void   *y )
 {

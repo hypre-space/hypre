@@ -28,7 +28,7 @@ hypre_PrintBoxArrayData( FILE            *file,
                          hypre_BoxArray  *data_space,
                          HYPRE_Int        num_values,
                          HYPRE_Int        dim,
-                         double          *data       )
+                         HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -42,6 +42,7 @@ hypre_PrintBoxArrayData( FILE            *file,
    hypre_Index      index;
                    
    HYPRE_Int        i, j, d;
+   HYPRE_Complex    value;
 
    /*----------------------------------------
     * Print data
@@ -74,8 +75,13 @@ hypre_PrintBoxArrayData( FILE            *file,
                hypre_fprintf(file, ", %d",
                              hypre_IndexD(start, d) + hypre_IndexD(index, d));
             }
-            hypre_fprintf(file, "; %d) %.14e\n",
-                          j, data[datai + j*data_box_volume]);
+            value = data[datai + j*data_box_volume];
+#ifdef HYPRE_COMPLEX
+            hypre_fprintf(file, "; %d) %.14e , %.14e\n",
+                          j, hypre_creal(value), hypre_cimag(value));
+#else
+            hypre_fprintf(file, "; %d) %.14e\n", j, value);
+#endif
          }
       }
       hypre_BoxLoop1End(datai);
@@ -101,7 +107,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
                              HYPRE_Int        stencil_size,
                              HYPRE_Int       *symm_elements,
                              HYPRE_Int        dim,
-                             double          *data       )
+                             HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -114,6 +120,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
    hypre_Index      index;
                    
    HYPRE_Int        i, j, d;
+   HYPRE_Complex    value;
 
    /*----------------------------------------
     * Print data
@@ -126,8 +133,13 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
    {
       if (symm_elements[j] < 0 && j!=center_rank )
       {
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf( file, "*: (*, *, *; %d) %.14e , %.14e\n",
+                        j, hypre_creal(data[0]), hypre_cimag(data[0]));
+#else
          hypre_fprintf( file, "*: (*, *, *; %d) %.14e\n",
                         j, data[0] );
+#endif
       }
       ++data;
    }
@@ -157,8 +169,13 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
             hypre_fprintf(file, ", %d",
                           hypre_IndexD(start, d) + hypre_IndexD(index, d));
          }
-         hypre_fprintf(file, "; %d) %.14e\n",
-                       center_rank, data[datai]);
+         value = data[datai];
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(file, "; %d) %.14e , %.14e\n",
+                       center_rank, hypre_creal(value), hypre_cimag(value));
+#else
+         hypre_fprintf(file, "; %d) %.14e\n", center_rank, value);
+#endif
       }
       hypre_BoxLoop1End(datai);
       data += data_box_volume;
@@ -177,7 +194,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
                            hypre_BoxArray  *box_array,
                            hypre_BoxArray  *data_space,
                            HYPRE_Int        num_values,
-                           double          *data       )
+                           HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
                    
@@ -186,6 +203,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
    hypre_IndexRef   start;
                    
    HYPRE_Int        i, j;
+   HYPRE_Complex    value;
 
    /*----------------------------------------
     * Print data
@@ -201,8 +219,13 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
       for (j = 0; j < num_values; j++)
       {
-         hypre_fprintf( file, "*: (*, *, *; %d) %.14e\n",
-                        j, data[datai + j] );
+         value = data[datai + j];
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(file, "*: (*, *, *; %d) %.14e , %.14e\n",
+                       j, hypre_creal(value), hypre_cimag(value));
+#else
+         hypre_fprintf(file, "*: (*, *, *; %d) %.14e\n", j, value);
+#endif
       }
 
       data += num_values;
@@ -221,7 +244,7 @@ hypre_ReadBoxArrayData( FILE            *file,
                         hypre_BoxArray  *data_space,
                         HYPRE_Int        num_values,
                         HYPRE_Int        dim,
-                        double          *data       )
+                        HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -287,7 +310,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
                            HYPRE_Int        real_stencil_size,
                            HYPRE_Int        constant_coefficient,
                            HYPRE_Int        dim,
-                           double          *data       )
+                           HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;

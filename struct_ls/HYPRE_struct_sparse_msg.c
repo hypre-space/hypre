@@ -81,7 +81,7 @@ HYPRE_StructSparseMSGSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGSetTol( HYPRE_StructSolver solver,
-                        double             tol    )
+                        HYPRE_Real         tol    )
 {
    return( hypre_SparseMSGSetTol( (void *) solver, tol ) );
 }
@@ -155,7 +155,7 @@ HYPRE_StructSparseMSGSetRelaxType( HYPRE_StructSolver solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
-                                     double             weight)
+                                     HYPRE_Real         weight)
 {
    return( hypre_SparseMSGSetJacobiWeight( (void *) solver, weight) );
 }
@@ -233,7 +233,7 @@ HYPRE_StructSparseMSGGetNumIterations( HYPRE_StructSolver  solver,
 
 HYPRE_Int
 HYPRE_StructSparseMSGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                                   double             *norm   )
+                                                   HYPRE_Real         *norm   )
 {
    return( hypre_SparseMSGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

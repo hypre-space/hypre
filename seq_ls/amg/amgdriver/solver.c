@@ -41,15 +41,15 @@ char     *file_name;
    HYPRE_Int      gmres_max_restarts;
 
    /* wjacobi params */
-   double   wjacobi_weight;
+   HYPRE_Real   wjacobi_weight;
    HYPRE_Int      wjacobi_max_iter;
 
    /* amg setup params */
    HYPRE_Int      amg_levmax;
    HYPRE_Int      amg_ncg;
-   double   amg_ecg;
+   HYPRE_Real   amg_ecg;
    HYPRE_Int      amg_nwt;
-   double   amg_ewt;
+   HYPRE_Real   amg_ewt;
    HYPRE_Int      amg_nstr;
 
    /* amg solve params */
@@ -195,7 +195,7 @@ Solver  *solver;
 
    HYPRE_Int      type;
 
-   double   stop_tolerance;
+   HYPRE_Real   stop_tolerance;
 
    /* pcg params */
    HYPRE_Int      pcg_max_iter;
@@ -206,15 +206,15 @@ Solver  *solver;
    HYPRE_Int      gmres_max_restarts;
 
    /* wjacobi params */
-   double   wjacobi_weight;
+   HYPRE_Real   wjacobi_weight;
    HYPRE_Int      wjacobi_max_iter;
 
    /* amg setup params */
    HYPRE_Int      amg_levmax;
    HYPRE_Int      amg_ncg;
-   double   amg_ecg;
+   HYPRE_Real   amg_ecg;
    HYPRE_Int      amg_nwt;
-   double   amg_ewt;
+   HYPRE_Real   amg_ewt;
    HYPRE_Int      amg_nstr;
 
    /* amg solve params */

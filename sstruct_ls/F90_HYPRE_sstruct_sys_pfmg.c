@@ -96,13 +96,13 @@ hypre_F90_IFACE(hypre_sstructsyspfmgsolve, HYPRE_SSTRUCTSYSPFMGSOLVE)
 void
 hypre_F90_IFACE(hypre_sstructsyspfmgsettol, HYPRE_SSTRUCTSYSPFMGSETTOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructSysPFMGSetTol(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDbl (tol)    ) );
+          hypre_F90_PassReal (tol)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -188,13 +188,13 @@ hypre_F90_IFACE(hypre_sstructsyspfmgsetrelaxtyp, HYPRE_SSTRUCTSYSPFMGSETRELAXTYP
 void
 hypre_F90_IFACE(hypre_sstructsyspfmgsetjacobiweigh, HYPRE_SSTRUCTSYSPFMGSETJACOBIWEIGH)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *weight,
+    hypre_F90_Real *weight,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructSysPFMGSetJacobiWeight(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDbl (weight) ) );
+          hypre_F90_PassReal (weight) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -252,13 +252,13 @@ hypre_F90_IFACE(hypre_sstructsyspfmgsetskiprela, HYPRE_SSTRUCTSYSPFMGSETSKIPRELA
 void
 hypre_F90_IFACE(hypre_sstructsyspfmgsetdxyz, HYPRE_SSTRUCTSYSPFMGSETDXYZ)
    (hypre_F90_Obj *solver,
-    hypre_F90_DblArray *dxyz,
+    hypre_F90_RealArray *dxyz,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructSysPFMGSetDxyz(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDblArray (dxyz)   ));
+          hypre_F90_PassRealArray (dxyz)   ));
 }
 
 /*--------------------------------------------------------------------------
@@ -316,11 +316,11 @@ hypre_F90_IFACE(hypre_sstructsyspfmggetnumitera, HYPRE_SSTRUCTSYSPFMGGETNUMITERA
 void
 hypre_F90_IFACE(hypre_sstructsyspfmggetfinalrel, HYPRE_SSTRUCTSYSPFMGGETFINALREL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *norm,
+    hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDblRef (norm)   ));
+          hypre_F90_PassRealRef (norm)   ));
 }

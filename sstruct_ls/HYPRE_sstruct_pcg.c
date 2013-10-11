@@ -79,7 +79,7 @@ HYPRE_SStructPCGSolve( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetTol( HYPRE_SStructSolver solver,
-                        double              tol )
+                        HYPRE_Real          tol )
 {
    return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -88,7 +88,7 @@ HYPRE_SStructPCGSetTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetAbsoluteTol( HYPRE_SStructSolver solver,
-                        double              tol )
+                                HYPRE_Real          tol )
 {
    return( HYPRE_PCGSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -174,7 +174,7 @@ HYPRE_SStructPCGGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                              double              *norm )
+                                              HYPRE_Real          *norm )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }

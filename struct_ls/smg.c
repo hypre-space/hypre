@@ -158,7 +158,7 @@ hypre_SMGGetMemoryUse( void *smg_vdata,
 
 HYPRE_Int
 hypre_SMGSetTol( void   *smg_vdata,
-                 double  tol       )
+                 HYPRE_Real  tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
  
@@ -169,7 +169,7 @@ hypre_SMGSetTol( void   *smg_vdata,
 
 HYPRE_Int
 hypre_SMGGetTol( void   *smg_vdata,
-                 double *tol       )
+                 HYPRE_Real *tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
  
@@ -402,8 +402,8 @@ hypre_SMGPrintLogging( void *smg_vdata,
    HYPRE_Int    num_iterations  = (smg_data -> num_iterations);
    HYPRE_Int    logging   = (smg_data -> logging);
    HYPRE_Int    print_level  = (smg_data -> print_level);
-   double      *norms     = (smg_data -> norms);
-   double      *rel_norms = (smg_data -> rel_norms);
+   HYPRE_Real  *norms     = (smg_data -> norms);
+   HYPRE_Real  *rel_norms = (smg_data -> rel_norms);
 
    
    if (myid == 0)
@@ -429,14 +429,14 @@ hypre_SMGPrintLogging( void *smg_vdata,
 
 HYPRE_Int
 hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
-                                       double *relative_residual_norm )
+                                       HYPRE_Real *relative_residual_norm )
 {
    hypre_SMGData *smg_data = smg_vdata;
 
    HYPRE_Int      max_iter        = (smg_data -> max_iter);
    HYPRE_Int      num_iterations  = (smg_data -> num_iterations);
    HYPRE_Int      logging         = (smg_data -> logging);
-   double        *rel_norms       = (smg_data -> rel_norms);
+   HYPRE_Real    *rel_norms       = (smg_data -> rel_norms);
 
    if (logging > 0)
    {
@@ -458,14 +458,14 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
 
 HYPRE_Int
 hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
-                                        double              values,
+                                        HYPRE_Real          values,
                                         hypre_BoxArray     *box_array,
                                         hypre_Index         stride    )
 {
    hypre_Box          *v_data_box;
 
    HYPRE_Int           vi;
-   double             *vp;
+   HYPRE_Real         *vp;
 
    hypre_Box          *box;
    hypre_Index         loop_size;

@@ -21,13 +21,13 @@ void FreeGlobals P((void ));
 /* gmres.c */
 HYPRE_Int SPGMRATimes P((void *A_data_arg , N_Vector v_arg , N_Vector z_arg ));
 HYPRE_Int SPGMRPSolve P((void *P_data_arg , N_Vector r_arg , N_Vector z_arg , HYPRE_Int lr_arg ));
-void GMRES P((hypre_Vector *x_arg , hypre_Vector *b_arg , double tol_arg , void *data_arg ));
+void GMRES P((hypre_Vector *x_arg , hypre_Vector *b_arg , HYPRE_Real tol_arg , void *data_arg ));
 void GMRESSetup P((hypre_Matrix *A , HYPRE_Int (*precond )(), void *precond_data , void *data ));
 void *NewGMRESData P((Problem *problem , Solver *solver , char *log_file_name ));
 void FreeGMRESData P((void *data ));
 
 /* pcg.c */
-void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
+void PCG P((hypre_Vector *x , hypre_Vector *b , HYPRE_Real tol , void *data ));
 void PCGSetup P((hypre_Matrix *A , HYPRE_Int (*precond )(), void *precond_data , void *data ));
 void *NewPCGData P((Problem *problem , Solver *solver , char *log_file_name ));
 void FreePCGData P((void *data ));
@@ -39,7 +39,7 @@ void WriteProblem P((char *file_name , Problem *problem ));
 
 /* random.c */
 void hypre_SeedRand P((HYPRE_Int seed ));
-double hypre_Rand P((void ));
+HYPRE_Real hypre_Rand P((void ));
 
 /* read.c */
 hypre_Matrix *ReadYSMP P((char *file_name ));
@@ -51,7 +51,7 @@ void FreeSolver P((Solver *solver ));
 void WriteSolver P((char *file_name , Solver *solver ));
 
 /* wjacobi.c */
-HYPRE_Int WJacobi P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
+HYPRE_Int WJacobi P((hypre_Vector *x , hypre_Vector *b , HYPRE_Real tol , void *data ));
 void WJacobiSetup P((hypre_Matrix *A , void *data ));
 void *NewWJacobiData P((Problem *problem , Solver *solver , char *log_file_name ));
 void FreeWJacobiData P((void *data ));

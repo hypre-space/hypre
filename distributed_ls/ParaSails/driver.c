@@ -39,18 +39,18 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
     ParaSails *ps;
     FILE *file;
     HYPRE_Int n, beg_row, end_row;
-    double time0, time1;
-    double setup_time, solve_time;
-    double max_setup_time, max_solve_time;
-    double cost;
+    HYPRE_Real time0, time1;
+    HYPRE_Real setup_time, solve_time;
+    HYPRE_Real max_setup_time, max_solve_time;
+    HYPRE_Real cost;
 
-    double *x, *b;
+    HYPRE_Real *x, *b;
     HYPRE_Int i, niter;
-    double thresh;
-    double threshg;
+    HYPRE_Real thresh;
+    HYPRE_Real threshg;
     HYPRE_Int nlevels;
-    double filter;
-    double loadbal;
+    HYPRE_Real filter;
+    HYPRE_Real loadbal;
 
     hypre_MPI_Init(&argc, &argv);
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
@@ -70,8 +70,8 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
     fclose(file);
     assert(n >= npes);
 
-    beg_row = (HYPRE_Int) ((double)(mype*n) / npes) + 1; /* assumes 1-based */
-    end_row = (HYPRE_Int) ((double)((mype+1)* n) / npes);
+    beg_row = (HYPRE_Int) ((HYPRE_Real)(mype*n) / npes) + 1; /* assumes 1-based */
+    end_row = (HYPRE_Int) ((HYPRE_Real)((mype+1)* n) / npes);
 
     if (mype == 0)
         assert(beg_row == 1);
@@ -83,8 +83,8 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
     end_row--;
 #endif
 
-    x = (double *) malloc((end_row-beg_row+1) * sizeof(double));
-    b = (double *) malloc((end_row-beg_row+1) * sizeof(double));
+    x = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
+    b = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
 
     A = MatrixCreate(hypre_MPI_COMM_WORLD, beg_row, end_row);
 
@@ -104,7 +104,7 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
     else
     {
         for (i=0; i<end_row-beg_row+1; i++)
-            b[i] = (double) (2*rand()) / (double) RAND_MAX - 1.0;
+            b[i] = (HYPRE_Real) (2*rand()) / (HYPRE_Real) RAND_MAX - 1.0;
     }
 
     while (num_runs && num_runs >= -1)

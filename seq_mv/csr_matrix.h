@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * Header info for CSR Matrix data structures
@@ -40,7 +36,7 @@ typedef struct
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    HYPRE_Int      owns_data;
 
-   double  *data;
+   HYPRE_Complex  *data;
 
    /* for compressing rows in matrix multiplication  */
    HYPRE_Int     *rownnz;
@@ -61,8 +57,6 @@ typedef struct
 #define hypre_CSRMatrixRownnz(matrix)       ((matrix) -> rownnz)
 #define hypre_CSRMatrixNumRownnz(matrix)    ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)     ((matrix) -> owns_data)
-
-
 
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix

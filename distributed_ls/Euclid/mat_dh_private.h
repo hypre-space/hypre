@@ -25,12 +25,12 @@ extern HYPRE_Int mat_find_owner(HYPRE_Int *beg_rows, HYPRE_Int *end_rows, HYPRE_
 
 extern void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *rpIN, HYPRE_Int **rpOUT,
                                      HYPRE_Int *cvalIN, HYPRE_Int **cvalOUT,
-                                     double *avalIN, double **avalOUT);
+                                     HYPRE_Real *avalIN, HYPRE_Real **avalOUT);
 
   /* same as above, but memory for output was already allocated */
 extern void mat_dh_transpose_reuse_private(HYPRE_Int m, 
-                                     HYPRE_Int *rpIN, HYPRE_Int *cvalIN, double *avalIN,
-                                     HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, double *avalOUT);
+                                     HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
+                                     HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, HYPRE_Real *avalOUT);
 
 /*-------------------------------------------------------------------------
  * utility functions for reading and writing matrices in various formats.
@@ -82,31 +82,31 @@ extern void profileMat(Mat_dh A);
 
 /* seq or mpi */
 extern void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
-                   double *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp);
+                   HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp);
 
 
 /* seq; reordering not implemented */
 /* see io_dh.h
-                                HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename);
 */
 
 /* seq only */
-extern void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, double *aval,
+extern void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval,
                                                                     FILE* fp); 
 
 
 /* seq only */
-extern void mat_dh_read_csr_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval, double **aval,
+extern void mat_dh_read_csr_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval,
                                                                     FILE* fp); 
 
 /* seq only */
 extern void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *m, HYPRE_Int **rp, 
-                                         HYPRE_Int **cval, double **aval, FILE* fp); 
+                                         HYPRE_Int **cval, HYPRE_Real **aval, FILE* fp); 
 
 /* seq or mpi */ 
 /* see io_dh.h
-                                     double **aval, char *filename);
+                                     HYPRE_Real **aval, char *filename);
 */
 
 /*-------------------------------------------------------------------------*/
@@ -116,14 +116,14 @@ extern void destroy_nat_ordering_private(HYPRE_Int *p);
 extern void invert_perm(HYPRE_Int m, HYPRE_Int *pIN, HYPRE_Int *pOUT);
 
 
-extern void make_full_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, double **aval);
+extern void make_full_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
   /* converts upper or lower triangular to full;
      may bomb if input is not triangular!
    */
 
-extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, double **aval);
+extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
   /* pads with zeros to make structurally symmetric. */
 
-extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, double **aval);
+extern void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rp, HYPRE_Int **cval, HYPRE_Real **aval);
 
 #endif

@@ -89,14 +89,14 @@ HYPRE_GMRESGetKDim( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_GMRESSetTol( HYPRE_Solver solver,
-                         double             tol    )
+                         HYPRE_Real         tol    )
 {
    return( hypre_GMRESSetTol( (void *) solver, tol ) );
 }
 
 HYPRE_Int
 HYPRE_GMRESGetTol( HYPRE_Solver solver,
-                         double           * tol    )
+                         HYPRE_Real       * tol    )
 {
    return( hypre_GMRESGetTol( (void *) solver, tol ) );
 }
@@ -106,14 +106,14 @@ HYPRE_GMRESGetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_GMRESSetAbsoluteTol( HYPRE_Solver solver,
-                         double             a_tol    )
+                         HYPRE_Real         a_tol    )
 {
    return( hypre_GMRESSetAbsoluteTol( (void *) solver, a_tol ) );
 }
 
 HYPRE_Int
 HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver,
-                         double           * a_tol    )
+                         HYPRE_Real       * a_tol    )
 {
    return( hypre_GMRESGetAbsoluteTol( (void *) solver, a_tol ) );
 }
@@ -124,14 +124,14 @@ HYPRE_GMRESGetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_GMRESSetConvergenceFactorTol( HYPRE_Solver solver,
-                         double             cf_tol    )
+                         HYPRE_Real         cf_tol    )
 {
    return( hypre_GMRESSetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
 
 HYPRE_Int
 HYPRE_GMRESGetConvergenceFactorTol( HYPRE_Solver solver,
-                         double           * cf_tol    )
+                         HYPRE_Real       * cf_tol    )
 {
    return( hypre_GMRESGetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
@@ -317,7 +317,7 @@ HYPRE_GMRESGetConverged( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                               HYPRE_Real         *norm   )
 {
    return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

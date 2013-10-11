@@ -27,7 +27,7 @@
  ****************************************************************************/
 
 
-HYPRE_Int hypre_VcycleILUsmoothing(double **x, double **rhs,
+HYPRE_Int hypre_VcycleILUsmoothing(HYPRE_Real **x, HYPRE_Real **rhs,
 
 
 
@@ -37,20 +37,20 @@ HYPRE_Int hypre_VcycleILUsmoothing(double **x, double **rhs,
 			  
 			     HYPRE_Int **i_ILUdof_ILUdof, 
 			     HYPRE_Int **j_ILUdof_ILUdof,
-			     double **LD_data,
+			     HYPRE_Real **LD_data,
 
 			     HYPRE_Int **i_ILUdof_ILUdof_t, 
 			     HYPRE_Int **j_ILUdof_ILUdof_t,
-			     double **U_data,
+			     HYPRE_Real **U_data,
 
 			     
 			     hypre_CSRMatrix **P,
 
 
-			     double *v, double *w, 
-			     double *v_coarse,
-			     double *w_coarse,
-			     double *d_coarse, 
+			     HYPRE_Real *v, HYPRE_Real *w, 
+			     HYPRE_Real *v_coarse,
+			     HYPRE_Real *w_coarse,
+			     HYPRE_Real *d_coarse, 
 
 			     HYPRE_Int nu, 
 			     HYPRE_Int level, HYPRE_Int coarse_level, 
@@ -65,28 +65,28 @@ HYPRE_Int hypre_VcycleILUsmoothing(double **x, double **rhs,
   HYPRE_Int max_CG_iter=999; 
   HYPRE_Int num_coarsedofs;
 
-  double eps = 1.e-12;
-  double res_norm=0.e0;
-  double rhs_norm;
+  HYPRE_Real eps = 1.e-12;
+  HYPRE_Real res_norm=0.e0;
+  HYPRE_Real rhs_norm;
 
-  double *aux_v, *aux_w, *aux_d;
+  HYPRE_Real *aux_v, *aux_w, *aux_d;
 
-  double **sparse_matrix;
+  HYPRE_Real **sparse_matrix;
   HYPRE_Int **i_dof_dof;
   HYPRE_Int **j_dof_dof;
 
-  double **Prolong_coeff;
+  HYPRE_Real **Prolong_coeff;
   HYPRE_Int **i_dof_neighbor_coarsedof;
   HYPRE_Int **j_dof_neighbor_coarsedof;
 
 
 
-  sparse_matrix = hypre_CTAlloc(double* , coarse_level+1);
+  sparse_matrix = hypre_CTAlloc(HYPRE_Real* , coarse_level+1);
   i_dof_dof =  hypre_CTAlloc(HYPRE_Int* , coarse_level+1);
   j_dof_dof =  hypre_CTAlloc(HYPRE_Int* , coarse_level+1);
 
 
-  Prolong_coeff = hypre_CTAlloc(double* , coarse_level);
+  Prolong_coeff = hypre_CTAlloc(HYPRE_Real* , coarse_level);
   i_dof_neighbor_coarsedof =  hypre_CTAlloc(HYPRE_Int* , coarse_level);
   j_dof_neighbor_coarsedof =  hypre_CTAlloc(HYPRE_Int* , coarse_level);
 
@@ -106,9 +106,9 @@ HYPRE_Int hypre_VcycleILUsmoothing(double **x, double **rhs,
 
 
   /*
-  aux_v = (double *) malloc(num_dofs[0] * sizeof(double));
-  aux_w = (double *) malloc(num_dofs[0] * sizeof(double));
-  aux_d = (double *) malloc(num_dofs[0] * sizeof(double));
+  aux_v = (HYPRE_Real *) malloc(num_dofs[0] * sizeof(HYPRE_Real));
+  aux_w = (HYPRE_Real *) malloc(num_dofs[0] * sizeof(HYPRE_Real));
+  aux_d = (HYPRE_Real *) malloc(num_dofs[0] * sizeof(HYPRE_Real));
 
 
   for (i=0; i <num_dofs[0]; i++)
@@ -338,12 +338,12 @@ loop_10:
 
 }
 
-HYPRE_Int coarse_to_fine_interpolation(double *v,
-				 double *Prolong_coeff,
+HYPRE_Int coarse_to_fine_interpolation(HYPRE_Real *v,
+				 HYPRE_Real *Prolong_coeff,
 				 HYPRE_Int *i_dof_neighbor_coarsedof,
 				 HYPRE_Int *j_dof_neighbor_coarsedof,
 
-				 double *w_coarse,
+				 HYPRE_Real *w_coarse,
 				 HYPRE_Int num_dofs, HYPRE_Int num_coarsedofs)
 {
   HYPRE_Int ierr=0, i,j;
@@ -361,12 +361,12 @@ HYPRE_Int coarse_to_fine_interpolation(double *v,
 
 }
 
-HYPRE_Int fine_to_coarse_restriction(double *v_coarse,
-			       double *Prolong_coeff,
+HYPRE_Int fine_to_coarse_restriction(HYPRE_Real *v_coarse,
+			       HYPRE_Real *Prolong_coeff,
 			       HYPRE_Int *i_dof_neighbor_coarsedof,
 			       HYPRE_Int *j_dof_neighbor_coarsedof,
 
-			       double *w,
+			       HYPRE_Real *w,
 			       HYPRE_Int num_dofs, HYPRE_Int num_coarsedofs)
 {
   HYPRE_Int ierr=0, i,j;
@@ -384,11 +384,11 @@ HYPRE_Int fine_to_coarse_restriction(double *v_coarse,
 
 }
 
-HYPRE_Int cg_iter_coarse(double *x, double *rhs,
-		   double *sparse_matrix, 
+HYPRE_Int cg_iter_coarse(HYPRE_Real *x, HYPRE_Real *rhs,
+		   HYPRE_Real *sparse_matrix, 
 
 		   HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
-		   double *v, double *w, double *d, HYPRE_Int max_iter, 
+		   HYPRE_Real *v, HYPRE_Real *w, HYPRE_Real *d, HYPRE_Int max_iter, 
 		   HYPRE_Int num_dofs)
 
 {
@@ -517,14 +517,14 @@ loop:
   return ierr;
 
 }
-HYPRE_Int GS_forw(double *x, double *rhs,
-	    double *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+HYPRE_Int GS_forw(HYPRE_Real *x, HYPRE_Real *rhs,
+	    HYPRE_Real *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 	    HYPRE_Int num_dofs)
 
 {
   HYPRE_Int ierr = 0, i,j;
-  double aux;
-  double diag;
+  HYPRE_Real aux;
+  HYPRE_Real diag;
 
   for (i=0; i < num_dofs; i++)
     {
@@ -542,13 +542,13 @@ HYPRE_Int GS_forw(double *x, double *rhs,
 
 }     
 
-HYPRE_Int GS_back(double *x, double *rhs,
-	    double *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+HYPRE_Int GS_back(HYPRE_Real *x, HYPRE_Real *rhs,
+	    HYPRE_Real *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 	    HYPRE_Int num_dofs)
 
 {
   HYPRE_Int ierr = 0,i,j;
-  double aux, diag;
+  HYPRE_Real aux, diag;
 
   for (i=num_dofs-1; i >= 0; i--)
     {

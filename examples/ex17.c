@@ -9,7 +9,7 @@
 
    To see options: ex17 -help
 
-   Description:    This code solves an "NDIM-D Lapalacian" using CG.
+   Description:    This code solves an "NDIM-D Laplacian" using CG.
 */
 
 #include <math.h>
@@ -48,8 +48,6 @@ int main (int argc, char *argv[])
    /* Set defaults */
    n = 10;
    solver_id = 0;
-
-   nvol = pow(n, NDIM);
 
    /* Parse command line */
    {
@@ -97,6 +95,8 @@ int main (int argc, char *argv[])
          return (0);
       }
    }
+
+   nvol = pow(n, NDIM);
 
    /* Figure out the processor grid (N x N x N x N).  The local problem size for
       the interior nodes is indicated by n (n x n x n x n).  p indicates the

@@ -36,17 +36,17 @@ char *argv[];
 
    hypre_longint ft;
 
-   double  *S_data;
+   HYPRE_Real  *S_data;
    HYPRE_Int     *S_ia;
    HYPRE_Int     *S_ja;
-   double  *A_data;
+   HYPRE_Real  *A_data;
    HYPRE_Int     *A_ia;
    HYPRE_Int     *A_ja;
    hypre_Matrix  *A;
 
-   double  *x;
-   double  *y;
-   double  *z;
+   HYPRE_Real  *x;
+   HYPRE_Real  *y;
+   HYPRE_Real  *z;
 
    HYPRE_Int     *iarray;
    
@@ -107,7 +107,7 @@ char *argv[];
    }
 
    /* read in symmetric S_data (put diagonal at beginning of row) */
-   S_data = hypre_TAlloc(double, S_ia[n]);
+   S_data = hypre_TAlloc(HYPRE_Real, S_ia[n]);
    for (i = 0; i < n; i++)
    {
       for (j = (S_ia[i]+1); j < S_ia[i+1]; j++)
@@ -116,9 +116,9 @@ char *argv[];
    }
 
    /* read in x, y, z coordinates */
-   x = hypre_TAlloc(double, n);
-   y = hypre_TAlloc(double, n);
-   z = hypre_TAlloc(double, n);
+   x = hypre_TAlloc(HYPRE_Real, n);
+   y = hypre_TAlloc(HYPRE_Real, n);
+   z = hypre_TAlloc(HYPRE_Real, n);
    for (i = 0; i < n; i++)
       hypre_fscanf(fp, "%*d%le%le%le", &x[i], &y[i], &z[i]);
 
@@ -171,7 +171,7 @@ char *argv[];
 
    /* copy S_ja and S_data into A_ja and A_data */
    A_ja = hypre_TAlloc(HYPRE_Int, A_ia[n]);
-   A_data = hypre_TAlloc(double, A_ia[n]);
+   A_data = hypre_TAlloc(HYPRE_Real, A_ia[n]);
    for (i = 0; i < n; i++)
    {
       m = S_ia[i+1] - S_ia[i];

@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * HYPRE_IJVector interface
@@ -27,10 +24,11 @@
  * HYPRE_IJVectorCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_IJVectorCreate( MPI_Comm comm,
-                          HYPRE_Int jlower,
-                          HYPRE_Int jupper,
-                          HYPRE_IJVector *vector )
+HYPRE_Int
+HYPRE_IJVectorCreate( MPI_Comm        comm,
+                      HYPRE_Int       jlower,
+                      HYPRE_Int       jupper,
+                      HYPRE_IJVector *vector )
 {
    hypre_IJVector *vec;
    HYPRE_Int num_procs, my_id, *partitioning;
@@ -38,16 +36,15 @@ HYPRE_Int HYPRE_IJVectorCreate( MPI_Comm comm,
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_Int  row0, rowN;
 #else
-  HYPRE_Int *recv_buf;
-  HYPRE_Int *info;
-  HYPRE_Int i, i2;
+   HYPRE_Int *recv_buf;
+   HYPRE_Int *info;
+   HYPRE_Int i, i2;
 #endif
 
    vec = hypre_CTAlloc(hypre_IJVector, 1);
    
    if (!vec)
    {  
-      /*hypre_printf("Out of memory -- HYPRE_IJVectorCreate\n");*/
       hypre_error(HYPRE_ERROR_MEMORY);
       return hypre_error_flag;
    }
@@ -132,11 +129,8 @@ HYPRE_Int HYPRE_IJVectorCreate( MPI_Comm comm,
 
    hypre_IJVectorGlobalFirstRow(vec) = partitioning[0];
    hypre_IJVectorGlobalNumRows(vec)= partitioning[num_procs]-partitioning[0];
-   
-
 
 #endif
-
 
    hypre_IJVectorComm(vec)         = comm;
    hypre_IJVectorPartitioning(vec) = partitioning;
@@ -161,23 +155,12 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 
    if (!vec)
    {
-     /*hypre_printf("Vector variable is NULL -- HYPRE_IJVectorDestroy\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    if (hypre_IJVectorPartitioning(vec))
       hypre_TFree(hypre_IJVectorPartitioning(vec));
-
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      ierr = hypre_IJVectorDestroyPETSc(vec) ;
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-
-      ierr = hypre_IJVectorDestroyISIS(vec) ;
-
-   else */
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -185,12 +168,11 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
       if (hypre_IJVectorTranslator(vec))
       {
          hypre_AuxParVectorDestroy((hypre_AuxParVector *)
-		(hypre_IJVectorTranslator(vec)));
+                                   (hypre_IJVectorTranslator(vec)));
       }
    }
    else if ( hypre_IJVectorObjectType(vec) != -1 )
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorDestroy\n");*/
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -211,20 +193,9 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
 
    if (!vec)
    {
-     /*hypre_printf("Vector variable is NULL -- HYPRE_IJVectorInitialize\n"); */
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
-
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      return( hypre_IJVectorInitializePETSc(vec) );
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-
-      return( hypre_IJVectorInitializeISIS(vec) );
-
-   else */
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -232,11 +203,9 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
 	 hypre_IJVectorCreatePar(vec, hypre_IJVectorPartitioning(vec));
 
       hypre_IJVectorInitializePar(vec);
-
    }
    else
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorInitialize\n");*/
       hypre_error_in_arg(1);
    }
 
@@ -248,13 +217,13 @@ HYPRE_IJVectorInitialize( HYPRE_IJVector vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector, HYPRE_Int print_level)
+HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector,
+                             HYPRE_Int print_level )
 {
    hypre_IJVector *ijvector = (hypre_IJVector *) vector;
 
    if (!ijvector)
    {
-      /*hypre_printf("Variable ijvector is NULL -- HYPRE_IJVectorSetPrintLevel\n");*/
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -269,10 +238,10 @@ HYPRE_IJVectorSetPrintLevel( HYPRE_IJVector vector, HYPRE_Int print_level)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_IJVectorSetValues( HYPRE_IJVector  vector,
+HYPRE_IJVectorSetValues( HYPRE_IJVector        vector,
                          HYPRE_Int             nvalues,
                          const HYPRE_Int      *indices,
-                         const double   *values   )
+                         const HYPRE_Complex  *values   )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -280,40 +249,28 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector  vector,
 
    if (!vec)
    {
-     /*hypre_printf("Vector is NULL -- HYPRE_IJVectorSetValues\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    if (nvalues < 0)
    {
-     hypre_error_in_arg(2);
-     return hypre_error_flag;
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
    } 
 
    if (!values)
    {
-     hypre_error_in_arg(4);
-     return hypre_error_flag;
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
    } 
 
-   /*  if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      return( hypre_IJVectorSetValuesPETSc(vec, nvalues, indices, values) );
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-
-      return( hypre_IJVectorSetValuesISIS(vec, nvalues, indices, values) );
-
-   else */
-
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   {
       return( hypre_IJVectorSetValuesPar(vec, nvalues, indices, values) );
-
+   }
    else
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorSetValues\n");*/
       hypre_error_in_arg(1);
    }
 
@@ -325,10 +282,10 @@ HYPRE_IJVectorSetValues( HYPRE_IJVector  vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_IJVectorAddToValues( HYPRE_IJVector  vector,
+HYPRE_IJVectorAddToValues( HYPRE_IJVector        vector,
                            HYPRE_Int             nvalues,
                            const HYPRE_Int      *indices,
-                           const double   *values      )
+                           const HYPRE_Complex  *values )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -336,38 +293,28 @@ HYPRE_IJVectorAddToValues( HYPRE_IJVector  vector,
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorAddToValues\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    if (nvalues < 0)
    {
-     hypre_error_in_arg(2);
-     return hypre_error_flag;
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
    } 
 
    if (!values)
    {
-     hypre_error_in_arg(4);
-     return hypre_error_flag;
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
    } 
 
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      return( hypre_IJVectorAddToValuesPETSc(vec, nvalues, indices, values) );
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-
-      return( hypre_IJVectorAddToValuesISIS(vec, nvalues, indices, values) );
-
-   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
       return( hypre_IJVectorAddToValuesPar(vec, nvalues, indices, values) );
-
+   }
    else
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorAddToValues\n");*/
       hypre_error_in_arg(1);
    }
 
@@ -385,26 +332,16 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorAssemble\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      return( hypre_IJVectorAssemblePETSc(vec) );
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-
-      return( hypre_IJVectorAssembleISIS(vec) );
-
-   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
       return( hypre_IJVectorAssemblePar(vec) );
-
+   }
    else 
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorAssemble\n");*/
       hypre_error_in_arg(1);
    }
 
@@ -416,10 +353,10 @@ HYPRE_IJVectorAssemble( HYPRE_IJVector  vector )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
-                         HYPRE_Int             nvalues,
-                         const HYPRE_Int      *indices,
-                         double         *values   )
+HYPRE_IJVectorGetValues( HYPRE_IJVector   vector,
+                         HYPRE_Int        nvalues,
+                         const HYPRE_Int *indices,
+                         HYPRE_Complex   *values )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
@@ -427,44 +364,34 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorGetValues\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    if (nvalues < 0)
    {
-     hypre_error_in_arg(2);
-     return hypre_error_flag;
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
    } 
 
    if (!indices)
    {
-     hypre_error_in_arg(3);
-     return hypre_error_flag;
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
    } 
 
    if (!values)
    {
-     hypre_error_in_arg(4);
-     return hypre_error_flag;
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
    } 
 
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      return( hypre_GetIJVectorPETScLocalComponents(vec, nvalues, indices, values) );
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-
-      return( hypre_IJVectorGetValuesISIS(vec, nvalues, indices, values) );
-
-   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
       return( hypre_IJVectorGetValuesPar(vec, nvalues, indices, values) );
-
+   }
    else
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorGetValues\n");*/
       hypre_error_in_arg(1);
    }
 
@@ -477,33 +404,22 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
 
 HYPRE_Int 
 HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector, 
-				  HYPRE_Int max_off_proc_elmts)
+				  HYPRE_Int      max_off_proc_elmts )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorSetObjectType\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-
-      return( hypre_IJVectorSetMaxOffProcElmtsPETSc(vec, 
-		max_off_proc_elmts));
-
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-      return( hypre_IJVectorSetMaxOffProcElmtsISIS(vec, 
-		max_off_proc_elmts));
-
-   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-      return( hypre_IJVectorSetMaxOffProcElmtsPar(vec, 
-		max_off_proc_elmts));
-
+   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+   {
+      return( hypre_IJVectorSetMaxOffProcElmtsPar(vec, max_off_proc_elmts));
+   }
    else
    {
-      /*hypre_printf("Unrecognized object type -- HYPRE_IJVectorGetValues\n");*/
       hypre_error_in_arg(1);
    }
 
@@ -515,15 +431,15 @@ HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector, HYPRE_Int type )
+HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector,
+                             HYPRE_Int      type )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorSetObjectType\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    hypre_IJVectorObjectType(vec) = type;
@@ -536,15 +452,15 @@ HYPRE_IJVectorSetObjectType( HYPRE_IJVector vector, HYPRE_Int type )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector, HYPRE_Int *type )
+HYPRE_IJVectorGetObjectType( HYPRE_IJVector  vector,
+                             HYPRE_Int      *type )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorGetObjectType\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    *type = hypre_IJVectorObjectType(vec);
@@ -557,7 +473,9 @@ HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector, HYPRE_Int *type )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector, HYPRE_Int *jlower, HYPRE_Int *jupper )
+HYPRE_IJVectorGetLocalRange( HYPRE_IJVector  vector,
+                             HYPRE_Int      *jlower,
+                             HYPRE_Int      *jupper )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
    MPI_Comm comm;
@@ -566,9 +484,8 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector, HYPRE_Int *jlower, HYPRE_Int
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorGetObjectType\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    comm = hypre_IJVectorComm(vec);
@@ -590,15 +507,15 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector, HYPRE_Int *jlower, HYPRE_Int
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_IJVectorGetObject( HYPRE_IJVector vector, void **object )
+HYPRE_IJVectorGetObject( HYPRE_IJVector   vector,
+                         void           **object )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (!vec)
    {
-     /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorGetObject\n");*/
-     hypre_error_in_arg(1);
-     return hypre_error_flag;
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
    } 
 
    *object = hypre_IJVectorObject(vec);
@@ -613,12 +530,12 @@ HYPRE_IJVectorGetObject( HYPRE_IJVector vector, void **object )
 HYPRE_Int
 HYPRE_IJVectorRead( const char     *filename,
                     MPI_Comm        comm,
-                    HYPRE_Int             type,
+                    HYPRE_Int       type,
                     HYPRE_IJVector *vector_ptr )
 {
    HYPRE_IJVector  vector;
    HYPRE_Int       jlower, jupper, j;
-   double          value;
+   HYPRE_Complex   value;
    HYPRE_Int       myid, ret;
    char            new_filename[255];
    FILE           *file;
@@ -629,7 +546,6 @@ HYPRE_IJVectorRead( const char     *filename,
 
    if ((file = fopen(new_filename, "r")) == NULL)
    {
-      /*hypre_printf("Error: can't open input file %s\n", new_filename);*/
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -674,17 +590,16 @@ HYPRE_Int
 HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
                      const char     *filename )
 {
-   MPI_Comm  comm;
+   MPI_Comm        comm;
    HYPRE_Int      *partitioning;
    HYPRE_Int       jlower, jupper, j;
-   double    value;
+   HYPRE_Complex   value;
    HYPRE_Int       myid;
-   char      new_filename[255];
-   FILE     *file;
+   char            new_filename[255];
+   FILE           *file;
 
    if (!vector)
    {
-      /*hypre_printf("Variable vec is NULL -- HYPRE_IJVectorPrint\n");*/
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -696,7 +611,6 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
 
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      /*hypre_printf("Error: can't open output file %s\n", new_filename);*/
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }

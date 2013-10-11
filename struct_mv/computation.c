@@ -341,7 +341,7 @@ hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
 
 HYPRE_Int
 hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
-                                  double            *data,
+                                  HYPRE_Complex     *data,
                                   hypre_CommHandle **comm_handle_ptr )
 {
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);

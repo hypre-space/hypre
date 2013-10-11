@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * SStruct inner product routine
@@ -28,11 +25,11 @@
 HYPRE_Int
 hypre_SStructPInnerProd( hypre_SStructPVector *px,
                          hypre_SStructPVector *py,
-                         double               *presult_ptr )
+                         HYPRE_Real           *presult_ptr )
 {
    HYPRE_Int    nvars = hypre_SStructPVectorNVars(px);
-   double presult;
-   double sresult;
+   HYPRE_Real   presult;
+   HYPRE_Real   sresult;
    HYPRE_Int    var;
 
    presult = 0.0;
@@ -55,11 +52,11 @@ hypre_SStructPInnerProd( hypre_SStructPVector *px,
 HYPRE_Int
 hypre_SStructInnerProd( hypre_SStructVector *x,
                         hypre_SStructVector *y,
-                        double              *result_ptr )
+                        HYPRE_Real          *result_ptr )
 {
    HYPRE_Int    nparts = hypre_SStructVectorNParts(x);
-   double result;
-   double presult;
+   HYPRE_Real   result;
+   HYPRE_Real   presult;
    HYPRE_Int    part;
 
    HYPRE_Int    x_object_type= hypre_SStructVectorObjectType(x);

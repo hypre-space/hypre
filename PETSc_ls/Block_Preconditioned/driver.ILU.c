@@ -32,9 +32,9 @@ HYPRE_Int main(HYPRE_Int argc,char **args)
   char        file_name[255];
   HYPRE_Int         ierr, n;
   HYPRE_Int         myid;
-  double      minus_1 = -1.0, zero = 0.0;
-  double      norm_A, scaled_resid, norm_resid, norm_soln, eps;
-  double      dlamch_( char *arg1, HYPRE_Int arg2);
+  HYPRE_Real  minus_1 = -1.0, zero = 0.0;
+  HYPRE_Real  norm_A, scaled_resid, norm_resid, norm_soln, eps;
+  HYPRE_Real  dlamch_( char *arg1, HYPRE_Int arg2);
 
 
 

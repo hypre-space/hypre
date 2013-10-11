@@ -74,7 +74,7 @@ HYPRE_BiCGSTABSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
-                         double             tol    )
+                         HYPRE_Real         tol    )
 {
    return( hypre_BiCGSTABSetTol( (void *) solver, tol ) );
 }
@@ -84,7 +84,7 @@ HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
-                         double             a_tol    )
+                         HYPRE_Real         a_tol    )
 {
    return( hypre_BiCGSTABSetAbsoluteTol( (void *) solver, a_tol ) );
 }
@@ -94,7 +94,7 @@ HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver,
-                         double             cf_tol    )
+                         HYPRE_Real         cf_tol    )
 {
    return( hypre_BiCGSTABSetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
@@ -198,7 +198,7 @@ HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                               HYPRE_Real         *norm   )
 {
    return( hypre_BiCGSTABGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

@@ -33,7 +33,7 @@ hypre_Matrix  *matrix;
 {
    FILE    *fp;
 
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int     *ia;
    HYPRE_Int     *ja;
    HYPRE_Int      size;
@@ -78,7 +78,7 @@ hypre_Vector  *vector;
 {
    FILE    *fp;
 
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int      size;
    
    HYPRE_Int      j;

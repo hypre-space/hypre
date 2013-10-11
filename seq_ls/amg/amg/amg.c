@@ -36,9 +36,9 @@ void  *port_data;
    /* setup params */
    HYPRE_Int      levmax;
    HYPRE_Int      ncg;
-   double   ecg;
+   HYPRE_Real   ecg;
    HYPRE_Int      nwt;
-   double   ewt;
+   HYPRE_Real   ewt;
    HYPRE_Int      nstr;
 
    /* solve params */

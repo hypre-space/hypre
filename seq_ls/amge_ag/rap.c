@@ -40,7 +40,7 @@ HYPRE_Int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
 
   HYPRE_Int *i_dof_dof[2], *j_dof_dof[2];
 
-  double *b, *c_dof_dof, *c_t_dof_dof, *sparse_matrix[2];
+  HYPRE_Real *b, *c_dof_dof, *c_t_dof_dof, *sparse_matrix[2];
 
   HYPRE_Int Ndofs[2];
 
@@ -90,14 +90,14 @@ HYPRE_Int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
 
 			       Ndofs[1], Ndofs[0], Ndofs[1]);	
 
-  sparse_matrix[1] = hypre_CTAlloc(double, i_dof_dof[1][Ndofs[1]]);
+  sparse_matrix[1] = hypre_CTAlloc(HYPRE_Real, i_dof_dof[1][Ndofs[1]]);
 
 
   free(i_dof_dof_b);
   free(j_dof_dof_b);
 
 
-  b = hypre_CTAlloc(double, Ndofs[1]);
+  b = hypre_CTAlloc(HYPRE_Real, Ndofs[1]);
 
   for (i=0; i < Ndofs[1]; i++)
     b[i] = 0.e0;
@@ -152,11 +152,11 @@ HYPRE_Int hypre_AMGeRAP(hypre_CSRMatrix **A_crs_pointer,
 HYPRE_Int 
 transpose_matrix_create_with_data(  HYPRE_Int **i_face_element_pointer,
 				    HYPRE_Int **j_face_element_pointer,
-				    double **data_face_element_pointer,
+				    HYPRE_Real **data_face_element_pointer,
 
 				    HYPRE_Int *i_element_face, 
 				    HYPRE_Int *j_element_face,
-				    double *data_element_face,
+				    HYPRE_Real *data_element_face,
 
 				    HYPRE_Int num_elements, 
 				    HYPRE_Int num_faces)
@@ -166,7 +166,7 @@ transpose_matrix_create_with_data(  HYPRE_Int **i_face_element_pointer,
   HYPRE_Int ierr =0, i, j;
 
   HYPRE_Int *i_face_element, *j_face_element;
-  double *data_face_element;
+  HYPRE_Real *data_face_element;
 
   /* ======================================================================
      first create face_element graph: -------------------------------------
@@ -174,8 +174,8 @@ transpose_matrix_create_with_data(  HYPRE_Int **i_face_element_pointer,
 
   i_face_element  = (HYPRE_Int *) malloc((num_faces+1) * sizeof(HYPRE_Int));
   j_face_element  = (HYPRE_Int *) malloc(i_element_face[num_elements] * sizeof(HYPRE_Int));
-  data_face_element= (double *) malloc(i_element_face[num_elements] 
-				      * sizeof(double));
+  data_face_element= (HYPRE_Real *) malloc(i_element_face[num_elements] 
+				      * sizeof(HYPRE_Real));
 
   for (i=0; i < num_faces; i++)
     i_face_element[i] = 0;
@@ -217,15 +217,15 @@ transpose_matrix_create_with_data(  HYPRE_Int **i_face_element_pointer,
 HYPRE_Int 
 matrix_matrix_product_with_data(    HYPRE_Int **i_element_edge_pointer, 
 				    HYPRE_Int **j_element_edge_pointer,
-				    double **data_element_edge_pointer,
+				    HYPRE_Real **data_element_edge_pointer,
 
 				    HYPRE_Int *i_element_face, 
 				    HYPRE_Int *j_element_face,
-				    double *data_element_face,
+				    HYPRE_Real *data_element_face,
 
 				    HYPRE_Int *i_face_edge, 
 				    HYPRE_Int *j_face_edge,
-				    double *data_face_edge,
+				    HYPRE_Real *data_face_edge,
 
 				    HYPRE_Int num_elements, 
 				    HYPRE_Int num_faces, 
@@ -241,7 +241,7 @@ matrix_matrix_product_with_data(    HYPRE_Int **i_element_edge_pointer,
 
   
   HYPRE_Int *i_element_edge, *j_element_edge;
-  double *data_element_edge;
+  HYPRE_Real *data_element_edge;
 
 
   j_local_element_edge = (HYPRE_Int *) malloc((num_edges+1) * sizeof(HYPRE_Int));
@@ -296,8 +296,8 @@ matrix_matrix_product_with_data(    HYPRE_Int **i_element_edge_pointer,
 
   j_element_edge = (HYPRE_Int *) malloc(i_element_edge[num_elements]
 				     * sizeof(HYPRE_Int));
-  data_element_edge = (double *) malloc(i_element_edge[num_elements]
-					* sizeof(double));
+  data_element_edge = (HYPRE_Real *) malloc(i_element_edge[num_elements]
+					* sizeof(HYPRE_Real));
 
   for (i=0; i < i_element_edge[num_elements]; i++)
     data_element_edge[i] = 0.e0;

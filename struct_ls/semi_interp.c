@@ -129,9 +129,9 @@ hypre_SemiInterp( void               *interp_vdata,
    HYPRE_Int               ei;
    HYPRE_Int               constant_coefficient;
                          
-   double                 *Pp0, *Pp1;
-   double                 *xcp;
-   double                 *ep, *ep0, *ep1;
+   HYPRE_Real             *Pp0, *Pp1;
+   HYPRE_Real             *xcp;
+   HYPRE_Real             *ep, *ep0, *ep1;
                        
    hypre_Index             loop_size;
    hypre_Index             start;

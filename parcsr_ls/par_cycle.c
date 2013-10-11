@@ -54,29 +54,29 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_ParCSRBlockMatrix    **P_block_array;
    hypre_ParCSRBlockMatrix    **R_block_array;
 
-   double   *Ztemp_data;
-   double   *Ptemp_data;
+   HYPRE_Real   *Ztemp_data;
+   HYPRE_Real   *Ptemp_data;
    HYPRE_Int     **CF_marker_array;
    /* HYPRE_Int     **unknown_map_array;
    HYPRE_Int     **point_map_array;
    HYPRE_Int     **v_at_point_array; */
 
-   double    cycle_op_count;   
+   HYPRE_Real    cycle_op_count;   
    HYPRE_Int       cycle_type;
    HYPRE_Int       num_levels;
    HYPRE_Int       max_levels;
 
-   double   *num_coeffs;
+   HYPRE_Real   *num_coeffs;
    HYPRE_Int      *num_grid_sweeps;   
    HYPRE_Int      *grid_relax_type;   
    HYPRE_Int     **grid_relax_points;  
 
    HYPRE_Int     block_mode;
    
-   double  *max_eig_est;
-   double  *min_eig_est;
+   HYPRE_Real  *max_eig_est;
+   HYPRE_Real  *min_eig_est;
    HYPRE_Int      cheby_order;
-   double   cheby_fraction;
+   HYPRE_Real   cheby_fraction;
 
  /* Local variables  */ 
    HYPRE_Int      *lev_counter;
@@ -95,25 +95,25 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       relax_order;
    HYPRE_Int       relax_local;
    HYPRE_Int       old_version = 0;
-   double   *relax_weight;
-   double   *omega;
-   double    alfa, beta, gammaold;
-   double    gamma = 1.0;
+   HYPRE_Real   *relax_weight;
+   HYPRE_Real   *omega;
+   HYPRE_Real    alfa, beta, gammaold;
+   HYPRE_Real    gamma = 1.0;
    HYPRE_Int       local_size;
 /*   HYPRE_Int      *smooth_option; */
    HYPRE_Int       smooth_type;
    HYPRE_Int       smooth_num_levels;
    HYPRE_Int       num_threads;
 
-   double    alpha;
-   double  **l1_norms = NULL;
-   double   *l1_norms_level;
+   HYPRE_Real    alpha;
+   HYPRE_Real  **l1_norms = NULL;
+   HYPRE_Real   *l1_norms_level;
 
    HYPRE_Int seq_cg = 0;
 
 #if 0
-   double   *D_mat;
-   double   *S_vec;
+   HYPRE_Real   *D_mat;
+   HYPRE_Real   *S_vec;
 #endif
    
    /* Acquire data and allocate storage */
@@ -165,7 +165,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    if (grid_relax_points) old_version = 1;
 
-   num_coeffs = hypre_CTAlloc(double, num_levels);
+   num_coeffs = hypre_CTAlloc(HYPRE_Real, num_levels);
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
 

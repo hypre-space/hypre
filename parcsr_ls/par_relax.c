@@ -26,8 +26,8 @@
 #ifdef HYPRE_USING_ESSL
 #include <essl.h>
 #else
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, double *b, HYPRE_Int*, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
 #endif
 
 /*--------------------------------------------------------------------------
@@ -39,21 +39,21 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                            HYPRE_Int                *cf_marker,
                            HYPRE_Int                 relax_type,
                            HYPRE_Int                 relax_points,
-                           double              relax_weight,
-                           double              omega,
-                           double             *l1_norms,
+                           HYPRE_Real          relax_weight,
+                           HYPRE_Real          omega,
+                           HYPRE_Real         *l1_norms,
                            hypre_ParVector    *u,
                            hypre_ParVector    *Vtemp,
                            hypre_ParVector    *Ztemp )
 {
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
    HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
-   double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
+   HYPRE_Real     *A_offd_data  = hypre_CSRMatrixData(A_offd);
    HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
@@ -64,27 +64,27 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    HYPRE_Int	      	   first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
-   double         *u_data  = hypre_VectorData(u_local);
+   HYPRE_Real     *u_data  = hypre_VectorData(u_local);
 
    hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
-   double         *f_data  = hypre_VectorData(f_local);
+   HYPRE_Real     *f_data  = hypre_VectorData(f_local);
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-   double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double 	  *Vext_data = NULL;
-   double 	  *v_buf_data;
-   double 	  *tmp_data;
+   HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
+   HYPRE_Real 	  *Vext_data = NULL;
+   HYPRE_Real 	  *v_buf_data;
+   HYPRE_Real 	  *tmp_data;
 
    hypre_Vector   *Ztemp_local;
-   double         *Ztemp_data;
+   HYPRE_Real     *Ztemp_data;
 
    hypre_CSRMatrix *A_CSR;
    HYPRE_Int		   *A_CSR_i;   
    HYPRE_Int		   *A_CSR_j;
-   double	   *A_CSR_data;
+   HYPRE_Real	   *A_CSR_data;
    
    hypre_Vector    *f_vector;
-   double	   *f_vector_data;
+   HYPRE_Real	   *f_vector_data;
 
    HYPRE_Int             i, j, jr;
    HYPRE_Int             ii, jj;
@@ -99,14 +99,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    hypre_MPI_Status     *status;
    hypre_MPI_Request    *requests;
 
-   double         *A_mat;
-   double         *b_vec;
+   HYPRE_Real     *A_mat;
+   HYPRE_Real     *b_vec;
 
-   double          zero = 0.0;
-   double	   res, res0, res2;
-   double          one_minus_weight;
-   double          one_minus_omega;
-   double          prod;
+   HYPRE_Real      zero = 0.0;
+   HYPRE_Real	   res, res0, res2;
+   HYPRE_Real      one_minus_weight;
+   HYPRE_Real      one_minus_omega;
+   HYPRE_Real      prod;
 
    one_minus_weight = 1.0 - relax_weight;
    one_minus_omega = 1.0 - omega;
@@ -139,10 +139,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
         
 	if (num_cols_offd)
 	{
@@ -265,10 +265,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
         
 	if (num_cols_offd)
 	{
@@ -388,10 +388,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
             
-            v_buf_data = hypre_CTAlloc(double, 
+            v_buf_data = hypre_CTAlloc(HYPRE_Real, 
                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
             
-            Vext_data = hypre_CTAlloc(double,num_cols_offd);
+            Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
             
             if (num_cols_offd)
             {
@@ -837,10 +837,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
         
 	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
 	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
@@ -980,10 +980,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
         
 	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
 	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
@@ -1171,10 +1171,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
         
 	if (num_cols_offd)
 	{
@@ -1211,7 +1211,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(double,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1300,7 +1300,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(double,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1400,7 +1400,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(double,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1505,7 +1505,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(double,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1632,10 +1632,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(double, 
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-	Vext_data = hypre_CTAlloc(double,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
         
 	if (num_cols_offd)
 	{
@@ -2364,10 +2364,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         {
         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-        v_buf_data = hypre_CTAlloc(double,
+        v_buf_data = hypre_CTAlloc(HYPRE_Real,
                         hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-        Vext_data = hypre_CTAlloc(double,num_cols_offd);
+        Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
 
         if (num_cols_offd)
         {
@@ -3074,8 +3074,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
    	    f_vector_data = hypre_VectorData(f_vector);
 
-            A_mat = hypre_CTAlloc(double, n_global*n_global);
-            b_vec = hypre_CTAlloc(double, n_global);    
+            A_mat = hypre_CTAlloc(HYPRE_Real, n_global*n_global);
+            b_vec = hypre_CTAlloc(HYPRE_Real, n_global);    
 
             /*---------------------------------------------------------------
              *  Load CSR matrix into A_mat.
@@ -3146,8 +3146,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
    	    f_vector_data = hypre_VectorData(f_vector);
 
-            A_mat = hypre_CTAlloc(double, n_global*n_global);
-            b_vec = hypre_CTAlloc(double, n_global);    
+            A_mat = hypre_CTAlloc(HYPRE_Real, n_global*n_global);
+            b_vec = hypre_CTAlloc(HYPRE_Real, n_global);    
 
             /*---------------------------------------------------------------
              *  Load CSR matrix into A_mat.
@@ -3248,9 +3248,9 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       HYPRE_Int *A_offd_i = hypre_CSRMatrixI(A_offd);
       HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
       HYPRE_Int *A_offd_j = hypre_CSRMatrixJ(A_offd);
-      double *A_diag_data = hypre_CSRMatrixData(A_diag);
-      double *A_offd_data = hypre_CSRMatrixData(A_offd);
-      double *A_mat, *A_mat_local;
+      HYPRE_Real *A_diag_data = hypre_CSRMatrixData(A_diag);
+      HYPRE_Real *A_offd_data = hypre_CSRMatrixData(A_offd);
+      HYPRE_Real *A_mat, *A_mat_local;
       HYPRE_Int *comm_info, *info, *displs;
       HYPRE_Int *mat_info, *mat_displs;
       HYPRE_Int new_num_procs, A_mat_local_size, i, jj, column;
@@ -3271,10 +3271,10 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          mat_displs[i+1] = global_num_rows*displs[i+1];
          mat_info[i] = global_num_rows*info[i];
       }
-      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(double, global_num_rows);
+      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(HYPRE_Real, global_num_rows);
       A_mat_local_size =  global_num_rows*num_rows;
-      A_mat_local = hypre_CTAlloc(double, A_mat_local_size);
-      A_mat = hypre_CTAlloc(double, global_num_rows*global_num_rows);
+      A_mat_local = hypre_CTAlloc(HYPRE_Real, A_mat_local_size);
+      A_mat = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows);
       /* load local matrix into A_mat_local */
       for (i = 0; i < num_rows; i++)
       {
@@ -3295,8 +3295,8 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 		mat_info, mat_displs, hypre_MPI_DOUBLE, new_comm);
       if (relax_type == 99)
       {
-          double *AT_mat;
-	  AT_mat = hypre_CTAlloc(double, global_num_rows*global_num_rows);
+          HYPRE_Real *AT_mat;
+	  AT_mat = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows);
           for (i=0; i < global_num_rows; i++)
 	     for (jj=0; jj < global_num_rows; jj++)
                  AT_mat[i*global_num_rows + jj] = A_mat[i+ jj*global_num_rows];
@@ -3328,11 +3328,11 @@ HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int rela
       MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
       hypre_ParVector *f = hypre_ParAMGDataFArray(amg_data)[level]; 
       hypre_ParVector *u = hypre_ParAMGDataUArray(amg_data)[level]; 
-      double *A_mat = hypre_ParAMGDataAMat(amg_data);
-      double *b_vec = hypre_ParAMGDataBVec(amg_data);
-      double *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f)); 
-      double *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u)); 
-      double *A_tmp;
+      HYPRE_Real *A_mat = hypre_ParAMGDataAMat(amg_data);
+      HYPRE_Real *b_vec = hypre_ParAMGDataBVec(amg_data);
+      HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f)); 
+      HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u)); 
+      HYPRE_Real *A_tmp;
       HYPRE_Int *comm_info = hypre_ParAMGDataCommInfo(amg_data);
       HYPRE_Int *displs, *info;
       HYPRE_Int  n_global = hypre_ParCSRMatrixGlobalNumRows(A);
@@ -3347,7 +3347,7 @@ HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int rela
                           b_vec, info, displs,
                           hypre_MPI_DOUBLE, new_comm );
 
-      A_tmp = hypre_CTAlloc (double, n_global*n_global);
+      A_tmp = hypre_CTAlloc (HYPRE_Real, n_global*n_global);
       for (i=0; i < n_global*n_global; i++)
          A_tmp[i] = A_mat[i];
 
@@ -3395,13 +3395,13 @@ HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int rela
 
 
 HYPRE_Int gselim(A,x,n)
-double *A;
-double *x;
+HYPRE_Real *A;
+HYPRE_Real *x;
 HYPRE_Int n;
 {
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;
-   double factor;
+   HYPRE_Real factor;
    
    if (n==1)                           /* A is 1x1 */  
    {

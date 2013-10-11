@@ -64,7 +64,7 @@ typedef HYPRE_Int (*HYPRE_PtrToParSolverFcn)(HYPRE_Solver,
 #define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                       HYPRE_Int,
-                                      double);
+                                      HYPRE_Real);
 #endif
 
 /*@}*/
@@ -144,7 +144,7 @@ HYPRE_Int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
  * The default is 1.e-7.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetTol(HYPRE_Solver solver,
-                          double       tol);
+                          HYPRE_Real   tol);
 
 /**
  * (Optional) Sets maximum number of iterations, if BoomerAMG is used
@@ -196,7 +196,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
  * a large strength threshold, such as 0.9, is often better.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
-                                      double       strong_threshold);
+                                      HYPRE_Real   strong_threshold);
 
 /**
  * (Optional) Sets a parameter to modify the definition of strength for
@@ -205,7 +205,7 @@ HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
  * performed.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
-                                double        max_row_sum);
+                                HYPRE_Real    max_row_sum);
 
 /**
  * (Optional) Defines which parallel coarsening algorithm is used.
@@ -374,7 +374,7 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
  * Use HYPRE\_BoomerAMGSetRelaxWt or HYPRE\_BoomerAMGSetLevelRelaxWt instead.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
-                                  double       *relax_weight); 
+                                  HYPRE_Real   *relax_weight); 
 /**
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR 
  * on all levels. 
@@ -393,7 +393,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
  * The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRelaxWt(HYPRE_Solver  solver,
-                              double        relax_weight);
+                              HYPRE_Real    relax_weight);
 
 /**
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
@@ -403,7 +403,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxWt(HYPRE_Solver  solver,
  * The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetLevelRelaxWt(HYPRE_Solver  solver,
-                                   double        relax_weight,
+                                   HYPRE_Real    relax_weight,
                                    HYPRE_Int           level);
 
 /**
@@ -412,7 +412,7 @@ HYPRE_Int HYPRE_BoomerAMGSetLevelRelaxWt(HYPRE_Solver  solver,
  * Use HYPRE\_BoomerAMGSetOuterWt or HYPRE\_BoomerAMGSetLevelOuterWt instead.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetOmega(HYPRE_Solver  solver,
-                            double       *omega);
+                            HYPRE_Real   *omega);
 
 /**
  * (Optional) Defines the outer relaxation weight for hybrid SOR and SSOR
@@ -430,7 +430,7 @@ HYPRE_Int HYPRE_BoomerAMGSetOmega(HYPRE_Solver  solver,
  * The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetOuterWt(HYPRE_Solver  solver,
-                              double        omega);
+                              HYPRE_Real    omega);
 
 /**
  * (Optional) Defines the outer relaxation weight for hybrid SOR or SSOR
@@ -440,7 +440,7 @@ HYPRE_Int HYPRE_BoomerAMGSetOuterWt(HYPRE_Solver  solver,
  * The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetLevelOuterWt(HYPRE_Solver  solver,
-                                   double        omega,
+                                   HYPRE_Real    omega,
                                    HYPRE_Int           level);
 
 
@@ -456,7 +456,7 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
  *  The default is .3 (i.e., damp on upper 30% of the spectrum).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
-                                     double         ratio);
+                                     HYPRE_Real     ratio);
 
 
 
@@ -483,7 +483,7 @@ HYPRE_Int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
  * Returns the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                double       *rel_resid_norm);
+                                                HYPRE_Real   *rel_resid_norm);
 
 /*
  * (Optional)
@@ -496,7 +496,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
-                                  double       trunc_factor);
+                                  HYPRE_Real   trunc_factor);
 
 /**
  * (Optional) Defines the maximal number of elements per row for the interpolation.
@@ -515,7 +515,7 @@ HYPRE_Int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
  * The default is 1.0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
-                                     double       S_commpkg_switch);
+                                     HYPRE_Real   S_commpkg_switch);
 
 /**
  * (Optional) Defines which parallel interpolation operator is used.
@@ -568,7 +568,7 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
                                       HYPRE_Int    **grid_relax_type_ptr,
                                       HYPRE_Int   ***grid_relax_points_ptr,
                                       HYPRE_Int      coarsen_type,
-                                      double **relax_weights_ptr,
+                                      HYPRE_Real **relax_weights_ptr,
                                       HYPRE_Int      max_levels);
 
 /**
@@ -699,7 +699,7 @@ HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor(HYPRE_Solver solver,
-                                     double       agg_trunc_factor);
+                                     HYPRE_Real   agg_trunc_factor);
 
 /**
  * (Optional) Defines the truncation factor for the 
@@ -707,7 +707,7 @@ HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor(HYPRE_Solver solver,
  * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor(HYPRE_Solver solver,
-                                        double       agg_P12_trunc_factor);
+                                        HYPRE_Real   agg_P12_trunc_factor);
 
 /**
  * (Optional) Defines the maximal number of elements per row for the 
@@ -784,7 +784,7 @@ HYPRE_Int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
  * (Optional) Defines a smoothing parameter for the additive Schwarz method.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
-                                       double       schwarz_rlx_weight);
+                                       HYPRE_Real   schwarz_rlx_weight);
 
 /**
  *  (Optional) Indicates that the aggregates may not be SPD for the Schwarz method.
@@ -818,21 +818,21 @@ HYPRE_Int HYPRE_BoomerAMGSetLevel(HYPRE_Solver solver,
  * For further explanation see description of ParaSAILS.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetThreshold(HYPRE_Solver solver,
-                                double       threshold);
+                                HYPRE_Real   threshold);
 
 /**
  * (Optional) Defines filter for ParaSAILS.
  * For further explanation see description of ParaSAILS.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetFilter(HYPRE_Solver solver,
-                             double       filter);
+                             HYPRE_Real   filter);
 
 /**
  * (Optional) Defines drop tolerance for PILUT.
  * For further explanation see description of PILUT.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetDropTol(HYPRE_Solver solver,
-                              double       drop_tol);
+                              HYPRE_Real   drop_tol);
 
 /**
  * (Optional) Defines maximal number of nonzeros for PILUT.
@@ -860,7 +860,7 @@ HYPRE_Int HYPRE_BoomerAMGSetEuLevel(HYPRE_Solver solver,
  * For further explanation see description of Euclid.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetEuSparseA(HYPRE_Solver solver,
-                                double       eu_sparse_A);
+                                HYPRE_Real   eu_sparse_A);
 
 /**
  * (Optional) Defines use of block jacobi ILUT for Euclid.
@@ -980,7 +980,7 @@ HYPRE_Int HYPRE_ParaSailsSolve(HYPRE_Solver       solver,
  *                     The default value is 1.
  **/
 HYPRE_Int HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
-                             double       thresh,
+                             HYPRE_Real   thresh,
                              HYPRE_Int          nlevels);
 /**
  * Set the filter parameter for the 
@@ -994,7 +994,7 @@ HYPRE_Int HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
  *                    The default value is 0.1.
  **/
 HYPRE_Int HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
-                             double       filter);
+                             HYPRE_Real   filter);
 
 /**
  * Set the symmetry parameter for the
@@ -1030,7 +1030,7 @@ HYPRE_Int HYPRE_ParaSailsSetSym(HYPRE_Solver solver,
  *                     parameter is not set is 0.
  **/
 HYPRE_Int HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver,
-                              double       loadbal);
+                              HYPRE_Real   loadbal);
 
 /**
  * Set the pattern reuse parameter for the
@@ -1092,17 +1092,17 @@ HYPRE_Int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver       solver,
                                HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
-                                   double       thresh,
+                                   HYPRE_Real   thresh,
                                    HYPRE_Int          nlevels);
 
 HYPRE_Int HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
-                                   double       filter);
+                                   HYPRE_Real   filter);
 
 HYPRE_Int HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
                                 HYPRE_Int          sym);
 
 HYPRE_Int HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
-                                    double       loadbal);
+                                    HYPRE_Real   loadbal);
 
 HYPRE_Int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
                                   HYPRE_Int          reuse);
@@ -1243,7 +1243,7 @@ HYPRE_Int HYPRE_EuclidSetMem(HYPRE_Solver solver,
  * Note that this can destroy symmetry in a matrix.
  **/
 HYPRE_Int HYPRE_EuclidSetSparseA(HYPRE_Solver solver,
-                           double       sparse_A);
+                           HYPRE_Real   sparse_A);
 
 /**
  * If row\_scale not equal 0, values are scaled prior to factorization
@@ -1258,7 +1258,7 @@ HYPRE_Int HYPRE_EuclidSetRowScale(HYPRE_Solver solver,
  * absolute value of any entry in the row being factored.
  **/
 HYPRE_Int HYPRE_EuclidSetILUT(HYPRE_Solver solver,
-                        double       drop_tol);
+                        HYPRE_Real   drop_tol);
 
 /*@}*/
 
@@ -1306,7 +1306,7 @@ HYPRE_Int HYPRE_ParCSRPilutSetMaxIter(HYPRE_Solver solver,
  * (Optional)
  **/
 HYPRE_Int HYPRE_ParCSRPilutSetDropTolerance(HYPRE_Solver solver,
-                                      double       tol);
+                                      HYPRE_Real   tol);
 
 /**
  * (Optional)
@@ -1494,7 +1494,7 @@ HYPRE_Int HYPRE_AMSSetMaxIter(HYPRE_Solver solver,
  * to $0.0$. The default is $10^{-6}$.
  **/
 HYPRE_Int HYPRE_AMSSetTol(HYPRE_Solver solver,
-                          double       tol);
+                          HYPRE_Real   tol);
 
 /**
  * (Optional) Choose which three-level solver to use. Possible values are:
@@ -1547,8 +1547,8 @@ HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
 HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
                                        HYPRE_Int    relax_type,
                                        HYPRE_Int    relax_times,
-                                       double       relax_weight,
-                                       double       omega);
+                                       HYPRE_Real   relax_weight,
+                                       HYPRE_Real   omega);
 
 /**
  * (Optional) Sets AMG parameters for $B_\Pi$.
@@ -1558,7 +1558,7 @@ HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                       HYPRE_Int    alpha_coarsen_type,
                                       HYPRE_Int    alpha_agg_levels,
                                       HYPRE_Int    alpha_relax_type,
-                                      double       alpha_strength_threshold,
+                                      HYPRE_Real   alpha_strength_threshold,
                                       HYPRE_Int    alpha_interp_type,
                                       HYPRE_Int    alpha_Pmax);
 
@@ -1577,7 +1577,7 @@ HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      HYPRE_Int    beta_coarsen_type,
                                      HYPRE_Int    beta_agg_levels,
                                      HYPRE_Int    beta_relax_type,
-                                     double       beta_strength_threshold,
+                                     HYPRE_Real   beta_strength_threshold,
                                      HYPRE_Int    beta_interp_type,
                                      HYPRE_Int    beta_Pmax);
 
@@ -1598,7 +1598,7 @@ HYPRE_Int HYPRE_AMSGetNumIterations(HYPRE_Solver  solver,
  * Returns the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                double       *rel_resid_norm);
+                                                HYPRE_Real   *rel_resid_norm);
 
 /**
  * For problems with zero-conductivity regions, project the vector onto the
@@ -1750,7 +1750,7 @@ HYPRE_Int HYPRE_ADSSetMaxIter(HYPRE_Solver solver , HYPRE_Int maxit);
  * as a solver. When using ADS as a preconditioner, set the tolerance
  * to $0.0$. The default is $10^{-6}$.
  **/
-HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver , double tol);
+HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver , HYPRE_Real tol);
 
 /**
  * (Optional) Choose which auxiliary-space solver to use. Possible values are:
@@ -1798,7 +1798,7 @@ HYPRE_Int HYPRE_ADSSetPrintLevel(HYPRE_Solver solver , HYPRE_Int print_level);
  * \hline
  * \end{tabular}
  **/
-HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int relax_times , double relax_weight , double omega);
+HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real relax_weight , HYPRE_Real omega);
 
 /**
  * (Optional) Sets parameters for Chebyshev relaxation.
@@ -1813,13 +1813,13 @@ HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver , HYPRE_Int cheb
  * interface of HYPRE\_ADSSetInterpolations is being used!
  * See the user's manual for more details.
  **/
-HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver , HYPRE_Int cycle_type , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
+HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver , HYPRE_Int cycle_type , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , HYPRE_Real strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
 
 /**
  * (Optional) Sets AMG parameters for $B_\Pi$.
  * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
-HYPRE_Int HYPRE_ADSSetAMGOptions(HYPRE_Solver solver , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
+HYPRE_Int HYPRE_ADSSetAMGOptions(HYPRE_Solver solver , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , HYPRE_Real strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
 
 /**
  * Returns the number of iterations taken.
@@ -1829,7 +1829,7 @@ HYPRE_Int HYPRE_ADSGetNumIterations(HYPRE_Solver solver , HYPRE_Int *num_iterati
 /**
  * Returns the norm of the final relative residual.
  **/
-HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver solver , double *rel_resid_norm);
+HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver solver , HYPRE_Real *rel_resid_norm);
 
 /*@}*/
 
@@ -1866,10 +1866,10 @@ HYPRE_Int HYPRE_ParCSRPCGSolve(HYPRE_Solver       solver,
                          HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_ParCSRPCGSetTol(HYPRE_Solver solver,
-                          double       tol);
+                          HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRPCGSetAbsoluteTol(HYPRE_Solver solver,
-                                  double       tol);
+                                  HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRPCGSetMaxIter(HYPRE_Solver solver,
                               HYPRE_Int          max_iter);
@@ -1904,7 +1904,7 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
                                     HYPRE_Int          *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                double       *norm);
+                                                HYPRE_Real   *norm);
 
 /**
  * Setup routine for diagonal preconditioning.
@@ -1960,10 +1960,10 @@ HYPRE_Int HYPRE_ParCSRGMRESSetKDim(HYPRE_Solver solver,
                              HYPRE_Int          k_dim);
 
 HYPRE_Int HYPRE_ParCSRGMRESSetTol(HYPRE_Solver solver,
-                            double       tol);
+                            HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRGMRESSetAbsoluteTol(HYPRE_Solver solver,
-                                    double       a_tol);
+                                    HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
@@ -1998,7 +1998,7 @@ HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
                                       HYPRE_Int          *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                  double       *norm);
+                                                  HYPRE_Real   *norm);
 
 /*@}*/
 
@@ -2038,10 +2038,10 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESSetKDim(HYPRE_Solver solver,
                                  HYPRE_Int          k_dim);
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetTol(HYPRE_Solver solver,
-                                double       tol);
+                                HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetAbsoluteTol(HYPRE_Solver solver,
-                                        double       a_tol);
+                                        HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
@@ -2071,7 +2071,7 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESGetNumIterations(HYPRE_Solver  solver,
                                           HYPRE_Int          *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                      double       *norm);
+                                                      HYPRE_Real   *norm);
 
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver           solver,
                                       HYPRE_PtrToModifyPCFcn modify_pc);
@@ -2117,9 +2117,9 @@ HYPRE_Int HYPRE_ParCSRLGMRESSetAugDim(HYPRE_Solver solver,
                                 HYPRE_Int          aug_dim);
 
 HYPRE_Int HYPRE_ParCSRLGMRESSetTol(HYPRE_Solver solver,
-                             double       tol);
+                             HYPRE_Real   tol);
 HYPRE_Int HYPRE_ParCSRLGMRESSetAbsoluteTol(HYPRE_Solver solver,
-                                     double       a_tol);
+                                     HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
@@ -2148,7 +2148,7 @@ HYPRE_Int HYPRE_ParCSRLGMRESGetNumIterations(HYPRE_Solver  solver,
                                        HYPRE_Int          *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                   double       *norm);
+                                                   HYPRE_Real   *norm);
 
 /*@}*/
 
@@ -2185,10 +2185,10 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABSolve(HYPRE_Solver       solver,
                               HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABSetTol(HYPRE_Solver solver,
-                               double       tol);
+                               HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABSetAbsoluteTol(HYPRE_Solver solver,
-                                       double       a_tol);
+                                       HYPRE_Real   a_tol);
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABSetMinIter(HYPRE_Solver solver,
                                    HYPRE_Int          min_iter);
@@ -2217,7 +2217,7 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
                                          HYPRE_Int          *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                     double       *norm);
+                                                     HYPRE_Real   *norm);
 
 /*@}*/
 
@@ -2265,18 +2265,18 @@ HYPRE_Int HYPRE_ParCSRHybridSolve(HYPRE_Solver       solver,
  *  Set the convergence tolerance for the Krylov solver. The default is 1.e-7.
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetTol(HYPRE_Solver solver,
-                             double       tol);
+                             HYPRE_Real   tol);
 /**
  *  Set the absolute convergence tolerance for the Krylov solver. The default is 0.
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetAbsoluteTol(HYPRE_Solver solver,
-                                     double       tol);
+                                     HYPRE_Real   tol);
 
 /**
  *  Set the desired convergence factor
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetConvergenceTol(HYPRE_Solver solver,
-                                        double       cf_tol);
+                                        HYPRE_Real   cf_tol);
 
 /**
  *  Set the maximal number of iterations for the diagonally
@@ -2363,7 +2363,7 @@ HYPRE_Int HYPRE_ParCSRHybridSetPrintLevel(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetStrongThreshold(HYPRE_Solver solver,
-                                     double       strong_threshold);
+                                     HYPRE_Real   strong_threshold);
 
 /**
  * (Optional) Sets a parameter to modify the definition of strength for
@@ -2373,7 +2373,7 @@ HYPRE_ParCSRHybridSetStrongThreshold(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetMaxRowSum(HYPRE_Solver solver,
-                               double       max_row_sum);
+                               HYPRE_Real   max_row_sum);
 
 /**
  * (Optional) Defines a truncation factor for the interpolation.
@@ -2381,7 +2381,7 @@ HYPRE_ParCSRHybridSetMaxRowSum(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetTruncFactor(HYPRE_Solver solver,
-                                 double       trunc_factor);
+                                 HYPRE_Real   trunc_factor);
 
 
 /**
@@ -2572,7 +2572,7 @@ HYPRE_ParCSRHybridSetRelaxOrder(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetRelaxWt(HYPRE_Solver solver,
-                             double       relax_wt);
+                             HYPRE_Real   relax_wt);
 
 /**
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
@@ -2583,7 +2583,7 @@ HYPRE_ParCSRHybridSetRelaxWt(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetLevelRelaxWt(HYPRE_Solver solver,
-                                  double       relax_wt,
+                                  HYPRE_Real   relax_wt,
                                   HYPRE_Int          level);
 
 /**
@@ -2603,7 +2603,7 @@ HYPRE_ParCSRHybridSetLevelRelaxWt(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetOuterWt(HYPRE_Solver solver,
-                             double       outer_wt);
+                             HYPRE_Real   outer_wt);
 
 /**
  * (Optional) Defines the outer relaxation weight for hybrid SOR or SSOR
@@ -2614,7 +2614,7 @@ HYPRE_ParCSRHybridSetOuterWt(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetLevelOuterWt(HYPRE_Solver solver,
-                                  double       outer_wt,
+                                  HYPRE_Real   outer_wt,
                                   HYPRE_Int    level);
 
 /**
@@ -2647,14 +2647,14 @@ HYPRE_ParCSRHybridSetSeqThreshold(HYPRE_Solver solver,
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetRelaxWeight(HYPRE_Solver  solver,
-                                 double       *relax_weight);
+                                 HYPRE_Real   *relax_weight);
 
 /*
  *
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetOmega(HYPRE_Solver  solver,
-                           double       *omega);
+                           HYPRE_Real   *omega);
 
 /**
  * (Optional) Defines the number of levels of aggressive coarsening,
@@ -2720,7 +2720,7 @@ HYPRE_Int HYPRE_ParCSRHybridGetPCGNumIterations(HYPRE_Solver  solver,
  * Retrieves the final relative residual norm.
  **/
 HYPRE_Int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                   double       *norm);
+                                                   HYPRE_Real   *norm);
 
 /* Is this a retired function? (RDF) */
 HYPRE_Int
@@ -2761,7 +2761,7 @@ HYPRE_Int HYPRE_SchwarzSetDomainType(HYPRE_Solver solver,
                                HYPRE_Int          domain_type);
 
 HYPRE_Int HYPRE_SchwarzSetRelaxWeight(HYPRE_Solver solver,
-                                double       relax_weight);
+                                HYPRE_Real   relax_weight);
 
 HYPRE_Int HYPRE_SchwarzSetDomainStructure(HYPRE_Solver    solver,
                                     HYPRE_CSRMatrix domain_structure);
@@ -2798,7 +2798,7 @@ HYPRE_Int HYPRE_ParCSRCGNRSolve(HYPRE_Solver       solver,
                           HYPRE_ParVector    x);
 
 HYPRE_Int HYPRE_ParCSRCGNRSetTol(HYPRE_Solver solver,
-                           double       tol);
+                           HYPRE_Real   tol);
 
 HYPRE_Int HYPRE_ParCSRCGNRSetMinIter(HYPRE_Solver solver,
                                HYPRE_Int          min_iter);
@@ -2825,7 +2825,7 @@ HYPRE_Int HYPRE_ParCSRCGNRGetNumIterations(HYPRE_Solver  solver,
                                      HYPRE_Int          *num_iterations);
 
 HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                 double       *norm);
+                                                 HYPRE_Real   *norm);
 
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
@@ -2841,7 +2841,7 @@ HYPRE_ParCSRMatrix GenerateLaplacian(MPI_Comm comm,
                                      HYPRE_Int      p,
                                      HYPRE_Int      q,
                                      HYPRE_Int      r,
-                                     double  *value);
+                                     HYPRE_Real  *value);
 
 HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm comm,
                                          HYPRE_Int      nx,
@@ -2853,7 +2853,7 @@ HYPRE_ParCSRMatrix GenerateLaplacian27pt(MPI_Comm comm,
                                          HYPRE_Int      p,
                                          HYPRE_Int      q,
                                          HYPRE_Int      r,
-                                         double  *value);
+                                         HYPRE_Real  *value);
 
 HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm comm,
                                         HYPRE_Int      nx,
@@ -2862,7 +2862,7 @@ HYPRE_ParCSRMatrix GenerateLaplacian9pt(MPI_Comm comm,
                                         HYPRE_Int      Q,
                                         HYPRE_Int      p,
                                         HYPRE_Int      q,
-                                        double  *value);
+                                        HYPRE_Real  *value);
 
 HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm comm,
                                    HYPRE_Int      nx,
@@ -2874,7 +2874,7 @@ HYPRE_ParCSRMatrix GenerateDifConv(MPI_Comm comm,
                                    HYPRE_Int      p,
                                    HYPRE_Int      q,
                                    HYPRE_Int      r,
-                                   double  *value);
+                                   HYPRE_Real  *value);
 
 HYPRE_ParCSRMatrix
 GenerateRotate7pt(MPI_Comm comm,
@@ -2884,8 +2884,8 @@ GenerateRotate7pt(MPI_Comm comm,
                   HYPRE_Int      Q,
                   HYPRE_Int      p,
                   HYPRE_Int      q,
-                  double   alpha,
-                  double   eps );
+                  HYPRE_Real   alpha,
+                  HYPRE_Real   eps );
                                                                                 
 HYPRE_ParCSRMatrix
 GenerateVarDifConv(MPI_Comm comm,
@@ -2898,7 +2898,7 @@ GenerateVarDifConv(MPI_Comm comm,
                    HYPRE_Int      p,
                    HYPRE_Int      q,
                    HYPRE_Int      r,
-                   double eps,
+                   HYPRE_Real eps,
                    HYPRE_ParVector *rhs_ptr);
 
 float*
@@ -2928,7 +2928,7 @@ HYPRE_Int HYPRE_BoomerAMGSetPostInterpType(HYPRE_Solver solver,
  * (Optional) Sets a truncation threshold for Jacobi interpolation.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetJacobiTruncThreshold(HYPRE_Solver solver,
-                                           double       jacobi_trunc_threshold);
+                                           HYPRE_Real   jacobi_trunc_threshold);
 
 /*
  * (Optional) Defines the number of relaxation steps for CR
@@ -2942,14 +2942,14 @@ HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
  * The default is 0.7.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
-                             double       CR_rate);
+                             HYPRE_Real   CR_rate);
 
 /*
  * (Optional) Defines strong threshold for CR
  * The default is 0.0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
-                                 double       CR_strong_th);
+                                 HYPRE_Real   CR_strong_th);
 
 /*
  * (Optional) Defines whether to use CG 

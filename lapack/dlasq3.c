@@ -77,7 +77,7 @@
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal temp, s, t;
     static integer j4;

@@ -90,7 +90,7 @@ HYPRE_ParCSRCGNRSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver,
-                        double             tol    )
+                        HYPRE_Real         tol    )
 {
    return( HYPRE_CGNRSetTol( solver, tol ) );
 }
@@ -185,7 +185,7 @@ HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                              double       *norm   )
+                                              HYPRE_Real   *norm   )
 {
    return( HYPRE_CGNRGetFinalRelativeResidualNorm( solver, norm ) );
 }

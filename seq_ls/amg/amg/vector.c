@@ -28,7 +28,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_Vector  *hypre_NewVector(data, size)
-double  *data;
+HYPRE_Real  *data;
 HYPRE_Int      size;
 {
    hypre_Vector     *new;
@@ -96,9 +96,9 @@ hypre_VectorInt  *vector;
 
 void    hypre_InitVector(v, value)
 hypre_Vector *v;
-double  value;
+HYPRE_Real  value;
 {
-   double     *vp = hypre_VectorData(v);
+   HYPRE_Real *vp = hypre_VectorData(v);
    HYPRE_Int         n  = hypre_VectorSize(v);
 
    HYPRE_Int         i;
@@ -115,7 +115,7 @@ double  value;
 void    hypre_InitVectorRandom(v)
 hypre_Vector *v;
 {
-   double     *vp = hypre_VectorData(v);
+   HYPRE_Real *vp = hypre_VectorData(v);
    HYPRE_Int         n  = hypre_VectorSize(v);
 
    HYPRE_Int         i;
@@ -133,8 +133,8 @@ void     hypre_CopyVector(x, y)
 hypre_Vector  *x;
 hypre_Vector  *y;
 {
-   double     *xp = hypre_VectorData(x);
-   double     *yp = hypre_VectorData(y);
+   HYPRE_Real *xp = hypre_VectorData(x);
+   HYPRE_Real *yp = hypre_VectorData(y);
    HYPRE_Int         n  = hypre_VectorSize(x);
 
    HYPRE_Int         i;
@@ -149,10 +149,10 @@ hypre_Vector  *y;
  *--------------------------------------------------------------------------*/
 
 void     hypre_ScaleVector(alpha, y)
-double   alpha;
+HYPRE_Real   alpha;
 hypre_Vector  *y;
 {
-   double     *yp = hypre_VectorData(y);
+   HYPRE_Real *yp = hypre_VectorData(y);
    HYPRE_Int         n  = hypre_VectorSize(y);
 
    HYPRE_Int         i;
@@ -167,12 +167,12 @@ hypre_Vector  *y;
  *--------------------------------------------------------------------------*/
 
 void     hypre_Axpy(alpha, x, y)
-double   alpha;
+HYPRE_Real   alpha;
 hypre_Vector  *x;
 hypre_Vector  *y;
 {
-   double     *xp = hypre_VectorData(x);
-   double     *yp = hypre_VectorData(y);
+   HYPRE_Real *xp = hypre_VectorData(x);
+   HYPRE_Real *yp = hypre_VectorData(y);
    HYPRE_Int         n  = hypre_VectorSize(x);
 
    HYPRE_Int         i;
@@ -186,17 +186,17 @@ hypre_Vector  *y;
  * hypre_InnerProd
  *--------------------------------------------------------------------------*/
 
-double   hypre_InnerProd(x, y)
+HYPRE_Real   hypre_InnerProd(x, y)
 hypre_Vector  *x;
 hypre_Vector  *y;
 {
-   double     *xp = hypre_VectorData(x);
-   double     *yp = hypre_VectorData(y);
+   HYPRE_Real *xp = hypre_VectorData(x);
+   HYPRE_Real *yp = hypre_VectorData(y);
    HYPRE_Int         n  = hypre_VectorSize(x);
 
    HYPRE_Int         i;
 
-   double      result = 0.0;
+   HYPRE_Real  result = 0.0;
 
 
    for (i = 0; i < n; i++)

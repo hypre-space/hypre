@@ -22,7 +22,7 @@
 HYPRE_Int INCFACT_Apply ( void *solver_data, Vec b, Vec x)
      /* Wrapper around inc_fact_solve in form needed by Petsc */
 {
-  double    *INCFACT_b, *INCFACT_x;
+  HYPRE_Real    *INCFACT_b, *INCFACT_x;
   void      *incfact_data;
   Scalar     zero = 0.0;
   BJData    *BJ_data = solver_data;

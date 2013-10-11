@@ -58,9 +58,9 @@ void HYPRE_AMGFinalize P((void *data ));
 /* amg_params.c */
 void HYPRE_AMGSetLevMax P((HYPRE_Int levmax , void *data ));
 void HYPRE_AMGSetNCG P((HYPRE_Int ncg , void *data ));
-void HYPRE_AMGSetECG P((double ecg , void *data ));
+void HYPRE_AMGSetECG P((HYPRE_Real ecg , void *data ));
 void HYPRE_AMGSetNWT P((HYPRE_Int nwt , void *data ));
-void HYPRE_AMGSetEWT P((double ewt , void *data ));
+void HYPRE_AMGSetEWT P((HYPRE_Real ewt , void *data ));
 void HYPRE_AMGSetNSTR P((HYPRE_Int nstr , void *data ));
 void HYPRE_AMGSetNCyc P((HYPRE_Int ncyc , void *data ));
 void HYPRE_AMGSetMU P((HYPRE_Int *mu , void *data ));
@@ -78,22 +78,22 @@ void HYPRE_AMGSetIV P((HYPRE_Int *iv , void *data ));
 HYPRE_Int HYPRE_AMGSetup P((hypre_Matrix *A , void *data ));
 
 /* amg_solve.c */
-HYPRE_Int HYPRE_AMGSolve P((hypre_Vector *u , hypre_Vector *f , double tol , void *data ));
+HYPRE_Int HYPRE_AMGSolve P((hypre_Vector *u , hypre_Vector *f , HYPRE_Real tol , void *data ));
 
 /* vector.c */
-hypre_Vector *hypre_NewVector P((double *data , HYPRE_Int size ));
+hypre_Vector *hypre_NewVector P((HYPRE_Real *data , HYPRE_Int size ));
 void hypre_FreeVector P((hypre_Vector *vector ));
-void hypre_InitVector P((hypre_Vector *v , double value ));
+void hypre_InitVector P((hypre_Vector *v , HYPRE_Real value ));
 void hypre_InitVectorRandom P((hypre_Vector *v ));
 void hypre_CopyVector P((hypre_Vector *x , hypre_Vector *y ));
-void hypre_ScaleVector P((double alpha , hypre_Vector *y ));
-void hypre_Axpy P((double alpha , hypre_Vector *x , hypre_Vector *y ));
-double hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
+void hypre_ScaleVector P((HYPRE_Real alpha , hypre_Vector *y ));
+void hypre_Axpy P((HYPRE_Real alpha , hypre_Vector *x , hypre_Vector *y ));
+HYPRE_Real hypre_InnerProd P((hypre_Vector *x , hypre_Vector *y ));
 
 /* matrix.c */
-hypre_Matrix *hypre_NewMatrix P((double *data , HYPRE_Int *ia , HYPRE_Int *ja , HYPRE_Int size ));
+hypre_Matrix *hypre_NewMatrix P((HYPRE_Real *data , HYPRE_Int *ia , HYPRE_Int *ja , HYPRE_Int size ));
 void hypre_FreeMatrix P((hypre_Matrix *matrix ));
-void hypre_Matvec P((double alpha , hypre_Matrix *A , hypre_Vector *x , double beta , hypre_Vector *y ));
+void hypre_Matvec P((HYPRE_Real alpha , hypre_Matrix *A , hypre_Vector *x , HYPRE_Real beta , hypre_Vector *y ));
 
 #undef P
 

@@ -24,7 +24,7 @@ typedef struct
    MPI_Comm                comm;
                        
    HYPRE_Int               memory_use;
-   double                  tol;
+   HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               zero_guess;
                          
@@ -226,7 +226,7 @@ hypre_SMGRelax( void               *relax_vdata,
 
    hypre_IndexRef        base_stride;
    hypre_BoxArray       *base_box_a;
-   double                zero = 0.0;
+   HYPRE_Real            zero = 0.0;
 
    HYPRE_Int             max_iter;
    HYPRE_Int             num_spaces;
@@ -642,7 +642,7 @@ hypre_SMGRelaxSetMemoryUse( void *relax_vdata,
 
 HYPRE_Int
 hypre_SMGRelaxSetTol( void   *relax_vdata,
-                      double  tol         )
+                      HYPRE_Real  tol         )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
 

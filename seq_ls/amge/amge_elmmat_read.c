@@ -35,7 +35,7 @@
 
 #include "headers.h" 
 
-HYPRE_Int hypre_AMGeElmMatRead(double **element_data_pointer, 
+HYPRE_Int hypre_AMGeElmMatRead(HYPRE_Real **element_data_pointer, 
 			 HYPRE_Int *i_element_dof,
 			 HYPRE_Int *j_element_dof,
 			 HYPRE_Int num_elements,
@@ -51,14 +51,14 @@ HYPRE_Int hypre_AMGeElmMatRead(double **element_data_pointer,
   HYPRE_Int ierr = 0;
   HYPRE_Int i,j,k, entry;
 
-  double *element_data;
+  HYPRE_Real *element_data;
   HYPRE_Int num_entries = 0;
 
   for (i=0; i < num_elements; i++)
     num_entries+= (i_element_dof[i+1]-i_element_dof[i]) *
       (i_element_dof[i+1]-i_element_dof[i]);
 
-  element_data = hypre_CTAlloc(double, num_entries);
+  element_data = hypre_CTAlloc(HYPRE_Real, num_entries);
 
   f = fopen(element_matrix_file, "r");
   /* g = fopen("element_matrix_wrote", "w"); */

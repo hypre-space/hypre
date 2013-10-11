@@ -64,7 +64,7 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
 {
    HYPRE_Int     *RAP_int_i;
    HYPRE_Int     *RAP_int_j = NULL;
-   double  *RAP_int_data = NULL;
+   HYPRE_Real  *RAP_int_data = NULL;
    HYPRE_Int     num_cols = 0;
 
    MPI_Comm comm = hypre_ParCSRCommPkgComm(comm_pkg_RT);
@@ -79,7 +79,7 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
 
    HYPRE_Int     *RAP_ext_i;
    HYPRE_Int     *RAP_ext_j = NULL;
-   double  *RAP_ext_data = NULL;
+   HYPRE_Real  *RAP_ext_data = NULL;
 
    hypre_ParCSRCommHandle *comm_handle = NULL;
    hypre_ParCSRCommPkg *tmp_comm_pkg;
@@ -159,7 +159,7 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
    if (num_nonzeros)
    {
       RAP_ext_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-      RAP_ext_data = hypre_CTAlloc(double, num_nonzeros);
+      RAP_ext_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros);
    }
 
    for (i=0; i < num_sends+1; i++)
@@ -222,13 +222,13 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    
-   double          *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
    
-   double          *A_offd_data = hypre_CSRMatrixData(A_offd);
+   HYPRE_Real      *A_offd_data = hypre_CSRMatrixData(A_offd);
    HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
@@ -237,14 +237,14 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    
-   double          *P_diag_data = hypre_CSRMatrixData(P_diag);
+   HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
    HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
    HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
 
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
    HYPRE_Int             *col_map_offd_P = hypre_ParCSRMatrixColMapOffd(P);
    
-   double          *P_offd_data = hypre_CSRMatrixData(P_offd);
+   HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
    HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
 
@@ -261,25 +261,25 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RAP_int = NULL;
 
-   double          *RAP_int_data;
+   HYPRE_Real      *RAP_int_data;
    HYPRE_Int             *RAP_int_i;
    HYPRE_Int             *RAP_int_j;
 
    hypre_CSRMatrix *RAP_ext;
 
-   double          *RAP_ext_data = NULL;
+   HYPRE_Real      *RAP_ext_data = NULL;
    HYPRE_Int             *RAP_ext_i = NULL;
    HYPRE_Int             *RAP_ext_j = NULL;
 
    hypre_CSRMatrix *RAP_diag;
 
-   double          *RAP_diag_data;
+   HYPRE_Real      *RAP_diag_data;
    HYPRE_Int             *RAP_diag_i;
    HYPRE_Int             *RAP_diag_j;
 
    hypre_CSRMatrix *RAP_offd;
 
-   double          *RAP_offd_data = NULL;
+   HYPRE_Real      *RAP_offd_data = NULL;
    HYPRE_Int             *RAP_offd_i = NULL;
    HYPRE_Int             *RAP_offd_j = NULL;
 
@@ -295,27 +295,27 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    
    hypre_CSRMatrix *R_diag;
    
-   double          *R_diag_data;
+   HYPRE_Real      *R_diag_data;
    HYPRE_Int             *R_diag_i;
    HYPRE_Int             *R_diag_j;
 
    hypre_CSRMatrix *R_offd;
    
-   double          *R_offd_data;
+   HYPRE_Real      *R_offd_data;
    HYPRE_Int             *R_offd_i;
    HYPRE_Int             *R_offd_j;
 
    hypre_CSRMatrix *Ps_ext;
    
-   double          *Ps_ext_data;
+   HYPRE_Real      *Ps_ext_data;
    HYPRE_Int             *Ps_ext_i;
    HYPRE_Int             *Ps_ext_j;
 
-   double          *P_ext_diag_data = NULL;
+   HYPRE_Real      *P_ext_diag_data = NULL;
    HYPRE_Int             *P_ext_diag_i = NULL;
    HYPRE_Int             *P_ext_diag_j = NULL;
 
-   double          *P_ext_offd_data = NULL;
+   HYPRE_Real      *P_ext_offd_data = NULL;
    HYPRE_Int             *P_ext_offd_i = NULL;
    HYPRE_Int             *P_ext_offd_j = NULL;
 
@@ -347,11 +347,11 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    HYPRE_Int              num_procs;
    HYPRE_Int              num_threads;
 
-   double           r_entry;
-   double           r_a_product;
-   double           r_a_p_product;
+   HYPRE_Real       r_entry;
+   HYPRE_Real       r_a_product;
+   HYPRE_Real       r_a_p_product;
    
-   double           zero = 0.0;
+   HYPRE_Real       zero = 0.0;
 
    /*-----------------------------------------------------------------------
     *  Copy ParCSRMatrix RT into CSRMatrix R so that we have row-wise access 
@@ -427,12 +427,12 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    if (P_ext_diag_size)
    {
       P_ext_diag_j = hypre_CTAlloc(HYPRE_Int, P_ext_diag_size);
-      P_ext_diag_data = hypre_CTAlloc(double, P_ext_diag_size);
+      P_ext_diag_data = hypre_CTAlloc(HYPRE_Real, P_ext_diag_size);
    }
    if (P_ext_offd_size)
    {
       P_ext_offd_j = hypre_CTAlloc(HYPRE_Int, P_ext_offd_size);
-      P_ext_offd_data = hypre_CTAlloc(double, P_ext_offd_size);
+      P_ext_offd_data = hypre_CTAlloc(HYPRE_Real, P_ext_offd_size);
    }
 
    cnt_offd = 0;
@@ -720,7 +720,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
     
    RAP_size = jj_count[num_threads-1];
    RAP_int_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_RT+1);
-   RAP_int_data = hypre_CTAlloc(double, RAP_size);
+   RAP_int_data = hypre_CTAlloc(HYPRE_Real, RAP_size);
    RAP_int_j    = hypre_CTAlloc(HYPRE_Int, RAP_size);
 
    RAP_int_i[num_cols_offd_RT] = RAP_size;
@@ -1354,14 +1354,14 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    RAP_diag_size = jj_count_diag;
    if (RAP_diag_size)
    { 
-      RAP_diag_data = hypre_CTAlloc(double, RAP_diag_size);
+      RAP_diag_data = hypre_CTAlloc(HYPRE_Real, RAP_diag_size);
       RAP_diag_j    = hypre_CTAlloc(HYPRE_Int, RAP_diag_size);
    } 
  
    RAP_offd_size = jj_count_offd;
    if (RAP_offd_size)
    { 
-        RAP_offd_data = hypre_CTAlloc(double, RAP_offd_size);
+        RAP_offd_data = hypre_CTAlloc(HYPRE_Real, RAP_offd_size);
         RAP_offd_j    = hypre_CTAlloc(HYPRE_Int, RAP_offd_size);
    } 
 

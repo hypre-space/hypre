@@ -35,11 +35,11 @@ HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
 
 		    HYPRE_Int **i_ILUdof_ILUdof_pointer,
 		    HYPRE_Int **j_ILUdof_ILUdof_pointer,
-		    double **LD_data,
+		    HYPRE_Real **LD_data,
 
 		    HYPRE_Int **i_ILUdof_ILUdof_t_pointer,
 		    HYPRE_Int **j_ILUdof_ILUdof_t_pointer,
-		    double **U_data,
+		    HYPRE_Real **U_data,
 
 		    hypre_CSRMatrix *A,
 
@@ -66,16 +66,16 @@ HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
 
   HYPRE_Int *i_dof_dof_0, *j_dof_dof_0;
   HYPRE_Int *i_dof_dof, *j_dof_dof;
-  double *a_dof_dof;
+  HYPRE_Real *a_dof_dof;
 
   HYPRE_Int *i_dof_index;
 
   HYPRE_Int *i_a = hypre_CSRMatrixI(A);
   HYPRE_Int *j_a = hypre_CSRMatrixJ(A);
-  double *a_data = hypre_CSRMatrixData(A);
+  HYPRE_Real *a_data = hypre_CSRMatrixData(A);
 
-  double *b_dof_dof;
-  double *b_dof_dof_t;
+  HYPRE_Real *b_dof_dof;
+  HYPRE_Real *b_dof_dof_t;
 
   HYPRE_Int *i_ILUdof_ILUdof_t, *j_ILUdof_ILUdof_t;
 
@@ -83,11 +83,11 @@ HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
 
   HYPRE_Int i_dof_to_ILUdof_counter;
 
-  double diag, diagonal, entry, row_sum;
+  HYPRE_Real diag, diagonal, entry, row_sum;
 
   HYPRE_Int *dof_on_list;
 
-  double *aux;
+  HYPRE_Real *aux;
 
   dof_on_list = hypre_CTAlloc(HYPRE_Int, num_dofs);
   i_dof_to_ILUdof = hypre_CTAlloc(HYPRE_Int, num_dofs);
@@ -165,7 +165,7 @@ HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
   for (i=0; i< num_dofs; i++)
     i_dof_index[i] = -1;
 
-  a_dof_dof =  hypre_CTAlloc(double, i_dof_dof[num_dofs]);
+  a_dof_dof =  hypre_CTAlloc(HYPRE_Real, i_dof_dof[num_dofs]);
 
   /* fill-in a_dof_dof with a_data: ---------------------------------- */
 
@@ -201,12 +201,12 @@ HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
 
   i_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
   j_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int, (i_dof_dof[num_dofs]+num_dofs)/2);
-  b_dof_dof = hypre_CTAlloc(double, (i_dof_dof[num_dofs]+num_dofs)/2);
+  b_dof_dof = hypre_CTAlloc(HYPRE_Real, (i_dof_dof[num_dofs]+num_dofs)/2);
 
 
   i_ILUdof_ILUdof_t =  hypre_CTAlloc(HYPRE_Int, num_dofs+1);
   j_ILUdof_ILUdof_t = hypre_CTAlloc(HYPRE_Int, (i_dof_dof[num_dofs]-num_dofs)/2);
-  b_dof_dof_t = hypre_CTAlloc(double, (i_dof_dof[num_dofs]-num_dofs)/2);
+  b_dof_dof_t = hypre_CTAlloc(HYPRE_Real, (i_dof_dof[num_dofs]-num_dofs)/2);
 
 
   ILUdof_ILUdof_counter = 0;
@@ -277,7 +277,7 @@ HYPRE_Int hypre_ILUfactor(HYPRE_Int **i_ILUdof_to_dof_pointer,
   hypre_TFree(j_dof_dof);
   */
 
-  aux =  hypre_CTAlloc(double, num_dofs);
+  aux =  hypre_CTAlloc(HYPRE_Real, num_dofs);
 
   for (i=0; i < num_dofs; i++)
     aux[i] = 0.e0;

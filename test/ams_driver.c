@@ -42,11 +42,11 @@ hypre_int main (hypre_int argc, char *argv[])
 
    HYPRE_Int solver_id;
    HYPRE_Int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
-   double rlx_weight, rlx_omega;
+   HYPRE_Real rlx_weight, rlx_omega;
    HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
    HYPRE_Int h1_method, singular_problem, coordinates;
-   double tol, theta;
-   double rtol;
+   HYPRE_Real tol, theta;
+   HYPRE_Real rtol;
    HYPRE_Int rr;
    HYPRE_Int zero_cond;
    HYPRE_Int blockSize;
@@ -328,7 +328,7 @@ hypre_int main (hypre_int argc, char *argv[])
    if (solver_id == 0)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Start timing */
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
@@ -453,7 +453,7 @@ hypre_int main (hypre_int argc, char *argv[])
    else if (solver_id == 1 || solver_id == 3 || solver_id == 4)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Start timing */
       if (solver_id == 1)

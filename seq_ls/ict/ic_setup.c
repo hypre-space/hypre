@@ -56,7 +56,7 @@ HYPRE_Int ic_setup ( void *input_data, Matrix *IC_A )
 {
    ICData *ic_data = input_data;
    HYPRE_Int         i, ierr_ict, ierr_cg, ierr_input;
-   double     *IC_b, *IC_x;
+   HYPRE_Real *IC_b, *IC_x;
    HYPRE_Int         n, nnz, lenpmx;
    Matrix     *IC_A_copy=NULL;
    Matrix     *FACTOR_A;
@@ -86,7 +86,7 @@ HYPRE_Int ic_setup ( void *input_data, Matrix *IC_A )
 
      MatrixJA(IC_A_copy) = ctalloc( HYPRE_Int, MatrixNNZ(IC_A) );
 
-     MatrixData(IC_A_copy) = ctalloc( double, MatrixNNZ(IC_A) );
+     MatrixData(IC_A_copy) = ctalloc( HYPRE_Real, MatrixNNZ(IC_A) );
      for ( i=0; i < MatrixNNZ(IC_A); i++) 
      {
        MatrixJA(IC_A_copy)[i] = MatrixJA(IC_A)[i];
@@ -133,18 +133,18 @@ HYPRE_Int ic_setup ( void *input_data, Matrix *IC_A )
 #ifdef ILUFact
    if( (ICDataIpar(ic_data)[1] == 1) || (ICDataIpar(ic_data)[1] == 3) )
    {
-      ICDataRscale(ic_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      ICDataRscale(ic_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
    if( (ICDataIpar(ic_data)[1] == 2) || (ICDataIpar(ic_data)[1] == 3) )
    {
-      ICDataCscale(ic_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      ICDataCscale(ic_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
 
    ICDataLIwork(ic_data) = 3*MatrixSize(FACTOR_A);
 #elif defined ICFact
    if( ICDataIpar(ic_data)[1] != 0 )
    {
-      ICDataScale(ic_data) = ctalloc( double, MatrixSize(FACTOR_A) );
+      ICDataScale(ic_data) = ctalloc( HYPRE_Real, MatrixSize(FACTOR_A) );
    }
 
    ICDataLIwork(ic_data) = 3*MatrixSize(FACTOR_A) +
@@ -158,7 +158,7 @@ HYPRE_Int ic_setup ( void *input_data, Matrix *IC_A )
 #elif defined ICFact
    ICDataLRwork(ic_data) = 6*n; /* Note;2*n+1 for fact, 6*n for solve */
 #endif
-   ICDataRwork(ic_data) = ctalloc(double, ICDataLRwork(ic_data) );
+   ICDataRwork(ic_data) = ctalloc(HYPRE_Real, ICDataLRwork(ic_data) );
 
 
       /* Preconditioner */
@@ -185,7 +185,7 @@ HYPRE_Int ic_setup ( void *input_data, Matrix *IC_A )
      return(-10);
    }
 
-   MatrixData(ICDataPreconditioner(ic_data)) = ctalloc( double, 
+   MatrixData(ICDataPreconditioner(ic_data)) = ctalloc( HYPRE_Real, 
            lenpmx );
    if( MatrixData(ICDataPreconditioner(ic_data)) == NULL ) 
    {

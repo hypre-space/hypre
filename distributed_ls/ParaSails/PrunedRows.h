@@ -37,7 +37,7 @@ typedef struct
 PrunedRows;
 
 PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
-  double thresh);
+  HYPRE_Real thresh);
 void PrunedRowsDestroy(PrunedRows *p);
 HYPRE_Int *PrunedRowsAlloc(PrunedRows *p, HYPRE_Int len);
 void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind);

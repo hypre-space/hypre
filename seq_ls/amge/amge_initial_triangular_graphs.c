@@ -55,7 +55,7 @@ HYPRE_Int hypre_AMGeTriangInitialGraphs(HYPRE_Int **i_element_node_pointer,
 
   HYPRE_Int element_node_counter;
 
-  double eps = 1.e-4;
+  HYPRE_Real eps = 1.e-4;
 
   f = fopen(element_node_file, "r");
 

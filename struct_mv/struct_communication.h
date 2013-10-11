@@ -131,15 +131,15 @@ typedef struct hypre_CommPkg_struct
 typedef struct hypre_CommHandle_struct
 {
    hypre_CommPkg  *comm_pkg;
-   double         *send_data;
-   double         *recv_data;
+   HYPRE_Complex  *send_data;
+   HYPRE_Complex  *recv_data;
 
    HYPRE_Int       num_requests;
    hypre_MPI_Request    *requests;
    hypre_MPI_Status     *status;
 
-   double        **send_buffers;
-   double        **recv_buffers;
+   HYPRE_Complex **send_buffers;
+   HYPRE_Complex **recv_buffers;
 
    /* set = 0, add = 1 */
    HYPRE_Int       action;

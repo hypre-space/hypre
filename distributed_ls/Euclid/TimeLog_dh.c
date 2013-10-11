@@ -21,7 +21,7 @@
 struct _timeLog_dh {
   HYPRE_Int first;
   HYPRE_Int last; 
-  double time[MAX_TIME_MARKS];
+  HYPRE_Real time[MAX_TIME_MARKS];
   char   desc[MAX_TIME_MARKS][MAX_DESC_LENGTH];
   Timer_dh timer; 
 };
@@ -91,7 +91,7 @@ void TimeLog_dhReset(TimeLog_dh t)
 {
   START_FUNC_DH
   if (t->last < MAX_TIME_MARKS - 2) {
-    double total = 0.0;
+    HYPRE_Real total = 0.0;
     HYPRE_Int i, first = t->first, last = t->last;
     for (i=first; i<last; ++i) total += t->time[i];
     t->time[last] = total;
@@ -110,8 +110,8 @@ void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint)
 {
   START_FUNC_DH
   HYPRE_Int i;
-  double total = 0.0;
-  double timeMax[MAX_TIME_MARKS]; double timeMin[MAX_TIME_MARKS];
+  HYPRE_Real total = 0.0;
+  HYPRE_Real timeMax[MAX_TIME_MARKS]; HYPRE_Real timeMin[MAX_TIME_MARKS];
   static bool wasSummed = false;
 
 

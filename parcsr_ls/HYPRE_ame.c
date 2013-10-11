@@ -100,7 +100,7 @@ HYPRE_Int HYPRE_AMESetMaxIter(HYPRE_Solver esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMESetTol(HYPRE_Solver esolver,
-                    double tol)
+                    HYPRE_Real tol)
 {
    return hypre_AMESetTol((void *) esolver, tol);
 }
@@ -120,7 +120,7 @@ HYPRE_Int HYPRE_AMESetPrintLevel(HYPRE_Solver esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMEGetEigenvalues(HYPRE_Solver esolver,
-                            double **eigenvalues)
+                            HYPRE_Real **eigenvalues)
 {
    return hypre_AMEGetEigenvalues((void *) esolver, eigenvalues);
 }

@@ -236,7 +236,7 @@ hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
   hypre_BCSRMatrixBlock** B_blocks;
   HYPRE_Int* A_i = hypre_CSRMatrixI(A);
   HYPRE_Int* A_j = hypre_CSRMatrixJ(A);
-  double* A_data = hypre_CSRMatrixData(A);
+  HYPRE_Real* A_data = hypre_CSRMatrixData(A);
   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
   HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
   HYPRE_Int num_block_rows = num_rows/num_rows_per_block;
@@ -245,7 +245,7 @@ hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
   HYPRE_Int i, j, jA, t, d, i_block, j_block, jB;
   HYPRE_Int* block_flag;
   HYPRE_Int* block_number;
-  double** blocks;
+  HYPRE_Real** blocks;
 
   /*--------------------------------------------------------------------------
    *
@@ -280,10 +280,10 @@ hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
 			     num_nonzero_blocks,
 			     num_rows_per_block, num_cols_per_block);
   hypre_BCSRMatrixInitialise(B);
-  blocks = hypre_CTAlloc(double*, num_nonzero_blocks);
+  blocks = hypre_CTAlloc(HYPRE_Real*, num_nonzero_blocks);
   for(t = 0; t < num_nonzero_blocks; t++) {
-    blocks[t] = hypre_CTAlloc(double, num_rows_per_block*num_cols_per_block);
-    memset(blocks[t], 0, sizeof(double)*num_rows_per_block*num_cols_per_block);
+    blocks[t] = hypre_CTAlloc(HYPRE_Real, num_rows_per_block*num_cols_per_block);
+    memset(blocks[t], 0, sizeof(HYPRE_Real)*num_rows_per_block*num_cols_per_block);
   }
 
   /*--------------------------------------------------------------------------
@@ -344,7 +344,7 @@ hypre_BCSRMatrixToCSRMatrix(hypre_BCSRMatrix* B) {
   hypre_CSRMatrix* A;
   HYPRE_Int* A_i;
   HYPRE_Int* A_j;
-  double* A_data;
+  HYPRE_Real* A_data;
   hypre_CSRMatrix* A_no_zeros;
   HYPRE_Int* B_i = hypre_BCSRMatrixI(B);
   HYPRE_Int* B_j = hypre_BCSRMatrixJ(B);
@@ -358,7 +358,7 @@ hypre_BCSRMatrixToCSRMatrix(hypre_BCSRMatrix* B) {
   HYPRE_Int num_nonzero_blocks = hypre_BCSRMatrixNumNonzeroBlocks(B);
   HYPRE_Int num_nonzeros = num_nonzero_blocks*num_rows_per_block*num_cols_per_block;
   HYPRE_Int i, j, k, l, d, jB;
-  double* block = hypre_CTAlloc(double, num_rows_per_block*num_cols_per_block);
+  HYPRE_Real* block = hypre_CTAlloc(HYPRE_Real, num_rows_per_block*num_cols_per_block);
 
   A = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
   hypre_CSRMatrixInitialize(A);

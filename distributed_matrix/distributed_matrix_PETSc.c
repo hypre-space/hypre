@@ -104,7 +104,7 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
@@ -127,7 +127,7 @@ hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE

@@ -20,11 +20,11 @@ typedef struct
 {
    MPI_Comm                comm;
                        
-   double                  tol;                /* not yet used */
+   HYPRE_Real              tol;                /* not yet used */
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;         /* not yet used */
    HYPRE_Int               zero_guess;
-   double                  weight;
+   HYPRE_Real              weight;
                          
    HYPRE_Int               num_nodesets;
    HYPRE_Int              *nodeset_sizes;
@@ -48,14 +48,14 @@ typedef struct
    hypre_ComputePkg      **compute_pkgs;
 
    /* pointers to local storage used to invert diagonal blocks */
-   double               **A_loc;
-   double                *x_loc;
+   HYPRE_Real           **A_loc;
+   HYPRE_Real            *x_loc;
 
    /* pointers for vector and matrix data */	
-   double              ***Ap;
-   double               **bp;
-   double               **xp;
-   double               **tp;
+   HYPRE_Real          ***Ap;
+   HYPRE_Real           **bp;
+   HYPRE_Real           **xp;
+   HYPRE_Real           **tp;
 
 
    /* log info (always logged) */
@@ -187,12 +187,12 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
    hypre_SStructPVector  *t;
    HYPRE_Int            **diag_rank;
-   double               **A_loc;
-   double                *x_loc;
-   double              ***Ap;
-   double               **bp;
-   double               **xp;
-   double               **tp;
+   HYPRE_Real           **A_loc;
+   HYPRE_Real            *x_loc;
+   HYPRE_Real          ***Ap;
+   HYPRE_Real           **bp;
+   HYPRE_Real           **xp;
+   HYPRE_Real           **tp;
 
    hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
@@ -224,7 +224,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_BoxArray        *new_box_a;
    hypre_Box             *new_box;
 
-   double                 scale;
+   HYPRE_Real             scale;
    HYPRE_Int              frac;
 
    HYPRE_Int              i, j, k, p, m, s, compute_i;
@@ -277,22 +277,22 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
 
-   x_loc    = hypre_TAlloc(double   , hypre_NumThreads()*nvars);
-   A_loc    = hypre_TAlloc(double  *, hypre_NumThreads()*nvars);
-   A_loc[0] = hypre_TAlloc(double   , hypre_NumThreads()*nvars*nvars);
+   x_loc    = hypre_TAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
+   A_loc    = hypre_TAlloc(HYPRE_Real  *, hypre_NumThreads()*nvars);
+   A_loc[0] = hypre_TAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
       A_loc[vi] = A_loc[0] + vi*nvars;
    }
 
    /* Allocate pointers for vector and matrix */
-   bp = hypre_TAlloc(double  *, nvars);
-   xp = hypre_TAlloc(double  *, nvars);
-   tp = hypre_TAlloc(double  *, nvars);
-   Ap = hypre_TAlloc(double **, nvars);
+   bp = hypre_TAlloc(HYPRE_Real  *, nvars);
+   xp = hypre_TAlloc(HYPRE_Real  *, nvars);
+   tp = hypre_TAlloc(HYPRE_Real  *, nvars);
+   Ap = hypre_TAlloc(HYPRE_Real **, nvars);
    for (vi = 0; vi < nvars; vi++)
    {
-      Ap[vi] = hypre_TAlloc(double  *, nvars);
+      Ap[vi] = hypre_TAlloc(HYPRE_Real  *, nvars);
    }
 
    /*----------------------------------------------------------
@@ -541,7 +541,7 @@ hypre_NodeRelax(  void               *relax_vdata,
 
    HYPRE_Int              max_iter         = (relax_data -> max_iter);
    HYPRE_Int              zero_guess       = (relax_data -> zero_guess);
-   double                 weight           = (relax_data -> weight);
+   HYPRE_Real             weight           = (relax_data -> weight);
    HYPRE_Int              num_nodesets     = (relax_data -> num_nodesets);
    HYPRE_Int             *nodeset_ranks    = (relax_data -> nodeset_ranks);
    hypre_Index           *nodeset_strides  = (relax_data -> nodeset_strides);
@@ -569,15 +569,15 @@ hypre_NodeRelax(  void               *relax_vdata,
    HYPRE_Int              xi;
    HYPRE_Int              ti;
                         
-   double               **tA_loc = (relax_data -> A_loc);
-   double                *tx_loc = (relax_data -> x_loc);
-   double               **A_loc;
-   double                *x_loc;
+   HYPRE_Real           **tA_loc = (relax_data -> A_loc);
+   HYPRE_Real            *tx_loc = (relax_data -> x_loc);
+   HYPRE_Real           **A_loc;
+   HYPRE_Real            *x_loc;
 
-   double              ***Ap = (relax_data -> Ap);
-   double               **bp = (relax_data -> bp);
-   double               **xp = (relax_data -> xp);
-   double               **tp = (relax_data -> tp);
+   HYPRE_Real          ***Ap = (relax_data -> Ap);
+   HYPRE_Real           **bp = (relax_data -> bp);
+   HYPRE_Real           **xp = (relax_data -> xp);
+   HYPRE_Real           **tp = (relax_data -> tp);
 
    hypre_StructMatrix    *A_block;
    hypre_StructVector    *x_block;
@@ -981,7 +981,7 @@ hypre_NodeRelax(  void               *relax_vdata,
 
 HYPRE_Int
 hypre_NodeRelaxSetTol( void   *relax_vdata,
-                       double  tol         )
+                       HYPRE_Real  tol         )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
 
@@ -1023,7 +1023,7 @@ hypre_NodeRelaxSetZeroGuess( void *relax_vdata,
 
 HYPRE_Int
 hypre_NodeRelaxSetWeight( void    *relax_vdata,
-                          double   weight      )
+                          HYPRE_Real   weight      )
 {
    hypre_NodeRelaxData *relax_data = relax_vdata;
 

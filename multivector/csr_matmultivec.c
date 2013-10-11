@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Matvec functions for hypre_CSRMatrix class.
@@ -29,17 +26,17 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
-                           hypre_Multivector *x, double beta,
+hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
+                           hypre_Multivector *x, HYPRE_Complex beta,
                            hypre_Multivector *y)
 {
-   double *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int    *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int    *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int    num_rows = hypre_CSRMatrixNumRows(A);
    HYPRE_Int    num_cols = hypre_CSRMatrixNumCols(A);
-   double *x_data = hypre_MultivectorData(x);
-   double *y_data = hypre_MultivectorData(y);
+   HYPRE_Complex *x_data = hypre_MultivectorData(x);
+   HYPRE_Complex *y_data = hypre_MultivectorData(y);
    HYPRE_Int    x_size = hypre_MultivectorSize(x);
    HYPRE_Int    y_size = hypre_MultivectorSize(y);
    HYPRE_Int    num_vectors = hypre_MultivectorNumVectors(x);
@@ -47,7 +44,7 @@ hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
    HYPRE_Int    *y_active_ind= y->active_indices;
    HYPRE_Int    num_active_vectors = x->num_active_vectors;
    HYPRE_Int    i, j, jj, m, ierr = 0, optimize;
-   double temp, tempx, xpar=0.7, *xptr, *yptr;
+   HYPRE_Complex temp, tempx, xpar=0.7, *xptr, *yptr;
    
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -189,24 +186,24 @@ hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatMultivecT(double alpha, hypre_CSRMatrix *A,
-                            hypre_Multivector *x, double beta,
+hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
+                            hypre_Multivector *x, HYPRE_Complex beta,
                             hypre_Multivector *y)
 {
-   double *A_data    = hypre_CSRMatrixData(A);
+   HYPRE_Complex *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int    *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int    *A_j       = hypre_CSRMatrixJ(A);
    HYPRE_Int    num_rows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int    num_cols  = hypre_CSRMatrixNumCols(A);
-   double *x_data = hypre_MultivectorData(x);
-   double *y_data = hypre_MultivectorData(y);
+   HYPRE_Complex *x_data = hypre_MultivectorData(x);
+   HYPRE_Complex *y_data = hypre_MultivectorData(y);
    HYPRE_Int    x_size = hypre_MultivectorSize(x);
    HYPRE_Int    y_size = hypre_MultivectorSize(y);
    HYPRE_Int    num_vectors = hypre_MultivectorNumVectors(x);
    HYPRE_Int    *x_active_ind= x->active_indices;
    HYPRE_Int    *y_active_ind= y->active_indices;
    HYPRE_Int    num_active_vectors = x->num_active_vectors;
-   double temp;
+   HYPRE_Complex temp;
    HYPRE_Int    i, jv, jj, size, ierr = 0;
 
    /*---------------------------------------------------------------------

@@ -39,19 +39,19 @@ HYPRE_Int          min_point;
 HYPRE_Int          max_point;
 HYPRE_Int          point_type;
 HYPRE_Int          relax_type;
-double       *D_mat;
-double       *S_vec;
+HYPRE_Real   *D_mat;
+HYPRE_Real   *S_vec;
 {
-   double         *a  = hypre_MatrixData(A);
+   HYPRE_Real     *a  = hypre_MatrixData(A);
    HYPRE_Int            *ia = hypre_MatrixIA(A);
    HYPRE_Int            *ja = hypre_MatrixJA(A);
    HYPRE_Int             n  = hypre_MatrixSize(A);
 	          
-   double         *up = hypre_VectorData(u);
-   double         *fp = hypre_VectorData(f);
+   HYPRE_Real     *up = hypre_VectorData(u);
+   HYPRE_Real     *fp = hypre_VectorData(f);
    HYPRE_Int            *icg = hypre_VectorIntData(ICG);
    HYPRE_Int            *iv = hypre_VectorIntData(IV);
-   double          res;
+   HYPRE_Real      res;
 	          
    HYPRE_Int             i, idx, i_start, i_start_next, i_end;
    HYPRE_Int             j, jj, j_low, j_high, nn;
@@ -60,9 +60,9 @@ double       *S_vec;
    HYPRE_Int             num_vars;
    HYPRE_Int             relax_error = 0;
 
-   double         *A_mat;
-   double         *x_vec;
-   double         *b_vec;
+   HYPRE_Real     *A_mat;
+   HYPRE_Real     *x_vec;
+   HYPRE_Real     *b_vec;
 
 
    /*-----------------------------------------------------------------------
@@ -180,8 +180,8 @@ double       *S_vec;
 
       num_vars = hypre_MatrixSize(A);
 
-      A_mat = hypre_CTAlloc(double, num_vars*num_vars);
-      b_vec = hypre_CTAlloc(double, num_vars);    
+      A_mat = hypre_CTAlloc(HYPRE_Real, num_vars*num_vars);
+      b_vec = hypre_CTAlloc(HYPRE_Real, num_vars);    
 
 
                                     /* Load CSR matrix into A_mat */
@@ -217,13 +217,13 @@ double       *S_vec;
  *------------------------------------------------------------------------ */
 
 HYPRE_Int gselim(A,x,n)
-double *A;
-double *x;
+HYPRE_Real *A;
+HYPRE_Real *x;
 HYPRE_Int n;
 {
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;
-   double factor;
+   HYPRE_Real factor;
    
    if (n==1)                           /* A is 1x1 */  
    {

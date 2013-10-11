@@ -42,8 +42,9 @@ FILES =\
  exchange_data.c\
  fortran_matrix.c\
  hypre_ap.c\
- hypre_printf.c\
+ hypre_complex.c\
  hypre_memory.c\
+ hypre_printf.c\
  hypre_qsort.c\
  memory_dmalloc.c\
  mpistubs.c\

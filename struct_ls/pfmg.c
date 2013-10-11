@@ -129,7 +129,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 
 HYPRE_Int
 hypre_PFMGSetTol( void   *pfmg_vdata,
-                  double  tol       )
+                  HYPRE_Real  tol       )
 {
    hypre_PFMGData *pfmg_data = pfmg_vdata;
  
@@ -140,7 +140,7 @@ hypre_PFMGSetTol( void   *pfmg_vdata,
 
 HYPRE_Int
 hypre_PFMGGetTol( void   *pfmg_vdata,
-                  double *tol       )
+                  HYPRE_Real *tol       )
 {
    hypre_PFMGData *pfmg_data = pfmg_vdata;
  
@@ -278,7 +278,7 @@ hypre_PFMGGetRelaxType( void *pfmg_vdata,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_PFMGSetJacobiWeight( void  *pfmg_vdata,
-                           double weight )
+                           HYPRE_Real weight )
 {
    hypre_PFMGData *pfmg_data = pfmg_vdata;
 
@@ -290,7 +290,7 @@ hypre_PFMGSetJacobiWeight( void  *pfmg_vdata,
 
 HYPRE_Int
 hypre_PFMGGetJacobiWeight( void  *pfmg_vdata,
-                           double *weight )
+                           HYPRE_Real *weight )
 {
    hypre_PFMGData *pfmg_data = pfmg_vdata;
 
@@ -405,7 +405,7 @@ hypre_PFMGGetSkipRelax( void *pfmg_vdata,
 
 HYPRE_Int
 hypre_PFMGSetDxyz( void   *pfmg_vdata,
-                   double *dxyz       )
+                   HYPRE_Real *dxyz       )
 {
    hypre_PFMGData *pfmg_data = pfmg_vdata;
 
@@ -492,8 +492,8 @@ hypre_PFMGPrintLogging( void *pfmg_vdata,
    HYPRE_Int       num_iterations  = (pfmg_data -> num_iterations);
    HYPRE_Int       logging   = (pfmg_data -> logging);
    HYPRE_Int    print_level  = (pfmg_data -> print_level);
-   double         *norms     = (pfmg_data -> norms);
-   double         *rel_norms = (pfmg_data -> rel_norms);
+   HYPRE_Real     *norms     = (pfmg_data -> norms);
+   HYPRE_Real     *rel_norms = (pfmg_data -> rel_norms);
 
    if (myid == 0)
    {
@@ -518,14 +518,14 @@ hypre_PFMGPrintLogging( void *pfmg_vdata,
 
 HYPRE_Int
 hypre_PFMGGetFinalRelativeResidualNorm( void   *pfmg_vdata,
-                                        double *relative_residual_norm )
+                                        HYPRE_Real *relative_residual_norm )
 {
    hypre_PFMGData *pfmg_data = pfmg_vdata;
 
    HYPRE_Int       max_iter        = (pfmg_data -> max_iter);
    HYPRE_Int       num_iterations  = (pfmg_data -> num_iterations);
    HYPRE_Int       logging         = (pfmg_data -> logging);
-   double         *rel_norms       = (pfmg_data -> rel_norms);
+   HYPRE_Real     *rel_norms       = (pfmg_data -> rel_norms);
             
    if (logging > 0)
    {

@@ -40,7 +40,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 {
    hypre_PFMGData       *pfmg_data = pfmg_vdata;
 
-   double                tol             = (pfmg_data -> tol);
+   HYPRE_Real            tol             = (pfmg_data -> tol);
    HYPRE_Int             max_iter        = (pfmg_data -> max_iter);
    HYPRE_Int             rel_change      = (pfmg_data -> rel_change);
    HYPRE_Int             zero_guess      = (pfmg_data -> zero_guess);
@@ -59,12 +59,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    void                **restrict_data_l = (pfmg_data -> restrict_data_l);
    void                **interp_data_l   = (pfmg_data -> interp_data_l);
    HYPRE_Int             logging         = (pfmg_data -> logging);
-   double               *norms           = (pfmg_data -> norms);
-   double               *rel_norms       = (pfmg_data -> rel_norms);
+   HYPRE_Real           *norms           = (pfmg_data -> norms);
+   HYPRE_Real           *rel_norms       = (pfmg_data -> rel_norms);
    HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
-   double                b_dot_b = 0, r_dot_r, eps = 0;
-   double                e_dot_e, x_dot_x;
+   HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
+   HYPRE_Real            e_dot_e, x_dot_x;
                     
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;

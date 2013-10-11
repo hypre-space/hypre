@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "multivector.h"
 
 #ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
@@ -25,19 +22,19 @@
 
 typedef struct {
 
-  double	absolute;
-  double	relative;
+  HYPRE_Real	absolute;
+  HYPRE_Real	relative;
 
 } lobpcg_Tolerance;
 
 typedef struct {
 
 /* these pointers should point to 2 functions providing standard lapack  functionality */
-   HYPRE_Int   (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *
+   HYPRE_Int   (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
         lda, HYPRE_Int *info);
    HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
-        n, double *a, HYPRE_Int *lda, double *b, HYPRE_Int *ldb,
-        double *w, double *work, HYPRE_Int *lwork, HYPRE_Int *info);
+        n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
+        HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 } lobpcg_BLASLAPACKFunctions;
 
@@ -62,26 +59,26 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 
 /* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
 ze> is the width of multivector "blockVectorX" */
-              double * lambda_values,
+              HYPRE_Real * lambda_values,
 
 /* eigenvalues history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matrix s
 tored
 in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see next
 argument; If you don't need eigenvalues history, provide NULL in this entry */
-              double * lambdaHistory_values,
+              HYPRE_Real * lambdaHistory_values,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
               HYPRE_Int lambdaHistory_gh,
 
 /* residual norms; argument should point to array of <blocksize> doubles */
-              double * residualNorms_values,
+              HYPRE_Real * residualNorms_values,
 
 /* residual norms history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matri
 x
 stored in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see
 next
 argument If you don't need residual norms history, provide NULL in this entry */
-              double * residualNormsHistory_values ,
+              HYPRE_Real * residualNormsHistory_values ,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
               HYPRE_Int residualNormsHistory_gh

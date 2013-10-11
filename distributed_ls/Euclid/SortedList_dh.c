@@ -173,12 +173,12 @@ SRecord * SortedList_dhGetSmallestLowerTri(SortedList_dh sList)
 
 #undef __FUNC__
 #define __FUNC__ "SortedList_dhPermuteAndInsert"
-bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, double thresh)
+bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, HYPRE_Real thresh)
 {
   START_FUNC_DH
   bool wasInserted = false;
   HYPRE_Int col = sr->col;
-  double testVal = fabs(sr->val);
+  HYPRE_Real testVal = fabs(sr->val);
   HYPRE_Int beg_row = sList->beg_row, end_row = beg_row + sList->m;
   HYPRE_Int beg_rowP = sList->beg_rowP;
 

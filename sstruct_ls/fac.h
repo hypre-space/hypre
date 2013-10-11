@@ -62,11 +62,11 @@ typedef struct
    HYPRE_SStructSolver    csolver;
    HYPRE_SStructSolver    cprecond;
 
-   double                 tol;
+   HYPRE_Real             tol;
    HYPRE_Int              max_cycles;
    HYPRE_Int              zero_guess;
    HYPRE_Int              relax_type;
-   double                 jacobi_weight;  /* weighted jacobi weight */
+   HYPRE_Real             jacobi_weight;  /* weighted jacobi weight */
    HYPRE_Int              usr_jacobi_weight; /* indicator flag for user weight */
 
    HYPRE_Int              num_pre_smooth;
@@ -77,8 +77,8 @@ typedef struct
    HYPRE_Int              time_index;
    HYPRE_Int              rel_change;
    HYPRE_Int              logging;
-   double                *norms;
-   double                *rel_norms;
+   HYPRE_Real            *norms;
+   HYPRE_Real            *rel_norms;
 
 
 } hypre_FACData;

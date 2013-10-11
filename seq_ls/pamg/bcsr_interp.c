@@ -73,7 +73,7 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
 
   hypre_BCSRMatrixBlock* temp;
 
-  double* data;
+  HYPRE_Real* data;
    
   /*-----------------------------------------------------------------------
    *  Access the CSR vectors for A and S. Also get size of fine grid.
@@ -160,7 +160,7 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
    *  Intialize some stuff.
    *-----------------------------------------------------------------------*/
 
-  data = hypre_CTAlloc(double, num_rows_per_block*num_cols_per_block);
+  data = hypre_CTAlloc(HYPRE_Real, num_rows_per_block*num_cols_per_block);
   zero = hypre_BCSRMatrixBlockCreate(num_rows_per_block, num_cols_per_block);
   hypre_BCSRMatrixBlockInitialise(zero);
   hypre_BCSRMatrixBlockFillData(zero, data);
@@ -396,7 +396,7 @@ hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
   hypre_BCSRMatrixBlock* temp;
   hypre_BCSRMatrixBlock* temp2;
 
-  double* data;
+  HYPRE_Real* data;
    
   /*-----------------------------------------------------------------------
    *  Access the CSR vectors for A and S. Also get size of fine grid.
@@ -483,7 +483,7 @@ hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, HYPRE_Int* CF_marker,
    *  Intialize some stuff.
    *-----------------------------------------------------------------------*/
 
-  data = hypre_CTAlloc(double, num_rows_per_block*num_cols_per_block);
+  data = hypre_CTAlloc(HYPRE_Real, num_rows_per_block*num_cols_per_block);
   zero = hypre_BCSRMatrixBlockCreate(num_rows_per_block, num_cols_per_block);
   hypre_BCSRMatrixBlockInitialise(zero);
   hypre_BCSRMatrixBlockFillData(zero, data);

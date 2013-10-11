@@ -26,7 +26,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
 		   HYPRE_Int			n_coarse,
 		   HYPRE_Int			num_relax_steps,
 		   HYPRE_Int			relax_type,
-		   double	        relax_weight,
+		   HYPRE_Real	        relax_weight,
                    hypre_CSRMatrix     **P_ptr )
 {
    
@@ -37,9 +37,9 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
    hypre_Vector	   *zero_vector;
    hypre_Vector	   *x_vector;
    hypre_Vector	   *tmp_vector;
-   double          *x_data;
+   HYPRE_Real      *x_data;
 
-   double          *P_data;
+   HYPRE_Real      *P_data;
    HYPRE_Int             *P_i;
    HYPRE_Int             *P_j;
 
@@ -57,7 +57,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
    HYPRE_Int              kk,k1;
    HYPRE_Int              extended_nghbr;
    
-   double           summ, sump;
+   HYPRE_Real       summ, sump;
    
    /*-----------------------------------------------------------------------
     *  Access the CSR vectors for A and S. Also get size of fine grid.
@@ -146,7 +146,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
    P_size = P_i[n_fine];
 
    P_j    = hypre_CTAlloc(HYPRE_Int, P_size);
-   P_data = hypre_CTAlloc(double, P_size);
+   P_data = hypre_CTAlloc(HYPRE_Real, P_size);
    zero_vector = hypre_SeqVectorCreate(n_fine);
    x_vector = hypre_SeqVectorCreate(n_fine);
    tmp_vector = hypre_SeqVectorCreate(n_fine);

@@ -70,14 +70,14 @@ hypre_AMGCycle( void           *amg_vdata,
    HYPRE_Int       num_sweep;
    HYPRE_Int       relax_type;
    HYPRE_Int       relax_points;
-   double   *relax_weight;
+   HYPRE_Real   *relax_weight;
    HYPRE_Int use_block_flag;
 
-   double    alpha;
-   double    beta;
+   HYPRE_Real    alpha;
+   HYPRE_Real    beta;
 #if 0
-   double   *D_mat;
-   double   *S_vec;
+   HYPRE_Real   *D_mat;
+   HYPRE_Real   *S_vec;
 #endif
    
    /* Acquire data and allocate storage */

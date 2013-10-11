@@ -54,8 +54,8 @@ HYPRE_Int SetStencilBndry
 HYPRE_Int
 AddValuesMatrix( bHYPRE_StructMatrix A_b,
                  HYPRE_Int dim, HYPRE_Int nblocks, HYPRE_Int ** ilower, HYPRE_Int ** iupper,
-                 double cx, double cy, double cz,
-                 double conx, double cony, double conz,
+                 HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz,
+                 HYPRE_Real conx, HYPRE_Real cony, HYPRE_Real conz,
                  HYPRE_Int symmetric, HYPRE_Int constant_coefficient );
 
 HYPRE_Int
@@ -69,8 +69,8 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 P, Q, R;
    HYPRE_Int                 bx, by, bz;
    HYPRE_Int                 px, py, pz;
-   double              cx, cy, cz;
-   double              conx, cony, conz;
+   HYPRE_Real          cx, cy, cz;
+   HYPRE_Real          conx, cony, conz;
    HYPRE_Int                 solver_id;
    HYPRE_Int                 relax, rap;
 
@@ -104,7 +104,7 @@ main( HYPRE_Int   argc,
 
    HYPRE_Int                 num_iterations;
    HYPRE_Int                 time_index;
-   double              final_res_norm;
+   HYPRE_Real          final_res_norm;
 
    HYPRE_Int                 num_procs, myid;
 
@@ -128,7 +128,7 @@ main( HYPRE_Int   argc,
    bHYPRE_StructStencil stencil;
 
    HYPRE_Int                *stencil_indices;
-   double             *values;
+   HYPRE_Real         *values;
 
    HYPRE_Int                 i, s;
 /* not currently used   HYPRE_Int                 isave, d;*/
@@ -637,7 +637,7 @@ main( HYPRE_Int   argc,
     * Set up the linear system
     *-----------------------------------------------------------*/
 
-   values = hypre_CTAlloc(double, volume);
+   values = hypre_CTAlloc(HYPRE_Real, volume);
 
    b_SV = bHYPRE_StructVector_Create( bmpicomm, grid, &_ex );
 
@@ -1292,7 +1292,7 @@ HYPRE_Int SetStencilBndry
   hypre_Box         *box;
   hypre_Box         *dummybox;
   hypre_Box         *boundingbox;
-  double            *values;
+  HYPRE_Real        *values;
   HYPRE_Int                volume, dim;
   HYPRE_Int               *stencil_indices;
   HYPRE_Int                constant_coefficient;
@@ -1353,7 +1353,7 @@ HYPRE_Int SetStencilBndry
      {
         for (ib = 0; ib < size; ib++)
         {
-           values = hypre_CTAlloc(double, vol[ib]);
+           values = hypre_CTAlloc(HYPRE_Real, vol[ib]);
         
            for (i = 0; i < vol[ib]; i++)
            {
@@ -1415,18 +1415,18 @@ HYPRE_Int SetStencilBndry
 HYPRE_Int
 AddValuesMatrix( bHYPRE_StructMatrix A_b,
                  HYPRE_Int dim, HYPRE_Int nblocks, HYPRE_Int ** ilower, HYPRE_Int ** iupper,
-                 double cx, double cy, double cz,
-                 double conx, double cony, double conz,
+                 HYPRE_Real cx, HYPRE_Real cy, HYPRE_Real cz,
+                 HYPRE_Real conx, HYPRE_Real cony, HYPRE_Real conz,
                  HYPRE_Int symmetric, HYPRE_Int constant_coefficient )
 {
 
   HYPRE_Int ierr=0;
   HYPRE_Int                 i, s, bi;
-  double             *values;
-  double              east,west;
-  double              north,south;
-  double              top,bottom;
-  double              center;
+  HYPRE_Real         *values;
+  HYPRE_Real          east,west;
+  HYPRE_Real          north,south;
+  HYPRE_Real          top,bottom;
+  HYPRE_Real          center;
   HYPRE_Int                 volume ;
   HYPRE_Int                *stencil_indices;
   HYPRE_Int                 stencil_size, size;
@@ -1462,7 +1462,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
               {
                  volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
               }
-              values   = hypre_CTAlloc(double, stencil_size*volume);
+              values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
 
               for (i = 0; i < stencil_size*volume; i += stencil_size)
               {
@@ -1496,7 +1496,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
      }
      else if ( constant_coefficient==1 )
      {
-        values   = hypre_CTAlloc(double, stencil_size);
+        values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
         switch (dim)
         {
         case 1:
@@ -1527,7 +1527,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
         hypre_assert( constant_coefficient==2 );
 
         /* stencil index for the center equals dim, so it's easy to leave out */
-        values   = hypre_CTAlloc(double, stencil_size-1);
+        values   = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
         switch (dim)
         {
         case 1:
@@ -1557,7 +1557,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
               {
                  volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
               }
-              values   = hypre_CTAlloc(double, volume);
+              values   = hypre_CTAlloc(HYPRE_Real, volume);
 
               for ( i=0; i < volume; ++i )
               {
@@ -1614,7 +1614,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
               {
                  volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
               }
-              values   = hypre_CTAlloc(double, stencil_size*volume);
+              values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
 
               for (i = 0; i < stencil_size*volume; i += stencil_size)
               {
@@ -1654,7 +1654,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
      }
      else if ( constant_coefficient==1 )
      {
-        values = hypre_CTAlloc( double, stencil_size );
+        values = hypre_CTAlloc( HYPRE_Real, stencil_size );
 
         switch (dim)
         {
@@ -1690,7 +1690,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
      else
      {
         hypre_assert( constant_coefficient==2 );
-        values = hypre_CTAlloc( double, stencil_size-1 );
+        values = hypre_CTAlloc( HYPRE_Real, stencil_size-1 );
         switch (dim)
         {  /* no center in stencil_indices and values */
         case 1:
@@ -1741,7 +1741,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
               {
                  volume *= ( iupper[bi][i] - ilower[bi][i] + 1 );
               }
-              values   = hypre_CTAlloc(double, volume);
+              values   = hypre_CTAlloc(HYPRE_Real, volume);
 
               for ( i=0; i < volume; ++i )
               {

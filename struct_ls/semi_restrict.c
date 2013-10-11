@@ -127,9 +127,9 @@ hypre_SemiRestrict( void               *restrict_vdata,
    HYPRE_Int               rci;
    HYPRE_Int               constant_coefficient;
 
-   double                 *Rp0, *Rp1;
-   double                 *rp, *rp0, *rp1;
-   double                 *rcp;
+   HYPRE_Real             *Rp0, *Rp1;
+   HYPRE_Real             *rp, *rp0, *rp1;
+   HYPRE_Real             *rcp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;

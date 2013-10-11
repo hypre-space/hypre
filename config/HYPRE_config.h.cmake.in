@@ -19,6 +19,9 @@
 /* Use long long int for HYPRE_Int */
 #cmakedefine HYPRE_BIGINT
 
+/* Use complex values */
+#cmakedefine HYPRE_COMPLEX
+
 /* Define to be the max dimension size (must be at least 3) */
 #define HYPRE_MAXDIM 3
 

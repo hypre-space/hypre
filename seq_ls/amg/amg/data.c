@@ -33,9 +33,9 @@ hypre_AMGData   *hypre_AMGNewData(levmax, ncg, ecg, nwt, ewt, nstr,
 		       log_file_name)
 HYPRE_Int     levmax;
 HYPRE_Int     ncg;
-double  ecg;
+HYPRE_Real  ecg;
 HYPRE_Int     nwt;
-double  ewt;
+HYPRE_Real  ewt;
 HYPRE_Int     nstr;
 HYPRE_Int     ncyc;
 HYPRE_Int    *mu;

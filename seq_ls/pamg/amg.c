@@ -34,9 +34,9 @@ hypre_AMGInitialize()
 
    /* setup params */
    HYPRE_Int      max_levels;
-   double   strong_threshold;
-   double   A_trunc_factor;
-   double   P_trunc_factor;
+   HYPRE_Real   strong_threshold;
+   HYPRE_Real   A_trunc_factor;
+   HYPRE_Real   P_trunc_factor;
    HYPRE_Int      A_max_elmts;
    HYPRE_Int      P_max_elmts;
    HYPRE_Int      coarsen_type;
@@ -53,8 +53,8 @@ hypre_AMGInitialize()
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_type;    
  
-   double  *relax_weight;
-   double   tol;
+   HYPRE_Real  *relax_weight;
+   HYPRE_Real   tol;
 
    HYPRE_Int     *num_grid_sweeps;  
    HYPRE_Int     *grid_relax_type;   
@@ -95,7 +95,7 @@ hypre_AMGInitialize()
    max_iter  = 100;
    cycle_type = 1;
    tol = 1.0e-7;
-   relax_weight = hypre_CTAlloc(double, max_levels);
+   relax_weight = hypre_CTAlloc(HYPRE_Real, max_levels);
    schwarz_option = hypre_CTAlloc(HYPRE_Int, max_levels);
    for (j = 0; j < max_levels; j++)
    {
@@ -248,7 +248,7 @@ hypre_AMGSetMaxLevels( void *data,
 
 HYPRE_Int
 hypre_AMGSetStrongThreshold( void     *data,
-                             double    strong_threshold )
+                             HYPRE_Real    strong_threshold )
 {
    HYPRE_Int ierr = 0;
    hypre_AMGData  *amg_data = data;
@@ -272,7 +272,7 @@ hypre_AMGSetMode( void     *data,
 
 HYPRE_Int
 hypre_AMGSetATruncFactor( void     *data,
-                          double    A_trunc_factor)
+                          HYPRE_Real    A_trunc_factor)
 {
    HYPRE_Int ierr = 0;
    hypre_AMGData  *amg_data = data;
@@ -284,7 +284,7 @@ hypre_AMGSetATruncFactor( void     *data,
 
 HYPRE_Int
 hypre_AMGSetPTruncFactor( void     *data,
-                          double    P_trunc_factor)
+                          HYPRE_Real    P_trunc_factor)
 {
    HYPRE_Int ierr = 0;
    hypre_AMGData  *amg_data = data;
@@ -416,7 +416,7 @@ hypre_AMGSetCycleType( void  *data,
 
 HYPRE_Int
 hypre_AMGSetTol( void     *data,
-                 double    tol  )
+                 HYPRE_Real    tol  )
 {
    HYPRE_Int ierr = 0;
    hypre_AMGData  *amg_data = data;
@@ -486,7 +486,7 @@ hypre_AMGSetGridRelaxPoints( void     *data,
 
 HYPRE_Int
 hypre_AMGSetRelaxWeight( void     *data,
-                         double   *relax_weight )
+                         HYPRE_Real   *relax_weight )
 {
    HYPRE_Int ierr = 0;
    hypre_AMGData  *amg_data = data;

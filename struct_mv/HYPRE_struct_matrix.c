@@ -62,7 +62,7 @@ HYPRE_StructMatrixSetValues( HYPRE_StructMatrix  matrix,
                              HYPRE_Int          *grid_index,
                              HYPRE_Int           num_stencil_indices,
                              HYPRE_Int          *stencil_indices,
-                             double             *values )
+                             HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
    HYPRE_Int    d;
@@ -89,7 +89,7 @@ HYPRE_StructMatrixGetValues( HYPRE_StructMatrix  matrix,
                              HYPRE_Int          *grid_index,
                              HYPRE_Int           num_stencil_indices,
                              HYPRE_Int          *stencil_indices,
-                             double             *values )
+                             HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
    HYPRE_Int    d;
@@ -117,7 +117,7 @@ HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *iupper,
                                 HYPRE_Int           num_stencil_indices,
                                 HYPRE_Int          *stencil_indices,
-                                double             *values )
+                                HYPRE_Complex      *values )
 {
    hypre_Index         new_ilower;
    hypre_Index         new_iupper;
@@ -153,7 +153,7 @@ HYPRE_StructMatrixGetBoxValues( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int          *iupper,
                                 HYPRE_Int           num_stencil_indices,
                                 HYPRE_Int          *stencil_indices,
-                                double             *values )
+                                HYPRE_Complex      *values )
 {
    hypre_Index         new_ilower;
    hypre_Index         new_iupper;
@@ -185,9 +185,9 @@ HYPRE_StructMatrixGetBoxValues( HYPRE_StructMatrix  matrix,
 
 HYPRE_Int 
 HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
-                                     HYPRE_Int       num_stencil_indices,
-                                     HYPRE_Int      *stencil_indices,
-                                     double         *values )
+                                     HYPRE_Int          num_stencil_indices,
+                                     HYPRE_Int         *stencil_indices,
+                                     HYPRE_Complex     *values )
 {
    return hypre_StructMatrixSetConstantValues(
       matrix, num_stencil_indices, stencil_indices, values, 0 );
@@ -202,7 +202,7 @@ HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix  matrix,
                                HYPRE_Int          *grid_index,
                                HYPRE_Int           num_stencil_indices,
                                HYPRE_Int          *stencil_indices,
-                               double             *values )
+                               HYPRE_Complex      *values )
 {
    hypre_Index         new_grid_index;
    HYPRE_Int           d;
@@ -230,7 +230,7 @@ HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
                                   HYPRE_Int          *iupper,
                                   HYPRE_Int           num_stencil_indices,
                                   HYPRE_Int          *stencil_indices,
-                                  double             *values )
+                                  HYPRE_Complex      *values )
 {
    hypre_Index         new_ilower;
    hypre_Index         new_iupper;
@@ -262,9 +262,9 @@ HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
 
 HYPRE_Int 
 HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
-                                       HYPRE_Int       num_stencil_indices,
-                                       HYPRE_Int      *stencil_indices,
-                                       double         *values )
+                                       HYPRE_Int          num_stencil_indices,
+                                       HYPRE_Int         *stencil_indices,
+                                       HYPRE_Complex     *values )
 {
    return hypre_StructMatrixSetConstantValues(
       matrix, num_stencil_indices, stencil_indices, values, 1 );
@@ -356,10 +356,10 @@ HYPRE_StructMatrixPrint( const char         *filename,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructMatrixMatvec( double alpha,
+HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
                           HYPRE_StructMatrix A,
                           HYPRE_StructVector x,
-                          double beta,
+                          HYPRE_Complex      beta,
                           HYPRE_StructVector y     )
 {
    return ( hypre_StructMatvec( alpha, (hypre_StructMatrix *) A,

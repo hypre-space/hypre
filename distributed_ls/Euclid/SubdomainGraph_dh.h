@@ -63,7 +63,7 @@ struct _subdomain_dh {
   Hash_i_dh o2n_ext;   /* permutation for external columns */
   Hash_i_dh n2o_ext;   /* inverse permutation for external columns */
 
-  double timing[TIMING_BINS_SG];
+  HYPRE_Real timing[TIMING_BINS_SG];
   bool debug;
 };
 

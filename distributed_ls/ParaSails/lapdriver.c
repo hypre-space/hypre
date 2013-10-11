@@ -141,7 +141,7 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
 
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              dx, dy, dz;
+   HYPRE_Real          dx, dy, dz;
    HYPRE_Int                 p, q, r;
    HYPRE_Int                 lowerx, lowery, lowerz;
    HYPRE_Int                 upperx, uppery, upperz;
@@ -149,13 +149,13 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
    HYPRE_Int num_rows;
    HYPRE_Int row;
    HYPRE_Int inds[100], *inds_p;
-   double coefs[100], *coefs_p;
+   HYPRE_Real coefs[100], *coefs_p;
     HYPRE_Int beg_row, end_row;
-   double time0, time1;
-    double setup_time, solve_time;
-    double max_setup_time, max_solve_time;
+   HYPRE_Real time0, time1;
+    HYPRE_Real setup_time, solve_time;
+    HYPRE_Real max_setup_time, max_solve_time;
 
-   double *x0, *b;
+   HYPRE_Real *x0, *b;
    HYPRE_Int i;
    Matrix *A;
    ParaSails *ps;
@@ -211,12 +211,12 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
    beg_row = mype*(nx*ny*nz)+1;
    end_row = (mype+1)*(nx*ny*nz);
 
-    x0 = (double *) malloc((end_row-beg_row+1) * sizeof(double));
-    b  = (double *) malloc((end_row-beg_row+1) * sizeof(double));
+    x0 = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
+    b  = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
 
         for (i=0; i<end_row-beg_row+1; i++)
 	{
-            b[i] = (double) (2*rand()) / (double) RAND_MAX - 1.0;
+            b[i] = (HYPRE_Real) (2*rand()) / (HYPRE_Real) RAND_MAX - 1.0;
 	    x0[i] = 0.0;
 	}
 

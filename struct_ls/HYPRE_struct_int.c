@@ -20,7 +20,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Box          *v_data_box;
                     
    HYPRE_Int           vi;
-   double             *vp;
+   HYPRE_Real         *vp;
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;

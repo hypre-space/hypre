@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * SStruct scale routine
@@ -23,7 +22,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPScale( double                alpha,
+hypre_SStructPScale( HYPRE_Complex         alpha,
                      hypre_SStructPVector *py )
 {
    HYPRE_Int nvars = hypre_SStructPVectorNVars(py);
@@ -41,7 +40,7 @@ hypre_SStructPScale( double                alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructScale( double               alpha,
+hypre_SStructScale( HYPRE_Complex        alpha,
                     hypre_SStructVector *y )
 {
    HYPRE_Int nparts = hypre_SStructVectorNParts(y);

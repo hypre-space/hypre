@@ -89,7 +89,7 @@ HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
-                       double       tol    )
+                       HYPRE_Real   tol    )
 {
    return( HYPRE_PCGSetTol( solver, tol ) );
 }
@@ -99,7 +99,7 @@ HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetAbsoluteTol( HYPRE_Solver solver,
-                               double       a_tol    )
+                               HYPRE_Real   a_tol    )
 {
    return( HYPRE_PCGSetAbsoluteTol( solver, a_tol ) );
 }
@@ -216,7 +216,7 @@ HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                             double       *norm   )
+                                             HYPRE_Real   *norm   )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
@@ -247,9 +247,9 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
    hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
    hypre_ParVector    *y = (hypre_ParVector *) Hy;
    hypre_ParVector    *x = (hypre_ParVector *) Hx;
-   double *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   double *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   double *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
+   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
+   HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int local_size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
    HYPRE_Int i, ierr = 0;
@@ -278,10 +278,10 @@ HYPRE_ParCSRSymPrecondSetup( HYPRE_Solver solver,
    hypre_ParVector    *y = (hypre_ParVector *) b;
    hypre_ParVector    *x = (hypre_ParVector *) x;
 
-   double *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
-   double *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
-   double *A_diag = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
-   double *A_offd = hypre_CSRMatrixData(hypre_ParCSRMatrixOffD(A));
+   HYPRE_Real *x_data = hypre_VectorData(hypre_ParVectorLocalVector(x));
+   HYPRE_Real *y_data = hypre_VectorData(hypre_ParVectorLocalVector(y));
+   HYPRE_Real *A_diag = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Real *A_offd = hypre_CSRMatrixData(hypre_ParCSRMatrixOffD(A));
 
    HYPRE_Int i, ierr = 0;
    hypre_ParCSRMatrix *Asym;

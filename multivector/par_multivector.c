@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include <assert.h>
 #include <math.h>
 #include <stddef.h>
@@ -146,7 +142,7 @@ hypre_ParMultiVectorSetMask( hypre_ParMultiVector *pm_vector, HYPRE_Int *mask)
 
 HYPRE_Int
 hypre_ParMultiVectorSetConstantValues( hypre_ParMultiVector *v,
-                                       double               value )
+                                       HYPRE_Complex        value )
 {
    hypre_Multivector *v_local = hypre_ParMultiVectorLocalVector(v);
            
@@ -196,7 +192,7 @@ hypre_ParMultiVectorCopyWithoutMask(hypre_ParMultiVector *x, hypre_ParMultiVecto
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParMultiVectorScale(double alpha, hypre_ParMultiVector *y)
+hypre_ParMultiVectorScale(HYPRE_Complex alpha, hypre_ParMultiVector *y)
 {
    return 1 ; /* hypre_SeqMultivectorScale( alpha, y_local, NULL); */
 }
@@ -207,7 +203,7 @@ hypre_ParMultiVectorScale(double alpha, hypre_ParMultiVector *y)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParMultiVectorMultiScale(double *alpha, hypre_ParMultiVector *y)
+hypre_ParMultiVectorMultiScale(HYPRE_Complex *alpha, hypre_ParMultiVector *y)
 {
    return 1; /* hypre_SeqMultivectorMultiScale(alpha, y_local, NULL); */
 }
@@ -219,7 +215,7 @@ hypre_ParMultiVectorMultiScale(double *alpha, hypre_ParMultiVector *y)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParMultiVectorAxpy(double alpha, hypre_ParMultiVector *x,
+hypre_ParMultiVectorAxpy(HYPRE_Complex alpha, hypre_ParMultiVector *x,
                          hypre_ParMultiVector *y)
 {
    hypre_Multivector *x_local = hypre_ParMultiVectorLocalVector(x);
@@ -235,7 +231,7 @@ hypre_ParMultiVectorAxpy(double alpha, hypre_ParMultiVector *x,
 
 HYPRE_Int
 hypre_ParMultiVectorByDiag(hypre_ParMultiVector *x, HYPRE_Int *mask, HYPRE_Int n,
-                           double *alpha, hypre_ParMultiVector *y)
+                           HYPRE_Complex *alpha, hypre_ParMultiVector *y)
 {
    return hypre_SeqMultivectorByDiag(x->local_vector, mask, n, alpha, 
                                       y->local_vector);
@@ -247,7 +243,7 @@ hypre_ParMultiVectorByDiag(hypre_ParMultiVector *x, HYPRE_Int *mask, HYPRE_Int n
 
 HYPRE_Int
 hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
-                              double *results, double *workspace )
+                              HYPRE_Real *results, HYPRE_Real *workspace )
 {
    MPI_Comm           comm;
    HYPRE_Int                count;
@@ -268,7 +264,8 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
    count = (x->local_vector->num_active_vectors) * 
            (y->local_vector->num_active_vectors);
    
-   ierr = hypre_MPI_Allreduce(workspace, results, count, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+   ierr = hypre_MPI_Allreduce(workspace, results, count, HYPRE_MPI_REAL,
+                              hypre_MPI_SUM, comm);
    hypre_assert (ierr == hypre_MPI_SUCCESS);
 
 /* debug */
@@ -291,7 +288,7 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
 
 HYPRE_Int
 hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
-                                  double *diagResults, double *workspace )
+                                  HYPRE_Real *diagResults, HYPRE_Real *workspace )
 {
    HYPRE_Int   count;
    HYPRE_Int   ierr;
@@ -299,7 +296,8 @@ hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *x, hypre_ParMultiVector 
    hypre_SeqMultivectorInnerProdDiag(x->local_vector, y->local_vector, workspace);
    
    count = x->local_vector->num_active_vectors;
-   ierr = hypre_MPI_Allreduce(workspace, diagResults, count, hypre_MPI_DOUBLE, hypre_MPI_SUM, x->comm);
+   ierr = hypre_MPI_Allreduce(workspace, diagResults, count, HYPRE_MPI_REAL,
+                              hypre_MPI_SUM, x->comm);
    hypre_assert (ierr == hypre_MPI_SUCCESS);
    
    return 0;
@@ -307,7 +305,7 @@ hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *x, hypre_ParMultiVector 
 
 HYPRE_Int
 hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-                             HYPRE_Int rWidth, double* rVal, hypre_ParMultiVector * y)
+                             HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y)
 {
    return hypre_SeqMultivectorByMatrix(x->local_vector, rGHeight, rHeight,
                                         rWidth, rVal, y->local_vector);
@@ -315,7 +313,7 @@ hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_
 
 HYPRE_Int
 hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-                         HYPRE_Int rWidth, double* rVal, hypre_ParMultiVector * y)
+                         HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y)
 {
    return hypre_SeqMultivectorXapy(x->local_vector, rGHeight, rHeight,
                                     rWidth, rVal, y->local_vector);
@@ -331,7 +329,7 @@ hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
    HYPRE_Int i;
    HYPRE_Int num_active_vectors;
    HYPRE_Int *x_active_indices, *y_active_indices;
-   double * x_data, *y_data;
+   HYPRE_Complex * x_data, *y_data;
    HYPRE_Int size;
    
    hypre_assert(x->local_vector->num_active_vectors == y->local_vector->num_active_vectors);
@@ -383,8 +381,8 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
         /* ***** temporary implementation ****** */
 {
    HYPRE_Int i, n, id;
-   double * dest;
-   double * src;
+   HYPRE_Complex * dest;
+   HYPRE_Complex * src;
    HYPRE_Int count;
    HYPRE_Int retcode;
    char temp_string[128];
@@ -429,7 +427,7 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
       src = temp_vec->local_vector->data;
       count = temp_vec->local_vector->size;
    
-      memcpy(dest,src, count*sizeof(double));
+      memcpy(dest,src, count*sizeof(HYPRE_Complex));
       
    /* destroy current vector */
       hypre_ParVectorDestroy(temp_vec);

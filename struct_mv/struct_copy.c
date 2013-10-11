@@ -32,8 +32,8 @@ hypre_StructCopy( hypre_StructVector *x,
    HYPRE_Int        xi;
    HYPRE_Int        yi;
                    
-   double          *xp;
-   double          *yp;
+   HYPRE_Complex   *xp;
+   HYPRE_Complex   *yp;
                    
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
@@ -92,8 +92,8 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
    HYPRE_Int        xi;
    HYPRE_Int        yi;
 
-   double          *xp;
-   double          *yp;
+   HYPRE_Complex   *xp;
+   HYPRE_Complex   *yp;
 
    hypre_BoxArray  *boxes;
    hypre_Box       *box;

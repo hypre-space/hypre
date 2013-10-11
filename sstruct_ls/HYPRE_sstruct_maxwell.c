@@ -130,7 +130,7 @@ HYPRE_SStructMaxwellSetRfactors( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SStructMaxwellSetTol( HYPRE_SStructSolver solver,
-                            double              tol    )
+                            HYPRE_Real          tol    )
 {
    return( hypre_MaxwellSetTol( (void *) solver, tol ) );
 }
@@ -230,7 +230,7 @@ HYPRE_SStructMaxwellGetNumIterations( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SStructMaxwellGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                                  double              *norm   )
+                                                  HYPRE_Real          *norm   )
 {
    return( hypre_MaxwellGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

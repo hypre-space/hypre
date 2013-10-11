@@ -30,7 +30,7 @@ typedef struct
 {
    MPI_Comm                comm;
                       
-   double                  tol;
+   HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;
    HYPRE_Int               zero_guess;
@@ -67,8 +67,8 @@ typedef struct
    hypre_ParVector       **nVtemp_l;
    hypre_ParVector       **nVtemp2_l;
    HYPRE_Int             **nCF_marker_l;
-   double                 *nrelax_weight;
-   double                 *nomega;
+   HYPRE_Real             *nrelax_weight;
+   HYPRE_Real             *nomega;
    HYPRE_Int               nrelax_type;
    HYPRE_Int               node_numlevels;
 
@@ -86,8 +86,8 @@ typedef struct
    hypre_ParVector       **eVtemp_l;
    hypre_ParVector       **eVtemp2_l;
    HYPRE_Int             **eCF_marker_l;
-   double                 *erelax_weight;
-   double                 *eomega;
+   HYPRE_Real             *erelax_weight;
+   HYPRE_Real             *eomega;
    HYPRE_Int               erelax_type;
 
    /* edge data structure. These will have no grid. */
@@ -106,8 +106,8 @@ typedef struct
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int               print_level;
    HYPRE_Int               logging;
-   double                 *norms;
-   double                 *rel_norms;
+   HYPRE_Real             *norms;
+   HYPRE_Real             *rel_norms;
 
 } hypre_MaxwellData;
 

@@ -26,7 +26,7 @@ integer *incx;
     doublereal ret_val, d__1;
 
     /* Builtin functions */
-    double sqrt();
+    HYPRE_Real sqrt();
 
     /* Local variables */
     static doublereal xmax;

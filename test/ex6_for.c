@@ -71,8 +71,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    HYPRE_Int          five = 5;
    HYPRE_Int          fifty = 50;
 
-   double       tol = 1.e-6;
-   double       zerodot = 0.;
+   HYPRE_Real   tol = 1.e-6;
+   HYPRE_Real   zerodot = 0.;
 #else
    HYPRE_SStructGrid     grid;
    HYPRE_SStructGraph    graph;
@@ -317,7 +317,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
             HYPRE_Int nentries = 5;
             HYPRE_Int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
-            double values[30];
+            HYPRE_Real values[30];
 
             HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++) /* label the stencil indices -
@@ -352,7 +352,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
             HYPRE_Int nentries = 5;
             HYPRE_Int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-            double values[60];
+            HYPRE_Real values[60];
 
             HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -387,7 +387,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
             HYPRE_Int nentries = 5;
             HYPRE_Int nvalues  = 80; /* 16 grid points, each with 5 stencil entries */
-            double values[80];
+            HYPRE_Real values[80];
 
             HYPRE_Int stencil_indices[5];
             for (j = 0; j < nentries; j++)
@@ -418,7 +418,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       if (myid == 0)
       {
          HYPRE_Int maxnvalues = 6;
-         double values[6];
+         HYPRE_Real values[6];
 
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
@@ -522,7 +522,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else if (myid == 1)
       {
          HYPRE_Int maxnvalues = 4;
-         double values[4];
+         HYPRE_Real values[4];
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
 
@@ -643,7 +643,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             HYPRE_Int iupper[2] = {-1, 2};
 
             HYPRE_Int nvalues = 6;  /* 6 grid points */
-            double values[6];
+            HYPRE_Real values[6];
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -670,7 +670,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             HYPRE_Int iupper[2] = { 2, 4};
 
             HYPRE_Int nvalues = 12; /* 12 grid points */
-            double values[12];
+            HYPRE_Real values[12];
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;
@@ -699,7 +699,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
             HYPRE_Int iupper[2] = { 6, 4};
 
             HYPRE_Int nvalues = 16; /* 16 grid points */
-            double values[16];
+            HYPRE_Real values[16];
 
             for (i = 0; i < nvalues; i ++)
                values[i] = 1.0;

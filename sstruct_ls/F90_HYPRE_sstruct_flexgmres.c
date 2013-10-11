@@ -112,13 +112,13 @@ hypre_F90_IFACE(hypre_sstructflexgmressetkdim, HYPRE_SSTRUCTFLEXGMRESSETKDIM)
 void
 hypre_F90_IFACE(hypre_sstructflexgmressettol, HYPRE_SSTRUCTFLEXGMRESSETTOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructFlexGMRESSetTol(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDbl (tol) ) );
+          hypre_F90_PassReal (tol) ) );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFlexGMRESSetAbsoluteTol
@@ -127,13 +127,13 @@ hypre_F90_IFACE(hypre_sstructflexgmressettol, HYPRE_SSTRUCTFLEXGMRESSETTOL)
 void
 hypre_F90_IFACE(hypre_sstructflexgmressetabsolutetol, HYPRE_SSTRUCTFLEXGMRESSETABSOLUTETOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructFlexGMRESSetAbsoluteTol(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDbl (tol) ) );
+          hypre_F90_PassReal (tol) ) );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_SStructFlexGMRESSetMinIter
@@ -284,13 +284,13 @@ hypre_F90_IFACE(hypre_sstructflexgmresgetnumiterati, HYPRE_SSTRUCTFLEXGMRESGETNU
 void
 hypre_F90_IFACE(hypre_sstructflexgmresgetfinalrelat, HYPRE_SSTRUCTFLEXGMRESGETFINALRELAT)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *norm,
+    hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDblRef (norm) ) );
+          hypre_F90_PassRealRef (norm) ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -52,12 +52,12 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    HYPRE_Int                 first_local_row, last_local_row;
    HYPRE_Int                 first_local_col, last_local_col;
    HYPRE_Int                 size, *col_ind;
-   double              *values;
+   HYPRE_Real          *values;
 
    /* parameters for BoomerAMG */
-   double              strong_threshold;
+   HYPRE_Real          strong_threshold;
    HYPRE_Int                 num_grid_sweeps;  
-   double              relax_weight; 
+   HYPRE_Real          relax_weight; 
 
    /* parameters for GMRES */
    HYPRE_Int	               k_dim;
@@ -194,7 +194,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A,i,&size,&col_ind,&values );
       newColInd = new HYPRE_Int[size];
       for (j=0; j<size; j++) newColInd[j] = col_ind[j] + 1;
-      H.sumIntoSystemMatrix(i+1,size,(const double*)values,
+      H.sumIntoSystemMatrix(i+1,size,(const HYPRE_Real*)values,
                                      (const HYPRE_Int*)newColInd);
       delete [] newColInd;
       ierr += HYPRE_ParCSRMatrixRestoreRow(parcsr_A,i,&size,&col_ind,&values);
@@ -206,13 +206,13 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-   double ddata=1.0;
+   HYPRE_Real ddata=1.0;
    HYPRE_Int  status;
 
    for (i=first_local_row; i<= last_local_row; i++)
    {
       index = i + 1;
-      H.sumIntoRHSVector(1,(const double*) &ddata, (const HYPRE_Int*) &index);
+      H.sumIntoRHSVector(1,(const HYPRE_Real*) &ddata, (const HYPRE_Int*) &index);
    }
 
    hypre_EndTiming(time_index);
@@ -399,7 +399,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -454,7 +454,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)

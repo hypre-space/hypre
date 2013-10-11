@@ -19,11 +19,11 @@
 /* Include C interface to gmres_driver */
 #include "ilut_facsol_f.h"
 
-HYPRE_Int ilu_solve ( void *input_data, double *x, double *b )
+HYPRE_Int ilu_solve ( void *input_data, HYPRE_Real *x, HYPRE_Real *b )
 {
    ILUData    *ilu_data = input_data;
    HYPRE_Int            n, nnz, ierr_solver, ierr_input;
-   double        *b_copy;
+   HYPRE_Real    *b_copy;
    Matrix        *A, *preconditioner;
    HYPRE_Int            i, ierr_ilut;
    HYPRE_Int            lenpmx;
@@ -52,7 +52,7 @@ HYPRE_Int ilu_solve ( void *input_data, double *x, double *b )
     ILUDataIpar(ilu_data)[0] = 0;
     ILUDataIpar(ilu_data)[1] = 0;
 
-    b_copy = talloc(double,n);
+    b_copy = talloc(HYPRE_Real,n);
 
     for ( i=0; i< n; i++ )
     {

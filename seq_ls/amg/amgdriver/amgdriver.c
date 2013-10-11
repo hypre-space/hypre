@@ -42,7 +42,7 @@ char *argv[];
    hypre_Matrix  *A;
    hypre_Vector  *u;
    hypre_Vector  *f;
-   double   stop_tolerance;
+   HYPRE_Real   stop_tolerance;
    void    *amg_data;
    void    *wjacobi_data;
    void    *pcg_data;
@@ -225,21 +225,21 @@ char *argv[];
       hypre_fprintf(fp,"\nTIMING INFORMATION\n");
       hypre_fprintf(fp,"\nSetup Time:\n");
       hypre_fprintf(fp, " wall clock time = %f seconds\n", 
-                         ((double) setup_ticks)/AMG_TICKS_PER_SEC);
+                         ((HYPRE_Real) setup_ticks)/AMG_TICKS_PER_SEC);
       hypre_fprintf(fp," CPU clock time  = %f seconds\n", 
-                         ((double) setup_cpu)/AMG_CPU_TICKS_PER_SEC);
+                         ((HYPRE_Real) setup_cpu)/AMG_CPU_TICKS_PER_SEC);
 
       hypre_fprintf(fp,"\nSolve Time:\n");
       hypre_fprintf(fp, " wall clock time = %f seconds\n", 
-                         ((double) solve_ticks)/AMG_TICKS_PER_SEC);
+                         ((HYPRE_Real) solve_ticks)/AMG_TICKS_PER_SEC);
       hypre_fprintf(fp," CPU clock time  = %f seconds\n", 
-                         ((double) solve_cpu)/AMG_CPU_TICKS_PER_SEC);
+                         ((HYPRE_Real) solve_cpu)/AMG_CPU_TICKS_PER_SEC);
  
       hypre_fprintf(fp,"\nOverall Time:\n");
       hypre_fprintf(fp, " wall clock time = %f seconds\n", 
-                         ((double) time_ticks)/AMG_TICKS_PER_SEC);
+                         ((HYPRE_Real) time_ticks)/AMG_TICKS_PER_SEC);
       hypre_fprintf(fp," CPU clock time  = %f seconds\n", 
-                         ((double) cpu_ticks)/AMG_CPU_TICKS_PER_SEC);
+                         ((HYPRE_Real) cpu_ticks)/AMG_CPU_TICKS_PER_SEC);
   
       fclose(fp);
 

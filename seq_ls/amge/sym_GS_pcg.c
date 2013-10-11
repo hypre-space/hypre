@@ -1,12 +1,12 @@
 #include "headers.h" 
 
 HYPRE_Int 
-hypre_sym_GS_pcg(double *x, double *rhs,
-		 double *sparse_matrix, 
+hypre_sym_GS_pcg(HYPRE_Real *x, HYPRE_Real *rhs,
+		 HYPRE_Real *sparse_matrix, 
 
 		 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 		
-		 double *v, double *w, double *d, 
+		 HYPRE_Real *v, HYPRE_Real *w, HYPRE_Real *d, 
 		
 		 HYPRE_Int max_iter, 
 		
@@ -144,14 +144,14 @@ loop:
   return ierr;
 
 }
-HYPRE_Int GS_forw(double *x, double *rhs,
-	    double *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+HYPRE_Int GS_forw(HYPRE_Real *x, HYPRE_Real *rhs,
+	    HYPRE_Real *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 	    HYPRE_Int num_dofs)
 
 {
   HYPRE_Int ierr = 0, i,j;
-  double aux;
-  double diag;
+  HYPRE_Real aux;
+  HYPRE_Real diag;
 
   for (i=0; i < num_dofs; i++)
     {
@@ -169,13 +169,13 @@ HYPRE_Int GS_forw(double *x, double *rhs,
 
 }     
 
-HYPRE_Int GS_back(double *x, double *rhs,
-	    double *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
+HYPRE_Int GS_back(HYPRE_Real *x, HYPRE_Real *rhs,
+	    HYPRE_Real *sparse_matrix, HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 	    HYPRE_Int num_dofs)
 
 {
   HYPRE_Int ierr = 0,i,j;
-  double aux, diag;
+  HYPRE_Real aux, diag;
 
   for (i=num_dofs-1; i >= 0; i--)
     {

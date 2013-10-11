@@ -202,7 +202,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  
                    
    /* pre-allocate the max space for responding to contacts */
-   overhead = ceil((double) sizeof(HYPRE_Int)/response_obj_size); /*for appending an integer*/
+   overhead = ceil((HYPRE_Real) sizeof(HYPRE_Int)/response_obj_size); /*for appending an integer*/
    
    max_response_total_bytes = (max_response_size+overhead)*response_obj_size;
 

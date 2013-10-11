@@ -52,9 +52,9 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    HYPRE_Int             relax_type = (sys_pfmg_data -> relax_type);
    HYPRE_Int             usr_jacobi_weight= (sys_pfmg_data -> usr_jacobi_weight);
-   double                jacobi_weight    = (sys_pfmg_data -> jacobi_weight);
+   HYPRE_Real            jacobi_weight    = (sys_pfmg_data -> jacobi_weight);
    HYPRE_Int             skip_relax = (sys_pfmg_data -> skip_relax);
-   double               *dxyz       = (sys_pfmg_data -> dxyz);
+   HYPRE_Real           *dxyz       = (sys_pfmg_data -> dxyz);
                      
    HYPRE_Int             max_iter;
    HYPRE_Int             max_levels;
@@ -95,17 +95,17 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    hypre_Box            *cbox;
 
-   double               *relax_weights;
-   double               *mean, *deviation;
-   double                alpha, beta;
+   HYPRE_Real           *relax_weights;
+   HYPRE_Real           *mean, *deviation;
+   HYPRE_Real            alpha, beta;
    HYPRE_Int             dxyz_flag;
 
-   double                min_dxyz;
+   HYPRE_Real            min_dxyz;
    HYPRE_Int             cdir, periodic, cmaxsize;
    HYPRE_Int             d, l;
    HYPRE_Int             i;
 
-   double**              sys_dxyz;
+   HYPRE_Real**              sys_dxyz;
                        
    HYPRE_Int             nvars;
 
@@ -125,10 +125,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     * Allocate arrays for mesh sizes for each diagonal block
     *--------------------------------------------------------*/
    nvars    = hypre_SStructPMatrixNVars(A);
-   sys_dxyz = hypre_TAlloc(double *, nvars);
+   sys_dxyz = hypre_TAlloc(HYPRE_Real *, nvars);
    for ( i = 0; i < nvars; i++)
    {
-      sys_dxyz[i] = hypre_TAlloc(double, 3);
+      sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, 3);
    }
    
    /*-----------------------------------------------------
@@ -155,8 +155,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
-      mean = hypre_CTAlloc(double, 3);
-      deviation = hypre_CTAlloc(double, 3);
+      mean = hypre_CTAlloc(HYPRE_Real, 3);
+      deviation = hypre_CTAlloc(HYPRE_Real, 3);
 
       dxyz_flag = 0;
       for (i = 0; i < nvars; i++)
@@ -195,7 +195,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    P_grid_l[0] = NULL;
    cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
    active_l = hypre_TAlloc(HYPRE_Int, max_levels);
-   relax_weights = hypre_CTAlloc(double, max_levels);
+   relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
    hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
@@ -535,8 +535,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    if ((sys_pfmg_data -> logging) > 0)
    {
       max_iter = (sys_pfmg_data -> max_iter);
-      (sys_pfmg_data -> norms)     = hypre_TAlloc(double, max_iter);
-      (sys_pfmg_data -> rel_norms) = hypre_TAlloc(double, max_iter);
+      (sys_pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
+      (sys_pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
    }
 
 #if DEBUG

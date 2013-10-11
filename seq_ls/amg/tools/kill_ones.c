@@ -35,7 +35,7 @@ char     *file_name;
  
    FILE    *fp;
  
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int     *ia;
    HYPRE_Int     *ja;
    HYPRE_Int      size;
@@ -62,7 +62,7 @@ char     *file_name;
    for (j = 0; j < ia[size]-1; j++)
       hypre_fscanf(fp, "%d", &ja[j]);
  
-   data = hypre_CTAlloc(double, hypre_NDIMA(ia[size]-1));
+   data = hypre_CTAlloc(HYPRE_Real, hypre_NDIMA(ia[size]-1));
    for (j = 0; j < ia[size]-1; j++)
       hypre_fscanf(fp, "%le", &data[j]);
  

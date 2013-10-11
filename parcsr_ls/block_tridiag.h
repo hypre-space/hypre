@@ -30,7 +30,7 @@ typedef struct
    HYPRE_Int    relax_type;   
    HYPRE_Int    *index_set1, *index_set2;
    HYPRE_Int    print_level;
-   double threshold;
+   HYPRE_Real threshold;
    hypre_ParCSRMatrix *A11, *A21, *A22;
    hypre_ParVector    *F1, *U1, *F2, *U2;
    HYPRE_Solver       precon1, precon2;
@@ -48,7 +48,7 @@ HYPRE_Int  hypre_BlockTridiagSetup(void * , hypre_ParCSRMatrix *,
 HYPRE_Int  hypre_BlockTridiagSolve(void * , hypre_ParCSRMatrix *,
                              hypre_ParVector *, hypre_ParVector *);
 HYPRE_Int  hypre_BlockTridiagSetIndexSet(void *, HYPRE_Int, HYPRE_Int *);
-HYPRE_Int  hypre_BlockTridiagSetAMGStrengthThreshold(void *, double);
+HYPRE_Int  hypre_BlockTridiagSetAMGStrengthThreshold(void *, HYPRE_Real);
 HYPRE_Int  hypre_BlockTridiagSetAMGNumSweeps(void *, HYPRE_Int);
 HYPRE_Int  hypre_BlockTridiagSetAMGRelaxType(void *, HYPRE_Int);
 HYPRE_Int  hypre_BlockTridiagSetPrintLevel(void *, HYPRE_Int);

@@ -23,16 +23,16 @@
    * piece of memory obtained by calling MALLOC_DH 
    */
 typedef struct {
-    double size;
-    double cookie;
+    HYPRE_Real size;
+    HYPRE_Real cookie;
 } memRecord_dh;
 
 struct _mem_dh {
-  double maxMem;        /* max allocated at any point in time */
-  double curMem;        /* total currently allocated */
-  double totalMem;      /* total cumulative malloced */
-  double mallocCount;  /* number of times mem_dh->malloc has been called. */
-  double freeCount;    /* number of times mem_dh->free has been called. */
+  HYPRE_Real maxMem;        /* max allocated at any point in time */
+  HYPRE_Real curMem;        /* total currently allocated */
+  HYPRE_Real totalMem;      /* total cumulative malloced */
+  HYPRE_Real mallocCount;  /* number of times mem_dh->malloc has been called. */
+  HYPRE_Real freeCount;    /* number of times mem_dh->free has been called. */
 };
 
 
@@ -91,11 +91,11 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
    * error checking.  This is modeled after the PETSc code.
    */
   tmp = (memRecord_dh*)address;
-  tmp->size = (double) s;
+  tmp->size = (HYPRE_Real) s;
 
   m->mallocCount += 1;
-  m->totalMem += (double)s;
-  m->curMem += (double)s;
+  m->totalMem += (HYPRE_Real)s;
+  m->curMem += (HYPRE_Real)s;
   m->maxMem = MAX(m->maxMem, m->curMem);
 
   END_FUNC_VAL_2( retval )
@@ -107,7 +107,7 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
 void Mem_dhFree(Mem_dh m, void *ptr)
 {
   START_FUNC_DH_2
-  double size;
+  HYPRE_Real size;
   char *tmp = (char*)ptr;
   memRecord_dh *rec;
   tmp -= sizeof(memRecord_dh);
@@ -129,7 +129,7 @@ void  Mem_dhPrint(Mem_dh m, FILE* fp, bool allPrint)
   START_FUNC_DH_2
   if (fp == NULL) SET_V_ERROR("fp == NULL");
   if (myid_dh == 0 || allPrint) {
-    double tmp;
+    HYPRE_Real tmp;
     hypre_fprintf(fp, "---------------------- Euclid memory report (start)\n");
     hypre_fprintf(fp, "malloc calls = %g\n", m->mallocCount);
     hypre_fprintf(fp, "free   calls = %g\n", m->freeCount);

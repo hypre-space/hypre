@@ -23,7 +23,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructAxpy( double              alpha,
+hypre_StructAxpy( HYPRE_Complex       alpha,
                   hypre_StructVector *x,
                   hypre_StructVector *y     )
 {
@@ -33,8 +33,8 @@ hypre_StructAxpy( double              alpha,
    HYPRE_Int         xi;
    HYPRE_Int         yi;
                     
-   double           *xp;
-   double           *yp;
+   HYPRE_Complex    *xp;
+   HYPRE_Complex    *yp;
                     
    hypre_BoxArray   *boxes;
    hypre_Box        *box;

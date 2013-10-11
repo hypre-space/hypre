@@ -40,14 +40,14 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    HYPRE_Int              Ai;
    HYPRE_Int              vi;
                         
-   double                *Ap;
-   double                *vxp;
-   double                *vyp;
-   double                *vzp;
-   double                 lambdax;
-   double                 lambday;
-   double                 lambdaz;
-   double                 lambda_max;
+   HYPRE_Real            *Ap;
+   HYPRE_Real            *vxp;
+   HYPRE_Real            *vyp;
+   HYPRE_Real            *vzp;
+   HYPRE_Real             lambdax;
+   HYPRE_Real             lambday;
+   HYPRE_Real             lambdaz;
+   HYPRE_Real             lambda_max;
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
@@ -190,15 +190,15 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
          if (dir == 0)
          {
-            vxp[vi] = (double) ( ((HYPRE_Int) vxp[vi]) | k );
+            vxp[vi] = (HYPRE_Real) ( ((HYPRE_Int) vxp[vi]) | k );
          }
          else if (dir == 1)
          {
-            vyp[vi] = (double) ( ((HYPRE_Int) vyp[vi]) | k );
+            vyp[vi] = (HYPRE_Real) ( ((HYPRE_Int) vyp[vi]) | k );
          }
          else if (dir == 2)
          {
-            vzp[vi] = (double) ( ((HYPRE_Int) vzp[vi]) | k );
+            vzp[vi] = (HYPRE_Real) ( ((HYPRE_Int) vzp[vi]) | k );
          }
       }
       hypre_BoxLoop2End(Ai, vi);
@@ -230,8 +230,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    HYPRE_Int              ei;
    HYPRE_Int              vi;
                         
-   double                *ep;
-   double                *vp;
+   HYPRE_Real            *ep;
+   HYPRE_Real            *vp;
                         
    hypre_Index            loop_size;
    hypre_Index            cindex;
@@ -328,13 +328,13 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    HYPRE_Int              Ai;
    HYPRE_Int              vi;
                         
-   double                *Ap;
-   double                *vxp;
-   double                *vyp;
-   double                *vzp;
-   double                 lambdax;
-   double                 lambday;
-   double                 lambdaz;
+   HYPRE_Real            *Ap;
+   HYPRE_Real            *vxp;
+   HYPRE_Real            *vyp;
+   HYPRE_Real            *vzp;
+   HYPRE_Real             lambdax;
+   HYPRE_Real             lambday;
+   HYPRE_Real             lambdaz;
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
@@ -475,8 +475,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
    HYPRE_Int              ei;
    HYPRE_Int              vi;
                         
-   double                *ep;
-   double                *vp;
+   HYPRE_Real            *ep;
+   HYPRE_Real            *vp;
                         
    hypre_Index            loop_size;
    hypre_Index            cindex;

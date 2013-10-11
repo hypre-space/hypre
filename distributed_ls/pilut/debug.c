@@ -96,9 +96,9 @@ hypre_longint hypre_INT_Checksum(const HYPRE_Int *v, HYPRE_Int len, const char *
 }
 
 /*************************************************************************
-* This function prints a checksum for a float (double) array
+* This function prints a checksum for a float (HYPRE_Real) array
 **************************************************************************/
-hypre_longint hypre_FP_Checksum(const double *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
+hypre_longint hypre_FP_Checksum(const HYPRE_Real *v, HYPRE_Int len, const char *msg, HYPRE_Int tag,
           hypre_PilutSolverGlobals *globals)
 {
   static HYPRE_Int numChk = 0;

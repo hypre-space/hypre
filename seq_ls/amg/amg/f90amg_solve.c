@@ -30,10 +30,10 @@
 void      hypre_NAME_C_FOR_FORTRAN(amg_solve)(Solve_err_flag, u_data, f_data,
 					n, tol, data)
 HYPRE_Int      *Solve_err_flag;
-double   *u_data;
-double   *f_data;
+HYPRE_Real   *u_data;
+HYPRE_Real   *f_data;
 HYPRE_Int      *n;
-double   *tol;
+HYPRE_Real   *tol;
 HYPRE_Int      *data;
 {
    hypre_Vector   *u;

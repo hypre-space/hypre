@@ -68,7 +68,7 @@ HYPRE_CGNRSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_CGNRSetTol( HYPRE_Solver solver,
-                         double             tol    )
+                         HYPRE_Real         tol    )
 {
    return( hypre_CGNRSetTol( (void *) solver, tol ) );
 }
@@ -162,7 +162,7 @@ HYPRE_CGNRGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                               HYPRE_Real         *norm   )
 {
    return( hypre_CGNRGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

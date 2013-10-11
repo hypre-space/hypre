@@ -23,22 +23,22 @@ HYPRE_Int hypre_ComputeSchwarzSmoother(HYPRE_Int *i_domain_dof,
 
 				 hypre_CSRMatrix *A,
 
-				 double **domain_matrixinverse_pointer)
+				 HYPRE_Real **domain_matrixinverse_pointer)
 
 {
   HYPRE_Int ierr = 0;
 
   HYPRE_Int i,j,k, j_loc, k_loc;
 
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
 
   HYPRE_Int *i_dof_dof =  hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof =  hypre_CSRMatrixJ(A);
-  double *a_dof_dof =  hypre_CSRMatrixData(A);
+  HYPRE_Real *a_dof_dof =  hypre_CSRMatrixData(A);
   
   HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 	
-  double *matrix, *matrixinverse;
+  HYPRE_Real *matrix, *matrixinverse;
 
   HYPRE_Int max_matrix_size, matrix_size, matrix_size_counter = 0;
 
@@ -58,10 +58,10 @@ HYPRE_Int hypre_ComputeSchwarzSmoother(HYPRE_Int *i_domain_dof,
     }
 
 
-  matrix        = hypre_CTAlloc(double, max_matrix_size* max_matrix_size);
-  matrixinverse = hypre_CTAlloc(double, max_matrix_size* max_matrix_size);
+  matrix        = hypre_CTAlloc(HYPRE_Real, max_matrix_size* max_matrix_size);
+  matrixinverse = hypre_CTAlloc(HYPRE_Real, max_matrix_size* max_matrix_size);
 
-  domain_matrixinverse = hypre_CTAlloc(double, matrix_size_counter);
+  domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, matrix_size_counter);
 
 
   i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs);
@@ -146,19 +146,19 @@ HYPRE_Int hypre_ComputeSchwarzSmoother(HYPRE_Int *i_domain_dof,
   return ierr;
 }
   
-HYPRE_Int hypre_SchwarzSolve(double *x,
-		       double *rhs,
-		       double *aux,
+HYPRE_Int hypre_SchwarzSolve(HYPRE_Real *x,
+		       HYPRE_Real *rhs,
+		       HYPRE_Real *aux,
 
 		       HYPRE_Int *i_dof_dof,
 		       HYPRE_Int *j_dof_dof,
-		       double *a_dof_dof,
+		       HYPRE_Real *a_dof_dof,
 
 		       HYPRE_Int *i_domain_dof,
 		       HYPRE_Int *j_domain_dof,
 		       HYPRE_Int num_domains,
 
-		       double *domain_matrixinverse,
+		       HYPRE_Real *domain_matrixinverse,
 
 		       HYPRE_Int num_dofs)
 

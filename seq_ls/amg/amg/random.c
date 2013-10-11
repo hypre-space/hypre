@@ -45,9 +45,9 @@ HYPRE_Int   seed;
  * hypre_Rand
  *--------------------------------------------------------------------------*/
 
-double  hypre_Rand()
+HYPRE_Real  hypre_Rand()
 {
    Seed = (L * Seed) % M;
 
-   return ( ((double) Seed) / ((double) M) );
+   return ( ((HYPRE_Real) Seed) / ((HYPRE_Real) M) );
 }

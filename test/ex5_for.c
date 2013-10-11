@@ -54,7 +54,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    HYPRE_Int solver_id;
    HYPRE_Int print_solution;
 
-   double h, h2;
+   HYPRE_Real h, h2;
 
 #ifdef HYPRE_FORTRAN
    hypre_F90_Obj A;
@@ -78,8 +78,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
         HYPRE_Int thousand = 1000;
         HYPRE_Int hypre_type = HYPRE_PARCSR;
 
-     double oo1 = 1.e-3;
-     double tol = 1.e-7;
+     HYPRE_Real oo1 = 1.e-3;
+     HYPRE_Real tol = 1.e-7;
 #else
    HYPRE_IJMatrix A;
    HYPRE_ParCSRMatrix parcsr_A;
@@ -214,7 +214,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    */
    {
       HYPRE_Int nnz;
-      double values[5];
+      HYPRE_Real values[5];
       HYPRE_Int cols[5];
 
       for (i = ilower; i <= iupper; i++)
@@ -305,11 +305,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    /* Set the rhs values to h^2 and the solution to zero */
    {
-      double *rhs_values, *x_values;
+      HYPRE_Real *rhs_values, *x_values;
       HYPRE_Int    *rows;
 
-      rhs_values = calloc(local_size, sizeof(double));
-      x_values = calloc(local_size, sizeof(double));
+      rhs_values = calloc(local_size, sizeof(HYPRE_Real));
+      x_values = calloc(local_size, sizeof(HYPRE_Real));
       rows = calloc(local_size, sizeof(HYPRE_Int));
 
       for (i=0; i<local_size; i++)
@@ -353,7 +353,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    if (solver_id == 0)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Create solver */
 #ifdef HYPRE_FORTRAN
@@ -415,7 +415,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    else if (solver_id == 50)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Create solver */
 #ifdef HYPRE_FORTRAN
@@ -474,7 +474,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    else if (solver_id == 1)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Create solver */
 #ifdef HYPRE_FORTRAN
@@ -561,11 +561,11 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    else if (solver_id == 8)
    {
       HYPRE_Int    num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       HYPRE_Int      sai_max_levels = 1;
-      double   sai_threshold = 0.1;
-      double   sai_filter = 0.05;
+      HYPRE_Real   sai_threshold = 0.1;
+      HYPRE_Real   sai_filter = 0.05;
       HYPRE_Int      sai_sym = 1;
 
       /* Create solver */

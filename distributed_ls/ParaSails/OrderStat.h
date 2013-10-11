@@ -24,7 +24,7 @@
 
 #include "_hypre_utilities.h"
 
-double randomized_select(double *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i);
+HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i);
 void shell_sort(const HYPRE_Int n, HYPRE_Int x[]);
 
 #endif /* _ORDERSTAT_H */

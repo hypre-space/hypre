@@ -22,13 +22,13 @@
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
 
-double
-hypre_StructInnerProd(  hypre_StructVector *x,
-                        hypre_StructVector *y )
+HYPRE_Real
+hypre_StructInnerProd( hypre_StructVector *x,
+                       hypre_StructVector *y )
 {
-   double           final_innerprod_result;
-   double           local_result;
-   double           process_result;
+   HYPRE_Real       final_innerprod_result;
+   HYPRE_Real       local_result;
+   HYPRE_Real       process_result;
                    
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
@@ -36,8 +36,8 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    HYPRE_Int        xi;
    HYPRE_Int        yi;
                    
-   double          *xp;
-   double          *yp;
+   HYPRE_Complex   *xp;
+   HYPRE_Complex   *yp;
                    
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
@@ -74,14 +74,14 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 #endif
       hypre_BoxLoop2For(xi, yi)
       {
-         local_result += xp[xi] * yp[yi];
+         local_result += xp[xi] * hypre_conj(yp[yi]);
       }
       hypre_BoxLoop2End(xi, yi);
    }
    process_result = local_result;
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                       hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
+                       HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 

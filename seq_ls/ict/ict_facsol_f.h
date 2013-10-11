@@ -68,21 +68,21 @@
 #endif
 
 void ICT_DRIVER(HYPRE_Int *n, HYPRE_Int *nnz,
-                 HYPRE_Int *ia, HYPRE_Int *ja, double *a,
-                 HYPRE_Int *ipar, double *rpar,
+                 HYPRE_Int *ia, HYPRE_Int *ja, HYPRE_Real *a,
+                 HYPRE_Int *ipar, HYPRE_Real *rpar,
                  HYPRE_Int *lenpmx,
-                 double *plu, HYPRE_Int *jlu, 
+                 HYPRE_Real *plu, HYPRE_Int *jlu, 
 #ifdef ILUFact
                  HYPRE_Int *ju, 
 #endif
                  HYPRE_Int *perm, HYPRE_Int *qperm, 
 #ifdef ILUFact
-                 double *rscale, double *cscale, 
+                 HYPRE_Real *rscale, HYPRE_Real *cscale, 
 #endif
 #ifdef ICFact
-                 double *scale,
+                 HYPRE_Real *scale,
 #endif
-                 HYPRE_Int *iwork, HYPRE_Int *liw, double *rwork, HYPRE_Int *lrw,
+                 HYPRE_Int *iwork, HYPRE_Int *liw, HYPRE_Real *rwork, HYPRE_Int *lrw,
                  HYPRE_Int *ier_ict, HYPRE_Int *ier_input);
 
 
@@ -142,21 +142,21 @@ void ICT_DRIVER(HYPRE_Int *n, HYPRE_Int *nnz,
 #endif
 
 void CG_DRIVER(HYPRE_Int *n, HYPRE_Int *nnz,
-                 HYPRE_Int *ia, HYPRE_Int *ja, double *a, double *rhs, double *sol,
-                 HYPRE_Int *ipar, double *rpar,
+                 HYPRE_Int *ia, HYPRE_Int *ja, HYPRE_Real *a, HYPRE_Real *rhs, HYPRE_Real *sol,
+                 HYPRE_Int *ipar, HYPRE_Real *rpar,
                  HYPRE_Int *lenpmx,
-                 double *plu, HYPRE_Int *jlu, 
+                 HYPRE_Real *plu, HYPRE_Int *jlu, 
 #ifdef ILUFact
                  HYPRE_Int *ju,
 #endif 
                  HYPRE_Int *perm, HYPRE_Int *qperm, 
 #ifdef ILUFact
-                 double *rscale, double *cscale,
+                 HYPRE_Real *rscale, HYPRE_Real *cscale,
 #endif 
 #ifdef ICFact
-                 double *scale,
+                 HYPRE_Real *scale,
 #endif 
-                 double *rwork, HYPRE_Int *lrw,
+                 HYPRE_Real *rwork, HYPRE_Int *lrw,
                  HYPRE_Int *ier_cg, HYPRE_Int *ier_input);
 
 
@@ -175,7 +175,7 @@ void CG_DRIVER(HYPRE_Int *n, HYPRE_Int *nnz,
 #define CALL_DVPERM(n, x, perm) \
              DVPERM(&n, x, perm)
 
-void DVPERM(HYPRE_Int *n, double *x, HYPRE_Int *perm);
+void DVPERM(HYPRE_Int *n, HYPRE_Real *x, HYPRE_Int *perm);
 
 /*****************************************************************************
  * C routine would use this macro to call "csrssr" :
@@ -192,5 +192,5 @@ void DVPERM(HYPRE_Int *n, double *x, HYPRE_Int *perm);
 #define CALL_CSRSSR(n, a, ja, ia, nzmax, ao, jao, iao, ierr ) \
              CSRSSR(&n, a, ja, ia, &nzmax, ao, jao, iao, &ierr )
 
-void CSRSSR(HYPRE_Int *n, double *a, HYPRE_Int *ja, HYPRE_Int *ia, HYPRE_Int *nzmax,
-            double *ao, HYPRE_Int *jao, HYPRE_Int *iao, HYPRE_Int *ierr );
+void CSRSSR(HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *ja, HYPRE_Int *ia, HYPRE_Int *nzmax,
+            HYPRE_Real *ao, HYPRE_Int *jao, HYPRE_Int *iao, HYPRE_Int *ierr );

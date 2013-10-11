@@ -254,20 +254,20 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_ac, *a_aw, *a_as;
-   double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
-   double               *a_csw, *a_cse, *a_cnw, *a_cne;
-   double               *a_asw, *a_ase;
-   double               *a_bsw, *a_bse, *a_bnw, *a_bne;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_ac, *a_aw, *a_as;
+   HYPRE_Real           *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *a_asw, *a_ase;
+   HYPRE_Real           *a_bsw, *a_bse, *a_bnw, *a_bne;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
-   double               *rap_csw, *rap_cse;
-   double               *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
+   HYPRE_Real           *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -967,20 +967,20 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
-   double               *a_be, *a_bn;
-   double               *a_csw, *a_cse, *a_cnw, *a_cne;
-   double               *a_asw, *a_ase, *a_anw, *a_ane;
-   double               *a_bnw, *a_bne;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_ac, *a_aw, *a_ae, *a_as, *a_an;
+   HYPRE_Real           *a_be, *a_bn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *a_asw, *a_ase, *a_anw, *a_ane;
+   HYPRE_Real           *a_bnw, *a_bne;
 
-   double               *rap_ce, *rap_cn;
-   double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
-   double               *rap_cnw, *rap_cne;
-   double               *rap_asw, *rap_ase, *rap_anw, *rap_ane;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
+   HYPRE_Real           *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
    HYPRE_Int            iA, iAm1, iAp1;
    HYPRE_Int            iAc;
@@ -1632,10 +1632,10 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
    hypre_Box           *RAP_dbox;
 
-   double               *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
-   double               *rap_cc, *rap_cw,  *rap_cs;
-   double               *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
+   HYPRE_Real           *rap_cc, *rap_cw,  *rap_cs;
+   HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int            iAc;
    HYPRE_Int            iAcmx;
@@ -1646,7 +1646,7 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
    HYPRE_Int            xOffset;
    HYPRE_Int            yOffset;
 
-   double               zero = 0.0;
+   HYPRE_Real           zero = 0.0;
 
    hypre_StructStencil *stencil;
    HYPRE_Int            stencil_size;
@@ -1838,16 +1838,16 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
    hypre_Box           *RAP_dbox;
 
-   double               *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
-   double               *rap_cc, *rap_cw, *rap_ce, *rap_cs, *rap_cn;
-   double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
-   double               *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
-   double               *rap_csw, *rap_cse, *rap_cnw, *rap_cne;
-   double               *rap_asw, *rap_ase, *rap_anw, *rap_ane;
+   HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_ce, *rap_cs, *rap_cn;
+   HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
+   HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
+   HYPRE_Real           *rap_csw, *rap_cse, *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
    HYPRE_Int            iAc;
 
-   double               zero = 0.0;
+   HYPRE_Real           zero = 0.0;
 
    hypre_StructStencil *stencil;
    HYPRE_Int            stencil_size;

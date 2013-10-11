@@ -112,7 +112,7 @@ HYPRE_ParCSRLGMRESSetAugDim( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRLGMRESSetTol( HYPRE_Solver solver,
-                          double       tol    )
+                          HYPRE_Real   tol    )
 {
    return( HYPRE_LGMRESSetTol( solver, tol ) );
 }
@@ -122,7 +122,7 @@ HYPRE_ParCSRLGMRESSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRLGMRESSetAbsoluteTol( HYPRE_Solver solver,
-                                  double       a_tol    )
+                                  HYPRE_Real   a_tol    )
 {
    return( HYPRE_LGMRESSetAbsoluteTol( solver, a_tol ) );
 }
@@ -214,7 +214,7 @@ HYPRE_ParCSRLGMRESGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                                double       *norm   )
+                                                HYPRE_Real   *norm   )
 {
    return( HYPRE_LGMRESGetFinalRelativeResidualNorm( solver, norm ) );
 }

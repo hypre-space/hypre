@@ -39,8 +39,8 @@
 
 HYPRE_Int
 hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
-                       double          *measure_array, 
-                       double           cconst)
+                       HYPRE_Real      *measure_array, 
+                       HYPRE_Real       cconst)
 {
    HYPRE_Int     S_num_nodes = hypre_CSRMatrixNumRows(S);
    HYPRE_Int     i;
@@ -95,15 +95,15 @@ hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
 
 HYPRE_Int
 hypre_AMGIndepSet( hypre_CSRMatrix *S,
-                   double          *measure_array,
-                   double           cconst,
+                   HYPRE_Real      *measure_array,
+                   HYPRE_Real       cconst,
                    HYPRE_Int             *graph_array,
                    HYPRE_Int              graph_array_size,
                    HYPRE_Int             *IS_marker        )
 {
    HYPRE_Int    *S_i         = hypre_CSRMatrixI(S);
    HYPRE_Int    *S_j         = hypre_CSRMatrixJ(S);
-   double *S_data      = hypre_CSRMatrixData(S);
+   HYPRE_Real *S_data      = hypre_CSRMatrixData(S);
          
    HYPRE_Int     i, j, ig, jS;
 

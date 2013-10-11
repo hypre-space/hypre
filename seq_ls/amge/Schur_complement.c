@@ -28,7 +28,7 @@
 
 HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
 			      HYPRE_Int *j_domain_chord,
-			      double *a_domain_chord,
+			      HYPRE_Real *a_domain_chord,
 
 			      HYPRE_Int *i_chord_dof, HYPRE_Int *j_chord_dof,
 
@@ -39,7 +39,7 @@ HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
 			      HYPRE_Int *j_subdomain_dof,
 
 			      HYPRE_Int **i_Schur_dof_dof_pointer,
-			      double **a_Schur_dof_dof_pointer,
+			      HYPRE_Real **a_Schur_dof_dof_pointer,
 			      
 			      HYPRE_Int num_domains, HYPRE_Int num_chords, HYPRE_Int num_dofs)
 
@@ -52,7 +52,7 @@ HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
   HYPRE_Int chord;
 
   HYPRE_Int *i_Schur_dof_dof, *j_Schur_dof_dof;
-  double *a_Schur_dof_dof;
+  HYPRE_Real *a_Schur_dof_dof;
 
 
 
@@ -61,7 +61,7 @@ HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
 
   HYPRE_Int first_counter, second_counter;
 
-  double *A, *A_11, *A_22, *X_11;
+  HYPRE_Real *A, *A_11, *A_22, *X_11;
 
   HYPRE_Int max_num_local_dofs = 0;
   HYPRE_Int local_dof_counter;
@@ -108,10 +108,10 @@ HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
   first = hypre_CTAlloc(HYPRE_Int, max_num_local_dofs);
   second = hypre_CTAlloc(HYPRE_Int, max_num_local_dofs);
 
-  A    = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
-  A_11 = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
-  X_11 = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
-  A_22 = hypre_CTAlloc(double, max_num_local_dofs*max_num_local_dofs);
+  A    = hypre_CTAlloc(HYPRE_Real, max_num_local_dofs*max_num_local_dofs);
+  A_11 = hypre_CTAlloc(HYPRE_Real, max_num_local_dofs*max_num_local_dofs);
+  X_11 = hypre_CTAlloc(HYPRE_Real, max_num_local_dofs*max_num_local_dofs);
+  A_22 = hypre_CTAlloc(HYPRE_Real, max_num_local_dofs*max_num_local_dofs);
 
 
   i_Schur_dof_dof = hypre_CTAlloc(HYPRE_Int, num_domains+1);
@@ -121,7 +121,7 @@ HYPRE_Int hypre_AMGeSchurComplement(HYPRE_Int *i_domain_chord,
     Schur_dof_dof_counter+= (i_subdomain_dof[i+1]-i_subdomain_dof[i])*
                             (i_subdomain_dof[i+1]-i_subdomain_dof[i]);
 
-  a_Schur_dof_dof = hypre_CTAlloc(double, Schur_dof_dof_counter);
+  a_Schur_dof_dof = hypre_CTAlloc(HYPRE_Real, Schur_dof_dof_counter);
 
   Schur_dof_dof_counter = 0;
 

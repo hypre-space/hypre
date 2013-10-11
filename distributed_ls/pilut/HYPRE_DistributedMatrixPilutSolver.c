@@ -294,7 +294,7 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
 
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetDropTolerance( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
-                  double tolerance )
+                  HYPRE_Real tolerance )
 {
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
@@ -434,7 +434,7 @@ HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutS
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver in_ptr,
-                                           double *x, double *b )
+                                           HYPRE_Real *x, HYPRE_Real *b )
 {
 
    hypre_DistributedMatrixPilutSolver *solver = 

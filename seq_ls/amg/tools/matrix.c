@@ -29,7 +29,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_Matrix  *hypre_NewMatrix(data, ia, ja, size)
-double  *data;
+HYPRE_Real  *data;
 HYPRE_Int     *ia;
 HYPRE_Int     *ja;
 HYPRE_Int      size;

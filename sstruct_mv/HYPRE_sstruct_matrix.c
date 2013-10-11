@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * HYPRE_SStructMatrix interface
@@ -137,7 +136,6 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
 
    hypre_SStructMatrixNSSymmetric(matrix) = 0;
-   hypre_SStructMatrixIsComplex(matrix)   = 0;
    hypre_SStructMatrixGlobalSize(matrix)  = 0;
    hypre_SStructMatrixRefCount(matrix)    = 1;
   
@@ -325,7 +323,7 @@ HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
                               HYPRE_Int            var,
                               HYPRE_Int            nentries,
                               HYPRE_Int           *entries,
-                              double              *values )
+                              HYPRE_Complex       *values )
 {
    hypre_SStructMatrixSetValues(matrix, part, index, var,
                                 nentries, entries, values, 0);
@@ -343,7 +341,7 @@ HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
                                 HYPRE_Int            var,
                                 HYPRE_Int            nentries,
                                 HYPRE_Int           *entries,
-                                double              *values )
+                                HYPRE_Complex       *values )
 {
    hypre_SStructMatrixSetValues(matrix, part, index, var,
                                 nentries, entries, values, 1);
@@ -360,7 +358,7 @@ HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            part,
                                  HYPRE_Int           *index,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    HYPRE_Int           ndim         = hypre_SStructMatrixNDim(matrix);
    hypre_SStructGraph *graph        = hypre_SStructMatrixGraph(matrix);
@@ -397,7 +395,7 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
                               HYPRE_Int            var,
                               HYPRE_Int            nentries,
                               HYPRE_Int           *entries,
-                              double              *values )
+                              HYPRE_Complex       *values )
 {
    hypre_SStructMatrixSetValues(matrix, part, index, var,
                                 nentries, entries, values, -1);
@@ -414,7 +412,7 @@ HYPRE_Int
 HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            part,
                                  HYPRE_Int           *index,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    HYPRE_Int           ndim         = hypre_SStructMatrixNDim(matrix);
    hypre_SStructGraph *graph        = hypre_SStructMatrixGraph(matrix);
@@ -452,7 +450,7 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            var,
                                  HYPRE_Int            nentries,
                                  HYPRE_Int           *entries,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
                                    nentries, entries, values, 0);
@@ -471,7 +469,7 @@ HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix  matrix,
                                    HYPRE_Int            var,
                                    HYPRE_Int            nentries,
                                    HYPRE_Int           *entries,
-                                   double              *values )
+                                   HYPRE_Complex       *values )
 {
    hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
                                    nentries, entries, values, 1);
@@ -490,7 +488,7 @@ HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            var,
                                  HYPRE_Int            nentries,
                                  HYPRE_Int           *entries,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
                                    nentries, entries, values, -1);
@@ -832,10 +830,10 @@ HYPRE_SStructMatrixPrint( const char          *filename,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructMatrixMatvec( double alpha,
+HYPRE_SStructMatrixMatvec( HYPRE_Complex       alpha,
                            HYPRE_SStructMatrix A,
                            HYPRE_SStructVector x,
-                           double beta,
+                           HYPRE_Complex       beta,
                            HYPRE_SStructVector y     )
 {
    hypre_SStructMatvec(alpha, A, x, beta, y);

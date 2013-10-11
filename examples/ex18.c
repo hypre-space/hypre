@@ -3,13 +3,13 @@
 
    Interface:      SStructured interface (SStruct)
 
-   Compile with:   make ex17
+   Compile with:   make ex18
 
-   Sample run:     mpirun -np 16 ex17 -n 10
+   Sample run:     mpirun -np 16 ex18 -n 4
 
    To see options: ex18 -help
 
-   Description:    This code solves an "NDIM-D Lapalacian" using CG.
+   Description:    This code solves an "NDIM-D Laplacian" using CG.
 */
 
 #include <math.h>
@@ -52,8 +52,6 @@ int main (int argc, char *argv[])
    /* Set defaults */
    n = 4;
    solver_id = 0;
-
-   nvol = pow(n, NDIM);
 
    /* Parse command line */
    {
@@ -101,6 +99,8 @@ int main (int argc, char *argv[])
          return (0);
       }
    }
+
+   nvol = pow(n, NDIM);
 
    /* Figure out the processor grid (N x N x N x N).  The local problem size for
       the interior nodes is indicated by n (n x n x n x n).  p indicates the

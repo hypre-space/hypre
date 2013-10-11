@@ -36,8 +36,8 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 ierr,i; 
    HYPRE_Int                 max_levels = 25;
    HYPRE_Int                 num_iterations; 
-   double              norm;
-   double              final_res_norm;
+   HYPRE_Real          norm;
+   HYPRE_Real          final_res_norm;
 
 
    HYPRE_ParCSRMatrix  A;
@@ -55,8 +55,8 @@ main( HYPRE_Int   argc,
    HYPRE_Int		       time_index;
 
    /* parameters for BoomerAMG */
-   double   strong_threshold;
-   double   trunc_factor;
+   HYPRE_Real   strong_threshold;
+   HYPRE_Real   trunc_factor;
    HYPRE_Int      cycle_type;
    HYPRE_Int      coarsen_type = 0;
    HYPRE_Int      hybrid = 1;
@@ -65,11 +65,11 @@ main( HYPRE_Int   argc,
    HYPRE_Int     *grid_relax_type;   
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      relax_default;
-   double  *relax_weight; 
-   double   tol = 1.0e-6;
+   HYPRE_Real  *relax_weight; 
+   HYPRE_Real   tol = 1.0e-6;
 
    /* parameters for PILUT */
-   double   drop_tol = -1;
+   HYPRE_Real   drop_tol = -1;
    HYPRE_Int      nonzeros_to_keep = -1;
 
    /* parameters for GMRES */
@@ -248,7 +248,7 @@ main( HYPRE_Int   argc,
    num_grid_sweeps = hypre_CTAlloc(HYPRE_Int,4);
    grid_relax_type = hypre_CTAlloc(HYPRE_Int,4);
    grid_relax_points = hypre_CTAlloc(HYPRE_Int *,4);
-   relax_weight = hypre_CTAlloc(double,max_levels);
+   relax_weight = hypre_CTAlloc(HYPRE_Real,max_levels);
 
    for (i=0; i < max_levels; i++)
 	relax_weight[i] = 0.0;
@@ -963,13 +963,13 @@ BuildParLaplacian( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1062,7 +1062,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -1109,15 +1109,15 @@ BuildParDifConv( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
-   double              ax, ay, az;
-   double              hinx,hiny,hinz;
+   HYPRE_Real          cx, cy, cz;
+   HYPRE_Real          ax, ay, az;
+   HYPRE_Real          hinx,hiny,hinz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1227,7 +1227,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 7);
+   values = hypre_CTAlloc(HYPRE_Real, 7);
 
    values[1] = -cx/(hinx*hinx);
    values[2] = -cy/(hiny*hiny);
@@ -1405,7 +1405,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1481,7 +1481,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[1] = -1.0;
 
@@ -1526,7 +1526,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1607,7 +1607,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)

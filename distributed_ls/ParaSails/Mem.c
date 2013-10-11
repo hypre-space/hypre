@@ -144,7 +144,7 @@ void MemStat(Mem *m, FILE *stream, char *msg)
     hypre_fprintf(stream, "bytes_alloc: %ld\n", m->bytes_alloc);
     if (m->bytes_alloc != 0)
         hypre_fprintf(stream, "efficiency : %f\n", m->total_bytes / 
-	    (double) m->bytes_alloc);
+	    (HYPRE_Real) m->bytes_alloc);
     hypre_fprintf(stream, "*********************\n");
     fflush(stream);
 }

@@ -158,7 +158,7 @@ HYPRE_Int
 hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
                                hypre_Index           index,
                                HYPRE_Int             var,
-                               double               *value,
+                               HYPRE_Complex        *value,
                                HYPRE_Int             action )
 {
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
@@ -238,7 +238,7 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
                                   hypre_Index           ilower,
                                   hypre_Index           iupper,
                                   HYPRE_Int             var,
-                                  double               *values,
+                                  HYPRE_Complex        *values,
                                   HYPRE_Int             action )
 {
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
@@ -460,7 +460,7 @@ HYPRE_Int
 hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector,
                                hypre_Index           index,
                                HYPRE_Int             var,
-                               double               *value )
+                               HYPRE_Complex        *value )
 {
    hypre_SStructPGrid *pgrid     = hypre_SStructPVectorPGrid(pvector);
    hypre_StructVector *svector   = hypre_SStructPVectorSVector(pvector, var);
@@ -485,7 +485,7 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
                                   hypre_Index           ilower,
                                   hypre_Index           iupper,
                                   HYPRE_Int             var,
-                                  double               *values )
+                                  HYPRE_Complex        *values )
 {
    hypre_SStructPGrid *pgrid     = hypre_SStructPVectorPGrid(pvector);
    hypre_StructVector *svector   = hypre_SStructPVectorSVector(pvector, var);
@@ -512,7 +512,7 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
 
 HYPRE_Int 
 hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector,
-                                       double                value )
+                                       HYPRE_Complex         value )
 {
    HYPRE_Int           nvars = hypre_SStructPVectorNVars(pvector);
    hypre_StructVector *svector;
@@ -573,7 +573,7 @@ hypre_SStructVectorRef( hypre_SStructVector  *vector,
 
 HYPRE_Int 
 hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector,
-                                      double               value )
+                                      HYPRE_Complex        value )
 {
    HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
@@ -612,14 +612,14 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                hypre_ParVector     **parvector_ptr )
 {
    hypre_ParVector      *parvector;
-   double               *pardata;
+   HYPRE_Complex        *pardata;
    HYPRE_Int             pari;
 
    hypre_SStructPVector *pvector;
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
    HYPRE_Int             yi;
-   double               *yp;
+   HYPRE_Complex        *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
    HYPRE_Int             bi;
@@ -696,14 +696,14 @@ HYPRE_Int
 hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                hypre_ParVector     *parvector )
 {
-   double               *pardata;
+   HYPRE_Complex        *pardata;
    HYPRE_Int             pari;
 
    hypre_SStructPVector *pvector;
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
    HYPRE_Int             yi;
-   double               *yp;
+   HYPRE_Complex        *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
    HYPRE_Int             bi;

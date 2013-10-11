@@ -27,27 +27,27 @@
  ****************************************************************************/
 
 
-HYPRE_Int hypre_VcycleSchwarzpcg(double *x, double *rhs, 
-			   double **v_cycle, double **w_cycle,
+HYPRE_Int hypre_VcycleSchwarzpcg(HYPRE_Real *x, HYPRE_Real *rhs, 
+			   HYPRE_Real **v_cycle, HYPRE_Real **w_cycle,
 
-			   double *reduction_factor_pointer,
+			   HYPRE_Real *reduction_factor_pointer,
 
 			   hypre_CSRMatrix **Matrix,
 
 			   HYPRE_Int **i_domain_dof,
 			   HYPRE_Int **j_domain_dof,
-			   double **domain_matrixinverse,
+			   HYPRE_Real **domain_matrixinverse,
 			   HYPRE_Int *Nelements,
 			     
 			   hypre_CSRMatrix **P,
 
-			   double *v_fine, double *w_fine, double *aux_fine,
-			   double *v, double *w, double *d, 
+			   HYPRE_Real *v_fine, HYPRE_Real *w_fine, HYPRE_Real *aux_fine,
+			   HYPRE_Real *v, HYPRE_Real *w, HYPRE_Real *d, 
 
 			   HYPRE_Int max_iter, 
 		       
-			   double *v_coarse, double *w_coarse, 
-			   double *d_coarse, 
+			   HYPRE_Real *v_coarse, HYPRE_Real *w_coarse, 
+			   HYPRE_Real *d_coarse, 
 
 			   HYPRE_Int nu, 
 			   HYPRE_Int level, HYPRE_Int coarse_level, 
@@ -65,7 +65,7 @@ HYPRE_Int hypre_VcycleSchwarzpcg(double *x, double *rhs,
   HYPRE_Int num_dofs = Ndofs[0];
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(Matrix[0]);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(Matrix[0]);
-  double *sparse_matrix = hypre_CSRMatrixData(Matrix[0]);
+  HYPRE_Real *sparse_matrix = hypre_CSRMatrixData(Matrix[0]);
 
 
   if (max_iter) max_iter = 1000;

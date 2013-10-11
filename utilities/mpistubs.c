@@ -55,13 +55,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
    return(0);
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtime( )
 {
    return(0.0);
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtick( )
 {
    return(0.0);
@@ -181,7 +181,7 @@ hypre_MPI_Allgather( void               *sendbuf,
 
    switch (sendtype)
    {
-      case HYPRE_MPI_INT:
+      case hypre_MPI_INT:
       {
          HYPRE_Int *crecvbuf = (HYPRE_Int *)recvbuf;
          HYPRE_Int *csendbuf = (HYPRE_Int *)sendbuf;
@@ -217,6 +217,28 @@ hypre_MPI_Allgather( void               *sendbuf,
       case hypre_MPI_BYTE:
       {
          memcpy(recvbuf, sendbuf, sendcount);
+      } 
+      break;
+
+      case hypre_MPI_REAL:
+      {
+         HYPRE_Real *crecvbuf = (HYPRE_Real *)recvbuf;
+         HYPRE_Real *csendbuf = (HYPRE_Real *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+	    crecvbuf[i] = csendbuf[i];
+         }
+      } 
+      break;
+
+      case hypre_MPI_COMPLEX:
+      {
+         HYPRE_Complex *crecvbuf = (HYPRE_Complex *)recvbuf;
+         HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+	    crecvbuf[i] = csendbuf[i];
+         }
       } 
       break;
    }
@@ -470,7 +492,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
    
    switch (datatype)
    {
-      case HYPRE_MPI_INT:
+      case hypre_MPI_INT:
       {
          HYPRE_Int *crecvbuf = (HYPRE_Int *)recvbuf;
          HYPRE_Int *csendbuf = (HYPRE_Int *)sendbuf;
@@ -507,6 +529,28 @@ hypre_MPI_Allreduce( void              *sendbuf,
       case hypre_MPI_BYTE:
       {
          memcpy(recvbuf, sendbuf, count);
+      } 
+      break;
+
+      case hypre_MPI_REAL:
+      {
+         HYPRE_Real *crecvbuf = (HYPRE_Real *)recvbuf;
+         HYPRE_Real *csendbuf = (HYPRE_Real *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      } 
+      break;
+
+      case hypre_MPI_COMPLEX:
+      {
+         HYPRE_Complex *crecvbuf = (HYPRE_Complex *)recvbuf;
+         HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
       } 
       break;
    }
@@ -632,13 +676,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
    return (HYPRE_Int) MPI_Abort(comm, (hypre_int)errorcode);
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtime( )
 {
    return MPI_Wtime();
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtick( )
 {
    return MPI_Wtick();

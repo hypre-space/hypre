@@ -313,10 +313,10 @@ hypre_BoxVolume( hypre_Box *box )
  * To prevent overflow when needed
  *--------------------------------------------------------------------------*/
 
-double
+HYPRE_Real
 hypre_doubleBoxVolume( hypre_Box *box )
 {
-   double    volume;
+   HYPRE_Real    volume;
    HYPRE_Int d, ndim = hypre_BoxNDim(box);
 
    volume = 1.0;

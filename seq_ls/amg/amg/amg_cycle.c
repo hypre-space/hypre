@@ -31,7 +31,7 @@ HYPRE_Int         hypre_AMGCycle(U_array,F_array, tol, data)
 
 hypre_Vector      **U_array;
 hypre_Vector      **F_array;
-double       tol;
+HYPRE_Real   tol;
 void        *data; 
 {
 
@@ -80,10 +80,10 @@ void        *data;
    HYPRE_Int       num_sweep;
    HYPRE_Int       base_lev;
 
-   double    alpha;
-   double    beta;
-   double   *D_mat;
-   double   *S_vec;
+   HYPRE_Real    alpha;
+   HYPRE_Real    beta;
+   HYPRE_Real   *D_mat;
+   HYPRE_Real   *S_vec;
    
 /* Acquire data and allocate storage */
 
@@ -118,8 +118,8 @@ void        *data;
    ity  = hypre_CTAlloc(HYPRE_Int, 10);
    ipt  = hypre_CTAlloc(HYPRE_Int, 10);
 
-   D_mat = hypre_CTAlloc(double, num_unknowns * num_unknowns);
-   S_vec = hypre_CTAlloc(double, num_unknowns);
+   D_mat = hypre_CTAlloc(HYPRE_Real, num_unknowns * num_unknowns);
+   S_vec = hypre_CTAlloc(HYPRE_Real, num_unknowns);
 
 /* Initialize */
 

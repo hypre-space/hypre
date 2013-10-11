@@ -108,7 +108,7 @@
  **************************************************************/
 HYPRE_Int
 hypre_AMGCoarsen( hypre_CSRMatrix    *A,
-                  double              strength_threshold,
+                  HYPRE_Real          strength_threshold,
                   hypre_CSRMatrix    *S,
                   HYPRE_Int               **CF_marker_ptr,
                   HYPRE_Int                *coarse_size_ptr     )
@@ -117,20 +117,20 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
 /*
     HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
     HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
-    double          *A_data        = hypre_CSRMatrixData(A);
+    HYPRE_Real      *A_data        = hypre_CSRMatrixData(A);
 */                
    HYPRE_Int             *S_i;
    HYPRE_Int             *S_j;
-   double          *S_data;
+   HYPRE_Real      *S_data;
                  
    HYPRE_Int             *CF_marker;
    HYPRE_Int              coarse_size;
 
-   double          *measure_array;
+   HYPRE_Real      *measure_array;
    HYPRE_Int             *graph_array;
    HYPRE_Int              graph_size;
 
-/*  double           diag, row_scale;
+/*  HYPRE_Real       diag, row_scale;
     HYPRE_Int              jS; */
 
    HYPRE_Int              i, j, k, jS, kS, ig;
@@ -158,7 +158,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
     * between 0 and 1.
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(double, num_variables);
+   measure_array = hypre_CTAlloc(HYPRE_Real, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -412,7 +412,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
 
 HYPRE_Int
 hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
-                      double              strength_threshold,
+                      HYPRE_Real          strength_threshold,
                       hypre_CSRMatrix    *S,
                       HYPRE_Int               **CF_marker_ptr,
                       HYPRE_Int                *coarse_size_ptr     )
@@ -423,7 +423,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 /*
     HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
     HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
-    double          *A_data        = hypre_CSRMatrixData(A);
+    HYPRE_Real      *A_data        = hypre_CSRMatrixData(A);
 */
                   
    HYPRE_Int             *S_i;
@@ -441,7 +441,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
    HYPRE_Int             *graph_ptr;
    HYPRE_Int              graph_size;
 
-/*   double           diag, row_scale;
+/*   HYPRE_Real       diag, row_scale;
 
     HYPRE_Int              jA, jS;
 */
@@ -701,7 +701,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 
 HYPRE_Int
 hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
-			 double              strength_threshold,
+			 HYPRE_Real          strength_threshold,
 			 hypre_CSRMatrix    *S,
 			 HYPRE_Int               **CF_marker_ptr,
 			 HYPRE_Int                *coarse_size_ptr     )
@@ -711,7 +711,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 /*
     HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
     HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
-    double          *A_data        = hypre_CSRMatrixData(A);
+    HYPRE_Real      *A_data        = hypre_CSRMatrixData(A);
 */
 
                   
@@ -728,7 +728,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    HYPRE_Int             *measure_array;
    HYPRE_Int             *graph_array;
 /*
-    double           diag, row_scale;
+    HYPRE_Real       diag, row_scale;
     HYPRE_Int              jA, jS;
 */
 
@@ -1070,7 +1070,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
  **************************************************************/
 HYPRE_Int
 hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
-                  double              strength_threshold,
+                  HYPRE_Real          strength_threshold,
                   hypre_CSRMatrix    *S,
                   /*hypre_CSRMatrix   **S_ptr,*/
                   HYPRE_Int               **CF_marker_ptr,
@@ -1081,22 +1081,22 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 /*
     HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
     HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
-    double          *A_data        = hypre_CSRMatrixData(A);
+    HYPRE_Real      *A_data        = hypre_CSRMatrixData(A);
 */
 
                   
    HYPRE_Int             *S_i;
    HYPRE_Int             *S_j;
-   double          *S_data;
+   HYPRE_Real      *S_data;
                  
    HYPRE_Int             *CF_marker;
    HYPRE_Int              coarse_size;
 
-   double          *measure_array;
+   HYPRE_Real      *measure_array;
    HYPRE_Int             *graph_array;
    HYPRE_Int              graph_size;
 /*
-    double           diag, row_scale;
+    HYPRE_Real       diag, row_scale;
     HYPRE_Int              i, j, k, jA, jS, kS, ig;
 */
    HYPRE_Int              i, j, jS, ig;
@@ -1234,7 +1234,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
     * between 0 and 1.
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(double, num_variables);
+   measure_array = hypre_CTAlloc(HYPRE_Real, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -1473,7 +1473,7 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
 
 HYPRE_Int
 hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
-                      double              strength_threshold,
+                      HYPRE_Real          strength_threshold,
                       /*hypre_CSRMatrix   **S_ptr,*/
                       hypre_CSRMatrix    *S,
                       HYPRE_Int               **CF_marker_ptr,
@@ -1483,7 +1483,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
 /*
     HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
-    double          *A_data        = hypre_CSRMatrixData(A);
+    HYPRE_Real      *A_data        = hypre_CSRMatrixData(A);
 */
 
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
@@ -1504,7 +1504,7 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    HYPRE_Int             *graph_ptr;
    HYPRE_Int              graph_size;
 /*
-   double           diag, row_scale;
+   HYPRE_Real       diag, row_scale;
     HYPRE_Int              i, j, jA, jS, ig;
 */
    HYPRE_Int              measure, max_measure;

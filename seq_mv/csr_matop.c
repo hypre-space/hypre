@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Matrix operation functions for hypre_CSRMatrix class.
@@ -26,36 +23,36 @@
  * adds two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- 	 in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+ in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
 hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
-              hypre_CSRMatrix *B)
+                    hypre_CSRMatrix *B )
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   double     *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   hypre_CSRMatrix *C;
-   double     *C_data;
-   HYPRE_Int	      *C_i;
+   hypre_CSRMatrix  *C;
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
 
    HYPRE_Int         ia, ib, ic, jcol, num_nonzeros;
-   HYPRE_Int	       pos;
+   HYPRE_Int         pos;
    HYPRE_Int         *marker;
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
-              hypre_printf("Warning! incompatible matrix dimensions!\n");
-	      return NULL;
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
+      return NULL;
    }
 
 
@@ -63,28 +60,28 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
 
    for (ia = 0; ia < ncols_A; ia++)
-	marker[ia] = -1;
+      marker[ia] = -1;
 
    num_nonzeros = 0;
    C_i[0] = 0;
    for (ic = 0; ic < nrows_A; ic++)
    {
-	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-	{
-		jcol = A_j[ia];
-		marker[jcol] = ic;
-		num_nonzeros++;
-	}
-	for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
-	{
-		jcol = B_j[ib];
-		if (marker[jcol] != ic)
-		{
-			marker[jcol] = ic;
-			num_nonzeros++;
-		}
-   	}
-	C_i[ic+1] = num_nonzeros;
+      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      {
+         jcol = A_j[ia];
+         marker[jcol] = ic;
+         num_nonzeros++;
+      }
+      for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+      {
+         jcol = B_j[ib];
+         if (marker[jcol] != ic)
+         {
+            marker[jcol] = ic;
+            num_nonzeros++;
+         }
+      }
+      C_i[ic+1] = num_nonzeros;
    }
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_A, num_nonzeros);
@@ -94,101 +91,100 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
    C_data = hypre_CSRMatrixData(C);
 
    for (ia = 0; ia < ncols_A; ia++)
-	marker[ia] = -1;
+      marker[ia] = -1;
 
    pos = 0;
    for (ic = 0; ic < nrows_A; ic++)
    {
-	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-	{
-		jcol = A_j[ia];
-		C_j[pos] = jcol;
-		C_data[pos] = A_data[ia];
-		marker[jcol] = pos;
-		pos++;
-	}
-	for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
-	{
-		jcol = B_j[ib];
-		if (marker[jcol] < C_i[ic])
-		{
-			C_j[pos] = jcol;
-			C_data[pos] = B_data[ib];
-			marker[jcol] = pos;
-			pos++;
-		}
-		else
-		{
-			C_data[marker[jcol]] += B_data[ib];
-		}
-   	}
+      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      {
+         jcol = A_j[ia];
+         C_j[pos] = jcol;
+         C_data[pos] = A_data[ia];
+         marker[jcol] = pos;
+         pos++;
+      }
+      for (ib = B_i[ic]; ib < B_i[ic+1]; ib++)
+      {
+         jcol = B_j[ib];
+         if (marker[jcol] < C_i[ic])
+         {
+            C_j[pos] = jcol;
+            C_data[pos] = B_data[ib];
+            marker[jcol] = pos;
+            pos++;
+         }
+         else
+         {
+            C_data[marker[jcol]] += B_data[ib];
+         }
+      }
    }
 
    hypre_TFree(marker);
    return C;
-}	
+}       
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiply
  * multiplies two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- 	 in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+ in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
 hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
-              hypre_CSRMatrix *B)
+                         hypre_CSRMatrix *B)
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   double     *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   hypre_CSRMatrix *C;
-   double     *C_data;
-   HYPRE_Int	      *C_i;
+   hypre_CSRMatrix  *C;
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
 
    HYPRE_Int         ia, ib, ic, ja, jb, num_nonzeros=0;
-   HYPRE_Int	       row_start, counter;
-   double      a_entry, b_entry;
-   HYPRE_Int         *B_marker;
+   HYPRE_Int         row_start, counter;
+   HYPRE_Complex     a_entry, b_entry;
+   HYPRE_Int        *B_marker;
 
    if (ncols_A != nrows_B)
    {
-              hypre_printf("Warning! incompatible matrix dimensions!\n");
-	      return NULL;
+      hypre_printf("Warning! incompatible matrix dimensions!\n");
+      return NULL;
    }
-
 
    B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
 
    for (ib = 0; ib < ncols_B; ib++)
-	B_marker[ib] = -1;
+      B_marker[ib] = -1;
 
    for (ic = 0; ic < nrows_A; ic++)
    {
-	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-	{
-		ja = A_j[ia];
-		for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-		{
-			jb = B_j[ib];
-			if (B_marker[jb] != ic)
-			{
-				B_marker[jb] = ic;
-				num_nonzeros++;
-			}
-		}
-   	}
-	C_i[ic+1] = num_nonzeros;
+      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      {
+         ja = A_j[ia];
+         for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+         {
+            jb = B_j[ib];
+            if (B_marker[jb] != ic)
+            {
+               B_marker[jb] = ic;
+               num_nonzeros++;
+            }
+         }
+      }
+      C_i[ic+1] = num_nonzeros;
    }
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, num_nonzeros);
@@ -198,94 +194,94 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    C_data = hypre_CSRMatrixData(C);
 
    for (ib = 0; ib < ncols_B; ib++)
-	B_marker[ib] = -1;
+      B_marker[ib] = -1;
 
    counter = 0;
    for (ic = 0; ic < nrows_A; ic++)
    {
-	row_start = C_i[ic];
-	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-	{
-		ja = A_j[ia];
-		a_entry = A_data[ia];
-		for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-		{
-			jb = B_j[ib];
-			b_entry = B_data[ib];
-			if (B_marker[jb] < row_start)
-			{
-				B_marker[jb] = counter;
-				C_j[B_marker[jb]] = jb;
-				C_data[B_marker[jb]] = a_entry*b_entry;
-				counter++;
-			}
-			else
-				C_data[B_marker[jb]] += a_entry*b_entry;
-				 
-		}
-	}
+      row_start = C_i[ic];
+      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+      {
+         ja = A_j[ia];
+         a_entry = A_data[ia];
+         for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+         {
+            jb = B_j[ib];
+            b_entry = B_data[ib];
+            if (B_marker[jb] < row_start)
+            {
+               B_marker[jb] = counter;
+               C_j[B_marker[jb]] = jb;
+               C_data[B_marker[jb]] = a_entry*b_entry;
+               counter++;
+            }
+            else
+               C_data[B_marker[jb]] += a_entry*b_entry;
+                                 
+         }
+      }
    }
    hypre_TFree(B_marker);
    return C;
-}	
+}       
 
 hypre_CSRMatrix *
-hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, double tol)
+hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         num_nonzeros  = hypre_CSRMatrixNumNonzeros(A);
 
-   hypre_CSRMatrix *B;
-   double     *B_data; 
+   hypre_CSRMatrix  *B;
+   HYPRE_Complex    *B_data; 
    HYPRE_Int        *B_i;
    HYPRE_Int        *B_j;
 
-   HYPRE_Int zeros;
-   HYPRE_Int i, j;
-   HYPRE_Int pos_A, pos_B;
+   HYPRE_Int         zeros;
+   HYPRE_Int         i, j;
+   HYPRE_Int         pos_A, pos_B;
 
    zeros = 0;
    for (i=0; i < num_nonzeros; i++)
-	if (fabs(A_data[i]) <= tol)
-		zeros++;
+      if (hypre_cabs(A_data[i]) <= tol)
+         zeros++;
 
    if (zeros)
    {
-	B = hypre_CSRMatrixCreate(nrows_A,ncols_A,num_nonzeros-zeros);
-	hypre_CSRMatrixInitialize(B);
-	B_i = hypre_CSRMatrixI(B);
-	B_j = hypre_CSRMatrixJ(B);
-	B_data = hypre_CSRMatrixData(B);
-	B_i[0] = 0;
-	pos_A = 0;
-	pos_B = 0;
-	for (i=0; i < nrows_A; i++)
-	{
-		for (j = A_i[i]; j < A_i[i+1]; j++)
-		{
-		   if (fabs(A_data[j]) <= tol)
-		   {
-			pos_A++;
-		   }
-		   else
-		   {
-			B_data[pos_B] = A_data[pos_A];
-			B_j[pos_B] = A_j[pos_A];
-			pos_B++;
-			pos_A++;
-		   }
-		}
-		B_i[i+1] = pos_B;
-	}
-	return B;
+      B = hypre_CSRMatrixCreate(nrows_A,ncols_A,num_nonzeros-zeros);
+      hypre_CSRMatrixInitialize(B);
+      B_i = hypre_CSRMatrixI(B);
+      B_j = hypre_CSRMatrixJ(B);
+      B_data = hypre_CSRMatrixData(B);
+      B_i[0] = 0;
+      pos_A = 0;
+      pos_B = 0;
+      for (i=0; i < nrows_A; i++)
+      {
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            if (fabs(A_data[j]) <= tol)
+            {
+               pos_A++;
+            }
+            else
+            {
+               B_data[pos_B] = A_data[pos_A];
+               B_j[pos_B] = A_j[pos_A];
+               pos_B++;
+               pos_A++;
+            }
+         }
+         B_i[i+1] = pos_B;
+      }
+      return B;
    }
    else
-	return NULL;
-}	
+      return NULL;
+}       
 
 
 /******************************************************************************
@@ -300,17 +296,17 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, double tol)
 
 
 HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
-				HYPRE_Int data)
+                                   HYPRE_Int data)
 
 {
-   double       *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Complex      *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int          *A_i = hypre_CSRMatrixI(A);
    HYPRE_Int          *A_j = hypre_CSRMatrixJ(A);
    HYPRE_Int           num_rowsA = hypre_CSRMatrixNumRows(A);
    HYPRE_Int           num_colsA = hypre_CSRMatrixNumCols(A);
    HYPRE_Int           num_nonzerosA = hypre_CSRMatrixNumNonzeros(A);
 
-   double       *AT_data;
+   HYPRE_Complex      *AT_data;
    HYPRE_Int          *AT_i;
    HYPRE_Int          *AT_j;
    HYPRE_Int           num_rowsAT;
@@ -335,11 +331,11 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
       max_col = -1;
       for (i = 0; i < num_rowsA; ++i)
       {
-          for (j = A_i[i]; j < A_i[i+1]; j++)
-          {
-              if (A_j[j] > max_col)
-                 max_col = A_j[j];
-          }
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+         {
+            if (A_j[j] > max_col)
+               max_col = A_j[j];
+         }
       }
       num_colsA = max_col+1;
    }
@@ -356,7 +352,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    hypre_CSRMatrixJ(*AT) = AT_j;
    if (data) 
    {
-      AT_data = hypre_CTAlloc(double, num_nonzerosAT);
+      AT_data = hypre_CTAlloc(HYPRE_Complex, num_nonzerosAT);
       hypre_CSRMatrixData(*AT) = AT_data;
    }
 
@@ -367,12 +363,12 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    for (i = 0; i < num_nonzerosA; i++)
    {
-       ++AT_i[A_j[i]+1];
+      ++AT_i[A_j[i]+1];
    }
 
    for (i = 2; i <= num_rowsAT; i++)
    {
-       AT_i[i] += AT_i[i-1];
+      AT_i[i] += AT_i[i-1];
    }
 
    /*----------------------------------------------------------------
@@ -398,7 +394,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    for (i = num_rowsAT; i > 0; i--)
    {
-         AT_i[i] = AT_i[i-1];
+      AT_i[i] = AT_i[i-1];
    }
 
    AT_i[0] = 0;
@@ -415,14 +411,14 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
 HYPRE_Int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
 {
-   HYPRE_Int i, j, tempi, row_size;
-   double tempd;
+   HYPRE_Int     i, j, tempi, row_size;
+   HYPRE_Complex tempd;
 
-   double *A_data = hypre_CSRMatrixData(A);
-   HYPRE_Int    *A_i = hypre_CSRMatrixI(A);
-   HYPRE_Int    *A_j = hypre_CSRMatrixJ(A);
-   HYPRE_Int     num_rowsA = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int     num_colsA = hypre_CSRMatrixNumCols(A);
+   HYPRE_Complex *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Int     *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int      num_rowsA = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      num_colsA = hypre_CSRMatrixNumCols(A);
 
    /* the matrix should be square */
    if (num_rowsA != num_colsA)
@@ -466,12 +462,12 @@ HYPRE_Int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
  * Returns the sum of all matrix elements.
  *--------------------------------------------------------------------------*/
 
-double hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
+HYPRE_Complex hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
 {
-   double sum = 0;
-   double * data = hypre_CSRMatrixData( A );
-   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
-   HYPRE_Int i;
+   HYPRE_Complex  sum = 0;
+   HYPRE_Complex *data = hypre_CSRMatrixData( A );
+   HYPRE_Int      num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int      i;
 
    for ( i=0; i<num_nonzeros; ++i ) sum += data[i];
 

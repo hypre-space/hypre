@@ -44,7 +44,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 			       HYPRE_Int		   option,
 			       HYPRE_Int               **i_domain_dof_pointer,
 			       HYPRE_Int               **j_domain_dof_pointer,
-			       double            **domain_matrixinverse_pointer,
+			       HYPRE_Real        **domain_matrixinverse_pointer,
 			       HYPRE_Int                *num_domains_pointer)
 
 {
@@ -54,7 +54,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	
 
   HYPRE_Int *i_domain_dof, *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
 
 
@@ -69,7 +69,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
-  double *a_dof_dof = hypre_CSRMatrixData(A);
+  HYPRE_Real *a_dof_dof = hypre_CSRMatrixData(A);
   HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
 
@@ -87,11 +87,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
-  double *AE, *XE;
+  HYPRE_Real *AE, *XE;
 
 
   /* PCG arrays: --------------------------------------------------- 
-  double *x, *rhs, *v, *w, *d, *aux;
+  HYPRE_Real *x, *rhs, *v, *w, *d, *aux;
 
   HYPRE_Int max_iter;
 
@@ -205,21 +205,21 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
   if (option == 1)
-    domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
+    domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, domain_matrixinverse_counter);
   else
-    domain_matrixinverse = hypre_CTAlloc(double, num_dofs * num_functions);
+    domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, num_dofs * num_functions);
 
 
 
   i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
-  AE = hypre_CTAlloc(double, max_local_dof_counter *
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
 
 
-  XE = hypre_CTAlloc(double, max_local_dof_counter *
+  XE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
   i_int_to_local = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
@@ -398,13 +398,13 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   /* hypre_printf("exit *Schwarz*: ===============================\n\n"); */
 
   /* -----------------------------------------------------------------
-   x   = hypre_CTAlloc(double, num_dofs); 
-   rhs = hypre_CTAlloc(double, num_dofs);
+   x   = hypre_CTAlloc(HYPRE_Real, num_dofs); 
+   rhs = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
-   v   = hypre_CTAlloc(double, num_dofs);
-   w   = hypre_CTAlloc(double, num_dofs);
-   d   = hypre_CTAlloc(double, num_dofs);
-   aux = hypre_CTAlloc(double, num_dofs);
+   v   = hypre_CTAlloc(HYPRE_Real, num_dofs);
+   w   = hypre_CTAlloc(HYPRE_Real, num_dofs);
+   d   = hypre_CTAlloc(HYPRE_Real, num_dofs);
+   aux = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
    for (i=0; i < num_dofs; i++)
      x[i] = 0.e0;
@@ -457,7 +457,7 @@ HYPRE_Int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 		       HYPRE_Int num_domains,
 		       HYPRE_Int *i_domain_dof,
 		       HYPRE_Int *j_domain_dof,
-		       double *domain_matrixinverse,
+		       HYPRE_Real *domain_matrixinverse,
 		       hypre_Vector *x_vector,
 		       hypre_Vector *aux_vector)
 
@@ -466,10 +466,10 @@ HYPRE_Int hypre_SchwarzSolve(hypre_CSRMatrix *A,
   /* HYPRE_Int num_dofs; */
   HYPRE_Int *i_dof_dof;
   HYPRE_Int *j_dof_dof;
-  double *a_dof_dof;
-  double *x;
-  double *rhs;
-  double *aux;
+  HYPRE_Real *a_dof_dof;
+  HYPRE_Real *x;
+  HYPRE_Real *rhs;
+  HYPRE_Real *aux;
 
   HYPRE_Int i,j,k, j_loc, k_loc;
 
@@ -782,7 +782,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
 			 HYPRE_Int                 **i_domain_dof_pointer,
 			 HYPRE_Int                 **j_domain_dof_pointer,
-			 double              **domain_matrixinverse_pointer,
+			 HYPRE_Real          **domain_matrixinverse_pointer,
 
 
 			 HYPRE_Int                 *num_domains_pointer) 
@@ -790,13 +790,13 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 {
 
   HYPRE_Int *i_domain_dof, *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
   
 
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
-  double *a_dof_dof = hypre_CSRMatrixData(A);
+  HYPRE_Real *a_dof_dof = hypre_CSRMatrixData(A);
   HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
   /* HYPRE_Int *i_dof_to_accept_weight; */
@@ -818,10 +818,10 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
-  double *AE, *XE;
+  HYPRE_Real *AE, *XE;
 
   /* PCG arrays: --------------------------------------------------- */
-  /* double *x, *rhs, *v, *w, *d, *aux;
+  /* HYPRE_Real *x, *rhs, *v, *w, *d, *aux;
 
   HYPRE_Int max_iter; */
 
@@ -979,16 +979,16 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 	max_local_dof_counter = local_dof_counter;
     }
 
-  domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
+  domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, domain_matrixinverse_counter);
 
 
   i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
-  AE = hypre_CTAlloc(double, max_local_dof_counter *
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
-  XE = hypre_CTAlloc(double, max_local_dof_counter *
+  XE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
   /* i_dof_index = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int)); */
@@ -1070,13 +1070,13 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
   
   /*
-   x   = hypre_CTAlloc(double, num_dofs); 
-   rhs = hypre_CTAlloc(double, num_dofs);
+   x   = hypre_CTAlloc(HYPRE_Real, num_dofs); 
+   rhs = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
-   v   = hypre_CTAlloc(double, num_dofs);
-   w   = hypre_CTAlloc(double, num_dofs);
-   d   = hypre_CTAlloc(double, num_dofs);
-   aux = hypre_CTAlloc(double, num_dofs);
+   v   = hypre_CTAlloc(HYPRE_Real, num_dofs);
+   w   = hypre_CTAlloc(HYPRE_Real, num_dofs);
+   d   = hypre_CTAlloc(HYPRE_Real, num_dofs);
+   aux = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
    for (i=0; i < num_dofs; i++)
      x[i] = 0.e0;

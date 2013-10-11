@@ -39,7 +39,7 @@ main( hypre_int argc,
    HYPRE_Int         size;
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
    HYPRE_Int         xi1, xi2, xi3, xi4;
-   double           *xp1, *xp2, *xp3, *xp4;
+   HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    hypre_Index       loop_size, start, unit_stride, index;
    
    /*-----------------------------------------------------------
@@ -163,10 +163,10 @@ main( hypre_int argc,
    hypre_CopyBox(x1_data_box, x4_data_box);
 
    size = (nx+2)*(ny+2)*(nz+2);
-   xp1 = hypre_CTAlloc(double, size);
-   xp2 = hypre_CTAlloc(double, size);
-   xp3 = hypre_CTAlloc(double, size);
-   xp4 = hypre_CTAlloc(double, size);
+   xp1 = hypre_CTAlloc(HYPRE_Real, size);
+   xp2 = hypre_CTAlloc(HYPRE_Real, size);
+   xp3 = hypre_CTAlloc(HYPRE_Real, size);
+   xp4 = hypre_CTAlloc(HYPRE_Real, size);
 
    reps = 1000000000/(nx*ny*nz+1000);
 

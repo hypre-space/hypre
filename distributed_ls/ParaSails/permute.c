@@ -31,7 +31,7 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     HYPRE_Int row;
 
     HYPRE_Int *ptr, *ind;
-    double *val;
+    HYPRE_Real *val;
     HYPRE_Int i, j;
 
     HYPRE_Int oldrow, k;
@@ -51,7 +51,7 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     /* allocate space for whole matrix */
     ptr = (HYPRE_Int *)    malloc((M+1) * sizeof(HYPRE_Int));
     ind = (HYPRE_Int *)    malloc(nnz * sizeof(HYPRE_Int));
-    val = (double *) malloc(nnz * sizeof(double));
+    val = (HYPRE_Real *) malloc(nnz * sizeof(HYPRE_Real));
     
     /* read the entire matrix */
     k = 0;

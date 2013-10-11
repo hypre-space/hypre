@@ -26,7 +26,7 @@
 
 HYPRE_Int hypre_AMGeAGSchwarzSmootherSetup(HYPRE_Int ***i_domain_dof_pointer,
 				     HYPRE_Int ***j_domain_dof_pointer,
-				     double ***domain_matrixinverse_pointer,
+				     HYPRE_Real ***domain_matrixinverse_pointer,
 				   
 				     hypre_AMGeMatrixTopology **A,
 
@@ -45,7 +45,7 @@ HYPRE_Int hypre_AMGeAGSchwarzSmootherSetup(HYPRE_Int ***i_domain_dof_pointer,
   HYPRE_Int i,j,l;
   HYPRE_Int level = level_pointer[0];
   HYPRE_Int **i_domain_dof, **j_domain_dof;
-  double **domain_matrixinverse;
+  HYPRE_Real **domain_matrixinverse;
 
   HYPRE_Int *i_AE_node, *j_AE_node;
 
@@ -55,7 +55,7 @@ HYPRE_Int hypre_AMGeAGSchwarzSmootherSetup(HYPRE_Int ***i_domain_dof_pointer,
 
   i_domain_dof = hypre_CTAlloc(HYPRE_Int*, level);
   j_domain_dof = hypre_CTAlloc(HYPRE_Int*, level);
-  domain_matrixinverse = hypre_CTAlloc(double*, level);
+  domain_matrixinverse = hypre_CTAlloc(HYPRE_Real*, level);
 
 
   l=0;

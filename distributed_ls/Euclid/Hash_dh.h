@@ -26,10 +26,10 @@
 */
 typedef struct _hash_node {
   HYPRE_Int     iData;      /* integer */
-  double  fData;      /* float */
+  HYPRE_Real  fData;      /* float */
   HYPRE_Int     *iDataPtr;  /* pointer to integer */
   HYPRE_Int     *iDataPtr2; /* pointer to integer */
-  double  *fDataPtr;  /* pointer to float */
+  HYPRE_Real  *fDataPtr;  /* pointer to float */
 } HashData;
 
 

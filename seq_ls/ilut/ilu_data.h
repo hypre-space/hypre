@@ -31,18 +31,18 @@ typedef struct
   HYPRE_Int             mode;
   Matrix         *A;
   HYPRE_Int             ipar[20];
-  double          rpar[20];
+  HYPRE_Real      rpar[20];
   Matrix         *preconditioner;
   HYPRE_Int             lenpmx;
   HYPRE_Int            *perm;
   HYPRE_Int            *inverse_perm;
-  double         *rscale;
+  HYPRE_Real     *rscale;
 #ifdef ILUFact
-  double         *cscale;
+  HYPRE_Real     *cscale;
 #endif
   HYPRE_Int            *iwork;
   HYPRE_Int             l_iwork;
-  double         *rwork;
+  HYPRE_Real     *rwork;
   HYPRE_Int             l_rwork;
   
 } ILUData;

@@ -29,10 +29,10 @@ grid topology
 
 
 diffusion coefficients (default is 1.0):
-    -dx <double> -dy <double> -dz <double>
+    -dx <HYPRE_Real> -dy <HYPRE_Real> -dz <HYPRE_Real>
 
 convection coefficients (default is 0.0)
-    -cx <double> -cy <double> -cz <double>
+    -cx <HYPRE_Real> -cy <HYPRE_Real> -cz <HYPRE_Real>
 
 grid dimension; if more than one mpi process, this is
 the local size for each processor:
@@ -43,10 +43,10 @@ boundary conditions:
   2D grids; the condition along each side is either dirichlet (constant),
   if bcXX >= 0, or neuman, if bcXX < 0.
 
-   -bcx1 <double>
-   -bcx2 <double>
-   -bcy1 <double>
-   -bcy2 <double>
+   -bcx1 <HYPRE_Real>
+   -bcx2 <HYPRE_Real>
+   -bcy1 <HYPRE_Real>
+   -bcy2 <HYPRE_Real>
 
 Misc.
      -debug_matgen
@@ -67,34 +67,34 @@ struct _matgenfd {
   bool threeD;  
   HYPRE_Int m;           /* number of matrix rows in local matrix */
   HYPRE_Int cc;          /* Dimension of each processor's subgrid */
-  double hh;       /* Grid spacing; this is constant,  equal to 1.0/(px*cc-1) */
+  HYPRE_Real hh;       /* Grid spacing; this is constant,  equal to 1.0/(px*cc-1) */
   HYPRE_Int id;          /* the processor whose submatrix is to be generated */
   HYPRE_Int np;          /* number of subdomains (processors, mpi tasks) */
-  double stencil[8];
+  HYPRE_Real stencil[8];
 
 
   /* derivative coefficients; a,b,c are 2nd derivatives, 
    * c,d,e are 1st derivatives; f,g,h not currently used.
    */
-  double a, b, c, d, e, f, g, h;
+  HYPRE_Real a, b, c, d, e, f, g, h;
 
   HYPRE_Int first; /* global number of first locally owned row */
   bool debug;
 
   /* boundary conditions; if value is < 0, neumen; else, dirichelet */
-  double bcX1, bcX2;
-  double bcY1, bcY2;
-  double bcZ1, bcZ2;
+  HYPRE_Real bcX1, bcX2;
+  HYPRE_Real bcY1, bcY2;
+  HYPRE_Real bcZ1, bcZ2;
                 
   /* The following return coefficients; default is konstant() */
-  double (*A)(double coeff, double x, double y, double z);
-  double (*B)(double coeff, double x, double y, double z);
-  double (*C)(double coeff, double x, double y, double z);
-  double (*D)(double coeff, double x, double y, double z);
-  double (*E)(double coeff, double x, double y, double z);
-  double (*F)(double coeff, double x, double y, double z);
-  double (*G)(double coeff, double x, double y, double z);
-  double (*H)(double coeff, double x, double y, double z);
+  HYPRE_Real (*A)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*B)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*C)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*D)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*E)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*F)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*G)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+  HYPRE_Real (*H)(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 };
 
 extern void MatGenFD_Create(MatGenFD *mg);
@@ -102,8 +102,8 @@ extern void MatGenFD_Destroy(MatGenFD mg);
 extern void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *A, Vec_dh *rhs);
 
  /* =========== coefficient functions ============== */
-extern double konstant(double coeff, double x, double y, double z);
-extern double e2_xy(double coeff, double x, double y, double z);
+extern HYPRE_Real konstant(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
+extern HYPRE_Real e2_xy(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 
 
 
@@ -131,13 +131,13 @@ extern double e2_xy(double coeff, double x, double y, double z);
 #define BOX2_DD  100
 #define BOX3_DD  50
 
-extern double box_1(double coeff, double x, double y, double z);
+extern HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
   /* -bd2 is diffusion coeff outside box;
      -bd1 is diffusion coeff inside box.
   */
      
 
 
-extern double box_2(double coeff, double x, double y, double z);
+extern HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 
 #endif

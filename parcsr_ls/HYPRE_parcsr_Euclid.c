@@ -293,7 +293,7 @@ HYPRE_EuclidSolve( HYPRE_Solver solver,
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
-  double *b, *x;
+  HYPRE_Real *b, *x;
 
   x = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) bb));
   b = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) xx));
@@ -383,7 +383,7 @@ HYPRE_EuclidSetMem(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
-				double ilut)
+				HYPRE_Real ilut)
 {
   char str_ilut[256];
   START_FUNC_DH
@@ -394,7 +394,7 @@ HYPRE_EuclidSetILUT(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
-				double sparse_A)
+				HYPRE_Real sparse_A)
 {
   char str_sparse_A[256];
   START_FUNC_DH

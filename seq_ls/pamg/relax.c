@@ -32,33 +32,33 @@ HYPRE_Int  hypre_AMGRelax( hypre_CSRMatrix *A,
                          HYPRE_Int            *cf_marker,
                          HYPRE_Int             relax_type,
                          HYPRE_Int             relax_points,
-                         double          relax_weight,
+                         HYPRE_Real      relax_weight,
                          hypre_Vector    *u,
                          hypre_Vector    *Vtemp )
 {
-   double         *A_data  = hypre_CSRMatrixData(A);
+   HYPRE_Real     *A_data  = hypre_CSRMatrixData(A);
    HYPRE_Int            *A_i     = hypre_CSRMatrixI(A);
    HYPRE_Int            *A_j     = hypre_CSRMatrixJ(A);
 
    HYPRE_Int             n       = hypre_CSRMatrixNumRows(A);
    
-   double         *u_data  = hypre_VectorData(u);
-   double         *f_data  = hypre_VectorData(f);
+   HYPRE_Real     *u_data  = hypre_VectorData(u);
+   HYPRE_Real     *f_data  = hypre_VectorData(f);
 
-   double         *Vtemp_data = hypre_VectorData(Vtemp);
+   HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp);
    
-   double          res;
+   HYPRE_Real      res;
 	          
    HYPRE_Int             i, ii;
    HYPRE_Int             jj;
    HYPRE_Int             column;
    HYPRE_Int             relax_error = 0;
 
-   double         *A_mat;
-   double         *b_vec;
+   HYPRE_Real     *A_mat;
+   HYPRE_Real     *b_vec;
 
-   double          zero = 0.0;
-   double 	   one_minus_weight = 1.0 -relax_weight;
+   HYPRE_Real      zero = 0.0;
+   HYPRE_Real 	   one_minus_weight = 1.0 -relax_weight;
  
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
@@ -298,8 +298,8 @@ HYPRE_Int  hypre_AMGRelax( hypre_CSRMatrix *A,
       case 9: /* Direct solve: use gaussian elimination */
       {
 
-         A_mat = hypre_CTAlloc(double, n*n);
-         b_vec = hypre_CTAlloc(double, n);    
+         A_mat = hypre_CTAlloc(HYPRE_Real, n*n);
+         b_vec = hypre_CTAlloc(HYPRE_Real, n);    
 
          /*-----------------------------------------------------------------
           *  Load CSR matrix into A_mat.
@@ -339,13 +339,13 @@ HYPRE_Int  hypre_AMGRelax( hypre_CSRMatrix *A,
  *------------------------------------------------------------------------ */
 
 HYPRE_Int gselim(A,x,n)
-double *A;
-double *x;
+HYPRE_Real *A;
+HYPRE_Real *x;
 HYPRE_Int n;
 {
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;
-   double factor;
+   HYPRE_Real factor;
    
    if (n==1)                           /* A is 1x1 */  
    {

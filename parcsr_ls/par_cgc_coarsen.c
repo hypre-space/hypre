@@ -94,7 +94,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 
    HYPRE_Int              ierr = 0;
    HYPRE_Int              use_commpkg_A = 0;
-   double	    wall_time;
+   HYPRE_Real	    wall_time;
 
    HYPRE_Int              measure_max; /* BM Aug 30, 2006: maximal measure, needed for CGC */
 
@@ -635,7 +635,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
 /*   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (hypre_ParCSRMatrixOffd (S)); */
 /*   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S); */
 
-/*   double wall_time; */
+/*   HYPRE_Real wall_time; */
 
   HYPRE_IJMatrix ijG;
   hypre_ParCSRMatrix *G;
@@ -878,7 +878,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
   HYPRE_Int i,/* ii,*/ip,j,jj,m,n,p;
   HYPRE_Int mpisize,mpirank;
 
-  double weight;
+  HYPRE_Real weight;
 
   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
 /*   hypre_MPI_Status status; */
@@ -1095,8 +1095,8 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
 /*   hypre_ParCSRCommPkg    *comm_pkg    = hypre_ParCSRMatrixCommPkg (G); */
 /*   hypre_ParCSRCommHandle *comm_handle; */
 
-  double *G_data = hypre_CSRMatrixData (G);
-  double max;
+  HYPRE_Real *G_data = hypre_CSRMatrixData (G);
+  HYPRE_Real max;
   HYPRE_Int *G_i = hypre_CSRMatrixI(G);
   HYPRE_Int *G_j = hypre_CSRMatrixJ(G);
   hypre_CSRMatrix *H,*HT;

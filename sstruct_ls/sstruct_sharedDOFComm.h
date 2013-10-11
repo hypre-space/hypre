@@ -19,7 +19,7 @@ typedef struct
                                                                                                                                     
    HYPRE_Int ncols;
    HYPRE_Int      *cols;
-   double   *data;
+   HYPRE_Real   *data;
                                                                                                                                     
 } hypre_MaxwellOffProcRow;
 

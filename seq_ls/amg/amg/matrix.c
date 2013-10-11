@@ -28,7 +28,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_Matrix  *hypre_NewMatrix(data, ia, ja, size)
-double  *data;
+HYPRE_Real  *data;
 HYPRE_Int     *ia;
 HYPRE_Int     *ja;
 HYPRE_Int      size;
@@ -67,21 +67,21 @@ hypre_Matrix  *matrix;
  *--------------------------------------------------------------------------*/
 
 void            hypre_Matvec(alpha, A, x, beta, y)
-double          alpha;
+HYPRE_Real      alpha;
 hypre_Matrix         *A;
 hypre_Vector         *x;
-double          beta;
+HYPRE_Real      beta;
 hypre_Vector         *y;
 {
-   double     *a  = hypre_MatrixData(A);
+   HYPRE_Real *a  = hypre_MatrixData(A);
    HYPRE_Int        *ia = hypre_MatrixIA(A);
    HYPRE_Int        *ja = hypre_MatrixJA(A);
    HYPRE_Int         n  = hypre_MatrixSize(A);
 
-   double     *xp = hypre_VectorData(x);
-   double     *yp = hypre_VectorData(y);
+   HYPRE_Real *xp = hypre_VectorData(x);
+   HYPRE_Real *yp = hypre_VectorData(y);
 
-   double      temp;
+   HYPRE_Real  temp;
 
    HYPRE_Int         i, j, jj;
 
@@ -160,21 +160,21 @@ hypre_Vector         *y;
  *--------------------------------------------------------------------------*/
 
 void            hypre_MatvecT(alpha, A, x, beta, y)
-double          alpha;
+HYPRE_Real      alpha;
 hypre_Matrix         *A;
 hypre_Vector         *x;
-double          beta;
+HYPRE_Real      beta;
 hypre_Vector         *y;
 {
-   double     *a  = hypre_MatrixData(A);
+   HYPRE_Real *a  = hypre_MatrixData(A);
    HYPRE_Int        *ia = hypre_MatrixIA(A);
    HYPRE_Int        *ja = hypre_MatrixJA(A);
    HYPRE_Int         n  = hypre_MatrixSize(A);
 
-   double     *xp = hypre_VectorData(x);
-   double     *yp = hypre_VectorData(y);
+   HYPRE_Real *xp = hypre_VectorData(x);
+   HYPRE_Real *yp = hypre_VectorData(y);
 
-   double      temp;
+   HYPRE_Real  temp;
 
    HYPRE_Int         xlen = hypre_VectorSize(x);
    HYPRE_Int         ylen = hypre_VectorSize(y);

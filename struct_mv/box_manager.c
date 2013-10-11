@@ -1265,9 +1265,9 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          void *entry_response_buf;
          void *index_ptr;
 
-         double gamma;
-         double local_volume, global_volume;
-         double sendbuf2[2], recvbuf2[2];
+         HYPRE_Real gamma;
+         HYPRE_Real local_volume, global_volume;
+         HYPRE_Real sendbuf2[2], recvbuf2[2];
 
          hypre_BoxArray *gather_regions;
          hypre_BoxArray *local_boxes;
@@ -1291,7 +1291,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
          {
             
             /* create an array of local boxes.  get the global box size/volume
-               (as a double). */
+               (as a HYPRE_Real). */
 
             local_boxes = hypre_BoxArrayCreate(num_my_entries, ndim);
             local_boxnums = hypre_CTAlloc(HYPRE_Int, num_my_entries);
@@ -1313,16 +1313,16 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                local_boxnums[i] =   hypre_BoxManEntryId(entry_ptr);
                
                /* calculate volume */ 
-               local_volume += (double) hypre_BoxVolume(box);
+               local_volume += (HYPRE_Real) hypre_BoxVolume(box);
                
             }/* end of local boxes */
      
             /* get the number of global entries and the global volume */
 
             sendbuf2[0] = local_volume;
-            sendbuf2[1] = (double) num_my_entries;
+            sendbuf2[1] = (HYPRE_Real) num_my_entries;
             
-            hypre_MPI_Allreduce(&sendbuf2, &recvbuf2, 2, hypre_MPI_DOUBLE,
+            hypre_MPI_Allreduce(&sendbuf2, &recvbuf2, 2, HYPRE_MPI_REAL,
                                 hypre_MPI_SUM, comm);   
             
             global_volume = recvbuf2[0];

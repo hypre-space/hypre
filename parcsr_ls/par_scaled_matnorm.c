@@ -26,7 +26,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
+hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
 {
    hypre_ParCSRCommHandle	*comm_handle;
    hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -34,27 +34,27 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int			*diag_i = hypre_CSRMatrixI(diag);
    HYPRE_Int			*diag_j = hypre_CSRMatrixJ(diag);
-   double		*diag_data = hypre_CSRMatrixData(diag);
+   HYPRE_Real		*diag_data = hypre_CSRMatrixData(diag);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int			*offd_i = hypre_CSRMatrixI(offd);
    HYPRE_Int			*offd_j = hypre_CSRMatrixJ(offd);
-   double		*offd_data = hypre_CSRMatrixData(offd);
+   HYPRE_Real		*offd_data = hypre_CSRMatrixData(offd);
    HYPRE_Int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
    HYPRE_Int			 num_rows = hypre_CSRMatrixNumRows(diag);
 
    hypre_ParVector      *dinvsqrt;
-   double		*dis_data;
+   HYPRE_Real		*dis_data;
    hypre_Vector      	*dis_ext;
-   double 		*dis_ext_data;
+   HYPRE_Real 		*dis_ext_data;
    hypre_Vector         *sum;
-   double		*sum_data;
+   HYPRE_Real		*sum_data;
   
    HYPRE_Int	      num_cols_offd = hypre_CSRMatrixNumCols(offd);
    HYPRE_Int	      num_sends, i, j, index, start;
 
-   double     *d_buf_data;
-   double      mat_norm, max_row_sum;
+   HYPRE_Real *d_buf_data;
+   HYPRE_Real  mat_norm, max_row_sum;
 
    dinvsqrt = hypre_ParVectorCreate(comm, global_num_rows, row_starts);
    hypre_ParVectorInitialize(dinvsqrt);
@@ -85,7 +85,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   d_buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+   d_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends));
 
    index = 0;

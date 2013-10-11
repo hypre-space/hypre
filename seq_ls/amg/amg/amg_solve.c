@@ -30,7 +30,7 @@
 HYPRE_Int         HYPRE_AMGSolve(u, f, tol, data)
 hypre_Vector      *u;
 hypre_Vector      *f;
-double       tol;
+HYPRE_Real   tol;
 void        *data;
 {
 
@@ -63,21 +63,21 @@ void        *data;
    HYPRE_Int      total_coeffs;
    HYPRE_Int      total_variables;
 
-   double   alpha = 1.0;
-   double   beta = -1.0;
-   double   cycle_cmplxty;
-   double   operat_cmplxty;
-   double   grid_cmplxty;
-   double   conv_factor;
-   double   resid_nrm;
-   double   resid_nrm_tmp;
-   double   resid_nrm_init;
-   double   relative_resid;
-   double   rhs_norm;
-   double   energy;
-   double  *tmpvec;
-   double   old_energy;
-   double   old_resid;
+   HYPRE_Real   alpha = 1.0;
+   HYPRE_Real   beta = -1.0;
+   HYPRE_Real   cycle_cmplxty;
+   HYPRE_Real   operat_cmplxty;
+   HYPRE_Real   grid_cmplxty;
+   HYPRE_Real   conv_factor;
+   HYPRE_Real   resid_nrm;
+   HYPRE_Real   resid_nrm_tmp;
+   HYPRE_Real   resid_nrm_init;
+   HYPRE_Real   relative_resid;
+   HYPRE_Real   rhs_norm;
+   HYPRE_Real   energy;
+   HYPRE_Real  *tmpvec;
+   HYPRE_Real   old_energy;
+   HYPRE_Real   old_resid;
 
    hypre_Vector **F_array;
    hypre_Vector **U_array;
@@ -116,10 +116,10 @@ void        *data;
 
    for (j = 1; j < num_levels; j++)
    {
-       tmpvec = hypre_CTAlloc(double, num_variables[j]);
+       tmpvec = hypre_CTAlloc(HYPRE_Real, num_variables[j]);
        F_array[j] = hypre_NewVector(tmpvec, num_variables[j]);
 
-       tmpvec = hypre_CTAlloc(double, num_variables[j]);
+       tmpvec = hypre_CTAlloc(HYPRE_Real, num_variables[j]);
        U_array[j] = hypre_NewVector(tmpvec, num_variables[j]);
    }
 
@@ -234,7 +234,7 @@ void        *data;
  *    Compute closing statistics
  *--------------------------------------------------------------------------*/
 
-   conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((double) cycle_count)));
+   conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((HYPRE_Real) cycle_count)));
 
 
    for (j=0;j<hypre_AMGDataNumLevels(amg_data);j++)
@@ -245,9 +245,9 @@ void        *data;
 
    cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
-   grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
-   operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
-   cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
+   grid_cmplxty = ((HYPRE_Real) total_variables) / ((HYPRE_Real) num_variables[0]);
+   operat_cmplxty = ((HYPRE_Real) total_coeffs) / ((HYPRE_Real) num_coeffs[0]);
+   cycle_cmplxty = ((HYPRE_Real) cycle_op_count) / ((HYPRE_Real) num_coeffs[0]);
 
    if (amg_ioutdat >= 0)
    {

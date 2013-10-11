@@ -59,8 +59,8 @@
 struct _timer_dh {
   bool isRunning;
   hypre_longint sc_clk_tck;
-  double begin_wall; 
-  double end_wall;
+  HYPRE_Real begin_wall; 
+  HYPRE_Real end_wall;
 
 #ifdef EUCLID_TIMING
   struct tms  begin_cpu;
@@ -73,9 +73,9 @@ extern void Timer_dhCreate(Timer_dh *t);
 extern void Timer_dhDestroy(Timer_dh t);
 extern void Timer_dhStart(Timer_dh t);
 extern void Timer_dhStop(Timer_dh t);
-extern double Timer_dhReadCPU(Timer_dh t);
-extern double Timer_dhReadWall(Timer_dh t);
-extern double Timer_dhReadUsage(Timer_dh t);
+extern HYPRE_Real Timer_dhReadCPU(Timer_dh t);
+extern HYPRE_Real Timer_dhReadWall(Timer_dh t);
+extern HYPRE_Real Timer_dhReadUsage(Timer_dh t);
 
 /* notes:
     (1)  unless compiled with EUCLID_TIMING defined, readCPU 

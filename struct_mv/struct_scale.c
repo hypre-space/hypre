@@ -23,13 +23,13 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructScale( double              alpha,
+hypre_StructScale( HYPRE_Complex       alpha,
                    hypre_StructVector *y     )
 {
    hypre_Box       *y_data_box;
                    
    HYPRE_Int        yi;
-   double          *yp;
+   HYPRE_Complex   *yp;
                    
    hypre_BoxArray  *boxes;
    hypre_Box       *box;

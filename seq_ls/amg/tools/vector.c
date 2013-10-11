@@ -29,7 +29,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_Vector  *hypre_NewVector(data, size)
-double  *data;
+HYPRE_Real  *data;
 HYPRE_Int      size;
 {
    hypre_Vector     *new;

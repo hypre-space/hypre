@@ -49,6 +49,9 @@
 /* Define to 1 if using long long int for HYPRE_Int */
 #undef HYPRE_BIGINT
 
+/* Define to 1 if using complex values */
+#undef HYPRE_COMPLEX
+
 /* Define to be the max dimension size (must be at least 3) */
 #undef HYPRE_MAXDIM
 

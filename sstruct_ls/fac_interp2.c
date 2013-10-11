@@ -45,7 +45,7 @@ typedef struct
    hypre_CommPkg       **interlevel_comm;
    hypre_CommPkg       **gnodes_comm_pkg;
 
-   double              **weights;
+   HYPRE_Real          **weights;
 
 } hypre_FacSemiInterpData2;
 
@@ -179,8 +179,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    HYPRE_Int                 proc, myproc, tot_procs;
    HYPRE_Int                 num_values;
 
-   double                  **weights;
-   double                    refine_factors_2recp[3];
+   HYPRE_Real              **weights;
+   HYPRE_Real                refine_factors_2recp[3];
    hypre_Index               refine_factors_half;
 
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myproc);
@@ -636,10 +636,10 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    (fac_interp_data -> interlevel_comm)= interlevel_comm;
 
    /* interpolation weights */
-   weights= hypre_TAlloc(double *, ndim);
+   weights= hypre_TAlloc(HYPRE_Real *, ndim);
    for (i= 0; i< ndim; i++)
    {
-      weights[i]= hypre_CTAlloc(double, rfactors[i]+1);
+      weights[i]= hypre_CTAlloc(HYPRE_Real, rfactors[i]+1);
    }
 
    hypre_ClearIndex(refine_factors_half);
@@ -711,7 +711,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    HYPRE_Int              **recv_boxnum_map= interp_data-> recv_boxnum_map;
    hypre_BoxArrayArray    **ownboxes       = interp_data-> ownboxes;
    HYPRE_Int             ***own_cboxnums   = interp_data-> own_cboxnums;
-   double                 **weights        = interp_data-> weights;
+   HYPRE_Real             **weights        = interp_data-> weights;
    HYPRE_Int                ndim           = interp_data-> ndim;
 
    hypre_CommHandle       *comm_handle;
@@ -742,8 +742,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    HYPRE_Int               xci;
    HYPRE_Int               ei;
 
-   double               ***xcp;
-   double               ***ep;
+   HYPRE_Real           ***xcp;
+   HYPRE_Real           ***ep;
 
    hypre_Index             loop_size, lindex;
    hypre_Index             start, start_offset;
@@ -765,9 +765,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
    HYPRE_Int               part_fine= 1;
 
-   double                  xweight1, xweight2;
-   double                  yweight1, yweight2;
-   double                  zweight1, zweight2;
+   HYPRE_Real              xweight1, xweight2;
+   HYPRE_Real              yweight1, yweight2;
+   HYPRE_Real              zweight1, zweight2;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -841,17 +841,17 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       jsize= 1;
    }
   
-   xcp  = hypre_TAlloc(double **, ksize);
-   ep   = hypre_TAlloc(double **, refine_factors[2]);
+   xcp  = hypre_TAlloc(HYPRE_Real **, ksize);
+   ep   = hypre_TAlloc(HYPRE_Real **, refine_factors[2]);
 
    for (k= 0; k< refine_factors[2]; k++)
    {
-      ep[k]= hypre_TAlloc(double *, refine_factors[1]);
+      ep[k]= hypre_TAlloc(HYPRE_Real *, refine_factors[1]);
    }
 
    for (k= 0; k< ksize; k++)  
    {
-      xcp[k]= hypre_TAlloc(double *, jsize);
+      xcp[k]= hypre_TAlloc(HYPRE_Real *, jsize);
    }
 
    for (var= 0; var< nvars; var++)

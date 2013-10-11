@@ -1,8 +1,8 @@
 #include "headers.h" 
 
-HYPRE_Int matrix_inverse(double *X,
+HYPRE_Int matrix_inverse(HYPRE_Real *X,
 
-		   double *A,
+		   HYPRE_Real *A,
 
 		   HYPRE_Int n)
 
@@ -12,16 +12,16 @@ HYPRE_Int matrix_inverse(double *X,
   HYPRE_Int i,j,k;
   HYPRE_Int matz = 1;
 
-  double *W, *Aux1, *Aux2;
-  double *Q; 
+  HYPRE_Real *W, *Aux1, *Aux2;
+  HYPRE_Real *Q; 
 
-  double diag;
-  double eps = 1.e-3;
+  HYPRE_Real diag;
+  HYPRE_Real eps = 1.e-3;
 
-  Q   = hypre_CTAlloc(double, n*n);
-  W   = hypre_CTAlloc(double, n);
-  Aux1= hypre_CTAlloc(double, n);
-  Aux2= hypre_CTAlloc(double, n);
+  Q   = hypre_CTAlloc(HYPRE_Real, n*n);
+  W   = hypre_CTAlloc(HYPRE_Real, n);
+  Aux1= hypre_CTAlloc(HYPRE_Real, n);
+  Aux2= hypre_CTAlloc(HYPRE_Real, n);
   
 
   if (n > 0)

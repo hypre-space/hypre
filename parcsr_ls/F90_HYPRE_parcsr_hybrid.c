@@ -94,13 +94,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsolve, HYPRE_PARCSRHYBRIDSOLVE)
 void
 hypre_F90_IFACE(hypre_parcsrhybridsettol, HYPRE_PARCSRHYBRIDSETTOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetTol(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (tol)    ) );
+          hypre_F90_PassReal (tol)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -110,13 +110,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsettol, HYPRE_PARCSRHYBRIDSETTOL)
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetconvergenc, HYPRE_PARCSRHYBRIDSETCONVERGENC)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *cf_tol,
+    hypre_F90_Real *cf_tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetConvergenceTol(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (cf_tol) ) );
+          hypre_F90_PassReal (cf_tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -344,13 +344,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetprintlevel, HYPRE_PARCSRHYBRIDSETPRINTLEVEL
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetstrongthre, HYPRE_PARCSRHYBRIDSETSTRONGTHRE)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *strong_threshold,
+    hypre_F90_Real *strong_threshold,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetStrongThreshold(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (strong_threshold) ));
+          hypre_F90_PassReal (strong_threshold) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -360,13 +360,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetstrongthre, HYPRE_PARCSRHYBRIDSETSTRONGTHRE
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetmaxrowsum, HYPRE_PARCSRHYBRIDSETMAXROWSUM)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *max_row_sum,
+    hypre_F90_Real *max_row_sum,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetMaxRowSum(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (max_row_sum)   ));
+          hypre_F90_PassReal (max_row_sum)   ));
 }
 
 /*--------------------------------------------------------------------------
@@ -376,13 +376,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetmaxrowsum, HYPRE_PARCSRHYBRIDSETMAXROWSUM)
 void
 hypre_F90_IFACE(hypre_parcsrhybridsettruncfacto, HYPRE_PARCSRHYBRIDSETTRUNCFACTO)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *trunc_factor,
+    hypre_F90_Real *trunc_factor,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetTruncFactor(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (trunc_factor) ));
+          hypre_F90_PassReal (trunc_factor) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -588,13 +588,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetrelaxorder, HYPRE_PARCSRHYBRIDSETRELAXORDER
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetrelaxwt, HYPRE_PARCSRHYBRIDSETRELAXWT)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *relax_wt,
+    hypre_F90_Real *relax_wt,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetRelaxWt(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (relax_wt) ));
+          hypre_F90_PassReal (relax_wt) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -604,14 +604,14 @@ hypre_F90_IFACE(hypre_parcsrhybridsetrelaxwt, HYPRE_PARCSRHYBRIDSETRELAXWT)
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetlevelrelax, HYPRE_PARCSRHYBRIDSETLEVELRELAX)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *relax_wt,
+    hypre_F90_Real *relax_wt,
     hypre_F90_Int *level,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetLevelRelaxWt(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (relax_wt),
+          hypre_F90_PassReal (relax_wt),
           hypre_F90_PassInt (level) ));
 }
 
@@ -622,13 +622,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetlevelrelax, HYPRE_PARCSRHYBRIDSETLEVELRELAX
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetouterwt, HYPRE_PARCSRHYBRIDSETOUTERWT)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *outer_wt,
+    hypre_F90_Real *outer_wt,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetOuterWt(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (outer_wt) ));
+          hypre_F90_PassReal (outer_wt) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -638,14 +638,14 @@ hypre_F90_IFACE(hypre_parcsrhybridsetouterwt, HYPRE_PARCSRHYBRIDSETOUTERWT)
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetlevelouter, HYPRE_PARCSRHYBRIDSETLEVELOUTER)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *outer_wt,
+    hypre_F90_Real *outer_wt,
     hypre_F90_Int *level,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetLevelOuterWt(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (outer_wt),
+          hypre_F90_PassReal (outer_wt),
           hypre_F90_PassInt (level) ));
 }
 
@@ -656,13 +656,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetlevelouter, HYPRE_PARCSRHYBRIDSETLEVELOUTER
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetrelaxweigh, HYPRE_PARCSRHYBRIDSETRELAXWEIGH)
    (hypre_F90_Obj *solver,
-    hypre_F90_DblArray *relax_weight,
+    hypre_F90_RealArray *relax_weight,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetRelaxWeight(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDblArray (relax_weight) ));
+          hypre_F90_PassRealArray (relax_weight) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -672,13 +672,13 @@ hypre_F90_IFACE(hypre_parcsrhybridsetrelaxweigh, HYPRE_PARCSRHYBRIDSETRELAXWEIGH
 void
 hypre_F90_IFACE(hypre_parcsrhybridsetomega, HYPRE_PARCSRHYBRIDSETOMEGA)
    (hypre_F90_Obj *solver,
-    hypre_F90_DblArray *omega,
+    hypre_F90_RealArray *omega,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridSetOmega(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDblArray (omega) ));
+          hypre_F90_PassRealArray (omega) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -736,11 +736,11 @@ hypre_F90_IFACE(hypre_parcsrhybridgetpcgnumiter, HYPRE_PARCSRHYBRIDGETPCGNUMITER
 void
 hypre_F90_IFACE(hypre_parcsrhybridgetfinalrelat, HYPRE_PARCSRHYBRIDGETFINALRELAT)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *norm,
+    hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDblRef (norm) ));
+          hypre_F90_PassRealRef (norm) ));
 }

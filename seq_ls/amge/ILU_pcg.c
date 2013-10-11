@@ -27,18 +27,18 @@
 
 #include "headers.h"  
 
-HYPRE_Int hypre_ILUpcg(double *x, double *rhs,
-		 double *sparse_matrix, 
+HYPRE_Int hypre_ILUpcg(HYPRE_Real *x, HYPRE_Real *rhs,
+		 HYPRE_Real *sparse_matrix, 
 
 		 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 
 		 HYPRE_Int *i_ILUdof_to_dof,
 		 HYPRE_Int *i_ILUdof_ILUdof, HYPRE_Int *j_ILUdof_ILUdof,
-		 double *LD_data,
+		 HYPRE_Real *LD_data,
 		 HYPRE_Int *i_ILUdof_ILUdof_t, HYPRE_Int *j_ILUdof_ILUdof_t,
-		 double *U_data,
+		 HYPRE_Real *U_data,
 
-		 double *v, double *w, double *d,
+		 HYPRE_Real *v, HYPRE_Real *w, HYPRE_Real *d,
 		 HYPRE_Int max_iter, 
 
 		 HYPRE_Int num_dofs)
@@ -227,9 +227,9 @@ loop:
   return ierr;
 
 }
-HYPRE_Int sparse_matrix_vector_product(double *v,
-				 double *sparse_matrix, 
-				 double *w, 
+HYPRE_Int sparse_matrix_vector_product(HYPRE_Real *v,
+				 HYPRE_Real *sparse_matrix, 
+				 HYPRE_Real *w, 
 				 HYPRE_Int *i_dof_dof, HYPRE_Int *j_dof_dof,
 				 HYPRE_Int num_dofs)
 {

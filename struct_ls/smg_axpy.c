@@ -16,7 +16,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SMGAxpy( double              alpha,
+hypre_SMGAxpy( HYPRE_Real          alpha,
                hypre_StructVector *x,
                hypre_StructVector *y,
                hypre_Index         base_index,
@@ -29,8 +29,8 @@ hypre_SMGAxpy( double              alpha,
    HYPRE_Int         xi;
    HYPRE_Int         yi;
                     
-   double           *xp;
-   double           *yp;
+   HYPRE_Real       *xp;
+   HYPRE_Real       *yp;
                     
    hypre_BoxArray   *boxes;
    hypre_Box        *box;

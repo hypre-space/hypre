@@ -87,7 +87,7 @@ HYPRE_SStructFACSolve3(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFACSetTol( HYPRE_SStructSolver solver,
-                        double             tol    )
+                        HYPRE_Real         tol    )
 {
    return( hypre_FACSetTol( (void *) solver, tol ) );
 }
@@ -238,7 +238,7 @@ HYPRE_SStructFACSetRelaxType( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFACSetJacobiWeight( HYPRE_SStructSolver solver,
-                                 double              weight)
+                                 HYPRE_Real          weight)
 {
    return( hypre_FACSetJacobiWeight( (void *) solver, weight) );
 }
@@ -304,7 +304,7 @@ HYPRE_SStructFACGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructFACGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                              double             *norm   )
+                                              HYPRE_Real         *norm   )
 {
    return( hypre_FACGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

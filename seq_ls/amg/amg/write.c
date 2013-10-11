@@ -33,7 +33,7 @@ hypre_Matrix  *matrix;
 {
    FILE    *fp;
 
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int     *ia;
    HYPRE_Int     *ja;
    HYPRE_Int      size;
@@ -78,7 +78,7 @@ hypre_Vector  *vector;
 {
    FILE    *fp;
 
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int      size;
    
    HYPRE_Int      j;
@@ -159,9 +159,9 @@ void    *data;
    /* amg setup params */
    HYPRE_Int      amg_levmax;
    HYPRE_Int      amg_ncg;
-   double   amg_ecg;
+   HYPRE_Real   amg_ecg;
    HYPRE_Int      amg_nwt;
-   double   amg_ewt;
+   HYPRE_Real   amg_ewt;
    HYPRE_Int      amg_nstr;
 
 
@@ -229,7 +229,7 @@ void    *data;
 
 void     hypre_WriteSolverParams(tol,data)
 void    *data;
-double   tol;
+HYPRE_Real   tol;
 
 {
    FILE    *fp;
@@ -240,7 +240,7 @@ double   tol;
 
    HYPRE_Int      type;
 
-   double   stop_tolerance;
+   HYPRE_Real   stop_tolerance;
 
  
    /* amg solve params */

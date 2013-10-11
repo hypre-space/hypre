@@ -67,14 +67,14 @@ HYPRE_StructPFMGSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPFMGSetTol( HYPRE_StructSolver solver,
-                        double             tol    )
+                        HYPRE_Real         tol    )
 {
    return( hypre_PFMGSetTol( (void *) solver, tol ) );
 }
 
 HYPRE_Int
 HYPRE_StructPFMGGetTol( HYPRE_StructSolver solver,
-                        double           * tol    )
+                        HYPRE_Real       * tol    )
 {
    return( hypre_PFMGGetTol( (void *) solver, tol ) );
 }
@@ -176,13 +176,13 @@ HYPRE_StructPFMGGetRelaxType( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
-                                double             weight)
+                                HYPRE_Real         weight)
 {
    return( hypre_PFMGSetJacobiWeight( (void *) solver, weight) );
 }
 HYPRE_Int
 HYPRE_StructPFMGGetJacobiWeight(HYPRE_StructSolver solver,
-                                double            *weight)
+                                HYPRE_Real        *weight)
 {
    return( hypre_PFMGGetJacobiWeight( (void *) solver, weight) );
 }
@@ -260,7 +260,7 @@ HYPRE_StructPFMGGetSkipRelax( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPFMGSetDxyz( HYPRE_StructSolver  solver,
-                         double             *dxyz   )
+                         HYPRE_Real         *dxyz   )
 {
    return( hypre_PFMGSetDxyz( (void *) solver, dxyz) );
 }
@@ -314,7 +314,7 @@ HYPRE_StructPFMGGetNumIterations( HYPRE_StructSolver  solver,
 
 HYPRE_Int
 HYPRE_StructPFMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                              double             *norm   )
+                                              HYPRE_Real         *norm   )
 {
    return( hypre_PFMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

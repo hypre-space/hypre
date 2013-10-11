@@ -148,7 +148,7 @@ HYPRE_Int HYPRE_PETScMatPilutSolverSetFactorRowSize(
 
 HYPRE_Int HYPRE_PETScMatPilutSolverSetDropTolerance( 
                   HYPRE_PETScMatPilutSolver in_ptr,
-                  double tol )
+                  HYPRE_Real tol )
 {
   HYPRE_Int ierr=0;
   hypre_PETScMatPilutSolver *solver = 
@@ -246,7 +246,7 @@ HYPRE_Int HYPRE_PETScMatPilutSolverSolve( HYPRE_PETScMatPilutSolver in_ptr,
                                            Vec x, Vec b )
 {
    HYPRE_Int ierr=0, size;
-   double    *x_vals, *b_vals;
+   HYPRE_Real    *x_vals, *b_vals;
 
    hypre_PETScMatPilutSolver *solver = 
       (hypre_PETScMatPilutSolver *) in_ptr;

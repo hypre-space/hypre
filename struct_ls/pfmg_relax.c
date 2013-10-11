@@ -20,7 +20,7 @@ typedef struct
    void                   *relax_data;
    void                   *rb_relax_data;
    HYPRE_Int               relax_type;
-   double                  jacobi_weight;
+   HYPRE_Real              jacobi_weight;
 
 } hypre_PFMGRelaxData;
 
@@ -107,7 +107,7 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
 {
    hypre_PFMGRelaxData *pfmg_relax_data  = pfmg_relax_vdata;
    HYPRE_Int            relax_type       = (pfmg_relax_data -> relax_type);
-   double               jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
+   HYPRE_Real           jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
 
    switch(relax_type)
    {
@@ -170,7 +170,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 
 HYPRE_Int
 hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
-                               double weight) 
+                               HYPRE_Real weight) 
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
 
@@ -238,7 +238,7 @@ hypre_PFMGRelaxSetPostRelax( void  *pfmg_relax_vdata )
 
 HYPRE_Int
 hypre_PFMGRelaxSetTol( void   *pfmg_relax_vdata,
-                       double  tol              )
+                       HYPRE_Real  tol              )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
 

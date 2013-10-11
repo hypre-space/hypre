@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_parcsr_mv.h"
 
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
@@ -477,7 +473,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
    HYPRE_Int *B_ext_i;
    HYPRE_Int *B_ext_j;
 
-   double *B_ext_data=NULL, *diag_data=NULL, *offd_data=NULL;
+   HYPRE_Complex *B_ext_data=NULL, *diag_data=NULL, *offd_data=NULL;
    HYPRE_Int *B_ext_row_map=NULL;
    /* ... not referenced, but needed for function call */
  
@@ -551,7 +547,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int *A_ext_j;
 
    HYPRE_Int data = 0;
-   double *A_ext_data = NULL, *diag_data=NULL, *offd_data=NULL;
+   HYPRE_Complex *A_ext_data = NULL, *diag_data=NULL, *offd_data=NULL;
    /* ... not referenced, but needed for function call */
  
    num_cols_A = hypre_ParCSRBooleanMatrix_Get_GlobalNCols(A);

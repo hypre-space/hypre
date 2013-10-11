@@ -25,11 +25,11 @@ void hypre_BoomerAMGJacobiInterp( hypre_ParCSRMatrix * A,
                                   hypre_ParCSRMatrix * S,
                                   HYPRE_Int num_functions, HYPRE_Int * dof_func,
                                   HYPRE_Int * CF_marker, HYPRE_Int level,
-                                  double truncation_threshold,
-                                  double truncation_threshold_minus )
+                                  HYPRE_Real truncation_threshold,
+                                  HYPRE_Real truncation_threshold_minus )
 /* nji steps of Jacobi interpolation, with nji presently just set in the code.*/
 {
-   double weight_AF = 1.0;  /* weight multiplied by A's fine row elements */
+   HYPRE_Real weight_AF = 1.0;  /* weight multiplied by A's fine row elements */
    HYPRE_Int * dof_func_offd = NULL;
    HYPRE_Int nji = 1;
    HYPRE_Int iji;
@@ -55,10 +55,10 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
                                     hypre_ParCSRMatrix ** P,
                                     hypre_ParCSRMatrix * S,
                                     HYPRE_Int * CF_marker, HYPRE_Int level,
-                                    double truncation_threshold,
-                                    double truncation_threshold_minus,
+                                    HYPRE_Real truncation_threshold,
+                                    HYPRE_Real truncation_threshold_minus,
                                     HYPRE_Int * dof_func, HYPRE_Int * dof_func_offd,
-                                    double weight_AF)
+                                    HYPRE_Real weight_AF)
 /* One step of Jacobi interpolation:
    A is the linear system.
    P is an interpolation matrix, input and output
@@ -82,10 +82,10 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_ParCSRMatrix * C;
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(*P);
-   double          *P_diag_data = hypre_CSRMatrixData(P_diag);
+   HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
    HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
    HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
-   double          *P_offd_data = hypre_CSRMatrixData(P_offd);
+   HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
    hypre_CSRMatrix *C_diag;
    hypre_CSRMatrix *C_offd;
@@ -101,8 +101,8 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    MPI_Comm comm = hypre_ParCSRMatrixComm( A );
 #ifdef HYPRE_JACINT_PRINT_ROW_SUMS
    HYPRE_Int m, nmav, npav;
-   double PIi, PIimax, PIimin, PIimav, PIipav, randthresh;
-   double eps = 1.0e-17;
+   HYPRE_Real PIi, PIimax, PIimin, PIimav, PIipav, randthresh;
+   HYPRE_Real eps = 1.0e-17;
 #endif
 #ifdef HYPRE_JACINT_PRINT_MATRICES
    char filename[80];
@@ -184,12 +184,12 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 
 #ifdef HYPRE_JACINT_PRINT_SOME_ROWS
    hypre_printf("some rows to be changed: ");
-   randthresh = 15/(double)Jchanges;
+   randthresh = 15/(HYPRE_Real)Jchanges;
    for ( i=0; i<num_rows_diag_P; ++i )
    {
       if ( J_marker[i]<0 )
       {
-         if ( ((double)rand())/RAND_MAX < randthresh )
+         if ( ((HYPRE_Real)rand())/RAND_MAX < randthresh )
          {
             hypre_printf( "%i: ", i );
             for ( m=P_diag_i[i]; m<P_diag_i[i+1]; ++m )
@@ -380,7 +380,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
 }
 
 void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
-                                    double eps, double dlt,
+                                    HYPRE_Real eps, HYPRE_Real dlt,
                                     HYPRE_Int * CF_marker )
 /* Truncate the interpolation matrix P, but only in rows for which the
    marker is <0.  Truncation means that an element P(i,j) is set to 0 if
@@ -404,10 +404,10 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
 {
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
-   double          *P_diag_data = hypre_CSRMatrixData(P_diag);
+   HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
    HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
    HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
-   double          *P_offd_data = hypre_CSRMatrixData(P_offd);
+   HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
    HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
    HYPRE_Int             *new_P_diag_i;
@@ -418,11 +418,11 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
    HYPRE_Int num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(P_offd);
 #if 0
    MPI_Comm comm = hypre_ParCSRMatrixComm( P );
-   double vmax1, vmin1;
+   HYPRE_Real vmax1, vmin1;
 #endif
-   double vmax = 0.0;
-   double vmin = 0.0;
-   double v, old_sum, new_sum, scale, wmax, wmin;
+   HYPRE_Real vmax = 0.0;
+   HYPRE_Real vmin = 0.0;
+   HYPRE_Real v, old_sum, new_sum, scale, wmax, wmin;
    HYPRE_Int i1, m, m1d, m1o;
 
    /* compute vmax = eps*max(P(i,j)), vmin = eps*min(P(i,j)) */

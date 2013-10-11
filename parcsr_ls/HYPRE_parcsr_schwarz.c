@@ -144,7 +144,7 @@ HYPRE_SchwarzSetNonSymm( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver  solver,
-                             double relax_weight)
+                             HYPRE_Real relax_weight)
 {
    return( hypre_SchwarzSetRelaxWeight((void *) solver,relax_weight));
 }

@@ -50,8 +50,8 @@ char     *file_name;
    char     temp_file_name[256];
    FILE    *temp_fp;
    HYPRE_Int      flag;
-   double  *data;
-   double   temp_d;
+   HYPRE_Real  *data;
+   HYPRE_Real   temp_d;
 
    HYPRE_Int      i, j, k;
 
@@ -111,7 +111,7 @@ char     *file_name;
    }
    else
    {
-      data = hypre_CTAlloc(double, hypre_NDIMU(num_variables));
+      data = hypre_CTAlloc(HYPRE_Real, hypre_NDIMU(num_variables));
 
       if (flag == 1)
       {
@@ -152,7 +152,7 @@ char     *file_name;
    }
    else
    {
-      data = hypre_CTAlloc(double, hypre_NDIMU(num_variables));
+      data = hypre_CTAlloc(HYPRE_Real, hypre_NDIMU(num_variables));
 
       if (flag == 1)
       {
@@ -266,7 +266,7 @@ Problem *problem;
 
    HYPRE_Int      flag;
    char     temp_file_name[256];
-   double   temp_d;
+   HYPRE_Real   temp_d;
 
 
    /*----------------------------------------------------------

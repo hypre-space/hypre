@@ -36,20 +36,20 @@ extern "C" {
 typedef struct
 {
    MPI_Comm               comm;
-
-   HYPRE_Int                    num_sends;
-   HYPRE_Int                   *send_procs;
-   HYPRE_Int			 *send_map_starts;
-   HYPRE_Int			 *send_map_elmts;
-
-   HYPRE_Int                    num_recvs;
-   HYPRE_Int                   *recv_procs;
-   HYPRE_Int                   *recv_vec_starts;
-
+   
+   HYPRE_Int              num_sends;
+   HYPRE_Int             *send_procs;
+   HYPRE_Int             *send_map_starts;
+   HYPRE_Int             *send_map_elmts;
+   
+   HYPRE_Int              num_recvs;
+   HYPRE_Int             *recv_procs;
+   HYPRE_Int             *recv_vec_starts;
+   
    /* remote communication information */
-   hypre_MPI_Datatype          *send_mpi_types;
-   hypre_MPI_Datatype          *recv_mpi_types;
-
+   hypre_MPI_Datatype    *send_mpi_types;
+   hypre_MPI_Datatype    *recv_mpi_types;
+   
 } hypre_ParCSRCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -59,12 +59,12 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
-   void 	  *send_data;
-   void 	  *recv_data;
-
+   void                 *send_data;
+   void                 *recv_data;
+   
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
-
+   
 } hypre_ParCSRCommHandle;
 
 /*--------------------------------------------------------------------------
@@ -111,51 +111,36 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int                   length;
-   HYPRE_Int                   row_start;
-   HYPRE_Int                   row_end;
-   HYPRE_Int                   storage_length;
-   HYPRE_Int                   *proc_list;
-   HYPRE_Int		         *row_start_list;
-   HYPRE_Int                   *row_end_list;  
-  HYPRE_Int                    *sort_index;
+   HYPRE_Int   length;
+   HYPRE_Int   row_start;
+   HYPRE_Int   row_end;
+   HYPRE_Int   storage_length;
+   HYPRE_Int  *proc_list;
+   HYPRE_Int  *row_start_list;
+   HYPRE_Int  *row_end_list;  
+   HYPRE_Int  *sort_index;
+
 } hypre_IJAssumedPart;
 
-
-
-
 #endif /* hypre_PARCSR_ASSUMED_PART */
-
-
-
-
 
 #ifndef hypre_NEW_COMMPKG
 #define hypre_NEW_COMMPKG
 
-
 typedef struct
 {
-   HYPRE_Int                   length;
-   HYPRE_Int                   storage_length; 
-   HYPRE_Int                   *id;
-   HYPRE_Int                   *vec_starts;
-   HYPRE_Int                   element_storage_length; 
-   HYPRE_Int                   *elements;
-   double                *d_elements;
-   void                  *v_elements;
+   HYPRE_Int       length;
+   HYPRE_Int       storage_length; 
+   HYPRE_Int      *id;
+   HYPRE_Int      *vec_starts;
+   HYPRE_Int       element_storage_length; 
+   HYPRE_Int      *elements;
+   HYPRE_Real     *d_elements; /* Is this used anywhere? */
+   void           *v_elements;
    
 }  hypre_ProcListElements;   
 
-
-
-
 #endif /* hypre_NEW_COMMPKG */
-
-
-
-
-
 
 /******************************************************************************
  *
@@ -166,30 +151,29 @@ typedef struct
 #ifndef hypre_PAR_VECTOR_HEADER
 #define hypre_PAR_VECTOR_HEADER
 
-
 /*--------------------------------------------------------------------------
  * hypre_ParVector
  *--------------------------------------------------------------------------*/
 
 typedef struct
 {
-   MPI_Comm	 comm;
+   MPI_Comm      comm;
 
-   HYPRE_Int      	 global_size;
-   HYPRE_Int      	 first_index;
-   HYPRE_Int           last_index;
-   HYPRE_Int      	*partitioning;
-   hypre_Vector	*local_vector; 
+   HYPRE_Int     global_size;
+   HYPRE_Int     first_index;
+   HYPRE_Int     last_index;
+   HYPRE_Int    *partitioning;
+   hypre_Vector *local_vector; 
 
    /* Does the Vector create/destroy `data'? */
-   HYPRE_Int      	 owns_data;
-   HYPRE_Int      	 owns_partitioning;
+   HYPRE_Int     owns_data;
+   HYPRE_Int     owns_partitioning;
 
-   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
-                                              is used (compile-time option) AND this partition
-                                              needed
-                                              (for setting off-proc elements, for example)*/
-
+   hypre_IJAssumedPart *assumed_partition; /* only populated if
+                                              no_global_partition option is used
+                                              (compile-time option) AND this
+                                              partition needed (for setting
+                                              off-proc elements, for example)*/
 
 } hypre_ParVector;
 
@@ -197,7 +181,7 @@ typedef struct
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParVectorComm(vector)  	        ((vector) -> comm)
+#define hypre_ParVectorComm(vector)             ((vector) -> comm)
 #define hypre_ParVectorGlobalSize(vector)       ((vector) -> global_size)
 #define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
 #define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
@@ -205,17 +189,12 @@ typedef struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
-#define hypre_ParVectorNumVectors(vector)\
- (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
+#define hypre_ParVectorNumVectors(vector)                               \
+   (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
-
 #endif
-
-
-
-
 
 /******************************************************************************
  *
@@ -234,80 +213,80 @@ typedef struct
 
 typedef struct
 {
-   MPI_Comm		comm;
-
-   HYPRE_Int     		global_num_rows;
-   HYPRE_Int     		global_num_cols;
-   HYPRE_Int			first_row_index;
-   HYPRE_Int			first_col_diag;
+   MPI_Comm              comm;
+   
+   HYPRE_Int             global_num_rows;
+   HYPRE_Int             global_num_cols;
+   HYPRE_Int             first_row_index;
+   HYPRE_Int             first_col_diag;
    /* need to know entire local range in case row_starts and col_starts 
       are null  (i.e., bgl) AHB 6/05*/
-   HYPRE_Int                  last_row_index;
-   HYPRE_Int                  last_col_diag;
-
-   hypre_CSRMatrix	*diag;
-   hypre_CSRMatrix	*offd;
-   HYPRE_Int			*col_map_offd; 
-	/* maps columns of offd to global columns */
-   HYPRE_Int 			*row_starts; 
-	/* array of length num_procs+1, row_starts[i] contains the 
-	   global number of the first row on proc i,  
-	   first_row_index = row_starts[my_id],
-	   row_starts[num_procs] = global_num_rows */
-   HYPRE_Int 			*col_starts;
-	/* array of length num_procs+1, col_starts[i] contains the 
-	   global number of the first column of diag on proc i,  
-	   first_col_diag = col_starts[my_id],
-	   col_starts[num_procs] = global_num_cols */
-
-   hypre_ParCSRCommPkg	*comm_pkg;
-   hypre_ParCSRCommPkg	*comm_pkgT;
+   HYPRE_Int             last_row_index;
+   HYPRE_Int             last_col_diag;
+   
+   hypre_CSRMatrix      *diag;
+   hypre_CSRMatrix      *offd;
+   HYPRE_Int            *col_map_offd; 
+   /* maps columns of offd to global columns */
+   HYPRE_Int            *row_starts; 
+   /* array of length num_procs+1, row_starts[i] contains the 
+      global number of the first row on proc i,  
+      first_row_index = row_starts[my_id],
+      row_starts[num_procs] = global_num_rows */
+   HYPRE_Int            *col_starts;
+   /* array of length num_procs+1, col_starts[i] contains the 
+      global number of the first column of diag on proc i,  
+      first_col_diag = col_starts[my_id],
+      col_starts[num_procs] = global_num_cols */
+   
+   hypre_ParCSRCommPkg  *comm_pkg;
+   hypre_ParCSRCommPkg  *comm_pkgT;
    
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
-   HYPRE_Int      owns_data;
+   HYPRE_Int             owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
-   HYPRE_Int      owns_row_starts;
-   HYPRE_Int      owns_col_starts;
-
-   HYPRE_Int      num_nonzeros;
-   double   d_num_nonzeros;
-
+   HYPRE_Int             owns_row_starts;
+   HYPRE_Int             owns_col_starts;
+   
+   HYPRE_Int             num_nonzeros;
+   HYPRE_Real            d_num_nonzeros;
+   
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
-   HYPRE_Int     *rowindices;
-   double  *rowvalues;
-   HYPRE_Int      getrowactive;
-
-   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
-                                              is used (compile-time option)*/
-
-
+   HYPRE_Int            *rowindices;
+   HYPRE_Complex        *rowvalues;
+   HYPRE_Int             getrowactive;
+   
+   hypre_IJAssumedPart  *assumed_partition; /* only populated if
+                                              no_global_partition option is used
+                                              (compile-time option) */
+   
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParCSRMatrixComm(matrix)		  ((matrix) -> comm)
+#define hypre_ParCSRMatrixComm(matrix)            ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)   ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixLastRowIndex(matrix)    ((matrix) -> last_row_index)
 #define hypre_ParCSRMatrixLastColDiag(matrix)     ((matrix) -> last_col_diag)
-#define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
-#define hypre_ParCSRMatrixOffd(matrix)  	  ((matrix) -> offd)
-#define hypre_ParCSRMatrixColMapOffd(matrix)  	  ((matrix) -> col_map_offd)
+#define hypre_ParCSRMatrixDiag(matrix)            ((matrix) -> diag)
+#define hypre_ParCSRMatrixOffd(matrix)            ((matrix) -> offd)
+#define hypre_ParCSRMatrixColMapOffd(matrix)      ((matrix) -> col_map_offd)
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
-#define hypre_ParCSRMatrixCommPkg(matrix)	  ((matrix) -> comm_pkg)
-#define hypre_ParCSRMatrixCommPkgT(matrix)	  ((matrix) -> comm_pkgT)
+#define hypre_ParCSRMatrixCommPkg(matrix)         ((matrix) -> comm_pkg)
+#define hypre_ParCSRMatrixCommPkgT(matrix)        ((matrix) -> comm_pkgT)
 #define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
 #define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
 #define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)
-#define hypre_ParCSRMatrixNumRows(matrix) \
-hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
-#define hypre_ParCSRMatrixNumCols(matrix) \
-hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumRows(matrix)                       \
+   hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumCols(matrix)                       \
+   hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
 #define hypre_ParCSRMatrixDNumNonzeros(matrix)    ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
@@ -323,27 +302,27 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 
 typedef struct
 {
-   MPI_Comm              comm;
-   HYPRE_Int                   global_num_rows;
-   HYPRE_Int                   global_num_cols;
-   HYPRE_Int                   first_row_index;
-   HYPRE_Int                   first_col_diag;
-   HYPRE_Int                   last_row_index;
-   HYPRE_Int                   last_col_diag;
+   MPI_Comm                comm;
+   HYPRE_Int               global_num_rows;
+   HYPRE_Int               global_num_cols;
+   HYPRE_Int               first_row_index;
+   HYPRE_Int               first_col_diag;
+   HYPRE_Int               last_row_index;
+   HYPRE_Int               last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   HYPRE_Int	                *col_map_offd; 
-   HYPRE_Int 	                *row_starts; 
-   HYPRE_Int 	                *col_starts;
-   hypre_ParCSRCommPkg  *comm_pkg;
-   hypre_ParCSRCommPkg  *comm_pkgT;
-   HYPRE_Int                   owns_data;
-   HYPRE_Int                   owns_row_starts;
-   HYPRE_Int                   owns_col_starts;
-   HYPRE_Int                   num_nonzeros;
-   HYPRE_Int                  *rowindices;
-   HYPRE_Int                   getrowactive;
-
+   HYPRE_Int              *col_map_offd; 
+   HYPRE_Int              *row_starts; 
+   HYPRE_Int              *col_starts;
+   hypre_ParCSRCommPkg    *comm_pkg;
+   hypre_ParCSRCommPkg    *comm_pkgT;
+   HYPRE_Int               owns_data;
+   HYPRE_Int               owns_row_starts;
+   HYPRE_Int               owns_col_starts;
+   HYPRE_Int               num_nonzeros;
+   HYPRE_Int              *rowindices;
+   HYPRE_Int               getrowactive;
+   
 } hypre_ParCSRBooleanMatrix;
 
 /*--------------------------------------------------------------------------
@@ -375,9 +354,6 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
-
-
-
 
 /******************************************************************************
  *
@@ -413,7 +389,7 @@ typedef struct
 
 typedef struct {
    void * digit[11];
-/* ... should be   hypre_NumbersNode * digit[11]; */
+   /* ... should be   hypre_NumbersNode * digit[11]; */
 } hypre_NumbersNode;
 
 
@@ -424,21 +400,15 @@ HYPRE_Int hypre_NumbersNEntered( hypre_NumbersNode * node );
 HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n );
 HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node );
 
-
 #endif
-
-
-
 
 /******************************************************************************
  *
  * Header info for Parallel Chord Matrix data structures
  *
- *
  *****************************************************************************/
+
 #include <HYPRE_config.h>
-
-
 
 #ifndef hypre_PAR_CHORD_MATRIX_HEADER
 #define hypre_PAR_CHORD_MATRIX_HEADER
@@ -454,39 +424,37 @@ typedef struct
 {
    MPI_Comm comm;
 
-  /*  A structure: -------------------------------------------------------- */
-  HYPRE_Int num_inprocessors;
-  HYPRE_Int *inprocessor;
+   /*  A structure: -------------------------------------------------------- */
+   HYPRE_Int num_inprocessors;
+   HYPRE_Int *inprocessor;
 
-  /* receiving in idof from different (in)processors; ---------------------- */
-  HYPRE_Int *num_idofs_inprocessor; 
-  HYPRE_Int **idof_inprocessor; 
+   /* receiving in idof from different (in)processors; --------------------- */
+   HYPRE_Int *num_idofs_inprocessor; 
+   HYPRE_Int **idof_inprocessor; 
 
+   /* symmetric information: ----------------------------------------------- */
+   /* this can be replaces by CSR format: ---------------------------------- */
+   HYPRE_Int *num_inchords;
+   HYPRE_Int **inchord_idof;
+   HYPRE_Int **inchord_rdof;
+   HYPRE_Complex **inchord_data;
 
-  /* symmetric information: ----------------------------------------------- */
-  /* this can be replaces by CSR format: ---------------------------------- */
-  HYPRE_Int *num_inchords;
-  HYPRE_Int **inchord_idof;
-  HYPRE_Int **inchord_rdof;
-  double **inchord_data;
+   HYPRE_Int num_idofs;
+   HYPRE_Int num_rdofs;
 
-  HYPRE_Int num_idofs;
-  HYPRE_Int num_rdofs;
+   HYPRE_Int *firstindex_idof; /* not owned by my_id; ---------------------- */
+   HYPRE_Int *firstindex_rdof; /* not owned by my_id; -----------------------*/
 
-  HYPRE_Int *firstindex_idof; /* not owned by my_id; ----------------------------- */
-  HYPRE_Int *firstindex_rdof; /* not owned by my_id; ----------------------------- */
+   /* --------------------------- mirror information: ---------------------- */
+   /* participation of rdof in different processors; ----------------------- */
 
-  /* --------------------------- mirror information: ---------------------- */
-  /* participation of rdof in different processors; ------------------------ */
+   HYPRE_Int num_toprocessors;
+   HYPRE_Int *toprocessor;
 
-  HYPRE_Int num_toprocessors;
-  HYPRE_Int *toprocessor;
-
-  /* rdofs to be sentto toprocessors; --------------------------------------
-     ----------------------------------------------------------------------- */
-  HYPRE_Int *num_rdofs_toprocessor;
-  HYPRE_Int **rdof_toprocessor;
-
+   /* rdofs to be sentto toprocessors; -------------------------------------
+      ---------------------------------------------------------------------- */
+   HYPRE_Int *num_rdofs_toprocessor;
+   HYPRE_Int **rdof_toprocessor;
 
 } hypre_ParChordMatrix;
 
@@ -494,7 +462,7 @@ typedef struct
  * Accessor functions for the Parallel CSR Matrix structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParChordMatrixComm(matrix)		  ((matrix) -> comm)
+#define hypre_ParChordMatrixComm(matrix)                  ((matrix) -> comm)
 
 /*  matrix structure: ----------------------------------------------------- */
 
@@ -517,12 +485,10 @@ typedef struct
 
 /* participation of rdof in different processors; ---------- */
 
-
 #define hypre_ParChordMatrixNumToprocessors(matrix) ((matrix) -> num_toprocessors)
 #define hypre_ParChordMatrixToprocessor(matrix)  ((matrix) -> toprocessor)
 #define hypre_ParChordMatrixNumRdofsToprocessor(matrix) ((matrix) -> num_rdofs_toprocessor)
 #define hypre_ParChordMatrixRdofToprocessor(matrix) ((matrix) -> rdof_toprocessor)
-
 
 #endif
 
@@ -532,9 +498,9 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRMatrix * A;
-   hypre_ParVector * x;
-   hypre_ParVector * b;
-
+   hypre_ParVector    * x;
+   hypre_ParVector    * b;
+   
 } HYPRE_ParCSR_System_Problem;
 
 #endif /* hypre_PAR_MAKE_SYSTEM */
@@ -572,12 +538,12 @@ HYPRE_Int HYPRE_ParCSRMatrixGetDims ( HYPRE_ParCSRMatrix matrix , HYPRE_Int *M ,
 HYPRE_Int HYPRE_ParCSRMatrixGetRowPartitioning ( HYPRE_ParCSRMatrix matrix , HYPRE_Int **row_partitioning_ptr );
 HYPRE_Int HYPRE_ParCSRMatrixGetColPartitioning ( HYPRE_ParCSRMatrix matrix , HYPRE_Int **col_partitioning_ptr );
 HYPRE_Int HYPRE_ParCSRMatrixGetLocalRange ( HYPRE_ParCSRMatrix matrix , HYPRE_Int *row_start , HYPRE_Int *row_end , HYPRE_Int *col_start , HYPRE_Int *col_end );
-HYPRE_Int HYPRE_ParCSRMatrixGetRow ( HYPRE_ParCSRMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , double **values );
-HYPRE_Int HYPRE_ParCSRMatrixRestoreRow ( HYPRE_ParCSRMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , double **values );
+HYPRE_Int HYPRE_ParCSRMatrixGetRow ( HYPRE_ParCSRMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , HYPRE_Complex **values );
+HYPRE_Int HYPRE_ParCSRMatrixRestoreRow ( HYPRE_ParCSRMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , HYPRE_Complex **values );
 HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix ( MPI_Comm comm , HYPRE_CSRMatrix A_CSR , HYPRE_Int *row_partitioning , HYPRE_Int *col_partitioning , HYPRE_ParCSRMatrix *matrix );
 HYPRE_Int HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning ( MPI_Comm comm , HYPRE_CSRMatrix A_CSR , HYPRE_ParCSRMatrix *matrix );
-HYPRE_Int HYPRE_ParCSRMatrixMatvec ( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y );
-HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y );
+HYPRE_Int HYPRE_ParCSRMatrixMatvec ( HYPRE_Complex alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , HYPRE_Complex beta , HYPRE_ParVector y );
+HYPRE_Int HYPRE_ParCSRMatrixMatvecT ( HYPRE_Complex alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , HYPRE_Complex beta , HYPRE_ParVector y );
 
 /* HYPRE_parcsr_vector.c */
 HYPRE_Int HYPRE_ParVectorCreate ( MPI_Comm comm , HYPRE_Int global_size , HYPRE_Int *partitioning , HYPRE_ParVector *vector );
@@ -586,13 +552,13 @@ HYPRE_Int HYPRE_ParVectorDestroy ( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorInitialize ( HYPRE_ParVector vector );
 HYPRE_Int HYPRE_ParVectorRead ( MPI_Comm comm , const char *file_name , HYPRE_ParVector *vector );
 HYPRE_Int HYPRE_ParVectorPrint ( HYPRE_ParVector vector , const char *file_name );
-HYPRE_Int HYPRE_ParVectorSetConstantValues ( HYPRE_ParVector vector , double value );
+HYPRE_Int HYPRE_ParVectorSetConstantValues ( HYPRE_ParVector vector , HYPRE_Complex value );
 HYPRE_Int HYPRE_ParVectorSetRandomValues ( HYPRE_ParVector vector , HYPRE_Int seed );
 HYPRE_Int HYPRE_ParVectorCopy ( HYPRE_ParVector x , HYPRE_ParVector y );
 HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParVectorScale ( double value , HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParVectorAxpy ( double alpha , HYPRE_ParVector x , HYPRE_ParVector y );
-HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , double *prod );
+HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value , HYPRE_ParVector x );
+HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha , HYPRE_ParVector x , HYPRE_ParVector y );
+HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_Real *prod );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm , HYPRE_Vector b , HYPRE_Int *partitioning , HYPRE_ParVector *vector );
 
 /* new_commpkg.c */
@@ -668,24 +634,24 @@ HYPRE_Int hypre_ParCSRCommHandleDestroy ( hypre_ParCSRCommHandle *comm_handle );
 void hypre_MatvecCommPkgCreate_core ( MPI_Comm comm , HYPRE_Int *col_map_offd , HYPRE_Int first_col_diag , HYPRE_Int *col_starts , HYPRE_Int num_cols_diag , HYPRE_Int num_cols_offd , HYPRE_Int firstColDiag , HYPRE_Int *colMapOffd , HYPRE_Int data , HYPRE_Int *p_num_recvs , HYPRE_Int **p_recv_procs , HYPRE_Int **p_recv_vec_starts , HYPRE_Int *p_num_sends , HYPRE_Int **p_send_procs , HYPRE_Int **p_send_map_starts , HYPRE_Int **p_send_map_elmts );
 HYPRE_Int hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_MatvecCommPkgDestroy ( hypre_ParCSRCommPkg *comm_pkg );
-HYPRE_Int hypre_BuildCSRMatrixMPIDataType ( HYPRE_Int num_nonzeros , HYPRE_Int num_rows , double *a_data , HYPRE_Int *a_i , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_matrix_datatype );
-HYPRE_Int hypre_BuildCSRJDataType ( HYPRE_Int num_nonzeros , double *a_data , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_jdata_datatype );
+HYPRE_Int hypre_BuildCSRMatrixMPIDataType ( HYPRE_Int num_nonzeros , HYPRE_Int num_rows , HYPRE_Complex *a_data , HYPRE_Int *a_i , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_matrix_datatype );
+HYPRE_Int hypre_BuildCSRJDataType ( HYPRE_Int num_nonzeros , HYPRE_Complex *a_data , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_jdata_datatype );
 
 /* par_csr_matop.c */
 void hypre_ParMatmul_RowSizes ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C );
 hypre_ParCSRMatrix *hypre_ParMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
-void hypre_ParCSRMatrixExtractBExt_Arrays ( HYPRE_Int **pB_ext_i , HYPRE_Int **pB_ext_j , double **pB_ext_data , HYPRE_Int **pB_ext_row_map , HYPRE_Int *num_nonzeros , HYPRE_Int data , HYPRE_Int find_row_map , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , HYPRE_Int num_cols_B , HYPRE_Int num_recvs , HYPRE_Int num_sends , HYPRE_Int first_col_diag , HYPRE_Int first_row_index , HYPRE_Int *recv_vec_starts , HYPRE_Int *send_map_starts , HYPRE_Int *send_map_elmts , HYPRE_Int *diag_i , HYPRE_Int *diag_j , HYPRE_Int *offd_i , HYPRE_Int *offd_j , HYPRE_Int *col_map_offd , double *diag_data , double *offd_data );
+void hypre_ParCSRMatrixExtractBExt_Arrays ( HYPRE_Int **pB_ext_i , HYPRE_Int **pB_ext_j , HYPRE_Complex **pB_ext_data , HYPRE_Int **pB_ext_row_map , HYPRE_Int *num_nonzeros , HYPRE_Int data , HYPRE_Int find_row_map , MPI_Comm comm , hypre_ParCSRCommPkg *comm_pkg , HYPRE_Int num_cols_B , HYPRE_Int num_recvs , HYPRE_Int num_sends , HYPRE_Int first_col_diag , HYPRE_Int first_row_index , HYPRE_Int *recv_vec_starts , HYPRE_Int *send_map_starts , HYPRE_Int *send_map_elmts , HYPRE_Int *diag_i , HYPRE_Int *diag_j , HYPRE_Int *offd_i , HYPRE_Int *offd_j , HYPRE_Int *col_map_offd , HYPRE_Complex *diag_data , HYPRE_Complex *offd_data );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractBExt ( hypre_ParCSRMatrix *B , hypre_ParCSRMatrix *A , HYPRE_Int data );
 HYPRE_Int hypre_ParCSRMatrixTranspose ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **AT_ptr , HYPRE_Int data );
 void hypre_ParCSRMatrixGenSpanningTree ( hypre_ParCSRMatrix *G_csr , HYPRE_Int **indices , HYPRE_Int G_type );
 void hypre_ParCSRMatrixExtractSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
 void hypre_ParCSRMatrixExtractRowSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
-double hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
+HYPRE_Complex hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );
 hypre_ParCSRMatrix *hypre_ParMatmul_FC ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );
-void hypre_ParMatScaleDiagInv_F ( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *A , double weight , HYPRE_Int *CF_marker );
+void hypre_ParMatScaleDiagInv_F ( hypre_ParCSRMatrix *C , hypre_ParCSRMatrix *A , HYPRE_Complex weight , HYPRE_Int *CF_marker );
 hypre_ParCSRMatrix *hypre_ParMatMinus_F ( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , HYPRE_Int *CF_marker );
 void hypre_ParCSRMatrixZero_F ( hypre_ParCSRMatrix *P , HYPRE_Int *CF_marker );
 void hypre_ParCSRMatrixCopy_C ( hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *C , HYPRE_Int *CF_marker );
@@ -705,8 +671,8 @@ HYPRE_Int hypre_ParCSRMatrixPrint ( hypre_ParCSRMatrix *matrix , const char *fil
 HYPRE_Int hypre_ParCSRMatrixPrintIJ ( const hypre_ParCSRMatrix *matrix , const HYPRE_Int base_i , const HYPRE_Int base_j , const char *filename );
 HYPRE_Int hypre_ParCSRMatrixReadIJ ( MPI_Comm comm , const char *filename , HYPRE_Int *base_i_ptr , HYPRE_Int *base_j_ptr , hypre_ParCSRMatrix **matrix_ptr );
 HYPRE_Int hypre_ParCSRMatrixGetLocalRange ( hypre_ParCSRMatrix *matrix , HYPRE_Int *row_start , HYPRE_Int *row_end , HYPRE_Int *col_start , HYPRE_Int *col_end );
-HYPRE_Int hypre_ParCSRMatrixGetRow ( hypre_ParCSRMatrix *mat , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , double **values );
-HYPRE_Int hypre_ParCSRMatrixRestoreRow ( hypre_ParCSRMatrix *matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , double **values );
+HYPRE_Int hypre_ParCSRMatrixGetRow ( hypre_ParCSRMatrix *mat , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , HYPRE_Complex **values );
+HYPRE_Int hypre_ParCSRMatrixRestoreRow ( hypre_ParCSRMatrix *matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , HYPRE_Complex **values );
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix ( MPI_Comm comm , hypre_CSRMatrix *A , HYPRE_Int *row_starts , HYPRE_Int *col_starts );
 HYPRE_Int GenerateDiagAndOffd ( hypre_CSRMatrix *A , hypre_ParCSRMatrix *matrix , HYPRE_Int first_col_diag , HYPRE_Int last_col_diag );
 hypre_CSRMatrix *hypre_MergeDiagAndOffd ( hypre_ParCSRMatrix *par_matrix );
@@ -717,12 +683,12 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixCompleteClone ( hypre_ParCSRMatrix *A );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 
 /* par_csr_matvec.c */
-HYPRE_Int hypre_ParCSRMatrixMatvec ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
-HYPRE_Int hypre_ParCSRMatrixMatvecT ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y );
-HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y , HYPRE_Int *CF_marker , HYPRE_Int fpt );
+HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
+HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y , HYPRE_Int *CF_marker , HYPRE_Int fpt );
 
 /* par_make_system.c */
-HYPRE_ParCSR_System_Problem *HYPRE_Generate2DSystem ( HYPRE_ParCSRMatrix H_L1 , HYPRE_ParCSRMatrix H_L2 , HYPRE_ParVector H_b1 , HYPRE_ParVector H_b2 , HYPRE_ParVector H_x1 , HYPRE_ParVector H_x2 , double *M_vals );
+HYPRE_ParCSR_System_Problem *HYPRE_Generate2DSystem ( HYPRE_ParCSRMatrix H_L1 , HYPRE_ParCSRMatrix H_L2 , HYPRE_ParVector H_b1 , HYPRE_ParVector H_b2 , HYPRE_ParVector H_x1 , HYPRE_ParVector H_x2 , HYPRE_Complex *M_vals );
 HYPRE_Int HYPRE_Destroy2DSystem ( HYPRE_ParCSR_System_Problem *sys_prob );
 
 /* par_vector.c */
@@ -735,19 +701,19 @@ HYPRE_Int hypre_ParVectorSetPartitioningOwner ( hypre_ParVector *vector , HYPRE_
 HYPRE_Int hypre_ParVectorSetNumVectors ( hypre_ParVector *vector , HYPRE_Int num_vectors );
 hypre_ParVector *hypre_ParVectorRead ( MPI_Comm comm , const char *file_name );
 HYPRE_Int hypre_ParVectorPrint ( hypre_ParVector *vector , const char *file_name );
-HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v , double value );
+HYPRE_Int hypre_ParVectorSetConstantValues ( hypre_ParVector *v , HYPRE_Complex value );
 HYPRE_Int hypre_ParVectorSetRandomValues ( hypre_ParVector *v , HYPRE_Int seed );
 HYPRE_Int hypre_ParVectorCopy ( hypre_ParVector *x , hypre_ParVector *y );
 hypre_ParVector *hypre_ParVectorCloneShallow ( hypre_ParVector *x );
-HYPRE_Int hypre_ParVectorScale ( double alpha , hypre_ParVector *y );
-HYPRE_Int hypre_ParVectorAxpy ( double alpha , hypre_ParVector *x , hypre_ParVector *y );
-double hypre_ParVectorInnerProd ( hypre_ParVector *x , hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorScale ( HYPRE_Complex alpha , hypre_ParVector *y );
+HYPRE_Int hypre_ParVectorAxpy ( HYPRE_Complex alpha , hypre_ParVector *x , hypre_ParVector *y );
+HYPRE_Real hypre_ParVectorInnerProd ( hypre_ParVector *x , hypre_ParVector *y );
 hypre_ParVector *hypre_VectorToParVector ( MPI_Comm comm , hypre_Vector *v , HYPRE_Int *vec_starts );
 hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v );
 HYPRE_Int hypre_ParVectorPrintIJ ( hypre_ParVector *vector , HYPRE_Int base_j , const char *filename );
 HYPRE_Int hypre_ParVectorReadIJ ( MPI_Comm comm , const char *filename , HYPRE_Int *base_j_ptr , hypre_ParVector **vector_ptr );
 HYPRE_Int hypre_FillResponseParToVectorAll ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
-double hypre_ParVectorLocalSumElts ( hypre_ParVector *vector );
+HYPRE_Complex hypre_ParVectorLocalSumElts ( hypre_ParVector *vector );
 
 #ifdef __cplusplus
 }

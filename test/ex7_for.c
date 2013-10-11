@@ -75,7 +75,7 @@
 HYPRE_Int optionK, optionB, optionC, optionU0, optionF;
 
 /* Diffusion coefficient */
-double K(double x, double y)
+HYPRE_Real K(HYPRE_Real x, HYPRE_Real y)
 {
    switch (optionK)
    {
@@ -99,7 +99,7 @@ double K(double x, double y)
 }
 
 /* Convection vector, first component */
-double B1(double x, double y)
+HYPRE_Real B1(HYPRE_Real x, HYPRE_Real y)
 {
    switch (optionB)
    {
@@ -117,7 +117,7 @@ double B1(double x, double y)
 }
 
 /* Convection vector, second component */
-double B2(double x, double y)
+HYPRE_Real B2(HYPRE_Real x, HYPRE_Real y)
 {
    switch (optionB)
    {
@@ -135,7 +135,7 @@ double B2(double x, double y)
 }
 
 /* Reaction coefficient */
-double C(double x, double y)
+HYPRE_Real C(HYPRE_Real x, HYPRE_Real y)
 {
    switch (optionC)
    {
@@ -151,7 +151,7 @@ double C(double x, double y)
 }
 
 /* Boundary condition */
-double U0(double x, double y)
+HYPRE_Real U0(HYPRE_Real x, HYPRE_Real y)
 {
    switch (optionU0)
    {
@@ -167,7 +167,7 @@ double U0(double x, double y)
 }
 
 /* Right-hand side */
-double F(double x, double y)
+HYPRE_Real F(HYPRE_Real x, HYPRE_Real y)
 {
    switch (optionF)
    {
@@ -199,7 +199,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    HYPRE_Int myid, num_procs;
 
    HYPRE_Int n, N, pi, pj;
-   double h, h2;
+   HYPRE_Real h, h2;
    HYPRE_Int ilower[2], iupper[2];
 
    HYPRE_Int solver_id;
@@ -210,7 +210,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    HYPRE_Int object_type;
 
    HYPRE_Int num_iterations;
-   double final_res_norm;
+   HYPRE_Real final_res_norm;
 
    HYPRE_Int print_solution;
 
@@ -239,8 +239,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
    HYPRE_Int      twohundred = 200;
    HYPRE_Int      fivehundred = 500;
 
-   double   zerodot = 0.;
-   double   tol = 1.e-6;
+   HYPRE_Real   zerodot = 0.;
+   HYPRE_Real   tol = 1.e-6;
 #else
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil  stencil;
@@ -556,7 +556,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
 
    /* 4. Set up SStruct Vectors for b and x */
    {
-      double *values;
+      HYPRE_Real *values;
 
       /* We have one part and one variable. */
       HYPRE_Int part = 0;
@@ -595,7 +595,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_SStructVectorInitialize(x);
 #endif
 
-      values = calloc((n*n), sizeof(double));
+      values = calloc((n*n), sizeof(HYPRE_Real));
 
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
@@ -664,9 +664,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       {
          HYPRE_Int stencil_indices[5] = {0, 1, 2, 3, 4}; /* labels correspond
                                                       to the offsets */
-         double *values;
+         HYPRE_Real *values;
 
-         values = calloc(5*(n*n), sizeof(double));
+         values = calloc(5*(n*n), sizeof(HYPRE_Real));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -702,9 +702,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else /* Symmetric storage */
       {
          HYPRE_Int stencil_indices[3] = {0, 1, 2};
-         double *values;
+         HYPRE_Real *values;
 
-         values = calloc(3*(n*n), sizeof(double));
+         values = calloc(3*(n*n), sizeof(HYPRE_Real));
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -739,7 +739,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Int bc_iupper[2];
 
       HYPRE_Int stencil_indices[5] = {0, 1, 2, 3, 4};
-      double *values, *bvalues;
+      HYPRE_Real *values, *bvalues;
 
       HYPRE_Int nentries;
 
@@ -752,8 +752,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else
          nentries = 3;
 
-      values  = calloc(nentries*n, sizeof(double));
-      bvalues = calloc(n, sizeof(double));
+      values  = calloc(nentries*n, sizeof(HYPRE_Real));
+      bvalues = calloc(n, sizeof(HYPRE_Real));
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
          we have I x_b = u_0; */

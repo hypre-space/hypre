@@ -69,7 +69,7 @@ typedef struct
    hypre_BoxArray       *base_points;
    hypre_BoxArray      **fine_points_l;
 
-   double               *data;
+   HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructVector  **x_l;
 
@@ -236,8 +236,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
    hypre_Box              *A_dbox;
    hypre_Box              *Ac_dbox;
 
-   double                 *a_cc, *a_cw, *a_ce;
-   double                 *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real             *a_cc, *a_cw, *a_ce;
+   HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
                     
    HYPRE_Int               iA, iAm1, iAp1;
    HYPRE_Int               iAc;
@@ -493,7 +493,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_StructGrid      **grid_l;
    hypre_BoxArray         *base_points;
    hypre_BoxArray        **fine_points_l;
-   double                 *data;
+   HYPRE_Real             *data;
    HYPRE_Int               data_size = 0;
    hypre_StructMatrix    **A_l;
    hypre_StructVector    **x_l;
@@ -616,7 +616,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
-   data = hypre_SharedCTAlloc(double, data_size);
+   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
 
    (cyc_red_data -> data) = data;
 
@@ -772,10 +772,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    hypre_Box            *b_dbox;
    hypre_Box            *xc_dbox;
                      
-   double               *Ap, *Awp, *Aep;
-   double               *xp, *xwp, *xep;
-   double               *bp;
-   double               *xcp;
+   HYPRE_Real           *Ap, *Awp, *Aep;
+   HYPRE_Real           *xp, *xwp, *xep;
+   HYPRE_Real           *bp;
+   HYPRE_Real           *xcp;
                        
    HYPRE_Int             Ai;
    HYPRE_Int             xi;

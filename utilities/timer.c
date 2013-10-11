@@ -31,38 +31,38 @@
 #include "mpi.h"
 #endif
 
-double time_getWallclockSeconds(void)
+HYPRE_Real time_getWallclockSeconds(void)
 {
 #ifdef TIMER_USE_MPI
    return(hypre_MPI_Wtime());
 #else
 #ifdef WIN32
    clock_t cl=clock();
-   return(((double) cl)/((double) CLOCKS_PER_SEC));
+   return(((HYPRE_Real) cl)/((HYPRE_Real) CLOCKS_PER_SEC));
 #else
    struct tms usage;
    hypre_longint wallclock = times(&usage);
-   return(((double) wallclock)/((double) sysconf(_SC_CLK_TCK)));
+   return(((HYPRE_Real) wallclock)/((HYPRE_Real) sysconf(_SC_CLK_TCK)));
 #endif
 #endif
 }
 
-double time_getCPUSeconds(void)
+HYPRE_Real time_getCPUSeconds(void)
 {
 #ifndef TIMER_NO_SYS
    clock_t cpuclock = clock();
-   return(((double) (cpuclock))/((double) CLOCKS_PER_SEC));
+   return(((HYPRE_Real) (cpuclock))/((HYPRE_Real) CLOCKS_PER_SEC));
 #else
    return(0.0);
 #endif
 }
 
-double time_get_wallclock_seconds_(void)
+HYPRE_Real time_get_wallclock_seconds_(void)
 {
    return(time_getWallclockSeconds());
 }
 
-double time_get_cpu_seconds_(void)
+HYPRE_Real time_get_cpu_seconds_(void)
 {
    return(time_getCPUSeconds());
 }

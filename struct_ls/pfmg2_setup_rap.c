@@ -303,14 +303,14 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    hypre_Box            *RAP_dbox;
    hypre_Box            *cgrid_box;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double                a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
-   double                a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real            a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
+   HYPRE_Real            a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
@@ -610,13 +610,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -844,18 +844,18 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw;
-   double                a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
-   double                a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
-   double                a_csw_offd, a_csw_offdm1, a_csw_offdp1, a_cse_offd, a_cse_offdm1;
-   double                a_cnw_offd, a_cnw_offdm1;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real            a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
+   HYPRE_Real            a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
+   HYPRE_Real            a_csw_offd, a_csw_offdm1, a_csw_offdp1, a_cse_offd, a_cse_offdm1;
+   HYPRE_Real            a_cnw_offd, a_cnw_offdm1;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
@@ -1199,13 +1199,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw;
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -1580,14 +1580,14 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               a_cn_offd, a_cn_offdp1, a_cw_offdp1;
-   double               a_ce_offd, a_ce_offdm1, a_ce_offdp1;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           a_cn_offd, a_cn_offdp1, a_cw_offdp1;
+   HYPRE_Real           a_ce_offd, a_ce_offdm1, a_ce_offdp1;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
    HYPRE_Int             iAc;
@@ -1858,11 +1858,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -2072,16 +2072,16 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *a_cse, *a_cnw, *a_cne;
-   double               a_cn_offd, a_cn_offdp1, a_cw_offdp1;
-   double               a_ce_offd, a_ce_offdm1, a_ce_offdp1;
-   double               a_cne_offd, a_cne_offdm1, a_cne_offdp1;
-   double               a_cse_offd, a_cse_offdp1, a_cnw_offd, a_cnw_offdp1;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           a_cn_offd, a_cn_offdp1, a_cw_offdp1;
+   HYPRE_Real           a_ce_offd, a_ce_offdm1, a_ce_offdp1;
+   HYPRE_Real           a_cne_offd, a_cne_offdm1, a_cne_offdp1;
+   HYPRE_Real           a_cse_offd, a_cse_offdp1, a_cnw_offd, a_cnw_offdp1;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
    HYPRE_Int             iAc;
@@ -2403,12 +2403,12 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *a_cse, *a_cnw, *a_cne;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;

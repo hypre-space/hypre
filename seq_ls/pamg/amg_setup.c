@@ -49,11 +49,11 @@ hypre_AMGSetup( void            *amg_vdata,
    HYPRE_Int              *domain_j;
 
    HYPRE_Int             **CF_marker_array;   
-   double           *relax_weight;
-   double           *unit_vector;
-   double            strong_threshold;
-   double            A_trunc_factor;
-   double            P_trunc_factor;
+   HYPRE_Real       *relax_weight;
+   HYPRE_Real       *unit_vector;
+   HYPRE_Real        strong_threshold;
+   HYPRE_Real        A_trunc_factor;
+   HYPRE_Real        P_trunc_factor;
 
    HYPRE_Int      num_variables;
    HYPRE_Int      max_levels; 
@@ -81,7 +81,7 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_CSRMatrix  *A_tilde;
    hypre_BCSRMatrix *B;
    hypre_BCSRMatrix *PB;
-/*   double *S2_data; */
+/*   HYPRE_Real *S2_data; */
 /*   HYPRE_Int       num_nz; */
 
    HYPRE_Int       num_levels;
@@ -102,7 +102,7 @@ hypre_AMGSetup( void            *amg_vdata,
    HYPRE_Int       num_domains;
    HYPRE_Int      *i_domain_dof;
    HYPRE_Int      *j_domain_dof;
-   double   *domain_matrixinverse;
+   HYPRE_Real   *domain_matrixinverse;
 
    HYPRE_Int* fake_dof_func;
 
@@ -142,7 +142,7 @@ hypre_AMGSetup( void            *amg_vdata,
       hypre_AMGDataIDomainDof(amg_data) = hypre_CTAlloc(HYPRE_Int*, max_levels);
       hypre_AMGDataJDomainDof(amg_data) = hypre_CTAlloc(HYPRE_Int*, max_levels);
       hypre_AMGDataDomainMatrixInverse(amg_data) = 
-				hypre_CTAlloc(double*, max_levels);
+				hypre_CTAlloc(HYPRE_Real*, max_levels);
       for (i=0; i < max_levels; i++)
       {
          hypre_AMGDataIDomainDof(amg_data)[i] = NULL;
@@ -176,7 +176,7 @@ hypre_AMGSetup( void            *amg_vdata,
     *----------------------------------------------------------*/
 
    num_variables = hypre_CSRMatrixNumRows(A);
-   unit_vector = hypre_CTAlloc(double, num_variables);
+   unit_vector = hypre_CTAlloc(HYPRE_Real, num_variables);
 
    for (i=0; i < num_variables; i++)
       unit_vector[i] = 1;

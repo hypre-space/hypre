@@ -95,7 +95,7 @@ hypre_JacobiSolve( void               *jacobi_vdata,
 
 HYPRE_Int
 hypre_JacobiSetTol( void   *jacobi_vdata,
-                    double  tol          )
+                    HYPRE_Real  tol          )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
 
@@ -109,7 +109,7 @@ hypre_JacobiSetTol( void   *jacobi_vdata,
 
 HYPRE_Int
 hypre_JacobiGetTol( void   *jacobi_vdata,
-                    double *tol          )
+                    HYPRE_Real *tol          )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
 
@@ -207,7 +207,7 @@ hypre_JacobiSetTempVec( void               *jacobi_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm( void * jacobi_vdata,
-                                                    double * norm )
+                                                    HYPRE_Real * norm )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
    void *relax_data = jacobi_data -> relax_data;

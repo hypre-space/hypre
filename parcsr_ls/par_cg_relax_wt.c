@@ -31,7 +31,7 @@ HYPRE_Int
 hypre_BoomerAMGCGRelaxWt( void              *amg_vdata, 
 		   	  HYPRE_Int 		     level,
 		   	  HYPRE_Int 		     num_cg_sweeps,
-			  double 	    *rlx_wt_ptr)
+			  HYPRE_Real 	    *rlx_wt_ptr)
 {
    hypre_ParAMGData *amg_data = amg_vdata;
 
@@ -52,8 +52,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVector    *Qtemp = NULL;
 
    HYPRE_Int     *CF_marker = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
-   double   *Ptemp_data;
-   double   *Ztemp_data;
+   HYPRE_Real   *Ptemp_data;
+   HYPRE_Real   *Ztemp_data;
 
    /* HYPRE_Int     **unknown_map_array;
    HYPRE_Int     **point_map_array;
@@ -75,25 +75,25 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    HYPRE_Int       smooth_num_levels;
    HYPRE_Int       smooth_option = 0;
 
-   double   *l1_norms = NULL;
+   HYPRE_Real   *l1_norms = NULL;
 
-   double    alpha;
-   double    beta;
-   double    gamma = 1.0;
-   double    gammaold;
+   HYPRE_Real    alpha;
+   HYPRE_Real    beta;
+   HYPRE_Real    gamma = 1.0;
+   HYPRE_Real    gammaold;
 
-   double   *tridiag;
-   double   *trioffd;
-   double    alphinv, row_sum = 0;
-   double    max_row_sum = 0;
-   double    rlx_wt = 0;
-   double    rlx_wt_old = 0;
-   double    lambda_max, lambda_max_old;
-   /* double    lambda_min, lambda_min_old; */
+   HYPRE_Real   *tridiag;
+   HYPRE_Real   *trioffd;
+   HYPRE_Real    alphinv, row_sum = 0;
+   HYPRE_Real    max_row_sum = 0;
+   HYPRE_Real    rlx_wt = 0;
+   HYPRE_Real    rlx_wt_old = 0;
+   HYPRE_Real    lambda_max, lambda_max_old;
+   /* HYPRE_Real    lambda_min, lambda_min_old; */
 
 #if 0
-   double   *D_mat;
-   double   *S_vec;
+   HYPRE_Real   *D_mat;
+   HYPRE_Real   *S_vec;
 #endif
    
    HYPRE_Int num_threads;
@@ -103,8 +103,8 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 
    /* Acquire data and allocate storage */
 
-   tridiag  = hypre_CTAlloc(double, num_cg_sweeps+1);
-   trioffd  = hypre_CTAlloc(double, num_cg_sweeps+1);
+   tridiag  = hypre_CTAlloc(HYPRE_Real, num_cg_sweeps+1);
+   trioffd  = hypre_CTAlloc(HYPRE_Real, num_cg_sweeps+1);
    for (i=0; i < num_cg_sweeps+1; i++)
    {
 	tridiag[i] = 0;
@@ -368,16 +368,16 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_Bisection(HYPRE_Int n, double *diag, double *offd, 
-		double y, double z,
-		double tol, HYPRE_Int k, double *ev_ptr)
+hypre_Bisection(HYPRE_Int n, HYPRE_Real *diag, HYPRE_Real *offd, 
+		HYPRE_Real y, HYPRE_Real z,
+		HYPRE_Real tol, HYPRE_Int k, HYPRE_Real *ev_ptr)
 {
-   double x;
-   double eigen_value;
+   HYPRE_Real x;
+   HYPRE_Real eigen_value;
    HYPRE_Int ierr = 0;
    HYPRE_Int sign_change = 0;
    HYPRE_Int i;
-   double p0, p1, p2;
+   HYPRE_Real p0, p1, p2;
 
    while (fabs(y-z) > tol*(fabs(y) + fabs(z)))
    {

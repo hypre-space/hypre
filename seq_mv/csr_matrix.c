@@ -85,11 +85,11 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
    HYPRE_Int  ierr=0;
 
    if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
-      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(double, num_nonzeros);
+      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, num_nonzeros);
    if ( ! hypre_CSRMatrixI(matrix) )
       hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
 /*   if ( ! hypre_CSRMatrixRownnz(matrix) )
-      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rownnz);*/
+     hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rownnz);*/
    if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
       hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
 
@@ -141,18 +141,18 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 
    if ((irownnz == 0) || (irownnz == num_rows))
    {
-       hypre_CSRMatrixRownnz(matrix) = NULL;
+      hypre_CSRMatrixRownnz(matrix) = NULL;
    }
    else
    {
-       Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz);
-       irownnz = 0;
-       for (i=0; i < num_rows; i++)
-       {
-          adiag = A_i[i+1]-A_i[i];
-          if(adiag > 0) Arownnz[irownnz++] = i;
-       }
-        hypre_CSRMatrixRownnz(matrix) = Arownnz;
+      Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz);
+      irownnz = 0;
+      for (i=0; i < num_rows; i++)
+      {
+         adiag = A_i[i+1]-A_i[i];
+         if(adiag > 0) Arownnz[irownnz++] = i;
+      }
+      hypre_CSRMatrixRownnz(matrix) = Arownnz;
    }
    return ierr;
 }
@@ -168,7 +168,7 @@ hypre_CSRMatrixRead( char *file_name )
 
    FILE    *fp;
 
-   double  *matrix_data;
+   HYPRE_Complex *matrix_data;
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
    HYPRE_Int      num_rows;
@@ -236,7 +236,7 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
 {
    FILE    *fp;
 
-   double  *matrix_data;
+   HYPRE_Complex *matrix_data;
    HYPRE_Int     *matrix_i;
    HYPRE_Int     *matrix_j;
    HYPRE_Int      num_rows;
@@ -274,7 +274,12 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    {
       for (j = 0; j < matrix_i[num_rows]; j++)
       {
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(fp, "%.14e , %.14e\n",
+                       hypre_creal(matrix_data[j]), hypre_cimag(matrix_data[j]));
+#else
          hypre_fprintf(fp, "%.14e\n", matrix_data[j]);
+#endif
       }
    }
    else
@@ -297,7 +302,7 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 {
    FILE            *fp;
    hypre_CSRMatrix *matrix;
-   double          *matrix_data;
+   HYPRE_Complex   *matrix_data;
    HYPRE_Int       *matrix_i;
    HYPRE_Int       *matrix_j;
    HYPRE_Int        num_rows;
@@ -345,7 +350,12 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
    {
       for (j = 0; j < matrix_i[num_rows]; j++)
       {
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(fp, "%16.8e , %16.8e\n",
+                       hypre_creal(matrix_data[j]), hypre_cimag(matrix_data[j]));
+#else
          hypre_fprintf(fp, "%16.8e\n", matrix_data[j]);
+#endif
       }
    }
    else
@@ -370,37 +380,37 @@ hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
 HYPRE_Int 
 hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
 {
-   HYPRE_Int  ierr=0;
-   HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(A);
-   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
-   HYPRE_Int *A_j = hypre_CSRMatrixJ(A);
-   double *A_data;
-   HYPRE_Int *B_i = hypre_CSRMatrixI(B);
-   HYPRE_Int *B_j = hypre_CSRMatrixJ(B);
-   double *B_data;
+   HYPRE_Int      ierr=0;
+   HYPRE_Int      num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int     *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int     *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Complex *A_data;
+   HYPRE_Int     *B_i = hypre_CSRMatrixI(B);
+   HYPRE_Int     *B_j = hypre_CSRMatrixJ(B);
+   HYPRE_Complex *B_data;
 
    HYPRE_Int i, j;
 
    for (i=0; i < num_rows; i++)
    {
-	B_i[i] = A_i[i];
-	for (j=A_i[i]; j < A_i[i+1]; j++)
-	{
-		B_j[j] = A_j[j];
-	}
+      B_i[i] = A_i[i];
+      for (j=A_i[i]; j < A_i[i+1]; j++)
+      {
+         B_j[j] = A_j[j];
+      }
    }
    B_i[num_rows] = A_i[num_rows];
    if (copy_data)
    {
-	A_data = hypre_CSRMatrixData(A);
-	B_data = hypre_CSRMatrixData(B);
-   	for (i=0; i < num_rows; i++)
-   	{
-	   for (j=A_i[i]; j < A_i[i+1]; j++)
-	   {
-		B_data[j] = A_data[j];
-	   }
-	}
+      A_data = hypre_CSRMatrixData(A);
+      B_data = hypre_CSRMatrixData(B);
+      for (i=0; i < num_rows; i++)
+      {
+         for (j=A_i[i]; j < A_i[i+1]; j++)
+         {
+            B_data[j] = A_data[j];
+         }
+      }
    }
    return ierr;
 }
@@ -532,7 +542,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
 
 
    /* ==== The first run through A and B is to count the number of nonzero elements,
-      without double-counting duplicates.  Then we can create C. */
+      without HYPRE_Complex-counting duplicates.  Then we can create C. */
    num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
    for ( i=0; i<num_rows; ++i )
    {

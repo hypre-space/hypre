@@ -64,7 +64,6 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 
    hypre_SStructVectorIJVector(vector)   = NULL;
    hypre_SStructVectorParVector(vector)  = NULL;
-   hypre_SStructVectorIsComplex(vector)  = 0;
    hypre_SStructVectorGlobalSize(vector) = 0;
    hypre_SStructVectorRefCount(vector)   = 1;
    hypre_SStructVectorDataSize(vector)   = 0;
@@ -137,9 +136,9 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    HYPRE_Int               nvars ;
    HYPRE_Int               nparts = hypre_SStructVectorNParts(vector) ;
    HYPRE_Int               var,part  ;
-   double                 *data ;
-   double                 *pdata ;
-   double                 *sdata  ;
+   HYPRE_Complex          *data ;
+   HYPRE_Complex          *pdata ;
+   HYPRE_Complex          *sdata  ;
    hypre_SStructPVector   *pvector;
    hypre_StructVector     *svector;
    HYPRE_Int              *dataindices;
@@ -163,7 +162,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(double, datasize);
+   data = hypre_CTAlloc(HYPRE_Complex, datasize);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 
@@ -257,7 +256,7 @@ HYPRE_SStructVectorSetValues( HYPRE_SStructVector  vector,
                               HYPRE_Int            part,
                               HYPRE_Int           *index,
                               HYPRE_Int            var,
-                              double              *value )
+                              HYPRE_Complex       *value )
 {
    HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
@@ -285,7 +284,7 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
                                 HYPRE_Int            part,
                                 HYPRE_Int           *index,
                                 HYPRE_Int            var,
-                                double              *value )
+                                HYPRE_Complex       *value )
 {
    HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
@@ -314,7 +313,7 @@ HYPRE_Int
 HYPRE_SStructVectorAddFEMValues( HYPRE_SStructVector  vector,
                                  HYPRE_Int            part,
                                  HYPRE_Int           *index,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    HYPRE_Int           ndim         = hypre_SStructVectorNDim(vector);
    hypre_SStructGrid  *grid         = hypre_SStructVectorGrid(vector);
@@ -345,7 +344,7 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
                               HYPRE_Int            part,
                               HYPRE_Int           *index,
                               HYPRE_Int            var,
-                              double              *value )
+                              HYPRE_Complex       *value )
 {
    HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
@@ -374,7 +373,7 @@ HYPRE_Int
 HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
                                  HYPRE_Int            part,
                                  HYPRE_Int           *index,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    HYPRE_Int             ndim         = hypre_SStructVectorNDim(vector);
    hypre_SStructGrid    *grid         = hypre_SStructVectorGrid(vector);
@@ -407,7 +406,7 @@ HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector  vector,
                                  HYPRE_Int           *ilower,
                                  HYPRE_Int           *iupper,
                                  HYPRE_Int            var,
-                                 double              *values )
+                                 HYPRE_Complex       *values )
 {
    HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
@@ -431,7 +430,7 @@ HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector  vector,
                                    HYPRE_Int           *ilower,
                                    HYPRE_Int           *iupper,
                                    HYPRE_Int            var,
-                                   double              *values )
+                                   HYPRE_Complex       *values )
 {
    HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
@@ -456,7 +455,7 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                 HYPRE_Int           *ilower,
                                 HYPRE_Int           *iupper,
                                 HYPRE_Int            var,
-                                double              *values )
+                                HYPRE_Complex       *values )
 {
    HYPRE_Int             ndim    = hypre_SStructVectorNDim(vector);
    hypre_SStructPVector *pvector = hypre_SStructVectorPVector(vector, part);
@@ -639,7 +638,7 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
 
 HYPRE_Int 
 HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector,
-                                      double              value )
+                                      HYPRE_Complex       value )
 {
    hypre_SStructPVector *pvector;
    HYPRE_Int part;
@@ -741,7 +740,8 @@ HYPRE_SStructVectorCopy( HYPRE_SStructVector x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructVectorScale( double alpha, HYPRE_SStructVector y )
+HYPRE_SStructVectorScale( HYPRE_Complex       alpha,
+                          HYPRE_SStructVector y )
 {
    hypre_SStructScale( alpha, (hypre_SStructVector *)y );
 
@@ -755,7 +755,7 @@ HYPRE_SStructVectorScale( double alpha, HYPRE_SStructVector y )
 HYPRE_Int
 HYPRE_SStructInnerProd( HYPRE_SStructVector x,
                         HYPRE_SStructVector y,
-                        double *result )
+                        HYPRE_Real         *result )
 {
    hypre_SStructInnerProd(x, y, result);
 
@@ -767,7 +767,7 @@ HYPRE_SStructInnerProd( HYPRE_SStructVector x,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SStructAxpy( double alpha,
+HYPRE_SStructAxpy( HYPRE_Complex       alpha,
                    HYPRE_SStructVector x,
                    HYPRE_SStructVector y )
 {

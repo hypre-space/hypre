@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #ifndef MULTIVECTOR_FUNCTION_PROTOTYPES
 #define MULTIVECTOR_FUNCTION_PROTOTYPES
 
@@ -71,34 +68,34 @@ mv_MultiVectorCopy( mv_MultiVectorPtr src, mv_MultiVectorPtr dest );
 
   /* computes y = a*x + y */
 void 
-mv_MultiVectorAxpy( double a, mv_MultiVectorPtr x, mv_MultiVectorPtr y ); 
+mv_MultiVectorAxpy( HYPRE_Complex a, mv_MultiVectorPtr x, mv_MultiVectorPtr y ); 
 
   /* computes the matrix v = x'*y stored in fortran style: gh is the leading dimension,
      h the number of rows and w the number of columns (cf. blas or lapack) */
 void 
 mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
-				HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, double* v );
+				HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Real* v );
 
   /*computes the diagonal of x'*y stored in diag(mask) */
 void 
 mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr, mv_MultiVectorPtr,
-				   HYPRE_Int* mask, HYPRE_Int n, double* diag );
+				   HYPRE_Int* mask, HYPRE_Int n, HYPRE_Real* diag );
 
   /* computes y = x*v, where v is stored in fortran style */
 void 
 mv_MultiVectorByMatrix( mv_MultiVectorPtr x, 
-			   HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, double* v,
+			   HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
 			   mv_MultiVectorPtr y );
 
   /* computes y = x*v + y, where v is stored in fortran style */
 void 
 mv_MultiVectorXapy( mv_MultiVectorPtr x, 
-		       HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, double* v,
+		       HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, HYPRE_Complex* v,
 		       mv_MultiVectorPtr y );
 
   /* computes y = x*diag(mask) */
 void mv_MultiVectorByDiagonal( mv_MultiVectorPtr x, 
-				  HYPRE_Int* mask, HYPRE_Int n, double* diag,
+				  HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag,
 				  mv_MultiVectorPtr y );
 
   /* computes y = f(x) vector-by-vector */

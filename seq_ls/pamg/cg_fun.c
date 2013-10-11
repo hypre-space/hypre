@@ -117,10 +117,10 @@ hypre_CGMatvecCreate( void   *A,
 
 HYPRE_Int
 hypre_CGMatvec( void   *matvec_data,
-                 double  alpha,
+                 HYPRE_Real  alpha,
                  void   *A,
                  void   *x,
-                 double  beta,
+                 HYPRE_Real  beta,
                  void   *y           )
 {
    return ( hypre_CSRMatrixMatvec ( alpha,
@@ -136,10 +136,10 @@ hypre_CGMatvec( void   *matvec_data,
 
 HYPRE_Int
 hypre_CGMatvecT(void   *matvec_data,
-                 double  alpha,
+                 HYPRE_Real  alpha,
                  void   *A,
                  void   *x,
-                 double  beta,
+                 HYPRE_Real  beta,
                  void   *y           )
 {
    return ( hypre_CSRMatrixMatvecT( alpha,
@@ -163,7 +163,7 @@ hypre_CGMatvecDestroy( void *matvec_data )
  * hypre_CGInnerProd
  *--------------------------------------------------------------------------*/
 
-double
+HYPRE_Real
 hypre_CGInnerProd( void *x, 
                     void *y )
 {
@@ -199,7 +199,7 @@ hypre_CGClearVector( void *x )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CGScaleVector( double  alpha,
+hypre_CGScaleVector( HYPRE_Real  alpha,
                       void   *x     )
 {
    return ( hypre_SeqVectorScale( alpha, (hypre_Vector *) x ) );
@@ -210,7 +210,7 @@ hypre_CGScaleVector( double  alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CGAxpy( double alpha,
+hypre_CGAxpy( HYPRE_Real alpha,
                void   *x,
                void   *y )
 {

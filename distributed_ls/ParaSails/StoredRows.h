@@ -36,7 +36,7 @@ typedef struct
 
     HYPRE_Int     *len;
     HYPRE_Int    **ind;
-    double **val;
+    HYPRE_Real **val;
 
     HYPRE_Int      count;
 }
@@ -45,9 +45,9 @@ StoredRows;
 StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size);
 void    StoredRowsDestroy(StoredRows *p);
 HYPRE_Int    *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len);
-double *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len);
-void    StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, double *val);
+HYPRE_Real *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len);
+void    StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Real *val);
 void    StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
-          double **valp);
+          HYPRE_Real **valp);
 
 #endif /* _STOREDROWS_H */

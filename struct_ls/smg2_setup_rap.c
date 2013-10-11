@@ -177,14 +177,14 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int            iA, iAm1, iAp1;
    HYPRE_Int            iAc;
@@ -497,14 +497,14 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
 
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int            iA, iAm1, iAp1;
    HYPRE_Int            iAc;
@@ -782,15 +782,15 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 
    hypre_Box              *RAP_dbox;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int            iAc;
    HYPRE_Int            iAcm1;
 
    HYPRE_Int            xOffset;
 
-   double               zero = 0.0;
+   HYPRE_Real           zero = 0.0;
 
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -890,14 +890,14 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
    hypre_Box              *RAP_dbox;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int            iAc;
 
-   double               zero = 0.0;
+   HYPRE_Real           zero = 0.0;
 
    hypre_SetIndex3(stridec, 1, 1, 1);
 

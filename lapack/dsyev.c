@@ -86,7 +86,7 @@
     integer a_dim1, a_offset, i__1, i__2;
     doublereal d__1;
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static integer inde;
     static doublereal anrm;

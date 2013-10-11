@@ -31,7 +31,7 @@ hypre_SeqVectorZeroBCValues(hypre_Vector *v,
                             HYPRE_Int    *rows,
                             HYPRE_Int     nrows)
 {
-   double  *vector_data = hypre_VectorData(v);
+   HYPRE_Real  *vector_data = hypre_VectorData(v);
    HYPRE_Int      i;
    HYPRE_Int      ierr  = 0;
 

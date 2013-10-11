@@ -21,7 +21,7 @@ typedef struct
 {
    MPI_Comm                comm;
 
-   double                  tol;                /* not yet used */
+   HYPRE_Real              tol;                /* not yet used */
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;         /* not yet used */
    HYPRE_Int               zero_guess;

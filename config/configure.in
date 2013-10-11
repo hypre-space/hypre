@@ -205,6 +205,23 @@ then
    AC_DEFINE(HYPRE_BIGINT, 1)
 fi
 
+AC_ARG_ENABLE(complex,
+AS_HELP_STRING([--enable-complex],
+               [Use complex values (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_complex=yes ;;
+    no)  hypre_using_complex=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-complex]) ;;
+ esac],
+[hypre_using_complex=no]
+)
+if test "$hypre_using_complex" = "yes"
+then
+   AC_DEFINE(HYPRE_COMPLEX, 1)
+fi
+
 AC_ARG_ENABLE(maxdim,
 AS_HELP_STRING([--enable-maxdim=MAXDIM],
                [Change max dimension size to MAXDIM (default is 3).

@@ -45,10 +45,10 @@ typedef struct
 {
    hypre_ParaSails obj;
    HYPRE_Int       sym;
-   double          thresh;
+   HYPRE_Real      thresh;
    HYPRE_Int       nlevels;
-   double          filter;
-   double          loadbal;
+   HYPRE_Real      filter;
+   HYPRE_Real      loadbal;
    HYPRE_Int       reuse; /* reuse pattern */
    MPI_Comm        comm;
    HYPRE_Int       logging;
@@ -159,7 +159,7 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
                             HYPRE_ParVector b,
                             HYPRE_ParVector x     )
 {
-   double *rhs, *soln;
+   HYPRE_Real *rhs, *soln;
    Secret *secret = (Secret *) solver;
 
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
@@ -177,7 +177,7 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver, 
-                               double       thresh,
+                               HYPRE_Real   thresh,
                                HYPRE_Int    nlevels )
 {
    Secret *secret = (Secret *) solver;
@@ -195,7 +195,7 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver, 
-                               double       filter  )
+                               HYPRE_Real   filter  )
 {
    Secret *secret = (Secret *) solver;
 
@@ -206,7 +206,7 @@ HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver, 
-                               double     * filter  )
+                               HYPRE_Real * filter  )
 {
    Secret *secret = (Secret *) solver;
 
@@ -237,7 +237,7 @@ HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver, 
-                                double       loadbal )
+                                HYPRE_Real   loadbal )
 {
    Secret *secret = (Secret *) solver;
 
@@ -248,7 +248,7 @@ HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver, 
-                                double     * loadbal )
+                                HYPRE_Real * loadbal )
 {
    Secret *secret = (Secret *) solver;
 
@@ -396,7 +396,7 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x     )
 {
-   double *rhs, *soln;
+   HYPRE_Real *rhs, *soln;
    Secret *secret = (Secret *) solver;
 
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
@@ -414,7 +414,7 @@ HYPRE_ParaSailsSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
-                         double       thresh,
+                         HYPRE_Real   thresh,
                          HYPRE_Int    nlevels )
 {
    Secret *secret = (Secret *) solver;
@@ -433,7 +433,7 @@ HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetThresh( HYPRE_Solver solver, 
-                          double       thresh )
+                          HYPRE_Real   thresh )
 {
    Secret *secret = (Secret *) solver;
 
@@ -444,7 +444,7 @@ HYPRE_ParaSailsSetThresh( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsGetThresh( HYPRE_Solver solver, 
-                          double     * thresh )
+                          HYPRE_Real * thresh )
 {
    Secret *secret = (Secret *) solver;
 
@@ -488,7 +488,7 @@ HYPRE_ParaSailsGetNlevels( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetFilter(HYPRE_Solver solver, 
-                         double       filter  )
+                         HYPRE_Real   filter  )
 {
    Secret *secret = (Secret *) solver;
 
@@ -499,7 +499,7 @@ HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsGetFilter(HYPRE_Solver solver, 
-                         double     * filter  )
+                         HYPRE_Real * filter  )
 {
    Secret *secret = (Secret *) solver;
 
@@ -542,7 +542,7 @@ HYPRE_ParaSailsGetSym(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver, 
-                          double       loadbal )
+                          HYPRE_Real   loadbal )
 {
    Secret *secret = (Secret *) solver;
 
@@ -553,7 +553,7 @@ HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver, 
-                          double     * loadbal )
+                          HYPRE_Real * loadbal )
 {
    Secret *secret = (Secret *) solver;
 

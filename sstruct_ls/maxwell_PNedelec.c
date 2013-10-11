@@ -47,8 +47,8 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int             *iedgeEdge;
    HYPRE_Int             *jedge_Edge;
 
-   double                *vals_edgeEdge;
-   double                 fCedge_ratio;
+   HYPRE_Real            *vals_edgeEdge;
+   HYPRE_Real             fCedge_ratio;
    HYPRE_Int             *ncols_edgeEdge;
 
    hypre_Index            cindex;
@@ -1555,7 +1555,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
          j++;
       }
    }
-   vals_edgeEdge = hypre_CTAlloc(double, k);
+   vals_edgeEdge = hypre_CTAlloc(HYPRE_Real, k);
    jedge_Edge    = hypre_CTAlloc(HYPRE_Int, k);
 
    /* update nedges so that the true number of rows is set */
@@ -1938,11 +1938,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (double) n/(rfactor[1]*rfactor[0]); 
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[1]*rfactor[0]); 
                                  k++;
 
                                  jedge_Edge[k]= rank2;
-                                 vals_edgeEdge[k]= 1.0/rfactor[0]*(1.0-(double) n/rfactor[1]);
+                                 vals_edgeEdge[k]= 1.0/rfactor[0]*(1.0-(HYPRE_Real) n/rfactor[1]);
                                  k++;
                               }
                            }  /* for (n= 1; n< rfactor[1]; n++) */
@@ -2043,11 +2043,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (double) n/(rfactor[0]*rfactor[2]);
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[0]*rfactor[2]);
                                  k++;
 
                                  jedge_Edge[k]= rank2;
-                                 vals_edgeEdge[k]= 1.0/rfactor[0]*(1.0 - (double) n/rfactor[2]);
+                                 vals_edgeEdge[k]= 1.0/rfactor[0]*(1.0 - (HYPRE_Real) n/rfactor[2]);
                                  k++;
                               }
                            }  /* for (n= 1; n< rfactor[2]; n++) */
@@ -2178,11 +2178,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (double) n/(rfactor[0]*rfactor[1]);
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[0]*rfactor[1]);
                                  k++;
 
                                  jedge_Edge[k]= rank2;
-                                 vals_edgeEdge[k]= 1.0/rfactor[1]*(1.0 - (double) n/rfactor[0]);
+                                 vals_edgeEdge[k]= 1.0/rfactor[1]*(1.0 - (HYPRE_Real) n/rfactor[0]);
                                  k++;
                               }
                            }  /* for (n= 1; n< rfactor[0]; n++) */
@@ -2283,11 +2283,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (double) n/(rfactor[1]*rfactor[2]);
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[1]*rfactor[2]);
                                  k++;
 
                                  jedge_Edge[k]= rank2;
-                                 vals_edgeEdge[k]= 1.0/rfactor[1]*(1.0 - (double) n/rfactor[2]);
+                                 vals_edgeEdge[k]= 1.0/rfactor[1]*(1.0 - (HYPRE_Real) n/rfactor[2]);
                                  k++;
                               }
                            }  /* for (n= 1; n< rfactor[2]; n++) */
@@ -2415,11 +2415,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (double) n/(rfactor[0]*rfactor[2]);
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[0]*rfactor[2]);
                                  k++;
 
                                  jedge_Edge[k]= rank2;
-                                 vals_edgeEdge[k]= 1.0/rfactor[2]*(1.0-(double) n/rfactor[0]);
+                                 vals_edgeEdge[k]= 1.0/rfactor[2]*(1.0-(HYPRE_Real) n/rfactor[0]);
                                  k++;
                               }
                            }  /* for (n= 1; n< rfactor[1]; n++) */
@@ -2519,11 +2519,11 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                   (l >= lower_ranks[part][t]))
                               {
                                  jedge_Edge[k]= rank;
-                                 vals_edgeEdge[k]= (double) n/(rfactor[0]*rfactor[2]);
+                                 vals_edgeEdge[k]= (HYPRE_Real) n/(rfactor[0]*rfactor[2]);
                                  k++;
 
                                  jedge_Edge[k]= rank2;
-                                 vals_edgeEdge[k]= 1.0/rfactor[2]*(1.0-(double) n/rfactor[0]);
+                                 vals_edgeEdge[k]= 1.0/rfactor[2]*(1.0-(HYPRE_Real) n/rfactor[0]);
                                  k++;
                               }
                            }  /* for (n= 1; n< rfactor[0]; n++) */
@@ -2617,7 +2617,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                            hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                            jedge_Edge[k]= rank;
-                           vals_edgeEdge[k]= (double) p/(rfactor[0]*rfactor[1]);
+                           vals_edgeEdge[k]= (HYPRE_Real) p/(rfactor[0]*rfactor[1]);
                            k++;
 
                            hypre_SubtractIndexes(cindex, ishift, 3, var_index);
@@ -2626,7 +2626,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                            jedge_Edge[k]= rank;
-                           vals_edgeEdge[k]= (double) (rfactor[0]-p)/(rfactor[0]*rfactor[1]);
+                           vals_edgeEdge[k]= (HYPRE_Real) (rfactor[0]-p)/(rfactor[0]*rfactor[1]);
                            k++;
                         }  /* for (n= 0; n< rfactor[1]; n++) */
                      }     /* for (p= 1; p< rfactor[0]; p++) */
@@ -2693,7 +2693,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                            hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                  matrix_type);
                            jedge_Edge[k]= rank;
-                           vals_edgeEdge[k]= (double) p/(rfactor[0]*rfactor[1]);
+                           vals_edgeEdge[k]= (HYPRE_Real) p/(rfactor[0]*rfactor[1]);
                            k++;
 
                            hypre_SubtractIndexes(cindex, jshift, 3, var_index);
@@ -2702,7 +2702,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                            hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                  matrix_type);
                            jedge_Edge[k]= rank;
-                           vals_edgeEdge[k]= (double) (rfactor[1]-p)/(rfactor[0]*rfactor[1]);
+                           vals_edgeEdge[k]= (HYPRE_Real) (rfactor[1]-p)/(rfactor[0]*rfactor[1]);
                            k++;
                         }  /* for (n= 0; n< rfactor[0]; n++) */
                      }     /* for (p= 1; p< rfactor[1]; p++) */
@@ -2773,7 +2773,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) p*n/
+                              vals_edgeEdge[k]= (HYPRE_Real) p*n/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
 
                               k++;
@@ -2784,7 +2784,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) p*(rfactor[1]-n)/
+                              vals_edgeEdge[k]= (HYPRE_Real) p*(rfactor[1]-n)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2794,7 +2794,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) (rfactor[1]-n)*(rfactor[2]-p)/
+                              vals_edgeEdge[k]= (HYPRE_Real) (rfactor[1]-n)*(rfactor[2]-p)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2804,7 +2804,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) n*(rfactor[2]-p)/
+                              vals_edgeEdge[k]= (HYPRE_Real) n*(rfactor[2]-p)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
                            }  /* for (m= 0; m< rfactor[0]; m++) */
@@ -2876,7 +2876,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) p*n/
+                              vals_edgeEdge[k]= (HYPRE_Real) p*n/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2886,7 +2886,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) p*(rfactor[0]-n)/
+                              vals_edgeEdge[k]= (HYPRE_Real) p*(rfactor[0]-n)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2896,7 +2896,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) (rfactor[0]-n)*(rfactor[2]-p)/
+                              vals_edgeEdge[k]= (HYPRE_Real) (rfactor[0]-n)*(rfactor[2]-p)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2906,7 +2906,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) n*(rfactor[2]-p)/
+                              vals_edgeEdge[k]= (HYPRE_Real) n*(rfactor[2]-p)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
                            }  /* for (m= 0; m< rfactor[1]; m++) */
@@ -2979,7 +2979,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, cindex, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) n*p/
+                              vals_edgeEdge[k]= (HYPRE_Real) n*p/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2989,7 +2989,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) p*(rfactor[0]-n)/
+                              vals_edgeEdge[k]= (HYPRE_Real) p*(rfactor[0]-n)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -2999,7 +2999,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) (rfactor[1]-p)*(rfactor[0]-n)/
+                              vals_edgeEdge[k]= (HYPRE_Real) (rfactor[1]-p)*(rfactor[0]-n)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
 
@@ -3009,7 +3009,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                               hypre_SStructBoxManEntryGetGlobalRank(entry, var_index, &rank,
                                                                     matrix_type);
                               jedge_Edge[k]= rank;
-                              vals_edgeEdge[k]= (double) n*(rfactor[1]-p)/
+                              vals_edgeEdge[k]= (HYPRE_Real) n*(rfactor[1]-p)/
                                  (rfactor[0]*rfactor[1]*rfactor[2]);
                               k++;
                            }  /* for (m= 0; m< rfactor[2]; m++) */
@@ -3026,7 +3026,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
 
    HYPRE_IJMatrixSetValues(edge_Edge, size, ncols_edgeEdge,
                            (const HYPRE_Int*) iedgeEdge, (const HYPRE_Int*) jedge_Edge,
-                           (const double*) vals_edgeEdge);
+                           (const HYPRE_Real*) vals_edgeEdge);
    HYPRE_IJMatrixAssemble((HYPRE_IJMatrix) edge_Edge);
 
    hypre_TFree(ncols_edgeEdge);

@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_parcsr_mv.h"
  
 /*--------------------------------------------------------------------------
@@ -33,8 +30,8 @@ main( HYPRE_Int   argc,
    HYPRE_Int		first_index;
    HYPRE_Int 		i;
    HYPRE_Int 		*partitioning;
-   double	prod;
-   double 	*data, *data2;
+   HYPRE_Complex	prod;
+   HYPRE_Complex 	*data, *data2;
    hypre_Vector *vector; 
    hypre_Vector *local_vector; 
    hypre_Vector *local_vector2;

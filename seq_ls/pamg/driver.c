@@ -20,7 +20,7 @@
 
 
 
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, double vcx, double vcy, double vcz, HYPRE_Int mtx_entry, double *values);
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Real vcx, HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values);
 
 HYPRE_Int
 main( HYPRE_Int   argc,
@@ -45,8 +45,8 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 num_relax_steps;
    HYPRE_Int                 mode = 0;
    HYPRE_Int use_block_flag;
-   double	       norm;
-   double	       tol;
+   HYPRE_Real	       norm;
+   HYPRE_Real	       tol;
    HYPRE_Int                 i, j, k;
    HYPRE_Int                 k_dim;
    HYPRE_Int		       ierr = 0;
@@ -74,9 +74,9 @@ main( HYPRE_Int   argc,
    HYPRE_Int 		      *global_part;
 #endif
 
-      double   strong_threshold;
-      double   A_trunc_factor = 0;
-      double   P_trunc_factor = 0;
+      HYPRE_Real   strong_threshold;
+      HYPRE_Real   A_trunc_factor = 0;
+      HYPRE_Real   P_trunc_factor = 0;
       HYPRE_Int      A_max_elmts = 0;
       HYPRE_Int      P_max_elmts = 0;
       HYPRE_Int      cycle_type;
@@ -87,8 +87,8 @@ main( HYPRE_Int   argc,
       HYPRE_Int     *num_grid_sweeps;  
       HYPRE_Int     *grid_relax_type;   
       HYPRE_Int    **grid_relax_points; 
-      double  *relax_weight;
-      double   final_res_norm;
+      HYPRE_Real  *relax_weight;
+      HYPRE_Real   final_res_norm;
       HYPRE_Int     *schwarz_option;
       HYPRE_Int      schwarz_lev;
       HYPRE_Int      print_matrix = 0;
@@ -561,7 +561,7 @@ main( HYPRE_Int   argc,
       num_grid_sweeps = hypre_CTAlloc(HYPRE_Int,4);
       grid_relax_type = hypre_CTAlloc(HYPRE_Int,4);
       grid_relax_points = hypre_CTAlloc(HYPRE_Int *,4);
-      relax_weight = hypre_CTAlloc(double,max_levels);
+      relax_weight = hypre_CTAlloc(HYPRE_Real,max_levels);
       schwarz_option = hypre_CTAlloc(HYPRE_Int,max_levels);
       for (i=0; i < max_levels; i++)
       {
@@ -1042,10 +1042,10 @@ BuildLaplacian( HYPRE_Int               argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
    HYPRE_Int                 num_fun = 1;
-   double             *values;
-   double             *mtrx;
+   HYPRE_Real         *values;
+   HYPRE_Real         *mtrx;
   
 
 
@@ -1160,7 +1160,7 @@ BuildLaplacian( HYPRE_Int               argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -1202,7 +1202,7 @@ BuildLaplacian( HYPRE_Int               argc,
    else
    {
 
-      mtrx = hypre_CTAlloc(double, num_fun*num_fun);
+      mtrx = hypre_CTAlloc(HYPRE_Real, num_fun*num_fun);
       
       if (num_fun == 2)
       {
@@ -1253,9 +1253,9 @@ BuildLaplacian( HYPRE_Int               argc,
       else
       {
          
-         double *mtrx_values;
+         HYPRE_Real *mtrx_values;
 
-         mtrx_values = hypre_CTAlloc(double, num_fun*num_fun*4);
+         mtrx_values = hypre_CTAlloc(HYPRE_Real, num_fun*num_fun*4);
 
 
          if (num_fun == 2)
@@ -1415,7 +1415,7 @@ BuildLaplacian9pt( HYPRE_Int               argc,
    hypre_CSRMatrix    *A;
 
    HYPRE_Int                 num_procs, myid;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1488,7 +1488,7 @@ BuildLaplacian9pt( HYPRE_Int               argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[1] = -1.0;
 
@@ -1553,7 +1553,7 @@ BuildLaplacian27pt(HYPRE_Int               argc,
    hypre_CSRMatrix    *A;
 
    HYPRE_Int                 num_procs, myid;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1628,7 +1628,7 @@ BuildLaplacian27pt(HYPRE_Int               argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[1] = -1.0;
 
@@ -1671,9 +1671,9 @@ BuildDifConv(   HYPRE_Int               argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
-   double              ax, ay, az;
-   double              hinx,hiny,hinz;
+   HYPRE_Real          cx, cy, cz;
+   HYPRE_Real          ax, ay, az;
+   HYPRE_Real          hinx,hiny,hinz;
 
 #if 0
    hypre_ParCSRMatrix *A;
@@ -1683,7 +1683,7 @@ BuildDifConv(   HYPRE_Int               argc,
    hypre_CSRMatrix    *A;
 
    HYPRE_Int                 num_procs, myid;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1798,7 +1798,7 @@ BuildDifConv(   HYPRE_Int               argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 7);
+   values = hypre_CTAlloc(HYPRE_Real, 7);
 
    values[1] = -cx/(hinx*hinx);
    values[2] = -cy/(hiny*hiny);
@@ -1953,8 +1953,8 @@ BuildFuncsFromFile( HYPRE_Int                  argc,
 /**************************************************************************/
 
 
-HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, double vcx, 
-                      double vcy, double vcz, HYPRE_Int mtx_entry, double *values)
+HYPRE_Int SetSysVcoefValues(HYPRE_Int num_fun, HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Real vcx, 
+                      HYPRE_Real vcy, HYPRE_Real vcz, HYPRE_Int mtx_entry, HYPRE_Real *values)
 {
 
 

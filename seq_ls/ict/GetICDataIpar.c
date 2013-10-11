@@ -44,7 +44,7 @@ HYPRE_Int *GetICDataIpar( void * data )
  * GetICDataRpar
  *--------------------------------------------------------------------------*/
 
-double *GetICDataRpar( void * data )
+HYPRE_Real *GetICDataRpar( void * data )
      /* Returns a pointer to the beginning of the vector of doubles that holds
         floating point parameters (some optional) to the incomplete factorization
         and solve codes.

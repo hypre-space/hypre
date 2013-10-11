@@ -28,7 +28,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
                       HYPRE_Int      Q,
                       HYPRE_Int      p,
                       HYPRE_Int      q,
-                      double  *value )
+                      HYPRE_Real  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -36,11 +36,11 @@ GenerateLaplacian9pt( MPI_Comm comm,
 
    HYPRE_Int    *diag_i;
    HYPRE_Int    *diag_j;
-   double *diag_data;
+   HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j;
-   double *offd_data;
+   HYPRE_Real *offd_data;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy;
@@ -237,12 +237,12 @@ GenerateLaplacian9pt( MPI_Comm comm,
    }
 
    diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
       offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
    }
 
    row_index = 0;

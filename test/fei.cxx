@@ -35,11 +35,11 @@
  * local functions
  *---------------------------------------------------------------------*/
 HYPRE_Int setupFEProblem(LLNL_FEI_Impl *feiPtr);
-HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, double *rhs);
+HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, HYPRE_Real *rhs);
 HYPRE_Int readFEMatrix(HYPRE_Int *nElemsOut, HYPRE_Int *elemNNodesOut, HYPRE_Int ***elemConnOut,
-           double ****elemStiffOut, HYPRE_Int *startRowOut, HYPRE_Int *endRowOut);
-HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, double ***alphaOut, 
-           double ***betaOut, double ***gammaOut);
+           HYPRE_Real ****elemStiffOut, HYPRE_Int *startRowOut, HYPRE_Int *endRowOut);
+HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, HYPRE_Real ***alphaOut, 
+           HYPRE_Real ***betaOut, HYPRE_Real ***gammaOut);
 HYPRE_Int composeSharedNodes(HYPRE_Int nElems, HYPRE_Int elemNNodes, HYPRE_Int **elemConn,
            HYPRE_Int *partition, HYPRE_Int *nSharedOut, HYPRE_Int **sharedIDsOut, 
            HYPRE_Int **sharedLengsOut, HYPRE_Int ***sharedProcsOut);
@@ -184,7 +184,7 @@ HYPRE_Int setupFEProblem(LLNL_FEI_Impl *feiPtr)
    HYPRE_Int    *fieldIDs, elemBlkID, elemDOF, elemFormat, interleave;
    HYPRE_Int    *nodeNFields, **nodeFieldIDs, nShared, *sharedIDs, *sharedLengs;
    HYPRE_Int    **sharedProcs;
-   double ***elemStiff, **alpha, **beta, **gamma, *elemLoad;
+   HYPRE_Real ***elemStiff, **alpha, **beta, **gamma, *elemLoad;
 
    /*-----------------------------------------------------------
     * Initialize parallel machine information
@@ -198,7 +198,7 @@ HYPRE_Int setupFEProblem(LLNL_FEI_Impl *feiPtr)
     *-----------------------------------------------------------*/
 
    readFEMatrix(&nElems,&elemNNodes,&elemConn,&elemStiff,&startRow,&endRow);
-   elemLoad = new double[nElems * elemNNodes];
+   elemLoad = new HYPRE_Real[nElems * elemNNodes];
    readFERhs(nElems, elemNNodes, elemLoad);
 
    /*-----------------------------------------------------------
@@ -308,10 +308,10 @@ HYPRE_Int setupFEProblem(LLNL_FEI_Impl *feiPtr)
  * read finite element matrices
  *--------------------------------------------------------------------------*/
 HYPRE_Int readFEMatrix(HYPRE_Int *nElemsOut, HYPRE_Int *elemNNodesOut, HYPRE_Int ***elemConnOut,
-                 double ****elemStiffOut, HYPRE_Int *startRowOut, HYPRE_Int *endRowOut)
+                 HYPRE_Real ****elemStiffOut, HYPRE_Int *startRowOut, HYPRE_Int *endRowOut)
 {
    HYPRE_Int    mypid, nElems, elemNNodes, startRow, endRow, **elemConn, i, j, k;
-   double ***elemStiff;
+   HYPRE_Real ***elemStiff;
    char   *paramString;
    FILE   *fp;
 
@@ -326,15 +326,15 @@ HYPRE_Int readFEMatrix(HYPRE_Int *nElemsOut, HYPRE_Int *elemNNodesOut, HYPRE_Int
    }
    hypre_fscanf(fp,"%d %d %d %d", &nElems, &elemNNodes, &startRow, &endRow);
    elemConn = new HYPRE_Int*[nElems];
-   elemStiff = new double**[nElems];
+   elemStiff = new HYPRE_Real**[nElems];
    for (i = 0; i < nElems; i++) 
    {
       elemConn[i] = new HYPRE_Int[elemNNodes];
-      elemStiff[i] = new double*[elemNNodes];
+      elemStiff[i] = new HYPRE_Real*[elemNNodes];
       for (j = 0; j < elemNNodes; j++) hypre_fscanf(fp,"%d", &(elemConn[i][j]));
       for (j = 0; j < elemNNodes; j++) 
       {
-         elemStiff[i][j] = new double[elemNNodes];
+         elemStiff[i][j] = new HYPRE_Real[elemNNodes];
          for (k = 0; k < elemNNodes; k++) 
             hypre_fscanf(fp,"%lg", &(elemStiff[i][j][k]));
       }
@@ -353,7 +353,7 @@ HYPRE_Int readFEMatrix(HYPRE_Int *nElemsOut, HYPRE_Int *elemNNodesOut, HYPRE_Int
 /***************************************************************************
  * read finite element right hand sides
  *--------------------------------------------------------------------------*/
-HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, double *elemLoad)
+HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, HYPRE_Real *elemLoad)
 {
    HYPRE_Int    mypid, length, i;
    char   *paramString;
@@ -378,11 +378,11 @@ HYPRE_Int readFERhs(HYPRE_Int nElems, HYPRE_Int elemNNodes, double *elemLoad)
 /***************************************************************************
  * read BC from file
  *--------------------------------------------------------------------------*/
-HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, double ***alphaOut, 
-              double ***betaOut, double ***gammaOut)
+HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, HYPRE_Real ***alphaOut, 
+              HYPRE_Real ***betaOut, HYPRE_Real ***gammaOut)
 {
    HYPRE_Int    mypid, nBCs=0, *BCEqn, i;
-   double **alpha, **beta, **gamma;
+   HYPRE_Real **alpha, **beta, **gamma;
    char   *paramString;
    FILE   *fp;
 
@@ -397,14 +397,14 @@ HYPRE_Int readFEMBC(HYPRE_Int *nBCsOut, HYPRE_Int **BCEqnOut, double ***alphaOut
    }
    hypre_fscanf(fp,"%d", &nBCs);
    BCEqn = new HYPRE_Int[nBCs];
-   alpha = new double*[nBCs];
-   beta  = new double*[nBCs];
-   gamma = new double*[nBCs];
+   alpha = new HYPRE_Real*[nBCs];
+   beta  = new HYPRE_Real*[nBCs];
+   gamma = new HYPRE_Real*[nBCs];
    for (i = 0; i < nBCs; i++) 
    {
-      alpha[i] = new double[1];
-      beta[i]  = new double[1];
-      gamma[i] = new double[1];
+      alpha[i] = new HYPRE_Real[1];
+      beta[i]  = new HYPRE_Real[1];
+      gamma[i] = new HYPRE_Real[1];
    }
    for (i = 0; i < nBCs; i++) 
       hypre_fscanf(fp,"%d %lg %lg %lg",&(BCEqn[i]),&(alpha[i][0]),

@@ -14,7 +14,7 @@ doublereal dlamch_(char *cmach)
     Purpose   
     =======   
 
-    DLAMCH determines double precision machine parameters.   
+    DLAMCH determines HYPRE_Real precision machine parameters.   
 
     Arguments   
     =========   
@@ -54,7 +54,7 @@ doublereal dlamch_(char *cmach)
     integer i__1;
     doublereal ret_val;
     /* Builtin functions */
-    double pow_di(doublereal *, integer *);
+    HYPRE_Real pow_di(doublereal *, integer *);
     /* Local variables */
     static doublereal base;
     static integer beta;
@@ -420,7 +420,7 @@ L30:
     integer i__1;
     doublereal d__1, d__2, d__3, d__4, d__5;
     /* Builtin functions */
-    double pow_di(doublereal *, integer *);
+    HYPRE_Real pow_di(doublereal *, integer *);
     /* Local variables */
     static logical ieee;
     static doublereal half;

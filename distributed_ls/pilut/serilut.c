@@ -47,16 +47,16 @@
 **************************************************************************/
 HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
              FactorMatType *ldu,
-	     ReduceMatType *rmat, HYPRE_Int maxnz, double tol, 
+	     ReduceMatType *rmat, HYPRE_Int maxnz, HYPRE_Real tol, 
              hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
   HYPRE_Int *perm, *iperm, 
           *usrowptr, *uerowptr, *ucolind;
   HYPRE_Int row_size, *col_ind;
-  double *values, *uvalues, *dvalues, *nrm2s;
+  HYPRE_Real *values, *uvalues, *dvalues, *nrm2s;
   HYPRE_Int nlocal, nbnd;
-  double mult, rtol;
+  HYPRE_Real mult, rtol;
   HYPRE_Int *structural_union;
 
 
@@ -245,7 +245,7 @@ HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
     rmat->rmat_rnz     = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rnz"    );
   rmat->rmat_rrowlen   = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rrowlen");
     rmat->rmat_rcolind = (HYPRE_Int **)hypre_mymalloc(sizeof(HYPRE_Int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
-    rmat->rmat_rvalues =  (double **)hypre_mymalloc(sizeof(double *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
+    rmat->rmat_rvalues =  (HYPRE_Real **)hypre_mymalloc(sizeof(HYPRE_Real *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
   rmat->rmat_ndone = nlocal;
   rmat->rmat_ntogo = nbnd;
 
@@ -360,7 +360,7 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
   HYPRE_Int nbnd, nlocal, i, j, ierr;
   HYPRE_Int break_loop; /* marks finding an element making this row exterior. -AC */
   HYPRE_Int row_size, *col_ind;
-  double *values;
+  HYPRE_Real *values;
 
   /* Determine which vertices are in the boundary,
    * permuting interior rows first then boundary nodes. */
@@ -485,14 +485,14 @@ HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist,
 * This function applies the second droping rule where maxnz elements 
 * greater than tol are kept. The elements are stored into LDU.
 **************************************************************************/
-void hypre_SecondDrop(HYPRE_Int maxnz, double tol, HYPRE_Int row,
+void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 		HYPRE_Int *perm, HYPRE_Int *iperm,
 		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, j, ierr;
   HYPRE_Int diag, lrow;
   HYPRE_Int first, last, itmp;
-  double dtmp;
+  HYPRE_Real dtmp;
 
   /* Reset the jr array, it is not needed any more */
   for (i=0; i<lastjr; i++) 
@@ -639,7 +639,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, double tol, HYPRE_Int row,
 * greater than tol are kept. The elements are stored into L and the Rmat.
 * This version keeps only maxnzkeep 
 **************************************************************************/
-void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, double tol, HYPRE_Int row,
+void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol, HYPRE_Int row,
 		      HYPRE_Int nlocal, HYPRE_Int *perm, HYPRE_Int *iperm, 
 		      FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
@@ -647,7 +647,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, double tol, HY
   HYPRE_Int i, j, nl;
   HYPRE_Int max, nz, lrow, rrow;
   HYPRE_Int last, first, itmp;
-  double dtmp;
+  HYPRE_Real dtmp;
   HYPRE_Int ierr=0;
 
 

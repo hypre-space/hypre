@@ -111,8 +111,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                      
    hypre_Box            *PT_data_box;
    hypre_Box            *x_data_box;
-   double               *PTp;
-   double               *xp;
+   HYPRE_Real           *PTp;
+   HYPRE_Real           *xp;
    HYPRE_Int             PTi;
    HYPRE_Int             xi;
 

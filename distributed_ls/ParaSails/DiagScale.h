@@ -30,13 +30,13 @@
 typedef struct
 {
     HYPRE_Int     offset;      /* number of on-processor entries */
-    double *local_diags; /* on-processor entries */
-    double *ext_diags;   /* off-processor entries */
+    HYPRE_Real *local_diags; /* on-processor entries */
+    HYPRE_Real *ext_diags;   /* off-processor entries */
 }
 DiagScale;
 
 DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb);
 void DiagScaleDestroy(DiagScale *p);
-double DiagScaleGet(DiagScale *p, HYPRE_Int index);
+HYPRE_Real DiagScaleGet(DiagScale *p, HYPRE_Int index);
 
 #endif /* _DIAGSCALE_H */

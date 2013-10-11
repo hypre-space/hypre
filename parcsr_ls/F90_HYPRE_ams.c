@@ -214,13 +214,13 @@ hypre_F90_IFACE(hypre_amssetmaxiter, HYPRE_AMSSETMAXITER)
 void
 hypre_F90_IFACE(hypre_amssettol, HYPRE_AMSSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_AMSSetTol(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassDbl (tol) ) );
+           hypre_F90_PassReal (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -264,8 +264,8 @@ hypre_F90_IFACE(hypre_amssetsmoothingoptions, HYPRE_AMSSETSMOOTHINGOPTIONS)
    ( hypre_F90_Obj *solver,
      hypre_F90_Int *relax_type,
      hypre_F90_Int *relax_times,
-     hypre_F90_Dbl *relax_weight,
-     hypre_F90_Dbl *omega,
+     hypre_F90_Real *relax_weight,
+     hypre_F90_Real *omega,
      hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -273,8 +273,8 @@ hypre_F90_IFACE(hypre_amssetsmoothingoptions, HYPRE_AMSSETSMOOTHINGOPTIONS)
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassInt (relax_type),
            hypre_F90_PassInt (relax_times),
-           hypre_F90_PassDbl (relax_weight),
-           hypre_F90_PassDbl (omega) ) );
+           hypre_F90_PassReal (relax_weight),
+           hypre_F90_PassReal (omega) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -287,7 +287,7 @@ hypre_F90_IFACE(hypre_amssetalphaamgoptions, HYPRE_AMSSETALPHAAMGOPTIONS)
      hypre_F90_Int *alpha_coarsen_type,
      hypre_F90_Int *alpha_agg_levels,
      hypre_F90_Int *alpha_relax_type,
-     hypre_F90_Dbl *alpha_strength_threshold,
+     hypre_F90_Real *alpha_strength_threshold,
      hypre_F90_Int *alpha_interp_type,
      hypre_F90_Int *alpha_Pmax,
      hypre_F90_Int *ierr)
@@ -299,7 +299,7 @@ hypre_F90_IFACE(hypre_amssetalphaamgoptions, HYPRE_AMSSETALPHAAMGOPTIONS)
            hypre_F90_PassInt (alpha_coarsen_type),
            hypre_F90_PassInt (alpha_agg_levels),
            hypre_F90_PassInt (alpha_relax_type),
-           hypre_F90_PassDbl (alpha_strength_threshold),
+           hypre_F90_PassReal (alpha_strength_threshold),
            hypre_F90_PassInt (alpha_interp_type),
            hypre_F90_PassInt (alpha_Pmax) ) );
 }
@@ -314,7 +314,7 @@ hypre_F90_IFACE(hypre_amssetbetaamgoptions, HYPRE_AMSSETBETAAMGOPTIONS)
      hypre_F90_Int *beta_coarsen_type,
      hypre_F90_Int *beta_agg_levels,
      hypre_F90_Int *beta_relax_type,
-     hypre_F90_Dbl *beta_strength_threshold,
+     hypre_F90_Real *beta_strength_threshold,
      hypre_F90_Int *beta_interp_type,
      hypre_F90_Int *beta_Pmax,
      hypre_F90_Int *ierr)
@@ -326,7 +326,7 @@ hypre_F90_IFACE(hypre_amssetbetaamgoptions, HYPRE_AMSSETBETAAMGOPTIONS)
            hypre_F90_PassInt (beta_coarsen_type),
            hypre_F90_PassInt (beta_agg_levels),
            hypre_F90_PassInt (beta_relax_type),
-           hypre_F90_PassDbl (beta_strength_threshold),
+           hypre_F90_PassReal (beta_strength_threshold),
            hypre_F90_PassInt (beta_interp_type),
            hypre_F90_PassInt (beta_Pmax) ) );
 }
@@ -354,13 +354,13 @@ hypre_F90_IFACE(hypre_amsgetnumiterations, HYPRE_AMSGETNUMITERATIONS)
 void
 hypre_F90_IFACE(hypre_amsgetfinalrelativeresidualnorm, HYPRE_AMSGETFINALRELATIVERESIDUALNORM)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *rel_resid_norm,
+     hypre_F90_Real *rel_resid_norm,
      hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_AMSGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassDblRef (rel_resid_norm) ) );
+           hypre_F90_PassRealRef (rel_resid_norm) ) );
 }
 
 /*--------------------------------------------------------------------------

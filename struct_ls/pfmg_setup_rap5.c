@@ -188,14 +188,14 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    hypre_BoxArray       *bdy_boxes, *tmp_boxes;
    hypre_Box            *bdy_box, *fcbox;
 
-   double               *pb, *pa;
+   HYPRE_Real           *pb, *pa;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cb, *a_ca;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cb, *a_ca;
 
-   double               *rap_cc, *rap_cw, *rap_ce;
-   double               *rap_cb, *rap_ca;
-   double                west, east;
-   double                center_int, center_bdy;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_ce;
+   HYPRE_Real           *rap_cb, *rap_ca;
+   HYPRE_Real            west, east;
+   HYPRE_Real            center_int, center_bdy;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;

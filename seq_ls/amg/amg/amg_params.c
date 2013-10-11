@@ -46,7 +46,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetECG(ecg, data)
-double    ecg;
+HYPRE_Real    ecg;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;
@@ -64,7 +64,7 @@ void     *data;
 }
 
 void      HYPRE_AMGSetEWT(ewt, data)
-double    ewt;
+HYPRE_Real    ewt;
 void     *data;
 {
    hypre_AMGData  *amg_data = data;

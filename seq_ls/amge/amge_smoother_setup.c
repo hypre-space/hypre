@@ -29,11 +29,11 @@ HYPRE_Int hypre_AMGeSmootherSetup(HYPRE_Int ***i_ILUdof_to_dof_pointer,
 
 			    HYPRE_Int ***i_ILUdof_ILUdof_pointer,
 			    HYPRE_Int ***j_ILUdof_ILUdof_pointer,
-			    double ***LD_data_pointer,
+			    HYPRE_Real ***LD_data_pointer,
 			     
 			    HYPRE_Int ***i_ILUdof_ILUdof_t_pointer,
 			    HYPRE_Int ***j_ILUdof_ILUdof_t_pointer,
-			    double ***U_data_pointer,
+			    HYPRE_Real ***U_data_pointer,
 
 
 			    hypre_CSRMatrix **Matrix,
@@ -55,20 +55,20 @@ HYPRE_Int hypre_AMGeSmootherSetup(HYPRE_Int ***i_ILUdof_to_dof_pointer,
   HYPRE_Int level = level_pointer[0];
   HYPRE_Int **i_ILUdof_to_dof;
   HYPRE_Int **i_ILUdof_ILUdof, **j_ILUdof_ILUdof;
-  double **LD_data;
+  HYPRE_Real **LD_data;
 			     
   HYPRE_Int **i_ILUdof_ILUdof_t, **j_ILUdof_ILUdof_t;
-  double **U_data;
+  HYPRE_Real **U_data;
 
   i_ILUdof_to_dof = hypre_CTAlloc(HYPRE_Int*, level);
 
   i_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int*, level);
   j_ILUdof_ILUdof = hypre_CTAlloc(HYPRE_Int*, level);
-  LD_data = hypre_CTAlloc(double*, level);
+  LD_data = hypre_CTAlloc(HYPRE_Real*, level);
 
   i_ILUdof_ILUdof_t = hypre_CTAlloc(HYPRE_Int*, level);
   j_ILUdof_ILUdof_t = hypre_CTAlloc(HYPRE_Int*, level);
-  U_data = hypre_CTAlloc(double*, level);
+  U_data = hypre_CTAlloc(HYPRE_Real*, level);
 
 
   l=0;

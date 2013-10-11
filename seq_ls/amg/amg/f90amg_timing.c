@@ -54,8 +54,8 @@ hypre_longint *cpu_ticks;
  *--------------------------------------------------------------------------*/
 
 void  hypre_NAME_C_FOR_FORTRAN(amg_printtiming)(time_ticks, cpu_ticks)
-double *time_ticks;
-double *cpu_ticks;
+HYPRE_Real *time_ticks;
+HYPRE_Real *cpu_ticks;
 {
  
    HYPRE_AMGPrintTiming(*time_ticks, *cpu_ticks);

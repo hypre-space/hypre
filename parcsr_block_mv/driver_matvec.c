@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "../utilities/_hypre_utilities.h"
 #include "../seq_mv/seq_mv.h"
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
@@ -40,14 +37,14 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    HYPRE_Solver        gmres_solver, precon;
    HYPRE_Int                 *diag_i, *diag_j, *offd_i, *offd_j;
    HYPRE_Int                 *diag_i2, *diag_j2, *offd_i2, *offd_j2;
-   double              *diag_d, *diag_d2, *offd_d, *offd_d2;
-   HYPRE_Int		       mypid, local_size, nprocs;
-   HYPRE_Int		       global_num_rows, global_num_cols, num_cols_offd;
-   HYPRE_Int		       num_nonzeros_diag, num_nonzeros_offd, *colMap;
-   HYPRE_Int 		       ii, jj, kk, row, col, nnz, *indices, *colMap2;
-   double 	       *data, ddata, *y_data;
-   HYPRE_Int 		       *row_starts, *col_starts, *rstarts, *cstarts;
-   HYPRE_Int 		       *row_starts2, *col_starts2;
+   HYPRE_Complex       *diag_d, *diag_d2, *offd_d, *offd_d2;
+   HYPRE_Int                   mypid, local_size, nprocs;
+   HYPRE_Int                   global_num_rows, global_num_cols, num_cols_offd;
+   HYPRE_Int                   num_nonzeros_diag, num_nonzeros_offd, *colMap;
+   HYPRE_Int                   ii, jj, kk, row, col, nnz, *indices, *colMap2;
+   HYPRE_Complex               *data, ddata, *y_data;
+   HYPRE_Int                   *row_starts, *col_starts, *rstarts, *cstarts;
+   HYPRE_Int                   *row_starts2, *col_starts2;
    HYPRE_Int                 block_size=2, bnnz=4, *index_set;
    FILE                *fp;
 
@@ -115,7 +112,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    diag = hypre_ParCSRBlockMatrixDiag(par_blk_matrix);
    diag_i2 = hypre_CTAlloc(HYPRE_Int, local_size+1);
    diag_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);
-   diag_d2 = hypre_CTAlloc(double, num_nonzeros_diag*bnnz);
+   diag_d2 = hypre_CTAlloc(HYPRE_Complex, num_nonzeros_diag*bnnz);
    for (ii = 0; ii <= local_size; ii++) diag_i2[ii] = diag_i[ii];
    for (ii = 0; ii < num_nonzeros_diag; ii++) diag_j2[ii] = diag_j[ii];
    hypre_CSRBlockMatrixI(diag) = diag_i2;
@@ -145,7 +142,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       offd_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
       for (ii = 0; ii < num_nonzeros_offd; ii++) offd_j2[ii] = offd_j[ii];
       hypre_CSRBlockMatrixJ(offd) = offd_j2;
-      offd_d2 = hypre_CTAlloc(double, num_nonzeros_offd*bnnz);
+      offd_d2 = hypre_CTAlloc(HYPRE_Complex, num_nonzeros_offd*bnnz);
       for (ii = 0; ii < num_nonzeros_offd; ii++)
       {
          for (jj = 0; jj < block_size; jj++)
@@ -188,7 +185,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    diag = hypre_ParCSRBlockMatrixDiag(par_blk_matrixT);
    diag_i2 = hypre_CTAlloc(HYPRE_Int, local_size+1);
    diag_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);
-   diag_d2 = hypre_CTAlloc(double, num_nonzeros_diag*bnnz);
+   diag_d2 = hypre_CTAlloc(HYPRE_Complex, num_nonzeros_diag*bnnz);
    for (ii = 0; ii <= local_size; ii++) diag_i2[ii] = diag_i[ii];
    for (ii = 0; ii < num_nonzeros_diag; ii++) diag_j2[ii] = diag_j[ii];
    hypre_CSRBlockMatrixI(diag) = diag_i2;
@@ -218,7 +215,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       offd_j2 = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
       for (ii = 0; ii < num_nonzeros_offd; ii++) offd_j2[ii] = offd_j[ii];
       hypre_CSRBlockMatrixJ(offd) = offd_j2;
-      offd_d2 = hypre_CTAlloc(double, num_nonzeros_offd*bnnz);
+      offd_d2 = hypre_CTAlloc(HYPRE_Complex, num_nonzeros_offd*bnnz);
       for (ii = 0; ii < num_nonzeros_offd; ii++)
       {
          for (jj = 0; jj < block_size; jj++)
@@ -344,7 +341,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       hypre_fscanf(fp, "%d %d", &global_num_rows, &num_nonzeros_diag);
       diag_i = (HYPRE_Int *) malloc((global_num_rows+1) * sizeof(HYPRE_Int));
       diag_j = (HYPRE_Int *) malloc(num_nonzeros_diag * sizeof(HYPRE_Int));
-      diag_d = (double *) malloc(num_nonzeros_diag * sizeof(double));
+      diag_d = (HYPRE_Complex *) malloc(num_nonzeros_diag * sizeof(HYPRE_Complex));
       row = 0;
       nnz = 0;
       diag_i[0] = 0;
@@ -386,7 +383,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
              &num_nonzeros_diag);
       diag_i = (HYPRE_Int *) malloc((global_num_rows+1) * sizeof(HYPRE_Int));
       diag_j = (HYPRE_Int *) malloc(num_nonzeros_diag * sizeof(HYPRE_Int));
-      diag_d = (double *) malloc(num_nonzeros_diag * sizeof(double));
+      diag_d = (HYPRE_Complex *) malloc(num_nonzeros_diag * sizeof(HYPRE_Complex));
       row = 0;
       nnz = 0;
       diag_i[0] = 0;
@@ -499,7 +496,7 @@ HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
    HYPRE_ParCSRMatrix  A;
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q;
-   double             *values;
+   HYPRE_Complex      *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -540,7 +537,7 @@ HYPRE_Int MyBuildParLaplacian9pt(HYPRE_ParCSRMatrix  *A_ptr)
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Complex, 2);
    values[1] = -1.;
    values[0] = 0.;
    if (nx > 1) values[0] += 2.0;

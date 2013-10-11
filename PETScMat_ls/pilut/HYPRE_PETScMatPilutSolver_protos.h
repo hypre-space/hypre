@@ -22,7 +22,7 @@ HYPRE_Int HYPRE_PETScMatPilutSolverInitialize P((HYPRE_PETScMatPilutSolver in_pt
 HYPRE_Int HYPRE_PETScMatPilutSolverSetMatrix P((HYPRE_PETScMatPilutSolver in_ptr , Mat matrix ));
 Mat HYPRE_PETScMatPilutSolverGetMatrix P((HYPRE_PETScMatPilutSolver in_ptr ));
 HYPRE_Int HYPRE_PETScMatPilutSolverSetFactorRowSize P((HYPRE_PETScMatPilutSolver in_ptr , HYPRE_Int size ));
-HYPRE_Int HYPRE_PETScMatPilutSolverSetDropTolerance P((HYPRE_PETScMatPilutSolver in_ptr , double tol ));
+HYPRE_Int HYPRE_PETScMatPilutSolverSetDropTolerance P((HYPRE_PETScMatPilutSolver in_ptr , HYPRE_Real tol ));
 HYPRE_Int HYPRE_PETScMatPilutSolverSetMaxIts P((HYPRE_PETScMatPilutSolver in_ptr , HYPRE_Int its ));
 HYPRE_Int HYPRE_PETScMatPilutSolverSetup P((HYPRE_PETScMatPilutSolver in_ptr , Vec x , Vec b ));
 HYPRE_Int HYPRE_PETScMatPilutSolverApply P((HYPRE_PETScMatPilutSolver in_ptr , Vec b , Vec x ));

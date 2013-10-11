@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Matvec functions for hypre_CSRBlockMatrix class.
@@ -28,24 +25,24 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
-                           hypre_Vector *x, double beta, hypre_Vector *y)
+hypre_CSRBlockMatrixMatvec(HYPRE_Complex alpha, hypre_CSRBlockMatrix *A,
+                           hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *y)
 {
-   double     *A_data   = hypre_CSRBlockMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRBlockMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRBlockMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRBlockMatrixJ(A);
    HYPRE_Int         num_rows = hypre_CSRBlockMatrixNumRows(A);
    HYPRE_Int         num_cols = hypre_CSRBlockMatrixNumCols(A);
    HYPRE_Int         blk_size = hypre_CSRBlockMatrixBlockSize(A);
 
-   double     *x_data = hypre_VectorData(x);
-   double     *y_data = hypre_VectorData(y);
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *y_data = hypre_VectorData(y);
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         y_size = hypre_VectorSize(y);
 
    HYPRE_Int         i, b1, b2, jj, bnnz=blk_size*blk_size;
    HYPRE_Int         ierr = 0;
-   double      temp;
+   HYPRE_Complex     temp;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -58,9 +55,9 @@ hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-    if (num_cols*blk_size != x_size) ierr = 1;
-    if (num_rows*blk_size != y_size) ierr = 2;
-    if (num_cols*blk_size != x_size && num_rows*blk_size != y_size) ierr = 3;
+   if (num_cols*blk_size != x_size) ierr = 1;
+   if (num_rows*blk_size != y_size) ierr = 2;
+   if (num_cols*blk_size != x_size && num_rows*blk_size != y_size) ierr = 3;
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
@@ -89,15 +86,15 @@ hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_rows*blk_size; i++)
-	    y_data[i] = 0.0;
+         for (i = 0; i < num_rows*blk_size; i++)
+            y_data[i] = 0.0;
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_rows*blk_size; i++)
+         for (i = 0; i < num_rows*blk_size; i++)
             y_data[i] *= temp;
       }
    }
@@ -134,7 +131,7 @@ hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows*blk_size; i++)
-	 y_data[i] *= alpha;
+         y_data[i] *= alpha;
    }
 
    return ierr;
@@ -150,24 +147,24 @@ hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRBlockMatrixMatvecT( double               alpha,
+hypre_CSRBlockMatrixMatvecT( HYPRE_Complex         alpha,
                              hypre_CSRBlockMatrix *A,
                              hypre_Vector         *x,
-                             double                beta,
+                             HYPRE_Complex         beta,
                              hypre_Vector          *y     )
 {
-   double     *A_data    = hypre_CSRBlockMatrixData(A);
+   HYPRE_Complex    *A_data    = hypre_CSRBlockMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRBlockMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRBlockMatrixJ(A);
    HYPRE_Int         num_rows  = hypre_CSRBlockMatrixNumRows(A);
    HYPRE_Int         num_cols  = hypre_CSRBlockMatrixNumCols(A);
 
-   double     *x_data = hypre_VectorData(x);
-   double     *y_data = hypre_VectorData(y);
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *y_data = hypre_VectorData(y);
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         y_size = hypre_VectorSize(y);
 
-   double      temp;
+   HYPRE_Complex     temp;
    
    HYPRE_Int         i, j, jj;
    HYPRE_Int         ierr  = 0;
@@ -187,14 +184,14 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-    if (num_rows*blk_size != x_size)
-              ierr = 1;
+   if (num_rows*blk_size != x_size)
+      ierr = 1;
 
-    if (num_cols*blk_size != y_size)
-              ierr = 2;
+   if (num_cols*blk_size != y_size)
+      ierr = 2;
 
-    if (num_rows*blk_size != x_size && num_cols*blk_size != y_size)
-              ierr = 3;
+   if (num_rows*blk_size != x_size && num_cols*blk_size != y_size)
+      ierr = 3;
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
@@ -205,7 +202,7 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*blk_size; i++)
-	 y_data[i] *= beta;
+         y_data[i] *= beta;
 
       return ierr;
    }
@@ -223,16 +220,16 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_cols*blk_size; i++)
-	    y_data[i] = 0.0;
+         for (i = 0; i < num_cols*blk_size; i++)
+            y_data[i] = 0.0;
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_cols*blk_size; i++)
-	    y_data[i] *= temp;
+         for (i = 0; i < num_cols*blk_size; i++)
+            y_data[i] *= temp;
       }
    }
 
@@ -253,7 +250,8 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
             for (b2 = 0; b2 < blk_size; b2++) /*col*/
             {
                j = A_j[jj]; /*col */
-               y_data[j*blk_size+b2] += A_data[jj*bnnz+b1*blk_size+b2] * x_data[i*blk_size + b1];
+               y_data[j*blk_size+b2] +=
+                  A_data[jj*bnnz+b1*blk_size+b2] * x_data[i*blk_size + b1];
             }
          }
       }
@@ -269,7 +267,7 @@ hypre_CSRBlockMatrixMatvecT( double               alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*blk_size; i++)
-	 y_data[i] *= alpha;
+         y_data[i] *= alpha;
    }
 
    return ierr;

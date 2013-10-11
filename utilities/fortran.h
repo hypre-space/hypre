@@ -117,22 +117,27 @@
  * and hence usually the size of hypre_int.
  *-------------------------------------------------------*/
 
-typedef hypre_int  hypre_F90_Comm;
-typedef HYPRE_Int  hypre_F90_Int;
-typedef HYPRE_Int  hypre_F90_IntArray;
-typedef double     hypre_F90_Dbl;
-typedef double     hypre_F90_DblArray;
-typedef HYPRE_Int *hypre_F90_Obj;
-typedef HYPRE_Int *hypre_F90_ObjRef;
+typedef hypre_int      hypre_F90_Comm;
+typedef HYPRE_Int      hypre_F90_Int;
+typedef HYPRE_Int      hypre_F90_IntArray;
+typedef HYPRE_Real     hypre_F90_Real;
+typedef HYPRE_Real     hypre_F90_RealArray;
+typedef HYPRE_Complex  hypre_F90_Complex;
+typedef HYPRE_Complex  hypre_F90_ComplexArray;
+typedef HYPRE_Int     *hypre_F90_Obj;
+typedef HYPRE_Int     *hypre_F90_ObjRef;
 
-#define hypre_F90_PassComm(arg)       (hypre_MPI_Comm_f2c(*arg))
-#define hypre_F90_PassInt(arg)        ((HYPRE_Int) *arg)
-#define hypre_F90_PassIntRef(arg)     ((HYPRE_Int *) arg)
-#define hypre_F90_PassIntArray(arg)   ((HYPRE_Int *) arg)
-#define hypre_F90_PassDbl(arg)        ((double) *arg)
-#define hypre_F90_PassDblRef(arg)     ((double *) arg)
-#define hypre_F90_PassDblArray(arg)   ((double *) arg)
-#define hypre_F90_PassObj(obj,arg)    ((obj) *arg)
-#define hypre_F90_PassObjRef(obj,arg) ((obj *) arg)
+#define hypre_F90_PassComm(arg)          (hypre_MPI_Comm_f2c(*arg))
+#define hypre_F90_PassInt(arg)           ((HYPRE_Int) *arg)
+#define hypre_F90_PassIntRef(arg)        ((HYPRE_Int *) arg)
+#define hypre_F90_PassIntArray(arg)      ((HYPRE_Int *) arg)
+#define hypre_F90_PassReal(arg)          ((HYPRE_Real) *arg)
+#define hypre_F90_PassRealRef(arg)       ((HYPRE_Real *) arg)
+#define hypre_F90_PassRealArray(arg)     ((HYPRE_Real *) arg)
+#define hypre_F90_PassComplex(arg)       ((HYPRE_Complex) *arg)
+#define hypre_F90_PassComplexRef(arg)    ((HYPRE_Complex *) arg)
+#define hypre_F90_PassComplexArray(arg)  ((HYPRE_Complex *) arg)
+#define hypre_F90_PassObj(obj,arg)       ((obj) *arg)
+#define hypre_F90_PassObjRef(obj,arg)    ((obj *) arg)
 
 #endif

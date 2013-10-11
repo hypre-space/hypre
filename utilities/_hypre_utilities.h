@@ -21,6 +21,9 @@ typedef long int          hypre_longint;
 typedef unsigned int      hypre_uint;
 typedef unsigned long int hypre_ulongint;
 
+/* This allows us to consistently avoid 'double' throughout hypre */
+typedef double            hypre_double;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,7 +39,6 @@ extern "C" {
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -67,6 +69,7 @@ extern "C" {
 #endif
 
 #endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -78,7 +81,6 @@ extern "C" {
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -126,6 +128,7 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR             
 #define MPI_LONG            hypre_MPI_LONG             
 #define MPI_BYTE            hypre_MPI_BYTE             
+#define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM              
 #define MPI_MIN             hypre_MPI_MIN              
@@ -224,6 +227,8 @@ typedef HYPRE_Int  hypre_MPI_Aint;
 #define  hypre_MPI_CHAR 2
 #define  hypre_MPI_LONG 3
 #define  hypre_MPI_BYTE 4
+#define  hypre_MPI_REAL 5
+#define  hypre_MPI_COMPLEX 6
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -255,11 +260,16 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_BOTTOM     MPI_BOTTOM
 #define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
 
-#define  hypre_MPI_DOUBLE MPI_DOUBLE
+#define  hypre_MPI_DOUBLE  MPI_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */
-#define  hypre_MPI_CHAR   MPI_CHAR
-#define  hypre_MPI_LONG   MPI_LONG
-#define  hypre_MPI_BYTE   MPI_BYTE
+#define  hypre_MPI_INT     HYPRE_MPI_INT
+#define  hypre_MPI_CHAR    MPI_CHAR
+#define  hypre_MPI_LONG    MPI_LONG
+#define  hypre_MPI_BYTE    MPI_BYTE
+/* HYPRE_MPI_REAL is defined in HYPRE_utilities.h */
+#define  hypre_MPI_REAL    HYPRE_MPI_REAL
+/* HYPRE_MPI_COMPLEX is defined in HYPRE_utilities.h */
+#define  hypre_MPI_COMPLEX HYPRE_MPI_COMPLEX
 
 #define  hypre_MPI_SUM MPI_SUM
 #define  hypre_MPI_MIN MPI_MIN
@@ -289,8 +299,8 @@ typedef MPI_User_function    hypre_MPI_User_function;
 HYPRE_Int hypre_MPI_Init( hypre_int *argc , char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
 HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm , HYPRE_Int errorcode );
-double hypre_MPI_Wtime( void );
-double hypre_MPI_Wtick( void );
+HYPRE_Real hypre_MPI_Wtime( void );
+HYPRE_Real hypre_MPI_Wtick( void );
 HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm , hypre_MPI_Group group , hypre_MPI_Comm *newcomm );
 HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm , hypre_MPI_Comm *newcomm );
@@ -345,6 +355,7 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int com
 #endif
 
 #endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -374,7 +385,6 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int com
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -459,7 +469,7 @@ char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
 void hypre_SharedFree ( char *ptr );
-double *hypre_IncrementSharedDataPtr ( double *ptr , size_t size );
+HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
@@ -474,6 +484,7 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 #endif
 
 #endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -504,6 +515,7 @@ HYPRE_Int hypre_GetThreadNum( void );
 #endif
 
 #endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -538,10 +550,10 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-double time_getWallclockSeconds( void );
-double time_getCPUSeconds( void );
-double time_get_wallclock_seconds_( void );
-double time_get_cpu_seconds_( void );
+HYPRE_Real time_getWallclockSeconds( void );
+HYPRE_Real time_getCPUSeconds( void );
+HYPRE_Real time_get_wallclock_seconds_( void );
+HYPRE_Real time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -568,9 +580,9 @@ double time_get_cpu_seconds_( void );
 
 typedef struct
 {
-   double  *wall_time;
-   double  *cpu_time;
-   double  *flops;
+   HYPRE_Real  *wall_time;
+   HYPRE_Real  *cpu_time;
+   HYPRE_Real  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -578,9 +590,9 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   double   wall_count;
-   double   CPU_count;
-   double   FLOP_count;
+   HYPRE_Real   wall_count;
+   HYPRE_Real   CPU_count;
+   HYPRE_Real   FLOP_count;
 
 } hypre_TimingType;
 
@@ -624,6 +636,7 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 #endif
 
 #endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -635,8 +648,6 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -675,6 +686,7 @@ typedef hypre_ListElement  *hypre_LinkList;
 #endif
 
 #endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -687,7 +699,6 @@ typedef hypre_ListElement  *hypre_LinkList;
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 #ifndef hypre_EXCHANGE_DATA_HEADER
 #define hypre_EXCHANGE_DATA_HEADER
 
@@ -696,15 +707,12 @@ typedef hypre_ListElement  *hypre_LinkList;
 #define hypre_BinaryTreeChildIds(tree)      (tree->child_id)
 #define hypre_BinaryTreeChildId(tree, i)    (tree->child_id[i])
 
-
 typedef struct
 {
    HYPRE_Int                   parent_id;
    HYPRE_Int                   num_child;
    HYPRE_Int		        *child_id;
 } hypre_BinaryTree;
-
-
 
 /* In the fill_response() function the user needs to set the recv__buf
    and the response_message_size.  Memory of size send_response_storage has been
@@ -713,7 +721,6 @@ typedef struct
    the send_response_storage.  The realloc amount should be storage+overhead. 
    If the response is an empty "confirmation" message, then set
    response_message_size =0 (and do not modify the send_buf) */
-
 
 typedef struct
 {
@@ -743,6 +750,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
 
 #endif /* end of header */
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -754,8 +762,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-
 
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
@@ -783,6 +789,10 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #endif
 
+/*--------------------------------------------------------------------------
+ * Other prototypes
+ *--------------------------------------------------------------------------*/
+
 /* amg_linklist.c */
 void dispose_elt ( hypre_LinkList element_ptr );
 void remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
@@ -792,6 +802,19 @@ void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_pt
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
+
+/* hypre_complex.c */
+#ifdef HYPRE_COMPLEX
+HYPRE_Complex hypre_conj( HYPRE_Complex value );
+HYPRE_Real    hypre_cabs( HYPRE_Complex value );
+HYPRE_Real    hypre_creal( HYPRE_Complex value );
+HYPRE_Real    hypre_cimag( HYPRE_Complex value );
+#else
+#define hypre_conj(value)  value
+#define hypre_cabs(value)  fabs(value)
+#define hypre_creal(value) value
+#define hypre_cimag(value) 0.0
+#endif
 
 /* hypre_printf.c */
 #ifdef HYPRE_BIGINT
@@ -812,27 +835,27 @@ HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
 
 /* hypre_qsort.c */
 void swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
-void swap2 ( HYPRE_Int *v , double *w , HYPRE_Int i , HYPRE_Int j );
+void swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap3_d ( double *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap4_d ( double *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
-void hypre_swap_d ( double *v , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap4_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
 void qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
-void qsort1 ( HYPRE_Int *v , double *w , HYPRE_Int left , HYPRE_Int right );
+void qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort2 ( HYPRE_Int *v , double *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort3_abs ( double *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort4_abs ( double *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
-void hypre_qsort_abs ( double *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort4_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 
 /* qsplit.c */
-HYPRE_Int hypre_DoubleQuickSplit ( double *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
+HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
 
 /* random.c */
 void hypre_SeedRand ( HYPRE_Int seed );
-double hypre_Rand ( void );
+HYPRE_Real hypre_Rand ( void );
 
 #ifdef __cplusplus
 }

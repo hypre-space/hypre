@@ -10,7 +10,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,double *,double *,HYPRE_Int *);
+HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,HYPRE_Real *,HYPRE_Real *,HYPRE_Int *);
 
 /******************************************************************************
  *
@@ -21,14 +21,14 @@ HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int*,double *,double *,HYPRE_Int *);
 
 HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                HYPRE_Int scale, /* scale by diagonal?*/
-                               double *max_eig)
+                               HYPRE_Real *max_eig)
 {
                               
-   double e_max;
-   double row_sum, max_norm;
-   double *col_val;
-   double temp;
-   double diag_value;
+   HYPRE_Real e_max;
+   HYPRE_Real row_sum, max_norm;
+   HYPRE_Real *col_val;
+   HYPRE_Real temp;
+   HYPRE_Real diag_value;
 
    HYPRE_Int   pos_diag, neg_diag;
    HYPRE_Int   start_row, end_row;
@@ -99,8 +99,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
 HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax with */
                                  HYPRE_Int scale, /* scale by diagonal?*/
                                  HYPRE_Int max_iter,
-                                 double *max_eig, 
-                                 double *min_eig)
+                                 HYPRE_Real *max_eig, 
+                                 HYPRE_Real *min_eig)
 {
 
    HYPRE_Int i, j, err;
@@ -112,23 +112,23 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    hypre_ParVector    *u;
 
 
-   double   *tridiag = NULL;
-   double   *trioffd = NULL;
+   HYPRE_Real   *tridiag = NULL;
+   HYPRE_Real   *trioffd = NULL;
 
-   double lambda_max , max_row_sum;
+   HYPRE_Real lambda_max , max_row_sum;
    
-   double beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
+   HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
   
-   double diag;
+   HYPRE_Real diag;
  
-   double lambda_min;
+   HYPRE_Real lambda_min;
    
-   double *s_data, *p_data, *ds_data, *u_data;
+   HYPRE_Real *s_data, *p_data, *ds_data, *u_data;
 
    HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
 
@@ -180,8 +180,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
 
    /* make room for tri-diag matrix */
-    tridiag  = hypre_CTAlloc(double, max_iter+1);
-    trioffd  = hypre_CTAlloc(double, max_iter+1);
+    tridiag  = hypre_CTAlloc(HYPRE_Real, max_iter+1);
+    trioffd  = hypre_CTAlloc(HYPRE_Real, max_iter+1);
     for (i=0; i < max_iter + 1; i++)
     {
        tridiag[i] = 0;
@@ -346,9 +346,9 @@ means half, and .1 means 10percent)
 
 HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with */
                             hypre_ParVector *f,    /* right-hand side */
-                            double max_eig,      
-                            double min_eig,     
-                            double fraction,   
+                            HYPRE_Real max_eig,      
+                            HYPRE_Real min_eig,     
+                            HYPRE_Real fraction,   
                             HYPRE_Int order,            /* polynomial order */
                             HYPRE_Int scale,            /* scale by diagonal?*/
                             HYPRE_Int variant,           
@@ -359,33 +359,33 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
    
    
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
    HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
 
-   double *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
-   double *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
-   double *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
+   HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
+   HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
+   HYPRE_Real *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
 
-   double  *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
+   HYPRE_Real  *r_data = hypre_VectorData(hypre_ParVectorLocalVector(r));
 
-   double theta, delta;
+   HYPRE_Real theta, delta;
    
-   double den;
-   double upper_bound, lower_bound;
+   HYPRE_Real den;
+   HYPRE_Real upper_bound, lower_bound;
    
    HYPRE_Int i, j;
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
  
-   double coefs[5];
-   double mult;
-   double *orig_u;
+   HYPRE_Real coefs[5];
+   HYPRE_Real mult;
+   HYPRE_Real *orig_u;
    
-   double tmp_d;
+   HYPRE_Real tmp_d;
 
    HYPRE_Int cheby_order;
 
-   double *ds_data, *tmp_data;
-   double  diag;
+   HYPRE_Real *ds_data, *tmp_data;
+   HYPRE_Real  diag;
 
    hypre_ParVector    *ds;
    hypre_ParVector    *tmp_vec;
@@ -488,7 +488,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
       }
    }
 
-   orig_u = hypre_CTAlloc(double, num_rows);
+   orig_u = hypre_CTAlloc(HYPRE_Real, num_rows);
 
    if (!scale)
    {
@@ -646,7 +646,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 HYPRE_Int hypre_BoomerAMGRelax_FCFJacobi( hypre_ParCSRMatrix *A,
                                     hypre_ParVector    *f,
                                     HYPRE_Int                *cf_marker,
-                                    double              relax_weight,
+                                    HYPRE_Real          relax_weight,
                                     hypre_ParVector    *u,
                                     hypre_ParVector    *Vtemp)
 {
@@ -716,7 +716,7 @@ HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
    {
       HYPRE_Int myid;
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
       HYPRE_PCGGetNumIterations(solver, &num_iterations);
@@ -747,25 +747,25 @@ HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
   symmetric tridiagonal matrix.
 */
 
-double hypre_LINPACKcgpthy(double*,double*);
+HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real*,HYPRE_Real*);
 
 
-HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int *n,double *d,double *e,HYPRE_Int *ierr)
+HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int *n,HYPRE_Real *d,HYPRE_Real *e,HYPRE_Int *ierr)
 {
     /* System generated locals */
     HYPRE_Int  i__1,i__2;
-    double d__1,d__2,c_b10 = 1.0;
+    HYPRE_Real d__1,d__2,c_b10 = 1.0;
 
     /* Local variables */
-     double c,f,g,h;
+     HYPRE_Real c,f,g,h;
      HYPRE_Int  i,j,l,m;
-     double p,r,s,c2,c3 = 0.0;
+     HYPRE_Real p,r,s,c2,c3 = 0.0;
      HYPRE_Int  l1,l2;
-     double s2 = 0.0;
+     HYPRE_Real s2 = 0.0;
      HYPRE_Int  ii;
-     double dl1,el1;
+     HYPRE_Real dl1,el1;
      HYPRE_Int  mml;
-     double tst1,tst2;
+     HYPRE_Real tst1,tst2;
 
 /*     THIS SUBROUTINE IS A TRANSLATION OF THE ALGOL PROCEDURE TQL1, */
 /*     NUM. MATH. 11, 293-306(1968) BY BOWDLER, MARTIN, REINSCH, AND */
@@ -808,7 +808,7 @@ HYPRE_Int hypre_LINPACKcgtql1(HYPRE_Int *n,double *d,double *e,HYPRE_Int *ierr)
 
 /*     ------------------------------------------------------------------ 
 */
-    double ds;
+    HYPRE_Real ds;
 
     --e;
     --d;
@@ -939,13 +939,13 @@ L1001:
 } /* cgtql1_ */
 
 
-double hypre_LINPACKcgpthy(double *a,double *b)
+HYPRE_Real hypre_LINPACKcgpthy(HYPRE_Real *a,HYPRE_Real *b)
 {
     /* System generated locals */
-    double ret_val,d__1,d__2,d__3;
+    HYPRE_Real ret_val,d__1,d__2,d__3;
  
     /* Local variables */
-    double p,r,s,t,u;
+    HYPRE_Real p,r,s,t,u;
 
 
 /*     FINDS DSQRT(A**2+B**2) WITHOUT OVERFLOW OR DESTRUCTIVE UNDERFLOW */
@@ -991,8 +991,8 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
                                   hypre_ParVector    *f,
                                   HYPRE_Int                *cf_marker,
                                   HYPRE_Int                 relax_points,
-                                  double              relax_weight,
-                                  double             *l1_norms,
+                                  HYPRE_Real          relax_weight,
+                                  HYPRE_Real         *l1_norms,
                                   hypre_ParVector    *u,
                                   hypre_ParVector    *Vtemp )
 
@@ -1001,12 +1001,12 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     
     MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
     hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
+    HYPRE_Real     *A_diag_data  = hypre_CSRMatrixData(A_diag);
     HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
     HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
     hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
     HYPRE_Int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
-    double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
+    HYPRE_Real     *A_offd_data  = hypre_CSRMatrixData(A_offd);
     HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
     hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
     hypre_ParCSRCommHandle *comm_handle;
@@ -1015,15 +1015,15 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
     
     hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
-    double         *u_data  = hypre_VectorData(u_local);
+    HYPRE_Real     *u_data  = hypre_VectorData(u_local);
     
     hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
-    double         *f_data  = hypre_VectorData(f_local);
+    HYPRE_Real     *f_data  = hypre_VectorData(f_local);
     
     hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-    double 	   *Vext_data = NULL;
-    double 	   *v_buf_data;
+    HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
+    HYPRE_Real 	   *Vext_data = NULL;
+    HYPRE_Real 	   *v_buf_data;
     
     HYPRE_Int            i, j;
     HYPRE_Int            ii, jj;
@@ -1031,8 +1031,8 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     HYPRE_Int		   index, start;
     HYPRE_Int		   num_procs, my_id ;
     
-    double         zero = 0.0;
-    double	   res;
+    HYPRE_Real     zero = 0.0;
+    HYPRE_Real	   res;
 
 
     hypre_MPI_Comm_size(comm,&num_procs);  
@@ -1042,10 +1042,10 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     {
        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
        
-       v_buf_data = hypre_CTAlloc(double, 
+       v_buf_data = hypre_CTAlloc(HYPRE_Real, 
                                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
        
-       Vext_data = hypre_CTAlloc(double,num_cols_offd);
+       Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
        
        if (num_cols_offd)
        {

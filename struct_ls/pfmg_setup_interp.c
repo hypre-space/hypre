@@ -92,7 +92,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
                         
-   double                *Pp0, *Pp1;
+   HYPRE_Real            *Pp0, *Pp1;
    HYPRE_Int              constant_coefficient;
                         
    hypre_StructStencil   *stencil;
@@ -233,16 +233,16 @@ hypre_PFMGSetupInterpOp_CC0
   hypre_Box          *P_dbox,
   HYPRE_Int           Pstenc0,
   HYPRE_Int           Pstenc1,
-  double             *Pp0,
-  double             *Pp1,
+  HYPRE_Real         *Pp0,
+  HYPRE_Real         *Pp1,
   HYPRE_Int           rap_type,
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
    HYPRE_Int              si;
    HYPRE_Int              Ai, Pi;
-   double                *Ap;
-   double                 center;
+   HYPRE_Real            *Ap;
+   HYPRE_Real             center;
    HYPRE_Int              Astenc;
    HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
@@ -337,16 +337,16 @@ hypre_PFMGSetupInterpOp_CC1
   hypre_Box          *P_dbox,
   HYPRE_Int           Pstenc0,
   HYPRE_Int           Pstenc1,
-  double             *Pp0,
-  double             *Pp1,
+  HYPRE_Real         *Pp0,
+  HYPRE_Real         *Pp1,
   HYPRE_Int           rap_type,
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
    HYPRE_Int              si;
    HYPRE_Int              Ai, Pi;
-   double                *Ap;
-   double                 center;
+   HYPRE_Real            *Ap;
+   HYPRE_Real             center;
    HYPRE_Int              Astenc;
    HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
@@ -438,8 +438,8 @@ hypre_PFMGSetupInterpOp_CC2
   hypre_Box          *P_dbox,
   HYPRE_Int           Pstenc0,
   HYPRE_Int           Pstenc1,
-  double             *Pp0,
-  double             *Pp1,
+  HYPRE_Real         *Pp0,
+  HYPRE_Real         *Pp1,
   HYPRE_Int           rap_type,
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
@@ -447,9 +447,9 @@ hypre_PFMGSetupInterpOp_CC2
    HYPRE_Int              si;
    HYPRE_Int              Ai;
    HYPRE_Int              Pi;
-   double                *Ap;
-   double                 P0, P1;
-   double                 center, center_offd;
+   HYPRE_Real            *Ap;
+   HYPRE_Real             P0, P1;
+   HYPRE_Real             center, center_offd;
    HYPRE_Int              Astenc;
    HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);

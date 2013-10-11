@@ -274,7 +274,7 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
                                HYPRE_Int             var,
                                HYPRE_Int             nentries,
                                HYPRE_Int            *entries,
-                               double               *values,
+                               HYPRE_Complex        *values,
                                HYPRE_Int             action )
 {
    hypre_SStructStencil *stencil = hypre_SStructPMatrixStencil(pmatrix, var);
@@ -370,7 +370,7 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
                                   HYPRE_Int             var,
                                   HYPRE_Int             nentries,
                                   HYPRE_Int            *entries,
-                                  double               *values,
+                                  HYPRE_Complex        *values,
                                   HYPRE_Int             action )
 {
    HYPRE_Int             ndim    = hypre_SStructPMatrixNDim(pmatrix);
@@ -779,8 +779,10 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrixSetRowSizes (ijmatrix, (const HYPRE_Int *) row_sizes);
 
    hypre_TFree(row_sizes);
-   hypre_SStructMatrixTmpColCoords(matrix) = hypre_CTAlloc(HYPRE_Int, max_row_size);
-   hypre_SStructMatrixTmpCoeffs(matrix) = hypre_CTAlloc(double, max_row_size);
+   hypre_SStructMatrixTmpColCoords(matrix) =
+      hypre_CTAlloc(HYPRE_Int, max_row_size);
+   hypre_SStructMatrixTmpCoeffs(matrix) =
+      hypre_CTAlloc(HYPRE_Complex, max_row_size);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -803,7 +805,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
                                HYPRE_Int            var,
                                HYPRE_Int            nentries,
                                HYPRE_Int           *entries,
-                               double              *values,
+                               HYPRE_Complex       *values,
                                HYPRE_Int            action )
 {
    HYPRE_Int                ndim     = hypre_SStructMatrixNDim(matrix);
@@ -823,7 +825,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    HYPRE_Int                row_coord;
    HYPRE_Int               *col_coords;
    HYPRE_Int                ncoeffs;
-   double                  *coeffs;
+   HYPRE_Complex           *coeffs;
    HYPRE_Int                i, entry, Uverank;
    HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -898,13 +900,13 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    {
       HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
                                 (const HYPRE_Int *) col_coords,
-                                (const double *) coeffs);
+                                (const HYPRE_Complex *) coeffs);
    }
    else if (action > -1)
    {
       HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
                               (const HYPRE_Int *) col_coords,
-                              (const double *) coeffs);
+                              (const HYPRE_Complex *) coeffs);
    }
    else
    {
@@ -934,7 +936,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                   HYPRE_Int            var,
                                   HYPRE_Int            nentries,
                                   HYPRE_Int           *entries,
-                                  double              *values,
+                                  HYPRE_Complex       *values,
                                   HYPRE_Int            action )
 {
    HYPRE_Int             ndim     = hypre_SStructMatrixNDim(matrix);
@@ -955,7 +957,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    HYPRE_Int            *ncols;
    HYPRE_Int            *rows;
    HYPRE_Int            *cols;
-   double               *ijvalues;
+   HYPRE_Complex        *ijvalues;
    hypre_Box            *box, *vbox;
    hypre_Box            *to_box;
    hypre_Box            *map_box;
@@ -993,7 +995,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       }
       rows     = hypre_CTAlloc(HYPRE_Int, nrows);
       cols     = hypre_CTAlloc(HYPRE_Int, nrows);
-      ijvalues = hypre_CTAlloc(double, nrows);
+      ijvalues = hypre_CTAlloc(HYPRE_Complex, nrows);
 
       hypre_SetIndex(stride, 1);
 
@@ -1083,14 +1085,14 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
             HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
                                       (const HYPRE_Int *) rows,
                                       (const HYPRE_Int *) cols,
-                                      (const double *) ijvalues);
+                                      (const HYPRE_Complex *) ijvalues);
          }
          else if (action > -1)
          {
             HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
                                     (const HYPRE_Int *) rows,
                                     (const HYPRE_Int *) cols,
-                                    (const double *) ijvalues);
+                                    (const HYPRE_Complex *) ijvalues);
          }
          else
          {
@@ -1240,7 +1242,7 @@ hypre_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
                               HYPRE_Int            var,
                               HYPRE_Int            nentries,
                               HYPRE_Int           *entries,
-                              double              *values,
+                              HYPRE_Complex       *values,
                               HYPRE_Int            action )
 {
    HYPRE_Int             ndim  = hypre_SStructMatrixNDim(matrix);
@@ -1300,7 +1302,7 @@ hypre_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            var,
                                  HYPRE_Int            nentries,
                                  HYPRE_Int           *entries,
-                                 double              *values,
+                                 HYPRE_Complex       *values,
                                  HYPRE_Int            action )
 {
    HYPRE_Int                ndim  = hypre_SStructMatrixNDim(matrix);
@@ -1362,7 +1364,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                        HYPRE_Int            var,
                                        HYPRE_Int            nentries,
                                        HYPRE_Int           *entries,
-                                       double              *values,
+                                       HYPRE_Complex       *values,
                                        HYPRE_Int            action )
 {
    HYPRE_Int                ndim  = hypre_SStructMatrixNDim(matrix);
@@ -1381,7 +1383,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_IndexRef           offset, start;
    hypre_BoxManEntry      **frentries, **toentries;
    hypre_SStructBoxManInfo *frinfo, *toinfo;
-   double                  *tvalues = NULL;
+   HYPRE_Complex           *tvalues = NULL;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
    HYPRE_Int                entry, sentry, ei, fri, toi, vi, mi;
 
@@ -1468,7 +1470,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                if (hypre_BoxVolume(ibox1))
                {
                   tvalues =
-                     hypre_TReAlloc(tvalues, double, hypre_BoxVolume(ibox1));
+                     hypre_TReAlloc(tvalues, HYPRE_Complex, hypre_BoxVolume(ibox1));
 
                   if (action >= 0)
                   {

@@ -56,7 +56,7 @@ hypre_SMGSolve( void               *smg_vdata,
 
    hypre_SMGData        *smg_data = smg_vdata;
 
-   double                tol             = (smg_data -> tol);
+   HYPRE_Real            tol             = (smg_data -> tol);
    HYPRE_Int             max_iter        = (smg_data -> max_iter);
    HYPRE_Int             rel_change      = (smg_data -> rel_change);
    HYPRE_Int             zero_guess      = (smg_data -> zero_guess);
@@ -77,11 +77,11 @@ hypre_SMGSolve( void               *smg_vdata,
    void                **restrict_data_l = (smg_data -> restrict_data_l);
    void                **interp_data_l   = (smg_data -> interp_data_l);
    HYPRE_Int             logging         = (smg_data -> logging);
-   double               *norms           = (smg_data -> norms);
-   double               *rel_norms       = (smg_data -> rel_norms);
+   HYPRE_Real           *norms           = (smg_data -> norms);
+   HYPRE_Real           *rel_norms       = (smg_data -> rel_norms);
 
-   double                b_dot_b = 0, r_dot_r, eps = 0;
-   double                e_dot_e = 0, x_dot_x = 1;
+   HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
+   HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
                     
    HYPRE_Int             i, l;
                     

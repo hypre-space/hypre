@@ -144,10 +144,10 @@ hypre_SMGResidual( void               *residual_vdata,
    HYPRE_Int               bi;
    HYPRE_Int               ri;
                          
-   double                 *Ap;
-   double                 *xp;
-   double                 *bp;
-   double                 *rp;
+   HYPRE_Real             *Ap;
+   HYPRE_Real             *xp;
+   HYPRE_Real             *bp;
+   HYPRE_Real             *rp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;

@@ -40,23 +40,23 @@ HYPRE_Int hypre_BCSRMatrixRelax(hypre_BCSRMatrix *A, hypre_Vector *f, HYPRE_Int 
    HYPRE_Int n = hypre_BCSRMatrixNumBlockRows(A);
    HYPRE_Int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
    
-   double *u_data  = hypre_VectorData(u);
-   double *f_data  = hypre_VectorData(f);
+   HYPRE_Real *u_data  = hypre_VectorData(u);
+   HYPRE_Real *f_data  = hypre_VectorData(f);
 
    hypre_BCSRMatrixBlock* inv
      = hypre_BCSRMatrixBlockCreate(num_rows_per_block,
 				   num_rows_per_block);
 
-   double* res = hypre_CTAlloc(double, num_rows_per_block);
+   HYPRE_Real* res = hypre_CTAlloc(HYPRE_Real, num_rows_per_block);
 
-   double* eye;
+   HYPRE_Real* eye;
 
    HYPRE_Int i, ii, jj;
 
    HYPRE_Int relax_error = 0;
 
    hypre_BCSRMatrixBlockInitialise(inv);
-   eye = hypre_CTAlloc(double, num_rows_per_block*num_rows_per_block);
+   eye = hypre_CTAlloc(HYPRE_Real, num_rows_per_block*num_rows_per_block);
    for(i = 0; i < num_rows_per_block; i++) {
      eye[i*num_rows_per_block + i] = 1.0;
    }

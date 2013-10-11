@@ -100,7 +100,7 @@ HYPRE_SStructLGMRESSetAugDim( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetTol( HYPRE_SStructSolver solver,
-                          double              tol )
+                          HYPRE_Real          tol )
 {
    return( HYPRE_LGMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -110,7 +110,7 @@ HYPRE_SStructLGMRESSetTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
-                          double              atol )
+                          HYPRE_Real          atol )
 {
    return( HYPRE_LGMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
 }
@@ -185,7 +185,7 @@ HYPRE_SStructLGMRESGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                                double              *norm )
+                                                HYPRE_Real          *norm )
 {
    return( HYPRE_LGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }

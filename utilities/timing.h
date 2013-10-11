@@ -32,10 +32,10 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-double time_getWallclockSeconds( void );
-double time_getCPUSeconds( void );
-double time_get_wallclock_seconds_( void );
-double time_get_cpu_seconds_( void );
+HYPRE_Real time_getWallclockSeconds( void );
+HYPRE_Real time_getCPUSeconds( void );
+HYPRE_Real time_get_wallclock_seconds_( void );
+HYPRE_Real time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -62,9 +62,9 @@ double time_get_cpu_seconds_( void );
 
 typedef struct
 {
-   double  *wall_time;
-   double  *cpu_time;
-   double  *flops;
+   HYPRE_Real  *wall_time;
+   HYPRE_Real  *cpu_time;
+   HYPRE_Real  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -72,9 +72,9 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   double   wall_count;
-   double   CPU_count;
-   double   FLOP_count;
+   HYPRE_Real   wall_count;
+   HYPRE_Real   CPU_count;
+   HYPRE_Real   FLOP_count;
 
 } hypre_TimingType;
 

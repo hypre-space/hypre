@@ -53,7 +53,7 @@ amg_CPUClock_t HYPRE_AMGCPUClock()
  * PrintTiming
  *--------------------------------------------------------------------------*/
  
-void  HYPRE_AMGPrintTiming(double time_ticks, double cpu_ticks)
+void  HYPRE_AMGPrintTiming(HYPRE_Real time_ticks, HYPRE_Real cpu_ticks)
 {
 
   

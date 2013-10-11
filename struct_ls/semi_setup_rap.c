@@ -314,12 +314,12 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_ptr;
+   HYPRE_Real           *a_ptr;
 
-   double               *rap_ptrS, *rap_ptrU, *rap_ptrD;
+   HYPRE_Real           *rap_ptrS, *rap_ptrU, *rap_ptrD;
 
    HYPRE_Int             symm_path_multiplier;
 
@@ -337,7 +337,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    HYPRE_Int             dim;
    HYPRE_Int             d;
                      
-   double                zero = 0.0;
+   HYPRE_Real            zero = 0.0;
 
    coarse_stencil = hypre_StructMatrixStencil(RAP);
    coarse_stencil_size = hypre_StructStencilSize(coarse_stencil);
@@ -831,7 +831,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      /*--------------------------------------------------
                       * If RAP stencil index is zero except in coarsened
                       * direction and RAP is symmetric, must
-                      * double entry when modifying the diagonal.
+                      * HYPRE_Real entry when modifying the diagonal.
                       *--------------------------------------------------*/
                      symm_path_multiplier = 1;
                      diag = 0;

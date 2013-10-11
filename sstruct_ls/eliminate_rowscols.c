@@ -135,7 +135,7 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
    HYPRE_Int         nnz       = hypre_CSRMatrixNumNonzeros(Adiag);
    HYPRE_Int        *Ai        = hypre_CSRMatrixI(Adiag);
    HYPRE_Int        *Aj        = hypre_CSRMatrixJ(Adiag);
-   double           *Adata     = hypre_CSRMatrixData(Adiag);
+   HYPRE_Real       *Adata     = hypre_CSRMatrixData(Adiag);
 
    HYPRE_Int        *local_rows;
   
@@ -189,7 +189,7 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
    hypre_CSRMatrix *Aoffd     = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int       *Ai        = hypre_CSRMatrixI(Aoffd);
 
-   double          *Adata     = hypre_CSRMatrixData(Aoffd);
+   HYPRE_Real      *Adata     = hypre_CSRMatrixData(Aoffd);
 
    HYPRE_Int i, j;
    HYPRE_Int ibeg, iend;
@@ -231,7 +231,7 @@ HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
 
    HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(Aoffd);
    HYPRE_Int *Aj = hypre_CSRMatrixJ(Aoffd);
-   double *Adata = hypre_CSRMatrixData(Aoffd);
+   HYPRE_Real *Adata = hypre_CSRMatrixData(Aoffd);
 
    for (i = 0; i < nnz; i++)
    {

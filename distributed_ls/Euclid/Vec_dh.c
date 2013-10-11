@@ -46,7 +46,7 @@ void Vec_dhInit(Vec_dh v, HYPRE_Int size)
 {
   START_FUNC_DH
   v->n = size;
-  v->vals = (double*)MALLOC_DH(size*sizeof(double)); CHECK_V_ERROR;
+  v->vals = (HYPRE_Real*)MALLOC_DH(size*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
@@ -58,7 +58,7 @@ void Vec_dhCopy(Vec_dh x, Vec_dh y)
   if (x->vals == NULL) SET_V_ERROR("x->vals is NULL");
   if (y->vals == NULL) SET_V_ERROR("y->vals is NULL");
   if (x->n != y->n) SET_V_ERROR("x and y are different lengths");
-  memcpy(y->vals, x->vals, x->n*sizeof(double));
+  memcpy(y->vals, x->vals, x->n*sizeof(HYPRE_Real));
   END_FUNC_DH
 }
 
@@ -74,17 +74,17 @@ void Vec_dhDuplicate(Vec_dh v, Vec_dh *out)
   Vec_dhCreate(out); CHECK_V_ERROR;
   tmp = *out;
   tmp->n = size;
-  tmp->vals = (double*)MALLOC_DH(size*sizeof(double)); CHECK_V_ERROR;
+  tmp->vals = (HYPRE_Real*)MALLOC_DH(size*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
 #undef __FUNC__
 #define __FUNC__ "Vec_dhSet"
-void Vec_dhSet(Vec_dh v, double value)
+void Vec_dhSet(Vec_dh v, HYPRE_Real value)
 {
   START_FUNC_DH
   HYPRE_Int i, m = v->n;
-  double *vals = v->vals;
+  HYPRE_Real *vals = v->vals;
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
   for (i=0; i<m; ++i) vals[i] = value;
   END_FUNC_DH
@@ -96,8 +96,8 @@ void Vec_dhSetRand(Vec_dh v)
 {
   START_FUNC_DH
   HYPRE_Int i, m = v->n;
-  double max = 0.0;
-  double *vals = v->vals;
+  HYPRE_Real max = 0.0;
+  HYPRE_Real *vals = v->vals;
 
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
 
@@ -117,7 +117,7 @@ void Vec_dhSetRand(Vec_dh v)
 void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
 {
   START_FUNC_DH
-  double *vals = v->vals;
+  HYPRE_Real *vals = v->vals;
   HYPRE_Int pe, i, m = v->n;
   FILE *fp;
 
@@ -221,7 +221,7 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
   Vec_dh tmp;
   FILE *fp;
   HYPRE_Int items, n, i;
-  double *v, w;
+  HYPRE_Real *v, w;
   char junk[MAX_JUNK];
   
   Vec_dhCreate(&tmp); CHECK_V_ERROR;
@@ -258,7 +258,7 @@ void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
 
   /* allocate storage */
   tmp->n = n;
-  v = tmp->vals =  (double*)MALLOC_DH(n*sizeof(double)); CHECK_V_ERROR;
+  v = tmp->vals =  (HYPRE_Real*)MALLOC_DH(n*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* reset file, and skip over header again */
   rewind(fp);

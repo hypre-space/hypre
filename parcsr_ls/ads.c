@@ -304,7 +304,7 @@ HYPRE_Int hypre_ADSSetMaxIter(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ADSSetTol(void *solver,
-                          double tol)
+                          HYPRE_Real tol)
 {
    hypre_ADSData *ads_data = solver;
    ads_data -> tol = tol;
@@ -365,8 +365,8 @@ HYPRE_Int hypre_ADSSetPrintLevel(void *solver,
 HYPRE_Int hypre_ADSSetSmoothingOptions(void *solver,
                                        HYPRE_Int A_relax_type,
                                        HYPRE_Int A_relax_times,
-                                       double A_relax_weight,
-                                       double A_omega)
+                                       HYPRE_Real A_relax_weight,
+                                       HYPRE_Real A_omega)
 {
    hypre_ADSData *ads_data = solver;
    ads_data -> A_relax_type = A_relax_type;
@@ -407,7 +407,7 @@ HYPRE_Int hypre_ADSSetAMSOptions(void *solver,
                                  HYPRE_Int B_C_coarsen_type,
                                  HYPRE_Int B_C_agg_levels,
                                  HYPRE_Int B_C_relax_type,
-                                 double B_C_theta,
+                                 HYPRE_Real B_C_theta,
                                  HYPRE_Int B_C_interp_type,
                                  HYPRE_Int B_C_Pmax)
 {
@@ -433,7 +433,7 @@ HYPRE_Int hypre_ADSSetAMGOptions(void *solver,
                                  HYPRE_Int B_Pi_coarsen_type,
                                  HYPRE_Int B_Pi_agg_levels,
                                  HYPRE_Int B_Pi_relax_type,
-                                 double B_Pi_theta,
+                                 HYPRE_Real B_Pi_theta,
                                  HYPRE_Int B_Pi_interp_type,
                                  HYPRE_Int B_Pi_Pmax)
 {
@@ -498,9 +498,9 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j, d;
 
-      double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
-      double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
-      double *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
+      HYPRE_Real *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
+      HYPRE_Real *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
+      HYPRE_Real *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
 
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
@@ -563,7 +563,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *Pi_diag = hypre_ParCSRMatrixDiag(Pi);
          HYPRE_Int *Pi_diag_I = hypre_CSRMatrixI(Pi_diag);
          HYPRE_Int *Pi_diag_J = hypre_CSRMatrixJ(Pi_diag);
-         double *Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
+         HYPRE_Real *Pi_diag_data = hypre_CSRMatrixData(Pi_diag);
 
          for (i = 0; i < F2V_diag_nrows+1; i++)
             Pi_diag_I[i] = 3 * F2V_diag_I[i];
@@ -594,7 +594,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *Pi_offd = hypre_ParCSRMatrixOffd(Pi);
          HYPRE_Int *Pi_offd_I = hypre_CSRMatrixI(Pi_offd);
          HYPRE_Int *Pi_offd_J = hypre_CSRMatrixJ(Pi_offd);
-         double *Pi_offd_data = hypre_CSRMatrixData(Pi_offd);
+         HYPRE_Real *Pi_offd_data = hypre_CSRMatrixData(Pi_offd);
 
          HYPRE_Int *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
          HYPRE_Int *Pi_cmap = hypre_ParCSRMatrixColMapOffd(Pi);
@@ -689,9 +689,9 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
    {
       HYPRE_Int i, j;
 
-      double *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
-      double *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
-      double *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
+      HYPRE_Real *RT100_data = hypre_VectorData(hypre_ParVectorLocalVector(RT100));
+      HYPRE_Real *RT010_data = hypre_VectorData(hypre_ParVectorLocalVector(RT010));
+      HYPRE_Real *RT001_data = hypre_VectorData(hypre_ParVectorLocalVector(RT001));
 
       /* Each component of Pi has the sparsity pattern of the topological
          face-to-vertex matrix. */
@@ -767,17 +767,17 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *Pix_diag = hypre_ParCSRMatrixDiag(Pix);
          HYPRE_Int *Pix_diag_I = hypre_CSRMatrixI(Pix_diag);
          HYPRE_Int *Pix_diag_J = hypre_CSRMatrixJ(Pix_diag);
-         double *Pix_diag_data = hypre_CSRMatrixData(Pix_diag);
+         HYPRE_Real *Pix_diag_data = hypre_CSRMatrixData(Pix_diag);
 
          hypre_CSRMatrix *Piy_diag = hypre_ParCSRMatrixDiag(Piy);
          HYPRE_Int *Piy_diag_I = hypre_CSRMatrixI(Piy_diag);
          HYPRE_Int *Piy_diag_J = hypre_CSRMatrixJ(Piy_diag);
-         double *Piy_diag_data = hypre_CSRMatrixData(Piy_diag);
+         HYPRE_Real *Piy_diag_data = hypre_CSRMatrixData(Piy_diag);
 
          hypre_CSRMatrix *Piz_diag = hypre_ParCSRMatrixDiag(Piz);
          HYPRE_Int *Piz_diag_I = hypre_CSRMatrixI(Piz_diag);
          HYPRE_Int *Piz_diag_J = hypre_CSRMatrixJ(Piz_diag);
-         double *Piz_diag_data = hypre_CSRMatrixData(Piz_diag);
+         HYPRE_Real *Piz_diag_data = hypre_CSRMatrixData(Piz_diag);
 
          for (i = 0; i < F2V_diag_nrows+1; i++)
          {
@@ -815,17 +815,17 @@ HYPRE_Int hypre_ADSComputePixyz(hypre_ParCSRMatrix *A,
          hypre_CSRMatrix *Pix_offd = hypre_ParCSRMatrixOffd(Pix);
          HYPRE_Int *Pix_offd_I = hypre_CSRMatrixI(Pix_offd);
          HYPRE_Int *Pix_offd_J = hypre_CSRMatrixJ(Pix_offd);
-         double *Pix_offd_data = hypre_CSRMatrixData(Pix_offd);
+         HYPRE_Real *Pix_offd_data = hypre_CSRMatrixData(Pix_offd);
 
          hypre_CSRMatrix *Piy_offd = hypre_ParCSRMatrixOffd(Piy);
          HYPRE_Int *Piy_offd_I = hypre_CSRMatrixI(Piy_offd);
          HYPRE_Int *Piy_offd_J = hypre_CSRMatrixJ(Piy_offd);
-         double *Piy_offd_data = hypre_CSRMatrixData(Piy_offd);
+         HYPRE_Real *Piy_offd_data = hypre_CSRMatrixData(Piy_offd);
 
          hypre_CSRMatrix *Piz_offd = hypre_ParCSRMatrixOffd(Piz);
          HYPRE_Int *Piz_offd_I = hypre_CSRMatrixI(Piz_offd);
          HYPRE_Int *Piz_offd_J = hypre_CSRMatrixJ(Piz_offd);
-         double *Piz_offd_data = hypre_CSRMatrixData(Piz_offd);
+         HYPRE_Real *Piz_offd_data = hypre_CSRMatrixData(Piz_offd);
 
          HYPRE_Int *F2V_cmap = hypre_ParCSRMatrixColMapOffd(F2V);
          HYPRE_Int *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
@@ -1191,7 +1191,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
    hypre_ADSData *ads_data = solver;
 
    HYPRE_Int i, my_id = -1;
-   double r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
+   HYPRE_Real r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
 
    char cycle[30];
    hypre_ParCSRMatrix *Ai[5], *Pi[5];
@@ -1343,7 +1343,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 
    if (my_id == 0 && ads_data -> print_level > 0 && ads_data -> maxit > 1)
       hypre_printf("\n\n Average Convergence Factor = %f\n\n",
-                   pow((r_norm/r0_norm),(1.0/(double) i)));
+                   pow((r_norm/r0_norm),(1.0/(HYPRE_Real) i)));
 
    ads_data -> num_iterations = i;
    ads_data -> rel_resid_norm = relative_resid;
@@ -1378,7 +1378,7 @@ HYPRE_Int hypre_ADSGetNumIterations(void *solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ADSGetFinalRelativeResidualNorm(void *solver,
-                                                double *rel_resid_norm)
+                                                HYPRE_Real *rel_resid_norm)
 {
    hypre_ADSData *ads_data = solver;
    *rel_resid_norm = ads_data -> rel_resid_norm;

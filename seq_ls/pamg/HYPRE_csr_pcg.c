@@ -95,7 +95,7 @@ HYPRE_CSRPCGSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_CSRPCGSetTol( HYPRE_Solver solver,
-                       double             tol    )
+                       HYPRE_Real         tol    )
 {
    return( HYPRE_PCGSetTol( solver, tol ) );
 }
@@ -209,7 +209,7 @@ HYPRE_CSRPCGGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_CSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                             double             *norm   )
+                                             HYPRE_Real         *norm   )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
@@ -240,9 +240,9 @@ HYPRE_CSRDiagScale( HYPRE_Solver solver,
    hypre_CSRMatrix *A = (hypre_CSRMatrix *) HA;
    hypre_Vector    *y = (hypre_Vector *) Hy;
    hypre_Vector    *x = (hypre_Vector *) Hx;
-   double *x_data = hypre_VectorData(x);
-   double *y_data = hypre_VectorData(y);
-   double *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Real *x_data = hypre_VectorData(x);
+   HYPRE_Real *y_data = hypre_VectorData(y);
+   HYPRE_Real *A_data = hypre_CSRMatrixData(A);
    HYPRE_Int *A_i = hypre_CSRMatrixI(A);
 
    HYPRE_Int i, ierr = 0;

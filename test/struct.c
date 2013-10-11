@@ -47,17 +47,17 @@
 HYPRE_Int  SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* period);
 
 HYPRE_Int  AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
-                           double            cx,
-                           double            cy,
-                           double            cz,
-                           double            conx,
-                           double            cony,
-                           double            conz) ;
+                           HYPRE_Real        cx,
+                           HYPRE_Real        cy,
+                           HYPRE_Real        cz,
+                           HYPRE_Real        conx,
+                           HYPRE_Real        cony,
+                           HYPRE_Real        conz) ;
 
 HYPRE_Int AddValuesVector( hypre_StructGrid  *gridvector,
                            hypre_StructVector *zvector,
                            HYPRE_Int          *period, 
-                           double             value  )  ;
+                           HYPRE_Real         value  )  ;
 
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
@@ -78,12 +78,12 @@ main( hypre_int argc,
    HYPRE_Int           P, Q, R;
    HYPRE_Int           bx, by, bz;
    HYPRE_Int           px, py, pz;
-   double              cx, cy, cz;
-   double              conx, cony, conz;
+   HYPRE_Real          cx, cy, cz;
+   HYPRE_Real          conx, cony, conz;
    HYPRE_Int           solver_id;
    HYPRE_Int           solver_type;
 
-   /*double              dxyz[3];*/
+   /*HYPRE_Real          dxyz[3];*/
 
    HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
    HYPRE_Int           v_num_ghost[3] = {0,0,0};
@@ -96,8 +96,8 @@ main( hypre_int argc,
    HYPRE_StructSolver  precond;
    HYPRE_Int           num_iterations;
    HYPRE_Int           time_index;
-   double              final_res_norm;
-   double              cf_tol;
+   HYPRE_Real          final_res_norm;
+   HYPRE_Real          cf_tol;
 
    HYPRE_Int           num_procs, myid;
 
@@ -109,7 +109,7 @@ main( hypre_int argc,
    HYPRE_Int           sym;
    HYPRE_Int           rap;
    HYPRE_Int           relax;
-   double              jacobi_weight;
+   HYPRE_Real          jacobi_weight;
    HYPRE_Int           usr_jacobi_weight;
    HYPRE_Int           jump;
    HYPRE_Int           rep, reps;
@@ -157,17 +157,17 @@ main( hypre_int argc,
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
-   double tol = 1e-6;
-   double pcgTol = 1e-2;
-   double nonOrthF;
+   HYPRE_Real tol = 1e-6;
+   HYPRE_Real pcgTol = 1e-2;
+   HYPRE_Real nonOrthF;
 
    FILE* filePtr;
 
    mv_MultiVectorPtr eigenvectors = NULL;
    mv_MultiVectorPtr constrains = NULL;
-   double* eigenvalues = NULL;
+   HYPRE_Real* eigenvalues = NULL;
 
-   double* residuals;
+   HYPRE_Real* residuals;
    utilities_FortranMatrix* residualNorms;
    utilities_FortranMatrix* residualNormsHistory;
    utilities_FortranMatrix* eigenvaluesHistory;
@@ -1814,7 +1814,7 @@ main( hypre_int argc,
             eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                                  blockSize, 
                                                                  x );
-            eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+            eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
 
             if ( lobpcgSeed )
                mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -2031,7 +2031,7 @@ main( hypre_int argc,
             eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                                  blockSize, 
                                                                  x );
-            eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+            eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
        
             if ( lobpcgSeed )
                mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -2827,7 +2827,7 @@ HYPRE_Int
 AddValuesVector( hypre_StructGrid  *gridvector,
                  hypre_StructVector *zvector,
                  HYPRE_Int          *period, 
-                 double             value  )
+                 HYPRE_Real         value  )
 {
 /* #include  "_hypre_struct_mv.h" */
    HYPRE_Int ierr = 0;
@@ -2836,7 +2836,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    hypre_IndexRef     ilower;
    hypre_IndexRef     iupper;
    hypre_Box          *box;
-   double             *values;
+   HYPRE_Real         *values;
    HYPRE_Int          volume,dim;
 
    gridboxes =  hypre_StructGridBoxes(gridvector);
@@ -2847,7 +2847,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   =  hypre_BoxVolume(box);
-      values   = hypre_CTAlloc(double, volume);
+      values   = hypre_CTAlloc(HYPRE_Real, volume);
 
       /*-----------------------------------------------------------
        * For periodic b.c. in all directions, need rhs to satisfy 
@@ -2892,12 +2892,12 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 
 HYPRE_Int
 AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
-                double            cx,
-                double            cy,
-                double            cz,
-                double            conx,
-                double            cony,
-                double            conz)
+                HYPRE_Real        cx,
+                HYPRE_Real        cy,
+                HYPRE_Real        cz,
+                HYPRE_Real        conx,
+                HYPRE_Real        cony,
+                HYPRE_Real        conz)
 {
 
    HYPRE_Int ierr=0;
@@ -2906,11 +2906,11 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
    hypre_IndexRef      ilower;
    hypre_IndexRef      iupper;
    hypre_Box          *box;
-   double             *values;
-   double              east,west;
-   double              north,south;
-   double              top,bottom;
-   double              center;
+   HYPRE_Real         *values;
+   HYPRE_Real          east,west;
+   HYPRE_Real          north,south;
+   HYPRE_Real          top,bottom;
+   HYPRE_Real          center;
    HYPRE_Int           volume,dim,sym;
    HYPRE_Int          *stencil_indices;
    HYPRE_Int           stencil_size;
@@ -2948,7 +2948,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(double, stencil_size*volume);
+            values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
 
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
@@ -2980,7 +2980,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       }
       else if ( constant_coefficient==1 )
       {
-         values   = hypre_CTAlloc(double, stencil_size);
+         values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
          switch (dim)
          {
             case 1:
@@ -3011,7 +3011,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          hypre_assert( constant_coefficient==2 );
 
          /* stencil index for the center equals dim, so it's easy to leave out */
-         values   = hypre_CTAlloc(double, stencil_size-1);
+         values   = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
          switch (dim)
          {
             case 1:
@@ -3038,7 +3038,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(double, volume);
+            values   = hypre_CTAlloc(HYPRE_Real, volume);
 
             for ( i=0; i < volume; ++i )
             {
@@ -3091,7 +3091,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(double, stencil_size*volume);
+            values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
 
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
@@ -3130,7 +3130,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       }
       else if ( constant_coefficient==1 )
       {
-         values = hypre_CTAlloc( double, stencil_size );
+         values = hypre_CTAlloc( HYPRE_Real, stencil_size );
 
          switch (dim)
          {
@@ -3168,7 +3168,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       else
       {
          hypre_assert( constant_coefficient==2 );
-         values = hypre_CTAlloc( double, stencil_size-1 );
+         values = hypre_CTAlloc( HYPRE_Real, stencil_size-1 );
          switch (dim)
          {  /* no center in stencil_indices and values */
             case 1:
@@ -3217,7 +3217,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(double, volume);
+            values   = hypre_CTAlloc(HYPRE_Real, volume);
 
             for ( i=0; i < volume; ++i )
             {
@@ -3256,7 +3256,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    hypre_Box         *box;
    hypre_Box         *dummybox;
    hypre_Box         *boundingbox;
-   double            *values;
+   HYPRE_Real        *values;
    HYPRE_Int          volume, dim;
    HYPRE_Int         *stencil_indices;
    HYPRE_Int          constant_coefficient;
@@ -3308,7 +3308,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
       {
          for (ib = 0; ib < size; ib++)
          {
-            values = hypre_CTAlloc(double, vol[ib]);
+            values = hypre_CTAlloc(HYPRE_Real, vol[ib]);
         
             for (i = 0; i < vol[ib]; i++)
             {

@@ -27,19 +27,19 @@
 
 
 
-HYPRE_Int hypre_ILUsolve(double *x,
+HYPRE_Int hypre_ILUsolve(HYPRE_Real *x,
 
 		   HYPRE_Int *i_ILUdof_to_dof,
 		   
 		   HYPRE_Int *i_ILUdof_ILUdof,
 		   HYPRE_Int *j_ILUdof_ILUdof,
-		   double *LD_data,
+		   HYPRE_Real *LD_data,
 
 		   HYPRE_Int *i_ILUdof_ILUdof_t,
 		   HYPRE_Int *j_ILUdof_ILUdof_t,
-		   double *U_data,
+		   HYPRE_Real *U_data,
 
-		   double *rhs,
+		   HYPRE_Real *rhs,
 
 		   HYPRE_Int num_dofs)
 
@@ -82,15 +82,15 @@ HYPRE_Int hypre_ILUsolve(double *x,
   return ierr;
 
 }
-HYPRE_Int hypre_LDsolve(double *x,
+HYPRE_Int hypre_LDsolve(HYPRE_Real *x,
 
 		   HYPRE_Int *i_ILUdof_to_dof,
 		   
 		   HYPRE_Int *i_ILUdof_ILUdof,
 		   HYPRE_Int *j_ILUdof_ILUdof,
-		   double *LD_data,
+		   HYPRE_Real *LD_data,
 
-		   double *rhs,
+		   HYPRE_Real *rhs,
 
 		   HYPRE_Int num_dofs)
 
@@ -122,15 +122,15 @@ HYPRE_Int hypre_LDsolve(double *x,
   return ierr;
 
 }
-HYPRE_Int hypre_Dsolve(double *x,
+HYPRE_Int hypre_Dsolve(HYPRE_Real *x,
 
 		 HYPRE_Int *i_ILUdof_to_dof,
 		   
 		 HYPRE_Int *i_ILUdof_ILUdof,
 		 HYPRE_Int *j_ILUdof_ILUdof,
-		 double *LD_data,
+		 HYPRE_Real *LD_data,
 
-		 double *rhs,
+		 HYPRE_Real *rhs,
 
 		 HYPRE_Int num_dofs)
 
@@ -149,14 +149,14 @@ HYPRE_Int hypre_Dsolve(double *x,
   return ierr;
 
 }
-HYPRE_Int hypre_Usolve(double *x,
+HYPRE_Int hypre_Usolve(HYPRE_Real *x,
 
 		 HYPRE_Int *i_ILUdof_to_dof,
 		 HYPRE_Int *i_ILUdof_ILUdof_t,
 		 HYPRE_Int *j_ILUdof_ILUdof_t,
-		 double *U_data,
+		 HYPRE_Real *U_data,
 
-		 double *rhs,
+		 HYPRE_Real *rhs,
 
 		 HYPRE_Int num_dofs)
 

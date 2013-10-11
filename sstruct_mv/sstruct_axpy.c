@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * SStruct axpy routine
@@ -26,7 +23,7 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPAxpy( double                alpha,
+hypre_SStructPAxpy( HYPRE_Complex         alpha,
                     hypre_SStructPVector *px,
                     hypre_SStructPVector *py )
 {
@@ -48,7 +45,7 @@ hypre_SStructPAxpy( double                alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructAxpy( double               alpha,
+hypre_SStructAxpy( HYPRE_Complex        alpha,
                    hypre_SStructVector *x,
                    hypre_SStructVector *y )
 {

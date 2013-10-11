@@ -60,7 +60,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    HYPRE_Int             jump       = (smsg_data -> jump);
    HYPRE_Int             relax_type = (smsg_data -> relax_type);
    HYPRE_Int             usr_jacobi_weight= (smsg_data -> usr_jacobi_weight);
-   double                jacobi_weight    = (smsg_data -> jacobi_weight);
+   HYPRE_Real            jacobi_weight    = (smsg_data -> jacobi_weight);
    HYPRE_Int            *num_grids  = (smsg_data -> num_grids);
    HYPRE_Int             num_all_grids;
    HYPRE_Int             num_levels;
@@ -70,8 +70,8 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_StructGrid    **Py_grid_a;
    hypre_StructGrid    **Pz_grid_a;
                     
-   double               *data;
-   double               *tdata;
+   HYPRE_Real           *data;
+   HYPRE_Real           *tdata;
    HYPRE_Int             data_size = 0;
    hypre_StructMatrix  **A_a;
    hypre_StructMatrix  **Px_a;
@@ -559,7 +559,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-   data = hypre_SharedCTAlloc(double, data_size);
+   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
    (smsg_data -> data) = data;
 
    hypre_StructVectorInitializeData(t_a[0], data);
@@ -785,8 +785,8 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    if ((smsg_data -> logging) > 0)
    {
       max_iter = (smsg_data -> max_iter);
-      (smsg_data -> norms)     = hypre_TAlloc(double, max_iter);
-      (smsg_data -> rel_norms) = hypre_TAlloc(double, max_iter);
+      (smsg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
+      (smsg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
    }
 
 #if DEBUG

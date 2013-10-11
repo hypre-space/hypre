@@ -518,9 +518,9 @@ do
                TestDirNames="$TestDirNames $DirPart"
                case $DirPart in
                   TEST_examples)
-                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
+#                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
                      cd ../examples
-                     for file in $ExampleFiles
+                     for file in ex*
                      do
                         if [ -x $file ]
                         then

@@ -124,25 +124,25 @@ hypre_F90_IFACE(hypre_structsmggetmemoryuse, HYPRE_STRUCTSMGGETMEMORYUSE)
 void
 hypre_F90_IFACE(hypre_structsmgsettol, HYPRE_STRUCTSMGSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructSMGSetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (tol) ) );
+           hypre_F90_PassReal (tol) ) );
 }
 
 void
 hypre_F90_IFACE(hypre_structsmggettol, HYPRE_STRUCTSMGGETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructSMGGetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (tol) ) );
+           hypre_F90_PassRealRef (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -379,11 +379,11 @@ hypre_F90_IFACE(hypre_structsmggetnumiterations, HYPRE_STRUCTSMGGETNUMITERATIONS
 void
 hypre_F90_IFACE(hypre_structsmggetfinalrelative, HYPRE_STRUCTSMGGETFINALRELATIVE)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructSMGGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (norm) ) );
+           hypre_F90_PassRealRef (norm) ) );
 }

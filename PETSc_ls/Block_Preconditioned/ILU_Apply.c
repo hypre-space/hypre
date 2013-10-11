@@ -22,7 +22,7 @@
 HYPRE_Int ILU_Apply ( void *solver_data, Vec b, Vec x)
      /* Wrapper around inc_fact_solve in form needed by Petsc */
 {
-  double    *ILU_b, *ILU_x;
+  HYPRE_Real    *ILU_b, *ILU_x;
   void      *ilu_data;
   Scalar     zero = 0.0;
   BJData    *BJ_data = solver_data;

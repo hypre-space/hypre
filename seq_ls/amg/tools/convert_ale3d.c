@@ -37,19 +37,19 @@ char *argv[];
    hypre_longint ft;
    HYPRE_Int      idum;
    HYPRE_Int      jdiag;
-   double   adum;
-   double   atemp;
+   HYPRE_Real   adum;
+   HYPRE_Real   atemp;
    HYPRE_Int      ctemp;
    HYPRE_Int      ret;
 
-   double  *S_data;
+   HYPRE_Real  *S_data;
    HYPRE_Int     *S_ia;
    HYPRE_Int     *S_ja;
    hypre_Matrix  *A;
 
-   double  *x;
-   double  *y;
-   double  *z;
+   HYPRE_Real  *x;
+   HYPRE_Real  *y;
+   HYPRE_Real  *z;
    
    HYPRE_Int      n, m, i, j;
 
@@ -108,7 +108,7 @@ char *argv[];
 
    /* read in column info, S_ja, and values S_data */
    S_ja = hypre_TAlloc(HYPRE_Int, S_ia[n]);
-   S_data = hypre_TAlloc(double, S_ia[n]);
+   S_data = hypre_TAlloc(HYPRE_Real, S_ia[n]);
  
   
    for (i = 0; i < S_ia[n]; i++)

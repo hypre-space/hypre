@@ -28,12 +28,12 @@ typedef struct
    HYPRE_Int      overlap;
    HYPRE_Int      num_functions;
    HYPRE_Int      use_nonsymm;  
-   double   relax_weight;
+   HYPRE_Real   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
    hypre_CSRMatrix *A_boundary;
    hypre_ParVector *Vtemp;
-   double  *scale;
+   HYPRE_Real  *scale;
    HYPRE_Int     *dof_func;
    HYPRE_Int     *pivots;
    

@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <stdarg.h>
 
-#define REAL_DH double
+#define REAL_DH HYPRE_Real
 
 /*-----------------------------------------------------------------------
  * compile-time dependent includes from other libraries.

@@ -96,14 +96,14 @@ hypre_F90_IFACE(hypre_parasailssolve, HYPRE_PARASAILSSOLVE)
 void 
 hypre_F90_IFACE(hypre_parasailssetparams, HYPRE_PARASAILSSETPARAMS)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *thresh,
+     hypre_F90_Real *thresh,
      hypre_F90_Int *nlevels,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsSetParams(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDbl (thresh),
+           hypre_F90_PassReal (thresh),
            hypre_F90_PassInt (nlevels) ) );
 }
 
@@ -114,26 +114,26 @@ hypre_F90_IFACE(hypre_parasailssetparams, HYPRE_PARASAILSSETPARAMS)
 void 
 hypre_F90_IFACE(hypre_parasailssetthresh, HYPRE_PARASAILSSETTHRESH)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *thresh,
+     hypre_F90_Real *thresh,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsSetThresh(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDbl (thresh) ) );
+           hypre_F90_PassReal (thresh) ) );
 }
 
 
 void 
 hypre_F90_IFACE(hypre_parasailsgetthresh, HYPRE_PARASAILSGETTHRESH)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *thresh,
+     hypre_F90_Real *thresh,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsGetThresh(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDblRef (thresh) ) );
+           hypre_F90_PassRealRef (thresh) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -172,26 +172,26 @@ hypre_F90_IFACE(hypre_parasailsgetnlevels, HYPRE_PARASAILSGETNLEVELS)
 void
 hypre_F90_IFACE(hypre_parasailssetfilter, HYPRE_PARASAILSSETFILTER)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *filter,
+     hypre_F90_Real *filter,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsSetFilter(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDbl (filter)  ) );
+           hypre_F90_PassReal (filter)  ) );
 }
 
 
 void
 hypre_F90_IFACE(hypre_parasailsgetfilter, HYPRE_PARASAILSGETFILTER)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *filter,
+     hypre_F90_Real *filter,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsGetFilter(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDblRef (filter)  ) );
+           hypre_F90_PassRealRef (filter)  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -229,25 +229,25 @@ hypre_F90_IFACE(hypre_parasailsgetsym, HYPRE_PARASAILSGETSYM)
 void
 hypre_F90_IFACE(hypre_parasailssetloadbal, HYPRE_PARASAILSSETLOADBAL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *loadbal,
+     hypre_F90_Real *loadbal,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsSetLoadbal(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDbl (loadbal) ) );
+           hypre_F90_PassReal (loadbal) ) );
 }
 
 void
 hypre_F90_IFACE(hypre_parasailsgetloadbal, HYPRE_PARASAILSGETLOADBAL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *loadbal,
+     hypre_F90_Real *loadbal,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParaSailsGetLoadbal(
            hypre_F90_PassObj (HYPRE_Solver, solver), 
-           hypre_F90_PassDblRef (loadbal) ) );
+           hypre_F90_PassRealRef (loadbal) ) );
 }
 
 /*--------------------------------------------------------------------------

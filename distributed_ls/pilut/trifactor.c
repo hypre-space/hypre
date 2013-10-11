@@ -47,14 +47,14 @@
 * This function performs the forward and backward substitution.
 * It solves the system LDUx = b.
 **************************************************************************/
-void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
+void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPRE_Real *b,
                    hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int ii, i, j, l, TAG;
   HYPRE_Int nlevels, snbrpes, rnbrpes;
   HYPRE_Int *perm, *iperm, *nnodes, *rowptr, *colind,
     *spes, *sptr, *sindex, *auxsptr, *rpes, *rdone, *rnum;
-  double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
+  HYPRE_Real *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
   hypre_MPI_Status Status;
   hypre_MPI_Request *receive_requests;
 
@@ -348,7 +348,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
   HYPRE_Int *rowdist, *sptr, *sindex, *spes, *rpes,
     *perm, *iperm, *newrowptr, *newcolind,
     *srowptr, *erowptr, *colind, *rnum ;
-  double *newvalues, *values, *x, **raddr;
+  HYPRE_Real *newvalues, *values, *x, **raddr;
   TriSolveCommType *TriSolveComm;
   hypre_MPI_Status Status;
   hypre_MPI_Request *receive_requests;
@@ -438,7 +438,7 @@ void hypre_SetUpFactor(DataDistType *ddist, FactorMatType *ldu, HYPRE_Int maxnz,
 
           TriSolveComm->rdone   = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes");
   rpes  = TriSolveComm->rpes    = hypre_idx_malloc(rnbrpes,  "hypre_SetUpFactor: TriSolveComm->rpes" );
-  raddr = TriSolveComm->raddr   = (double**) hypre_mymalloc( sizeof(double*)*(rnbrpes+1),
+  raddr = TriSolveComm->raddr   = (HYPRE_Real**) hypre_mymalloc( sizeof(HYPRE_Real*)*(rnbrpes+1),
 					       "hypre_SetUpFactor: TriSolveComm->raddr");
 
   /* Save send addresses, lengths, and construct spes */

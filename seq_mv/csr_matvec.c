@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Matvec functions for hypre_CSRMatrix class.
@@ -27,13 +24,13 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatvec( double           alpha,
-              hypre_CSRMatrix *A,
-              hypre_Vector    *x,
-              double           beta,
-              hypre_Vector    *y     )
+hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
+                       hypre_CSRMatrix *A,
+                       hypre_Vector    *x,
+                       HYPRE_Complex    beta,
+                       hypre_Vector    *y     )
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
@@ -42,8 +39,8 @@ hypre_CSRMatrixMatvec( double           alpha,
    HYPRE_Int        *A_rownnz = hypre_CSRMatrixRownnz(A);
    HYPRE_Int         num_rownnz = hypre_CSRMatrixNumRownnz(A);
 
-   double     *x_data = hypre_VectorData(x);
-   double     *y_data = hypre_VectorData(y);
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *y_data = hypre_VectorData(y);
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         y_size = hypre_VectorSize(y);
    HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
@@ -52,13 +49,13 @@ hypre_CSRMatrixMatvec( double           alpha,
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
 
-   double      temp, tempx;
+   HYPRE_Complex     temp, tempx;
 
    HYPRE_Int         i, j, jj;
 
    HYPRE_Int         m;
 
-   double     xpar=0.7;
+   HYPRE_Real        xpar=0.7;
 
    HYPRE_Int         ierr = 0;
 
@@ -74,31 +71,31 @@ hypre_CSRMatrixMatvec( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
+   hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
 
-    if (num_cols != x_size)
-              ierr = 1;
+   if (num_cols != x_size)
+      ierr = 1;
 
-    if (num_rows != y_size)
-              ierr = 2;
+   if (num_rows != y_size)
+      ierr = 2;
 
-    if (num_cols != x_size && num_rows != y_size)
-              ierr = 3;
+   if (num_cols != x_size && num_rows != y_size)
+      ierr = 3;
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
 
-    if (alpha == 0.0)
-    {
+   if (alpha == 0.0)
+   {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-       for (i = 0; i < num_rows*num_vectors; i++)
-          y_data[i] *= beta;
+      for (i = 0; i < num_rows*num_vectors; i++)
+         y_data[i] *= beta;
 
-       return ierr;
-    }
+      return ierr;
+   }
 
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
@@ -113,16 +110,16 @@ hypre_CSRMatrixMatvec( double           alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_rows*num_vectors; i++)
-	    y_data[i] = 0.0;
+         for (i = 0; i < num_rows*num_vectors; i++)
+            y_data[i] = 0.0;
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_rows*num_vectors; i++)
-	    y_data[i] *= temp;
+         for (i = 0; i < num_rows*num_vectors; i++)
+            y_data[i] *= temp;
       }
    }
 
@@ -204,7 +201,7 @@ hypre_CSRMatrixMatvec( double           alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows*num_vectors; i++)
-	 y_data[i] *= alpha;
+         y_data[i] *= alpha;
    }
 
    return ierr;
@@ -221,20 +218,20 @@ hypre_CSRMatrixMatvec( double           alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatvecT( double           alpha,
-               hypre_CSRMatrix *A,
-               hypre_Vector    *x,
-               double           beta,
-               hypre_Vector    *y     )
+hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
+                        hypre_CSRMatrix *A,
+                        hypre_Vector    *x,
+                        HYPRE_Complex    beta,
+                        hypre_Vector    *y     )
 {
-   double     *A_data    = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
    HYPRE_Int         num_rows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         num_cols  = hypre_CSRMatrixNumCols(A);
 
-   double     *x_data = hypre_VectorData(x);
-   double     *y_data = hypre_VectorData(y);
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *y_data = hypre_VectorData(y);
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         y_size = hypre_VectorSize(y);
    HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
@@ -243,7 +240,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
 
-   double      temp;
+   HYPRE_Complex     temp;
 
    HYPRE_Int         i, i1, j, jv, jj, ns, ne, size, rest;
    HYPRE_Int         num_threads;
@@ -261,16 +258,16 @@ hypre_CSRMatrixMatvecT( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
+   hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
  
-    if (num_rows != x_size)
-              ierr = 1;
+   if (num_rows != x_size)
+      ierr = 1;
 
-    if (num_cols != y_size)
-              ierr = 2;
+   if (num_cols != y_size)
+      ierr = 2;
 
-    if (num_rows != x_size && num_cols != y_size)
-              ierr = 3;
+   if (num_rows != x_size && num_cols != y_size)
+      ierr = 3;
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
@@ -281,7 +278,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
-	 y_data[i] *= beta;
+         y_data[i] *= beta;
 
       return ierr;
    }
@@ -299,16 +296,16 @@ hypre_CSRMatrixMatvecT( double           alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_cols*num_vectors; i++)
-	    y_data[i] = 0.0;
+         for (i = 0; i < num_cols*num_vectors; i++)
+            y_data[i] = 0.0;
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_cols*num_vectors; i++)
-	    y_data[i] *= temp;
+         for (i = 0; i < num_cols*num_vectors; i++)
+            y_data[i] *= temp;
       }
    }
 
@@ -403,12 +400,12 @@ hypre_CSRMatrixMatvecT( double           alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
-	 y_data[i] *= alpha;
+         y_data[i] *= alpha;
    }
 
    return ierr;
 }
-#else
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvecT
@@ -421,20 +418,20 @@ hypre_CSRMatrixMatvecT( double           alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatvecT( double           alpha,
-               hypre_CSRMatrix *A,
-               hypre_Vector    *x,
-               double           beta,
-               hypre_Vector    *y     )
+hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
+                        hypre_CSRMatrix *A,
+                        hypre_Vector    *x,
+                        HYPRE_Complex    beta,
+                        hypre_Vector    *y     )
 {
-   double     *A_data    = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data    = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
    HYPRE_Int         num_rows  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         num_cols  = hypre_CSRMatrixNumCols(A);
 
-   double     *x_data = hypre_VectorData(x);
-   double     *y_data = hypre_VectorData(y);
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *y_data = hypre_VectorData(y);
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         y_size = hypre_VectorSize(y);
    HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
@@ -443,9 +440,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
 
-   double      temp;
+   HYPRE_Complex     temp;
 
-   double      *y_data_expand;
+   HYPRE_Complex    *y_data_expand;
    HYPRE_Int         my_thread_num = 0, offset = 0;
    
    HYPRE_Int         i, j, jv, jj;
@@ -464,16 +461,16 @@ hypre_CSRMatrixMatvecT( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
+   hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
  
-    if (num_rows != x_size)
-              ierr = 1;
+   if (num_rows != x_size)
+      ierr = 1;
 
-    if (num_cols != y_size)
-              ierr = 2;
+   if (num_cols != y_size)
+      ierr = 2;
 
-    if (num_rows != x_size && num_cols != y_size)
-              ierr = 3;
+   if (num_rows != x_size && num_cols != y_size)
+      ierr = 3;
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
@@ -484,7 +481,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
-	 y_data[i] *= beta;
+         y_data[i] *= beta;
 
       return ierr;
    }
@@ -502,16 +499,16 @@ hypre_CSRMatrixMatvecT( double           alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_cols*num_vectors; i++)
-	    y_data[i] = 0.0;
+         for (i = 0; i < num_cols*num_vectors; i++)
+            y_data[i] = 0.0;
       }
       else
       {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_cols*num_vectors; i++)
-	    y_data[i] *= temp;
+         for (i = 0; i < num_cols*num_vectors; i++)
+            y_data[i] *= temp;
       }
    }
 
@@ -521,7 +518,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
    num_threads = hypre_NumThreads();
    if (num_threads > 1)
    {
-      y_data_expand = hypre_CTAlloc(double, num_threads*y_size);
+      y_data_expand = hypre_CTAlloc(HYPRE_Complex, num_threads*y_size);
 
       if ( num_vectors==1 )
       {
@@ -615,46 +612,43 @@ hypre_CSRMatrixMatvecT( double           alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_cols*num_vectors; i++)
-	 y_data[i] *= alpha;
+         y_data[i] *= alpha;
    }
 
    return ierr;
 }
 
-
-#endif
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
-                                                                                                              
+
 HYPRE_Int
-hypre_CSRMatrixMatvec_FF( double           alpha,
-              hypre_CSRMatrix *A,
-              hypre_Vector    *x,
-              double           beta,
-              hypre_Vector    *y,
-              HYPRE_Int             *CF_marker_x,
-              HYPRE_Int             *CF_marker_y,
-              HYPRE_Int fpt )
+hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
+                          hypre_CSRMatrix *A,
+                          hypre_Vector    *x,
+                          HYPRE_Complex    beta,
+                          hypre_Vector    *y,
+                          HYPRE_Int       *CF_marker_x,
+                          HYPRE_Int       *CF_marker_y,
+                          HYPRE_Int        fpt )
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-                                                                                                              
-   double     *x_data = hypre_VectorData(x);
-   double     *y_data = hypre_VectorData(y);
+
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *y_data = hypre_VectorData(y);
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         y_size = hypre_VectorSize(y);
-                                                                                                              
-   double      temp;
-                                                                                                              
+
+   HYPRE_Complex      temp;
+
    HYPRE_Int         i, jj;
-                                                                                                              
+
    HYPRE_Int         ierr = 0;
-                                                                                                              
-                                                                                                              
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
     *  length of X doesn't equal the number of columns of A,
@@ -665,37 +659,37 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
-                                                                                                              
-    if (num_cols != x_size)
-              ierr = 1;
-                                                                                                              
-    if (num_rows != y_size)
-              ierr = 2;
-                                                                                                              
-    if (num_cols != x_size && num_rows != y_size)
-              ierr = 3;
-                                                                                                              
+
+   if (num_cols != x_size)
+      ierr = 1;
+
+   if (num_rows != y_size)
+      ierr = 2;
+
+   if (num_cols != x_size && num_rows != y_size)
+      ierr = 3;
+
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
     *-----------------------------------------------------------------------*/
-                                                                                                              
-    if (alpha == 0.0)
-    {
+
+   if (alpha == 0.0)
+   {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-       for (i = 0; i < num_rows; i++)
-          if (CF_marker_x[i] == fpt) y_data[i] *= beta;
-                                                                                                              
-       return ierr;
-    }
-                                                                                                              
+      for (i = 0; i < num_rows; i++)
+         if (CF_marker_x[i] == fpt) y_data[i] *= beta;
+
+      return ierr;
+   }
+
    /*-----------------------------------------------------------------------
     * y = (beta/alpha)*y
     *-----------------------------------------------------------------------*/
-                                                                                                              
+
    temp = beta / alpha;
-                                                                                                              
+
    if (temp != 1.0)
    {
       if (temp == 0.0)
@@ -715,15 +709,15 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
             if (CF_marker_x[i] == fpt) y_data[i] *= temp;
       }
    }
-                                                                                                              
+
    /*-----------------------------------------------------------------
     * y += A*x
     *-----------------------------------------------------------------*/
-                                                                                                              
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,jj) HYPRE_SMP_SCHEDULE
 #endif
-                                                                                                              
+
    for (i = 0; i < num_rows; i++)
    {
       if (CF_marker_x[i] == fpt)
@@ -734,12 +728,11 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
          y_data[i] = temp;
       }
    }
-                                                                                                              
-                                                                                                              
+
    /*-----------------------------------------------------------------
     * y = alpha*y
     *-----------------------------------------------------------------*/
-                                                                                                              
+
    if (alpha != 1.0)
    {
 #ifdef HYPRE_USING_OPENMP
@@ -748,6 +741,6 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
       for (i = 0; i < num_rows; i++)
          if (CF_marker_x[i] == fpt) y_data[i] *= alpha;
    }
-                                                                                                              
+
    return ierr;
 }

@@ -44,7 +44,7 @@
 void     PCG(x, b, tol, data)
 hypre_Vector  *x;
 hypre_Vector  *b;
-double   tol;
+HYPRE_Real   tol;
 void    *data;
 {
    PCGData  *pcg_data      = data;
@@ -60,16 +60,16 @@ void    *data;
    HYPRE_Int      (*precond)()   = PCGDataPrecond(pcg_data);
    void      *precond_data = PCGDataPrecondData(pcg_data);
 
-   double     alpha, beta;
-   double     gamma, gamma_old;
-   double     bi_prod, i_prod, eps;
+   HYPRE_Real alpha, beta;
+   HYPRE_Real gamma, gamma_old;
+   HYPRE_Real bi_prod, i_prod, eps;
    
    HYPRE_Int        i = 0;
 	     
    /* logging variables */
-   double    *norm_log;
-   double    *rel_norm_log;
-   double    *conv_rate;
+   HYPRE_Real    *norm_log;
+   HYPRE_Real    *rel_norm_log;
+   HYPRE_Real    *conv_rate;
    FILE      *log_fp;
    HYPRE_Int        j;
 
@@ -78,9 +78,9 @@ void    *data;
     * Initialize some logging variables
     *-----------------------------------------------------------------------*/
 
-   norm_log     = hypre_CTAlloc(double, max_iter);
-   rel_norm_log = hypre_CTAlloc(double, max_iter);
-   conv_rate    = hypre_CTAlloc(double, max_iter+1);
+   norm_log     = hypre_CTAlloc(HYPRE_Real, max_iter);
+   rel_norm_log = hypre_CTAlloc(HYPRE_Real, max_iter);
+   conv_rate    = hypre_CTAlloc(HYPRE_Real, max_iter+1);
 
  
    /*-----------------------------------------------------------------------

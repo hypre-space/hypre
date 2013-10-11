@@ -18,7 +18,7 @@
  * OrderStat - Utility functions for selecting the i-th order statistic,
  * i.e., the i-th smallest element in a list of n elements.  There is one
  * user function in this file:  randomized_select(a, p, r, i), which 
- * selects the i-th order statistic from the double precision array a[p:r].
+ * selects the i-th order statistic from the HYPRE_Real precision array a[p:r].
    The contents of the array are altered by the function.
  *
  * Reference: Cormen, Leiserson, Rivest, Introduction to Algorithms, p. 187.
@@ -33,9 +33,9 @@
  * elements in a[q+1:r].
  *--------------------------------------------------------------------------*/
 
-static HYPRE_Int partition(double *a, HYPRE_Int p, HYPRE_Int r)
+static HYPRE_Int partition(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r)
 {
-    double x, temp;
+    HYPRE_Real x, temp;
     HYPRE_Int i, j;
 
     x = a[p];
@@ -69,9 +69,9 @@ static HYPRE_Int partition(double *a, HYPRE_Int p, HYPRE_Int r)
  * a random pivot element.
  *--------------------------------------------------------------------------*/
 
-static HYPRE_Int randomized_partition(double *a, HYPRE_Int p, HYPRE_Int r)
+static HYPRE_Int randomized_partition(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r)
 {
-    double temp;
+    HYPRE_Real temp;
     HYPRE_Int i;
 
     /* select a random number in [p,r] */
@@ -85,12 +85,12 @@ static HYPRE_Int randomized_partition(double *a, HYPRE_Int p, HYPRE_Int r)
 }
 
 /*--------------------------------------------------------------------------
- * randomized_select - Return the i-th smallest element of the double 
+ * randomized_select - Return the i-th smallest element of the HYPRE_Real 
  * precision array a[p:r].  The contents of the array are altered on return.
  * "i" should range from 1 to r-p+1.
  *--------------------------------------------------------------------------*/
 
-double randomized_select(double *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i)
+HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i)
 {
     HYPRE_Int q, k;
 

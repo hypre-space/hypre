@@ -51,7 +51,7 @@ HYPRE_Int hypre_AMGe2dGraphics(hypre_AMGeMatrixTopology **A,
 
   HYPRE_Int i_color_to_choose;
 
-  double *x_coord, *y_coord;
+  HYPRE_Real *x_coord, *y_coord;
 
   HYPRE_Int *i_AE_color;
   HYPRE_Int *i_element_element_0 = hypre_AMGeMatrixTopologyIAEElement(A[0]);
@@ -128,8 +128,8 @@ HYPRE_Int hypre_AMGe2dGraphics(hypre_AMGeMatrixTopology **A,
   x1 = hypre_CTAlloc(float, num_nodes);
   y1 = hypre_CTAlloc(float, num_nodes);
 
-  x_coord = hypre_CTAlloc(double, num_nodes);
-  y_coord = hypre_CTAlloc(double, num_nodes);
+  x_coord = hypre_CTAlloc(HYPRE_Real, num_nodes);
+  y_coord = hypre_CTAlloc(HYPRE_Real, num_nodes);
 
   f = fopen(coordinates, "r");
   for( i = 0; i < num_nodes; i++ )

@@ -114,7 +114,7 @@ void SubdomainGraph_dhDestroy(SubdomainGraph_dh s)
 void SubdomainGraph_dhInit(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  double t1 = hypre_MPI_Wtime();
+  HYPRE_Real t1 = hypre_MPI_Wtime();
 
   if (blocks < 1) blocks = 1;
 
@@ -170,7 +170,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 {
   START_FUNC_DH
     HYPRE_Int i, j, k; 
-    double max = 0, min = INT_MAX;
+    HYPRE_Real max = 0, min = INT_MAX;
 
     hypre_fprintf(fp, "\n------------- SubdomainGraph_dhPrintStatsLong -----------\n");
     hypre_fprintf(fp, "colors used     = %i\n", s->colors);
@@ -182,12 +182,12 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     for (i=0; i<s->blocks; ++i) {
       HYPRE_Int inNodes = s->row_count[i] - s->bdry_count[i];
       HYPRE_Int bdNodes = s->bdry_count[i];
-      double ratio;
+      HYPRE_Real ratio;
 
       if (bdNodes == 0) {
         ratio = -1;
       } else {
-        ratio = (double)inNodes/(double)bdNodes;
+        ratio = (HYPRE_Real)inNodes/(HYPRE_Real)bdNodes;
       }
 
       max = MAX(max, ratio);
@@ -289,7 +289,7 @@ void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
   HYPRE_Int m, n, beg_row;
-  double t1;
+  HYPRE_Real t1;
 
   /*-------------------------------------------------------
    * get number of local rows (m), global rows (n), and
@@ -471,7 +471,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   START_FUNC_DH
   HYPRE_Int m, n, beg_row;
   bool symmetric;
-  double t1;
+  HYPRE_Real t1;
 
   symmetric = Parser_dhHasSwitch(parser_dh, "-sym"); CHECK_V_ERROR;
   if (Parser_dhHasSwitch(parser_dh, "-makeSymmetric")) {
@@ -1696,7 +1696,7 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
   START_FUNC_DH
   HYPRE_Int i;
   HYPRE_Int blocks = np_dh;
-  double ratio[25];
+  HYPRE_Real ratio[25];
 
   if (myid_dh == 0) {
     if (np_dh == 1) blocks = s->blocks;
@@ -1711,7 +1711,7 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
       if (s->bdry_count[i] == 0) {
         ratio[i] = -1;
       } else {
-        ratio[i] = (double)(s->row_count[i] - s->bdry_count[i])/(double)s->bdry_count[i];
+        ratio[i] = (HYPRE_Real)(s->row_count[i] - s->bdry_count[i])/(HYPRE_Real)s->bdry_count[i];
       }
     }
 
@@ -1753,7 +1753,7 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
 void SubdomainGraph_dhPrintStats(SubdomainGraph_dh sg, FILE *fp)
 {
   START_FUNC_DH
-  double *timing = sg->timing;
+  HYPRE_Real *timing = sg->timing;
 
   fprintf_dh(fp, "\nSubdomainGraph timing report\n");
   fprintf_dh(fp, "-----------------------------\n");

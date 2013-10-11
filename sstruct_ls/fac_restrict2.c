@@ -522,9 +522,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    HYPRE_Int               xci;
    HYPRE_Int               xfi;
 
-   double               ***xfp;
-   double               ***xcp;
-   double               ***xcp_temp;
+   HYPRE_Real           ***xfp;
+   HYPRE_Real           ***xcp;
+   HYPRE_Real           ***xcp_temp;
 
    hypre_Index             loop_size, lindex;
    hypre_Index             start, fbox_size, node_offset;
@@ -541,8 +541,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    HYPRE_Int               imax, jmax, kmax;
    HYPRE_Int               icell, jcell, kcell, ijkcell;
 
-   double                 *sum;
-   double                  scaling;
+   HYPRE_Real             *sum;
+   HYPRE_Real              scaling;
 
    HYPRE_Int               part_crse= 0;
    HYPRE_Int               part_fine= 1;
@@ -586,7 +586,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    {
       num_coarse_cells*= 2;
    }
-   sum= hypre_CTAlloc(double, num_coarse_cells);
+   sum= hypre_CTAlloc(HYPRE_Real, num_coarse_cells);
 
    /*--------------------------------------------------------------------------
     * Scaling for averaging restriction.
@@ -624,27 +624,27 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
     *-----------------------------------------------------------------------*/
    if (ndim > 1)
    {
-      xcp_temp= hypre_TAlloc(double **, (ndim-1));
-      xcp     = hypre_TAlloc(double **, (ndim-1));
+      xcp_temp= hypre_TAlloc(HYPRE_Real **, (ndim-1));
+      xcp     = hypre_TAlloc(HYPRE_Real **, (ndim-1));
       for (k= 0; k< (ndim-1); k++)
       {
-         xcp_temp[k]= hypre_TAlloc(double *, 2);
-         xcp[k]     = hypre_TAlloc(double *, 2);
+         xcp_temp[k]= hypre_TAlloc(HYPRE_Real *, 2);
+         xcp[k]     = hypre_TAlloc(HYPRE_Real *, 2);
       }
    }
-   else /* 1d does not really require these double ptrs */
+   else /* 1d does not really require these HYPRE_Real ptrs */
    {
-      xcp_temp   = hypre_TAlloc(double **, 1);
-      xcp        = hypre_TAlloc(double **, 1);
-      xcp_temp[0]= hypre_TAlloc(double *, 1);
-      xcp[0]     = hypre_TAlloc(double *, 1);
+      xcp_temp   = hypre_TAlloc(HYPRE_Real **, 1);
+      xcp        = hypre_TAlloc(HYPRE_Real **, 1);
+      xcp_temp[0]= hypre_TAlloc(HYPRE_Real *, 1);
+      xcp[0]     = hypre_TAlloc(HYPRE_Real *, 1);
    }
 
    /* memory allocation of xfp is okay for all dimensions */
-   xfp= hypre_TAlloc(double **, rfactors[2]);
+   xfp= hypre_TAlloc(HYPRE_Real **, rfactors[2]);
    for (k= 0; k< rfactors[2]; k++)
    {
-      xfp[k]= hypre_TAlloc(double *, rfactors[1]);
+      xfp[k]= hypre_TAlloc(HYPRE_Real *, rfactors[1]);
    }
 
    for (var= 0; var< nvars; var++)

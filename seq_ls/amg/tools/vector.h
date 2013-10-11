@@ -30,7 +30,7 @@
 
 typedef struct
 {
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int      size;
 
 } hypre_Vector;
@@ -54,7 +54,7 @@ typedef struct
 
 
 /* vector.c */
-hypre_Vector *hypre_NewVector P((double *data , HYPRE_Int size ));
+hypre_Vector *hypre_NewVector P((HYPRE_Real *data , HYPRE_Int size ));
 void hypre_FreeVector P((hypre_Vector *vector ));
 
 #undef P

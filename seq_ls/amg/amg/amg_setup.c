@@ -62,18 +62,18 @@ void    *data;
    HYPRE_Int     *numv;
    HYPRE_Int     *nump;
    
-   double  *a;
+   HYPRE_Real  *a;
    HYPRE_Int     *ia;
    HYPRE_Int     *ja; 
    
-   double  *b;
+   HYPRE_Real  *b;
    HYPRE_Int     *ib;
    HYPRE_Int     *jb;
    
    HYPRE_Int      i, j, k;
    HYPRE_Int      decr;
 
-   double  *vtmp;
+   HYPRE_Real  *vtmp;
    hypre_Vector  *Vtemp;
 
    char     fnam[255];
@@ -158,7 +158,7 @@ void    *data;
    ndima = hypre_NDIMA(hypre_MatrixIA(A)[num_variables]-1);
    ndimb = hypre_NDIMB(hypre_MatrixIA(A)[num_variables]-1);
 
-   b  = hypre_CTAlloc(double, ndimb);
+   b  = hypre_CTAlloc(HYPRE_Real, ndimb);
    ib = hypre_CTAlloc(HYPRE_Int, ndimu);
    jb = hypre_CTAlloc(HYPRE_Int, ndimb);
    P  = hypre_NewMatrix(b, ib, jb, num_variables);
@@ -170,7 +170,7 @@ void    *data;
    ipmx  = hypre_CTAlloc(HYPRE_Int, num_levels);
    icg   = hypre_CTAlloc(HYPRE_Int, ndimu);
    ifg   = hypre_CTAlloc(HYPRE_Int, ndimu);
-   vtmp  = hypre_CTAlloc(double, num_variables);
+   vtmp  = hypre_CTAlloc(HYPRE_Real, num_variables);
    Vtemp = hypre_NewVector(vtmp,num_variables);
    
    /* set fine level point and variable bounds */

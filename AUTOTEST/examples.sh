@@ -11,30 +11,46 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
+tests=""
 
 # Echo usage information
-case $1 in
-   -h|-help)
-cat <<EOF
+while [ "$*" ]
+do
+   case $1 in
+      -h|-help)
+         cat <<EOF
 
-   $0 [-h] {ex_dir} [options for examples make]
+   $0 [options] {ex_dir} [options for examples]
 
    where: {ex_dir}  is the hypre examples directory
+          -<test>   run <test>  (test = default, bigint, maxdim, complex)
           -h|-help  prints this usage information and exits
 
    This script builds the hypre example codes in {ex_dir} and runs the example
    regression tests in test/TEST_examples.
 
-   Example usage: $0 ../examples
+   Example usage: $0 -maxdim ../examples
 
 EOF
-   exit
-   ;;
-esac
+         exit
+         ;;
+
+      -*)
+         tname=`echo $1 | sed 's/-//'`
+         tests="$tests $tname"
+         shift
+         ;;
+      *)
+         break
+         ;;
+   esac
+done
+
+# If no tests were specified, run default
+if [ "$tests" = "" ]; then
+   tests="default"
+fi
 
 # Setup
 output_dir=`pwd`/$testname.dir
@@ -46,11 +62,17 @@ shift
 # Run make in the examples directory
 cd $ex_dir
 make clean
-make $@
+for tname in $tests
+do
+   make $@ $tname
+done
 
 # Run the examples regression test
 cd ../test
-./runtest.sh $@ TEST_examples/default.sh
+for tname in $tests
+do
+   ./runtest.sh $@ TEST_examples/$tname.sh
+done
 
 # Collect all error files from the tests
 for errfile in $( find TEST_examples -name "*.err" -o -name "*.fil" -o -name "*.out*" )

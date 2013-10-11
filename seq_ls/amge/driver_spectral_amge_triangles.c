@@ -23,7 +23,7 @@ main( HYPRE_Int   argc,
 
   HYPRE_Int max_level;
 
-  double tolerance = 0.5;
+  HYPRE_Real tolerance = 0.5;
 
   /* Interpolation P and stiffness matrices Matrix; ---------------------- */
   hypre_CSRMatrix     **P;
@@ -38,7 +38,7 @@ main( HYPRE_Int   argc,
 
   /* auxiliary arrays for enforcing Dirichlet boundary conditions: -------- */
   HYPRE_Int *i_dof_dof_a, *j_dof_dof_a;
-  double *a_dof_dof;
+  HYPRE_Real *a_dof_dof;
 
 
   /* coarsenode information and coarsenode neighborhood information; ----- */
@@ -70,7 +70,7 @@ main( HYPRE_Int   argc,
   HYPRE_Int *i_node_dof_0, *j_node_dof_0;
 
   HYPRE_Int *i_element_dof_0, *j_element_dof_0;
-  double *element_data;
+  HYPRE_Real *element_data;
 
 
   HYPRE_Int **i_node_dof, **j_node_dof;
@@ -78,7 +78,7 @@ main( HYPRE_Int   argc,
 
   /* element matrices information: ---------------------------------------- */
   HYPRE_Int *i_element_chord_0, *j_element_chord_0;
-  double *a_element_chord_0;
+  HYPRE_Real *a_element_chord_0;
 
   HYPRE_Int *i_chord_dof_0, *j_chord_dof_0;
   HYPRE_Int *Num_chords;
@@ -91,22 +91,22 @@ main( HYPRE_Int   argc,
 
 
   /* node coordinates: ---------------------------------------------------- */  
-  double *x_coord, *y_coord;
+  HYPRE_Real *x_coord, *y_coord;
 
 
   /* ---------------------------------------------------------------------- */
   /*  PCG & V_cycle arrays:                                                 */
   /* ---------------------------------------------------------------------- */
 
-  double *x, *rhs, *r, *v, **w, **d,
+  HYPRE_Real *x, *rhs, *r, *v, **w, **d,
     *aux, *v_coarse, *w_coarse, *d_coarse, *v_fine, *w_fine, *d_fine;
   HYPRE_Int max_iter = 1000;
   HYPRE_Int coarse_level; 
   HYPRE_Int nu = 1;  
 
-  double reduction_factor;
+  HYPRE_Real reduction_factor;
 
-  double  grid_complexity, operator_complexity;
+  HYPRE_Real  grid_complexity, operator_complexity;
 
 
   /*-----------------------------------------------------------
@@ -491,15 +491,15 @@ main( HYPRE_Int   argc,
   /* GS solve pre--smoothing, GS solve post--smoothing; ===================== */
 
 
-  w = hypre_CTAlloc(double*, level+1); 
-  d = hypre_CTAlloc(double*, level+1);
+  w = hypre_CTAlloc(HYPRE_Real*, level+1); 
+  d = hypre_CTAlloc(HYPRE_Real*, level+1);
 
   for (l=0; l < level+1; l++)
     {
       if (Num_dofs[l] > 0)
 	{
-	  w[l] = hypre_CTAlloc(double, Num_dofs[l]);
-	  d[l] = hypre_CTAlloc(double, Num_dofs[l]);
+	  w[l] = hypre_CTAlloc(HYPRE_Real, Num_dofs[l]);
+	  d[l] = hypre_CTAlloc(HYPRE_Real, Num_dofs[l]);
 	}
       else
 	{
@@ -511,19 +511,19 @@ main( HYPRE_Int   argc,
 
   num_dofs = Num_dofs[0];
 
-  x = hypre_CTAlloc(double, num_dofs); 
-  rhs = hypre_CTAlloc(double, num_dofs);
+  x = hypre_CTAlloc(HYPRE_Real, num_dofs); 
+  rhs = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
-  r = hypre_CTAlloc(double, num_dofs); 
-  aux = hypre_CTAlloc(double, num_dofs);
-  v_fine = hypre_CTAlloc(double, num_dofs);
-  w_fine = hypre_CTAlloc(double, num_dofs);
-  d_fine = hypre_CTAlloc(double, num_dofs);
+  r = hypre_CTAlloc(HYPRE_Real, num_dofs); 
+  aux = hypre_CTAlloc(HYPRE_Real, num_dofs);
+  v_fine = hypre_CTAlloc(HYPRE_Real, num_dofs);
+  w_fine = hypre_CTAlloc(HYPRE_Real, num_dofs);
+  d_fine = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
   coarse_level = level;
-  v_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
-  w_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
-  d_coarse = hypre_CTAlloc(double, Num_dofs[coarse_level]);
+  v_coarse = hypre_CTAlloc(HYPRE_Real, Num_dofs[coarse_level]);
+  w_coarse = hypre_CTAlloc(HYPRE_Real, Num_dofs[coarse_level]);
+  d_coarse = hypre_CTAlloc(HYPRE_Real, Num_dofs[coarse_level]);
 
   for (l=0; l < level; l++)
     {

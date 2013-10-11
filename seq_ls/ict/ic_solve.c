@@ -19,11 +19,11 @@
 /* Include C interface to cg_driver */
 #include "ict_facsol_f.h"
 
-HYPRE_Int ic_solve ( void *input_data, double *x, double *b )
+HYPRE_Int ic_solve ( void *input_data, HYPRE_Real *x, HYPRE_Real *b )
 {
    ICData    *ic_data = input_data;
    HYPRE_Int            n, nnz, ierr_solver, ierr_input;
-   double        *b_copy;
+   HYPRE_Real    *b_copy;
    Matrix        *A, *preconditioner;
    HYPRE_Int            i, ierr_ict;
    HYPRE_Int            lenpmx;
@@ -52,7 +52,7 @@ HYPRE_Int ic_solve ( void *input_data, double *x, double *b )
     ICDataIpar(ic_data)[0] = 0;
     ICDataIpar(ic_data)[1] = 0;
 
-    b_copy = talloc(double,n);
+    b_copy = talloc(HYPRE_Real,n);
 
     for ( i=0; i< n; i++ )
     {

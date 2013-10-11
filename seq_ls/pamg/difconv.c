@@ -27,13 +27,13 @@ hypre_GenerateDifConv( HYPRE_Int      nx,
                        HYPRE_Int      P,
                        HYPRE_Int      Q,
                        HYPRE_Int      R,
-                       double  *value )
+                       HYPRE_Real  *value )
 {
    hypre_CSRMatrix *A;
 
    HYPRE_Int    *A_i;
    HYPRE_Int    *A_j;
-   double *A_data;
+   HYPRE_Real *A_data;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;
@@ -154,7 +154,7 @@ hypre_GenerateDifConv( HYPRE_Int      nx,
    }
 
    A_j = hypre_CTAlloc(HYPRE_Int, A_i[num_rows]);
-   A_data = hypre_CTAlloc(double, A_i[num_rows]);
+   A_data = hypre_CTAlloc(HYPRE_Real, A_i[num_rows]);
 
    row_index = 0;
    cnt = 0;

@@ -30,7 +30,7 @@
 
 typedef struct
 {
-   double  *data;
+   HYPRE_Real  *data;
    HYPRE_Int      size;
 
 } hypre_Vector;

@@ -27,9 +27,9 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
     hypre_longint offset;
     HYPRE_Int *counts, *pointers;
     HYPRE_Int row, col;
-    double value;
+    HYPRE_Real value;
     HYPRE_Int *ind;
-    double *val;
+    HYPRE_Real *val;
     HYPRE_Int i, j;
 
     /* skip the comment section */
@@ -65,7 +65,7 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
 
     /* allocate space for whole matrix */
     ind = (HYPRE_Int *)    malloc(nnz * sizeof(HYPRE_Int));
-    val = (double *) malloc(nnz * sizeof(double));
+    val = (HYPRE_Real *) malloc(nnz * sizeof(HYPRE_Real));
     
     /* set pointer to beginning of each row */
     pointers[1] = 0;

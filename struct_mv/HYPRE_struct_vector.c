@@ -59,7 +59,7 @@ HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 HYPRE_Int 
 HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
                              HYPRE_Int          *grid_index,
-                             double              values )
+                             HYPRE_Complex       values )
 {
    hypre_Index  new_grid_index;
                 
@@ -84,7 +84,7 @@ HYPRE_Int
 HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
                                 HYPRE_Int          *ilower,
                                 HYPRE_Int          *iupper,
-                                double             *values )
+                                HYPRE_Complex      *values )
 {
    hypre_Index   new_ilower;
    hypre_Index   new_iupper;
@@ -117,7 +117,7 @@ HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
 HYPRE_Int 
 HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
                                HYPRE_Int          *grid_index,
-                               double              values )
+                               HYPRE_Complex       values )
 {
    hypre_Index  new_grid_index;
                 
@@ -142,7 +142,7 @@ HYPRE_Int
 HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
                                   HYPRE_Int          *ilower,
                                   HYPRE_Int          *iupper,
-                                  double             *values )
+                                  HYPRE_Complex      *values )
 {
    hypre_Index   new_ilower;
    hypre_Index   new_iupper;
@@ -174,7 +174,7 @@ HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
 
 HYPRE_Int 
 HYPRE_StructVectorScaleValues( HYPRE_StructVector  vector,
-                               double              factor )
+                               HYPRE_Complex       factor )
 {
    return hypre_StructVectorScaleValues( vector, factor );
 }
@@ -186,7 +186,7 @@ HYPRE_StructVectorScaleValues( HYPRE_StructVector  vector,
 HYPRE_Int 
 HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
                              HYPRE_Int          *grid_index,
-                             double             *values )
+                             HYPRE_Complex      *values )
 {
    hypre_Index  new_grid_index;
                 
@@ -211,7 +211,7 @@ HYPRE_Int
 HYPRE_StructVectorGetBoxValues( HYPRE_StructVector  vector,
                                 HYPRE_Int          *ilower,
                                 HYPRE_Int          *iupper,
-                                double             *values )
+                                HYPRE_Complex      *values )
 {
    hypre_Index   new_ilower;
    hypre_Index   new_iupper;
@@ -289,7 +289,7 @@ HYPRE_StructVectorCopy( HYPRE_StructVector x, HYPRE_StructVector y )
 
 HYPRE_Int
 HYPRE_StructVectorSetConstantValues( HYPRE_StructVector  vector,
-                                     double              values )
+                                     HYPRE_Complex       values )
 {
    return( hypre_StructVectorSetConstantValues(vector, values) );
 }

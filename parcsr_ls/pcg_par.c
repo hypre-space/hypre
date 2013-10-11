@@ -113,10 +113,10 @@ hypre_ParKrylovMatvecCreate( void   *A,
 
 HYPRE_Int
 hypre_ParKrylovMatvec( void   *matvec_data,
-                       double  alpha,
+                       HYPRE_Complex  alpha,
                        void   *A,
                        void   *x,
-                       double  beta,
+                       HYPRE_Complex  beta,
                        void   *y           )
 {
    return ( hypre_ParCSRMatrixMatvec ( alpha,
@@ -132,10 +132,10 @@ hypre_ParKrylovMatvec( void   *matvec_data,
 
 HYPRE_Int
 hypre_ParKrylovMatvecT(void   *matvec_data,
-                       double  alpha,
+                       HYPRE_Complex  alpha,
                        void   *A,
                        void   *x,
-                       double  beta,
+                       HYPRE_Complex  beta,
                        void   *y           )
 {
    return ( hypre_ParCSRMatrixMatvecT( alpha,
@@ -159,7 +159,7 @@ hypre_ParKrylovMatvecDestroy( void *matvec_data )
  * hypre_ParKrylovInnerProd
  *--------------------------------------------------------------------------*/
 
-double
+HYPRE_Real
 hypre_ParKrylovInnerProd( void *x, 
                           void *y )
 {
@@ -195,7 +195,7 @@ hypre_ParKrylovClearVector( void *x )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovScaleVector( double  alpha,
+hypre_ParKrylovScaleVector( HYPRE_Complex  alpha,
                             void   *x     )
 {
    return ( hypre_ParVectorScale( alpha, (hypre_ParVector *) x ) );
@@ -206,7 +206,7 @@ hypre_ParKrylovScaleVector( double  alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovAxpy( double alpha,
+hypre_ParKrylovAxpy( HYPRE_Complex alpha,
                      void   *x,
                      void   *y )
 {

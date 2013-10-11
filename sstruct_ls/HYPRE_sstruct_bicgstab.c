@@ -79,7 +79,7 @@ HYPRE_SStructBiCGSTABSolve( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetTol( HYPRE_SStructSolver solver,
-                             double              tol )
+                             HYPRE_Real          tol )
 {
    return( HYPRE_BiCGSTABSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -89,7 +89,7 @@ HYPRE_SStructBiCGSTABSetTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetAbsoluteTol( HYPRE_SStructSolver solver,
-                                     double              tol )
+                                     HYPRE_Real          tol )
 {
    return( HYPRE_BiCGSTABSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -175,7 +175,7 @@ HYPRE_SStructBiCGSTABGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                                   double              *norm )
+                                                   HYPRE_Real          *norm )
 {
    return( HYPRE_BiCGSTABGetFinalRelativeResidualNorm( (HYPRE_Solver) solver,
                                                        norm ) );

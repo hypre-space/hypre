@@ -89,7 +89,7 @@
     integer z_dim1, z_offset, i__1, i__2;
     doublereal d__1, d__2;
     /* Builtin functions */
-    double sqrt(doublereal), d_sign(doublereal *, doublereal *);
+    HYPRE_Real sqrt(doublereal), d_sign(doublereal *, doublereal *);
     /* Local variables */
     static integer lend, jtot;
     extern /* Subroutine */ HYPRE_Int dlae2_(doublereal *, doublereal *, doublereal 

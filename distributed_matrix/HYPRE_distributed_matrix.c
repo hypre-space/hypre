@@ -250,7 +250,7 @@ HYPRE_DistributedMatrixGetRow( HYPRE_DistributedMatrix matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    return( hypre_DistributedMatrixGetRow( (hypre_DistributedMatrix *) matrix,
                              row,
@@ -268,7 +268,7 @@ HYPRE_DistributedMatrixRestoreRow( HYPRE_DistributedMatrix matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    return( hypre_DistributedMatrixRestoreRow( (hypre_DistributedMatrix *) matrix,
                              row,

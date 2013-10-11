@@ -63,7 +63,7 @@
     integer i__1;
     doublereal d__1;
     /* Builtin functions */
-    double d_sign(doublereal *, doublereal *);
+    HYPRE_Real d_sign(doublereal *, doublereal *);
     /* Local variables */
     static doublereal beta;
     extern doublereal dnrm2_(integer *, doublereal *, integer *);

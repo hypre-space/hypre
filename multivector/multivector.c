@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
@@ -147,7 +144,7 @@ mv_MultiVectorCopy( mv_MultiVectorPtr src, mv_MultiVectorPtr dest ) {
 }
 
 void 
-mv_MultiVectorAxpy( double a, mv_MultiVectorPtr x, mv_MultiVectorPtr y ) { 
+mv_MultiVectorAxpy( HYPRE_Complex a, mv_MultiVectorPtr x, mv_MultiVectorPtr y ) { 
 	
   hypre_assert( x != NULL && y != NULL );
   (x->interpreter->MultiAxpy)( a, x->data, y->data );
@@ -156,7 +153,7 @@ mv_MultiVectorAxpy( double a, mv_MultiVectorPtr x, mv_MultiVectorPtr y ) {
 void 
 mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 				     HYPRE_Int xyGHeight, HYPRE_Int xyHeight, 
-				     HYPRE_Int xyWidth, double* xy ) { 
+				     HYPRE_Int xyWidth, HYPRE_Real* xy ) { 
 /* xy = x'*y */	
 
   hypre_assert( x != NULL && y != NULL );
@@ -166,7 +163,7 @@ mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 
 void 
 mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
-					 HYPRE_Int* mask, HYPRE_Int n, double* d ) {
+					 HYPRE_Int* mask, HYPRE_Int n, HYPRE_Real* d ) {
 /* d = diag(x'*y) */	
 
   hypre_assert( x != NULL && y != NULL );
@@ -176,7 +173,7 @@ mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 void 
 mv_MultiVectorByMatrix( mv_MultiVectorPtr x, 
 			   HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-			   HYPRE_Int rWidth, double* rVal,
+			   HYPRE_Int rWidth, HYPRE_Complex* rVal,
 			   mv_MultiVectorPtr y ) {
 
   /* y = x*r */
@@ -189,7 +186,7 @@ mv_MultiVectorByMatrix( mv_MultiVectorPtr x,
 void 
 mv_MultiVectorXapy( mv_MultiVectorPtr x, 
 		       HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-		       HYPRE_Int rWidth, double* rVal,
+		       HYPRE_Int rWidth, HYPRE_Complex* rVal,
 		       mv_MultiVectorPtr y ) {
 
   /* y = y + x*a */
@@ -201,7 +198,7 @@ mv_MultiVectorXapy( mv_MultiVectorPtr x,
 
 void 
 mv_MultiVectorByDiagonal( mv_MultiVectorPtr x, 
-			     HYPRE_Int* mask, HYPRE_Int n, double* d,
+			     HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* d,
 			     mv_MultiVectorPtr y ) {
 
   /* y = x*d */

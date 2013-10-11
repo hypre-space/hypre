@@ -196,7 +196,7 @@ HYPRE_Int HYPRE_PETScSolverParILUTSetFactorRowSize(
 
 HYPRE_Int HYPRE_PETScSolverParILUTSetDropTolerance( 
                   HYPRE_PETScSolverParILUT in_ptr,
-                  double tol )
+                  HYPRE_Real tol )
 {
   HYPRE_Int ierr=0;
   hypre_PETScSolverParILUT *solver = 

@@ -90,7 +90,7 @@ HYPRE_SStructGMRESSetKDim( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
-                          double              tol )
+                          HYPRE_Real          tol )
 {
    return( HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -99,7 +99,7 @@ HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
-                          double              atol )
+                          HYPRE_Real          atol )
 {
    return( HYPRE_GMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
 }
@@ -183,7 +183,7 @@ HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                                double              *norm )
+                                                HYPRE_Real          *norm )
 {
    return( HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }

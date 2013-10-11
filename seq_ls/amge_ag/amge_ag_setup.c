@@ -38,7 +38,7 @@ HYPRE_Int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
 		      /* ------ fine-grid element matrices ----- */
 		      HYPRE_Int *i_element_chord_0,
 		      HYPRE_Int *j_element_chord_0,
-		      double *a_element_chord_0,
+		      HYPRE_Real *a_element_chord_0,
 
 		      HYPRE_Int *i_chord_dof_0,
 		      HYPRE_Int *j_chord_dof_0,
@@ -67,7 +67,7 @@ HYPRE_Int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
 
 
   HYPRE_Int *i_dof_dof_a, *j_dof_dof_a;
-  double *a_dof_dof;
+  HYPRE_Real *a_dof_dof;
 
 
 
@@ -96,7 +96,7 @@ HYPRE_Int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
   HYPRE_Int **i_chord_dof, **j_chord_dof;
   HYPRE_Int **i_element_dof, **j_element_dof;
   HYPRE_Int **i_element_chord, **j_element_chord;
-  double **a_element_chord;
+  HYPRE_Real **a_element_chord;
 
   HYPRE_Int **i_dof_coarsedof, **j_dof_coarsedof;
 
@@ -118,7 +118,7 @@ HYPRE_Int hypre_AMGeAGSetup(hypre_CSRMatrix ***P_pointer,
 
   i_element_chord = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
   j_element_chord = hypre_CTAlloc(HYPRE_Int*, Max_level+1);
-  a_element_chord = hypre_CTAlloc(double*, Max_level+1);
+  a_element_chord = hypre_CTAlloc(HYPRE_Real*, Max_level+1);
 
   i_element_chord[0] = i_element_chord_0;
   j_element_chord[0] = j_element_chord_0;

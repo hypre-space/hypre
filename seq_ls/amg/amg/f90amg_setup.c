@@ -29,7 +29,7 @@
 
 void     hypre_NAME_C_FOR_FORTRAN(amg_setup)(Setup_err_flag, a_data, ia, ja, n, data)
 HYPRE_Int     *Setup_err_flag;
-double  *a_data;
+HYPRE_Real  *a_data;
 HYPRE_Int     *ia;
 HYPRE_Int     *ja;
 HYPRE_Int     *n;
