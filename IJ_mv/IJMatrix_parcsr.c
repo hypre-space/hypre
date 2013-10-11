@@ -329,13 +329,13 @@ HYPRE_Int hypre_IJMatrixGetRowCountsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int i, my_id, pstart;
    HYPRE_Int print_level = hypre_IJMatrixPrintLevel(matrix);
 
+   hypre_MPI_Comm_rank(comm,&my_id);
+
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    pstart = 0;
 #else
    pstart = my_id;
 #endif
-
-   hypre_MPI_Comm_rank(comm,&my_id);
 
    for (i=0; i < nrows; i++)
    {
