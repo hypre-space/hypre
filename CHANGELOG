@@ -15,6 +15,21 @@
 # recent release.
 #=============================================================================
 
+Version 2.9.3a released 2013/10/15
+
+- Extended AMS to work for quad/hex meshes by removing an assumption that the
+  discrete gradient G only has +-1 entries.  Also changed default smoother in
+  AMS to l1-GS.
+
+- Added a hi-D capability to Struct and SStruct.  Use the --enable-maxdim option
+  to configure the library for higher-than-3D usage.
+
+- Added complex system support to a subset of the library, including most of the
+  matrix-vector class functions and the Krylov solvers.  Currently does not
+  support the FEI or babel components.  Use the --enable-complex option to set.
+
+#====================================
+
 Version 2.9.2a released 2013/02/15
 
 - Added HYPRE_AMSSet*AMGCoarseRelaxType for specifying the coarsest level
