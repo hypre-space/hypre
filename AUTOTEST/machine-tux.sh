@@ -62,10 +62,9 @@ if [ -d $src_dir/babel-runtime ]; then
 fi
 
 # Test other builds (last one is the default build)
-# temporarily change word delimeter in order to have spaces in options
-tmpIFS=$IFS
-IFS=:
 configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition --with-insure:--enable-bigint --enable-debug:--enable-maxdim=4 --enable-debug:--enable-complex --enable-maxdim=4 --enable-debug: "
+# temporarily change word delimeter to allow spaces in options
+tmpIFS=$IFS; IFS=:
 for opt in $configure_opts
 do
    # only use first part of $opt for subdir name

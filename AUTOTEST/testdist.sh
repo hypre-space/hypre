@@ -13,7 +13,7 @@
 
 # Which tests to run?
 TEST_ALPHA="-tux339"
-TEST_BETA="$TEST_ALPHA -rzzeus -hera -rzdawndev"
+TEST_BETA="$TEST_ALPHA -rzzeus -rzmerl -vulcan"
 TEST_GENERAL="$TEST_BETA"
 TERMCMD=""
 
