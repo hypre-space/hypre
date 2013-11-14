@@ -497,7 +497,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    /* a row will be considered zero if its l1 norm is less than eps */
-   HYPRE_Real eps = DBL_EPSILON * 1e+4;
+   HYPRE_Real eps = 0.0; /* DBL_EPSILON * 1e+4; */
 
    for (i = 0; i < num_rows; i++)
    {
@@ -508,8 +508,7 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
          for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
             l1_norm += fabs(A_offd_data[j]);
 
-      /* if (l1_norm < eps) */
-      if (l1_norm == 0.0)
+      if (l1_norm <= eps)
       {
          for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
             if (A_diag_J[j] == i)
