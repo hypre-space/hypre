@@ -508,7 +508,8 @@ HYPRE_Int hypre_ParCSRMatrixFixZeroRows(hypre_ParCSRMatrix *A)
          for (j = A_offd_I[i]; j < A_offd_I[i+1]; j++)
             l1_norm += fabs(A_offd_data[j]);
 
-      if (l1_norm < eps)
+      /* if (l1_norm < eps) */
+      if (l1_norm == 0.0)
       {
          for (j = A_diag_I[i]; j < A_diag_I[i+1]; j++)
             if (A_diag_J[j] == i)
@@ -711,7 +712,8 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          l1_norm[i] = -l1_norm[i];
 
    for (i = 0; i < num_rows; i++)
-      if (fabs(l1_norm[i]) < DBL_EPSILON)
+      /* if (fabs(l1_norm[i]) < DBL_EPSILON) */
+      if (fabs(l1_norm[i]) == 0.0)
       {
          hypre_error_in_arg(1);
          break;
@@ -3493,7 +3495,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
             l1_norm[i] = -l1_norm[i];
 
       for (i = ns; i < ne; i++)
-         if (fabs(l1_norm[i]) < DBL_EPSILON)
+         /* if (fabs(l1_norm[i]) < DBL_EPSILON) */
+         if (fabs(l1_norm[i]) == 0.0)
          {
             hypre_error_in_arg(1);
             break;
