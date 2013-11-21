@@ -15,6 +15,12 @@
 # recent release.
 #=============================================================================
 
+Version 2.9.4a released 2013/11/21
+
+- Minor bug fix in AMS and other minor changes.
+
+#====================================
+
 Version 2.9.3a released 2013/10/15
 
 - Extended AMS to work for quad/hex meshes by removing an assumption that the
