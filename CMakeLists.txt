@@ -185,7 +185,6 @@ list (APPEND HYPRE_SOURCES
   utilities/qsplit.c
   utilities/random.c
   utilities/threading.c
-  utilities/thread_mpistubs.c
   utilities/timer.c
   utilities/timing.c
   utilities/umalloc_local.c
@@ -501,7 +500,6 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   struct_mv/assumed_part.c
   struct_mv/box_algebra.c
-  struct_mv/box_alloc.c
   struct_mv/box_boundary.c
   struct_mv/box.c
   struct_mv/box_manager.c
@@ -511,7 +509,6 @@ list (APPEND HYPRE_SOURCES
   struct_mv/F90_HYPRE_struct_matrix.c
   struct_mv/F90_HYPRE_struct_stencil.c
   struct_mv/F90_HYPRE_struct_vector.c
-  struct_mv/grow.c
   struct_mv/HYPRE_struct_grid.c
   struct_mv/HYPRE_struct_matrix.c
   struct_mv/HYPRE_struct_stencil.c
@@ -526,7 +523,6 @@ list (APPEND HYPRE_SOURCES
   struct_mv/struct_matrix.c
   struct_mv/struct_matrix_mask.c
   struct_mv/struct_matvec.c
-  struct_mv/struct_overlap_innerprod.c
   struct_mv/struct_scale.c
   struct_mv/struct_stencil.c
   struct_mv/struct_vector.c
@@ -626,7 +622,6 @@ list (APPEND HYPRE_SOURCES
   sstruct_mv/sstruct_innerprod.c
   sstruct_mv/sstruct_matrix.c
   sstruct_mv/sstruct_matvec.c
-  sstruct_mv/sstruct_overlap_innerprod.c
   sstruct_mv/sstruct_scale.c
   sstruct_mv/sstruct_stencil.c
   sstruct_mv/sstruct_vector.c
