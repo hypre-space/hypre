@@ -175,6 +175,7 @@ list (APPEND HYPRE_SOURCES
   utilities/F90_HYPRE_error.c
   utilities/fortran_matrix.c
   utilities/hypre_ap.c
+  utilities/hypre_complex.c
   utilities/hypre_error.c
   utilities/hypre_memory.c
   utilities/hypre_mpi_comm_f2c.c
