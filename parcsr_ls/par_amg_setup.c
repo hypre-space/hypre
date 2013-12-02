@@ -1638,7 +1638,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParAMGDataNumGridSweeps(amg_data);
          HYPRE_Int    **grid_relax_points =
             hypre_ParAMGDataGridRelaxPoints(amg_data);
-         if (grid_relax_type[3] == 9 || grid_relax_type[33] == 99)
+         if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99
+          || grid_relax_type[3] == 19 || grid_relax_type[3] == 29)
 	 {
 	    grid_relax_type[3] = grid_relax_type[0];
 	    num_grid_sweeps[3] = 1;
