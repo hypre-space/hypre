@@ -25,6 +25,10 @@
  * Parallel CSR Matrix
  *--------------------------------------------------------------------------*/
 
+#ifndef HYPRE_PAR_CSR_MATRIX_STRUCT
+#define HYPRE_PAR_CSR_MATRIX_STRUCT
+#endif
+
 typedef struct hypre_ParCSRMatrix_struct
 {
    MPI_Comm              comm;

@@ -28,6 +28,10 @@
  * hypre_ParVector
  *--------------------------------------------------------------------------*/
 
+#ifndef HYPRE_PAR_VECTOR_STRUCT
+#define HYPRE_PAR_VECTOR_STRUCT
+#endif
+
 typedef struct hypre_ParVector_struct
 {
    MPI_Comm	 comm;

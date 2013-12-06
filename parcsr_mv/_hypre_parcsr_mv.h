@@ -155,6 +155,10 @@ typedef struct
  * hypre_ParVector
  *--------------------------------------------------------------------------*/
 
+#ifndef HYPRE_PAR_VECTOR_STRUCT
+#define HYPRE_PAR_VECTOR_STRUCT
+#endif
+
 typedef struct hypre_ParVector_struct
 {
    MPI_Comm      comm;
@@ -210,6 +214,10 @@ typedef struct hypre_ParVector_struct
 /*--------------------------------------------------------------------------
  * Parallel CSR Matrix
  *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_PAR_CSR_MATRIX_STRUCT
+#define HYPRE_PAR_CSR_MATRIX_STRUCT
+#endif
 
 typedef struct hypre_ParCSRMatrix_struct
 {
