@@ -75,7 +75,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
    }
 
    /* get max across procs */
-   hypre_MPI_Allreduce(&max_norm, &temp, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A)); 
+   hypre_MPI_Allreduce(&max_norm, &temp, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_ParCSRMatrixComm(A)); 
    max_norm = temp;
 
    /* from Charles */

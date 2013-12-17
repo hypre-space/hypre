@@ -447,8 +447,8 @@ void hypre_BoomerAMGTruncateInterp( hypre_ParCSRMatrix *P,
       someplace better.  I don't like adding communication here, for a minor reason.
    */
    vmax1 = vmax; vmin1 = vmin;
-   hypre_MPI_Allreduce( &vmax1, &vmax, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm );
-   hypre_MPI_Allreduce( &vmin1, &vmin, 1, hypre_MPI_DOUBLE, hypre_MPI_MIN, comm );
+   hypre_MPI_Allreduce( &vmax1, &vmax, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm );
+   hypre_MPI_Allreduce( &vmin1, &vmin, 1, HYPRE_MPI_REAL, hypre_MPI_MIN, comm );
 #endif
    if ( vmax <= 0.0 ) vmax =  1.0;  /* make sure no v is v>vmax if no v is v>0 */
    if ( vmin >= 0.0 ) vmin = -1.0;  /* make sure no v is v<vmin if no v is v<0 */

@@ -229,9 +229,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        A_seq_j, info, displs2,
                        HYPRE_MPI_INT, new_comm );
 
-            hypre_MPI_Allgatherv ( A_tmp_data, num_nonzeros, hypre_MPI_DOUBLE,
+            hypre_MPI_Allgatherv ( A_tmp_data, num_nonzeros, HYPRE_MPI_REAL,
                        A_seq_data, info, displs2,
-                       hypre_MPI_DOUBLE, new_comm );
+                       HYPRE_MPI_REAL, new_comm );
          }
          else
          {
@@ -239,9 +239,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        A_seq_j, info, displs2,
                        HYPRE_MPI_INT, 0, new_comm );
 
-            hypre_MPI_Gatherv ( A_tmp_data, num_nonzeros, hypre_MPI_DOUBLE,
+            hypre_MPI_Gatherv ( A_tmp_data, num_nonzeros, HYPRE_MPI_REAL,
                        A_seq_data, info, displs2,
-                       hypre_MPI_DOUBLE, 0, new_comm );
+                       HYPRE_MPI_REAL, 0, new_comm );
          }
 
          hypre_TFree(info);
@@ -381,13 +381,13 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       }
 
       if (redundant)
-         hypre_MPI_Allgatherv ( f_data, nf, hypre_MPI_DOUBLE,
+         hypre_MPI_Allgatherv ( f_data, nf, HYPRE_MPI_REAL,
                           recv_buf, info, displs,
-                          hypre_MPI_DOUBLE, new_comm );
+                          HYPRE_MPI_REAL, new_comm );
       else
-         hypre_MPI_Gatherv ( f_data, nf, hypre_MPI_DOUBLE,
+         hypre_MPI_Gatherv ( f_data, nf, HYPRE_MPI_REAL,
                           recv_buf, info, displs,
-                          hypre_MPI_DOUBLE, 0, new_comm );
+                          HYPRE_MPI_REAL, 0, new_comm );
 
       if (redundant || my_id ==0)
       {
@@ -398,16 +398,16 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       /*then u */
       if (redundant)
       {
-         hypre_MPI_Allgatherv ( u_data, n, hypre_MPI_DOUBLE,
+         hypre_MPI_Allgatherv ( u_data, n, HYPRE_MPI_REAL,
                        recv_buf, info, displs,
-                       hypre_MPI_DOUBLE, new_comm );
+                       HYPRE_MPI_REAL, new_comm );
          hypre_TFree(displs);
          hypre_TFree(info);
       }
       else
-         hypre_MPI_Gatherv ( u_data, n, hypre_MPI_DOUBLE,
+         hypre_MPI_Gatherv ( u_data, n, HYPRE_MPI_REAL,
                        recv_buf, info, displs,
-                       hypre_MPI_DOUBLE, 0, new_comm );
+                       HYPRE_MPI_REAL, 0, new_comm );
          
       /* clean up */
       if (redundant || my_id ==0)
@@ -434,12 +434,12 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
          if (my_id == 0)
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(U_coarse));
 
-         hypre_MPI_Scatterv ( local_data, info, displs, hypre_MPI_DOUBLE,
-                       u_data, n, hypre_MPI_DOUBLE, 0, new_comm );
+         hypre_MPI_Scatterv ( local_data, info, displs, HYPRE_MPI_REAL,
+                       u_data, n, HYPRE_MPI_REAL, 0, new_comm );
          /*if (my_id == 0)
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(F_coarse));
-            hypre_MPI_Scatterv ( local_data, info, displs, hypre_MPI_DOUBLE,
-                       f_data, n, hypre_MPI_DOUBLE, 0, new_comm );*/
+            hypre_MPI_Scatterv ( local_data, info, displs, HYPRE_MPI_REAL,
+                       f_data, n, HYPRE_MPI_REAL, 0, new_comm );*/
          if (my_id == 0) hypre_TFree(displs);
          hypre_TFree(info);
       }

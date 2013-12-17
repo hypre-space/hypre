@@ -2938,7 +2938,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             }
          }
 
-	 hypre_MPI_Allreduce(&local_max,&global_max,1,hypre_MPI_DOUBLE,hypre_MPI_MAX,comm);
+	 hypre_MPI_Allreduce(&local_max,&global_max,1,HYPRE_MPI_REAL,hypre_MPI_MAX,comm);
          if (num_functions == 1)
          /*if(CRaddCpoints == 0)*/
          {
