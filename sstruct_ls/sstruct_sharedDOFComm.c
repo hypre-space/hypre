@@ -852,7 +852,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    {
       if (RecvFromProcs[proc])
       {
-         hypre_MPI_Irecv(rbuffer_ColsData[proc], 2*send_RowsNcols_alloc[proc], hypre_MPI_DOUBLE,
+         hypre_MPI_Irecv(rbuffer_ColsData[proc], 2*send_RowsNcols_alloc[proc], HYPRE_MPI_REAL,
                          proc, 1, grid_comm, &requests[j++]);
       }  /* if (RecvFromProcs[proc]) */
    }     /* for (proc= 0; proc< nprocs; proc++) */
@@ -861,7 +861,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    {
       if (tot_sendColsData[proc])
       {
-         hypre_MPI_Isend(vals[proc], tot_sendColsData[proc], hypre_MPI_DOUBLE, proc,
+         hypre_MPI_Isend(vals[proc], tot_sendColsData[proc], HYPRE_MPI_REAL, proc,
                          1, grid_comm, &requests[j++]);
       }
    }
