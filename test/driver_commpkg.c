@@ -359,7 +359,7 @@ main( HYPRE_Int   argc,
             end_time = end_time - start_time;
         
             hypre_MPI_Allreduce(&end_time, &total_time, 1,
-                       hypre_MPI_DOUBLE, hypre_MPI_MAX, hypre_MPI_COMM_WORLD);
+                       HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_MPI_COMM_WORLD);
          
             loop_times[i] += total_time;
 
@@ -542,7 +542,7 @@ main( HYPRE_Int   argc,
             end_time = end_time - start_time;
         
             hypre_MPI_Allreduce(&end_time, &total_time, 1,
-                          hypre_MPI_DOUBLE, hypre_MPI_MAX, hypre_MPI_COMM_WORLD);
+                          HYPRE_MPI_REAL, hypre_MPI_MAX, hypre_MPI_COMM_WORLD);
 
             loop_times[i] += total_time;
          

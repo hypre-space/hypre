@@ -167,8 +167,15 @@ main( hypre_int argc,
    HYPRE_Int      smooth_num_sweeps = 1;
    HYPRE_Int      coarse_threshold = 9;
    HYPRE_Int      min_coarse_size = 0;
+/* redundant coarse grid solve */
    HYPRE_Int      seq_threshold = 0;
    HYPRE_Int      redundant = 0;
+/* additive versions */
+   HYPRE_Int additive = -1;
+   HYPRE_Int mult_add = -1;
+   HYPRE_Int simple = -1;
+   HYPRE_Int add_P_max_elmts = 0;
+   HYPRE_Real add_trunc_factor = 0;
 
    HYPRE_Real   relax_wt; 
    HYPRE_Real   relax_wt_level; 
@@ -979,6 +986,31 @@ main( hypre_int argc,
          arg_index++;
          cheby_fraction = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-additive") == 0 )
+      {
+         arg_index++;
+         additive  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mult_add") == 0 )
+      {
+         arg_index++;
+         mult_add  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-simple") == 0 )
+      {
+         arg_index++;
+         simple  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-add_Pmx") == 0 )
+      {
+         arg_index++;
+         add_P_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-add_tr") == 0 )
+      {
+         arg_index++;
+         add_trunc_factor  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
@@ -1123,15 +1155,19 @@ main( hypre_int argc,
       hypre_printf("       3=Hybrid Gauss-Seidel  \n");
       hypre_printf("       4=Hybrid backward Gauss-Seidel  \n");
       hypre_printf("       6=Hybrid symmetric Gauss-Seidel  \n");
-      hypre_printf("       8= L1-Gauss-Seidel  \n");
+      hypre_printf("       8= symmetric L1-Gauss-Seidel  \n");
+      hypre_printf("       13= forward L1-Gauss-Seidel  \n");
+      hypre_printf("       14= backward L1-Gauss-Seidel  \n");
       hypre_printf("       15=CG  \n");
       hypre_printf("       16=Chebyshev  \n");
       hypre_printf("       17=FCF-Jacobi  \n");
       hypre_printf("       18=L1-Jacobi (may be used with -CF) \n");
       hypre_printf("       9=Gauss elimination (use for coarsest grid only)  \n");
+      hypre_printf("       99=Gauss elimination with pivoting (use for coarsest grid only)  \n");
       hypre_printf("       20= Nodal Weighted Jacobi (for systems only) \n");
       hypre_printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel (for systems only) \n");
       hypre_printf("       26= Nodal Hybrid Symmetric Gauss-Seidel  (for systems only)\n");
+      hypre_printf("       29= Nodal Gauss elimination (use for coarsest grid only)  \n");
       hypre_printf("  -rlx_coarse  <val>       : set relaxation type for coarsest grid\n");
       hypre_printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
       hypre_printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
@@ -1491,6 +1527,7 @@ main( hypre_int argc,
 
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
+    /*HYPRE_IJMatrixPrint(ij_A, "Atest");*/
    /*HYPRE_ParCSRMatrixPrint(parcsr_A,"rot60");*/
 
 #if 0 /* print the matrix in Harwell-Boeing format and exit */
@@ -2121,6 +2158,11 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+      HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
+      HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
+      HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddPMaxElmts(amg_solver, add_P_max_elmts);
+      HYPRE_BoomerAMGSetAddTruncFactor(amg_solver, add_trunc_factor);
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
 
@@ -2252,6 +2294,11 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       if (num_functions > 1)
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+      HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
+      HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
+      HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddPMaxElmts(amg_solver, add_P_max_elmts);
+      HYPRE_BoomerAMGSetAddTruncFactor(amg_solver, add_trunc_factor);
  
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
  
@@ -2399,6 +2446,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2529,6 +2581,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2731,6 +2788,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2851,6 +2913,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3055,6 +3122,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_LGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_LGMRESSetPrecond(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3212,6 +3284,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_FlexGMRESSetPrecond(pcg_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3375,6 +3452,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BiCGSTABSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3573,6 +3655,11 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
+         HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
+         HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_CGNRSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_CGNRSetPrecond(pcg_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
