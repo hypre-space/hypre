@@ -2,9 +2,9 @@
 SStruct phase times:
 =============================================
 SStruct Setup:
-  wall clock time = 0.220000 seconds
+  wall clock time = 0.200000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.220000 seconds
+  cpu clock time  = 0.200000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -36,9 +36,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.180000 seconds
+  wall clock time = 0.170000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.190000 seconds
+  cpu clock time  = 0.180000 seconds
   cpu MFLOPS      = 0.000000
 
 

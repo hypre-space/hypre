@@ -75,7 +75,6 @@ Residual   6.47922482725667e-09
 # options.out.verb.0
      Complexity:    grid = 2.036000
                 operator = 5.803438
-
 # options.out.verb.2
 Eigenvalue lambda   2.43042158313014e-01
 Residual 9.452217e-09
