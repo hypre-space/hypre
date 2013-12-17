@@ -1,3 +1,17 @@
+
+#include <HYPRE_config.h>
+
+#include "HYPRE_seq_mv.h"
+
+#ifndef hypre_MV_HEADER
+#define hypre_MV_HEADER
+
+#include "_hypre_utilities.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -10,22 +24,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifndef hypre_MV_HEADER
-#define hypre_MV_HEADER
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 
-#include <HYPRE_config.h>
 
-#include "HYPRE_seq_mv.h"
-
-#include "_hypre_utilities.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /******************************************************************************
  *
@@ -105,7 +106,6 @@ typedef struct
 
 #endif
 
-
 /******************************************************************************
  *
  * Header info for Mapped Matrix data structures
@@ -139,6 +139,7 @@ typedef struct
          (hypre_MappedMatrixColMap(matrix)(j,hypre_MappedMatrixMapData(matrix)))
 
 #endif
+
 
 /******************************************************************************
  *
@@ -175,6 +176,7 @@ typedef struct
 (matrix)[j])
 
 #endif
+
 
 /******************************************************************************
  *

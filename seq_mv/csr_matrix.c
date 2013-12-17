@@ -58,14 +58,18 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
    if (matrix)
    {
       hypre_TFree(hypre_CSRMatrixI(matrix));
+      hypre_CSRMatrixI(matrix)    = NULL;
       if (hypre_CSRMatrixRownnz(matrix))
          hypre_TFree(hypre_CSRMatrixRownnz(matrix));
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {
          hypre_TFree(hypre_CSRMatrixData(matrix));
          hypre_TFree(hypre_CSRMatrixJ(matrix));
+         hypre_CSRMatrixData(matrix) = NULL;
+         hypre_CSRMatrixJ(matrix)    = NULL;
       }
       hypre_TFree(matrix);
+      matrix = NULL;
    }
 
    return ierr;

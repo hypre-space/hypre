@@ -294,7 +294,8 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCopy
  * copies data from x to y
- * y should have already been initialized at the same size as x
+ * if size of x is larger than y only the first size_y elements of x are 
+ * copied to y
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -304,11 +305,13 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size_y   = hypre_VectorSize(y);
            
    HYPRE_Int      i;
            
    HYPRE_Int      ierr = 0;
 
+   if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE

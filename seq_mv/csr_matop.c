@@ -156,12 +156,15 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    HYPRE_Int         row_start, counter;
    HYPRE_Complex     a_entry, b_entry;
    HYPRE_Int        *B_marker;
+   HYPRE_Int         allsquare = 0;
 
    if (ncols_A != nrows_B)
    {
       hypre_printf("Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
+
+   if (nrows_A == ncols_B) allsquare = 1;
 
    B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
    C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
@@ -171,20 +174,25 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
    for (ic = 0; ic < nrows_A; ic++)
    {
-      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-      {
-         ja = A_j[ia];
-         for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-         {
-            jb = B_j[ib];
-            if (B_marker[jb] != ic)
-            {
-               B_marker[jb] = ic;
-               num_nonzeros++;
-            }
-         }
-      }
-      C_i[ic+1] = num_nonzeros;
+	if (allsquare) 
+        {
+           B_marker[ic] = ic;
+           num_nonzeros++;
+        }
+	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+	{
+		ja = A_j[ia];
+		for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+		{
+			jb = B_j[ib];
+			if (B_marker[jb] != ic)
+			{
+				B_marker[jb] = ic;
+				num_nonzeros++;
+			}
+		}
+   	}
+	C_i[ic+1] = num_nonzeros;
    }
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, num_nonzeros);
@@ -199,27 +207,34 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    counter = 0;
    for (ic = 0; ic < nrows_A; ic++)
    {
-      row_start = C_i[ic];
-      for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
-      {
-         ja = A_j[ia];
-         a_entry = A_data[ia];
-         for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
-         {
-            jb = B_j[ib];
-            b_entry = B_data[ib];
-            if (B_marker[jb] < row_start)
-            {
-               B_marker[jb] = counter;
-               C_j[B_marker[jb]] = jb;
-               C_data[B_marker[jb]] = a_entry*b_entry;
-               counter++;
-            }
-            else
-               C_data[B_marker[jb]] += a_entry*b_entry;
-                                 
-         }
-      }
+	row_start = C_i[ic];
+        if (allsquare) 
+        {
+            B_marker[ic] = counter;
+            C_data[counter] = 0;
+            C_j[counter] = ic;
+            counter++;
+        }
+	for (ia = A_i[ic]; ia < A_i[ic+1]; ia++)
+	{
+		ja = A_j[ia];
+		a_entry = A_data[ia];
+		for (ib = B_i[ja]; ib < B_i[ja+1]; ib++)
+		{
+			jb = B_j[ib];
+			b_entry = B_data[ib];
+			if (B_marker[jb] < row_start)
+			{
+				B_marker[jb] = counter;
+				C_j[B_marker[jb]] = jb;
+				C_data[B_marker[jb]] = a_entry*b_entry;
+				counter++;
+			}
+			else
+				C_data[B_marker[jb]] += a_entry*b_entry;
+				 
+		}
+	}
    }
    hypre_TFree(B_marker);
    return C;
@@ -263,7 +278,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
       {
          for (j = A_i[i]; j < A_i[i+1]; j++)
          {
-            if (fabs(A_data[j]) <= tol)
+            if (hypre_cabs(A_data[j]) <= tol)
             {
                pos_A++;
             }
