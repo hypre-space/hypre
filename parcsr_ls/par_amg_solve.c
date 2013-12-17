@@ -64,6 +64,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      num_procs, my_id;
+   HYPRE_Int      additive;
+   HYPRE_Int      mult_additive;
+   HYPRE_Int      simple;
 
    HYPRE_Real   alpha = 1.0;
    HYPRE_Real   beta = -1.0;
@@ -102,6 +105,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    tol              = hypre_ParAMGDataTol(amg_data);
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
    max_iter         = hypre_ParAMGDataMaxIter(amg_data);
+   additive         = hypre_ParAMGDataAdditive(amg_data);
+   simple           = hypre_ParAMGDataSimple(amg_data);
+   mult_additive    = hypre_ParAMGDataMultAdditive(amg_data);
 
    num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels);
    num_variables    = hypre_CTAlloc(HYPRE_Real, num_levels);
@@ -249,7 +255,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;   
       /* Op count only needed for one cycle */
 
-      hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
+      if ((additive < 0 || additive >= num_levels) && (mult_additive < 0 
+	   || mult_additive >= num_levels) && (simple < 0 || simple >= num_levels))
+         hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
+      else
+         hypre_BoomerAMGAdditiveCycle(amg_data); 
 
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm

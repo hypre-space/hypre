@@ -4200,4 +4200,202 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    return(0);  
 
 }            
-          
+         
+/*---------------------------------------------------------------------------
+ * hypre_BoomerAMGTruncandBuild
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGTruncandBuild( hypre_ParCSRMatrix   *P,
+                         HYPRE_Real                trunc_factor,
+                         HYPRE_Int                     max_elmts)
+{
+
+   hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(P);
+   HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(P);
+   HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
+   HYPRE_Int             *P_offd_j = hypre_CSRMatrixJ(P_offd);
+   HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(P_offd);
+   HYPRE_Int              n_fine = hypre_CSRMatrixNumRows(P_offd);
+
+   HYPRE_Int             *new_col_map_offd;
+
+   HYPRE_Int              P_offd_size, new_num_cols_offd;
+
+   HYPRE_Int             *P_marker;
+
+   HYPRE_Int              i;
+
+   HYPRE_Int              index;
+
+   /* Compress P, removing coefficients smaller than trunc_factor * Max */
+
+   if (trunc_factor != 0.0 || max_elmts > 0)
+   {
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
+      P_offd_j = hypre_CSRMatrixJ(P_offd);
+      P_offd_i = hypre_CSRMatrixI(P_offd);
+      P_offd_size = P_offd_i[n_fine];
+   }
+
+   new_num_cols_offd = 0;
+   if (P_offd_size)
+   {
+      P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+
+/*#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"*/
+      for (i=0; i < num_cols_offd; i++)
+         P_marker[i] = 0;
+
+      for (i=0; i < P_offd_size; i++)
+      {
+         index = P_offd_j[i];
+         if (!P_marker[index])
+         {
+            new_num_cols_offd++;
+            P_marker[index] = 1;
+         }
+      }
+
+      if (new_num_cols_offd)
+         new_col_map_offd = hypre_CTAlloc(HYPRE_Int,new_num_cols_offd);
+
+      index = 0;
+      for (i=0; i < new_num_cols_offd; i++)
+      {
+         while (P_marker[index]==0) index++;
+         new_col_map_offd[i] = index++;
+      }
+
+/*#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"*/
+      for (i=0; i < P_offd_size; i++)
+        P_offd_j[i] = hypre_BinarySearch(new_col_map_offd,
+                                         P_offd_j[i],
+                                         new_num_cols_offd);
+   }
+
+   index = 0;
+   for(i = 0; i < new_num_cols_offd; i++)
+   {
+       while (P_marker[index] == 0) index++;
+
+       new_col_map_offd[i] = col_map_offd[index];
+       index++;
+   }
+
+   if (P_offd_size) hypre_TFree(P_marker);
+
+   if (new_num_cols_offd)
+   {
+        hypre_TFree(col_map_offd);
+        hypre_ParCSRMatrixColMapOffd(P) = new_col_map_offd;
+        hypre_CSRMatrixNumCols(P_offd) = new_num_cols_offd;
+   }
+
+   hypre_MatvecCommPkgCreate(P);
+
+   return(0);
+
+}
+ 
+hypre_ParCSRMatrix *hypre_CreateC( hypre_ParCSRMatrix  *A,
+                                   HYPRE_Real w)
+{
+   MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
+
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+
+   HYPRE_Real          *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
+
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+
+   HYPRE_Real          *A_offd_data = hypre_CSRMatrixData(A_offd);
+   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
+
+   HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int    num_rows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int    num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int    global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+
+   hypre_ParCSRMatrix *C;
+   hypre_CSRMatrix *C_diag;
+   hypre_CSRMatrix *C_offd;
+
+   HYPRE_Real          *C_diag_data;
+   HYPRE_Int       *C_diag_i;
+   HYPRE_Int       *C_diag_j;
+
+   HYPRE_Real          *C_offd_data;
+   HYPRE_Int       *C_offd_i;
+   HYPRE_Int       *C_offd_j;
+   HYPRE_Int       *col_map_offd_C;
+
+   HYPRE_Int i, j, index;
+   HYPRE_Real  invdiag;
+   HYPRE_Real  w_local = w;
+
+   C = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_rows, row_starts,
+        row_starts, num_cols_offd, A_diag_i[num_rows], A_offd_i[num_rows]);
+
+   hypre_ParCSRMatrixInitialize(C);
+
+   C_diag = hypre_ParCSRMatrixDiag(C);
+   C_offd = hypre_ParCSRMatrixOffd(C);
+
+   C_diag_i = hypre_CSRMatrixI(C_diag);
+   C_diag_j = hypre_CSRMatrixJ(C_diag);
+   C_diag_data = hypre_CSRMatrixData(C_diag);
+
+   C_offd_i = hypre_CSRMatrixI(C_offd);
+   C_offd_j = hypre_CSRMatrixJ(C_offd);
+   C_offd_data = hypre_CSRMatrixData(C_offd);
+
+   col_map_offd_C = hypre_ParCSRMatrixColMapOffd(C);
+
+   hypre_ParCSRMatrixOwnsRowStarts(C) = 0;
+   hypre_ParCSRMatrixOwnsColStarts(C) = 0;
+
+   for (i=0; i < num_cols_offd; i++)
+      col_map_offd_C[i] = col_map_offd_A[i];
+
+   for (i=0; i < num_rows; i++)
+   {
+      index = A_diag_i[i];
+      invdiag = -w/A_diag_data[index];
+      C_diag_data[index] = 1.0-w;
+      C_diag_j[index] = A_diag_j[index];
+      if (w == 0)
+      {
+         w_local = fabs(A_diag_data[index]);
+         for (j = index+1; j < A_diag_i[i+1]; j++)
+            w_local += fabs(A_diag_data[j]);
+         for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+            w_local += fabs(A_offd_data[j]);
+         invdiag = -1/w_local;
+         C_diag_data[index] = 1.0-A_diag_data[index]/w_local;
+      }
+      C_diag_i[i] = index;
+      C_offd_i[i] = A_offd_i[i];
+      for (j = index+1; j < A_diag_i[i+1]; j++)
+      {
+          C_diag_data[j] = A_diag_data[j]*invdiag;
+          C_diag_j[j] = A_diag_j[j];
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+          C_offd_data[j] = A_offd_data[j]*invdiag;
+          C_offd_j[j] = A_offd_j[j];
+      }
+   }
+   C_diag_i[num_rows] = A_diag_i[num_rows];
+   C_offd_i[num_rows] = A_offd_i[num_rows];
+
+   return C;
+}
+

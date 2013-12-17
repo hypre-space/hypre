@@ -733,6 +733,46 @@ HYPRE_Int HYPRE_BoomerAMGSetNumPaths(HYPRE_Solver solver,
                                HYPRE_Int          num_paths);
 
 /**
+ * (Optional) Defines use of an additive V-cycle using the
+ * classical additive method starting at level 'addlvl'
+ * 'addlvl' needs to be > -1 for this to have an effect
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAdditive(HYPRE_Solver solver,
+                                     HYPRE_Int addlvl);
+
+/**
+ * (Optional) Defines use of an additive V-cycle using the
+ * mult-additive method starting at level 'addlvl'
+ * 'addlvl' needs to be > -1 for this to have an effect
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetMultAdditive(HYPRE_Solver solver,
+                                     HYPRE_Int addlvl);
+
+/**
+ * (Optional) Defines use of an additive V-cycle using the
+ * simplified mult-additive method starting at level 'addlvl'
+ * 'addlvl' needs to be > -1 for this to have an effect
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
+                                     HYPRE_Int addlvl);
+
+/**
+ * (Optional) Defines the truncation factor for the 
+ * smoothed interpolation used for mult-additive or simple method.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor(HYPRE_Solver solver,
+                                     HYPRE_Real       add_trunc_factor);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the 
+ * smoothed interpolation used for mult-additive or simple method.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts(HYPRE_Solver solver,
+                                   HYPRE_Int          add_P_max_elmts);
+
+/**
  * (Optional) Defines which variant of the Schwarz method is used.
  * The following options exist for variant:
  * 

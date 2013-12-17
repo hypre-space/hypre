@@ -90,6 +90,7 @@ FILES =\
  par_coordinates.c\
  par_cr.c\
  par_cycle.c\
+ par_add_cycle.c\
  par_difconv.c\
  par_gsmg.c\
  par_indepset.c\

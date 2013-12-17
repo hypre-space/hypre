@@ -2051,7 +2051,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                if (fabs(dataB[i]) > lfactor)
                   lfactor = fabs(dataB[i]);
             lfactor *= 1e-10; /* scaling factor: max|A_ij|*1e-10 */
-            hypre_MPI_Allreduce(&lfactor, &factor, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX,
+            hypre_MPI_Allreduce(&lfactor, &factor, 1, HYPRE_MPI_REAL, hypre_MPI_MAX,
                                 hypre_ParCSRMatrixComm(A));
             for (i = 0; i < nnz; i++)
                data[i] *= factor;

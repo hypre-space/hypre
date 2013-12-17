@@ -199,6 +199,17 @@ typedef struct
    HYPRE_Real *b_vec;
    HYPRE_Int *comm_info;
 
+ /* information for multiplication with Lambda - additive AMG */
+   HYPRE_Int      additive;
+   HYPRE_Int      mult_additive;
+   HYPRE_Int      simple;
+   HYPRE_Int      add_P_max_elmts;
+   HYPRE_Int      add_trunc_factor;
+   hypre_ParCSRMatrix *Lambda;
+   hypre_ParVector *Rtilde;
+   hypre_ParVector *Xtilde;
+   HYPRE_Real *D_inv;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -378,6 +389,17 @@ typedef struct
 #define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
 #define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
+
+/* additive AMG parameters */
+#define hypre_ParAMGDataAdditive(amg_data) ((amg_data)->additive)
+#define hypre_ParAMGDataMultAdditive(amg_data) ((amg_data)->mult_additive)
+#define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
+#define hypre_ParAMGDataAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
+#define hypre_ParAMGDataAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
+#define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
+#define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
+#define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
+#define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
 
 #endif
 

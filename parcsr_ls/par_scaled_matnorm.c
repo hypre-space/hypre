@@ -124,7 +124,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
 	 max_row_sum = sum_data[i];
    }	
 
-   hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
+   hypre_MPI_Allreduce(&max_row_sum, &mat_norm, 1, HYPRE_MPI_REAL, hypre_MPI_MAX, comm);
 
    hypre_ParVectorDestroy(dinvsqrt);
    hypre_SeqVectorDestroy(sum);

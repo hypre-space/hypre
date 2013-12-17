@@ -1209,6 +1209,17 @@ HYPRE_BoomerAMGSetAggTruncFactor( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddTruncFactor
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddTruncFactor( HYPRE_Solver  solver,
+                                  HYPRE_Real        add_trunc_factor  )
+{
+   return( hypre_BoomerAMGSetAddTruncFactor( (void *) solver, add_trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetAggP12TruncFactor
  *--------------------------------------------------------------------------*/
 
@@ -1228,6 +1239,17 @@ HYPRE_BoomerAMGSetAggPMaxElmts( HYPRE_Solver  solver,
                                 HYPRE_Int          agg_P_max_elmts  )
 {
    return( hypre_BoomerAMGSetAggPMaxElmts( (void *) solver, agg_P_max_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddPMaxElmts( HYPRE_Solver  solver,
+                                HYPRE_Int          add_P_max_elmts  )
+{
+   return( hypre_BoomerAMGSetAddPMaxElmts( (void *) solver, add_P_max_elmts ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1471,3 +1493,57 @@ HYPRE_BoomerAMGSetInterpVecFirstLevel( HYPRE_Solver solver,
    return( hypre_BoomerAMGSetInterpVecFirstLevel( (void *) solver,
                                                   level ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAdditive, HYPRE_BoomerAMGGetAdditive
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAdditive( HYPRE_Solver solver,
+                          HYPRE_Int          additive  )
+{
+   return( hypre_BoomerAMGSetAdditive( (void *) solver, additive ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetAdditive( HYPRE_Solver solver,
+                          HYPRE_Int        * additive  )
+{
+   return( hypre_BoomerAMGGetAdditive( (void *) solver, additive ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMultAdditive, HYPRE_BoomerAMGGetMultAdditive
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetMultAdditive( HYPRE_Solver solver,
+                          HYPRE_Int          mult_additive  )
+{
+   return( hypre_BoomerAMGSetMultAdditive( (void *) solver, mult_additive ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetMultAdditive( HYPRE_Solver solver,
+                          HYPRE_Int        * mult_additive  )
+{
+   return( hypre_BoomerAMGGetMultAdditive( (void *) solver, mult_additive ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSimple, HYPRE_BoomerAMGGetSimple
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSimple( HYPRE_Solver solver,
+                          HYPRE_Int          simple  )
+{
+   return( hypre_BoomerAMGSetSimple( (void *) solver, simple ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetSimple( HYPRE_Solver solver,
+                          HYPRE_Int        * simple  )
+{
+   return( hypre_BoomerAMGGetSimple( (void *) solver, simple ) );
+}
+

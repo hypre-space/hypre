@@ -230,6 +230,17 @@ typedef struct
    HYPRE_Real *b_vec;
    HYPRE_Int *comm_info;
 
+ /* information for multiplication with Lambda - additive AMG */
+   HYPRE_Int      additive;
+   HYPRE_Int      mult_additive;
+   HYPRE_Int      simple;
+   HYPRE_Int      add_P_max_elmts;
+   HYPRE_Int      add_trunc_factor;
+   hypre_ParCSRMatrix *Lambda;
+   hypre_ParVector *Rtilde;
+   hypre_ParVector *Xtilde;
+   HYPRE_Real *D_inv;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -410,6 +421,17 @@ typedef struct
 #define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
 #define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 
+/* additive AMG parameters */
+#define hypre_ParAMGDataAdditive(amg_data) ((amg_data)->additive)
+#define hypre_ParAMGDataMultAdditive(amg_data) ((amg_data)->mult_additive)
+#define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
+#define hypre_ParAMGDataAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
+#define hypre_ParAMGDataAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
+#define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
+#define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
+#define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
+#define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
+
 #endif
 
 
@@ -560,10 +582,8 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads ( hypre_ParCSRMatrix *A , HYPRE_Int 
 HYPRE_Int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int relax_type , HYPRE_Int relax_times , HYPRE_Real *l1_norms , HYPRE_Real relax_weight , HYPRE_Real omega , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *z );
 
 /* aux_interp.c */
-void insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , HYPRE_Int *IN_marker , HYPRE_Int *node_add , HYPRE_Int num_cols_A_offd , HYPRE_Int full_off_procNodes , HYPRE_Int num_procs , HYPRE_Int *OUT_marker );
 HYPRE_Int alt_insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , hypre_ParCSRCommPkg *extend_comm_pkg , HYPRE_Int *IN_marker , HYPRE_Int full_off_procNodes , HYPRE_Int *OUT_marker );
 HYPRE_Int hypre_ParCSRFindExtendCommPkg ( hypre_ParCSRMatrix *A , HYPRE_Int newoff , HYPRE_Int *found , hypre_ParCSRCommPkg **extend_comm_pkg );
-void hypre_ParCSRCommExtendA ( hypre_ParCSRMatrix *A , HYPRE_Int newoff , HYPRE_Int *found , HYPRE_Int *p_num_recvs , HYPRE_Int **p_recv_procs , HYPRE_Int **p_recv_vec_starts , HYPRE_Int *p_num_sends , HYPRE_Int **p_send_procs , HYPRE_Int **p_send_map_starts , HYPRE_Int **p_send_map_elmts , HYPRE_Int **p_node_add );
 HYPRE_Int hypre_ssort ( HYPRE_Int *data , HYPRE_Int n );
 HYPRE_Int index_of_minimum ( HYPRE_Int *data , HYPRE_Int n );
 void swap_int ( HYPRE_Int *data , HYPRE_Int a , HYPRE_Int b );
@@ -768,8 +788,10 @@ HYPRE_Int HYPRE_BoomerAMGSetNumPaths ( HYPRE_Solver solver , HYPRE_Int num_paths
 HYPRE_Int HYPRE_BoomerAMGSetAggNumLevels ( HYPRE_Solver solver , HYPRE_Int agg_num_levels );
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType ( HYPRE_Solver solver , HYPRE_Int agg_interp_type );
 HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor ( HYPRE_Solver solver , HYPRE_Real agg_trunc_factor );
+HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor ( HYPRE_Solver solver , HYPRE_Real add_trunc_factor );
 HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor ( HYPRE_Solver solver , HYPRE_Real agg_P12_trunc_factor );
 HYPRE_Int HYPRE_BoomerAMGSetAggPMaxElmts ( HYPRE_Solver solver , HYPRE_Int agg_P_max_elmts );
+HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts ( HYPRE_Solver solver , HYPRE_Int add_P_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts ( HYPRE_Solver solver , HYPRE_Int agg_P12_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps ( HYPRE_Solver solver , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int HYPRE_BoomerAMGSetCRRate ( HYPRE_Solver solver , HYPRE_Real CR_rate );
@@ -792,6 +814,12 @@ HYPRE_Int HYPRE_BoomerAMGSetInterpVecAbsQTrunc ( HYPRE_Solver solver , HYPRE_Rea
 HYPRE_Int HYPRE_BoomerAMGSetSmoothInterpVectors ( HYPRE_Solver solver , HYPRE_Int smooth_interp_vectors );
 HYPRE_Int HYPRE_BoomerAMGSetInterpRefine ( HYPRE_Solver solver , HYPRE_Int num_refine );
 HYPRE_Int HYPRE_BoomerAMGSetInterpVecFirstLevel ( HYPRE_Solver solver , HYPRE_Int level );
+HYPRE_Int HYPRE_BoomerAMGSetAdditive ( HYPRE_Solver solver , HYPRE_Int additive );
+HYPRE_Int HYPRE_BoomerAMGGetAdditive ( HYPRE_Solver solver , HYPRE_Int *additive );
+HYPRE_Int HYPRE_BoomerAMGSetMultAdditive ( HYPRE_Solver solver , HYPRE_Int mult_additive );
+HYPRE_Int HYPRE_BoomerAMGGetMultAdditive ( HYPRE_Solver solver , HYPRE_Int *mult_additive );
+HYPRE_Int HYPRE_BoomerAMGSetSimple ( HYPRE_Solver solver , HYPRE_Int simple );
+HYPRE_Int HYPRE_BoomerAMGGetSimple ( HYPRE_Solver solver , HYPRE_Int *simple );
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1050,6 +1078,11 @@ HYPRE_Int HYPRE_SchwarzSetNonSymm ( HYPRE_Solver solver , HYPRE_Int use_nonsymm 
 HYPRE_Int HYPRE_SchwarzSetRelaxWeight ( HYPRE_Solver solver , HYPRE_Real relax_weight );
 HYPRE_Int HYPRE_SchwarzSetDofFunc ( HYPRE_Solver solver , HYPRE_Int *dof_func );
 
+/* par_add_cycle.c */
+HYPRE_Int hypre_BoomerAMGAdditiveCycle ( void *amg_vdata );
+HYPRE_Int hypre_CreateLambda ( void *amg_vdata );
+HYPRE_Int hypre_CreateDinv ( void *amg_vdata );
+
 /* par_amg.c */
 void *hypre_BoomerAMGCreate ( void );
 HYPRE_Int hypre_BoomerAMGDestroy ( void *data );
@@ -1150,8 +1183,10 @@ HYPRE_Int hypre_BoomerAMGSetNumPaths ( void *data , HYPRE_Int num_paths );
 HYPRE_Int hypre_BoomerAMGSetAggNumLevels ( void *data , HYPRE_Int agg_num_levels );
 HYPRE_Int hypre_BoomerAMGSetAggInterpType ( void *data , HYPRE_Int agg_interp_type );
 HYPRE_Int hypre_BoomerAMGSetAggPMaxElmts ( void *data , HYPRE_Int agg_P_max_elmts );
+HYPRE_Int hypre_BoomerAMGSetAddPMaxElmts ( void *data , HYPRE_Int add_P_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetAggP12MaxElmts ( void *data , HYPRE_Int agg_P12_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetAggTruncFactor ( void *data , HYPRE_Real agg_trunc_factor );
+HYPRE_Int hypre_BoomerAMGSetAddTruncFactor ( void *data , HYPRE_Real add_trunc_factor );
 HYPRE_Int hypre_BoomerAMGSetAggP12TruncFactor ( void *data , HYPRE_Real agg_P12_trunc_factor );
 HYPRE_Int hypre_BoomerAMGSetNumCRRelaxSteps ( void *data , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int hypre_BoomerAMGSetCRRate ( void *data , HYPRE_Real CR_rate );
@@ -1194,6 +1229,12 @@ HYPRE_Int hypre_BoomerAMGSetInterpVecAbsQTrunc ( void *data , HYPRE_Real q_trunc
 HYPRE_Int hypre_BoomerAMGSetSmoothInterpVectors ( void *solver , HYPRE_Int smooth_interp_vectors );
 HYPRE_Int hypre_BoomerAMGSetInterpRefine ( void *data , HYPRE_Int num_refine );
 HYPRE_Int hypre_BoomerAMGSetInterpVecFirstLevel ( void *data , HYPRE_Int level );
+HYPRE_Int hypre_BoomerAMGSetAdditive ( void *data , HYPRE_Int additive );
+HYPRE_Int hypre_BoomerAMGGetAdditive ( void *data , HYPRE_Int *additive );
+HYPRE_Int hypre_BoomerAMGSetMultAdditive ( void *data , HYPRE_Int mult_additive );
+HYPRE_Int hypre_BoomerAMGGetMultAdditive ( void *data , HYPRE_Int *mult_additive );
+HYPRE_Int hypre_BoomerAMGSetSimple ( void *data , HYPRE_Int simple );
+HYPRE_Int hypre_BoomerAMGGetSimple ( void *data , HYPRE_Int *simple );
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -1278,6 +1319,8 @@ HYPRE_Int hypre_BoomerAMGBuildDirInterp ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_
 HYPRE_Int hypre_BoomerAMGInterpTruncation ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
 void hypre_qsort2abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_BoomerAMGBuildInterpModUnk ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_marker , hypre_ParCSRMatrix *S , HYPRE_Int *num_cpts_global , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int debug_flag , HYPRE_Real trunc_factor , HYPRE_Int max_elmts , HYPRE_Int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+HYPRE_Int hypre_BoomerAMGTruncandBuild ( hypre_ParCSRMatrix *P , HYPRE_Real trunc_factor , HYPRE_Int max_elmts );
+hypre_ParCSRMatrix *hypre_CreateC ( hypre_ParCSRMatrix *A , HYPRE_Real w );
 
 /* par_jacobi_interp.c */
 void hypre_BoomerAMGJacobiInterp ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **P , hypre_ParCSRMatrix *S , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int *CF_marker , HYPRE_Int level , HYPRE_Real truncation_threshold , HYPRE_Real truncation_threshold_minus );
