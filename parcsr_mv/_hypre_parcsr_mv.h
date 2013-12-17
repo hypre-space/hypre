@@ -1,3 +1,18 @@
+
+#include <HYPRE_config.h>
+
+#include "HYPRE_parcsr_mv.h"
+
+#ifndef hypre_PARCSR_MV_HEADER
+#define hypre_PARCSR_MV_HEADER
+
+#include "_hypre_utilities.h"
+#include "seq_mv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -10,20 +25,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifndef hypre_PARCSR_MV_HEADER
-#define hypre_PARCSR_MV_HEADER
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 
-#include "HYPRE_parcsr_mv.h"
-#include "_hypre_utilities.h"
-#include "seq_mv.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
 #define HYPRE_PAR_CSR_COMMUNICATION_HEADER
@@ -199,6 +202,17 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -362,6 +376,17 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_Getrowactive(matrix)  ((matrix)->getrowactive)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -409,6 +434,17 @@ HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n );
 HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -499,6 +535,17 @@ typedef struct
 #define hypre_ParChordMatrixRdofToprocessor(matrix) ((matrix) -> rdof_toprocessor)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 #ifndef hypre_PAR_MAKE_SYSTEM
 #define  hypre_PAR_MAKE_SYSTEM
@@ -655,6 +702,9 @@ void hypre_ParCSRMatrixGenSpanningTree ( hypre_ParCSRMatrix *G_csr , HYPRE_Int *
 void hypre_ParCSRMatrixExtractSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
 void hypre_ParCSRMatrixExtractRowSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
 HYPRE_Complex hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
+HYPRE_Int hypre_ParCSRMatrixAminvDB ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , HYPRE_Real *d , hypre_ParCSRMatrix **C_ptr );
+HYPRE_Int hypre_MergeArrays ( HYPRE_Int size_A , HYPRE_Real *A , HYPRE_Int size_B , HYPRE_Real *B , HYPRE_Int *size_C_ptr , HYPRE_Real **C_ptr );
+hypre_ParCSRMatrix *hypre_ParTMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );
