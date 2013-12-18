@@ -625,7 +625,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    hypre_ParAMGDataLambda(amg_data) = Lambda;
    hypre_ParAMGDataRtilde(amg_data) = Rtilde;
    hypre_ParAMGDataXtilde(amg_data) = Xtilde;
-   /*hypre_ParAMGDataLevelStart(amg_data) = level_start;*/
 
    hypre_TFree(D_data_offd);
    hypre_TFree(D_data);
@@ -690,19 +689,14 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
 
    num_add_lvls = num_levels+1-addlvl;
-   /*level_start = hypre_CTAlloc(int, num_add_lvls+1);*/
   
    num_rows_L  = 0;
-   /*level_start[0] = 0; 
-   cnt = 1;*/
    for (i=addlvl; i < num_levels; i++)
    {
       A_tmp = A_array[i];
       A_tmp_diag = hypre_ParCSRMatrixDiag(A_tmp);
       num_rows_tmp = hypre_CSRMatrixNumRows(A_tmp_diag);
       num_rows_L += num_rows_tmp;
-      /*level_start[cnt] = level_start[cnt-1] + num_rows_tmp;
-      cnt++;*/
    }
 
    Rtilde = hypre_CTAlloc(hypre_ParVector, 1);
@@ -724,7 +718,6 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    l1_start = 0;
    for (level=addlvl; level < num_levels; level++)
    {
-      /*row_start = level_start[cnt_level];*/
       if (level != 0)
       {
          tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(F_array[level]));
@@ -750,7 +743,6 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    hypre_ParAMGDataDinv(amg_data) = D_inv;
    hypre_ParAMGDataRtilde(amg_data) = Rtilde;
    hypre_ParAMGDataXtilde(amg_data) = Xtilde;
-   /*hypre_ParAMGDataLevelStart(amg_data) = level_start;*/
 
    return Solve_err_flag;
 }
