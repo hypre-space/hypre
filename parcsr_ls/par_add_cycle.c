@@ -274,8 +274,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int *A_tmp_offd_i;
    HYPRE_Int *A_tmp_diag_j;
    HYPRE_Int *A_tmp_offd_j;
-   HYPRE_Int *L_recv_ptr;
-   HYPRE_Int *L_send_ptr;
+   HYPRE_Int *L_recv_ptr = NULL;
+   HYPRE_Int *L_send_ptr = NULL;
    HYPRE_Int *L_recv_procs = NULL;
    HYPRE_Int *L_send_procs = NULL;
    HYPRE_Int *L_send_map_elmts = NULL;
@@ -284,8 +284,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int *send_map_elmts;
    HYPRE_Int *send_map_starts;
    HYPRE_Int *recv_vec_starts;
-   HYPRE_Int *mark_send_procs;
-   HYPRE_Int *mark_recv_procs;
+   HYPRE_Int *all_send_procs = NULL;
+   HYPRE_Int *all_recv_procs = NULL;
    HYPRE_Int *remap = NULL;
    HYPRE_Int *level_start;
 
@@ -296,18 +296,19 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int       num_add_lvls;
    HYPRE_Int       num_procs;
    HYPRE_Int       num_sends, num_recvs;
-   HYPRE_Int       num_sends_L, num_recvs_L;
+   HYPRE_Int       num_sends_L = 0;
+   HYPRE_Int       num_recvs_L = 0;
    HYPRE_Int       send_data_L = 0;
-   HYPRE_Int       num_rows_L;
-   HYPRE_Int       num_rows_tmp;
-   HYPRE_Int       num_cols_offd_L;
-   HYPRE_Int       num_cols_offd;
+   HYPRE_Int       num_rows_L = 0;
+   HYPRE_Int       num_rows_tmp = 0;
+   HYPRE_Int       num_cols_offd_L = 0;
+   HYPRE_Int       num_cols_offd = 0;
    HYPRE_Int       level, i, j, k;
    HYPRE_Int       this_proc, cnt, cnt_diag, cnt_offd;
    HYPRE_Int       cnt_recv, cnt_send, cnt_row, row_start;
    HYPRE_Int       start_diag, start_offd, indx, cnt_map;
    HYPRE_Int       start, j_indx, index, cnt_level;
-   HYPRE_Int       L_proc;
+   HYPRE_Int       max_sends, max_recvs;
 
  /* Local variables  */ 
    HYPRE_Int       Solve_err_flag = 0;
@@ -332,23 +333,20 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    hypre_MPI_Comm_size(comm,&num_procs);
 
    l1_norms_ptr      = hypre_ParAMGDataL1Norms(amg_data); 
-   /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
 
    addlvl = hypre_max(additive, mult_additive);
    num_add_lvls = num_levels+1-addlvl;
-   mark_send_procs = hypre_CTAlloc(HYPRE_Int, num_procs);
-   mark_recv_procs = hypre_CTAlloc(HYPRE_Int, num_procs);
+
    level_start = hypre_CTAlloc(HYPRE_Int, num_add_lvls+1);
-   num_sends_L = 0;
-   num_recvs_L = 0;
    send_data_L = 0;
-  
    num_rows_L  = 0;
    num_cols_offd_L = 0;
    num_nonzeros_diag = 0;
    num_nonzeros_offd = 0;
    level_start[0] = 0; 
    cnt = 1;
+   max_sends = 0;
+   max_recvs = 0;
    for (i=addlvl; i < num_levels; i++)
    {
       A_tmp = A_array[i];
@@ -359,6 +357,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       num_rows_tmp = hypre_CSRMatrixNumRows(A_tmp_diag);
       num_cols_offd = hypre_CSRMatrixNumCols(A_tmp_offd);
       num_rows_L += num_rows_tmp;
+      level_start[cnt] = level_start[cnt-1] + num_rows_tmp;
+      cnt++;
       num_cols_offd_L += num_cols_offd;
       num_nonzeros_diag += A_tmp_diag_i[num_rows_tmp];
       num_nonzeros_offd += A_tmp_offd_i[num_rows_tmp];
@@ -366,32 +366,183 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       if (comm_pkg)
       {
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-         num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-         send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-         recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-         send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-         recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+         max_sends += num_sends;
+         if (num_sends) 
+	    send_data_L += hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
+         max_recvs += hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+      }
+   }
+   if (max_sends >= num_procs ||max_recvs >= num_procs)
+   {
+         max_sends = num_procs;
+         max_recvs = num_procs;
+   }
+   if (max_sends) all_send_procs = hypre_CTAlloc(HYPRE_Int, max_sends);
+   if (max_recvs) all_recv_procs = hypre_CTAlloc(HYPRE_Int, max_recvs);
+
+   cnt_send = 0;
+   cnt_recv = 0;
+   if (max_sends || max_recvs)
+   {
+      if (max_sends < num_procs && max_recvs < num_procs)
+      {
+         for (i=addlvl; i < num_levels; i++)
+         {
+            A_tmp = A_array[i];
+            comm_pkg = hypre_ParCSRMatrixCommPkg(A_tmp);
+            if (comm_pkg)
+            {
+               num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+               num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+               send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+               recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+               for (j = 0; j < num_sends; j++)
+	          all_send_procs[cnt_send++] = send_procs[j];
+               for (j = 0; j < num_recvs; j++)
+	          all_recv_procs[cnt_recv++] = recv_procs[j];
+            }
+         }
+         if (max_sends)
+         {
+            qsort0(all_send_procs, 0, max_sends-1);
+            num_sends_L = 1;
+            this_proc = all_send_procs[0];
+            for (i=1; i < max_sends; i++)
+            {
+               if (all_send_procs[i] > this_proc)
+               {
+                  this_proc = all_send_procs[i];
+                  all_send_procs[num_sends_L++] = this_proc;
+               }
+            }
+            L_send_procs = hypre_CTAlloc(HYPRE_Int, num_sends_L);
+            for (j=0; j < num_sends_L; j++)
+	       L_send_procs[j] = all_send_procs[j];
+	    hypre_TFree(all_send_procs);
+         }
+         if (max_recvs)
+         {
+            qsort0(all_recv_procs, 0, max_recvs-1);
+            num_recvs_L = 1;
+            this_proc = all_recv_procs[0];
+            for (i=1; i < max_recvs; i++)
+            {
+               if (all_recv_procs[i] > this_proc)
+               {
+                  this_proc = all_recv_procs[i];
+                  all_recv_procs[num_recvs_L++] = this_proc;
+               }
+            }
+            L_recv_procs = hypre_CTAlloc(HYPRE_Int, num_recvs_L);
+            for (j=0; j < num_recvs_L; j++)
+	       L_recv_procs[j] = all_recv_procs[j];
+	    hypre_TFree(all_recv_procs);
+         }
+
+         L_recv_ptr = hypre_CTAlloc(HYPRE_Int, num_recvs_L+1);
+         L_send_ptr = hypre_CTAlloc(HYPRE_Int, num_sends_L+1);
+
+         for (i=addlvl; i < num_levels; i++)
+         {
+            A_tmp = A_array[i];
+            comm_pkg = hypre_ParCSRMatrixCommPkg(A_tmp);
+            if (comm_pkg)
+            {
+               num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+               num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+               send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+               recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+               send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+               recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+            }
+            else
+            {
+               num_sends = 0;
+               num_recvs = 0;
+            }
+            for (k = 0; k < num_sends; k++)
+            {
+               this_proc = hypre_BinarySearch(L_send_procs,send_procs[k],num_sends_L);
+               L_send_ptr[this_proc+1] += send_map_starts[k+1]-send_map_starts[k];
+            }
+            for (k = 0; k < num_recvs; k++)
+            {
+               this_proc = hypre_BinarySearch(L_recv_procs,recv_procs[k],num_recvs_L);
+               L_recv_ptr[this_proc+1] += recv_vec_starts[k+1]-recv_vec_starts[k];
+            }
+         }
+
+         L_recv_ptr[0] = 0;
+         for (i=1; i < num_recvs_L; i++)
+            L_recv_ptr[i+1] += L_recv_ptr[i];
+
+         L_send_ptr[0] = 0;
+         for (i=1; i < num_sends_L; i++)
+            L_send_ptr[i+1] += L_send_ptr[i];
       }
       else
       {
-         num_sends = 0;
-         num_recvs = 0;
-      }
-      for (k = 0; k < num_sends; k++)
-      {
-         this_proc = send_procs[k];
-         if (mark_send_procs[this_proc] == 0) num_sends_L++;
-         mark_send_procs[this_proc] += send_map_starts[k+1]-send_map_starts[k];
-      }
-      if (num_sends) send_data_L += hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
-      for (k = 0; k < num_recvs; k++)
-      {
-         this_proc = recv_procs[k];
-         if (mark_recv_procs[this_proc] == 0) num_recvs_L++;
-         mark_recv_procs[this_proc] += recv_vec_starts[k+1]-recv_vec_starts[k];
-      }
-      level_start[cnt] = level_start[cnt-1] + num_rows_tmp;
-      cnt++;
+         num_recvs_L = 0;
+         num_sends_L = 0;
+         for (i=addlvl; i < num_levels; i++)
+         {
+            A_tmp = A_array[i];
+            comm_pkg = hypre_ParCSRMatrixCommPkg(A_tmp);
+            if (comm_pkg)
+            {
+               num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+               num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+               send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+               recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+               send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+               recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+               for (j = 0; j < num_sends; j++)
+               {
+                  this_proc = send_procs[j];
+	          if (all_send_procs[this_proc] == 0)
+		      num_sends_L++;
+                  all_send_procs[this_proc] += send_map_starts[j+1]-send_map_starts[j];
+               }
+               for (j = 0; j < num_recvs; j++)
+               {
+                  this_proc = recv_procs[j];
+	          if (all_recv_procs[this_proc] == 0)
+		      num_recvs_L++;
+                  all_recv_procs[this_proc] += recv_vec_starts[j+1]-recv_vec_starts[j];
+               }
+            }
+         }
+         if (max_sends)
+         {
+            L_send_procs = hypre_CTAlloc(HYPRE_Int, num_sends_L);
+            L_send_ptr = hypre_CTAlloc(HYPRE_Int, num_sends_L+1);
+            num_sends_L = 0;
+            for (j=0; j < num_procs; j++)
+            {
+	       this_proc = all_send_procs[j];
+	       if (this_proc)
+	       {
+	           L_send_procs[num_sends_L++] = j;
+	           L_send_ptr[num_sends_L] = this_proc + L_send_ptr[num_sends_L-1];
+	       }
+            }
+         }
+         if (max_recvs)
+         {
+            L_recv_procs = hypre_CTAlloc(HYPRE_Int, num_recvs_L);
+            L_recv_ptr = hypre_CTAlloc(HYPRE_Int, num_recvs_L+1);
+            num_recvs_L = 0;
+            for (j=0; j < num_procs; j++)
+            {
+	       this_proc = all_recv_procs[j];
+	       if (this_proc)
+	       {
+	           L_recv_procs[num_recvs_L++] = j;
+	           L_recv_ptr[num_recvs_L] = this_proc + L_recv_ptr[num_recvs_L-1];
+	       }
+            }
+         }
+      } 
    }
 
    L_diag = hypre_CSRMatrixCreate(num_rows_L, num_rows_L, num_nonzeros_diag);
@@ -412,10 +563,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    L_offd_i = hypre_CSRMatrixI(L_offd);
 
    if (num_rows_L) D_data = hypre_CTAlloc(HYPRE_Real,num_rows_L);
-   if (num_recvs_L) L_recv_procs = hypre_CTAlloc(HYPRE_Int, num_recvs_L);
-   L_recv_ptr = hypre_CTAlloc(HYPRE_Int, num_recvs_L+1);
-   if (num_sends_L) L_send_procs = hypre_CTAlloc(HYPRE_Int, num_sends_L);
-   L_send_ptr = hypre_CTAlloc(HYPRE_Int, num_sends_L+1);
    if (send_data_L)
    {
       L_send_map_elmts = hypre_CTAlloc(HYPRE_Int, send_data_L);
@@ -426,27 +573,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       D_data_offd = hypre_CTAlloc(HYPRE_Real,num_cols_offd_L);
       /*L_col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd_L);*/
       remap = hypre_CTAlloc(HYPRE_Int, num_cols_offd_L);
-   }
-
-   cnt_recv = 1;
-   cnt_send = 1;
-   L_recv_ptr[0] = 0;
-   L_send_ptr[0] = 0;
-   for (i=0; i< num_procs; i++)
-   {
-      if (mark_recv_procs[i])
-      {
-         L_recv_procs[cnt_recv-1] = i;
-         L_recv_ptr[cnt_recv] = L_recv_ptr[cnt_recv-1] + mark_recv_procs[i]; 
-         cnt_recv++;
-      }
-      if (mark_send_procs[i])
-      {
-         L_send_procs[cnt_send-1] = i;
-         L_send_ptr[cnt_send] = L_send_ptr[cnt_send-1] + mark_send_procs[i]; 
-         cnt_send++;
-      }
-      if (cnt_recv > num_recvs_L && cnt_send > num_sends_L) break;
    }
 
    Rtilde = hypre_CTAlloc(hypre_ParVector, 1);
@@ -517,41 +643,27 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       }
    
       /* Compute new combined communication package */
-      cnt = 0;
-      if (L_send_procs) L_proc = L_send_procs[cnt];
       for (i=0; i < num_sends; i++)
       {
-         this_proc = send_procs[i];
-         while (this_proc != L_proc)
-         {
-            cnt++;
-	    L_proc = L_send_procs[cnt];
-         }
-         indx = L_send_ptr[cnt];
+         this_proc = hypre_BinarySearch(L_send_procs,send_procs[i],num_sends_L);
+         indx = L_send_ptr[this_proc];
          for (j=send_map_starts[i]; j < send_map_starts[i+1]; j++)
          {
 	    L_send_map_elmts[indx++] = row_start + send_map_elmts[j];
          }
-         L_send_ptr[cnt] = indx;
+         L_send_ptr[this_proc] = indx;
       }
             
-      cnt = 0;
       cnt_map = 0;
-      if (L_recv_procs) L_proc = L_recv_procs[cnt];
       for (i = 0; i < num_recvs; i++)
       {
-         this_proc = recv_procs[i];
-         while (this_proc != L_proc)
-         {
-            cnt++;
-	    L_proc = L_recv_procs[cnt];
-         }
-         indx = L_recv_ptr[cnt];
+         this_proc = hypre_BinarySearch(L_recv_procs,recv_procs[i],num_recvs_L);
+         indx = L_recv_ptr[this_proc];
          for (j=recv_vec_starts[i]; j < recv_vec_starts[i+1]; j++)
          {
 	    remap[cnt_map++] = indx++;
          }
-         L_recv_ptr[cnt] = indx;
+         L_recv_ptr[this_proc] = indx;
       }
    
       /* Compute Lambda */ 
@@ -596,12 +708,24 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
          }
       }
    }
-   for (i=num_sends_L-1; i > 0; i--)
-      L_send_ptr[i] = L_send_ptr[i-1];
-   L_send_ptr[0] = 0;
-   for (i=num_recvs_L-1; i > 0; i--)
-      L_recv_ptr[i] = L_recv_ptr[i-1];
-   L_recv_ptr[0] = 0;
+
+   if (L_send_ptr)
+   {
+      for (i=num_sends_L-1; i > 0; i--)
+         L_send_ptr[i] = L_send_ptr[i-1];
+      L_send_ptr[0] = 0;
+   }
+   else
+      L_send_ptr = hypre_CTAlloc(HYPRE_Int,1);
+
+   if (L_recv_ptr)
+   {
+      for (i=num_recvs_L-1; i > 0; i--)
+         L_recv_ptr[i] = L_recv_ptr[i-1];
+      L_recv_ptr[0] = 0;
+   }
+   else
+      L_recv_ptr = hypre_CTAlloc(HYPRE_Int,1);
 
    L_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
 
@@ -629,8 +753,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    hypre_TFree(D_data_offd);
    hypre_TFree(D_data);
    if (num_procs > 1) hypre_TFree(buf_data);
-   hypre_TFree(mark_send_procs);
-   hypre_TFree(mark_recv_procs);
    hypre_TFree(remap);
    hypre_TFree(buf_data);
    hypre_TFree(level_start);
