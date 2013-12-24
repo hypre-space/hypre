@@ -755,7 +755,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          
          if (hypre_CSRMatrixNumRows(P_diag))
          {
-            if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
+            if (P_diag_data) min_weight = P_diag_data[0];
             for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
             {
                min_weight = hypre_min(min_weight, P_diag_data[j]);
