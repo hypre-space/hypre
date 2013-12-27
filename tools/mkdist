@@ -97,7 +97,7 @@ mkdir $HYPRE_DIST_INSTALL_DIR/src
 
   if [ "$VersionType" = "V" ]
   then
-    git checkout ${VersionId}
+    git checkout -q ${VersionId}
     if [  $? -ne 0 ]
     then
       echo "Error: Tag Version=${VersionId} not found in repository"
@@ -112,6 +112,7 @@ mkdir $HYPRE_DIST_INSTALL_DIR/src
     exit
   fi
 
+  rm -rf .git
   cd ..
 )
 
