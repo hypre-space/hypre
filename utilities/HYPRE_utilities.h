@@ -37,7 +37,7 @@ extern "C" {
  * Before a version of HYPRE goes out the door, increment the version
  * number and check in this file (for CVS to substitute the Date).
  */
-#define HYPRE_Version() "HYPRE_RELEASE_NAME  $Date$ Compiled: " __DATE__ " " __TIME__
+#define HYPRE_Version() "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
 
 /*--------------------------------------------------------------------------
  * Big int stuff
