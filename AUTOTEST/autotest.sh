@@ -69,8 +69,12 @@ EOF
       # Checkout the repository and update the global AUTOTEST directory
       -checkout)
          cd $testing_dir
-         rm -fr hypre
-         git clone /usr/casc/hypre/git/hypre
+         if [ ! -d hypre ]; then
+            echo "Clone the hypre directory in $testing_dir first"
+            exit
+         else
+            cd hypre; git checkout .; git pull; cd ..
+         fi
          trap "cp -fR $testing_dir/hypre/AUTOTEST $testing_dir" EXIT
          test_opts=""
          break
