@@ -54,8 +54,8 @@ the responsible project member before the release is made available to users.
 
   []
 
-- Tag repository with release number (use '-b' option to create a branch,
-  e.g., 'cvs rtag -b V2-0-0 linear_solvers').
+- Tag repository with release number: git tag -a V2-0-0 -m "Release 2.0.0".
+  Push the tags to the central repositoryL: git push --tags
 
   []
 
