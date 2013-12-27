@@ -16,9 +16,8 @@ testing_dir=`cd ..; pwd`
 autotest_dir="$testing_dir/AUTOTEST"
 finished_dir="$testing_dir/AUTOTEST-FINISHED"
 output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
-src_dir="$testing_dir/linear_solvers"
+src_dir="$testing_dir/hypre"
 remote_dir="hypre/testing"
-cvs_opts=""
 summary_file="SUMMARY.html"
 summary_subject="Autotest Error Summary `date +%Y-%m-%d`"
 email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov"
@@ -68,12 +67,11 @@ EOF
          ;;
 
       # Checkout the repository and update the global AUTOTEST directory
-      # Must have CVSROOT set to point to the hypre repository
       -checkout)
          cd $testing_dir
-         rm -fr linear_solvers
-         cvs checkout $cvs_opts linear_solvers
-         trap "cp -fR $testing_dir/linear_solvers/AUTOTEST $testing_dir" EXIT
+         rm -fr hypre
+         git clone /usr/casc/hypre/git/hypre
+         trap "cp -fR $testing_dir/hypre/AUTOTEST $testing_dir" EXIT
          test_opts=""
          break
          ;;
@@ -252,7 +250,7 @@ done
 
 # Fix permissions
 cd $testing_dir
-ch_dirs="linear_solvers $autotest_dir $finished_dir $output_dir"
+ch_dirs="hypre $autotest_dir $finished_dir $output_dir"
 for dir in $ch_dirs lastrun-*
 do
    if [ -e $dir ]; then
