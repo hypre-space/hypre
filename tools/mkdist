@@ -27,13 +27,13 @@ help ()
    
       -help        Displays this message.
       
-      -display     Reports the cvs rtag history.
+      -display     Reports the tag history.
       
       VersionId    Creates a distribution, where VersionId determines the
                    repository revision to use.  VersionId can either have the
                    form VM-m-r to specify a release tag or Dyyyy-mm-dd to
                    specify a date.  For example, V2-5-0a checks out source with
-                   rtag 'V2-5-0a' and creates the tar file hypre-2.5.0a.tar.gz.
+                   tag 'V2-5-0a' and creates the tar file hypre-2.5.0a.tar.gz.
                    The option D2010-01-27 checks out the most recent source not
                    later than the date '2010-01-27' and creates the tar file
                    hypre-2010.01.27.tar.gz.  The V option is used to create
@@ -49,8 +49,8 @@ EOF
 
 display ()
 {
-  printf "valid cvs rtags:\n"
-  cvs history -T -a | grep linear_solvers
+  printf "valid tags:\n"
+  git tag
 }
 
 #=============================================================================
@@ -91,27 +91,28 @@ mkdir $HYPRE_DIST_INSTALL_DIR/src
 # check the source code out of the repository
 (
   cd $HYPRE_DIST_INSTALL_DIR/src
-  if [ ! -d "$CVSROOT" ]
-  then
-    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
-    exit
-  fi
+
+  git clone /usr/casc/hypre/git/hypre
+  cd hypre
+
   if [ "$VersionType" = "V" ]
   then
-    cvs export -r ${VersionId} linear_solvers
+    git checkout ${VersionId}
     if [  $? -ne 0 ]
     then
-      echo "Error: Rtag Version=${VersionId} not found in CVS repository"
+      echo "Error: Tag Version=${VersionId} not found in repository"
       display
       exit
     fi
   elif [ "$VersionType" = "D" ]
   then
-    cvs export -D ${Version} linear_solvers
+    git checkout -q `git rev-list -n 1 --before="${Version}" master`
   else
     echo "Error: Invalid leading character in VersionID=${VersionId}"
     exit
   fi
+
+  cd ..
 )
 
 # replace dashes in version with dots and redefine directory names
@@ -127,13 +128,13 @@ HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
 # build documentation for examples sub-directory
 (
-  cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers/examples/docs
+  cd $HYPRE_DIST_INSTALL_DIR/src/hypre/examples/docs
   make
 )
     
 # build documentation and install in the distribution directory
 (
-  cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
+  cd $HYPRE_DIST_INSTALL_DIR/src/hypre
   ./configure --prefix=$HYPRE_DIST_INSTALL_DIR
   (cd docs; make install; make distclean)
 )
@@ -141,16 +142,16 @@ HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
 # store version info
 (
   cd $HYPRE_DIST_INSTALL_DIR
-  cp src/linear_solvers/COPYRIGHT .
-  cp src/linear_solvers/COPYING.LESSER .
-  cp src/linear_solvers/CHANGELOG .
-  cp src/linear_solvers/INSTALL .
-  cp src/linear_solvers/README .
+  cp src/hypre/COPYRIGHT .
+  cp src/hypre/COPYING.LESSER .
+  cp src/hypre/CHANGELOG .
+  cp src/hypre/INSTALL .
+  cp src/hypre/README .
 )
 
-# pop 'linear_solvers' directory to 'src'
-mv $HYPRE_DIR/src/linear_solvers/* $HYPRE_DIR/src
-rmdir $HYPRE_DIR/src/linear_solvers
+# pop 'hypre' directory to 'src'
+mv $HYPRE_DIR/src/hypre/* $HYPRE_DIR/src
+rmdir $HYPRE_DIR/src/hypre
 
 # remove certain directories that should not appear in the release
 rm -fr $HYPRE_DIR/src/AUTOTEST

@@ -19,8 +19,7 @@
 #   BHEAD_code_template) and script/info files (using the BHEAD_file_template).
 #   These files can be edited to whatever is needed in the future. 
 #
-#   This script is run in the directory one level above the linear_solvers 
-#   directory.
+#   This script is run in the directory one level above the hypre directory.
 #
 #   Algorithm Used:
 #      grep for BHEADER in all sub-directories
@@ -48,7 +47,7 @@ hypre_temp_outfile="AAfile.new"
 hypre_file_template="BHEAD_file_template"
 hypre_code_template="BHEAD_code_template"
 
-filelist=`grep -R -l BHEADER linear_solvers/*`
+filelist=`grep -R -l BHEADER hypre/*`
 
 current_dir=`pwd`
 
