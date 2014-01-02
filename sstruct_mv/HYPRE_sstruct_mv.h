@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision$
+ * $Revision: 2.33 $
  ***********************************************************************EHEADER*/
 
 #ifndef HYPRE_SSTRUCT_MV_HEADER
@@ -295,6 +295,164 @@ HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
                                HYPRE_Int         *index_dir);
 
 /**
+ * \color{blue}
+ * Declare a part to be a refinement of another part in an AMR hierarchy.
+ *
+ * The index space of {\tt fine_part} is defined to be a refinement of the index
+ * space of {\tt coarse_part} by a refinement factor in each dimension given by
+ * {\tt rfactors}.  The two index spaces are aligned based on {\tt coarse_index}
+ * and {\tt fine_index}, which specifies the fine index of the lower left cell
+ * of the given coarse index.  This induces notions of {\em real} and {\em
+ * slave} variables and interpolation between them, which impacts how vector and
+ * matrix values are set.
+ *
+ * By default, real variables are defined as follows, and the remaining
+ * variables are slave variables (this may be changed by the user through
+ * the routine {\tt HYPRE_SStructGridSetAMRRefSlaves}:
+ * \begin{itemize}
+ * \item fine variables on the interior of overlapping coarse-fine regions;
+ * \item coarse variables on the boundary of overlapping coarse-fine regions;
+ * \item all variables in non-overlapping regions.
+ * \end{itemize}
+ *
+ * By default, interpolation (and restriction) is defined to be the natural
+ * finite element interpolation corresponding to each variable type, but this
+ * may be changed by the user via the other {\tt SStructGridSetAMR} routines.
+ *
+ * There are two basic steps for changing interpolation, both optional.  The
+ * first is through the {\tt SStructGridSetAMRRef} routines using a reference
+ * overlapping coarse-fine patch.  This reference patch is applied throughout
+ * the entire part to define the global interpolation operator.  Interpolation
+ * may then be changed at individual locations in the grid through the
+ * {\tt HYPRE_SStructGridSetAMRInterp} routine.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRPart(HYPRE_SStructGrid  grid,
+                            HYPRE_Int          coarse_part,
+                            HYPRE_Int          fine_part,
+                            HYPRE_Int         *coarse_index,
+                            HYPRE_Int         *fine_index,
+                            HYPRE_Int         *rfactors);
+
+/**
+ * \color{blue}
+ * Set the number of coarse and fine ghost layers in the reference coarse-fine
+ * patch.  By default, the reference patch consists of a single coarse cell and
+ * its refinement.  Adding ghost layers introduces additional fine slave
+ * variables just outside of the default patch and allows users to specify
+ * interpolation to these slave variables from coarse variables that also live
+ * outside of the default patch.  This is most useful in finite difference
+ * settings, especially in the cell-centered case.
+ *
+ * Coarse and fine variables are referenced in the patch by an integer rank
+ * (starting from zero) using a lexicographical ordering.  For example, in 2D,
+ * for a refinement factor of two in both directions and a nodal variable type,
+ * a reference patch with no ghost layers will have four coarse variables
+ * numbered 0 through 3 and nine fine variables numbered 0 through 8.  For the
+ * same example with one coarse and one fine ghost layer, there will be 16
+ * coarse and 25 fine variables.
+ *
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRRefGhost(HYPRE_SStructGrid  grid,
+                                HYPRE_Int          part,
+                                HYPRE_Int          var,
+                                HYPRE_Int          coarse_nghost,
+                                HYPRE_Int          fine_nghost);
+
+/**
+ * \color{blue}
+ * Define the slave variables in the reference coarse-fine patch.
+ *
+ * This routine must be called after {\tt HYPRE_SStructGridSetAMRPart} and
+ * before any other {\tt SStructGridSetAMR} routines.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRRefSlaves(HYPRE_SStructGrid  grid,
+                                 HYPRE_Int          part,
+                                 HYPRE_Int          var,
+                                 HYPRE_Int          nslaves,
+                                 HYPRE_Int         *slaves);
+
+/**
+ * \color{blue}
+ * Set interpolation on the reference coarse-fine patch.  Interpolation maps
+ * real variables to all variables (real and slave).  Real variables are mapped
+ * to real variables identically.  Slave coarse variables are not interpolated
+ * at all.  Users may only change interpolation from real variables (coarse and
+ * fine) to slave fine variables on {\tt part}.  The argument {\tt row} is a
+ * fine reference patch rank for variable {\tt var}.  The array {\tt cols}
+ * contains both coarse and fine reference patch ranks for variables {\tt
+ * colvars}, as specified by a 0 (coarse) or 1 (fine) in {\tt cf}.
+ *
+ * Note: Currently, each call must set an entire row of interpolation.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRRefInterp(HYPRE_SStructGrid  grid,
+                                 HYPRE_Int          part,
+                                 HYPRE_Int          var,
+                                 HYPRE_Int          row,
+                                 HYPRE_Int          ncols,
+                                 HYPRE_Int         *colvars,
+                                 HYPRE_Int         *cf,
+                                 HYPRE_Int         *cols,
+                                 HYPRE_Complex     *values);
+
+/**
+ * \color{blue}
+ * Set (the transpose of) restriction on the reference coarse-fine patch.  By
+ * default, restriction is the transpose of interpolation.  Usually, this
+ * routine should only be called to set up a nonsymmetric operator.  Usage is
+ * the same as for setting up interpolation.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRRefRestrictT(HYPRE_SStructGrid  grid,
+                                    HYPRE_Int          part,
+                                    HYPRE_Int          var,
+                                    HYPRE_Int          row,
+                                    HYPRE_Int          ncols,
+                                    HYPRE_Int         *colvars,
+                                    HYPRE_Int         *cf,
+                                    HYPRE_Int         *cols,
+                                    HYPRE_Complex     *values);
+
+/**
+ * \color{blue}
+ * Set interpolation at a specific grid index on a refined part.  Usage is the
+ * same as for setting interpolation on the reference coarse-fine patch, except
+ * that an additional coarse index argument {\tt index} is given.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRInterp(HYPRE_SStructGrid  grid,
+                              HYPRE_Int          part,
+                              HYPRE_Int         *index,
+                              HYPRE_Int          var,
+                              HYPRE_Int          row,
+                              HYPRE_Int          ncols,
+                              HYPRE_Int         *colvars,
+                              HYPRE_Int         *cf,
+                              HYPRE_Int         *cols,
+                              HYPRE_Complex     *values);
+
+/**
+ * \color{blue}
+ * Set restriction at a specific grid index on a refined part.  Usage is the
+ * same as for setting restriction on the reference coarse-fine patch, except
+ * that an additional argument {\tt index} is given.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetAMRRestrictT(HYPRE_SStructGrid  grid,
+                                 HYPRE_Int          part,
+                                 HYPRE_Int         *index,
+                                 HYPRE_Int          var,
+                                 HYPRE_Int          row,
+                                 HYPRE_Int          ncols,
+                                 HYPRE_Int         *colvars,
+                                 HYPRE_Int         *cf,
+                                 HYPRE_Int         *cols,
+                                 HYPRE_Complex     *values);
+
+/**
  * Add an unstructured part to the grid.  The variables in the unstructured part
  * of the grid are referenced by a global rank between 0 and the total number of
  * unstructured variables minus one.  Each process owns some unique consecutive
@@ -312,6 +470,33 @@ HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
  **/
 HYPRE_Int
 HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
+
+/**
+ * \color{blue}
+ * Set the storage type of associated matrix and vector objects.  This object
+ * type is inherited by {\tt SStructGraph}, {\tt SStructMatrix}, and {\tt
+ * SStructVector} at their creation, but can also be changed through the
+ * corresponding {\tt SetObjectType} routines.  Setting an object type with this
+ * routine helps to minimize the number of overall calls to {\tt SetObjectType},
+ * but is particularly useful when grid-based operators are needed, such as a
+ * discrete gradient ({\tt HYPRE_SStructGridGetGradient}).
+ *
+ * Currently, {\tt type} can be {\tt HYPRE\_SSTRUCT}, {\tt HYPRE\_STRUCT}, or
+ * {\tt HYPRE\_PARCSR}. The default is {\tt HYPRE\_SSTRUCT}.
+ **/
+HYPRE_Int
+HYPRE_SStructGridSetObjectType(HYPRE_SStructGrid  grid,
+                               HYPRE_Int          type);
+
+/**
+ * \color{blue}
+ * Get a reference to a discrete gradient matrix object.
+ *
+ * RDF: Not sure yet if this routine really needs to exist.
+ **/
+HYPRE_Int
+HYPRE_SStructGridGetGradient(HYPRE_SStructGrid   grid,
+                             void              **gradient);
 
 /**
  * Set the periodicity on a particular part.
@@ -471,13 +656,12 @@ HYPRE_Int
 HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 
 /**
- * Set the storage type of the associated matrix object.  It is used before
- * AddEntries and Assemble to compute the right ranks in the graph.
+ * Set the storage type of the associated matrix object.  This object type is
+ * inherited by {\tt SStructMatrix} at its creation, but can also be changed
+ * through the corresponding {\tt SetObjectType} routine.
  * 
- * NOTE: This routine is only necessary for implementation reasons, and will
- * eventually be removed.
- *
- * @see HYPRE_SStructMatrixSetObjectType
+ * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
+ * The default type is inherited from the grid.
  **/
 HYPRE_Int
 HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
@@ -718,11 +902,10 @@ HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
                                   HYPRE_Int           symmetric);
 
 /**
- * Set the storage type of the matrix object to be constructed.  Currently, {\tt
- * type} can be either {\tt HYPRE\_SSTRUCT} (the default), {\tt HYPRE\_STRUCT},
- * or {\tt HYPRE\_PARCSR}.
+ * Set the storage type of the matrix object to be constructed.
  *
- * @see HYPRE_SStructMatrixGetObject
+ * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
+ * The default type is inherited from the graph.
  **/
 HYPRE_Int
 HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
@@ -730,8 +913,6 @@ HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
 
 /**
  * Get a reference to the constructed matrix object.
- *
- * @see HYPRE_SStructMatrixSetObjectType
  **/
 HYPRE_Int
 HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
@@ -929,11 +1110,10 @@ HYPRE_Int
 HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
 /**
- * Set the storage type of the vector object to be constructed.  Currently, {\tt
- * type} can be either {\tt HYPRE\_SSTRUCT} (the default), {\tt HYPRE\_STRUCT},
- * or {\tt HYPRE\_PARCSR}.
+ * Set the storage type of the vector object to be constructed.
  *
- * @see HYPRE_SStructVectorGetObject
+ * See {\tt HYPRE_SStructGridSetObjectType} for available values for {\tt type}.
+ * The default type is inherited from the grid.
  **/
 HYPRE_Int
 HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
@@ -941,8 +1121,6 @@ HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
 
 /**
  * Get a reference to the constructed vector object.
- *
- * @see HYPRE_SStructVectorSetObjectType
  **/
 HYPRE_Int
 HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
@@ -955,6 +1133,60 @@ HYPRE_Int
 HYPRE_SStructVectorPrint(const char          *filename,
                          HYPRE_SStructVector  vector,
                          HYPRE_Int            all);
+
+/**
+ * Copy a vector (y <-- x).
+ **/
+HYPRE_Int
+HYPRE_SStructVectorCopy(HYPRE_SStructVector x,
+                        HYPRE_SStructVector y);
+
+/**
+ * Scale a vector (y <-- alpha*x).
+ **/
+HYPRE_Int
+HYPRE_SStructVectorScale(HYPRE_Complex       alpha,
+                         HYPRE_SStructVector y);
+
+/**
+ * Compute {\tt result}, the inner product of vectors {\tt x} and {\tt y}.
+ **/
+HYPRE_Int
+HYPRE_SStructInnerProd(HYPRE_SStructVector  x,
+                       HYPRE_SStructVector  y,
+                       HYPRE_Real          *result);
+
+/**
+ * Add two vectors (y <-- alpha*x + y).
+ **/
+HYPRE_Int
+HYPRE_SStructAxpy(HYPRE_Complex       alpha,
+                  HYPRE_SStructVector x,
+                  HYPRE_SStructVector y);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct Other
+ **/
+/*@{*/
+
+/**
+ * \color{blue}
+ * Get a reference to the constructed matrix and right-hand-side (rhs) objects
+ * for an AMR system.  This routine is similar to the routines {\tt
+ * HYPRE_SStructMatrixGetObject} and {\tt HYPRE_SStructVectorGetObject}, but
+ * ensures that trivial equations such as Dirichlet conditions are also
+ * satisfied exactly in the AMR system.
+ **/
+HYPRE_Int
+HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
+                           HYPRE_SStructVector   rhs,
+                           void                **matrix_object,
+                           void                **rhs_object);
 
 /*@}*/
 /*@}*/
