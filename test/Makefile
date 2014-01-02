@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 CINCLUDES = ${MPIINCLUDE}
@@ -63,6 +62,18 @@ BABELLIBFLAGS =\
 ##################################################################
 # Targets
 ##################################################################
+
+HYPRE_DRIVE_FILES =\
+ hypre_drive.c\
+ hypre_system_ij.c\
+ hypre_system_struct.c\
+ hypre_system_sstruct.c\
+ hypre_solver.c\
+ hypre_solver_parcsr.c\
+ hypre_solver_struct.c\
+ hypre_solver_sstruct.c
+
+HYPRE_DRIVE_OBJS=${HYPRE_DRIVE_FILES:.c=.o}
 
 HYPRE_DRIVERS =\
  zboxloop.c\
@@ -118,7 +129,7 @@ HYPRE_BABEL_DRIVER_EXECS=${HYPRE_BABEL_DRIVERS:.c=}
 HYPRE_BABEL_DRIVER_CXX_EXECS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=}
 HYPRE_BABEL_DRIVER_F77_EXECS=${HYPRE_BABEL_DRIVERS_F77:.f=}
 
-all: ${HYPRE_DRIVER_EXECS}
+all: ${HYPRE_DRIVER_EXECS} hypre_drive
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
@@ -157,6 +168,10 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
+
+hypre_drive: ${HYPRE_DRIVE_OBJS}
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ ${HYPRE_DRIVE_OBJS} ${LFLAGS}
 
 zboxloop: zboxloop.o
 	@echo  "Building" $@ "... "
@@ -302,6 +317,7 @@ cxx_struct.cxx: struct.c
 ##################################################################
 # Babel version of above
 ##################################################################
+
 ${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
