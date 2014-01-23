@@ -325,6 +325,16 @@ HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
  * the entire part to define the global interpolation operator.  Interpolation
  * may then be changed at individual locations in the grid through the
  * {\tt HYPRE_SStructGridSetAMRInterp} routine.
+ *
+ * The reference coarse-fine patch consists of a single coarse cell and its
+ * refinement, where the coarse and fine reference patches are assumed to have a
+ * lower left index of zero.  Coarse and fine variables are referenced in the
+ * patch by their associated cell indexes (in the same way that variables are
+ * referenced on the grid).  For example, in 2D, for a refinement factor of two
+ * in both directions and a nodal variable type, the lower left fine nodal
+ * variable would be referenced by the index (-1,-1) and the upper right
+ * variable by index (1,1).  Similarly, the lower left coarse nodal variable
+ * would be referenced by index (-1,-1) and the upper right with index (0,0).
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRPart(HYPRE_SStructGrid  grid,
@@ -336,66 +346,65 @@ HYPRE_SStructGridSetAMRPart(HYPRE_SStructGrid  grid,
 
 /**
  * \color{blue}
- * Set the number of coarse and fine ghost layers in the reference coarse-fine
- * patch.  By default, the reference patch consists of a single coarse cell and
- * its refinement.  Adding ghost layers introduces additional fine slave
- * variables just outside of the default patch and allows users to specify
- * interpolation to these slave variables from coarse variables that also live
- * outside of the default patch.  This is most useful in finite difference
- * settings, especially in the cell-centered case.
+ * Define the slave variables in the reference coarse-fine patch.  The argument
+ * {\tt slaves} is an array of blocks of size {\tt ndim} containing the
+ * associated cell indexes for the slave variables.
  *
- * Coarse and fine variables are referenced in the patch by an integer rank
- * (starting from zero) using a lexicographical ordering.  For example, in 2D,
- * for a refinement factor of two in both directions and a nodal variable type,
- * a reference patch with no ghost layers will have four coarse variables
- * numbered 0 through 3 and nine fine variables numbered 0 through 8.  For the
- * same example with one coarse and one fine ghost layer, there will be 16
- * coarse and 25 fine variables.
- *
- **/
-HYPRE_Int
-HYPRE_SStructGridSetAMRRefGhost(HYPRE_SStructGrid  grid,
-                                HYPRE_Int          part,
-                                HYPRE_Int          var,
-                                HYPRE_Int          coarse_nghost,
-                                HYPRE_Int          fine_nghost);
-
-/**
- * \color{blue}
- * Define the slave variables in the reference coarse-fine patch.
- *
+ * See {\tt HYPRE_SStructGridSetAMRPart} for details on the coarse-fine patch.
  * This routine must be called after {\tt HYPRE_SStructGridSetAMRPart} and
  * before any other {\tt SStructGridSetAMR} routines.
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRRefSlaves(HYPRE_SStructGrid  grid,
-                                 HYPRE_Int          part,
+                                 HYPRE_Int          coarse_part,
                                  HYPRE_Int          var,
                                  HYPRE_Int          nslaves,
                                  HYPRE_Int         *slaves);
 
 /**
  * \color{blue}
+ *
  * Set interpolation on the reference coarse-fine patch.  Interpolation maps
  * real variables to all variables (real and slave).  Real variables are mapped
  * to real variables identically.  Slave coarse variables are not interpolated
  * at all.  Users may only change interpolation from real variables (coarse and
- * fine) to slave fine variables on {\tt part}.  The argument {\tt row} is a
- * fine reference patch rank for variable {\tt var}.  The array {\tt cols}
- * contains both coarse and fine reference patch ranks for variables {\tt
- * colvars}, as specified by a 0 (coarse) or 1 (fine) in {\tt cf}.
+ * fine) to slave fine variables {\tt scf=1} (see special cell-centered case
+ * below).  The argument {\tt sindex} is a fine reference patch index for slave
+ * variable {\tt svar}.  The array {\tt indexes} contains both coarse and fine
+ * reference patch indexes for variables {\tt vars} as specified in {\tt cf} by
+ * a 0 (coarse) or a 1 (fine).
  *
+ * Cell-centered variables are treated as a special case, where coupling occurs
+ * through fictitious slave face variables.  Although these variables are
+ * associated with faces, they should actually be thought of as being centered
+ * either at cells just outside of the patch for fine faces ({\tt scf=1}) or at
+ * the patch center for coarse faces ({\tt scf=0}).  These fictitious variables
+ * are also referenced differently from other variables, where, for convenience,
+ * {\tt sindex} always specifies cells just outside of the patch (in the coarse
+ * case in particular, this approach enables a distinction between the multiple
+ * coarse faces and interpolation formulas).  Interpolation may be from any
+ * neighboring real variables, inside or outside of the patch.
+ *
+ * Idea for the cell-centered case: To reduce the need to fix up interpolation
+ * at individual grid locations, consider adding a rule to replace interpolation
+ * from nonexistent coarse variables with interpolation from existing underlying
+ * fine variables.  For example, in those cases, take the average of the closest
+ * fine variables (in the odd refinement case, this is just injection from the
+ * underlying fine variable).
+ *
+ * See {\tt HYPRE_SStructGridSetAMRPart} for details on the coarse-fine patch.
  * Note: Currently, each call must set an entire row of interpolation.
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRRefInterp(HYPRE_SStructGrid  grid,
-                                 HYPRE_Int          part,
-                                 HYPRE_Int          var,
-                                 HYPRE_Int          row,
-                                 HYPRE_Int          ncols,
-                                 HYPRE_Int         *colvars,
+                                 HYPRE_Int          coarse_part,
+                                 HYPRE_Int          scf,
+                                 HYPRE_Int          svar,
+                                 HYPRE_Int         *sindex,
+                                 HYPRE_Int          nvalues,
+                                 HYPRE_Int         *vars,
                                  HYPRE_Int         *cf,
-                                 HYPRE_Int         *cols,
+                                 HYPRE_Int         *indexes,
                                  HYPRE_Complex     *values);
 
 /**
@@ -407,49 +416,52 @@ HYPRE_SStructGridSetAMRRefInterp(HYPRE_SStructGrid  grid,
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRRefRestrictT(HYPRE_SStructGrid  grid,
-                                    HYPRE_Int          part,
-                                    HYPRE_Int          var,
-                                    HYPRE_Int          row,
-                                    HYPRE_Int          ncols,
-                                    HYPRE_Int         *colvars,
+                                    HYPRE_Int          coarse_part,
+                                    HYPRE_Int          scf,
+                                    HYPRE_Int          svar,
+                                    HYPRE_Int         *sindex,
+                                    HYPRE_Int          nvalues,
+                                    HYPRE_Int         *vars,
                                     HYPRE_Int         *cf,
-                                    HYPRE_Int         *cols,
+                                    HYPRE_Int         *indexes,
                                     HYPRE_Complex     *values);
 
 /**
  * \color{blue}
  * Set interpolation at a specific grid index on a refined part.  Usage is the
  * same as for setting interpolation on the reference coarse-fine patch, except
- * that an additional coarse index argument {\tt index} is given.
+ * that an additional argument {\tt coarse_index} is given.
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRInterp(HYPRE_SStructGrid  grid,
-                              HYPRE_Int          part,
-                              HYPRE_Int         *index,
-                              HYPRE_Int          var,
-                              HYPRE_Int          row,
-                              HYPRE_Int          ncols,
-                              HYPRE_Int         *colvars,
+                              HYPRE_Int          coarse_part,
+                              HYPRE_Int         *coarse_index,
+                              HYPRE_Int          scf,
+                              HYPRE_Int          svar,
+                              HYPRE_Int         *sindex,
+                              HYPRE_Int          nvalues,
+                              HYPRE_Int         *vars,
                               HYPRE_Int         *cf,
-                              HYPRE_Int         *cols,
+                              HYPRE_Int         *indexes,
                               HYPRE_Complex     *values);
 
 /**
  * \color{blue}
  * Set restriction at a specific grid index on a refined part.  Usage is the
  * same as for setting restriction on the reference coarse-fine patch, except
- * that an additional argument {\tt index} is given.
+ * that an additional argument {\tt coarse_index} is given.
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRRestrictT(HYPRE_SStructGrid  grid,
-                                 HYPRE_Int          part,
-                                 HYPRE_Int         *index,
-                                 HYPRE_Int          var,
-                                 HYPRE_Int          row,
-                                 HYPRE_Int          ncols,
-                                 HYPRE_Int         *colvars,
+                                 HYPRE_Int          coarse_part,
+                                 HYPRE_Int         *coarse_index,
+                                 HYPRE_Int          scf,
+                                 HYPRE_Int          svar,
+                                 HYPRE_Int         *sindex,
+                                 HYPRE_Int          nvalues,
+                                 HYPRE_Int         *vars,
                                  HYPRE_Int         *cf,
-                                 HYPRE_Int         *cols,
+                                 HYPRE_Int         *indexes,
                                  HYPRE_Complex     *values);
 
 /**

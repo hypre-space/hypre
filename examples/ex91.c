@@ -436,8 +436,6 @@ int main (int argc, char *argv[])
       int coarse_part = 0;
       int fine_part = 1;
       int var = 0;
-      int coarse_nghost = 1;
-      int fine_nghost = 1;
       int i;
 
       /* Create an empty 2D grid object */
@@ -469,121 +467,132 @@ int main (int argc, char *argv[])
                                   coarse_index, fine_index, rfactors);
 
 
-      /* Set the number of ghost cells in the reference coarse-fine
-       * interpolation template to 1 */
-      HYPRE_SStructGridSetAMRRefGhost(grid, fine_part, var,
-                                      coarse_nghost, fine_nghost);
-
       /* Define interpolation and restriction on the reference coarse-fine
        * template and fix up interpolation at certain specific grid locations.
        * For interpolation, use bilinear between both coarse and fine real
        * variables.  For restriction, decouple fine slave variables from all
        * real variables (injection). */
       {
-         int    nfine      = r+2;
-         int    ncoarse    = 3;
-         int    row, ncols, colvars[3], cf[3], cols[3];
-         double values[3];
-         int    i1D[RMAX+2][2], edge;
-         double v1D[RMAX+2][2], s;
+         int    row, nvalues, vars[4], cf[4], indexes[8];
+         double values[4];
+         int    edge;
+         double v1[RMAX][2], s;
 
-         /* Set linear interpolation values and indexes in 1D.  Interpolation at
-          * the fine indexes 0 and r+1 are set up, but not used below, because
-          * this example currently uses a 5-pt stencil that doesn't couple to
-          * the corner ghost slave cells.
+         /* Set linear interpolation values and indexes in 1D.
           *
           * Examples:
-          *
-          *   r=2: i1D = [ 0 , 1 ] [ 0 , 1 ] [ 1 , 2 ] [ 1 , 2 ]
-          *        v1D = [3/4,1/4] [1/4,3/4] [3/4,1/4] [1/4,3/4]
-          *
-          *   r=3: i1D = [ 0 , 1 ] [ 0 , 1 ] [1] [ 1 , 2 ] [ 1 , 2 ]
-          *        v1D = [4/6,2/6] [2/6,4/6] [1] [4/6,2/6] [2/6,4/6]
+          *   r=2: v1 =                 [3/4,1/4,0] [3/4,0,1/4]
+          *   r=3: v1 =             [2/3,1/3,0] [1,0,0] [2/3,0,1/3]
+          *   r=4: v1 =     [5/8,3/8,0] [7/8,1/8,0] [7/8,0,1/8] [5/8,0,3/8]
+          *   r=5: v1 = [3/5,2/5,0] [4/5,1/5,0] [1,0,0] [4/5,0,1/5] [3/5,0,2/5]
           */
-         k = 2*r;
-         for (i = 0; i < (r+2); i++)
+
+         for (i = 0; i < r/2; i++)
          {
-            j = 2*i+r-1;
-            if (j != k)
-            {
-               i1D[i][0] = (int)(j/k);
-               i1D[i][1] = i1D[i][0]+1;
-               v1D[i][0] = i1D[i][1] - (j/k);
-               v1D[i][1] = (j/k) - i1D[i][0];
-            }
-            else
-            {
-               i1D[i][0] = 1;
-               i1D[i][1] = 2;   /* simplifies code below */
-               v1D[i][0] = 1.0;
-               v1D[i][1] = 0.0; /* simplifies code below */
-            }
+            j = r-1-i;
+            s = (r+1 + 2*i)/(2*r);
+            v1[i][0] = s;    v1[i][1] = 1-s;  v1[i][2] = 0;
+            v1[j][0] = s;    v1[j][1] = 0;    v1[j][2] = 1-s;
+         }
+         if (r%2) /* odd case - set middle values */
+         {
+            i = r/2;
+            v1[i][0] = 1;    v1[i][1] = 0;    v1[i][2] = 0;
          }
 
-         /* Set up interpolation along each edge of the reference coarse-fine
-          * template.  Interpolation does not need to be changed at corners
-          * since the 5-point stencil does not couple to them. */
-         colvars[0] = 0;  cf[0] = 1;  /* fine */
-         colvars[1] = 0;  cf[1] = 0;  /* coarse */
-         colvars[2] = 0;  cf[2] = 0;  /* coarse */
-         for (i = 1; i < (r+1); i++)
+         /* Set up interpolation in the reference coarse-fine template. */
+         vars[0] = 0;  cf[0] = 0;  /* coarse */
+         vars[1] = 0;  cf[1] = 0;  /* coarse */
+         vars[2] = 0;  cf[2] = 0;  /* coarse */
+         for (i = 0; i < r; i++)
          {
-            s = 2/(r+1);
-            values[0] = (1-s);
-            values[1] = s*v1D[i][0];
-            values[2] = s*v1D[i][1];
-
-            for (edge = 0; edge < 4; edge++)
+            vars[3+i] = 0;  cf[3+i] = 1;  /* fine */
+         }
+         t = 2/(r+1);
+         for (edge = 0; edge < 4; edge++)
+         {
+            cvalues[0] = 0;
+            cvalues[1] = 0;
+            cvalues[2] = 0;
+            for (i = 0; i < r; i++)
             {
+               values[0] = t*v1[i][0];
+               values[1] = t*v1[i][1];
+               values[2] = t*v1[i][2];
+               values[3] = (1-t);
                switch (edge)
                {
                   case 0: /* west edge */
-                     row     = i*nfine;
-                     cols[0] = row+1;
-                     cols[1] = i1D[i][0]*ncoarse;
-                     cols[2] = i1D[i][1]*ncoarse;
+                     index[0]   = -1;    index[1]   =  i;
+                     indexes[0] = -1;    indexes[1] =  0;  /* coarse */
+                     indexes[2] = -1;    indexes[3] = -1;  /* coarse */
+                     indexes[4] = -1;    indexes[5] =  1;  /* coarse */
+                     indexes[6] =  0;    indexes[7] =  i;  /* fine */
+                     cindex[0]  = -1;    cindex[1]  =  0;
                      break;
                   case 1: /* east edge */
-                     row     = i*nfine + nfine-1;
-                     cols[0] = row-1;
-                     cols[1] = i1D[i][0]*ncoarse + ncoarse-1;
-                     cols[2] = i1D[i][1]*ncoarse + ncoarse-1;
+                     index[0]   =  r;    index[1]   =  i;
+                     indexes[0] =  1;    indexes[1] =  0;  /* coarse */
+                     indexes[2] =  1;    indexes[3] = -1;  /* coarse */
+                     indexes[4] =  1;    indexes[5] =  1;  /* coarse */
+                     indexes[6] =  r;    indexes[7] =  i;  /* fine */
+                     cindex[0]  =  1;    cindex[1]  =  0;
                      break;
                   case 2: /* south edge */
-                     row     = i;
-                     cols[0] = row+nfine;
-                     cols[1] = i1D[i][0];
-                     cols[2] = i1D[i][1];
+                     index[0]   =  i;    index[1]   = -1;
+                     indexes[0] =  0;    indexes[1] = -1;  /* coarse */
+                     indexes[2] = -1;    indexes[3] = -1;  /* coarse */
+                     indexes[4] =  1;    indexes[5] = -1;  /* coarse */
+                     indexes[6] =  i;    indexes[7] =  0;  /* fine */
+                     cindex[0]  =  0;    cindex[1]  = -1;
                      break;
                   case 3: /* north edge */
-                     row     = i + (r+1)*nfine;
-                     cols[0] = row-nfine;
-                     cols[1] = i1D[i][0] + 2*ncoarse;
-                     cols[2] = i1D[i][1] + 2*ncoarse;
+                     index[0]   =  i;    index[1]   =  r;
+                     indexes[0] =  0;    indexes[1] =  1;  /* coarse */
+                     indexes[2] = -1;    indexes[3] =  1;  /* coarse */
+                     indexes[4] =  1;    indexes[5] =  1;  /* coarse */
+                     indexes[6] =  i;    indexes[7] =  r;  /* fine */
+                     cindex[0]  =  0;    cindex[1]  =  1;
                      break;
                }
-               ncols = 3;
-               HYPRE_SStructGridSetAMRRefInterp(grid, fine_part, var, row, ncols,
-                                                colvars, cf, cols, values);
-               ncols = 0;
-               HYPRE_SStructGridSetAMRRefRestrictT(grid, fine_part, var, row, ncols,
-                                                   colvars, cf, cols, values);
+               cvalues[0]  += values[0];
+               cvalues[1]  += values[1];
+               cvalues[2]  += values[2];
+               cvalues[3+i] = values[3];
+               cindexes[0]     = indexes[0];    cindexes[1]     = indexes[1];
+               cindexes[2]     = indexes[2];    cindexes[3]     = indexes[3];
+               cindexes[4]     = indexes[4];    cindexes[5]     = indexes[5];
+               cindexes[6+2*i] = indexes[6];    cindexes[7+2*i] = indexes[7];
+
+               nvalues = 4;
+               HYPRE_SStructGridSetAMRRefInterp(
+                  grid, coarse_part, 1, var, index,
+                  nvalues, vars, cf, indexes, values);
+               nvalues = 0;
+               HYPRE_SStructGridSetAMRRefRestrictT(
+                  grid, coarse_part, 1, var, index,
+                  nvalues, vars, cf, indexes, values);
             }
+            nvalues = 3+r;
+            HYPRE_SStructGridSetAMRRefInterp(
+               grid, coarse_part, 0, var, cindex,
+               nvalues, vars, cf, cindexes, cvalues);
          }
 
-         /* Fix up interpolation at certain specific grid locations */
-         HYPRE_SStructGridSetAMRInterp(grid, fine_part, index, var, row, ncols,
-                                       colvars, cf, cols, values);
+#if 0
+         /* Fix up interpolation at certain specific grid locations (later) */
+         HYPRE_SStructGridSetAMRInterp(
+            grid, coarse_part, coarse_index, 1, var, index,
+            nvalues, vars, cf, indexes, values);
+#endif
       }
 
-
-HYPRE_Int
-   HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
-                                    HYPRE_SStructVector   rhs,
-                                    void                **matrix_object,
-                                    void                **rhs_object);
-
-
+#if 0
+      HYPRE_SStructGetAMRObjects(HYPRE_SStructMatrix   matrix,
+                                 HYPRE_SStructVector   rhs,
+                                 void                **matrix_object,
+                                 void                **rhs_object);
+#endif
 
       /* This is a collective call finalizing the grid assembly.
          The grid is now ``ready to be used'' */
@@ -630,16 +639,9 @@ HYPRE_Int
       /* Create the graph object */
       HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
-      /* See MatrixSetObjectType below */
-      object_type = HYPRE_STRUCT;
-      HYPRE_SStructGraphSetObjectType(graph, object_type);
-
       /* Now we need to tell the graph which stencil to use for each
          variable on each part (we only have one variable and one part)*/
       HYPRE_SStructGraphSetStencil(graph, part, var, stencil);
-
-      /* Here we could establish connections between parts if we
-         had more than one part. */
 
       /* Assemble the graph */
       HYPRE_SStructGraphAssemble(graph);
@@ -656,16 +658,6 @@ HYPRE_Int
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
-
-      /* Set the object type (by default HYPRE_SSTRUCT). This determines the
-         data structure used to store the matrix.  If you want to use unstructured
-         solvers, e.g. BoomerAMG, the object type should be HYPRE_PARCSR.
-         If the problem is purely structured (with one part), you may want to use
-         HYPRE_STRUCT to access the structured solvers. Here we have a purely
-         structured example. */
-      object_type = HYPRE_STRUCT;
-      HYPRE_SStructVectorSetObjectType(b, object_type);
-      HYPRE_SStructVectorSetObjectType(x, object_type);
 
       /* Indicate that the vector coefficients are ready to be set */
       HYPRE_SStructVectorInitialize(b);
@@ -701,11 +693,6 @@ HYPRE_Int
       /* Use symmetric storage? The function below is for symmetric stencil entries
          (use HYPRE_SStructMatrixSetNSSymmetric for non-stencil entries) */
       HYPRE_SStructMatrixSetSymmetric(A, part, var, var, sym);
-
-      /* As with the vectors,  set the object type for the vectors
-         to be the struct type */
-      object_type = HYPRE_STRUCT;
-      HYPRE_SStructMatrixSetObjectType(A, object_type);
 
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_SStructMatrixInitialize(A);
