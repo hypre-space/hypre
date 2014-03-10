@@ -70,6 +70,10 @@ main( hypre_int argc,
    HYPRE_Int                 arg_index;
    HYPRE_Int                 print_usage;
    HYPRE_Int                 sparsity_known = 0;
+   HYPRE_Int                 add = 0;
+   HYPRE_Int                 off_proc = 0;
+   HYPRE_Int                 chunk = 0;
+   HYPRE_Int                 omp_flag = 0;
    HYPRE_Int                 build_matrix_type;
    HYPRE_Int                 build_matrix_arg_index;
    HYPRE_Int                 build_rhs_type;
@@ -110,6 +114,7 @@ main( hypre_int argc,
    HYPRE_Solver        pcg_precond, pcg_precond_gotten;
 
    HYPRE_Int                 num_procs, myid;
+   HYPRE_Int                 num_threads;
    HYPRE_Int                 local_row;
    HYPRE_Int                *row_sizes;
    HYPRE_Int                *diag_sizes;
@@ -232,7 +237,12 @@ main( hypre_int argc,
    HYPRE_Int      print_system = 0;
 
    HYPRE_Int rel_change = 0;
-   
+
+   HYPRE_Int *row_nums = NULL;
+   HYPRE_Int *num_cols = NULL;
+   HYPRE_Int *col_nums = NULL;
+   HYPRE_Int i_indx, j_indx, num_rows;
+   HYPRE_Real *data = NULL;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -243,6 +253,7 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   num_threads = hypre_NumThreads();
 /*
   hypre_InitMemoryDebug(myid);
 */
@@ -353,6 +364,26 @@ main( hypre_int argc,
       {
          arg_index++;
          sparsity_known = 2;
+      }
+      else if ( strcmp(argv[arg_index], "-add") == 0 )
+      {
+         arg_index++;
+         add = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-chunk") == 0 )
+      {
+         arg_index++;
+         chunk = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-off_proc") == 0 )
+      {
+         arg_index++;
+         off_proc = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-omp") == 0 )
+      {
+         arg_index++;
+         omp_flag = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
       {
@@ -649,6 +680,12 @@ main( hypre_int argc,
       {
          arg_index++;
       }
+   }
+
+   if (myid == 0)
+   {
+       printf(" wall clock %d MPI tasks %d OpenMP threads\n", num_procs, num_threads);
+       printf(" wall clock sparsity_known: %d add: %d chunk: %d omp: %d off_proc: %d\n", sparsity_known, add, chunk, omp_flag, off_proc);
    }
    /* begin CGC BM Aug 25, 2006 */
    if (coarsen_type == 21 || coarsen_type == 22) {
@@ -1253,6 +1290,8 @@ main( hypre_int argc,
       hypre_printf("  -use_ns            : use non-symm schwarz smoother\n");
       hypre_printf("  -var <val>         : schwarz smoother variant (0-3) \n");
       hypre_printf("  -blk_sm <val>      : same as '-smtype 6 -ov 0 -dom 1 -smlv <val>'\n");
+      hypre_printf("                           and list contains the values, where last value\n");
+      hypre_printf("                           in list is repeated if val < num_levels in AMG\n");
       exit(1);
    }
 
@@ -1356,11 +1395,10 @@ main( hypre_int argc,
    }
    else
    {
-
       /*-----------------------------------------------------------
        * Copy the parcsr matrix into the IJMatrix through interface calls
        *-----------------------------------------------------------*/
- 
+      HYPRE_Int mx_size = 5; 
       ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                                               &first_local_row, &last_local_row ,
                                               &first_local_col, &last_local_col );
@@ -1374,98 +1412,135 @@ main( hypre_int argc,
                                     &ij_A );
 
       ierr += HYPRE_IJMatrixSetObjectType( ij_A, HYPRE_PARCSR );
-  
-
+      num_rows = local_num_rows;
+      if (off_proc)
+      {
+	 if (myid != num_procs-1) num_rows++;
+	 if (myid) num_rows++;
+      }
       /* The following shows how to build an IJMatrix if one has only an
          estimate for the row sizes */
-      if (sparsity_known == 1)
-      {   
-         /* Build IJMatrix using exact row_sizes for diag and offdiag */
-
+     row_nums = hypre_CTAlloc(HYPRE_Int, num_rows);
+     num_cols = hypre_CTAlloc(HYPRE_Int, num_rows);
+     if (sparsity_known == 1)
+     {   
          diag_sizes = hypre_CTAlloc(HYPRE_Int, local_num_rows);
          offdiag_sizes = hypre_CTAlloc(HYPRE_Int, local_num_rows);
-         local_row = 0;
-         for (i=first_local_row; i<= last_local_row; i++)
+     }   
+     else
+     {   
+         size = 5;
+         if (sparsity_known == 0)
          {
-            ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size, 
-                                              &col_inds, &values );
- 
-            for (j=0; j < size; j++)
+            if (build_matrix_type == 2) size = 7;
+            if (build_matrix_type == 3) size = 9;
+            if (build_matrix_type == 4) size = 27;
+         }
+	 row_sizes = hypre_CTAlloc(HYPRE_Int, num_rows);
+	 for (i=0; i < num_rows; i++)
+	    row_sizes[i] = size;
+     }   
+     local_row = 0;
+     if (build_matrix_type == 2) mx_size = 27;
+     if (build_matrix_type == 3) mx_size = 9;
+     if (build_matrix_type == 4) mx_size = 27;
+     col_nums = hypre_CTAlloc(HYPRE_Int, mx_size*num_rows);
+     data = hypre_CTAlloc(HYPRE_Real, mx_size*num_rows);
+     i_indx = 0;
+     j_indx = 0;
+     if (off_proc && myid)
+     {
+	 num_cols[i_indx] = 2;
+	 row_nums[i_indx++] = first_local_row-1;
+         col_nums[j_indx] = first_local_row-1;
+         data[j_indx++] = 6.;
+         col_nums[j_indx] = first_local_row-2;
+         data[j_indx++] = -1;
+     }
+     for (i=0; i < local_num_rows; i++)
+     {
+         row_nums[i_indx] = first_local_row +i;
+         ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, first_local_row+i, &size, 
+                                             &col_inds, &values);
+	 num_cols[i_indx++] = size;
+         for (j = 0; j < size; j++)
+         {
+            col_nums[j_indx] = col_inds[j];
+            data[j_indx++] = values[j];
+            if (sparsity_known == 1)
             {
                if (col_inds[j] < first_local_row || col_inds[j] > last_local_row)
                   offdiag_sizes[local_row]++;
                else
                   diag_sizes[local_row]++;
             }
-            local_row++;
-            ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size, 
-                                                  &col_inds, &values );
          }
-         ierr += HYPRE_IJMatrixSetDiagOffdSizes( ij_A, 
-                                                 (const HYPRE_Int *) diag_sizes,
-                                                 (const HYPRE_Int *) offdiag_sizes );
+         local_row++;
+         ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, first_local_row+i, &size, 
+                                                 &col_inds, &values );
+     }
+     if (off_proc && myid != num_procs-1)
+     {
+	 num_cols[i_indx] = 2;
+	 row_nums[i_indx++] = last_local_row+1;
+         col_nums[j_indx] = last_local_row+2;
+         data[j_indx++] = -1.;
+         col_nums[j_indx] = last_local_row+1;
+         data[j_indx++] = 6;
+     }
+
+         /*ierr += HYPRE_IJMatrixSetRowSizes ( ij_A, (const HYPRE_Int *) num_cols );*/
+     if (sparsity_known == 1)
+        ierr += HYPRE_IJMatrixSetDiagOffdSizes( ij_A, (const HYPRE_Int *) diag_sizes,
+                                            (const HYPRE_Int *) offdiag_sizes );
+     else
+        ierr = HYPRE_IJMatrixSetRowSizes ( ij_A, (const HYPRE_Int *) row_sizes );
+
+     ierr += HYPRE_IJMatrixInitialize( ij_A );
+
+     if (omp_flag) HYPRE_IJMatrixSetOMPFlag(ij_A, 1);
+
+     if (chunk)
+     {
+         if (add)
+	    ierr += HYPRE_IJMatrixAddToValues(ij_A, num_rows, num_cols, row_nums, 
+					(const HYPRE_Int *) col_nums, 
+					(const HYPRE_Real *) data);
+         else
+            ierr += HYPRE_IJMatrixSetValues(ij_A, num_rows, num_cols, row_nums, 
+					(const HYPRE_Int *) col_nums, 
+					(const HYPRE_Real *) data);
+     }
+     else 
+     {
+         j_indx = 0;
+         for (i=0; i < num_rows; i++)
+         {
+            if (add)
+               ierr += HYPRE_IJMatrixAddToValues( ij_A, 1, &num_cols[i], &row_nums[i],
+                                             (const HYPRE_Int *) &col_nums[j_indx],
+                                             (const HYPRE_Real *) &data[j_indx] );
+            else
+               ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &num_cols[i], &row_nums[i],
+                                             (const HYPRE_Int *) &col_nums[j_indx],
+                                             (const HYPRE_Real *) &data[j_indx] );
+            j_indx += num_cols[i];
+         }
+     }
+     hypre_TFree(col_nums);
+     hypre_TFree(data);
+     hypre_TFree(row_nums);
+     hypre_TFree(num_cols); 
+     if (sparsity_known == 1)
+     {
          hypre_TFree(diag_sizes);
          hypre_TFree(offdiag_sizes);
-     
-         ierr = HYPRE_IJMatrixInitialize( ij_A );
-
-         for (i=first_local_row; i<= last_local_row; i++)
-         {
-          
-            ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
-                                              &col_inds, &values );
-
-            ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
-                                             (const HYPRE_Int *) col_inds,
-                                             (const HYPRE_Real *) values );
-
-            ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
-                                                  &col_inds, &values );
-         }
-      }
-      else
-      {
-         row_sizes = hypre_CTAlloc(HYPRE_Int, local_num_rows);
-
-         size = 5; /* this is in general too low, and supposed to test
-                      the capability of the reallocation of the interface */ 
-
-         if (sparsity_known == 0) /* tries a more accurate estimate of the
-                                     storage */
-         {
-            if (build_matrix_type == 2) size = 7;
-            if (build_matrix_type == 3) size = 9;
-            if (build_matrix_type == 4) size = 27;
-         }
-
-         for (i=0; i < local_num_rows; i++)
-            row_sizes[i] = size;
-
-         ierr = HYPRE_IJMatrixSetRowSizes ( ij_A, (const HYPRE_Int *) row_sizes );
-
+     }
+     else
          hypre_TFree(row_sizes);
-
-         ierr = HYPRE_IJMatrixInitialize( ij_A );
-
-         /* Loop through all locally stored rows and insert them into ij_matrix */
-         for (i=first_local_row; i<= last_local_row; i++)
-         {
-
-            ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
-                                              &col_inds, &values );
-
-            ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
-                                             (const HYPRE_Int *) col_inds,
-                                             (const HYPRE_Real *) values );
-
-            ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
-                                                  &col_inds, &values );
-         }
-      }
+   }
 
       ierr += HYPRE_IJMatrixAssemble( ij_A );
-
-   }
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("IJ Matrix Setup", hypre_MPI_COMM_WORLD);
@@ -1475,7 +1550,7 @@ main( hypre_int argc,
    if (ierr)
    {
       hypre_printf("Error in driver building IJMatrix from parcsr matrix. \n");
-      return(-1);
+      return(-1); 
    }
 
    /* This is to emphasize that one can IJMatrixAddToValues after an
