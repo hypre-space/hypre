@@ -286,6 +286,9 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
    }
 
    data = hypre_VectorData( local_vector );
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < vec_stop - vec_start; i++)
       data[i] = 0.;
   
@@ -428,7 +431,9 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
          }
 	 num_values = vec_stop - vec_start +1;
       }
-
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
       for (j = 0; j < num_values; j++)
          data[j] = values[j];
    } 
@@ -587,7 +592,9 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
          }
 	 num_values = vec_stop - vec_start +1;
       }
-
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
       for (j = 0; j < num_values; j++)
          data[j] += values[j];
    } 
@@ -807,6 +814,9 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
 
    if (indices)
    {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j) HYPRE_SMP_SCHEDULE
+#endif
       for (j = 0; j < num_values; j++)
       {
          i = indices[j] - vec_start;
@@ -815,6 +825,9 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
    }
    else
    {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
       for (j = 0; j < num_values; j++)
          values[j] = data[j];
    }

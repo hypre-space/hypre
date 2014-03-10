@@ -369,7 +369,11 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-      return( hypre_IJMatrixSetValuesParCSR( ijmatrix, nrows, ncols,
+      if (hypre_IJMatrixOMPFlag(ijmatrix))
+	 return( hypre_IJMatrixSetValuesOMPParCSR( ijmatrix, nrows, ncols,
+                                             rows, cols, values ) );
+      else
+         return( hypre_IJMatrixSetValuesParCSR( ijmatrix, nrows, ncols,
                                              rows, cols, values ) );
    }
    else
@@ -436,7 +440,11 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-      return( hypre_IJMatrixAddToValuesParCSR( ijmatrix, nrows, ncols,
+      if (hypre_IJMatrixOMPFlag(ijmatrix))
+	 return( hypre_IJMatrixAddToValuesOMPParCSR( ijmatrix, nrows, ncols,
+                                             rows, cols, values ) );
+      else
+         return( hypre_IJMatrixAddToValuesParCSR( ijmatrix, nrows, ncols,
                                              rows, cols, values ) );
    }
    else
@@ -958,3 +966,24 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
    return hypre_error_flag;
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetOMPFlag
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_IJMatrixSetOMPFlag( HYPRE_IJMatrix matrix,
+                          HYPRE_Int      omp_flag )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_IJMatrixOMPFlag(ijmatrix) = omp_flag;
+
+   return hypre_error_flag;
+}
+
