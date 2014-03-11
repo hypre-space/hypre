@@ -682,11 +682,6 @@ main( hypre_int argc,
       }
    }
 
-   if (myid == 0)
-   {
-       printf(" wall clock %d MPI tasks %d OpenMP threads\n", num_procs, num_threads);
-       printf(" wall clock sparsity_known: %d add: %d chunk: %d omp: %d off_proc: %d\n", sparsity_known, add, chunk, omp_flag, off_proc);
-   }
    /* begin CGC BM Aug 25, 2006 */
    if (coarsen_type == 21 || coarsen_type == 22) {
       arg_index = 0;
