@@ -1030,6 +1030,8 @@ HYPRE_Int hypre_ADSSetup(void *solver,
    if (ads_data -> cycle_type > 10)
    /* Create the AMG solvers on the range of Pi{x,y,z}^T */
    {
+      int P_owned_col_starts;
+
       HYPRE_BoomerAMGCreate(&ads_data -> B_Pix);
       HYPRE_BoomerAMGSetCoarsenType(ads_data -> B_Pix, ads_data -> B_Pi_coarsen_type);
       HYPRE_BoomerAMGSetAggNumLevels(ads_data -> B_Pix, ads_data -> B_Pi_agg_levels);
@@ -1077,36 +1079,48 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Pix))
          hypre_MatvecCommPkgCreate(ads_data -> Pix);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Pix);
       hypre_BoomerAMGBuildCoarseOperator(ads_data -> Pix,
                                          ads_data -> A,
                                          ads_data -> Pix,
                                          &ads_data -> A_Pix);
-      hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Pix) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Pix) = 0;
+      if (!P_owned_col_starts)
+      {
+         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Pix) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Pix) = 0;
+      }
       HYPRE_BoomerAMGSetup(ads_data -> B_Pix,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Pix,
                            0, 0);
 
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Piy))
          hypre_MatvecCommPkgCreate(ads_data -> Piy);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Piy);
       hypre_BoomerAMGBuildCoarseOperator(ads_data -> Piy,
                                          ads_data -> A,
                                          ads_data -> Piy,
                                          &ads_data -> A_Piy);
-      hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piy) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Piy) = 0;
+      if (!P_owned_col_starts)
+      {
+         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piy) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Piy) = 0;
+      }
       HYPRE_BoomerAMGSetup(ads_data -> B_Piy,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Piy,
                            0, 0);
 
       if (!hypre_ParCSRMatrixCommPkg(ads_data -> Piz))
          hypre_MatvecCommPkgCreate(ads_data -> Piz);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ads_data -> Piz);
       hypre_BoomerAMGBuildCoarseOperator(ads_data -> Piz,
                                          ads_data -> A,
                                          ads_data -> Piz,
                                          &ads_data -> A_Piz);
-      hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piz) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Piz) = 0;
+      if (!P_owned_col_starts)
+      {
+         hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_Piz) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(ads_data -> A_Piz) = 0;
+      }
       HYPRE_BoomerAMGSetup(ads_data -> B_Piz,
                            (HYPRE_ParCSRMatrix)ads_data -> A_Piz,
                            0, 0);
@@ -1163,12 +1177,12 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       ads_data -> r1 = hypre_ParVectorInRangeOf(ads_data -> A_C);
       ads_data -> g1 = hypre_ParVectorInRangeOf(ads_data -> A_C);
    }
-   if (ads_data -> Pix)
+   if (ads_data -> cycle_type > 10)
    {
       ads_data -> r2 = hypre_ParVectorInDomainOf(ads_data -> Pix);
       ads_data -> g2 = hypre_ParVectorInDomainOf(ads_data -> Pix);
    }
-   if (ads_data -> Pi)
+   else
    {
       ads_data -> r2 = hypre_ParVectorInDomainOf(ads_data -> Pi);
       ads_data -> g2 = hypre_ParVectorInDomainOf(ads_data -> Pi);
