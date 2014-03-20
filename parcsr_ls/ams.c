@@ -2227,7 +2227,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
    if (ams_data -> cycle_type > 10 && ams_data -> cycle_type != 20)
    /* Create the AMG solvers on the range of Pi{x,y,z}^T */
    {
-      HYPRE_int P_owned_col_starts;
+      HYPRE_Int P_owned_col_starts;
 
       HYPRE_BoomerAMGCreate(&ams_data -> B_Pix);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Pix, ams_data -> B_Pi_coarsen_type);
