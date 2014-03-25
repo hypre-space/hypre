@@ -1,0 +1,81 @@
+# options.out.default
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.no_orthchk
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.pcgitr.0
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.pcgitr.1
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.pcgitr.2
+Eigenvalue lambda   2.43042158313016e-01
+Residual   8.07167900723051e-09
+
+# options.out.pcgtol.01
+Eigenvalue lambda   2.43042158313016e-01
+Residual   9.73995121780180e-10
+
+# options.out.pcgtol.05
+Eigenvalue lambda   2.43042158313016e-01
+Residual   5.14236513706021e-09
+
+# options.out.seed
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.seed.repeat
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.solver.none
+Eigenvalue lambda   2.43042158316676e-01
+Residual   2.03104260070223e-06
+
+# options.out.verb.1
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.gen.1
+Eigenvalue lambda   1.00000000000000e+00
+Residual   7.54364534145478e-16
+
+# options.out.gen.2
+Eigenvalue lambda   3.14395676812965e-01
+Residual   9.71448492609710e-09
+
+# options.out.orthchk
+Eigenvalue lambda   2.43042158313014e-01
+Residual   9.45221695170877e-09
+
+# options.out.itr.100
+Eigenvalue lambda   1.10912678978531e-01
+Eigenvalue lambda   2.11917767568658e-01
+Residual   1.05202923460143e-07
+Residual   1.21965976773690e-03
+
+# options.out.itr.2
+Eigenvalue lambda   2.14273389869265e+00
+Eigenvalue lambda   2.32122316003068e+00
+Residual   1.68566474191610e+00
+Residual   1.58810659347606e+00
+
+# options.out.vrand.2
+Eigenvalue lambda   2.43042158313038e-01
+Eigenvalue lambda   4.79521039881191e-01
+Residual   8.56971341837092e-09
+Residual   6.47922482725667e-09
+
+# options.out.verb.0
+     Complexity:    grid = 2.036000
+                operator = 5.803438
+# options.out.verb.2
+Eigenvalue lambda   2.43042158313014e-01
+Residual 9.452217e-09
+=============================================

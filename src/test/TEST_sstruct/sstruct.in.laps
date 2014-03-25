@@ -1,0 +1,62 @@
+
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 1
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (0- 0-) (7+ 7+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# CELL  = 0
+GridSetVariables: 0 2 [0 0]
+
+###########################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 2 [6 6]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0] 0  4.0
+StencilSetEntry: 0  1 [-1  0] 0 -1.0
+StencilSetEntry: 0  2 [ 1  0] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1] 0 -1.0
+StencilSetEntry: 0  5 [ 0  0] 1  1.0e-5
+
+StencilSetEntry: 1  0 [ 0  0] 1  4.0
+StencilSetEntry: 1  1 [-1  0] 1 -1.0
+StencilSetEntry: 1  2 [ 1  0] 1 -1.0
+StencilSetEntry: 1  3 [ 0 -1] 1 -1.0
+StencilSetEntry: 1  4 [ 0  1] 1 -1.0
+StencilSetEntry: 1  5 [ 0  0] 0  1.0e-5
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 0 1 1
+
+###########################################################
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 (0- 0-) (0- 7+) [1 1] 0 1 0.0
+MatrixSetValues: 0 (0- 0-) (0- 7+) [1 1] 1 1 0.0
+MatrixSetValues: 0 (7+ 0-) (7+ 7+) [1 1] 0 2 0.0
+MatrixSetValues: 0 (7+ 0-) (7+ 7+) [1 1] 1 2 0.0
+MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 0 3 0.0
+MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 1 3 0.0
+MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 0 4 0.0
+MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 1 4 0.0
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+
+###########################################################
+

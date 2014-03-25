@@ -1,0 +1,48 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# new_ij: Run default case with different interpolation operators
+#    1: Extended interpolation
+#    2: FF interpolation
+#    3: standard interpolation
+#    4: Extended interpolation and truncation max 4 elmts per row
+#    5: FF interpolation and truncation max 4 elmts per row
+#    6: standard interpolation and truncation max 4 elmts per row
+#=============================================================================
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 6 \
+ > interp.out.0
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 7 \
+ > interp.out.1
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 8 \
+ > interp.out.2
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 6 -Pmx 4 \
+ > interp.out.3
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 7 -Pmx 4 \
+ > interp.out.4
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 8 -Pmx 4 \
+ > interp.out.5
+
+

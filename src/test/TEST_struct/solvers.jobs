@@ -1,0 +1,63 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# struct: Run SMG-CG, PFMG-CG, DSCG, CG, and Hybrid.
+#=============================================================================
+
+mpirun -np 3 ./struct -P 1 1 3 -solver 10 > solvers.out.0
+mpirun -np 3 ./struct -P 1 3 1 -solver 11 > solvers.out.1
+mpirun -np 3 ./struct -P 3 1 1 -solver 17 > solvers.out.2
+mpirun -np 1 ./struct -P 1 1 1 -solver 18 > solvers.out.3
+mpirun -np 1 ./struct -P 1 1 1 -solver 19 > solvers.out.4
+
+
+#=============================================================================
+# Run default case with all available PCG preconditioners (solvers): 
+#    10: SMG (default)
+#    11: PFMG
+#    17: 2-step Jacobi
+#    18: Diagonal scaling
+#    19: none
+#=============================================================================
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 10 -tol 1.e-6 > solvers.out.10.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 10 -tol 1.e-6 -pcgitr 0 -seed 1 -vrand 1 > solvers.out.10.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 10 -tol 1.e-6 -pcgitr 0  -seed 1 -vrand 5  > solvers.out.10.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 11 -tol 1.e-6  > solvers.out.11.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 11 -tol 1.e-6  -pcgitr 0 -seed 1 -vrand 1  > solvers.out.11.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 11 -tol 1.e-6  -pcgitr 0 -seed 1 -vrand 5  > solvers.out.11.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 17  > solvers.out.17.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 17 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1  > solvers.out.17.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 17 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5  > solvers.out.17.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 18  > solvers.out.18.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 18 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1  > solvers.out.18.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 18 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5  > solvers.out.18.lobpcg.5
+
+# PCG run... LOBPCG with one eigenpair .... LOBPCG with 5 eigenpairs
+mpirun -np 2 ./struct -solver 19  > solvers.out.19.lobpcg
+mpirun -np 2 ./struct -lobpcg -solver 19 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1  > solvers.out.19.lobpcg.1
+mpirun -np 2 ./struct -lobpcg -solver 19 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5  > solvers.out.19.lobpcg.5

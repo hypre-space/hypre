@@ -1,0 +1,170 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+README for the hypre_DataExchangeList() function
+
+**************
+*  Purpose:  *  
+**************
+
+This function allows a processor (i) to "contact" a list of processors
+with a message containing a variable amount of data.  The processors
+in the list do not know that they will be contacted by processor
+i. These processors must then send a "response" message back to
+processor i, and the response message can also contain any amount of
+data.
+
+Essentially, the user gives the function a list of processors and
+corresponding lists of data (of any type) to send to each processor.
+The function returns lists of data (the "responses") from each of the
+contacted processors.  The user must write a function that dictates
+how to create a response message based on a contact message.
+
+
+***************
+*  Function:  *
+***************
+
+int hypre_DataExchangeList(int num_contacts, 
+		     int *contact_proc_list, void *contact_send_buf, 
+		     int *contact_send_buf_starts, int contact_obj_size, 
+		     int response_obj_size,
+		     hypre_DataExchangeResponse *response_obj, 
+                     int max_response_size, int rnum,
+		     MPI_Comm comm, void **p_response_recv_buf,	   
+                     int **p_response_recv_buf_starts)
+
+
+*****************
+*  Parameters:  *
+*****************
+
+  num_contacts = the number of processors to contact
+
+  contact_proc_list  = list of processors to contact 
+
+  contact_send_buf  = array of data to send  - data may be any type 
+       (ints, doubles, structures, etc.).
+
+  contact_send_buf_starts = index into contact_send_buf
+       corresponding to contact_proc_list. For example, processor
+       (contact_proc_list[j]) is sent the buffer
+       contact_send_buf[contact_send_buf_starts[j]], and this buffer is
+       of size (contact_send_buf_starts[j+1] - contact_send_buf_starts[j]).
+                                      
+  contact_obj_size = sizeof() one data item (int, double, structure, etc.) in 
+      contact_send_buf.   THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
+
+  response_obj_size = sizeof() one data item in response_recv_buf(int,
+      double, structure, etc.)  THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
+
+  response_obj = this will give us the function we need to fill the
+      response as well as any data we might need to
+      accomplish that (more details below.)
+
+
+  max_response_size - this number indicates the size of the
+      array of data that the contacting processor expects back in a single response.
+      This should be a reasonable estimate - not an absolute upper bound!
+      If a contacted processor needs to respond with more than
+      max_response_size data, then a second communication is used - this is
+      transparent to the user and occurs inside hypre_DataExchangeList().
+      Choosing a max_response_size that is way too large will result in
+      the passing of overly large messages. THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
+
+
+  rnum = two consecutive calls to this function should have
+      different rnums. Recommend alternating rnum = 1 and rnum=2 - these
+      flags will be even (so odd numbered tags could be used in calling
+      code in between). THIS NEEDS TO BE THE SAME
+      NUMBER FOR ALL PROCESSORS.
+  
+
+  comm = MPI_COMM 
+
+  p_response_recv_buf  = (OUTPUT) where to receive the responses -
+        memory will be allocated in this function (do not preallocate) 
+
+  p_response_recv_buf_starts = (OUTPUT) index of p_response_buf corresponding to
+       contact_buf_list - memory will be allocated in this function
+
+**********************
+*  Response Object:  *
+**********************
+
+This object has a function pointer to assign before including it in a
+call to hypre_DataExchangeList(). In addition, one or more of the void
+pointers may be set. Each item in the structure is explained below.
+
+typedef struct
+{
+   int    (*fill_response)(void* recv_buf, 
+                           int contact_size, int contact_proc, 
+                           void* response_obj, MPI_Comm comm,
+			   void** response_buf, int* response_message_size, ); 
+   int     send_response_overhead;
+   int     send_response_storage;  
+   void    *data1;                 
+   void    *data2; 
+   
+} hypre_DataExchangeResponse;
+
+
+  int  (*fill_response)(void* recv_buf,
+                        int contact_size, int contact_proc, 
+                        void* response_obj, MPI_Comm comm,
+			void** response_buf, 
+                        int* response_message_size, ); 
+
+    The user writes a function to assign to this pointer.  This function
+    is called by hypre_DataExchangeList() upon receipt of a contact message
+    and must determine a response.  The data from the contact message is
+    stored in recv_buf, where contact_size indicates the number of
+    objects and contact_proc indicates the processor that made the
+    contact. The user will know the data type and can manipulate
+    recv_buf accordingly.  Likewise, the user can populate response_buf as
+    desired - this will constitute the response message.  The user must
+    indicate the size of the response in response_message_size.  Note
+    that response_message_size and contact_size are NOT in bytes - but
+    rather the number of objects sent (i.e. contact size = 4 if four
+    integers or structures were sent).
+
+    Note 1: If the desired response to contact messages is a NULL
+    response (a confirmation), simply assign response_message_size to
+    zero - do NOT set the response_buf to NULL.
+   
+    Note 2: cast the response_obj argument to a hypre_DataExchangeResponse
+    object to access the data fields.
+
+  send_response_storage - this number indicates the amount of storage
+     (again not in bytes) available for the response_buf 
+     objects.  The user should make sure they do not need to write a
+     larger amount of data than is available.  If more storage is needed
+     then adjust the send_response_storage variable to indicate the new size
+     desired. Then realloc response_buf to size (send_response_storage +
+     send_response_overhead)*(size of response object).
+
+  send_response_overhead - this is extra overhead needed by
+     hypre_DataExchangeList.  Include this if you need to realloc response_buf
+     (see previous entry). This is determined by the hypre_DataExchangeFunction().
+
+  data1, data2 - these are void pointers that the user may want
+     to assign to data from the program that calls exchangeDataList()
+     in the event that (1) certain data is needed to formulate an
+     appropriate response or (2) data needs to be saved from the
+     contacts to be manipulated after hypre_DataExchangeList() completes.
+

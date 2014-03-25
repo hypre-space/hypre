@@ -1,0 +1,158 @@
+#=============================================================================
+# sstruct: Run 3d problem with one proc empty. Two types of tests:
+# struct solvers and sys_pfmg require the first part to be full
+#              => compare runs with two refinements
+# other solvers: switch the empty proc, run 1= proc 2 empty
+#                                       run 2= proc 1 empty
+#=============================================================================
+#####
+#####
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -r 1 1 1 -rhsone -solver 3 \
+ > emptyProc.out.00
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 10 \
+ > emptyProc.out.01
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 11 \
+ > emptyProc.out.02
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -r 1 1 1 -rhsone -solver 13 \
+ > emptyProc.out.03
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 18 \
+ > emptyProc.out.04
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 20 \
+ > emptyProc.out.05
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 22 \
+ > emptyProc.out.06
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 28 \
+ > emptyProc.out.08
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 30 \
+ > emptyProc.out.09
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 31 \
+ > emptyProc.out.10
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 38 \
+ > emptyProc.out.11
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 40 \
+ > emptyProc.out.12
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 42 \
+ > emptyProc.out.14
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 50 \
+ > emptyProc.out.15
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 51 \
+ > emptyProc.out.16
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 58 \
+ > emptyProc.out.17
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 60 \
+ > emptyProc.out.18
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 62 \
+ > emptyProc.out.20
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -rhsone -solver 120 \
+ > emptyProc.out.21
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 200 \
+ > emptyProc.out.22
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 201 \
+ > emptyProc.out.23
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 203 \
+ > emptyProc.out.24
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 210 \
+ > emptyProc.out.25
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 211 \
+ > emptyProc.out.26
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 217 \
+ > emptyProc.out.27
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 218 \
+ > emptyProc.out.28
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 220 \
+ > emptyProc.out.29
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 221 \
+ > emptyProc.out.30
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 230 \
+ > emptyProc.out.31
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 231 \
+ > emptyProc.out.32
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 237 \
+ > emptyProc.out.33
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 238 \
+ > emptyProc.out.34
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 240 \
+ > emptyProc.out.35
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 241 \
+ > emptyProc.out.36
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 247 \
+ > emptyProc.out.37
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -r 1 1 1 -rhsone -solver 248 \
+ > emptyProc.out.38
+
+
+#=============================================================================
+# run 2
+#=============================================================================
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2  -rhsone -solver 3 \
+ > emptyProc.out.100
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 10 \
+ > emptyProc.out.101
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 11 \
+ > emptyProc.out.102
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 13 \
+ > emptyProc.out.103
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 18 \
+ > emptyProc.out.104
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 20 \
+ > emptyProc.out.105
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 22 \
+ > emptyProc.out.106
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 28 \
+ > emptyProc.out.108
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 30 \
+ > emptyProc.out.109
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 31 \
+ > emptyProc.out.110
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 38 \
+ > emptyProc.out.111
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 40 \
+ > emptyProc.out.112
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 42 \
+ > emptyProc.out.114
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 50 \
+ > emptyProc.out.115
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 51 \
+ > emptyProc.out.116
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 58 \
+ > emptyProc.out.117
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 60 \
+ > emptyProc.out.118
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 62 \
+ > emptyProc.out.120
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3 -rhsone -solver 120 \
+ > emptyProc.out.121
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 200 \
+ > emptyProc.out.122
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 201 \
+ > emptyProc.out.123
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 203 \
+ > emptyProc.out.124
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 210 \
+ > emptyProc.out.125
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 211 \
+ > emptyProc.out.126
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 217 \
+ > emptyProc.out.127
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 218 \
+ > emptyProc.out.128
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 220 \
+ > emptyProc.out.129
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 221 \
+ > emptyProc.out.130
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 230 \
+ > emptyProc.out.131
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 231 \
+ > emptyProc.out.132
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 237 \
+ > emptyProc.out.133
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 238 \
+ > emptyProc.out.134
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 240 \
+ > emptyProc.out.135
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 241 \
+ > emptyProc.out.136
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 247 \
+ > emptyProc.out.137
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2 -r 2 2 2 -rhsone -solver 248 \
+ > emptyProc.out.138

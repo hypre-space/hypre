@@ -1,0 +1,32 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# fei: Run through solvers
+#=============================================================================
+
+mpirun -np 4 ./fei -solver 0 > solvers.out.0
+mpirun -np 4 ./fei -solver 1 > solvers.out.1
+mpirun -np 4 ./fei -solver 2 > solvers.out.2
+mpirun -np 4 ./fei -solver 3 > solvers.out.3
+mpirun -np 4 ./fei -solver 4 > solvers.out.4
+mpirun -np 4 ./fei -solver 5 > solvers.out.5
+mpirun -np 4 ./fei -solver 6 > solvers.out.6
+mpirun -np 4 ./fei -solver 7 > solvers.out.7
+

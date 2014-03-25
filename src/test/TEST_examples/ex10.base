@@ -1,0 +1,44 @@
+***************************************************
+* Preconditioned Conjugate Gradient solver 
+* maximum no. of iterations = 100
+* convergence tolerance     = 1.000000e-06
+*--------------------------------------------------
+AMG max levels   = 30
+AMG coarsen type = 6
+AMG measure type = 0
+AMG threshold    = 2.500000e-01
+AMG numsweeps    = 1
+AMG relax type   = 6
+AMG relax weight = 1.000000e+00
+AMG relax omega  = 1.000000e+00
+AMG system size  = 1
+AMG smooth type  = 0
+AMG smooth numlevels  = 0
+AMG smooth numsweeps  = 1
+AMG Schwarz variant = 0
+AMG Schwarz overlap = 1
+AMG Schwarz domain type = 2
+AMG Schwarz relax weight = 1.000000e+00
+***************************************************
+<b,b>: 6.829186e-05
+
+
+Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
+-----    ------------   ---------  ------------ 
+    1    2.362072e-03    0.285831    2.858306e-01
+    2    1.590804e-04    0.067348    1.925006e-02
+    3    1.087675e-05    0.068373    1.316178e-03
+    4    4.417991e-07    0.040619    5.346141e-05
+    5    1.281097e-08    0.028997    1.550235e-06
+    6    5.026712e-10    0.039238    6.082744e-08
+
+
+***************************************************
+*                Solver Statistics                *
+*-------------------------------------------------*
+** HYPRE preconditioner setup time = 3.092300e-02
+** HYPRE solution time             = 2.983800e-02
+** HYPRE total time                = 6.076100e-02
+** HYPRE number of iterations      = 6
+** HYPRE final residual norm       = 5.026712e-10
+***************************************************

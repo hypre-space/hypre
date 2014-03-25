@@ -1,0 +1,81 @@
+#! /bin/sh
+# set -x
+#
+#  Returns the architecture of the host machine
+#
+#
+# Try to find location of utility uname
+for dir in /bin /usr/bin /usr/local/bin ; do
+    if [ -x $dir/uname ] ; then
+	UNAME="$dir/uname"
+        break
+    fi
+done
+#
+# Get machine kernal and hardware names values
+#
+if [ -n "$UNAME" ] ; then
+    ARCHLIST="`uname -s`"
+    ARCHLIST="$ARCHLIST `uname -m`"
+fi
+#
+# Get environment variable, ARCH, name if defined
+if [ -n "$ARCH" ] ; then
+    ARCHLIST="$ARCHLIST $ARCH"
+fi
+#
+# Get arch command and execute it to get host machine architecture
+if [ -x /bin/arch ] ; then
+    ARCHLIST="$ARCHLIST `/bin/arch`"
+elif [ -x /usr/local/bin/arch ] ; then
+    ARCHLIST="$ARCHLIST `/usr/local/bin/arch`"
+fi
+#
+# GARCH is a guess for the host machine architecture
+# LARCH is current value from list of architectures
+# FARCH is the returned value
+GARCH=
+
+# search architecture list; removing blanks first
+for LARCH in $ARCHLIST ; do
+   LARCH=`echo $LARCH | sed 's/ //g'`
+   case $LARCH in
+	AIX|RIOS|ppc64) FARCH=rs6000; break ;;
+	HP-UX) FARCH=hpux ; break ;;
+	IRIX64|IRIX) FARCH=$LARCH ; break ;;
+	Linux|LINUX) FARCH=LINUX ; break ;;
+	i586|i486|i86pc)
+	    GARCH=$LARCH ;;
+	sun4*)
+	   Version=`$UNAME -r`
+           MajorVersion=`expr "$Version" : "\(.\)"`
+           if [ "$MajorVersion" -ge 5 ] ; then
+              FARCH=solaris
+	   else
+	      FARCH=sun4
+  	   fi
+ 	   break ;;
+	hp9000*|hp7000*) FARCH=hpux ; break ;;
+	mips|dec-5000)   FARCH=dec5000 ; break ;;
+        IP12|iris-4d)    GARCH=IRIX ;;
+        cray|CRAY*)      GARCH=CRAY ;;
+	KSR1|KSR2)       FARCH=ksr ; break ;;	
+        FreeBSD)         FARCH=freebsd ; break ;;
+	i386)            GARCH=ipsc2 ;;
+	ULTRIX|RISC)     GARCH=dec5000 ;;
+   esac
+   LLARCH=$LARCH
+done
+#
+# Set return value if not already defined
+if [ -z "$FARCH" ] ; then
+    FARCH=$GARCH
+    if [ -z "$FARCH" ] ; then
+	FARCH=$LLARCH
+    fi
+    if [ -z "$FARCH" ] ; then
+	FARCH=unknown
+    fi
+fi
+echo $FARCH
+exit 0

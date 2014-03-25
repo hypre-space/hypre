@@ -1,0 +1,156 @@
+# Output file: solvers.out.0
+Iterations = 24
+Final Relative Residual Norm = 6.429522e-07
+
+# Output file: solvers.out.1
+Iterations = 24
+Final Relative Residual Norm = 6.654613e-07
+
+# Output file: solvers.out.2
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: solvers.out.3
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: solvers.out.4
+Iterations = 4
+Final Relative Residual Norm = 5.458963e-08
+
+# Output file: solvers.out.5
+Iterations = 7
+Final Relative Residual Norm = 2.672054e-07
+
+# Output file: solvers.out.6
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: solvers.out.7
+Iterations = 28
+Final Relative Residual Norm = 7.409212e-07
+
+# Output file: solvers.out.8
+Iterations = 28
+Final Relative Residual Norm = 7.485693e-07
+
+# Output file: solvers.out.9
+Iterations = 30
+Final Relative Residual Norm = 9.036190e-07
+
+# Output file: solvers.out.10
+Iterations = 30
+Final Relative Residual Norm = 9.036190e-07
+
+# Output file: solvers.out.11
+Iterations = 4
+Final Relative Residual Norm = 3.500202e-08
+
+# Output file: solvers.out.12
+Iterations = 7
+Final Relative Residual Norm = 3.319145e-07
+
+# Output file: solvers.out.13
+Iterations = 31
+Final Relative Residual Norm = 7.336388e-07
+
+# Output file: solvers.out.14
+Iterations = 11
+Final Relative Residual Norm = 8.131824e-07
+
+# Output file: solvers.out.15
+Iterations = 5
+Final Relative Residual Norm = 9.410367e-07
+
+# Output file: solvers.out.16
+Iterations = 28
+Final Relative Residual Norm = 7.409212e-07
+
+# Output file: solvers.out.17
+Iterations = 28
+Final Relative Residual Norm = 7.485693e-07
+
+# Output file: solvers.out.18
+Iterations = 30
+Final Relative Residual Norm = 9.036190e-07
+
+# Output file: solvers.out.19
+Iterations = 4
+Final Relative Residual Norm = 3.500202e-08
+
+# Output file: solvers.out.20
+Iterations = 4
+Final Relative Residual Norm = 3.500202e-08
+
+# Output file: solvers.out.10.lobpcg
+Iterations = 24
+Final Relative Residual Norm = 6.429522e-07
+
+# Output file: solvers.out.10.lobpcg.1
+Eigenvalue lambda   1.34883860790786e+00
+Residual   2.40758202827198e-03
+
+# Output file: solvers.out.10.lobpcg.4
+Eigenvalue lambda   1.34880848246857e+00
+Eigenvalue lambda   1.36560847743329e+00
+Eigenvalue lambda   1.47908699641263e+00
+Eigenvalue lambda   1.49589925872454e+00
+Residual   9.16737482218000e-07
+Residual   8.87659444661760e-07
+Residual   1.05420891872631e-06
+Residual   2.93887033819118e-06
+
+# Output file: solvers.out.11.lobpcg
+Iterations = 24
+Final Relative Residual Norm = 6.654613e-07
+
+# Output file: solvers.out.11.lobpcg.1
+Eigenvalue lambda   1.34884333064988e+00
+Residual   2.59663483715351e-03
+
+# Output file: solvers.out.11.lobpcg.4
+Eigenvalue lambda   1.34880848246842e+00
+Eigenvalue lambda   1.36560847743321e+00
+Eigenvalue lambda   1.47908699641204e+00
+Eigenvalue lambda   1.49589925872009e+00
+Residual   7.44187699977762e-07
+Residual   7.53870645897921e-07
+Residual   8.71824313454194e-07
+Residual   2.13560885729292e-06
+
+# Output file: solvers.out.18.lobpcg
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: solvers.out.18.lobpcg.1
+Eigenvalue lambda   1.34880848247291e+00
+Residual   8.70678344138635e-07
+
+# Output file: solvers.out.18.lobpcg.4
+Eigenvalue lambda   1.34880848246835e+00
+Eigenvalue lambda   1.36560847743319e+00
+Eigenvalue lambda   1.47908699641155e+00
+Eigenvalue lambda   1.49589925871655e+00
+Residual   4.73224543736348e-07
+Residual   8.40546341118427e-07
+Residual   5.39269867557280e-07
+Residual   5.77538756571810e-07
+
+# Output file: solvers.out.19.lobpcg
+Iterations = 25
+Final Relative Residual Norm = 9.124482e-07
+
+# Output file: solvers.out.19.lobpcg.1
+Eigenvalue lambda   1.34880848247291e+00
+Residual   8.70678345772805e-07
+
+# Output file: solvers.out.19.lobpcg.4
+Eigenvalue lambda   1.34880848246837e+00
+Eigenvalue lambda   1.36560847743319e+00
+Eigenvalue lambda   1.47908699641160e+00
+Eigenvalue lambda   1.49589925871662e+00
+Residual   4.73224544353182e-07
+Residual   8.40546342937915e-07
+Residual   5.39269871089064e-07
+Residual   5.77538761770312e-07
+

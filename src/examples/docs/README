@@ -1,0 +1,46 @@
+1. Requirements.
+
+- The code should be well documented with references to the
+  user manual.
+
+- The user should be able to download and build the examples
+  independently of hypre (i.e. assuming only that hypre was
+  installed in some directory $HYPRE_DIR). In particular, no
+  assumptions for the locations of the examples or hypre
+  directories should be made.
+
+- The examples should mimic an application code, so a user
+  can pick one of them and use it as a starting template.
+
+
+2. Adding a new example code.
+
+- Use the following naming convention: ex<n>.c
+
+- Edit the Makefile.
+
+- Test if everything builds and runs correctly.
+
+- Documentation: create ex<n>.htm in the docs directory, and include
+  it in the appropriate Interface, Equation, Discretization or Solver
+  documentation files. Add a short description in index.htm. Then do
+  "make" to build the documentation in the README_files directory and
+  create/update the README.html in the examples directory.
+
+  NOTE: To clarify, the docs directory is NOT distributed
+	to users.  To test what is in the distribution, do "make"
+	in the docs directory. This updates the examples/README_files
+	directory (which IS distributed) and the file README.html
+	which is created in the *examples* directory (from docs/index.htm
+	- which is why the links in index.htm do not - and should not -
+	work in the docs directory)
+
+3. Maintaining, updating and testing.
+
+- Changes in hypre interface should be reflected in the examples.
+
+- The outputs of some example runs should be kept as benchmarks.
+  If changes in hypre or the example itself result in different
+  output, this should be recorded.
+
+- The examples are part of hypre's regression testing.

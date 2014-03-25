@@ -1,0 +1,44 @@
+# Output file: smoother.out.0
+ Average Convergence Factor = 0.016690
+
+     Complexity:    grid = 1.692000
+                operator = 3.517576
+                   cycle = 7.032997
+
+# Output file: smoother.out.1
+ Average Convergence Factor = 0.021100
+
+     Complexity:    grid = 1.713333
+                operator = 3.541020
+                   cycle = 7.080340
+
+# Output file: smoother.out.2
+ Average Convergence Factor = 0.028763
+
+     Complexity:    grid = 1.695000
+                operator = 3.591288
+                   cycle = 7.180720
+
+# Output file: smoother.out.3
+ Average Convergence Factor = 0.125158
+
+     Complexity:    grid = 1.695000
+                operator = 3.591288
+                   cycle = 7.180720
+
+# Output file: smoother.out.4
+Iterations = 5
+Final Relative Residual Norm = 9.891191e-09
+
+# Output file: smoother.out.5
+Iterations = 36
+Final Relative Residual Norm = 9.189342e-09
+
+# Output file: smoother.out.6
+Iterations = 8
+Final Relative Residual Norm = 8.817485e-10
+
+# Output file: smoother.out.7
+BoomerAMG Iterations = 14
+Final Relative Residual Norm = 3.411596e-09
+

@@ -1,0 +1,50 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+#=============================================================================
+# Run each example 
+#=============================================================================
+
+mpirun -np 2 ./ex1 > default.out.1
+
+mpirun -np 2 ./ex2 > default.out.2
+
+mpirun -np 16 ./ex3 -n 33 -solver 0 -v 1 1 > default.out.3
+
+mpirun -np 16 ./ex4 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > default.out.4
+
+mpirun -np 4 ./ex5 > default.out.5
+
+mpirun -np 4 ./ex5f > default.out.5f
+
+mpirun -np 2 ./ex6 > default.out.6
+
+mpirun -np 16 ./ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > default.out.7
+
+mpirun -np 2 ./ex8 > default.out.8
+
+mpirun -np 16 ./ex9 -n 33 -solver 0 -v 1 1 > default.out.9
+
+mpirun -np 4 ./ex10 -n 120 -solver 2 > default.out.10
+
+mpirun -np 4 ./ex11 > default.out.11
+
+mpirun -np 2 ./ex12 -pfmg > default.out.12
+
+mpirun -np 2 ./ex12f -pfmg > default.out.12f
+
+mpirun -np 6 ./ex13 -n 10 > default.out.13
+
+mpirun -np 6 ./ex14 -n 10 > default.out.14
+
+mpirun -np 8 ./ex15 -n 10 > default.out.15

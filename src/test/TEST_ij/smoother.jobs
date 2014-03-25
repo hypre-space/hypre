@@ -1,0 +1,57 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# ij: Run default case with different coarsenings, hybrid GS,
+#    1: hybrid SOR on 3 procs
+#    2: hybrid scaled symGS on 4 procs. with scaled opt. outer wt on fine level
+#    3: hybrid GS on 4 procs with backward solve GS on up cycle
+#    4: hybrid GS, no CF-relaxation, on 4 procs
+#    5: hybrid SOR on 4 procs, determine a weight automatically
+#    6: use Schwarz smoothing
+#    7: use Schwarz smoothing with automatic weight determination
+#    8: use 3 level Schwarz smoothing with automatic weight determination
+#       followed by SSOR with automatic weight determination
+#=============================================================================
+
+mpirun -np 3 ./new_ij -rhsrand -n 15 30 10 -w 1.1 -owl 1.0 0 \
+ > smoother.out.0
+
+mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -rlx 6 -owl -10 0 \
+ > smoother.out.1
+
+mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -rlx_up 4 \
+ > smoother.out.2
+
+mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 \
+ > smoother.out.3
+
+mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 -CF 0 \
+-w -10 > smoother.out.4
+
+mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
+-sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 > smoother.out.5
+
+mpirun -np 4 ./new_ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
+-sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 -ow -10 -sw -10 \
+> smoother.out.6
+
+mpirun -np 4 ./new_ij -rlx 6 -n 20 20 10 -P 2 2 1 -sysL 3 -nf 3 -smlv 3 \
+-smtype 6 -dom 1 -ov 0 -w -10 -sw -10 \
+> smoother.out.7

@@ -1,0 +1,110 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+HEADERS =\
+ HYPRE_amg.h\
+ headers.h
+
+FILES =\
+ SPamg-pcg.c\
+ pcg.c\
+ amg.c\
+ amg_setup.c\
+ coarsen.c\
+ indepset.c\
+ random.c\
+ transpose.c\
+ interp.c\
+ rap.c \
+ amgstats.c\
+ amg_solve.c \
+ cycle.c\
+ relax.c
+
+OBJS = ${FILES:.c=.o}
+
+CC = gcc
+
+CFLAGS =\
+ -I/usr/local/include\
+ -I/home/casc/include\
+ -I/usr/local/mpi/mpich/include\
+ -I../..\
+ -g -Wall -DHYPRE_MEMORY_DMALLOC
+#-g -Wall  
+
+FFLAGS = -g
+
+LFLAGS =\
+ -L/usr/local/lib\
+ -L/home/casc/lib\
+ -L/home/casc/g77/lib\
+ -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
+ -L.\
+ -L../../seq_mv\
+ -L../../utilities\
+ -lHYPRE_ls\
+ -lHYPRE_mv\
+ -lHYPRE_memory\
+ -lf2c\
+ -lcegdb\
+ -ldmalloc\
+ -lm
+
+##################################################################
+# Main rules
+##################################################################
+
+SPamg-pcg: SPamg-pcg.o libHYPRE_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o SPamg-pcg SPamg-pcg.o ${LFLAGS}
+
+libHYPRE_ls.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${OBJS}
+	ranlib $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	@echo "Making (c) " $@
+	@${CC} -o $@ -c ${CFLAGS} $<
+
+.f.${AMG_ARCH}.o:
+	@echo "Making (f) " $@
+	@${F77} -o $@ -c ${FFLAGS} $<
+
+##################################################################
+# Miscellaneous rules
+##################################################################
+
+veryclean: clean
+	@rm -f libHYPRE_ls.a
+	@rm -f SPamg
+
+clean:
+	@rm -f *.o
+

@@ -1,0 +1,133 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+###############################################################################
+##  All configurable variables are defined in the file named Makefile.config.in
+##  When Autoconf is run, it will create a file named Makefile.config which
+##  will have all of the configurable variables replaced with their values.
+###############################################################################
+
+@SET_MAKE@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+VPATH = @srcdir@
+
+HYPRE_RELEASE_NAME    = @HYPRE_NAME@
+HYPRE_RELEASE_VERSION = @HYPRE_VERSION@
+HYPRE_RELEASE_DATE    = @HYPRE_DATE@
+HYPRE_RELEASE_TIME    = @HYPRE_TIME@
+HYPRE_RELEASE_BUGS    = @HYPRE_BUGS@
+
+HYPRE_SRC_TOP_DIR = @HYPRE_SRCDIR@
+HYPRE_BUILD_DIR   = @HYPRE_SRCDIR@/hypre
+
+HYPRE_INSTALL_DIR = @HYPRE_INSTALLDIR@
+HYPRE_LIB_INSTALL = @HYPRE_LIBINSTALL@
+HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
+
+HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
+
+.SUFFIXES:
+.SUFFIXES: .o .f .c .C .cxx .cc
+
+.f.o:
+	$(F77) $(FFLAGS) -c $< 
+.c.o:
+	$(CC) $(CFLAGS) -c $< 
+.C.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cc.o:
+	$(CXX) $(CXXFLAGS) -c $<
+
+F77       = @F77@
+FFLAGS    = @FFLAGS@ @F77FLAGS@ $(F77_COMPILE_FLAGS)
+
+CC        = @CC@
+CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
+
+CXX       = @CXX@
+CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
+
+LINK_F77  = @LINK_F77@
+LINK_CC   = @LINK_CC@
+LINK_CXX  = @LINK_CXX@
+
+BUILD_F77_SHARED    = @BUILD_F77_SHARED@
+BUILD_CC_SHARED     = @BUILD_CC_SHARED@
+BUILD_CXX_SHARED    = @BUILD_CXX_SHARED@
+SHARED_COMPILE_FLAG = @SHARED_COMPILE_FLAG@
+SHARED_BUILD_FLAG   = @SHARED_BUILD_FLAG@
+SHARED_SET_SONAME   = @SHARED_SET_SONAME@
+SHARED_OPTIONS      = @SHARED_OPTIONS@
+
+BUILD_PYTHON = @BUILD_PYTHON@
+PYTHON       = @PYTHON@
+
+BUILD_JAVA = @BUILD_JAVA@
+
+AR     = @AR@
+RANLIB = @RANLIB@
+
+LDFLAGS = @LDFLAGS@
+LIBS    = @LIBS@
+FLIBS   = @FLIBS@
+
+##################################################################
+##  BABEL Directories
+##################################################################
+HYPRE_BABEL_DIRS = @BABELDIR@
+
+##################################################################
+##  Examples Directory
+##################################################################
+HYPRE_EXAMPLE_DIRS = @EXAMPLEDIR@
+
+##################################################################
+##  LAPACK Library Flags 
+##################################################################
+HYPRE_LAPACK_SRC_DIR = @HYPRE_LAPACK_SRC_DIR@
+HYPRE_LAPACK_FILES   = @HYPRE_LAPACK_FILES@
+LAPACKLIBS           = @LAPACKLIBS@
+LAPACKLIBDIRS        = @LAPACKLIBDIRS@
+
+##################################################################
+##  BLAS Library Flags 
+##################################################################
+HYPRE_BLAS_SRC_DIR = @HYPRE_BLAS_SRC_DIR@
+HYPRE_BLAS_FILES   = @HYPRE_BLAS_FILES@
+BLASLIBS           = @BLASLIBS@
+BLASLIBDIRS        = @BLASLIBDIRS@
+
+##################################################################
+##  MPI options
+##################################################################
+MPIINCLUDE = @MPIINCLUDE@
+MPILIBDIRS = @MPILIBDIRS@
+MPILIBS    = @MPILIBS@
+MPIFLAGS   = @MPIFLAGS@
+
+##################################################################
+##  FEI options
+##################################################################
+HYPRE_FEI_SRC_DIR       = @HYPRE_FEI_SRC_DIR@
+HYPRE_FEI_BASE_DIR      = @HYPRE_FEI_BASE_DIR@
+HYPRE_FEI_SUBDIRS       = @HYPRE_FEI_SUBDIRS@
+HYPRE_FEI_SUPERLU_FILES = @HYPRE_FEI_SUPERLU_FILES@
+HYPRE_FEI_HYPRE_FILES   = @HYPRE_FEI_HYPRE_FILES@
+HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@

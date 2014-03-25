@@ -1,0 +1,81 @@
+#!/usr/bin/ksh
+# Wrapper script to set up environment so the arguments run a 1 task
+# mpi run on the local node.  Essentially runs ip over ethernet with
+# resd=no and a hostfile (containing the local machine name)
+#
+# Written by John C. Gyllenhaal at LLNL 6/25/02
+
+# Print usage
+if [ $# -lt 1 ]; then
+   echo "Usage: nopoe executable [args]";
+   echo " "
+   echo "  Runs executable with args in an environment where any mpi programs"
+   echo "  executed will be run on the local host with 1 task."
+   exit 1;
+fi
+
+
+# Get current hostname
+MY_HOSTNAME=`hostname`
+
+# Create hostname file using this name and pid
+HOSTLIST=hostlist.$MY_HOSTNAME.$$
+
+# Put 1 line of this hostname into HOSTCONTENTS
+HOSTCONTENTS="$MY_HOSTNAME"
+rm -f $HOSTLIST
+echo $HOSTCONTENTS > $HOSTLIST
+
+# SET MP_ variables to run locally on this host
+# IP mode needed if not using switch
+export MP_EUILIB=ip
+
+# Unset EUIDEVICE, defaults to ethernet which is correct and prevents warning
+unset MP_EUIDEVICE
+export MP_EUIDEVICE
+
+# Override user's environment to make one task
+unset MP_TASKS_PER_NODE
+export MP_TASKS_PER_NODE
+export MP_NODES=1
+export MP_PROCS=1
+
+# Don't talk to poe (cannot use switch in this case)
+export MP_RESD=NO
+
+# Don't reserve node (may not be necessary)
+export MP_CPU_USE=multiple
+
+# Run on this node (needed if not using poe)
+export MP_HOSTFILE=$HOSTLIST
+
+# Suppress message about RMPOOL being ignored
+unset MP_RMPOOL
+export MP_RMPOOL
+
+# Required for slurm on AIX
+unset MP_RMLIB
+export MP_RMLIB
+
+# Suppress AIX 5.3 message stating 
+#  mp_euilib is not us, high priority daemon has been started
+unset MP_PRIORITY
+export MP_PRIORITY
+
+# Turn of 0: prefix for output
+export MP_LABELIO=NO
+
+# Ignore batch script configuration (if any)
+unset LOADLBATCH
+export LOADLBATCH
+
+# Run the command with its arguments and get its return value
+"$@"
+RETVAL=$?
+
+# Remove hostlist
+rm -f $HOSTLIST
+
+exit $RETVAL;
+
+ 

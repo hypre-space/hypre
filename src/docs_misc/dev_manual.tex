@@ -1,0 +1,102 @@
+\documentclass[11pt]{book}
+
+%\usepackage{epsfig}
+%\usepackage{html}
+\usepackage{../docs/hypre}
+%\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage[
+pdftex,
+linktocpage,       % make page numbers be the link on TOC, LOF and LOT
+pagebackref,       % adds backlink to the bibliography
+plainpages=false,  % page anchors are named by their formatted form
+pdfstartview=Fit,  % startup page view
+bookmarksopen,     % show bookmarks with all the subtrees expanded
+bookmarksnumbered  % include section numbers in bookmarks
+]{hyperref}
+
+% set margins
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.0in}
+
+% define various commands and macros
+
+% define the version number
+% NOTE: this is automatically generated from another file in hypre
+\input{version}
+
+% write out the index entries in the `.idx' file
+%\makeindex
+
+%=============================================================================
+% Body:
+%=============================================================================
+
+\begin{document}
+
+%--------------- Title Page
+
+\begin{TitlePage}
+
+\Title{Developer's Manual}
+\SubTitle{Software Version: \HYPREVersion}
+\SubTitle{Date: \HYPREVersionDate}
+\vfill
+\begin{center}
+\includegraphics[width=.7\textwidth]{../docs/hypre_wiw}
+\end{center}
+\vfill
+\Author{%
+Center for Applied Scientific Computing\\
+Lawrence Livermore National Laboratory
+}
+
+\end{TitlePage}
+
+%--------------- Copyright Page
+
+\begin{CopyrightPage}
+\input{../docs/copyright.txt}
+\end{CopyrightPage}
+
+%--------------- Table of Contents
+
+\pagenumbering{roman}
+\tableofcontents
+\cleardoublepage
+\pagenumbering{arabic}
+
+%--------------- Include Chapters
+
+\input{dev_requirements}
+\input{dev_design}
+\input{dev_scm}
+\input{dev_error_handling}
+\input{dev_makefile}
+\input{dev_documentation}
+\input{dev_coding}
+\input{dev_language_interop}
+\input{dev_autotest}
+\input{dev_QA}
+\input{dev_install}
+\input{dev_babel}
+
+%--------------- Include Other
+
+% \input{glossary}
+
+%--------------- Print the References here
+
+\bibliographystyle{plain}
+\bibliography{dev_manual}
+
+%--------------- Print the Index here
+
+%\printindex
+
+\end{document}
+
+

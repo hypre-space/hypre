@@ -1,0 +1,43 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# sstruct: Run all of the solvers
+#=============================================================================
+
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.0
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk  -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.1
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.2
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2blk1 -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.3
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.4
+mpirun -np 2 ./sstruct -in sstruct.in.miller_2stk  -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.5
+mpirun -np 2 ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
+ -solver 11 > miller.out.6
+mpirun -np 2 ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
+ -solver 20 > miller.out.7
+mpirun -np 2 ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
+ -solver 11 > miller.out.8
+mpirun -np 2 ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
+ -solver 20 > miller.out.9

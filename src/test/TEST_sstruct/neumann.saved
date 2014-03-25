@@ -1,0 +1,16 @@
+# Output file: neumann.out.0
+Iterations = 6
+Final Relative Residual Norm = 2.366245e-07
+
+# Output file: neumann.out.1
+Iterations = 22
+Final Relative Residual Norm = 8.557340e-07
+
+# Output file: neumann.out.2
+Iterations = 6
+Final Relative Residual Norm = 2.366245e-07
+
+# Output file: neumann.out.3
+Iterations = 22
+Final Relative Residual Norm = 8.557340e-07
+

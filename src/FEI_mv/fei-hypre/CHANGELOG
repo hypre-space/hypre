@@ -1,0 +1,247 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+***********************************************************************
+* This file records the changes made to this directory                */
+***********************************************************************
+ 
+02/07/01    Version 1.5.0R1
+02/13/01    version 1.5.0R2 
+            - modify the matrixLoadComplete function to output matrix
+              to a file even when it has been previously assembled
+              (per Tim Dunn's request)
+02/15/01    version 1.5.0R3 
+            - correct an error in MPI_Allreduce in buildSchurRHS.
+            - take out a duplicate destroy(f1) in buildSchurRHS
+            - in matrixLoadComplete, change to print original matrix
+            - fix the SuperLU nrows for Schur reduced systems
+            - in BuildSchurReducedRHS, set currX and currB
+            - in BuildSchurReducedRHS, multiply ddata instead of divide
+02/20/01    still version 1.5.0R3
+            - fix memory leaks with reusing selectedList_
+            - change isis option to hypre in cfei-hypre.h
+02/21/01    still version 1.5.0R4
+            - major debug for minResProjection, interface change also
+02/22/01    version 1.5.0R5
+            - add in debug versions of A-Conjugate and MinRes projections
+            - change Schur reduction to look for Schur rows from top
+02/23/01    still version 1.5.0R5
+            - debug Schur reduction when a pressure BC is imposed (not SPD)
+02/26/01    still version 1.5.0R5
+            - fix a bug in buildRHS (multiply inv(M) instead of divide)
+            - fix the printMat option (print HYb_ instead of currB_) in
+              matrixLoadComplete
+02/28/01    version 2.0.0R6
+            - remove extra zeros in rows that at BC's
+03/06/01    version 1.5.0R6 and 2.0.0R6
+            - fix a bug in buildReducedRHS (ProcNRows)
+04/10/01    2.0.0R7
+            - fix a bug in BC handling (reset values, not take out columns)
+            - optimize by taking out zeros in loading matrix to parcsr
+            - revert Schur complement reduction to old ways 
+04/12/01    - convert totally to 2.0 
+04/24/01    2.0.0R8
+            - add Euclid preconditioner
+            - create an amgDebug flag for boomeramg diagnostics
+04/25/01    2.0.0R8
+            - make preconditioner reuse more usable
+            - make A-conjugate projection restart instead of truncation
+04/26/01    2.0.0R9
+            - split HYPRE_LinSysCore.C into 2 files and shorten subroutines
+            - add system AMG
+05/02/01    2.0.0R9
+            - take out iostream.h because it creates problem on solaris
+05/10/01    2.0.0R10
+            - re-work launchSolver parameter setting for preconditioners.
+            - add diagnostic information to SuperLUX
+06/14/01    2.0.0R11
+            - re-work hypre_slide_reduce.C to give smaller subroutines
+            - output matrices to file in longer precision
+06/25/01    2.0.1R1
+            - change to the new IJ interface
+            - add timings for non-MPI version
+07/17/01    2.0.1R2
+            - improve the projection methods 
+            - add amgMaxIter 
+07/19/01    2.0.1R3
+            - fix a bug in the lower and upper bounds of MatrixCreate
+            - fix problems with the projection methods 
+07/30/01    2.0.1R4
+            - this should couple with the bug fix in the new IJMatrix
+            - include automatically SuperLU
+            - a few more changes to new IJMatrix/Vectors in SuperLU/AMGe
+              part of the code
+09/14/01    2.0.1R5
+            - get rid of the HYPRE_LSI_Sort function
+            - add identity preconditioner
+            - add incompressible flow block preconditioners
+09/21/01    2.0.1R6
+            - add Symmetric QMR
+10/17/01    2.0.1R7
+            - add flexible GMRES
+            - fix SuperLU problems for HP machines
+10/25/01    2.0.1R8
+            - major reorganization of the block preconditioning module
+12/05/01    2.0.1R9
+            - fix several memory leaks
+12/19/01    2.0.1R10
+            - add links to MLI
+01/02/02    2.0.1R11
+            - add functions to get element matrices from FEI
+            - renovate the parameters function
+            - get rid of FEGridInfo module.
+01/08/02    2.0.1R12
+            - add functions to directly transfer element information from FEI
+            - fix a bug in mli_fedata.C
+03/18/02    2.0.1R13
+            - debug the schurReduction version 2
+            - update with respect to FEI 2.x.12
+03/26/02    2.0.1R14
+            - optimize the matrix loading phase
+            - get rid of the old matrix stuff
+04/26/02    2.0.1R15
+            - add new slide reduction capability 
+05/17/02    2.0.1R16
+            - add Uzawa algorithm 
+            - debug/improve slide reduction capability
+            - debug problems on blue (abs function)
+05/30/02    2.0.1R17
+            - add distribute SuperLU (not working yet)
+            - problem probably in DSuperLU
+07/02/02    2.0.1R18
+            - add hybrid CG diag/AMG solver
+            - fix ddilut problems
+            - take out MLI compiler complaints
+07/26/02    2.0.1R19
+            - improve on MLI's SGS and BSGS smoothers 
+            - add LSICG 
+            - consolidate setupPrecon and correct a few include problems
+09/18/02    2.0.0R20
+            - take out iostream.h again because it creates problem on solaris
+            - improve slideReduction for intersecting slide surfaces
+            - fix resetInitialGuess for Schur reduction
+            - take out diagnostic messages in SuperLU
+10/22/02    2.0.0R21
+            - fix a bug in HYPRE_SlideReduction.C
+            - implement null space correction in slide reduction
+            - incorporate LOBPCG for null space correction
+            - take out the last iostream.h from fei-base
+            - major revision of femli
+10/30/02    2.0.0R22
+            - add normal equation approach
+            - fix a few memory leaks in SuperLU
+            - change Pweight default to 0.0
+            - add ESSL to block smoothers
+11/21/02    2.0.0R23
+            - add material coarsening
+            - add polynomial null vectors
+11/27/02    2.0.0R24
+            - add nonsymmetric AMG
+            - correct bug in matrix_mult : put diag in front
+            - add better matrix transpose function
+12/03/02    2.0.0R25
+            - add variable tolerance for block preconditioning
+            - fix autotest bug (unused variables) in mli_method_amgrs.C
+12/18/02    2.0.0R26
+            - add Kaczmarz smoother
+            - correct a bug in mli_solver_gs.C
+12/19/02    2.5.0R1
+            - change major revision number to reflect use of fei-2.5.0
+            - fix a bug with fgmres variable preconditioning
+            - change normal equation to construct it in launch stage
+            - put null detection in gmres
+01/08/03    2.5.0R2
+            - take out strings.h include file from fei-hypre and femli
+            - move HYPRE_LSI_Uzawa.h to HYPRE_LSI_Uzawa_c.h to avoid
+              compile problems on Microsoft windows.
+            - fix SGS problem with relaxation parameter
+            - add diagnostics (print rnorm) tool to SGS
+            - add window option for strcasecmp in fei-hypre and femli
+01/14/03    2.5.0R3
+            - add scale matrix function (not done yet)
+            - fix nodal coordinate passing
+            - mli works now even local_nrows =0 for some processors
+            - amgrs not work perfectly since matrixTranspose not working
+              right.
+            - add diagnostics to SGS smoother
+            - change mli test driver to run nonsymmetric problems.
+04/29/03    2.5.1R1
+            - modify putIntoSystemMatrix to support fei-lite
+            - add a few more diagnostics messages (per Kull's problem)
+06/09/03    2.5.1R2
+            - correct an error with gmres (convergence check)
+08/21/03    2.5.1R3
+            - put in an additional fe class for multiple domain per proc
+            - take out compiler warnings
+            - take out a few memory leaks
+09/12/03    2.5.1R4
+            - put in ARPACK and eigenvector nullspace for aggregation
+            - add scalar variable to aggregation
+            - change error threshold for QR
+            - add amgMaxLevels 
+09/19/03    2.5.2R1
+            - add slide reduction option 4 to handle ALE3D's constraint
+              problems
+            - clean up a little bit for HYPRE_SlideReduction
+10/30/03    2.5.2R2
+            - add compatible relaxation to femli/amgrs
+            - clean up some compiler complaints
+11/07/03    2.5.2R3
+            - clean up a lot compiler complaints
+            - improve on the AMGSAe capabilities.
+11/18/03    2.5.2R4
+            - clean up a few compiler complaints
+            - a few adjustments for mli
+            - re-do the outputlevel stuff
+11/19/03    2.5.3R1
+            - fix the vendor blas/lapack problem in superlu
+12/04/03    2.5.4R1
+            - change the blas/lapack problem in superlu one more time
+            - add gmres smoother
+            - add one more coarsening in AMGSA
+12/17/03    2.5.4R2
+            - add a few more options in HYPRE_LSI_mli.cxx
+            - perfect the global coarsening in AMGSA
+            - smooth vector AMGSA capability by Edmond
+04/21/04    2.5.4R3
+            - take out MPI functions from FEI_HYPRE_Impl.cxx
+            - take out MPI reference from FEI_HYPRE_include.h
+            - add Edmond's smooth vector capabilites via the FEI
+            - MLI now default (HYPRE_LinSycCore.cxx, HYPRE_LSC_aux.cxx, etc.)
+04/27/04    2.5.5R1
+            - correct autotest complaints
+            - add new fei implementation
+07/01/04    2.5.5R2
+            - separate superlu and blas and lapack from HYPRE_LSI
+            - better amgsa coarsening
+            - deal with lsame and xerbla multiply defined problems
+07/31/04    2.5.5R3
+            - add error flag return to satisfy Al Nichols' need
+              (include changes to krylov, fei-hypre, and ParaSails)
+10/11/04    2.6.1R1
+            - change semantics for with-blas and with-lapack
+            - add domain decomposition algorithm, mli smoothing
+            - add tolerance for arpack
+11/30/04    2.6.2R1
+            - add hybrid SA/GSA preconditioner to CG and GMRES
+            - major revision to configure/makefile
+            - add up to 24 null space vector to AMGSA
+03/30/06    2.7.1R1
+            - add ML Maxwell 
+            - to use: turn on define in HYPRE_MLMaxwell.h, compile hypre 
+                      and ml, copy libml.a to hypre/lib, copy ml_maxwell.cxx
+                      to test directory, modify Makefile in test directory
+                      to compile ml_maxwell.cxx (link with ml), and run
+                      with Gradient and EdgeStiff files (first line nnz,
+                      number of rows, number of columns, then entries with
+                      0-based.)
+

@@ -1,0 +1,136 @@
+
+##############################################################################
+#
+# This file describes the input file for the 'struct.c' driver.
+#
+# The input file is line-based.  Any line beginning with a '#' character is
+# considered a comment and ignored by the driver.  For all non-comment lines,
+# the driver checks the first string to see if it matches certain key words of
+# the form 'Keyword:'.  These key words are usually followed by input data as
+# specified below.  If the first string doesn't match any key words, the line is
+# ignored, so blank lines are allowed.
+#
+# The format for each keyword input line is described below.  Each is followed
+# by a simple example
+#
+# More description here at a later date...
+#
+##############################################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (0- 0-) (4+ 4+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# CELL  = 0
+# NODE  = 1
+# XFACE = 2
+# YFACE = 3
+# ZFACE = 4
+# XEDGE = 5
+# YEDGE = 6
+# ZEDGE = 7
+GridSetVariables: 0 1 [1]
+
+# GridAddVariables: part index(ndim) vartype
+# (Not yet implemented!)
+
+# GridSetNeighborPart: part      ilower(ndim)      iupper(ndim) \
+#                      nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
+#                      index_map[ndim] index_dir[ndim]
+GridSetNeighborPart: 0 (1- 3-) (4+ 3-) 1 (1- 1-) (4+ 1-) [0 1] [1 1]
+
+# GridSetSharedPart: part  ilower(ndim)  iupper(ndim)  offset[ndim] \
+#                    spart silower(ndim) siupper(ndim) soffset[ndim] \
+#                    index_map[ndim] index_dir[ndim]
+GridSetSharedPart: 0 (1- 0+) (10+  0+) [0 0] 4 (1- 1-) ( 1- 10+) [0 0] [1 0] [ 1 -1]
+
+# GridSetPeriodic: part periodic[ndim]
+GridSetPeriodic: 0 [5 0]
+
+###########################################################
+# (note: Stencil and FEMStencil cannot be used together)
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [5]
+ 
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0] 0  4.0
+StencilSetEntry: 0  1 [-1  0] 0 -1.0
+StencilSetEntry: 0  2 [ 1  0] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1] 0 -1.0
+ 
+# RhsSet: value
+RhsSet: 1.0
+
+# FEMStencilCreate: size
+FEMStencilCreate: 4
+ 
+# FEMStencilSetRow: row offset[ndim] var values[size]
+# (note: columns have the same ordering as rows)
+FEMStencilSetRow: 0 [-1 -1] 0 [  1.0 -0.5 -0.5  0.0 ]
+FEMStencilSetRow: 1 [ 0 -1] 0 [ -0.5  1.0  0.0 -0.5 ]
+FEMStencilSetRow: 2 [-1  0] 0 [ -0.5  0.0  1.0 -0.5 ]
+FEMStencilSetRow: 3 [ 0  0] 0 [  0.0 -0.5 -0.5  1.0 ]
+
+# FEMRhsSet: values[size]
+FEMRhsSet: [ 0.1 1.4 0.3 0.7 ]
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+
+# GraphAddEntries: \
+#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
+#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
+#   index_map[ndim] entry value
+# (note: this could be made to work with FEMStencil, but 'entry' needs to change)
+GraphAddEntries: 1 (6- 12- : -1 -1) (13+ 12- : 0 -1) [2 1] 0   0 (3- 5+ : -1 -1) (6+ 5+ : 0 -1) [1 1] 0 [0 1] 5 -1.0
+
+###########################################################
+
+# MatrixSetSymmetric: part var to_var symmetric
+# ('-1' means "all", e.g. "all parts")
+MatrixSetSymmetric: -1 -1 -1  1
+
+# MatrixSetNSSymmetric: symmetric
+MatrixSetNSSymmetric: 1
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 (1- 1-) (1- 2+) [1 1] 0 1 0.0
+
+# MatrixAddToValues: \
+#   part ilower(ndim) iupper(ndim) var nentries entries[nentries] values[nentries]
+MatrixAddToValues: 0 (1- 1- 1-) (4+ 4+ 4+) 0 4 [0 1 2 3] [6.0 -1.0 -1.0 -1.0]
+
+# FEMMatrixAddToValues: \
+#   part ilower(ndim) iupper(ndim) nrows rows[nrows] ncols cols[ncols] \
+#   values[nrows*ncols]
+FEMMatrixAddToValues: 0 (0- 0-) (4+ 0-) 2 [0 1] 2 [0 1] [ 1.0 -0.5 -0.5 1.0 ]
+
+###########################################################
+
+# RhsAddToValues: \
+#   part ilower(ndim) iupper(ndim) var value
+RhsAddToValues: 0 (1- 1- 1-) (4+ 4+ 4+) 0 -0.5
+
+# FEMRhsAddToValues: \
+#   part ilower(ndim) iupper(ndim) values[size]
+#   values[nrows*ncols]
+FEMRhsAddToValues: 0 (0- 0-) (4+ 0-) [ -0.1 -1.4 0.0 0.0 ]
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+
+###########################################################
+

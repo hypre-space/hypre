@@ -1,0 +1,33 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# Run each example 
+#=============================================================================
+
+
+mpirun -np 2 ./ex1_for > fortran_examples.out.1
+
+mpirun -np 16 ./ex3_for -n 33 -solver 0 -v 1 1 > fortran_examples.out.3
+
+mpirun -np 4 ./ex5_for > fortran_examples.out.5
+
+mpirun -np 2 ./ex6_for > fortran_examples.out.6
+
+mpirun -np 16 ./ex7_for -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > fortran_examples.out.7

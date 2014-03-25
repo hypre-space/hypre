@@ -1,0 +1,36 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# sstruct: Run base 3d cases
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.neumann -r 6 6 6 -solver 200 \
+ > neumann.out.0
+mpirun -np 1 ./sstruct -in sstruct.in.neumann -r 6 6 6 -solver 201 \
+ > neumann.out.1
+
+#=============================================================================
+# sstruct: Run various blockings and distributions
+#=============================================================================
+
+mpirun -np 4 ./sstruct -in sstruct.in.neumann -P 2 2 1 -b 1 3 2 -r 3 1 3 -solver 200 \
+ > neumann.out.2
+mpirun -np 3 ./sstruct -in sstruct.in.neumann -P 1 1 3 -b 6 1 1 -r 1 6 2 -solver 201 \
+ > neumann.out.3

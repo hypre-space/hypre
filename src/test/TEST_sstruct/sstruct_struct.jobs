@@ -1,0 +1,37 @@
+#!/bin/sh 
+
+#=============================================================================
+# Compare the struct solvers called from sstruct & struct interfaces
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 12 12 -solver 1 -istart -3 -3 -3 -relax 1 -rap 1 \
+> sstruct_struct.out.1
+mpirun -np 1 ./sstruct -in sstruct.in.struct -solver 201 -relax 1 -rap 1 -rhsone \
+> sstruct_struct.out.201
+
+mpirun -np 1 ./struct -n 12 12 12 -solver 0 -istart -3 -3 -3 -relax 1 \
+> sstruct_struct.out.0
+mpirun -np 1 ./sstruct -in sstruct.in.struct -solver 200 -relax 1 -rhsone \
+> sstruct_struct.out.200
+
+#=============================================================================
+# Compare 19pt, 7pt, positive, and negative definite
+#=============================================================================
+
+mpirun -np 2 sstruct -in sstruct.in.19aniso  -P 2 1 1 -solver 201 \
+> sstruct_struct.out.10
+mpirun -np 2 sstruct -in sstruct.in.p19aniso -P 2 1 1 -solver 201 \
+> sstruct_struct.out.11
+mpirun -np 2 sstruct -in sstruct.in.7aniso   -P 2 1 1 -solver 201 \
+> sstruct_struct.out.12
+mpirun -np 2 sstruct -in sstruct.in.p7aniso  -P 2 1 1 -solver 201 \
+> sstruct_struct.out.13
+
+mpirun -np 2 sstruct -in sstruct.in.19iso  -P 2 1 1 -solver 201 \
+> sstruct_struct.out.15
+mpirun -np 2 sstruct -in sstruct.in.p19iso -P 2 1 1 -solver 201 \
+> sstruct_struct.out.16
+mpirun -np 2 sstruct -in sstruct.in.7iso   -P 2 1 1 -solver 201 \
+> sstruct_struct.out.17
+mpirun -np 2 sstruct -in sstruct.in.p7iso  -P 2 1 1 -solver 201 \
+> sstruct_struct.out.18

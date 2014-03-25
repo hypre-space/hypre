@@ -1,0 +1,635 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
+
+
+#include "utilities.h"
+
+#include "LinearSystemCore.h"
+#include "LLNL_FEI_Impl.h"
+
+#ifndef hypre_FE_MV_HEADER
+#define hypre_FE_MV_HEADER
+
+#include "HYPRE.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/******************************************************************************
+ *
+ * Header info for the hypre_FEMesh structures
+ *
+ *****************************************************************************/
+
+#ifndef hypre_FE_MESH_HEADER
+#define hypre_FE_MESH_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_FEMesh:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_FEMesh_struct
+{
+   MPI_Comm comm_;
+   void     *linSys_;
+   void     *feiPtr_;
+   int      objectType_;
+
+} hypre_FEMesh;
+typedef struct hypre_FEMesh_struct *HYPRE_FEMesh;
+
+#endif
+
+/******************************************************************************
+ *
+ * Header info for the hypre_FEMatrix structures
+ *
+ *****************************************************************************/
+
+#ifndef hypre_FE_MATRIX_HEADER
+#define hypre_FE_MATRIX_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_FEMatrix:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_FEMatrix_struct
+{
+   MPI_Comm      comm_;
+   hypre_FEMesh *mesh_;
+
+} hypre_FEMatrix;
+typedef struct hypre_FEMatrix_struct *HYPRE_FEMatrix;
+
+#endif
+
+/******************************************************************************
+ *
+ * Header info for the hypre_FEVector structures
+ *
+ *****************************************************************************/
+
+#ifndef hypre_FE_VECTOR_HEADER
+#define hypre_FE_VECTOR_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_FEVector:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_FEVector_struct
+{
+   MPI_Comm      comm_;
+   hypre_FEMesh* mesh_;
+
+} hypre_FEVector;
+typedef struct hypre_FEVector_struct *HYPRE_FEVector;
+
+#endif
+
+/**
+ * @name HYPRE's Finite Element Interface
+ *
+ * @memo A finite element-based conceptual interface
+ **/
+/*@{*/
+                                                                                
+/**
+ * @name HYPRE FEI functions
+ **/
+/*@{*/
+                                                                                
+/*--------------------------------------------------------------------------
+ * HYPRE_fei_mesh.cxx 
+ *--------------------------------------------------------------------------*/
+
+/**
+  * Finite element interface constructor: this function creates an
+  * instantiation of the HYPRE fei class.
+  * @param comm - an MPI communicator
+  * @param mesh - upon return, contains a pointer to the finite element mesh
+ **/
+
+int HYPRE_FEMeshCreate( MPI_Comm comm, HYPRE_FEMesh *mesh );
+
+/**
+  * Finite element interface destructor: this function destroys
+  * the object as well as its internal memory allocations.
+  * @param mesh - a pointer to the finite element mesh 
+ **/
+
+int HYPRE_FEMeshDestroy( HYPRE_FEMesh mesh );
+
+/**
+  * This function passes the externally-built FEI object (for example,
+  * Sandia's implementation of the FEI) as well as corresponding
+  * LinearSystemCore object. 
+  * @param mesh - a pointer to the finite element mesh 
+  * @param externFEI - a pointer to the externally built finite element object 
+  * @param linSys - a pointer to the HYPRE linear system solver object built
+  *                 using the HYPRE\_base\_create function.
+ **/
+
+int HYPRE_FEMeshSetFEObject(HYPRE_FEMesh mesh, void *externFEI, void *linSys);
+
+/**
+  * The parameters function is the single most important function
+  * to pass solver information (which solver, which preconditioner,
+  * tolerance, other solver parameters) to the underlying solver.
+  * @param mesh - a pointer to the finite element mesh 
+  * @param numParams - number of command strings
+  * @param paramStrings - the command strings
+ **/
+int HYPRE_FEMeshParameters(HYPRE_FEMesh mesh, int numParams, char **paramStrings);
+
+/**
+  * Each node or element variable has one or more fields. The field
+  * information can be set up using this function.
+  * @param mesh - a pointer to the finite element mesh 
+  * @param numFields - total number of fields for all variable types
+  * @param fieldSizes - degree of freedom for each field type
+  * @param fieldIDs - a list of field identifiers
+ **/
+
+int HYPRE_FEMeshInitFields( HYPRE_FEMesh mesh, int numFields,
+                            int *fieldSizes, int *fieldIDs );
+
+/**
+  * The whole finite element mesh can be broken down into a number of
+  * element blocks. The attributes for each element block are: an
+  * identifier, number of elements, number of nodes per elements,
+  * the number of fields in each element node, etc.
+  * @param mesh - a pointer to the finite element mesh 
+  * @param blockID - element block identifier
+  * @param nElements - number of element in this block
+  * @param numNodesPerElement - number of nodes per element in this block
+  * @param numFieldsPerNode - number of fields for each node
+  * @param nodalFieldIDs - field identifiers for the nodal unknowns
+  * @param numElemDOFFieldsPerElement - number of fields for the element
+  * @param elemDOFFieldIDs - field identifier for the element unknowns
+  * @param interleaveStratety - indicates how unknowns are ordered
+  */
+
+int HYPRE_FEMeshInitElemBlock( HYPRE_FEMesh mesh, int blockID, 
+                               int nElements, int numNodesPerElement,
+                               int *numFieldsPerNode, int **nodalFieldIDs,
+                               int numElemDOFFieldsPerElement,
+                               int *elemDOFFieldIDs, int interleaveStrategy );
+
+/**
+  * This function initializes element connectivity (that is, the node
+  * identifiers associated with the current element) given an element
+  * block identifier and the element identifier with the element block.
+  * @param mesh - a pointer to the finite element mesh 
+  * @param blockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+ **/
+
+int HYPRE_FEMeshInitElem( HYPRE_FEMesh mesh, int blockID, int elemID,
+                          int *elemConn );
+
+/**
+  * This function initializes the nodes that are shared between the
+  * current processor and its neighbors. The FEI will decide a unique
+  * processor each shared node will be assigned to.
+  * @param mesh - a pointer to the finite element mesh 
+  * @param nShared - number of shared nodes
+  * @param sharedIDs - shared node identifiers
+  * @param sharedLengs - the number of processors each node shares with
+  * @param sharedProcs - the processor identifiers each node shares with
+ **/
+
+int HYPRE_FEMeshInitSharedNodes( HYPRE_FEMesh mesh, int nShared,
+                                 int *sharedIDs, int *sharedLeng,
+                                 int **sharedProcs );
+
+/**
+  * This function signals to the FEI that the initialization step has
+  * been completed. The loading step will follow.
+  * @param mesh - a pointer to the finite element mesh 
+ **/
+
+int HYPRE_FEMeshInitComplete( HYPRE_FEMesh mesh );
+
+/**
+  * This function loads the nodal boundary conditions. The boundary conditions
+  * @param mesh - a pointer to the finite element mesh 
+  * @param nNodes - number of nodes boundary conditions are imposed
+  * @param nodeIDs - nodal identifiers
+  * @param fieldID - field identifier with nodes where BC are imposed
+  * @param alpha - the multipliers for the field
+  * @param beta - the multipliers for the normal derivative of the field
+  * @param gamma - the boundary values on the right hand side of the equations
+ **/
+
+int HYPRE_FEMeshLoadNodeBCs( HYPRE_FEMesh mesh, int numNodes,
+                             int *nodeIDs, int fieldID, double **alpha,
+                             double **beta, double **gamma );
+
+/**
+  * This function adds the element contribution to the global stiffness matrix
+  * and also the element load to the right hand side vector
+  * @param mesh - a pointer to the finite element mesh 
+  * @param BlockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+  * @param elemStiff - element stiffness matrix
+  * @param elemLoad - right hand side (load) for this element
+  * @param elemFormat - the format the unknowns are passed in
+ **/
+
+int HYPRE_FEMeshSumInElem( HYPRE_FEMesh mesh, int blockID, int elemID, 
+                           int* elemConn, double** elemStiffness, 
+                           double *elemLoad, int elemFormat );
+
+/**
+  * This function differs from the sumInElem function in that the right hand
+  * load vector is not passed.
+  * @param mesh - a pointer to the finite element mesh 
+  * @param blockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+  * @param elemStiff - element stiffness matrix
+  * @param elemFormat - the format the unknowns are passed in
+ **/
+
+int HYPRE_FEMeshSumInElemMatrix( HYPRE_FEMesh mesh, int blockID, int elemID, 
+                                 int* elemConn, double** elemStiffness, 
+                                 int elemFormat );
+
+/**
+  * This function adds the element load to the right hand side vector
+  * @param mesh - a pointer to the finite element mesh 
+  * @param blockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+  * @param elemLoad - right hand side (load) for this element
+ **/
+
+int HYPRE_FEMeshSumInElemRHS( HYPRE_FEMesh mesh, int blockID, int elemID, 
+                              int* elemConn, double* elemLoad );
+
+/**
+  * This function signals to the FEI that the loading phase has
+  * been completed.
+  * @param mesh - a pointer to the finite element mesh 
+ **/
+
+int HYPRE_FEMeshLoadComplete( HYPRE_FEMesh mesh );
+
+/**
+  * This function tells the FEI to solve the linear system
+  * @param mesh - a pointer to the finite element mesh
+ **/
+
+int HYPRE_FEMeshSolve( HYPRE_FEMesh mesh );
+
+/**
+  * This function returns the node identifiers given the element block.
+  * @param mesh - a pointer to the finite element mesh
+  * @param blockID - element block identifier
+  * @param numNodes - the number of nodes
+  * @param nodeIDList - the node identifiers
+ **/
+
+int HYPRE_FEMeshGetBlockNodeIDList( HYPRE_FEMesh mesh, int blockID, 
+                                    int numNodes, int *nodeIDList );
+
+/**
+  * This function returns the nodal solutions given the element block number.
+  * @param mesh - a pointer to the finite element mesh
+  * @param blockID - element block identifier
+  * @param numNodes - the number of nodes
+  * @param nodeIDList - the node identifiers
+  * @param solnOffsets - the equation number for each nodal solution
+  * @param solnValues - the nodal solution values
+ **/
+
+int HYPRE_FEMeshGetBlockNodeSolution( HYPRE_FEMesh mesh, int blockID,
+                                      int numNodes, int *nodeIDList, 
+                                      int *solnOffsets, double *solnValues );
+
+/*@}*/
+
+/**
+ * @name HYPRE FEI Matrix functions
+ **/
+/*@{*/
+                                                                                
+/*--------------------------------------------------------------------------
+ * HYPRE_fei_matrix.cxx 
+ *--------------------------------------------------------------------------*/
+/**
+  * Finite element matrix constructor
+  * @param comm - an MPI communicator
+  * @param mesh - a pointer to the finite element mesh
+  * @param matrix - upon return, contains a pointer to the FE matrix
+ **/
+
+int HYPRE_FEMatrixCreate( MPI_Comm comm, HYPRE_FEMesh mesh, 
+                          HYPRE_FEMatrix *matrix );
+/**
+  * Finite element matrix destructor
+  * @param matrix - a pointer to the FE matrix
+ **/
+
+int HYPRE_FEMatrixDestroy( HYPRE_FEMatrix matrix );
+
+/**
+  * This function gets the underlying HYPRE parcsr matrix from the FE mesh
+  * @param matrix - a pointer to the FE matrix
+  * @param object - a pointer to the HYPRE parcsr matrix
+ **/
+
+int HYPRE_FEMatrixGetObject( HYPRE_FEMatrix matrix, void **object );
+
+/*@}*/
+
+/**
+ * @name HYPRE FEI Vector functions
+ **/
+/*@{*/
+                                                                                
+/*--------------------------------------------------------------------------
+ * HYPRE_fei_vector.cxx 
+ *--------------------------------------------------------------------------*/
+/**
+  * Finite element vector constructor
+  * @param comm - an MPI communicator
+  * @param mesh - a pointer to the finite element mesh
+  * @param vector - upon return, contains a pointer to the FE vector
+ **/
+int HYPRE_FEVectorCreate( MPI_Comm comm , HYPRE_FEMesh mesh, 
+                          HYPRE_FEVector *vector);
+
+/**
+  * Finite element vector destructor
+  * @param vector - a pointer to the FE vector
+ **/
+int HYPRE_FEVectorDestroy( HYPRE_FEVector vector );
+
+/**
+  * This function gets the underlying RHS vector from the FE mesh
+  * @param vector - a pointer to the FE vector
+  * @param object - upon return, points to the RHS vector
+ **/
+                                                                                
+int HYPRE_FEVectorGetRHS( HYPRE_FEVector vector, void **object );
+                                                                                
+/**
+  * This function gives the solution vector to the FE mesh
+  * @param vector - a pointer to the FE vector
+  * @param object - points to the solution vector
+ **/
+                                                                                
+int HYPRE_FEVectorSetSol( HYPRE_FEVector vector, void *object );
+                                                                                
+/*@}*/
+
+/**
+ * @name Solver parameters
+ **/
+/*@{*/
+
+/**
+  * Here the various options for solvers and perconditioners
+  * are defined.
+  * 
+  *\begin{description}
+  *\item[solver xxx] where xxx specifies one of {\sf cg}, {\sf gmres},
+  *  	      {\sf fgmres}, {\sf bicgs}, {\sf bicgstab}, {\sf tfqmr}, 
+  *           {\sf symqmr}, {\sf superlu}, or {\sf superlux}.  The 
+  *           default is {\sf gmres}.
+  *           The solver type can be followed by {\sf override} to
+  *           specify its priority when multiple solvers are declared
+  *           at random order.
+  *\item[preconditioner xxx] where xxx is one of {\sf diagonal}, {\sf pilut},
+  *           {\sf euclid}, {\sf parasails}, {\sf boomeramg}, {\sf poly}, or 
+  *           {\sf mli}. The default is {\sf diagonal}.  Another option for 
+  *           xxx is {\sf reuse} which allows the preconditioner to be reused 
+  *           (this should only be set after a preconditioner has been set 
+  *           up already).
+  *           The preconditioner type can be followed by {\sf override} to
+  *           specify its priority when multiple preconditioners are declared
+  *           at random order.
+  *\item[maxIterations xxx] where xxx is an integer specifying the maximum 
+  *           number of iterations permitted for the iterative solvers.
+  *           The default value is 1000.
+  *\item[tolerance xxx] where xxx is a floating point number specifying the 
+  *           termination criterion for the iterative solvers.  The default 
+  *           value is 1.0E-6.
+  *\item[gmresDim xxx] where xxx is an integer specifying the value of m in
+  *           restarted GMRES(m).  The default value is 100.
+  *\item[stopCrit xxx] where xxx is one of {\sf absolute} or {\sf relative}
+  *           stopping criterion.
+  *\item[superluOrdering xxx] - where xxx specifies one of {\sf natural} or
+  *           {\sf mmd} (minimum degree ordering).  This ordering
+  *           is used to minimize the number of nonzeros generated
+  *           in the LU decomposition.  The default is natural ordering.
+  *\item[superluScale xxx] where xxx specifies one of {\sf y} (perform row
+  *           and column scalings before decomposition) or {\sf n}.
+  *           The default is no scaling.
+  *\end{description}
+ **/
+Preconditioners and Solvers
+
+/**
+  * Parameter options for the algebraic multigrid preconditioner BoomerAMG.
+  * 
+  *\begin{description}
+  *\item[amgMaxLevels xxx] where xxx is an integer specifying the maximum 
+  *           number of levels to be used for the grid hierarchy.
+  *\item[amgCoarsenType xxx] where xxx specifies one of {\sf falgout} or
+  *           {\sf ruge}, or {\sf default (CLJP)} coarsening for BOOMERAMG.
+  *\item[amgMeasureType xxx] where xxx specifies one of {\sf local} or
+  *           or {\sf global}.  This parameter affects how coarsening is 
+  *           performed in parallel.
+  *\item[amgRelaxType xxx] where xxx is one of {\sf jacobi} (Damped Jacobi),
+  *           {\sf gs-slow} (sequential Gauss-Seidel), {\sf gs-fast}
+  *           (Gauss-Seidel on interior nodes), or {\sf hybrid}.
+  *           The default is {\sf hybrid}.
+  *\item[amgNumSweeps xxx] where xxx is an integer specifying the number of
+  *           pre- and post-smoothing at each level of BOOMERAMG.
+  *           The default is two pre- and two post-smoothings.
+  *\item[amgRelaxWeight xxx] where xxx is a floating point number between 
+  *           0 and 1 specifying the damping factor for BOOMERAMG's damped
+  *           Jacobi and GS smoothers.  The default value is 1.0.
+  *\item[amgRelaxOmega xxx] where xxx is a floating point number between 
+  *           0 and 1 specifying the damping factor for BOOMERAMG's hybrid
+  *           smoother for multiple processors.  The default value is 1.0.
+  *\item[amgStrongThreshold xxx] where xxx is a floating point number between 0 
+  *           and 1 specifying the threshold used to determine
+  *           strong coupling in BOOMERAMG's coasening.  The default 
+  *           value is 0.25.
+  *\item[amgSystemSize xxx] where xxx is the degree of freedom per node.
+  *\item[amgMaxLevels xxx] where xxx is an integer specifying the maximum 
+  *           number of iterations to be used during the solve phase.
+  *\item[amgUseGSMG] - tells BOOMERAMG to use a different coarsening called 
+  *           GSMG.
+  *\item[amgGSMGNumSamples] where xxx is the number of samples to generate
+  *           to determine how to coarsen for GSMG.
+  *\end{description}
+ **/
+BoomerAMG 
+
+/** 
+  * Parameter options for the smoothed aggregation preconditioner MLI.
+  * 
+  *\begin{description}
+  *\item[outputLevel xxx] where xxx is the output level for diagnostics.
+  *\item[method xxx] where xxx is either {\sf AMGSA} (default), {\sf AMGSAe},
+  *     to indicate which MLI algorithm is to be used.
+  *\item[numLevels xxx] where xxx is the maximum number of levels (default=30)
+  *                     used.
+  *\item[maxIterations xxx] where xxx is the maximum number of iterations
+  *                         (default = 1 as preconditioner).
+  *\item[cycleType xxx] where xxx is either 'V' or 'W' cycle (default = 'V').
+  *\item[strengthThreshold xxx] strength threshold for coarsening (default = 0).
+  *\item[smoother xxx] where xxx is either {\sf Jacobi}, {\sf BJacobi}, {\sf GS}, 
+  *     {\sf SGS}, {\sf HSGS} (SSOR,default), {\sf BSGS}, {\sf ParaSails}, 
+  *     {\sf MLS}, {\sf CGJacobi}, {\sf CGBJacobi}, or {\sf Chebyshev}.
+  *\item[numSweeps xxx] where xxx is the number of smoother sweeps (default = 2).
+  *\item[coarseSolver xxx] where xxx is one of those in 'smoother' or
+  *     {\sf SuperLU} (default).
+  *\item[minCoarseSize xxx] where xxx is the minimum coarse grid size to
+  *     control the number of levels used (default = 3000).
+  *\item[Pweight xxx] where xxx is the relaxation parameter for the prolongation
+  *     smoother (default 0.0).
+  *\item[nodeDOF xxx] where xxx is the degree of freedom for each node
+  *                   (default = 1).
+  *\item[nullSpaceDim xxx] where xxx is the dimension of the null space for
+  *     the coarse grid (default = 1).
+  *\item[useNodalCoord xxx] where xxx is either 'on' or 'off' (default)
+  *     to indicate whether the nodal coordinates are used to generate the 
+  *     initial null space.
+  *\item[saAMGCalibrationSize xxx] where xxx is the additional null space 
+  *     vectors to be generated via calibration (default = 0).
+  *\item[numSmoothVecs xxx] where xxx is the number of near null space 
+  *     vectors used to create the prolongation operator (default = 0).
+  *\item[smoothVecSteps xxx] where xxx is the number of smoothing steps
+  *     used to generate the smooth vectors (default = 0).
+  *\end{description}
+  *
+  *In addition, to use 'AMGSAe', the parameter 'haveSFEI' has to be sent into
+  *the FEI using the parameters function (this option is valid only for the
+  *Sandia FEI implementation).
+ **/ 
+MLI
+
+/** 
+  * Parameter options for ILUT, ParaSails and polynomial preconditioners
+  * are defined.
+  * 
+  *\begin{description}
+  *\item[euclidNlevels xxx] where xxx is an non-negative integer specifying 
+  *           the desired sparsity of the incomplete factors.  The
+  *           default value is 0.
+  *\item[euclidThreshold xxx] where xxx is a floating point number specifying 
+  *           the threshold used to sparsify the incomplete factors.  The default
+  *           value is 0.0.
+  *\item[parasailsThreshold xxx] where xxx is a floating point number between 0 
+  *           and 1 specifying the threshold used to prune small entries
+  *           in setting up the sparse approximate inverse.  The default
+  *           value is 0.0.
+  *\item[parasailsNlevels xxx] where xxx is an integer larger than 0 specifying 
+  *           the desired sparsity of the approximate inverse.  The
+  *           default value is 1.
+  *\item[parasailsFilter xxx] where xxx is a floating point number between 0 
+  *           and 1 specifying the threshold used to prune small entries
+  *           in $A$.  The default value is 0.0.
+  *\item[parasailsLoadbal xxx] where xxx is a floating point number between 0 
+  *           and 1 specifying how load balancing has to be done 
+  *           (Edmond, explain please).  The default value is 0.0.
+  *\item[parasailsSymmetric] sets Parasails to take $A$ as symmetric.
+  *\item[parasailsUnSymmetric] sets Parasails to take $A$ as nonsymmetric
+  *                            (default).
+  *\item[parasailsReuse] sets Parasails to reuse the sparsity pattern of $A$.
+  *\item[polyorder xxx] where xxx is the order of the least-squares polynomial 
+  *           preconditioner.
+  *\end{description}
+ **/
+Various
+
+/**
+  * Parameters which define different reduction modes.
+  *
+  *\begin{description}
+  *\item[schurReduction] turns on the Schur reduction mode.
+  *\item[slideReduction] turns on the slide reduction mode.
+  *\item[slideReduction2] turns on the slide reduction mode version 2 
+  *(see section 2).
+  *\item[slideReduction3] turns on the slide reduction mode version 3 
+  *(see section 2).
+  *\end{description}
+ **/
+Matrix Reduction
+
+/**
+  * Parameters control diagnostic information, memory use, etc.
+  * 
+  *\begin{description}
+  *\item[outputLevel xxx] where xxx is an integer specifying the output
+  *           level.  An output level of $1$ prints only the solver 
+  *           information such as number of iterations and timings.
+  *           An output level of $2$ prints debug information such as
+  *           the functions visited and preconditioner information.
+  *           An output level of $3$ or higher prints more debug information 
+  *           such as the matrix and right hand side loaded via the 
+  *           LinearSystemCore functions to the standard output.
+  *\item[setDebug xxx] where xxx is one of {\sf slideReduction1}, 
+  *           {\sf slideReduction2},
+  *           {\sf slideReduction3} (level 1,2,3 diagnostics in the slide surface
+  *           reduction code), {\sf printMat} (print the original matrix
+  *           into a file), {\sf printReducedMat} (print the reduced matrix
+  *           into a file),  {\sf printSol} (print the solution into a file), 
+  *           {\sf ddilut} (output diagnostic information for DDIlut
+  *           preconditioner setup), and {\sf amgDebug} (output diagnostic 
+  *           information for AMG).
+  *\item[optimizeMemory] cleans up the matrix sparsity pattern after the matrix
+  *           has been loaded. (It has been kept to allow matrix reuse.)
+  *\item[imposeNoBC] turns off the boundary condition to allow diagnosing the
+  *           matrix (for example, checking the null space.)
+  *\end{description}
+ **/
+Performance Tuning and Diagnostics
+
+/**
+  * Parameters that are helpful for finite element information.
+  * 
+  *\begin{description}
+  *\item[AConjugateProjection xxx] where xxx specifies the number of previous
+  *           solution vectors to keep for the A-conjugate projection. 
+  *           The default is 0 (the projection is off).
+  *\item[minResProjection xxx] where xxx specifies the number of previous
+  *           solution vectors to keep for projection. 
+  *           The default is 0 (the projection is off).
+  *\item[haveFEData] indicates that additional finite element information are 
+  *           available to assist in building more efficient solvers. 
+  *\item[haveSFEI] indicates that the simplified finite element information are 
+  *           available to assist in building more efficient solvers. 
+  *\end{description}
+ **/
+Miscellaneous
+
+/*@}*/
+
+/*@}*/
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+

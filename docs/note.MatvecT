@@ -1,0 +1,82 @@
+2014-01-22  Copy (s)struct_matvec to sstruct_matvecT
+
+            Change { yp[yi] += Ap0[Ai] * xp[xi+xoff0]; } to { yp[xi+xoff0] += Ap0[Ai] * xp[yi]; }
+
+<stop taking notes, but git-commit progress>
+
+...
+
+<resume not taking>
+
+2014-02-13  Need to SetPeriodic to test edges.
+
+            Need SStructMatvecTSetup for comms to work.
+
+2014-02-14  11:00 Implementing SStructMatvecTSetup.
+
+            11:30 Need to zero ghost cells! They do carry over.
+                  Cf parcsr_block_mv/par_csr_block_matvec.c
+                    @ handles comms with ParCSRComm... 
+                        @ creates y_tmp for off-diagonal/non-local comp
+                        @ comms y_tmp to y_buf
+                        @ adds y_buf to y_local
+                  Cf parcsr_block_mv/csr_block_matvec.c
+                    @ impressively compact, largely unreadable, no comms, (does checks sizes)
+                    @ // y += A^T*x
+                        for (i = 0; i < num_rows; i++)
+                          for (jj = A_i[i]; jj < A_i[i+1]; jj++) /*each nonzero in that row*/
+                            for (b1 = 0; b1 < blk_size; b1++) /*row */
+                              for (b2 = 0; b2 < blk_size; b2++) /*col*/
+                              {
+                                j = A_j[jj]; /*col */
+                                y_data[j*blk_size+b2] += A_data[jj*bnnz+b1*blk_size+b2] * x_data[i*blk_size + b1];
+                              }
+
+                  Best way to get zero in the ghost cells is to create a tmp vector?
+
+                  How does InitializeIndtComputations() access ghost cells for backing?
+                  <> hypre_CommInfo{Send/Recv}Boxes(comm_info = compute_info)
+
+                  Sh*t! Already have StructVectorClearBoundGhostValues() right in MatvecTCompute!
+
+                  BGhostNotClear() should not be 0. Can set 'force' to 1, but not proper.
+
+                  What is the difference between BoundGhostValues and GhostValues?
+                  <>  BoundGhostValues subtracts boxes which are "on boundaries". (What does that mean?)
+                  <>  Matvec uses BoundGhostValues, so I guess I will do the same for MatvecT.
+
+
+            10:00 pm  Have arbitary tranpose working on 1p. Having problems with 2p. 
+                      Added check_matvec.py script for confirmation. Nice.
+
+2014-02-24   7:00 pm  Finished check_matvec_2.py which reads matrix and vectors from ex18comp output
+                      file and checks result. Result agrees for 1p but not for 2p!
+
+             8:00 pm  Found that problem is in zeroing ghost cells. In A{0,1} x{0} mult, proc-1 y[4]
+                      (ghost cell) is properly initialized to zero but proc-0 y[4] is 0.5384, from
+                      A{1,1} x{1} mult. Why is this not zero? Is ClearBoundGhostValues not acting?
+                      Is BGhostNotClear not set to 1? Do I need to use ClearGhostValues rather than
+                      ClearBoundGhostValues?
+
+                      Replacing ClearBoundGhostValues with ClearGhostValues (and commenting
+                      BGhostNotClear(y) = 1) does the trick, but is it correct? XXX Note that
+                      ClearBoundGhostValues(x,0) is called only if constant_coefficient is true.
+                      Perhaps this is just a kluge. No clearing is necessary for A*x.
+
+                      Try with 4 processors, in case 2 is a special case. -> Agreement is perfect.
+                      
+                      Try with random (distinct on each process) entries. -> Agreement sucks!
+
+                      Try random matrix entries with single process. -> Perfect.
+
+                      Try random matrix entries with two processes. -> Fail.
+                      All the i=0's and i=3's are off ...  by amounts that cancel between processes.
+                      Ghosts are not being pushed to other process?
+
+                      Shoot! My check is wrong. I'm applying pbc's on the local volume!
+                      Fixed. Now agreement for 2p/random is perfect.
+
+                      Try random 4p. -> Perfect. Yahoo!
+
+                      Sync and exit.
+

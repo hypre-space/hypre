@@ -1,0 +1,49 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+
+#===========================================================================
+# This script builds all of the code in the AMG directory structure
+#===========================================================================
+
+AMG_SRC="."
+
+. $AMG_SRC/config/build_generic
+
+#=======================================================
+# Untar `cvode'
+#=======================================================
+ 
+if [ ! -d "$AMG_SRC/cvode" ]; then
+  echo "Untarring cvode ..."
+  (cd $AMG_SRC; gtar xzf cvode.tar.Z; mv CVODE cvode)
+  (cd $AMG_SRC; cp cvode.build cvode/build)
+fi
+
+#=============================================================================
+# Build
+#=============================================================================
+
+DIRS="tools amgdriver"
+
+for i in $DIRS
+do
+   (cd $AMG_SRC/$i; ./build $AMG_BUILD_ARGS)
+done
+

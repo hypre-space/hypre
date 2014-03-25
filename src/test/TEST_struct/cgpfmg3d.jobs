@@ -1,0 +1,31 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# struct: Run CG+PFMG with skip base 3d case
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 12 12 -solver 11 -skip 1 \
+ > cgpfmg3d.out.0
+#=============================================================================
+# struct: Run CG+PFMG with skip parallel and blocking 
+#=============================================================================
+
+mpirun -np 8 ./struct -n 3 3 3 -b 2 2 2 -P 2 2 2  -solver 11 -skip 1 \
+ > cgpfmg3d.out.1

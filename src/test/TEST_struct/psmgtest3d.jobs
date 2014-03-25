@@ -1,0 +1,35 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# struct: Run Periodic SMG base 3d case (periodic in x), test parallel 
+# and blocking, and run a full periodic case. 
+# Note: driver sets up right hand size for full periodic case that 
+# satifies compatibility condition, it (the rhs) is dependent on blocking 
+# and parallel partitioning. Thus results will differ with number of 
+# blocks and processors.
+#=============================================================================
+
+mpirun -np 1 ./struct -n 8 8 8 -p 8 0 0 -solver 0 \
+ > psmgtest3d.out.0
+mpirun -np 8 ./struct -n 2 2 2 -P 2 2 2  -p 8 0 0 -b 2 2 2 -solver 0 \
+ > psmgtest3d.out.1
+mpirun -np 4 ./struct -n 4 8 4 -P 2 1 2  -p 8 8 8 -solver 0 \
+ > psmgtest3d.out.2
+

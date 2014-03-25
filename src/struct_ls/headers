@@ -1,0 +1,68 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+INTERNAL_HEADER=_hypre_struct_ls.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
+cat >> $INTERNAL_HEADER <<@
+
+#include "_hypre_utilities.h"
+
+#include "HYPRE_struct_ls.h"
+
+#ifndef hypre_STRUCT_LS_HEADER
+#define hypre_STRUCT_LS_HEADER
+
+#include "_hypre_struct_mv.h"
+#include "krylov.h"
+
+#include "temp_multivector.h"
+ /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+#include "HYPRE_MatvecFunctions.h"
+ /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+

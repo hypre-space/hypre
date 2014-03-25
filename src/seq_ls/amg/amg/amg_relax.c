@@ -1,0 +1,283 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
+
+
+
+/******************************************************************************
+ *
+ * Relaxation scheme
+ *
+ *****************************************************************************/
+
+#include "headers.h"
+
+
+/*--------------------------------------------------------------------------
+ * Relax
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int    	 hypre_AMGRelax(u,f,A,ICG,IV,
+                   min_point,max_point,point_type,relax_type,
+                   D_mat, S_vec)
+hypre_Vector 	     *u;
+hypre_Vector 	     *f;
+hypre_Matrix       *A;
+hypre_VectorInt    *ICG;
+hypre_VectorInt    *IV;
+HYPRE_Int          min_point;
+HYPRE_Int          max_point;
+HYPRE_Int          point_type;
+HYPRE_Int          relax_type;
+HYPRE_Real   *D_mat;
+HYPRE_Real   *S_vec;
+{
+   HYPRE_Real     *a  = hypre_MatrixData(A);
+   HYPRE_Int            *ia = hypre_MatrixIA(A);
+   HYPRE_Int            *ja = hypre_MatrixJA(A);
+   HYPRE_Int             n  = hypre_MatrixSize(A);
+	          
+   HYPRE_Real     *up = hypre_VectorData(u);
+   HYPRE_Real     *fp = hypre_VectorData(f);
+   HYPRE_Int            *icg = hypre_VectorIntData(ICG);
+   HYPRE_Int            *iv = hypre_VectorIntData(IV);
+   HYPRE_Real      res;
+	          
+   HYPRE_Int             i, idx, i_start, i_start_next, i_end;
+   HYPRE_Int             j, jj, j_low, j_high, nn;
+   HYPRE_Int             C_point_flag, F_point_flag;
+   HYPRE_Int             column;
+   HYPRE_Int             num_vars;
+   HYPRE_Int             relax_error = 0;
+
+   HYPRE_Real     *A_mat;
+   HYPRE_Real     *x_vec;
+   HYPRE_Real     *b_vec;
+
+
+   /*-----------------------------------------------------------------------
+    * Start Relaxation sweep.
+    *-----------------------------------------------------------------------*/
+   
+   switch (relax_type)
+   {
+      case 1:                            /* Gauss-Seidel */
+      {
+         for (i = 0; i < n; i++)
+         { 
+             if ( point_type==2  ||
+                 (point_type==1&&icg[i]<0)  ||
+                 (point_type==3&&icg[i]>0) )
+             {
+                if (a[ia[i]-1] != 0.0)
+                {
+                   res = fp[i];
+                   for (jj = ia[i]; jj < ia[i+1]-1; jj++)
+	           {
+	               j = ja[jj]-1;
+	               res -= a[jj] * up[j];
+	           }
+	           up[i] = res/a[ia[i]-1];
+                }
+              }
+         }
+         return(relax_error);
+      }
+      break;
+   case 3:                           /* Point Gauss-Seidel (simultaneously
+                                        relax all variables at a grid-point.
+                                        Relaxes all variables at a point if
+                                        the FIRST variable at a point is
+                                        of the desired point-type (i.e., 
+                                        point-type = 3 and the first variable
+                                        at the point is a C-variable)      */
+      for (i = 0; i < max_point; ++i)
+      {
+          i_start = iv[i]-1;
+          i_start_next = iv[i+1]-1;
+          C_point_flag = 0;
+          F_point_flag = 0;
+
+          for (jj = i_start; jj < i_start_next; ++jj)
+	  {
+             if (icg[jj] <= 0) F_point_flag = 1;
+             if (icg[jj] > 0) C_point_flag = 1;
+          }
+          if ( point_type==2  ||
+              (point_type==1 && F_point_flag)  ||
+              (point_type==3 && C_point_flag) ) 
+	  {
+              i_end = iv[i+1]-2;       /* iv[i+1]-1 is start of next point */
+              if ((i_end == i_start) && a[ia[i_start]-1] != 0.0)
+	      {
+                 res = fp[i_start];
+                 for (jj = ia[i_start]; jj < ia[i_start+1]-1; jj++)
+	         {
+	             j = ja[jj]-1;
+	             res -= a[jj] * up[j];
+                 }
+                 up[i_start] = res/a[ia[i]-1];
+              }
+              else
+              {
+                num_vars = i_end - i_start + 1;
+                for (idx = 0; idx < num_vars; ++idx)
+		{
+                    S_vec[idx] = 0.0;
+		}
+                for (idx = 0; idx < num_vars * num_vars; ++idx)
+		{
+                   D_mat[idx] = 0.0;
+		} 
+                for (idx = i_start; idx <= i_end; ++idx)
+		{
+                    n = idx - i_start;
+                    D_mat[n*num_vars+n] = a[ia[idx]-1];
+                    S_vec[n] = fp[idx];
+                    j_low = ia[idx];
+                    j_high = ia[idx+1]-1;
+                    for (j = j_low; j < j_high; ++j)
+		    { 
+                        column = ja[j]-1;
+                        if (column < i_start || column > i_end)
+			{
+                            S_vec[n] -= a[j] * up[column];
+			}
+                        else
+			{
+                            nn = column - i_start;
+                            D_mat[n*num_vars+nn] = a[j];
+                        }
+		    }
+		}
+                    relax_error = gselim(D_mat,S_vec,num_vars); 
+                    if (relax_error != 0) return(relax_error);
+                    n = 0;
+                    for (idx = i_start; idx <= i_end; ++idx)
+		    {
+                        up[idx] = S_vec[n++];
+		    }
+		
+                
+	      }
+
+          }
+      }
+      return(relax_error);
+      break;
+   case 9:                           /* Direct solve: use gaussian 
+                                        elimination */
+
+      num_vars = hypre_MatrixSize(A);
+
+      A_mat = hypre_CTAlloc(HYPRE_Real, num_vars*num_vars);
+      b_vec = hypre_CTAlloc(HYPRE_Real, num_vars);    
+
+
+                                    /* Load CSR matrix into A_mat */
+
+     for (j = 0; j < num_vars; ++j)
+     {
+       for (i = ia[j]-1; i < ia[j+1]-1; i++)
+       {
+           column = ja[i]-1;
+           A_mat[j*num_vars+column] = a[i];
+       }
+       b_vec[j] = fp[j];
+     }
+
+     relax_error = gselim(A_mat,b_vec,num_vars);
+
+     for (j = 0; j < num_vars; j++)
+     {
+         up[j] = b_vec[j];
+     }
+
+     hypre_TFree(A_mat); 
+     hypre_TFree(b_vec);
+
+     return(relax_error); 
+   }
+}
+
+/*-------------------------------------------------------------------------
+ *
+ *                      Gaussian Elimination
+ *
+ *------------------------------------------------------------------------ */
+
+HYPRE_Int gselim(A,x,n)
+HYPRE_Real *A;
+HYPRE_Real *x;
+HYPRE_Int n;
+{
+   HYPRE_Int    err_flag = 0;
+   HYPRE_Int    j,k,m;
+   HYPRE_Real factor;
+   
+   if (n==1)                           /* A is 1x1 */  
+   {
+      if (A[0] != 0.0)
+      {
+         x[0] = x[0]/A[0];
+         return(err_flag);
+      }
+      else
+      {
+         err_flag = 1;
+         return(err_flag);
+      }
+   }
+   else                               /* A is nxn.  Forward elimination */ 
+   {
+      for (k = 0; k < n-1; k++)
+      {
+          if (A[k*n+k] != 0.0)
+          {          
+             for (j = k+1; j < n; j++)
+             {
+                 if (A[j*n+k] != 0.0)
+                 {
+                    factor = A[j*n+k]/A[k*n+k];
+                    for (m = k+1; m < n; m++)
+                    {
+                        A[j*n+m]  -= factor * A[k*n+m];
+                    }
+                                     /* Elimination step for rhs */ 
+                    x[j] -= factor * x[k];              
+                 }
+             }
+          }
+       }
+                                    /* Back Substitution  */
+       for (k = n-1; k > 0; --k)
+       {
+           x[k] /= A[k*n+k];
+           for (j = 0; j < k; j++)
+           {
+               if (A[j*n+k] != 0.0)
+               {
+                  x[j] -= x[k] * A[j*n+k];
+               }
+           }
+       }
+       x[0] /= A[0];
+       return(err_flag);
+    }
+}
+ 
+
+         
+
+
+      

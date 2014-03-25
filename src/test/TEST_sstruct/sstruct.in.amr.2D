@@ -1,0 +1,53 @@
+
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+#GridSetExtents: 0 (0- 0-) (15+ 15+)
+#GridSetExtents: 1 (12- 12-) (19+ 19+)
+GridSetExtents: 0 (0- 0-) (7+ 15+)
+GridSetExtents: 1 (6- 12-) (13+ 19+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# NODE  = 1
+GridSetVariables: 0 1 [1]
+GridSetVariables: 1 1 [1]
+
+###########################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [5]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0] 0  5.0
+StencilSetEntry: 0  1 [-1  0] 0 -1.0
+StencilSetEntry: 0  2 [ 1  0] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1] 0 -1.0
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 1 0 0
+
+# GraphAddEntries: \
+#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
+#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
+#   index_map[ndim] entry value
+GraphAddEntries: 1 (6- 12- : -1 -1) (13+ 12- : 0 -1) [2 1] 0   0 (3- 5+ : -1 -1) (6+ 5+ : 0 -1) [1 1] 0 [0 1] 5 -1.0
+GraphAddEntries: 0 (3- 5+ : -1 -1) (6+ 5+ : 0 -1) [1 1] 0     1 (6- 12- : -1 -1) (13+ 12- : 0 1) [2 1] 0 [0 1] 5 -1.0
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 0 1
+
+###########################################################
+

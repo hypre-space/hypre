@@ -1,0 +1,72 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# sstruct: Run all of the solvers
+#=============================================================================
+
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 10 > solvers.out.0
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 11 > solvers.out.1
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 18 > solvers.out.2
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 19 > solvers.out.3
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 20 > solvers.out.4
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 21 > solvers.out.5
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 22 > solvers.out.6
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 30 > solvers.out.7
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 31 > solvers.out.8
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 38 > solvers.out.9
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 39 > solvers.out.10
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 40 > solvers.out.11
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 41 > solvers.out.12
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 42 > solvers.out.13
+mpirun -np 2 ./sstruct -in sstruct.in.laps -P 2 1 1 -solver 3 > solvers.out.14
+mpirun -np 1 ./sstruct -in sstruct.in.marinak -P 1 1 1 -solver 20 > solvers.out.15
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 70 > solvers.out.16
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 71 > solvers.out.17
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 78 > solvers.out.18
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 80 > solvers.out.19
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 90 > solvers.out.20
+
+#=============================================================================
+# Run default case with all available PCG preconditioners (solvers): 
+#    10: SMG
+#    11: PFMG
+#    18: Diagonal scaling
+#    19: none
+#=============================================================================
+
+# PCG run... LOBPCG run for one eigenpair ... LOBPCG run for 4 eigenpairs
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 10 -tol 1.e-6 > solvers.out.10.lobpcg
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 10 -tol 1.e-6 -pcgitr 0 -seed 1 -vrand 1 > solvers.out.10.lobpcg.1
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 10 -tol 1.e-6 -pcgitr 0  -seed 1 -vrand 4  > solvers.out.10.lobpcg.4
+
+# PCG run... LOBPCG run for one eigenpair ... LOBPCG run for 4 eigenpairs
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 11 -tol 1.e-6  > solvers.out.11.lobpcg
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 11 -tol 1.e-6  -pcgitr 0 -seed 1 -vrand 1  > solvers.out.11.lobpcg.1
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 11 -tol 1.e-6  -pcgitr 0 -seed 1 -vrand 4  > solvers.out.11.lobpcg.4
+
+# PCG run... LOBPCG run for one eigenpair ... LOBPCG run for 4 eigenpairs
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 18  > solvers.out.18.lobpcg
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 18 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1  > solvers.out.18.lobpcg.1
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 18 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 4  > solvers.out.18.lobpcg.4
+
+# PCG run... LOBPCG run for one eigenpair ... LOBPCG run for 4 eigenpairs
+mpirun -np 2 ./sstruct -P 1 1 2 -solver 19  > solvers.out.19.lobpcg
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 19 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1  > solvers.out.19.lobpcg.1
+mpirun -np 2 ./sstruct -P 1 1 2 -lobpcg -solver 19 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 4  > solvers.out.19.lobpcg.4

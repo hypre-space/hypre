@@ -1,0 +1,241 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
+
+
+/* Include headers for problem and solver data structure */
+#include "./PETScSolverParILUT.h"
+
+
+/*--------------------------------------------------------------------------
+ * HYPRE_NewPETScSolverParILUT
+ *--------------------------------------------------------------------------*/
+
+HYPRE_PETScSolverParILUT  HYPRE_NewPETScSolverParILUT( 
+                                  MPI_Comm comm )
+     /* Allocates and Initializes solver structure */
+{
+
+   hypre_PETScSolverParILUT     *solver;
+   HYPRE_Int            ierr;
+
+   /* Allocate structure for holding solver data */
+   solver = (hypre_PETScSolverParILUT *) 
+            hypre_CTAlloc( hypre_PETScSolverParILUT, 1);
+
+   /* Initialize components of solver */
+   hypre_PETScSolverParILUTComm(solver) = comm;
+
+   hypre_PETScSolverParILUTSles(solver) = PETSC_NULL;
+   hypre_PETScSolverParILUTSlesOwner(solver) = ParILUTUser;
+
+   hypre_PETScSolverParILUTSystemMatrix(solver) = NULL;
+   hypre_PETScSolverParILUTPreconditionerMatrix(solver) = NULL;
+
+   /* PETScMatPilutSolver */
+   hypre_PETScSolverParILUTPETScMatPilutSolver( solver ) =
+      HYPRE_NewPETScMatPilutSolver( comm, PETSC_NULL );
+
+   /* Return created structure to calling routine */
+   return( (HYPRE_PETScSolverParILUT) solver );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FreePETScSolverParILUT
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_FreePETScSolverParILUT ( 
+                  HYPRE_PETScSolverParILUT in_ptr )
+{
+  HYPRE_Int ierr=0;
+
+   hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+  if( hypre_PETScSolverParILUTSlesOwner( solver ) == ParILUTLibrary )
+  {  
+     SLESDestroy(hypre_PETScSolverParILUTSles( solver ));
+  }
+
+  ierr = HYPRE_FreePETScMatPilutSolver( 
+     hypre_PETScSolverParILUTPETScMatPilutSolver ( solver ) );
+
+  hypre_TFree(solver);
+
+  return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTInitialize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTInitialize ( 
+                  HYPRE_PETScSolverParILUT in_ptr )
+{
+   HYPRE_Int ierr = 0;
+   hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+   HYPRE_PETScMatPilutSolverInitialize( 
+     hypre_PETScSolverParILUTPETScMatPilutSolver ( solver ) );
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSetSles
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTSetSystemSles( 
+                  HYPRE_PETScSolverParILUT in_ptr,
+                  SLES Sles)
+{
+  HYPRE_Int ierr=0;
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+  hypre_PETScSolverParILUTSles( solver ) = Sles;
+  return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSetSystemMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTSetSystemMatrix( 
+                  HYPRE_PETScSolverParILUT in_ptr,
+                  Mat matrix )
+{
+  HYPRE_Int ierr=0;
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+  hypre_PETScSolverParILUTSystemMatrix( solver ) = matrix;
+  return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSetPreconditionerMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTSetPreconditionerMatrix( 
+                  HYPRE_PETScSolverParILUT in_ptr,
+                  Mat matrix )
+{
+  HYPRE_Int ierr=0;
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+  hypre_PETScSolverParILUTPreconditionerMatrix( solver ) = matrix;
+  return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTGetSystemMatrix
+ *--------------------------------------------------------------------------*/
+
+Mat
+   HYPRE_PETScSolverParILUTGetSystemMatrix( 
+                  HYPRE_PETScSolverParILUT in_ptr )
+{
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+  return( hypre_PETScSolverParILUTSystemMatrix( solver ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTGetPreconditionerMatrix
+ *--------------------------------------------------------------------------*/
+
+Mat
+   HYPRE_PETScSolverParILUTGetPreconditionerMatrix( 
+                  HYPRE_PETScSolverParILUT in_ptr )
+{
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+  return( hypre_PETScSolverParILUTPreconditionerMatrix( solver ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSetFactorRowSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTSetFactorRowSize( 
+                  HYPRE_PETScSolverParILUT in_ptr,
+                  HYPRE_Int size )
+{
+  HYPRE_Int ierr=0;
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+  HYPRE_PETScMatPilutSolver distributed_solver =
+      hypre_PETScSolverParILUTPETScMatPilutSolver(solver);
+
+  HYPRE_PETScMatPilutSolverSetFactorRowSize(distributed_solver, size);
+
+  return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSetDropTolerance
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTSetDropTolerance( 
+                  HYPRE_PETScSolverParILUT in_ptr,
+                  HYPRE_Real tol )
+{
+  HYPRE_Int ierr=0;
+  hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+  HYPRE_PETScMatPilutSolver distributed_solver =
+      hypre_PETScSolverParILUTPETScMatPilutSolver(solver);
+
+  HYPRE_PETScMatPilutSolverSetDropTolerance(distributed_solver, tol);
+
+  return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSetup
+ *--------------------------------------------------------------------------*/
+
+/* In separate file */
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PETScSolverParILUTSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_PETScSolverParILUTSolve( HYPRE_PETScSolverParILUT in_ptr,
+                                           Vec x, Vec b )
+{
+   HYPRE_Int ierr = 0;
+
+   hypre_PETScSolverParILUT *solver = 
+      (hypre_PETScSolverParILUT *) in_ptr;
+
+
+   ierr = SLESView (hypre_PETScSolverParILUTSles( solver ), 
+                     VIEWER_STDOUT_SELF); CHKERRA(idumb);
+
+   ierr = SLESSolve(
+       hypre_PETScSolverParILUTSles( solver ), b, x, 
+       &(hypre_PETScSolverParILUTNumIts(solver)) );
+
+
+   return(ierr);
+}
+

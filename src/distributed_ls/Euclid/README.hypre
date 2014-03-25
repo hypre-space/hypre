@@ -1,0 +1,93 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+driver.c is the same as linear_solvers/test/IJ_linear_evolvers.c,
+but with added "-solver <int>" switches for Euclid:
+
+       43=Euclid-PCG
+       44=Euclid-GMRES
+       45=Euclid-BICGSTAB
+
+-------------------------------------------------------------------
+Euclid recognizes the following command-line switches:
+  
+   -printMemReport
+
+       prints a summary of Euclid's memory usage. Useful for
+       optimizing switches, e.g, executing:
+
+       >IJ_ls -nodes 1 -solver 43 -27pt -n 40 40 40  \
+         -printMemReport
+
+       shows a maximum dynamic allocation of 98.93 Mbytes; adding
+       the switch "-rho 2.3" (see below)
+
+       >IJ_ls -nodes 1 -solver 43 -27pt -n 40 40 40  \
+         -printMemReport -rho 2.3
+
+       reduces maximum allocation to 49.93 Mbytes.
+  
+   -eu_double
+
+       preconditioner is computed in double precision; default
+       is to use single precision.  Note that single precision
+       reduces memory requirements while making better use
+       of the memory hierarchy; hence, it may lead to faster
+       solution times, even if it increases iterations.
+
+   -level <int>   
+
+       sets the level for ILU(k) factorization; must be 0 or
+       greater; default is 1.  
+
+   -sparseA <double>
+
+       controls sparsification: values in A that are smaller
+       (in absolute value) than <double> are discarded before
+       factorization; default is 0.0, or no dropping.
+
+   -doNotScale
+
+      default behavior is to scale matrix rows so that the largest
+      entry in each row is +1 or -1; use this switch to turn off
+      scaling (but note that the sparsification strategy really only
+      makes sense when rows are scaled.)
+
+   -iluNONE
+
+      turns off preconditioning (mainly for testing/debugging).
+       
+   -rho <double>   
+
+      determines initial storage allocation for the ILU factors;
+      initial allocation is (number of non-zeros in A)*rho;
+      default is 2.0; Euclid will reallocate during factorization
+      if initial allocation is insufficient; carefull setting of
+      this parameter, based on previous solutions, can increase
+      memory usage; the "ideal" value that should have been set
+      is printed when HYPRE_ParCSREuclidPrintParams() is 
+      called.
+
+   -printMat
+
+      Causes both preconditioner and input matrix to be printed to 
+      files (F.trip, A.trip) in 
+      <row, col, val> format; this is primarily for debugging, 
+      e.g, for examining preconditioner patterns using spy() in
+      matlab.
+-------------------------------------------------------------------

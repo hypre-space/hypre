@@ -1,0 +1,74 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# ij driver for eigenvalue solvers: 
+# This script tests LOBPCG input options and defaults 
+#===========================================================================
+
+# All default parameters
+mpirun -np 2 ./ij  -lobpcg -seed 1 > options.out.default 
+
+#-solver none : no HYPRE preconditioner is used  (default -solver 1)
+mpirun -np 2 ./ij  -lobpcg -solver none -seed 1 >  options.out.solver.none 
+
+# maximum number of LOBPCG iterations (default 100)
+mpirun -np 2 ./ij  -lobpcg -n 15 15 16 -vrand 2 -solver 2 -seed 1 > options.out.itr.100
+# 2 iterations maximum
+mpirun -np 2 ./ij  -lobpcg -n 15 15 16 -vrand 2 -solver 2 -seed 1 -itr 2 > options.out.itr.2
+
+# -vrand 2 : compute 2 eigenpairs using random initial vectors (default 1)
+mpirun -np 2 ./ij -lobpcg -vrand 2 -seed 1 > options.out.vrand.2
+
+#-seed 1  : use 1 as the seed for the pseudo-random number generator
+#           (default seed is based on the time of the run)
+# The output files below should be identical, but different from options.out.default
+mpirun -np 2 ./ij -lobpcg -seed 1 > options.out.seed
+mpirun -np 2 ./ij -lobpcg -seed 1 > options.out.seed.repeat
+
+#no orthonormality check
+mpirun -np 2 ./ij  -lobpcg -seed 1           > options.out.no_orthchk
+#-orthchk : check eigenvectors for orthonormality
+mpirun -np 2 ./ij  -lobpcg -seed 1 -orthchk  > options.out.orthchk
+
+#-verb 0  : no print
+mpirun -np 2 ./ij  -lobpcg -seed 1 -verb 0 > options.out.verb.0
+#-verb 1  : print initial eigenvalues and residuals, iteration number, number of
+#          non-convergent eigenpairs and final eigenvalues and residuals (default)
+mpirun -np 2 ./ij  -lobpcg -seed 1         > options.out.verb.1
+
+#-verb 2  : print eigenvalues and residuals on each iteration
+mpirun -np 2 ./ij  -lobpcg -seed 1 -verb 2 > options.out.verb.2
+
+#-pcgitr 0 : the preconditioner is applied directly
+mpirun -np 2 ./ij  -lobpcg -seed 1 -pcgitr 0 > options.out.pcgitr.0
+#default number of inner iterations (1)
+mpirun -np 2 ./ij  -lobpcg -seed 1           > options.out.pcgitr.1
+#-pcgitr 2 : two inner iterations
+mpirun -np 2 ./ij  -lobpcg -seed 1 -pcgitr 2 > options.out.pcgitr.2
+
+#default residual tolerance for inner iterations (0.01)
+mpirun -np 2 ./ij  -lobpcg -solver 2 -seed 1 -pcgitr 1000 > options.out.pcgtol.01
+#-pcgtol 0.05
+mpirun -np 2 ./ij  -lobpcg -solver 2 -seed 1 -pcgitr 1000 -pcgtol 0.05 > options.out.pcgtol.05
+
+# -gen : generalized eigenvalue problem; A = B
+mpirun -np 2 ./ij  -lobpcg -gen -seed 1 -orthchk > options.out.gen.1
+# A: anizotropic Laplacian (cx = 0.1, cy = 1, cz = 10), B: Laplacian
+mpirun -np 2 ./ij  -lobpcg -gen -seed 1 -c 0.1 1 10 -orthchk > options.out.gen.2

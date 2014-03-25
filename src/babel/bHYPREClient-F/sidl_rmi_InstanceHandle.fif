@@ -1,0 +1,465 @@
+C       
+C       File:          sidl_rmi_InstanceHandle_Impl.f
+C       Symbol:        sidl.rmi.InstanceHandle-v0.9.15
+C       Symbol Type:   interface
+C       Babel Version: 1.0.4
+C       Release:       $Name$
+C       Revision:      @(#) $Id$
+C       Description:   Client-side documentation text for sidl.rmi.InstanceHandle
+C       
+C       Copyright (c) 2000-2002, The Regents of the University of California.
+C       Produced at the Lawrence Livermore National Laboratory.
+C       Written by the Components Team <components@llnl.gov>
+C       All rights reserved.
+C       
+C       This file is part of Babel. For more information, see
+C       http://www.llnl.gov/CASC/components/. Please read the COPYRIGHT file
+C       for Our Notice and the LICENSE file for the GNU Lesser General Public
+C       License.
+C       
+C       This program is free software; you can redistribute it and/or modify it
+C       under the terms of the GNU Lesser General Public License (as published by
+C       the Free Software Foundation) version 2.1 dated February 1999.
+C       
+C       This program is distributed in the hope that it will be useful, but
+C       WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+C       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+C       conditions of the GNU Lesser General Public License for more details.
+C       
+C       You should have recieved a copy of the GNU Lesser General Public License
+C       along with this program; if not, write to the Free Software Foundation,
+C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "sidl.rmi.InstanceHandle" (version 0.9.15)
+C       
+C        
+C       This interface holds the state information for handles to
+C       remote objects.  Client-side messaging libraries are expected
+C       to implement <code>sidl.rmi.InstanceHandle</code>,
+C       <code>sidl.rmi.Invocation</code> and
+C       <code>sidl.rmi.Response</code>.
+C       
+C       Every stub with a connection to a remote object holds a pointer
+C       to an InstanceHandle that manages the connection. Multiple
+C       stubs may point to the same InstanceHandle, however.  Babel
+C       takes care of the reference counting, but the developer should
+C       keep concurrency issues in mind.
+C       
+C       When a new remote object is created:
+C       sidl_rmi_InstanceHandle c = 
+C       sidl_rmi_ProtocolFactory_createInstance( url, typeName,
+C       _ex );
+C       
+C       When a new stub is created to connect to an existing remote
+C       instance:
+C       sidl_rmi_InstanceHandle c = 
+C       sidl_rmi_ProtocolFactory_connectInstance( url, _ex );
+C       
+C       When a method is invoked:
+C       sidl_rmi_Invocation i = 
+C       sidl_rmi_InstanceHandle_createInvocation( methodname );
+C       sidl_rmi_Invocation_packDouble( i, "input_val" , 2.0 );
+C       sidl_rmi_Invocation_packString( i, "input_str", "Hello" );
+C       ...
+C       sidl_rmi_Response r = sidl_rmi_Invocation_invokeMethod( i );
+C       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
+C       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+C       
+
+
+
+
+C       
+C       Method:  _cast[]
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine sidl_rmi_InstanceHandle__cast_f(ref, retval, 
+     &     exception)
+        implicit none
+C        in opaque ref
+        integer*8 ref
+C        out sidl.rmi.InstanceHandle retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _cast2[]
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine sidl_rmi_InstanceHandle__cast2_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out opaque retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  addRef[]
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine sidl_rmi_InstanceHandle_addRef_f(self, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  deleteRef[]
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine sidl_rmi_InstanceHandle_deleteRef_f(self, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isSame[]
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine sidl_rmi_InstanceHandle_isSame_f(self, iobj, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in sidl.BaseInterface iobj
+        integer*8 iobj
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isType[]
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine sidl_rmi_InstanceHandle_isType_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getClassInfo[]
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine sidl_rmi_InstanceHandle_getClassInfo_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out sidl.ClassInfo retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  initCreate[]
+C        initialize a connection (intended for use by the
+C       ProtocolFactory, (see above).  This should parse the url and
+C       do everything necessary to create the remote object.
+C       
+
+        subroutine sidl_rmi_InstanceHandle_initCreate_f(self, url, 
+     &     typeName, retval, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string url
+        character*(*) url
+C        in string typeName
+        character*(*) typeName
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  initConnect[]
+C       initialize a connection (intended for use by the ProtocolFactory) 
+C       This should parse the url and do everything necessary to connect 
+C       to a remote object.
+C       
+
+        subroutine sidl_rmi_InstanceHandle_initConnect_f(self, url, ar, 
+     &     retval, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string url
+        character*(*) url
+C        in bool ar
+        logical ar
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  initUnserialize[]
+C        Get a connection specifically for the purpose for requesting a 
+C       serialization of a remote object (intended for use by the
+C       ProtocolFactory, (see above).  This should parse the url and
+C       request the object.  It should return a deserializer..
+C       
+
+        subroutine sidl_rmi_InstanceHandle_initUnserialize_f(self, url, 
+     &     retval, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string url
+        character*(*) url
+C        out sidl.io.Serializable retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getProtocol[]
+C        return the short name of the protocol 
+C       
+
+        subroutine sidl_rmi_InstanceHandle_getProtocol_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getObjectID[]
+C        return the object ID for the remote object
+C       
+
+        subroutine sidl_rmi_InstanceHandle_getObjectID_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getObjectURL[]
+C        
+C       return the full URL for this object, takes the form: 
+C       protocol://serviceID/objectID (where serviceID would = server:port 
+C       on TCP/IP)
+C       So usually, like this: protocol://server:port/objectID
+C       
+
+        subroutine sidl_rmi_InstanceHandle_getObjectURL_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  createInvocation[]
+C        create a serializer handle to invoke the named method 
+C       
+
+        subroutine sidl_rmi_InstanceHandle_createInvocation_f(self, 
+     &     methodName, retval, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        out sidl.rmi.Invocation retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  close[]
+C        
+C       closes the connection (called by the destructor, if not done
+C       explicitly) returns true if successful, false otherwise
+C       (including subsequent calls)
+C       
+
+        subroutine sidl_rmi_InstanceHandle_close_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine sidl_rmi_InstanceHandle__exec_f(self, methodName, 
+     &     inArgs, outArgs, exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine sidl_rmi_InstanceHandle__getURL_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine sidl_rmi_InstanceHandle__isRemote_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine sidl_rmi_InstanceHandle__isLocal_f(self, retval, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine sidl_rmi_InstanceHandle__set_hooks_f(self, on, 
+     &     exception)
+        implicit none
+C        in sidl.rmi.InstanceHandle self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end

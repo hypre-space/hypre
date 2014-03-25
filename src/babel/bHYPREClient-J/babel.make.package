@@ -1,0 +1,43 @@
+BABEL_MAKEFILE_NAME = babel.make
+STUB_SRC_DIRS = bHYPREClient-J/
+JAVA_SRC_DIRS = bHYPREClient-J/bHYPRE/
+JAVA_SRC_FILES = bHYPREClient-J/bHYPRE/StructDiagScale.java                   \
+  bHYPREClient-J/bHYPRE/StructMatrixView.java                                 \
+  bHYPREClient-J/bHYPRE/ErrorHandler.java bHYPREClient-J/bHYPRE/PCG.java      \
+  bHYPREClient-J/bHYPRE/CoefficientAccess.java                                \
+  bHYPREClient-J/bHYPRE/PreconditionedSolver.java                             \
+  bHYPREClient-J/bHYPRE/SStructMatrixView.java                                \
+  bHYPREClient-J/bHYPRE/SStructMatrixVectorView.java                          \
+  bHYPREClient-J/bHYPRE/SStructVariable.java                                  \
+  bHYPREClient-J/bHYPRE/ErrorCode.java bHYPREClient-J/bHYPRE/SStructGrid.java \
+  bHYPREClient-J/bHYPRE/Schwarz.java bHYPREClient-J/bHYPRE/StructSMG.java     \
+  bHYPREClient-J/bHYPRE/IdentitySolver.java                                   \
+  bHYPREClient-J/bHYPRE/BoomerAMG.java bHYPREClient-J/bHYPRE/ParaSails.java   \
+  bHYPREClient-J/bHYPRE/CGNR.java bHYPREClient-J/bHYPRE/HGMRES.java           \
+  bHYPREClient-J/bHYPRE/StructVector.java                                     \
+  bHYPREClient-J/bHYPRE/MPICommunicator.java                                  \
+  bHYPREClient-J/bHYPRE/SStructParCSRVector.java                              \
+  bHYPREClient-J/bHYPRE/Hybrid.java bHYPREClient-J/bHYPRE/StructStencil.java  \
+  bHYPREClient-J/bHYPRE/IJMatrixView.java bHYPREClient-J/bHYPRE/Operator.java \
+  bHYPREClient-J/bHYPRE/SStructGraph.java                                     \
+  bHYPREClient-J/bHYPRE/SStructSplit.java                                     \
+  bHYPREClient-J/bHYPRE/IJParCSRMatrix.java                                   \
+  bHYPREClient-J/bHYPRE/IJVectorView.java                                     \
+  bHYPREClient-J/bHYPRE/MatrixVectorView.java                                 \
+  bHYPREClient-J/bHYPRE/StructPFMG.java                                       \
+  bHYPREClient-J/bHYPRE/SStructMatrix.java                                    \
+  bHYPREClient-J/bHYPRE/ParCSRDiagScale.java                                  \
+  bHYPREClient-J/bHYPRE/SStructParCSRMatrix.java                              \
+  bHYPREClient-J/bHYPRE/Solver.java bHYPREClient-J/bHYPRE/Pilut.java          \
+  bHYPREClient-J/bHYPRE/GMRES.java                                            \
+  bHYPREClient-J/bHYPRE/StructVectorView.java                                 \
+  bHYPREClient-J/bHYPRE/Euclid.java bHYPREClient-J/bHYPRE/StructMatrix.java   \
+  bHYPREClient-J/bHYPRE/ProblemDefinition.java                                \
+  bHYPREClient-J/bHYPRE/Vector.java bHYPREClient-J/bHYPRE/StructJacobi.java   \
+  bHYPREClient-J/bHYPRE/IJParCSRVector.java                                   \
+  bHYPREClient-J/bHYPRE/SStructVectorView.java                                \
+  bHYPREClient-J/bHYPRE/StructGrid.java                                       \
+  bHYPREClient-J/bHYPRE/SStructStencil.java                                   \
+  bHYPREClient-J/bHYPRE/BiCGSTAB.java                                         \
+  bHYPREClient-J/bHYPRE/SStructDiagScale.java bHYPREClient-J/bHYPRE/HPCG.java \
+  bHYPREClient-J/bHYPRE/SStructVector.java

@@ -1,0 +1,3 @@
+insure++.report_file insure.log
+insure++.report_overwrite false
+insure++.summarize leaks outstanding

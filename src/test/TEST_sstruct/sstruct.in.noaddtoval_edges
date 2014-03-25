@@ -1,0 +1,146 @@
+
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 3 1
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (1- 1- 1-) (4+ 4+ 4+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# XEDGE = 5
+# YEDGE = 6
+# ZEDGE = 7
+GridSetVariables: 0 3 [5 6 7]
+
+###########################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 3 [33 33 33]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0  0] 0 10.77777778
+StencilSetEntry: 0  1 [ 0  1  0] 0 -1.305555556
+StencilSetEntry: 0  2 [ 0  1  1] 0 -1.326388889
+StencilSetEntry: 0  3 [ 0  0  1] 0 -1.305555556
+StencilSetEntry: 0  4 [ 0 -1  0] 0 -1.305555556
+StencilSetEntry: 0  5 [ 0 -1  1] 0 -1.326388889
+StencilSetEntry: 0  6 [ 0  0 -1] 0 -1.305555556
+StencilSetEntry: 0  7 [ 0  1 -1] 0 -1.326388889
+StencilSetEntry: 0  8 [ 0 -1 -1] 0 -1.326388889
+
+StencilSetEntry: 0  9 [ 0  0  0] 1 -2.666666667
+StencilSetEntry: 0 10 [-1  0  0] 1  2.666666667
+StencilSetEntry: 0 11 [ 0  0 -1] 1 -0.666666667
+StencilSetEntry: 0 12 [-1  0 -1] 1  0.666666667
+StencilSetEntry: 0 13 [ 0  0  1] 1 -0.666666667
+StencilSetEntry: 0 14 [-1  0  1] 1  0.666666667
+StencilSetEntry: 0 15 [ 0  1  0] 1  2.666666667
+StencilSetEntry: 0 16 [-1  1  0] 1 -2.666666667
+StencilSetEntry: 0 17 [ 0  1  1] 1  0.666666667
+StencilSetEntry: 0 18 [-1  1  1] 1 -0.666666667
+StencilSetEntry: 0 19 [ 0  1 -1] 1  0.666666667
+StencilSetEntry: 0 20 [-1  1 -1] 1 -0.666666667
+
+StencilSetEntry: 0 21 [ 0  0  0] 2 -2.666666667
+StencilSetEntry: 0 22 [-1  0  0] 2  2.666666667
+StencilSetEntry: 0 23 [-1 -1  0] 2  0.666666667
+StencilSetEntry: 0 24 [ 0 -1  0] 2 -0.666666667
+StencilSetEntry: 0 25 [ 0  0  1] 2  2.666666667
+StencilSetEntry: 0 26 [-1  0  1] 2 -2.666666667
+StencilSetEntry: 0 27 [-1 -1  1] 2 -0.666666667
+StencilSetEntry: 0 28 [ 0 -1  1] 2  0.666666667
+StencilSetEntry: 0 29 [ 0  1  0] 2 -0.666666667
+StencilSetEntry: 0 30 [-1  1  0] 2  0.666666667
+StencilSetEntry: 0 31 [-1  1  1] 2 -0.666666667
+StencilSetEntry: 0 32 [ 0  1  1] 2  0.666666667
+
+StencilSetEntry: 1  0 [ 0  0  0] 1 10.77777778
+StencilSetEntry: 1  1 [-1  0  0] 1 -1.305555556
+StencilSetEntry: 1  2 [ 0  0 -1] 1 -1.305555556
+StencilSetEntry: 1  3 [-1  0 -1] 1 -1.326388889
+StencilSetEntry: 1  4 [ 1  0  0] 1 -1.305555556
+StencilSetEntry: 1  5 [ 1  0 -1] 1 -1.326388889
+StencilSetEntry: 1  6 [ 0  0  1] 1 -1.305555556
+StencilSetEntry: 1  7 [-1  0  1] 1 -1.326388889
+StencilSetEntry: 1  8 [ 1  0  1] 1 -1.326388889
+
+StencilSetEntry: 1  9 [ 0  0  0] 0 -2.666666667
+StencilSetEntry: 1 10 [ 0 -1  0] 0  2.666666667
+StencilSetEntry: 1 11 [ 0 -1 -1] 0  0.666666667
+StencilSetEntry: 1 12 [ 0  0 -1] 0 -0.666666667
+StencilSetEntry: 1 13 [ 1  0  0] 0  2.666666667
+StencilSetEntry: 1 14 [ 1 -1  0] 0 -2.666666667
+StencilSetEntry: 1 15 [ 1  0 -1] 0  0.666666667
+StencilSetEntry: 1 16 [ 1 -1 -1] 0 -0.666666667
+StencilSetEntry: 1 17 [ 0 -1  1] 0  0.666666667
+StencilSetEntry: 1 18 [ 0  0  1] 0 -0.666666667
+StencilSetEntry: 1 19 [ 1 -1  1] 0 -0.666666667
+StencilSetEntry: 1 20 [ 1  0  1] 0  0.666666667
+
+StencilSetEntry: 1 21 [ 0  0  0] 2 -2.666666667
+StencilSetEntry: 1 22 [ 0 -1  0] 2  2.666666667
+StencilSetEntry: 1 23 [-1  0  0] 2 -0.666666667
+StencilSetEntry: 1 24 [-1 -1  0] 2  0.666666667
+StencilSetEntry: 1 25 [ 1 -1  0] 2  0.666666667
+StencilSetEntry: 1 26 [ 1  0  0] 2 -0.666666667
+StencilSetEntry: 1 27 [ 0  0  1] 2  2.666666667
+StencilSetEntry: 1 28 [ 0 -1  1] 2 -2.666666667
+StencilSetEntry: 1 29 [-1 -1  1] 2 -0.666666667
+StencilSetEntry: 1 30 [-1  0  1] 2  0.666666667
+StencilSetEntry: 1 31 [ 1 -1  1] 2 -0.666666667
+StencilSetEntry: 1 32 [ 1  0  1] 2  0.666666667
+
+StencilSetEntry: 2  0 [ 0  0  0] 2 10.77777778
+StencilSetEntry: 2  1 [-1  0  0] 2 -1.305555556
+StencilSetEntry: 2  2 [ 0 -1  0] 2 -1.305555556
+StencilSetEntry: 2  3 [-1 -1  0] 2 -1.326388889
+StencilSetEntry: 2  4 [ 1  0  0] 2 -1.305555556
+StencilSetEntry: 2  5 [ 1 -1  0] 2 -1.326388889
+StencilSetEntry: 2  6 [ 0  1  0] 2 -1.305555556
+StencilSetEntry: 2  7 [-1  1  0] 2 -1.326388889
+StencilSetEntry: 2  8 [ 1  1  0] 2 -1.326388889
+
+StencilSetEntry: 2  9 [ 0  0  0] 0 -2.666666667
+StencilSetEntry: 2 10 [ 0  0 -1] 0  2.666666667
+StencilSetEntry: 2 11 [ 0 -1  0] 0 -0.666666667
+StencilSetEntry: 2 12 [ 0 -1 -1] 0  0.666666667
+StencilSetEntry: 2 13 [ 1  0  0] 0  2.666666667
+StencilSetEntry: 2 14 [ 1  0 -1] 0 -2.666666667
+StencilSetEntry: 2 15 [ 1 -1 -1] 0 -0.666666667
+StencilSetEntry: 2 16 [ 1 -1  0] 0  0.666666667
+StencilSetEntry: 2 17 [ 0  1  0] 0 -0.666666667
+StencilSetEntry: 2 18 [ 0  1 -1] 0  0.666666667
+StencilSetEntry: 2 19 [ 1  1  0] 0  0.666666667
+StencilSetEntry: 2 20 [ 1  1 -1] 0 -0.666666667
+
+StencilSetEntry: 2 21 [ 0  0  0] 1 -2.666666667
+StencilSetEntry: 2 22 [ 0  0 -1] 1  2.666666667
+StencilSetEntry: 2 23 [-1  0  0] 1 -0.666666667
+StencilSetEntry: 2 24 [-1  0 -1] 1  0.666666667
+StencilSetEntry: 2 25 [ 1  0  0] 1 -0.666666667
+StencilSetEntry: 2 26 [ 1  0 -1] 1  0.666666667
+StencilSetEntry: 2 27 [ 0  1  0] 1  2.666666667
+StencilSetEntry: 2 28 [ 0  1 -1] 1 -2.666666667
+StencilSetEntry: 2 29 [-1  1  0] 1  0.666666667
+StencilSetEntry: 2 30 [-1  1 -1] 1 -0.666666667
+StencilSetEntry: 2 31 [ 1  1  0] 1  0.666666667
+StencilSetEntry: 2 32 [ 1  1 -1] 1 -0.666666667
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 0 1 1
+GraphSetStencil: 0 2 2
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+
+###########################################################
+

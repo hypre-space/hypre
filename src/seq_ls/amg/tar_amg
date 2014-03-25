@@ -1,0 +1,41 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+
+#===========================================================================
+# This script creates a tar file of the AMG library distribution
+#===========================================================================
+
+TOP_DIR="$AMG_SRC/tmp"
+
+mkdir -p $TOP_DIR/amg
+mkdir -p $TOP_DIR/amg/src
+mkdir -p $TOP_DIR/amg/config
+mkdir -p $TOP_DIR/amg/examples
+mkdir -p $TOP_DIR/amg/docs
+
+(cd $AMG_SRC/amg;        cp `cat rcs_files` $TOP_DIR/amg/src)
+(cd $AMG_SRC/config;     cp `cat rcs_files` $TOP_DIR/amg/config)
+(cd $AMG_SRC/amg_fdrive; cp `cat rcs_files` $TOP_DIR/amg/examples)
+(cd $AMG_SRC/docs;       cp `cat rcs_files` $TOP_DIR/amg/docs)
+(cd $AMG_SRC;            cp amg.readme      $TOP_DIR)
+
+(cd $TOP_DIR; gtar czf $AMG_SRC/amg.tgz amg amg.readme)
+
+rm -fr $TOP_DIR

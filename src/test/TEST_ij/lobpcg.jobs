@@ -1,0 +1,27 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# ij: LOBPCG cases
+#=============================================================================
+
+mpirun -np 2 ./ij -lobpcg -vrand 2 -seed 1 -tol 1.e-4 -vout 1 > lobpcg.out.vout.1
+
+# use vectors computed by previous run as the initial
+mpirun -np 2 ./ij -lobpcg -vfromfile -seed 1 > lobpcg.out.vfromfile

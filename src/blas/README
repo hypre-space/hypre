@@ -1,0 +1,31 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+HYPRE BLAS README file
+
+This is a subset of the CBLAS from netlib.org.
+o The LAPACK/blas auxiliary routine xerbla_ has been
+  renamed through this directory as hypre_xerbla_, to
+  reduce name conflicts with the same routine in the
+  HYPRE lapack directory.
+o The LAPACK/blas auxiliary routine lsame_ has been
+  renamed through this directory as hypre_lsame_, for
+  the same reason as above.
+o The routines xerbla_ and lsame_ have been moved into
+  the blas_utils.c file.
+

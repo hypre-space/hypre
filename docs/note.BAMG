@@ -1,0 +1,160 @@
+
+  1.  Compute initial near-null vectors: v_{l=1}^{(kappa)} and u_{l=1}^{(kappa)}.
+
+      a.  Start with random vectors.
+
+      b.  Apply Kaczmarz relaxation:
+
+          psi <-- psi + s_i e_i, (e_i)_j = delta_i,j, s_i = < r, D e_i > / || D e_i ||_2^2
+
+  2.  Geometric coarsening
+
+      a.  BK use EO precon, Schur complement. Gamma_5 symmetry.
+          What is our plan?
+
+  3.  LS R & P
+
+      a.  Choose P_i_j to minimize
+      
+              \sum_k w_k ( v^(k)_i - \sum_{j \in C_l} P_i_j v^(k)_j )^2 .
+
+          NB: i (j) indexes the fine (coarse) grid.
+
+              The w_k allows for some test vectors to have greater importantce than others.
+
+              P_i_j v^(k)_j is the interpolation of the "canonical" (i.e., trivial) restriction of
+              the (fine-grid) test vector v^(k). I.e., the quantity minimized is
+              
+                  \sum_k w_k [ (1 - P R_can) v^(k) ]^2
+
+          (Again, spin structure and gamma_5 symmetry can be preserved by proper choice of
+          coarsening).
+
+          Same for R.
+
+          NB: R *is* restriction, P *is* interpolation. D_l == R_l D P_l.
+
+  4.  The bootstrap mg setup cycle
+
+      a.  Construct the initial hierarchy:
+          For each level, l = 1, ..., L-1,
+      
+          1)  Apply Kaczmarz relaxation to the initial test vectors v_l^(k)
+              (random vectors for l=1, normal w/ mean zero and variance 1).
+          
+          2)  Compute the restriction and interpolation operators, R_l^{l+1} and P_{l+1}^l using the
+              LS process.
+
+          3)  Restrict the smoothed test vectors: v_{l+1}^(k) = R_l^{l+1} v_l^(k)
+              (and use these as the initial test vectors for level l+1).
+
+      b.  update the hierarchy using a bs mg eigensolver based on the current hierarchy.
+
+          1)  Compute the k_e left and right SVD vectors with minimal singular value for the
+              coarsest grid.
+
+              Define composite R and P operators as P_l = P^1_2 * ... * P^{l-1}_l and R_l = ...
+
+              Define coarse-grid operators as D_l = R_l D P_l.
+
+              Define GSV mass matrices as Q_l = R_l R_l^H and T_l = P_l^H P_l.
+
+              Solve the GSV problem (on the coarsest level):
+
+                  D_L   v_L^(k) = sigma_L^(k) Q_L u_L^(k)
+                  D_L^H u_L^(k) = sigma_L^(k) T_L v_L^(k)
+
+              by solving the equivalent Hermitian (indef) GEV problem
+
+                  (        D_L ) ( U   U ) = ( Q_L     ) ( U  U ) ( Sigma        )
+                  ( D_L^H      ) ( V  -V )   (     T_L ) ( V -V ) (       -Sigma )
+
+              <>How in hypre?<>
+
+          2)  Compute the (sigma,u,v) triplets at the next level, L-1.
+
+              Solve the GSV problem by applying Kaczmarz to the two systems *in a separate and
+              alternating* fashion, updating the sigma approximations after each iteration as
+
+                                                 < D_l v_l^(k), u_l^(k) >
+                   sigma_l^(k) = ----------------------------------------------------------- .
+                                  sqrt( < Q_l u_l^(k), u_l^(k) > < T_l v_l^(k), v_l^(k) > )
+
+              Every several iterations, normalize the GSV vectors w.r.t. the mass matrices:
+
+                  v_l^(k) /= || v_l^(k) ||_{T_l}  and u_l^{k} /= || u_l^(k) ||_{Q_l} .
+
+              <>What are the initial values of the vectors?<>
+              
+              <>What role, if any, does the coarse level play?<>
+
+              Initial GSV vectors are taken to be the (test-)interpolated solutions to the
+              coarser-grid GSV.
+
+          3)  Add these sets of newly computed singular vectors to the sets of test vectors.
+
+          4)  Recompute R^l_{l+1} and P_{l+1}^l using the new (augmented) sets of test vectors using
+              the LS process.
+
+  5.  V vs W
+
+      a)  W cycle was found to work much better than super-V cycle: repeating the GEV solve at the
+          coarsest level is essential.
+
+      b)  W cycle hodgepodge was a (10,10) followed by two (4,4)'s *only for the lowest ev on the
+          finest grid*, followed by a (5,5).
+
+
+Bottom line: HDCG is almost certainly better. How much better?
+
+
+====================================================================================================
+ previous iteration of notes
+====================================================================================================
+
+Notes from
+
+J. Brannick and K. Kahl. Bootstrap AMG for the 2-dimensional Wilson Dirac system. SIAM J. Sci.
+Comput., 2013.
+
+"Adaptive" vs "Bootstrap"
+-------------------------
+
+In adaptive AMG [11, 29], the solver is applied to appropriately formulated homogeneous problems on
+different grids to compute a single test vector, which is then used to update the restriction,
+interpolation, and coarse-grid operators on all grids. This gives a new solver which can be used in
+another adaptive cycle. The process is then repeated in a sequence of adaptive cycles until an
+efficient solver has been constructed. In contrast, bootstrap AMG uses relaxation and a multigrid
+(eigen)solver based on the emerging AMG hierarchy to compute a collection of test vectors in each of
+the bootstrap cycles and, then, a local least squares problem is for- mulated to define
+interpolation operators that approximate these vectors collectively.
+
+The algorithm
+-------------
+
+The algorithm we consider here combines a bootstrap setup to compute the test vectors used in
+defining interpolation with an adaptive step that applies the existing solver to an appropriate
+initial guess to update the test vector(s)
+
+Kaczmarz
+--------
+
+For the linear system, D psi = b, with the non-Hermitian Wilson matrix D, the Kaczmarz iteration is
+based on the equivalent formulation involving the normal equations
+
+                          D^H D psi = D^H b.   (3.1)
+                
+Given an approximation to the solution, psi, of (3.1), one iteration of the basic Kacmarz iteration
+for this formulation reads:
+
+                          psi <- psi + s_i e_i, i=1,...,n,
+
+where e_i is the i-th Euclidian basis vector and s_i is chosen so that the corresponding component
+of the residual vanishes:
+
+                          < D^H b - D^H D (psi + s_i e_i) , e_i > = 0.
+
+Now, setting r = b - D psi gives < D^H (r + s_i D e_i) , e_i > = 0, implying
+
+                          s_i = < r , D e_i > / || D e_i ||_2^2.
+

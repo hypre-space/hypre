@@ -1,0 +1,745 @@
+C       
+C       File:          bHYPRE_StructPFMG_Impl.f
+C       Symbol:        bHYPRE.StructPFMG-v1.0.0
+C       Symbol Type:   class
+C       Babel Version: 1.0.4
+C       Description:   Client-side documentation text for bHYPRE.StructPFMG
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.StructPFMG" (version 1.0.0)
+C       
+C       Objects of this type can be cast to Solver objects
+C       using the {\tt \_\_cast} methods.
+C       
+C       The StructPFMG solver requires a Struct matrix.
+C       
+
+
+
+
+C       
+C       Method:  _create[]
+C       Create an instance of class bHYPRE.StructPFMG
+C       
+
+        subroutine bHYPRE_StructPFMG__create_f(retval)
+        implicit none
+C        out bHYPRE.StructPFMG retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _wrapObj[]
+C       Create an instance of class that wraps the passed in private_databHYPRE.StructPFMG
+C       
+
+        subroutine bHYPRE_StructPFMG__wrapObj_f(private_data, retval)
+        implicit none
+C        in opaque private_data
+        integer*8 private_data
+C        out bHYPRE.StructPFMG retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _cast[]
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_StructPFMG__cast_f(ref, retval, exception)
+        implicit none
+C        in opaque ref
+        integer*8 ref
+C        out bHYPRE.StructPFMG retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _cast2[]
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_StructPFMG__cast2_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out opaque retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Create[]
+C        This function is the preferred way to create a Struct PFMG solver. 
+C       
+
+        subroutine bHYPRE_StructPFMG_Create_f(mpi_comm, A, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.MPICommunicator mpi_comm
+        integer*8 mpi_comm
+C        in bHYPRE.StructMatrix A
+        integer*8 A
+C        out bHYPRE.StructPFMG retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  addRef[]
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_StructPFMG_addRef_f(self, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  deleteRef[]
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_StructPFMG_deleteRef_f(self, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isSame[]
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_StructPFMG_isSame_f(self, iobj, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in sidl.BaseInterface iobj
+        integer*8 iobj
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isType[]
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_StructPFMG_isType_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getClassInfo[]
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine bHYPRE_StructPFMG_getClassInfo_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out sidl.ClassInfo retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetOperator[]
+C       Set the operator for the linear system being solved.
+C       DEPRECATED.  use Create
+C       
+
+        subroutine bHYPRE_StructPFMG_SetOperator_f(self, A, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in bHYPRE.Operator A
+        integer*8 A
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetTolerance[]
+C       (Optional) Set the convergence tolerance.
+C       DEPRECATED.  use SetDoubleParameter
+C       
+
+        subroutine bHYPRE_StructPFMG_SetTolerance_f(self, tolerance, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in double tolerance
+        double precision tolerance
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetMaxIterations[]
+C       (Optional) Set maximum number of iterations.
+C       DEPRECATED   use SetIntParameter
+C       
+
+        subroutine bHYPRE_StructPFMG_SetMaxIterations_f(self, 
+     &     max_iterations, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in int max_iterations
+        integer*4 max_iterations
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetLogging[]
+C       (Optional) Set the {\it logging level}, specifying the degree
+C       of additional informational data to be accumulated.  Does
+C       nothing by default (level = 0).  Other levels (if any) are
+C       implementation-specific.  Must be called before {\tt Setup}
+C       and {\tt Apply}.
+C       DEPRECATED   use SetIntParameter
+C       
+
+        subroutine bHYPRE_StructPFMG_SetLogging_f(self, level, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in int level
+        integer*4 level
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetPrintLevel[]
+C       (Optional) Set the {\it print level}, specifying the degree
+C       of informational data to be printed either to the screen or
+C       to a file.  Does nothing by default (level=0).  Other levels
+C       (if any) are implementation-specific.  Must be called before
+C       {\tt Setup} and {\tt Apply}.
+C       DEPRECATED   use SetIntParameter
+C       
+
+        subroutine bHYPRE_StructPFMG_SetPrintLevel_f(self, level, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in int level
+        integer*4 level
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetNumIterations[]
+C       (Optional) Return the number of iterations taken.
+C       
+
+        subroutine bHYPRE_StructPFMG_GetNumIterations_f(self, 
+     &     num_iterations, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out int num_iterations
+        integer*4 num_iterations
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetRelResidualNorm[]
+C       (Optional) Return the norm of the relative residual.
+C       
+
+        subroutine bHYPRE_StructPFMG_GetRelResidualNorm_f(self, norm, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out double norm
+        double precision norm
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       DEPRECATED, use Create:
+C       
+
+        subroutine bHYPRE_StructPFMG_SetCommunicator_f(self, mpi_comm, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in bHYPRE.MPICommunicator mpi_comm
+        integer*8 mpi_comm
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Destroy[]
+C       The Destroy function doesn't necessarily destroy anything.
+C       It is just another name for deleteRef.  Thus it decrements the
+C       object's reference count.  The Babel memory management system will
+C       destroy the object if the reference count goes to zero.
+C       
+
+        subroutine bHYPRE_StructPFMG_Destroy_f(self, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetIntParameter[]
+C       Set the int parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetIntParameter_f(self, name, 
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in int value
+        integer*4 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetDoubleParameter[]
+C       Set the double parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetDoubleParameter_f(self, name, 
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in double value
+        double precision value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetStringParameter[]
+C       Set the string parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetStringParameter_f(self, name, 
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in string value
+        character*(*) value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetIntArray1Parameter[]
+C       Set the int 1-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetIntArray1Parameter_f(self, name,
+     &     value, nvalues, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> value(nvalues)
+        integer*4 value(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetIntArray2Parameter[]
+C       Set the int 2-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetIntArray2Parameter_f(self, name,
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in array<int,2,column-major> value
+        integer*8 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetDoubleArray1Parameter[]
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetDoubleArray1Parameter_f(self, 
+     &     name, value, nvalues, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<double> value(nvalues)
+        double precision value(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetDoubleArray2Parameter[]
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_SetDoubleArray2Parameter_f(self, 
+     &     name, value, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in array<double,2,column-major> value
+        integer*8 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetIntValue[]
+C       Set the int parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_GetIntValue_f(self, name, value, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out int value
+        integer*4 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetDoubleValue[]
+C       Get the double parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_StructPFMG_GetDoubleValue_f(self, name, value,
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out double value
+        double precision value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Setup[]
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+
+        subroutine bHYPRE_StructPFMG_Setup_f(self, b, x, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in bHYPRE.Vector b
+        integer*8 b
+C        in bHYPRE.Vector x
+        integer*8 x
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Apply[]
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+
+        subroutine bHYPRE_StructPFMG_Apply_f(self, b, x, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in bHYPRE.Vector b
+        integer*8 b
+C        inout bHYPRE.Vector x
+        integer*8 x
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  ApplyAdjoint[]
+C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+C       
+
+        subroutine bHYPRE_StructPFMG_ApplyAdjoint_f(self, b, x, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in bHYPRE.Vector b
+        integer*8 b
+C        inout bHYPRE.Vector x
+        integer*8 x
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine bHYPRE_StructPFMG__exec_f(self, methodName, inArgs, 
+     &     outArgs, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine bHYPRE_StructPFMG__getURL_f(self, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine bHYPRE_StructPFMG__isRemote_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine bHYPRE_StructPFMG__isLocal_f(self, retval, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_StructPFMG__set_hooks_f(self, on, exception)
+        implicit none
+C        in bHYPRE.StructPFMG self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks_static[]
+C       Static Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_StructPFMG__set_hooks_static_f(on, exception)
+        implicit none
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end

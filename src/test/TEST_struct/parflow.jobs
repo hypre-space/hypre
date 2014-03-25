@@ -1,0 +1,50 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# struct: Run base 3d case
+#=============================================================================
+
+mpirun -np 1 ./struct -n 16 16 16 -c 2.0 3.0 40 -solver 1 -p 16 16 0 \
+ > parflow.out.0
+
+#=============================================================================
+# struct: Run parallel and blocking 
+#=============================================================================
+
+mpirun -np 8 ./struct -n 8 8 8 -P 2 2 2  -c 2.0 3.0 40 -solver 1 -p 16 16 0 \
+ > parflow.out.1
+mpirun -np 8 ./struct -n 4 4 4 -b 2 2 2 -P 2 2 2  -c 2.0 3.0 40 -solver 1 \
+ -p 16 16 0 > parflow.out.2
+
+#=============================================================================
+# struct: Run base 2d case
+#=============================================================================
+
+mpirun -np 1 ./struct -d 2 -n 80 80 1 -solver 1  \
+ > parflow.out.3
+
+#=============================================================================
+# struct: Run parallel and blocking 
+#=============================================================================
+
+mpirun -np 8 ./struct -d 2 -n 10 80 1 -P 8 1 1 -solver 1 \
+ > parflow.out.4
+mpirun -np 4 ./struct -d 2 -n 10 10 1 -b 4 4 1 -P 2 2 1 -solver 1 \
+ > parflow.out.5

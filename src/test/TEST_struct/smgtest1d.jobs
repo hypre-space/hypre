@@ -1,0 +1,30 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# struct: Test 1d run as 2d and 3d in different configurations.
+#=============================================================================
+
+mpirun -np 1 ./struct -n 1 12 1  -c 0 1 0 -d 2 -solver 0 \
+ > smgtest1d.out.0
+mpirun -np 3 ./struct -n 1 2 1 -P 1 3 1 -b 1 2 1 -c 0 1 0 -solver 0 \
+ > smgtest1d.out.1
+mpirun -np 4 ./struct -n 1 1 3 -P 1 1 4  -c 0 0 1 -solver 0 \
+ > smgtest1d.out.2
+

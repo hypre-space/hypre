@@ -1,0 +1,58 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+mpirun -np 1 ./sstruct -in sstruct.in.fe_node1_2D -solver 8 -rhsone \
+ > neighborpart.out.0
+mpirun -np 2 ./sstruct -in sstruct.in.fe_node2_2D -solver 8 -rhsone \
+ > neighborpart.out.1
+mpirun -np 2 ./sstruct -in sstruct.in.fe_node2_2D_coord -solver 8 -rhsone \
+ > neighborpart.out.2
+mpirun -np 1 ./struct -n 5 5 1 -d 2 -solver 8 \
+ > neighborpart.out.3
+
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -solver 8 -rhsone \
+ > neighborpart.out.10
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D_coord -solver 8 -rhsone \
+ > neighborpart.out.11
+
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_3D -solver 8 -rhsone \
+ > neighborpart.out.20
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_3D_coord -solver 8 -rhsone \
+ > neighborpart.out.21
+
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -r 2 1 1 -solver 8 -rhsone \
+ > neighborpart.out.30
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -b 2 1 1 -solver 8 -rhsone \
+ > neighborpart.out.31
+mpirun -np 4 ./sstruct -in sstruct.in.fe_all2_2D -P 2 1 1 -solver 8 -rhsone \
+ > neighborpart.out.32
+
+mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -solver 8 -rhsone \
+ > neighborpart.out.40
+mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D_coord -solver 8 -rhsone \
+ > neighborpart.out.41
+
+mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -r 1 1 2 -solver 8 -rhsone \
+ > neighborpart.out.50
+mpirun -np 1 ./sstruct -in sstruct.in.fe_all3_3D -b 1 1 2 -solver 8 -rhsone \
+ > neighborpart.out.51
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all3_3D -P 1 1 2 -solver 8 -rhsone \
+ > neighborpart.out.52
+
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2D -solver 28 -rhsone \
+ > neighborpart.out.60
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2Ds -solver 28 -rhsone \
+ > neighborpart.out.61
+mpirun -np 2 ./sstruct -in sstruct.in.fe_all2_2Dss -solver 28 -rhsone \
+ > neighborpart.out.62

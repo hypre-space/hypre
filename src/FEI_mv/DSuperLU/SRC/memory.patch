@@ -1,0 +1,10 @@
+118d117
+< 
+144c143
+<     buf = (int_t *) SUPERLU_MALLOC(n * sizeof(int_t));
+---
+>     buf = (int_t *) SUPERLU_MALLOC( SUPERLU_MAX(1, n) * sizeof(int_t));
+152c151
+<     buf = (int_t *) SUPERLU_MALLOC(n * sizeof(int_t));
+---
+>     buf = (int_t *) SUPERLU_MALLOC( SUPERLU_MAX(1, n) * sizeof(int_t));

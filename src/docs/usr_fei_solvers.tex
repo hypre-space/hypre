@@ -1,0 +1,213 @@
+\section{FEI Solvers}
+\label{LSI_solvers}
+
+%% \subsection{Solution Process in the FEI}
+After the {\tt FEI} has been used to assemble the global linear system
+(as described in Chapter \ref{ch-FEI}), a number of \hypre{} solvers
+can be called to perform the solution.
+This is straightforward, if \hypre's {\tt FEI} has been used.
+If an external {\tt FEI} is employed, the user needs to link with \hypre's
+implementation of the \code{LinearSystemCore} class, as described
+in Section \ref{LSI_install}.
+
+Solver parameters are specified as an array of strings, and a complete
+list of the available options can be found in the FEI section of the reference
+manual.
+They are passed to the {\tt FEI} as in the following example:
+\begin{display}
+\begin{verbatim}
+nParams = 5;
+paramStrings = new char*[nParams];
+for (i = 0; i < nParams; i++) }
+   paramStrings[i] = new char[100];
+
+strcpy(paramStrings[0], "solver cg");
+strcpy(paramStrings[1], "preconditioner diag");
+strcpy(paramStrings[2], "maxiterations 100");
+strcpy(paramStrings[3], "tolerance 1.0e-6");
+strcpy(paramStrings[4], "outputLevel 1");
+
+feiPtr -> parameters(nParams, paramStrings);
+\end{verbatim}
+\end{display}
+To solve the linear system of equations, we call
+\begin{display}
+\begin{verbatim}
+feiPtr -> solve(&status);
+\end{verbatim}
+\end{display}
+where the returned value \code{status} indicates whether the solve was successful.
+
+Finally, the solution can be retrieved by the following function call:
+\begin{display}
+\begin{verbatim}
+feiPtr -> getBlockNodeSolution(elemBlkID, nNodes, nodeIDList,
+                               solnOffsets, solnValues);
+\end{verbatim}
+\end{display}
+where \code{nodeIDList} is a list of nodes in element block {\tt elemBlkID}, and
+\code{solnOffsets[i]} is the index pointing to the first location
+where the variables at node $i$ is returned in \code{solnValues}.
+
+\subsection{Solvers Available Only through the FEI} 
+While most of the solvers from the previous sections are available through
+the FEI interface, there are number of additional solvers and preconditioners
+that are accessible only through the FEI.
+These solvers are briefly described in this section (see also the reference manual).
+
+%On the other side of the {\sf LinearSystemCore} interface is the linear
+%solver package. Any linear solver package can be used as long as there
+%is an implementation of the interface in the solver package itself. The
+%{\sf LinearSystemCore} implementation in \hypre{} is encapsulated in the 
+%\hypre{} finite element conceptual interface called {\sf HYPRE\_LinSysCore}.
+%The incoming element stiffness matrices and other information are 
+%converted into \hypre{}'s internal data structures. 
+
+%\subsection{Parallel Matrix and Vector Construction} 
+%
+%The matrix class in \hypre{} accessible via the {\sf LinearSystemCore} interface
+%is the parallel compressed sparse row ({\sf ParCSR}) matrix.  The 
+%requirements about how the global matrix is partitioned among the
+%processors are that each processor holds a contiguous block of rows and columns
+%and the equation numbers in processors of lower rank are lower than those
+%in processors of higher rank.  The {\sf FEI} is responsible for ensuring
+%that these two requirements are followed. The matrix can be loaded in
+%parallel - a row or a block of rows at a time.  The solution and right
+%hand side vectors are constructed accordingly. The matrix rows corresponding
+%to the shared nodes can be assigned to either processor, and is determined
+%by the {\sf FEI} itself. Once the incoming matrix and vector data have
+%been captured in the \hypre{} {\sf ParCSR} format, a whole of matrix and
+%vector operators are available for use in the \hypre{} solvers.
+%
+\subsubsection{Sequential and Parallel Solvers} 
+
+\hypre{} currently has many iterative solvers. There is also internally a
+version of the sequential {\sf SuperLU} direct solver (developed at U.C.
+Berkeley) suitable to small problems (may be up to the size of $10000$).
+In the following we list some of these internal solvers.
+
+\begin{enumerate}
+\item Additional Krylov solvers (FGMRES, TFQMR, symmetric QMR),
+\item SuperLU direct solver (sequential),
+\item SuperLU direct solver with iterative refinement (sequential), 
+\end{enumerate}
+
+\subsubsection{Parallel Preconditioners} 
+
+The performance of the Krylov solvers can be improved by clever selection
+of preconditioners. Besides those mentioned previously
+in this chapter, the following preconditioners are
+available via the {\sf LinearSystemCore} interface: 
+
+\begin{enumerate}
+\item the modified version of MLI, which requires the finite element substructure matrices
+to construct the prolongation operators,
+\item parallel domain decomposition with inexact local solves ({\sf DDIlut}), 
+\item least-squares polynomial preconditioner,
+\item $2 \times 2$ block preconditioner, and
+\item $2 \times 2$ Uzawa preconditioner.
+\end{enumerate}
+
+Some of these preconditioners can be tuned by a number of internal parameters
+modifiable by users. A description of these parameters is given in the reference manual.
+
+\subsubsection{Matrix Reduction} 
+
+For some structural mechanics problems with multi-point constraints the 
+discretization matrix is indefinite (eigenvalues lie in both sides of
+the imaginary axis). Indefinite matrices are much more difficult to solve
+than definite matrices. Methods have been developed to reduce these
+indefinite matrices to definite matrices.  Two matrix reduction algorithms
+have been implemented in \hypre{}, as presented in the following subsections.
+
+\subsubsection{Schur Complement Reduction}
+
+The incoming linear system of equations is assumed to be in the form :
+\[ \left[ 
+\begin{array}{cc} 
+   D   & B \\
+   B^T & 0
+\end{array}
+  \right] 
+  \left[
+\begin{array}{c} 
+   x_1 \\
+   x_2
+\end{array}
+  \right] 
+  =
+  \left[
+\begin{array}{c} 
+   b_1 \\
+   b_2
+\end{array}
+  \right] 
+\]
+where $D$ is a diagonal matrix.  After Schur complement reduction is applied, 
+the resulting linear system becomes
+$$
+- B^T D^{-1} B x_2 = b_2 - B^T D^{-1} b_1.
+$$
+
+\subsubsection{Slide Surface Reduction}
+
+With the presence of slide surfaces, the matrix is in the same form as in the
+case of Schur complement reduction.  Here $A$ represents the relationship 
+between the master, slave, and other degrees of freedom.  The matrix block 
+$[B^T 0]$ corresponds to the constraint equations.  The goal of reduction
+is to eliminate the constraints.  As proposed by Manteuffel, the trick is
+to re-order the system into a $3 \times 3$ block matrix.
+\[ 
+\left[ 
+\begin{array}{ccc} 
+   A_{11}  & A_{12} & N \\
+   A_{21}  & A_{22} & D \\
+   N_{T}   & D      & 0 \\
+\end{array}
+\right] 
+=
+\left[ 
+\begin{array}{ccc} 
+   A_{11}       & \hat{A}_{12} \\
+   \hat{A}_{21} & \hat{A}_{22}.
+\end{array}
+\right] 
+\]
+The reduced system has the form :
+$$
+(A_{11} - \hat{A}_{21} \hat{A}_{22}^{-1} \hat{A}_{12}) x_1 =
+b_1 - \hat{A}_{21} \hat{A}_{22}^{-1} b_2,
+$$
+which is symmetric positive definite (SPD) if the original matrix is PD.
+In addition, $\hat{A}_{22}^{-1}$ is easy to compute. 
+
+There are three slide surface reduction algorithms in \hypre{}.  
+The first follows the matrix formulation in this section.  The second is
+similar except that it replaces the eliminated slave equations with
+identity rows so that the degree of freedom at each node is preserved.
+This is essential for certain block algorithms such as the smoothed
+aggregation multilevel preconditioners.
+The third is similar to the second except that it is more general and 
+can be applied to problems with intersecting slide surfaces (sequential only
+for intersecting slide surfaces).
+
+\subsubsection{Other Features} 
+
+To improve the efficiency of the \hypre{} solvers, a few other features have been
+incorporated.  We list a few of these features below :
+
+\begin{enumerate}
+\item Preconditioner reuse - For multiple linear solves with matrices that are
+      slightly perturbed from each other, oftentimes the use of the same 
+      preconditioners can save preconditioner setup times but suffer little
+      convergence rate degradation.
+\item Projection methods - For multiple solves that use the same matrix,
+      previous solution vectors can sometimes be used to give a better initial
+      guess for subsequent solves.  Two projection schemes have been implemented
+      in \hypre{} - A-conjugate projection (for SPD matrices) and minimal residual
+      projection (for both SPD and non-SPD matrices).
+\item The sparsity pattern of the matrix is in general not destroyed after
+      it has been loaded to an \hypre{} matrix.  But if the matrix is not to
+      be reused, an option is provided to clean up this pattern matrix to
+      conserve memory usage.
+\end{enumerate}

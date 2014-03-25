@@ -1,0 +1,5 @@
+#! /bin/sh
+# Output an error message that the specified program has been disabled.
+
+echo 1>&2 "$1 has been disabled"
+exit 0

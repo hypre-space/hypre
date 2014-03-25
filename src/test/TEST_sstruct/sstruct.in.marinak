@@ -1,0 +1,117 @@
+
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 3 8
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (2- 2- 2-) (57+ 2+ 36+)
+GridSetExtents: 1 (2- 2- 2-) (57+ 2+ 12+)
+GridSetExtents: 2 (2- 2- 2-) (23+ 2+ 36+)
+GridSetExtents: 3 (2- 2- 2-) (57+ 2+ 12+)
+GridSetExtents: 4 (2- 2- 2-) (20+ 2+ 12+)
+GridSetExtents: 5 (2- 2- 2-) (12+ 2+ 7+)
+GridSetExtents: 6 (2- 2- 2-) (20+ 2+ 7+)
+GridSetExtents: 7 (2- 2- 2-) (12+ 2+ 7+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# CELL  = 0
+GridSetVariables: 0 1 [0]
+GridSetVariables: 1 1 [0]
+GridSetVariables: 2 1 [0]
+GridSetVariables: 3 1 [0]
+GridSetVariables: 4 1 [0]
+GridSetVariables: 5 1 [0]
+GridSetVariables: 6 1 [0]
+GridSetVariables: 7 1 [0]
+
+# GridSetNeighborPart: part      ilower(ndim)      iupper(ndim) \
+#                      nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
+#                      index_map[ndim] index_dir[ndim]
+GridSetNeighborPart: 0 (1- 1- 1-) (1- 3+ 37+) 2 (23+ 1- 1-) (23+ 3+ 37+) [0 1 2] [1 1 1]
+GridSetNeighborPart: 0 (1- 1- 1-) (58+ 3+ 1-) 1 (1- 1- 12+) (58+ 3+ 12+) [0 1 2] [1 1 1]
+
+GridSetNeighborPart: 1 (1- 1- 13+) (58+ 3+ 13+) 0 (1- 1- 2-) (58+ 3+ 2-) [0 1 2] [1 1 1]
+GridSetNeighborPart: 1 (1- 1- 1- ) (1- 3+ 13+ ) 2 (12- 1- 2-) (24+ 3+ 2-) [2 1 0] [1 1 1]
+GridSetNeighborPart: 1 (1- 1- 1- ) (58+ 3+ 1- ) 3 (58+ 1- 2-) (1- 3+ 2-) [0 1 2] [-1 1 1]
+GridSetNeighborPart: 1 (58+ 1- 1- ) (58+ 3+ 12+ ) 7 (1- 1- 7+) (12+ 3+ 7+) [2 1 0] [1 1 1]
+
+GridSetNeighborPart: 2 (24+ 1- 1-) (24+ 3+ 37+) 0 (2- 1- 1-) (2- 3+ 37+) [0 1 2] [1 1 1]
+GridSetNeighborPart: 2 (12- 1- 1-) (24+ 3+ 1-) 1 (2- 1- 1-) (2- 3+ 13+) [2 1 0] [1 1 1]
+GridSetNeighborPart: 2 (1- 1- 1-) (13+ 3+ 1-) 3 (57+ 1- 13+) (57+ 3+ 1-) [2 1 0] [-1 1 1]
+
+GridSetNeighborPart: 3 (1- 1- 1-) (58+ 3+ 1-) 1 (58+ 1- 2-) (1- 3+ 2-) [0 1 2] [-1 1 1]
+GridSetNeighborPart: 3 (58+ 1- 1-) (58+ 3+ 13+) 2 (13+ 1- 2-) (1- 3+ 2-) [2 1 0] [1 1 -1]
+GridSetNeighborPart: 3 (1- 1- 1-) (1- 3+ 13+) 4 (20+ 1- 1-) (20+ 3+ 13+) [0 1 2] [1 1 1]
+
+GridSetNeighborPart: 4 (21+ 1- 1-) (21+ 3+ 13+) 3 (2- 1- 1-) (2- 3+ 13+) [0 1 2] [1 1 1]
+GridSetNeighborPart: 4 (1- 1- 1-) (1- 3+ 13+) 5 (13+ 1- 7+) (1- 3+ 7+) [2 1 0] [1 1 -1]
+GridSetNeighborPart: 4 (1- 1- 1-) (21+ 3+ 1-) 6 (1- 1- 7+) (21+ 3+ 7+) [0 1 2] [1 1 1]
+
+GridSetNeighborPart: 5 (1- 1- 8+) (13+ 3+ 8+) 4 (2- 1- 13+) (2- 3+ 1-) [2 1 0] [-1 1 1]
+GridSetNeighborPart: 5 (13+ 1- 1-) (13+ 3+ 8+) 6 (2- 1- 1-) (2- 3+ 8+) [0 1 2] [1 1 1]
+
+GridSetNeighborPart: 6 (1- 1- 8+) (21+ 3+ 8+) 4 (1- 1- 2-) (21+ 3+ 2-) [0 1 2] [1 1 1]
+GridSetNeighborPart: 6 (1- 1- 1-) (1- 3+ 8+) 5 (12+ 1- 1-) (12+ 3+ 8+) [0 1 2] [1 1 1]
+GridSetNeighborPart: 6 (21+ 1- 1-) (21+ 3+ 8+) 7 (2- 1- 1-) (2- 3+ 8+) [0 1 2] [1 1 1]
+
+GridSetNeighborPart: 7 (1- 1- 8+) (12+ 3+ 8+) 1 (57+ 1- 1-) (57+ 3+ 12+) [2 1 0] [1 1 1]
+GridSetNeighborPart: 7 (1- 1- 1-) (1- 3+ 8+) 6 (20+ 1- 1-) (20+ 3+ 8+) [0 1 2] [1 1 1]
+
+###########################################################
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [19]
+
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0  0] 0   8.0
+StencilSetEntry: 0  1 [-1  0  0] 0  -1.0
+StencilSetEntry: 0  2 [ 1  0  0] 0  -1.0
+StencilSetEntry: 0  3 [ 0  0 -1] 0  -1.0
+StencilSetEntry: 0  4 [ 0  0  1] 0  -1.0
+StencilSetEntry: 0  5 [ 1  0  1] 0  -1.0
+StencilSetEntry: 0  6 [ 1  0 -1] 0  -1.0
+StencilSetEntry: 0  7 [-1  0  1] 0  -1.0
+StencilSetEntry: 0  8 [-1  0 -1] 0  -1.0
+
+StencilSetEntry: 0  9 [ 0 -1  0] 0   0.0
+StencilSetEntry: 0 10 [-1 -1  0] 0   0.0
+StencilSetEntry: 0 11 [ 1 -1  0] 0   0.0
+StencilSetEntry: 0 12 [ 0 -1 -1] 0   0.0
+StencilSetEntry: 0 13 [ 0 -1  1] 0   0.0
+
+StencilSetEntry: 0 14 [ 0  1  0] 0   0.0
+StencilSetEntry: 0 15 [-1  1  0] 0   0.0
+StencilSetEntry: 0 16 [ 1  1  0] 0   0.0
+StencilSetEntry: 0 17 [ 0  1 -1] 0   0.0
+StencilSetEntry: 0 18 [ 0  1  1] 0   0.0
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 1 0 0
+GraphSetStencil: 2 0 0
+GraphSetStencil: 3 0 0
+GraphSetStencil: 4 0 0
+GraphSetStencil: 5 0 0
+GraphSetStencil: 6 0 0
+GraphSetStencil: 7 0 0
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 0 1 
+ProcessPoolSetPart: 0 2
+ProcessPoolSetPart: 0 3
+ProcessPoolSetPart: 0 4
+ProcessPoolSetPart: 0 5
+ProcessPoolSetPart: 0 6
+ProcessPoolSetPart: 0 7
+
+###########################################################
+

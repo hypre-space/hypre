@@ -1,0 +1,90 @@
+
+###########################################################
+# In this example, the x/y/z coordinates are as follows
+#
+#  y: cells 1 -> 4 "into the page"
+#
+#                  < z
+#    ---------------------------------
+#  ^ | (2,4) |       |       |       |
+#  x ---------------------------------  <- part 1
+#    |       |       |       | (1,1) |
+#    =================================
+#  ^ |       |       |       | (4,2) |
+#  y ---------------------------------  <- part 0
+#    | (1,1) |       |       |       |
+#    ---------------------------------
+#                    x >
+#
+#  z: cells 1 -> 4 "into the page"
+#
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 3 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (1- 1- 1-) (4+ 2+ 4+)
+GridSetExtents: 1 (1- 1- 1-) (2+ 4+ 4+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# NODE  = 1
+# XFACE = 2
+# YFACE = 3
+# ZFACE = 4
+# XEDGE = 5
+# YEDGE = 6
+# ZEDGE = 7
+GridSetVariables: 0 7 [1 2 3 4 5 6 7]
+GridSetVariables: 1 7 [1 2 3 4 5 6 7]
+
+# GridSetNeighborPart: part      ilower(ndim)      iupper(ndim) \
+#                      nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
+#                      index_map[ndim] index_dir[ndim]
+GridSetNeighborPart: 0 (1- 3- 1-) (4+ 3- 4+) 1 (1- 1- 4+) (1- 4+ 1-) [2 0 1] [-1  1  1]
+GridSetNeighborPart: 1 (0+ 1- 1-) (0+ 4+ 4+) 0 (4+ 2+ 1-) (1- 2+ 4+) [1 2 0] [ 1  1 -1]
+
+###########################################################
+
+# FEMStencilCreate: size
+FEMStencilCreate: 26
+ 
+# FEMStencilSetRow: row offset[ndim] var values[size]
+FEMStencilSetRow:  0 [-1 -1 -1] 0 [  4 -1 -1  0 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  1 [ 0 -1 -1] 0 [ -1  4  0 -1  0 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  2 [-1  0 -1] 0 [ -1  0  4 -1  0  0 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  3 [ 0  0 -1] 0 [  0 -1 -1  4  0  0  0 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  4 [-1 -1  0] 0 [ -1  0  0  0  4 -1 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  5 [ 0 -1  0] 0 [  0 -1  0  0 -1  4  0 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  6 [-1  0  0] 0 [  0  0 -1  0 -1  0  4 -1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  7 [ 0  0  0] 0 [  0  0  0 -1  0 -1 -1  4  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  8 [-1  0  0] 1 [  0  0  0  0  0  0  0  0  5 -2  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow:  9 [ 0  0  0] 1 [  0  0  0  0  0  0  0  0 -2  5  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 10 [ 0 -1  0] 2 [  0  0  0  0  0  0  0  0  0  0  5 -2  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 11 [ 0  0  0] 2 [  0  0  0  0  0  0  0  0  0  0 -2  5  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 12 [ 0  0 -1] 3 [  0  0  0  0  0  0  0  0  0  0  0  0  5 -2  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 13 [ 0  0  0] 3 [  0  0  0  0  0  0  0  0  0  0  0  0 -2  5  0  0  0  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 14 [ 0 -1 -1] 4 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  8 -3 -3  0  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 15 [ 0  0 -1] 4 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3  8  0 -3  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 16 [ 0 -1  0] 4 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3  0  8 -3  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 17 [ 0  0  0] 4 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3 -3  8  0  0  0  0  0  0  0  0 ]
+FEMStencilSetRow: 18 [-1  0 -1] 5 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  8 -3 -3  0  0  0  0  0 ]
+FEMStencilSetRow: 19 [ 0  0 -1] 5 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3  8  0 -3  0  0  0  0 ]
+FEMStencilSetRow: 20 [-1  0  0] 5 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3  0  8 -3  0  0  0  0 ]
+FEMStencilSetRow: 21 [ 0  0  0] 5 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3 -3  8  0  0  0  0 ]
+FEMStencilSetRow: 22 [-1 -1  0] 6 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  8 -3 -3  0 ]
+FEMStencilSetRow: 23 [ 0 -1  0] 6 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3  8  0 -3 ]
+FEMStencilSetRow: 24 [-1  0  0] 6 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3  0  8 -3 ]
+FEMStencilSetRow: 25 [ 0  0  0] 6 [  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 -3 -3  8 ]
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 2
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+
+###########################################################
+

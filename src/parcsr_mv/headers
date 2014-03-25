@@ -1,0 +1,73 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+
+INTERNAL_HEADER=_hypre_parcsr_mv.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#include <HYPRE_config.h>
+
+#include "HYPRE_parcsr_mv.h"
+
+#ifndef hypre_PARCSR_MV_HEADER
+#define hypre_PARCSR_MV_HEADER
+
+#include "_hypre_utilities.h"
+#include "seq_mv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat par_csr_communication.h   >> $INTERNAL_HEADER	
+cat par_csr_assumed_part.h    >> $INTERNAL_HEADER
+cat new_commpkg.h             >> $INTERNAL_HEADER
+cat par_vector.h              >> $INTERNAL_HEADER	
+cat par_csr_matrix.h          >> $INTERNAL_HEADER	
+cat numbers.h                 >> $INTERNAL_HEADER	
+cat par_chord_matrix.h        >> $INTERNAL_HEADER	
+cat par_make_system.h         >> $INTERNAL_HEADER
+
+../utilities/protos [!F]*.c                   >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+
