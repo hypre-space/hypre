@@ -513,6 +513,7 @@ main( hypre_int argc,
       hypre_printf("  -solver <ID>        : solver ID\n");
       hypre_printf("                        0  - SMG (default)\n");
       hypre_printf("                        1  - PFMG\n");
+      hypre_printf("                      101  - BAMG\n");
       hypre_printf("                        2  - SparseMSG\n");
       hypre_printf("                        3  - PFMG constant coeffs\n");
       hypre_printf("                        4  - PFMG constant coeffs var diag\n");
@@ -980,11 +981,12 @@ main( hypre_int argc,
 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
          if ( solver_id == 3 || solver_id == 4 ||
-              solver_id == 13 || solver_id == 14 )
+              solver_id == 13 || solver_id == 14 ||
+              solver_id == 103 | solver_id == 104 )
          {
             stencil_size  = hypre_StructStencilSize(stencil);
             stencil_entries = hypre_CTAlloc(HYPRE_Int, stencil_size);
-            if ( solver_id == 3 || solver_id == 13)
+            if ( solver_id == 3 || solver_id == 13 || solver_id == 103 )
             {
                for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
                hypre_StructMatrixSetConstantEntries(
@@ -994,7 +996,7 @@ main( hypre_int argc,
                hypre_TFree( stencil_entries );
                constant_coefficient = 1;
             }
-            if ( solver_id == 4 || solver_id == 14)
+            if ( solver_id == 4 || solver_id == 14 || solver_id == 104 )
             {
                hypre_SetIndex3(diag_index, 0, 0, 0);
                diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
@@ -1379,6 +1381,68 @@ main( hypre_int argc,
          HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
          HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
          HYPRE_StructSMGDestroy(solver);
+      }
+
+      /*-----------------------------------------------------------
+       * Solve the system using BAMG
+       *-----------------------------------------------------------*/
+
+      else if ( solver_id == 101 || solver_id == 103 || solver_id == 104 )
+      {
+         time_index = hypre_InitializeTiming("BAMG Setup");
+         hypre_BeginTiming(time_index);
+
+         HYPRE_StructBAMGCreate(hypre_MPI_COMM_WORLD, &solver);
+         /*HYPRE_StructBAMGSetMaxLevels( solver, 9 );*/
+         HYPRE_StructBAMGSetMaxIter(solver, 200);
+         HYPRE_StructBAMGSetTol(solver, 1.0e-06);
+         HYPRE_StructBAMGSetRelChange(solver, 0);
+         HYPRE_StructBAMGSetRAPType(solver, rap);
+         HYPRE_StructBAMGSetRelaxType(solver, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructBAMGSetJacobiWeight(solver, jacobi_weight);
+         }
+         HYPRE_StructBAMGSetNumPreRelax(solver, n_pre);
+         HYPRE_StructBAMGSetNumPostRelax(solver, n_post);
+         HYPRE_StructBAMGSetSkipRelax(solver, skip);
+         /*HYPRE_StructBAMGSetDxyz(solver, dxyz);*/
+         HYPRE_StructBAMGSetPrintLevel(solver, 1);
+         HYPRE_StructBAMGSetLogging(solver, 1);
+         HYPRE_StructBAMGSetup(solver, A, b, x);
+
+         hypre_EndTiming(time_index);
+         if ( reps==1 ) {
+            hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
+         }
+         else if ( rep==reps-1 ) {
+            hypre_FinalizeTiming(time_index);
+         }
+
+         time_index = hypre_InitializeTiming("BAMG Solve");
+         hypre_BeginTiming(time_index);
+
+
+         HYPRE_StructBAMGSolve(solver, A, b, x);
+
+         hypre_EndTiming(time_index);
+         if ( reps==1 ) {
+            hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
+         }
+         else if ( rep==reps-1 ) {
+            hypre_PrintTiming("Interface, Setup, and Solve times",
+                              hypre_MPI_COMM_WORLD);
+            hypre_FinalizeTiming(time_index);
+            hypre_ClearTiming();
+         }
+   
+         HYPRE_StructBAMGGetNumIterations(solver, &num_iterations);
+         HYPRE_StructBAMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+         HYPRE_StructBAMGDestroy(solver);
       }
 
       /*-----------------------------------------------------------
