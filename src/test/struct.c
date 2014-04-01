@@ -1397,7 +1397,6 @@ main( hypre_int argc,
          HYPRE_StructBAMGSetMaxIter(solver, 200);
          HYPRE_StructBAMGSetTol(solver, 1.0e-06);
          HYPRE_StructBAMGSetRelChange(solver, 0);
-         HYPRE_StructBAMGSetRAPType(solver, rap);
          HYPRE_StructBAMGSetRelaxType(solver, relax);
          if (usr_jacobi_weight)
          {
@@ -1409,6 +1408,7 @@ main( hypre_int argc,
          /*HYPRE_StructBAMGSetDxyz(solver, dxyz);*/
          HYPRE_StructBAMGSetPrintLevel(solver, 1);
          HYPRE_StructBAMGSetLogging(solver, 1);
+         hypre_printf("DEBUG: BAMGSetup\n\n");
          HYPRE_StructBAMGSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);

@@ -154,7 +154,7 @@ hypre_StructComplexInnerProd( hypre_StructVector *x,
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        MPI_LONG_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
-   printf("DEBUG - %s: result: %f + i %f\n", __func__, creal(final_innerprod_result), cimag(final_innerprod_result)); // XXX
+   //printf("DEBUG - %s: result: %f + i %f\n", __func__, creal(final_innerprod_result), cimag(final_innerprod_result)); // XXX
 
    hypre_IncFLOPCount(7*hypre_StructVectorGlobalSize(x));   // XXX r*r+r*i+i*r+i*i = 7 flops?
 

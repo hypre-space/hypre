@@ -61,14 +61,10 @@ FILES =\
  HYPRE_struct_gmres.c\
  HYPRE_struct_flexgmres.c\
  HYPRE_struct_lgmres.c\
- bamg2_setup_rap.c\
- bamg3_setup_rap.c\
  bamg.c\
  bamg_relax.c\
  bamg_setup.c\
  bamg_setup_interp.c\
- bamg_setup_rap5.c\
- bamg_setup_rap7.c\
  bamg_setup_rap.c\
  bamg_solve.c\
  jacobi.c\
