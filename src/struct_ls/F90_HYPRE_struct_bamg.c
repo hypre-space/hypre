@@ -279,34 +279,6 @@ hypre_F90_IFACE(hypre_structbamgsetjacobiweigh, HYPRE_STRUCTBAMGSETJACOBIWEIGH)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructBAMGSetRAPType, HYPRE_StructBAMGSetRapType
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_structbamgsetraptype, HYPRE_STRUCTBAMGSETRAPTYPE)
-   ( hypre_F90_Obj *solver,
-     hypre_F90_Int *rap_type,
-     hypre_F90_Int *ierr       )
-{
-   *ierr = (hypre_F90_Int)
-      ( HYPRE_StructBAMGSetRAPType(
-           hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassInt (rap_type) ) );
-}
-
-void
-hypre_F90_IFACE(hypre_structbamggetraptype, HYPRE_STRUCTBAMGGETRAPTYPE)
-   ( hypre_F90_Obj *solver,
-     hypre_F90_Int *rap_type,
-     hypre_F90_Int *ierr       )
-{
-   *ierr = (hypre_F90_Int)
-      ( HYPRE_StructBAMGGetRAPType(
-           hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassIntRef (rap_type) ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_StructBAMGSetNumPreRelax, HYPRE_StructBAMGGetNumPreRelax
  *--------------------------------------------------------------------------*/
 

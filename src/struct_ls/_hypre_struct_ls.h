@@ -218,8 +218,6 @@ HYPRE_Int HYPRE_StructBAMGSetRelaxType ( HYPRE_StructSolver solver , HYPRE_Int r
 HYPRE_Int HYPRE_StructBAMGGetRelaxType ( HYPRE_StructSolver solver , HYPRE_Int *relax_type );
 HYPRE_Int HYPRE_StructBAMGSetJacobiWeight ( HYPRE_StructSolver solver , HYPRE_Real weight );
 HYPRE_Int HYPRE_StructBAMGGetJacobiWeight ( HYPRE_StructSolver solver , HYPRE_Real *weight );
-HYPRE_Int HYPRE_StructBAMGSetRAPType ( HYPRE_StructSolver solver , HYPRE_Int rap_type );
-HYPRE_Int HYPRE_StructBAMGGetRAPType ( HYPRE_StructSolver solver , HYPRE_Int *rap_type );
 HYPRE_Int HYPRE_StructBAMGSetNumPreRelax ( HYPRE_StructSolver solver , HYPRE_Int num_pre_relax );
 HYPRE_Int HYPRE_StructBAMGGetNumPreRelax ( HYPRE_StructSolver solver , HYPRE_Int *num_pre_relax );
 HYPRE_Int HYPRE_StructBAMGSetNumPostRelax ( HYPRE_StructSolver solver , HYPRE_Int num_post_relax );
@@ -368,8 +366,6 @@ HYPRE_Int hypre_BAMGSetRelaxType ( void *bamg_vdata , HYPRE_Int relax_type );
 HYPRE_Int hypre_BAMGGetRelaxType ( void *bamg_vdata , HYPRE_Int *relax_type );
 HYPRE_Int hypre_BAMGSetJacobiWeight ( void *bamg_vdata , HYPRE_Real weight );
 HYPRE_Int hypre_BAMGGetJacobiWeight ( void *bamg_vdata , HYPRE_Real *weight );
-HYPRE_Int hypre_BAMGSetRAPType ( void *bamg_vdata , HYPRE_Int rap_type );
-HYPRE_Int hypre_BAMGGetRAPType ( void *bamg_vdata , HYPRE_Int *rap_type );
 HYPRE_Int hypre_BAMGSetNumPreRelax ( void *bamg_vdata , HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_BAMGGetNumPreRelax ( void *bamg_vdata , HYPRE_Int *num_pre_relax );
 HYPRE_Int hypre_BAMGSetNumPostRelax ( void *bamg_vdata , HYPRE_Int num_post_relax );
@@ -404,26 +400,15 @@ HYPRE_Int hypre_BAMGSetup ( void *bamg_vdata , hypre_StructMatrix *A , hypre_Str
 HYPRE_Int hypre_BAMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Real *mean , HYPRE_Real *deviation );
 
 /* bamg_setup_interp.c */
-hypre_StructMatrix *hypre_BAMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir , HYPRE_Int rap_type );
-HYPRE_Int hypre_BAMGSetupInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P , HYPRE_Int rap_type );
-HYPRE_Int hypre_BAMGSetupInterpOp_CC0 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
-HYPRE_Int hypre_BAMGSetupInterpOp_CC1 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
-HYPRE_Int hypre_BAMGSetupInterpOp_CC2 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int rap_type , HYPRE_Int si0 , HYPRE_Int si1 );
-
-/* bamg_setup_rap5.c */
-hypre_StructMatrix *hypre_BAMGCreateCoarseOp5 ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
-HYPRE_Int hypre_BAMGBuildCoarseOp5 ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-HYPRE_Int hypre_BAMGBuildCoarseOp5_onebox_CC0 ( HYPRE_Int fi , HYPRE_Int ci , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-HYPRE_Int hypre_BAMGBuildCoarseOp5_onebox_CC1 ( HYPRE_Int fi , HYPRE_Int ci , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-HYPRE_Int hypre_BAMGBuildCoarseOp5_onebox_CC2 ( HYPRE_Int fi , HYPRE_Int ci , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
-
-/* bamg_setup_rap7.c */
-hypre_StructMatrix *hypre_BAMGCreateCoarseOp7 ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
-HYPRE_Int hypre_BAMGBuildCoarseOp7 ( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *RAP );
+hypre_StructMatrix *hypre_BAMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir );
+HYPRE_Int hypre_BAMGSetupInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P );
+HYPRE_Int hypre_BAMGSetupInterpOp_CC0 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int si0 , HYPRE_Int si1 );
+HYPRE_Int hypre_BAMGSetupInterpOp_CC1 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int si0 , HYPRE_Int si1 );
+HYPRE_Int hypre_BAMGSetupInterpOp_CC2 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int si0 , HYPRE_Int si1 );
 
 /* bamg_setup_rap.c */
-hypre_StructMatrix *hypre_BAMGCreateRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir , HYPRE_Int rap_type );
-HYPRE_Int hypre_BAMGSetupRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , HYPRE_Int rap_type , hypre_StructMatrix *Ac );
+hypre_StructMatrix *hypre_BAMGCreateRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
+HYPRE_Int hypre_BAMGSetupRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_StructMatrix *Ac );
 
 /* bamg_solve.c */
 HYPRE_Int hypre_BAMGSolve ( void *bamg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );

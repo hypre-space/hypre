@@ -2240,7 +2240,7 @@ else
 
 fi
 
-{ $as_echo "$as_me:$LINENO: hypre_using_complex=${hypre_using_complex}" >&5 }
+{ $as_echo "$as_me:$LINENO: hypre_using_complex=${hypre_using_complex}" >&5; }
 
 if test "$hypre_using_complex" = "yes"
 then
@@ -2258,7 +2258,7 @@ else
 
 fi
 
-{ $as_echo "$as_me:$LINENO: hypre_maxdim=${hypre_maxdim}" >&5 }
+{ $as_echo "$as_me:$LINENO: hypre_maxdim=${hypre_maxdim}" >&5; }
 
 cat >>confdefs.h <<_ACEOF
 #define HYPRE_MAXDIM $hypre_maxdim

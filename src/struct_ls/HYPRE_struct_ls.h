@@ -252,23 +252,6 @@ HYPRE_Int HYPRE_StructBAMGGetJacobiWeight(HYPRE_StructSolver solver,
 
 
 /**
- * (Optional) Set type of coarse-grid operator to use.
- *
- * Current operators set by {\tt rap\_type} are:
- *
- * \begin{tabular}{l@{ -- }l}
- * 0 & Galerkin (default) \\
- * 1 & non-Galerkin 5-pt or 7-pt stencils \\
- * \end{tabular}
- *
- * Both operators are constructed algebraically.  The non-Galerkin option
- * maintains a 5-pt stencil in 2D and a 7-pt stencil in 3D on all grid levels.
- * The stencil coefficients are computed by averaging techniques.
- **/
-HYPRE_Int HYPRE_StructBAMGSetRAPType(HYPRE_StructSolver solver,
-                               HYPRE_Int          rap_type);
-
-/**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
 HYPRE_Int HYPRE_StructBAMGSetNumPreRelax(HYPRE_StructSolver solver,

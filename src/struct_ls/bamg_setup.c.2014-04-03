@@ -115,7 +115,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
 
 
   /*-----------------------------------------------------
-   * Set up coarse grids - full coarsening (i.e., 1 / 2^d )
+   * Set up coarse grids
    *-----------------------------------------------------*/
 
   grid  = hypre_StructMatrixGrid(A);
@@ -127,7 +127,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
   for (d = 0; d < ndim; d++)
   {
     max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
-    //max_levels = hypre_max(max_levels, hypre_Log2(hypre_BoxSizeD(cbox, d)));
   }
 
   if ((bamg_data -> max_levels) > 0)

@@ -191,23 +191,6 @@ HYPRE_StructBAMGGetJacobiWeight(HYPRE_StructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructBAMGSetRAPType( HYPRE_StructSolver solver,
-                            HYPRE_Int          rap_type )
-{
-   return( hypre_BAMGSetRAPType( (void *) solver, rap_type) );
-}
-
-HYPRE_Int
-HYPRE_StructBAMGGetRAPType( HYPRE_StructSolver solver,
-                            HYPRE_Int        * rap_type )
-{
-   return( hypre_BAMGGetRAPType( (void *) solver, rap_type) );
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_StructBAMGSetNumPreRelax( HYPRE_StructSolver solver,
                                 HYPRE_Int          num_pre_relax )
 {
