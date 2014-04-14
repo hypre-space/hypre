@@ -34,11 +34,13 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    HYPRE_Int                not_finished_coarsening;
    HYPRE_Int                level;
    HYPRE_Int                redundant;
+   HYPRE_Int                num_functions;
 
    HYPRE_Solver  coarse_solver;
 
    /* misc */
    dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
+   num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    redundant = hypre_ParAMGDataRedundant(amg_data);
 
    /*MPI Stuff */
@@ -57,6 +59,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       HYPRE_Int *A_seq_i = NULL;
       HYPRE_Int *A_seq_offd_i = NULL;
       HYPRE_Int *A_seq_j = NULL;
+      HYPRE_Int *seq_dof_func = NULL;
 
       HYPRE_Real *A_tmp_data = NULL;
       HYPRE_Int *A_tmp_i = NULL;
@@ -145,7 +148,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                HYPRE_BoomerAMGSetNumSweeps(coarse_solver, 
 		hypre_ParAMGDataUserNumSweeps(amg_data)); 
             HYPRE_BoomerAMGSetNumFunctions(coarse_solver, 
-		hypre_ParAMGDataNumFunctions(amg_data)); 
+		num_functions);
             HYPRE_BoomerAMGSetMaxIter(coarse_solver, 1); 
             HYPRE_BoomerAMGSetTol(coarse_solver, 0); 
          }
@@ -187,14 +190,31 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          {
             A_seq_i = hypre_CTAlloc(HYPRE_Int, size+1);
             A_seq_offd_i = hypre_CTAlloc(HYPRE_Int, size+1);
+            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int, size);
          }
 
          if (redundant)
+         {
             hypre_MPI_Allgatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, &A_seq_i[1], info,
                         displs, HYPRE_MPI_INT, new_comm );
+            if (num_functions > 1)
+            {
+	       hypre_MPI_Allgatherv ( dof_func_array[level], num_rows, HYPRE_MPI_INT, 
+			seq_dof_func, info, displs, HYPRE_MPI_INT, new_comm );
+	       HYPRE_BoomerAMGSetDofFunc(coarse_solver, seq_dof_func);
+            }
+         }
          else
+         {
             hypre_MPI_Gatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, &A_seq_i[1], info,
                         displs, HYPRE_MPI_INT, 0, new_comm );
+            if (num_functions > 1)
+            {
+	       hypre_MPI_Gatherv ( dof_func_array[level], num_rows, HYPRE_MPI_INT, 
+			seq_dof_func, info, displs, HYPRE_MPI_INT, 0, new_comm );
+	       if (my_id == 0) HYPRE_BoomerAMGSetDofFunc(coarse_solver, seq_dof_func);
+            }
+         }
 
          if (redundant || my_id == 0)
          {
@@ -448,7 +468,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    return(Solve_err_flag);
 }
 
-/* generate sub communicator, which contains only idle processors */
+/* generate sub communicator, which contains no idle processors */
 
 HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *new_comm_ptr) 
 {
