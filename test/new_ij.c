@@ -139,6 +139,7 @@ main( hypre_int argc,
    HYPRE_Real *values, val;
 
    HYPRE_Int use_nonsymm_schwarz = 0;
+   HYPRE_Int test_ij = 0;
 
    const HYPRE_Real dt_inf = 1.e40;
    HYPRE_Real dt = dt_inf;
@@ -343,6 +344,11 @@ main( hypre_int argc,
          build_matrix_type      = 7;
          build_matrix_arg_index = arg_index;
       } 
+      else if ( strcmp(argv[arg_index], "-test_ij") == 0 )
+      {
+         arg_index++;
+         test_ij = 1;
+      }
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
          arg_index++;
@@ -1310,6 +1316,8 @@ main( hypre_int argc,
       hypre_printf("  Dirichlet 0 BCs are implicit in the spatial operator\n");
    }
 
+   time_index = hypre_InitializeTiming("Spatial Operator");
+   hypre_BeginTiming(time_index);
    if ( build_matrix_type == -1 )
    {
       ierr = HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
@@ -1373,33 +1381,41 @@ main( hypre_int argc,
       }
    }
 
-   time_index = hypre_InitializeTiming("Spatial operator");
-   hypre_BeginTiming(time_index);
-
    if (build_matrix_type < 0)
    {
-      /*ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
-        parcsr_A = (HYPRE_ParCSRMatrix) object;*/
-
       ierr = HYPRE_IJMatrixGetLocalRange( ij_A,
                                           &first_local_row, &last_local_row ,
                                           &first_local_col, &last_local_col );
 
       local_num_rows = last_local_row - first_local_row + 1;
       local_num_cols = last_local_col - first_local_col + 1;
+      ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
+      parcsr_A = (HYPRE_ParCSRMatrix) object;
    }
    else
    {
       /*-----------------------------------------------------------
        * Copy the parcsr matrix into the IJMatrix through interface calls
        *-----------------------------------------------------------*/
-      HYPRE_Int mx_size = 5; 
       ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
                                               &first_local_row, &last_local_row ,
                                               &first_local_col, &last_local_col );
 
       local_num_rows = last_local_row - first_local_row + 1;
       local_num_cols = last_local_col - first_local_col + 1;
+   }
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("Generate Matrix", hypre_MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
+
+   /* Check the ij interface - not necessary if one just wants to test solvers */
+   if (test_ij && build_matrix_type > -1)
+   {
+      HYPRE_Int mx_size = 5; 
+      time_index = hypre_InitializeTiming("Generate IJ matrix");
+      hypre_BeginTiming(time_index);
+
       ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
       ierr += HYPRE_IJMatrixCreate( comm, first_local_row, last_local_row,
@@ -1436,7 +1452,7 @@ main( hypre_int argc,
 	    row_sizes[i] = size;
      }   
      local_row = 0;
-     if (build_matrix_type == 2) mx_size = 27;
+     if (build_matrix_type == 2) mx_size = 7;
      if (build_matrix_type == 3) mx_size = 9;
      if (build_matrix_type == 4) mx_size = 27;
      col_nums = hypre_CTAlloc(HYPRE_Int, mx_size*num_rows);
@@ -1533,20 +1549,19 @@ main( hypre_int argc,
      }
      else
          hypre_TFree(row_sizes);
-   }
 
       ierr += HYPRE_IJMatrixAssemble( ij_A );
 
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("IJ Matrix Setup", hypre_MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("IJ Matrix Setup", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
    
-   if (ierr)
-   {
-      hypre_printf("Error in driver building IJMatrix from parcsr matrix. \n");
-      return(-1); 
-   }
+      if (ierr)
+      {
+         hypre_printf("Error in driver building IJMatrix from parcsr matrix. \n");
+         return(-1); 
+      }
 
    /* This is to emphasize that one can IJMatrixAddToValues after an
       IJMatrixRead or an IJMatrixAssemble.  After an IJMatrixRead,
@@ -1554,60 +1569,51 @@ main( hypre_int argc,
       not changed somehow.  If one has not used IJMatrixRead, one has
       the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
 
-   ncols    = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
-   rows     = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
-   col_inds = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
-   values   = hypre_CTAlloc(HYPRE_Real, last_local_row - first_local_row + 1);
+      ncols    = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
+      rows     = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
+      col_inds = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
+      values   = hypre_CTAlloc(HYPRE_Real, last_local_row - first_local_row + 1);
 
-   if (dt < dt_inf)
-      val = 1./dt;
-   else 
-      val = 0.;   /* Use zero to avoid unintentional loss of significance */
+      if (dt < dt_inf)
+         val = 1./dt;
+      else 
+         val = 0.;   /* Use zero to avoid unintentional loss of significance */
 
-   for (i = first_local_row; i <= last_local_row; i++)
-   {
-      j = i - first_local_row;
-      rows[j] = i;
-      ncols[j] = 1;
-      col_inds[j] = i;
-      values[j] = val;
-   }
+      for (i = first_local_row; i <= last_local_row; i++)
+      {
+         j = i - first_local_row;
+         rows[j] = i;
+         ncols[j] = 1;
+         col_inds[j] = i;
+         values[j] = val;
+      }
       
-   ierr += HYPRE_IJMatrixAddToValues( ij_A,
+      ierr += HYPRE_IJMatrixAddToValues( ij_A,
                                       local_num_rows,
                                       ncols, rows,
                                       (const HYPRE_Int *) col_inds,
                                       (const HYPRE_Real *) values );
 
-   hypre_TFree(values);
-   hypre_TFree(col_inds);
-   hypre_TFree(rows);
-   hypre_TFree(ncols);
+      hypre_TFree(values);
+      hypre_TFree(col_inds);
+      hypre_TFree(rows);
+      hypre_TFree(ncols);
 
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
 
-   ierr += HYPRE_IJMatrixAssemble( ij_A );
+      ierr += HYPRE_IJMatrixAssemble( ij_A );
 
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
-   if (build_matrix_type > -1)
-      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
+     if (build_matrix_type > -1)
+         ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
-   ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
-   parcsr_A = (HYPRE_ParCSRMatrix) object;
-    /*HYPRE_IJMatrixPrint(ij_A, "Atest");*/
-   /*HYPRE_ParCSRMatrixPrint(parcsr_A,"rot60");*/
+     ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
+     parcsr_A = (HYPRE_ParCSRMatrix) object;
 
-#if 0 /* print the matrix in Harwell-Boeing format and exit */
-   {
-      hypre_CSRMatrix *csr_A;
-      csr_A = hypre_ParCSRMatrixDiag((hypre_ParCSRMatrix *)parcsr_A);
-      hypre_CSRMatrixPrintHB(csr_A, "new_ij_matrix.hb");
-      exit(0);
    }
-#endif
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
@@ -3817,7 +3823,7 @@ main( hypre_int argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_IJMatrixDestroy(ij_A);
+   if (test_ij || build_matrix_type == -1) HYPRE_IJMatrixDestroy(ij_A);
 
    /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
    if (build_rhs_type ==1 || build_rhs_type ==7)

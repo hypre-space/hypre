@@ -29,17 +29,17 @@ mpirun -np 2 ./ij -rhsrand -low_storage > matrix.out.2
 
 mpirun -np 4 ./new_ij -fromfile A_tstoffd -rhsfromfile b_tstoffd > matrix.out.3
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -add 1 > matrix.out.4
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -add 1 > matrix.out.4
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -add 1 -off_proc 1 > matrix.out.5
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -add 1 -off_proc 1 > matrix.out.5
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -off_proc 1 > matrix.out.6
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -off_proc 1 > matrix.out.6
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -off_proc 1 -omp 1 > matrix.out.7
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -off_proc 1 -omp 1 > matrix.out.7
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -off_proc 1 -omp 1 -add 1 > matrix.out.8
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -off_proc 1 -omp 1 -add 1 > matrix.out.8
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -omp 1 -exact_size > matrix.out.9
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -omp 1 -exact_size > matrix.out.9
 
-mpirun -np 2 ./new_ij -solver 2 -max_iter 5 -chunk 1 -omp 1 > matrix.out.10
+mpirun -np 2 ./new_ij -test_ij -solver 2 -max_iter 5 -chunk 1 -omp 1 > matrix.out.10
 
