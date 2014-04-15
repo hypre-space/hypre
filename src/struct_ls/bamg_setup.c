@@ -15,30 +15,6 @@
 
 #define DEBUG 0
 
-#define hypre_BAMGSetIndex(index, val) \
-{ \
-  int i; \
-  for ( i = 0; i < HYPRE_MAXDIM; i++ ) hypre_IndexD(index, i) = val; \
-}
-
-#define hypre_BAMGSetCIndex(dir, index) \
-{ \
-  hypre_BAMGSetIndex(index, 0); \
-  hypre_IndexD(index, dir) = 0; \
-}
-
-#define hypre_BAMGSetFIndex(dir, index) \
-{ \
-  hypre_BAMGSetIndex(index, 0); \
-  hypre_IndexD(index, dir) = 1; \
-}
-
-#define hypre_BAMGSetStride(dir, stride) \
-{ \
-  hypre_BAMGSetIndex(stride, 1); \
-  hypre_IndexD(stride, dir) = 2; \
-}
-
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -56,7 +32,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
   HYPRE_Int             usr_jacobi_weight= (bamg_data -> usr_jacobi_weight);
   HYPRE_Real            jacobi_weight    = (bamg_data -> jacobi_weight);
   HYPRE_Int             skip_relax =       (bamg_data -> skip_relax);
-  HYPRE_Real           *dxyz       =       (bamg_data -> dxyz);
 
   HYPRE_Int             max_iter;
   HYPRE_Int             max_levels;
@@ -67,8 +42,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
   hypre_Index           findex;
   hypre_Index           stride;
 
-  hypre_Index           coarsen;
-
   HYPRE_Int            *cdir_l;
   HYPRE_Int            *active_l;
   hypre_StructGrid    **grid_l;
@@ -76,9 +49,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
 
   HYPRE_Real           *data;
   HYPRE_Int             data_size = 0;
-  HYPRE_Real           *relax_weights;
-  HYPRE_Real           *mean, *deviation;
-  HYPRE_Real            alpha, beta;
 
   hypre_StructMatrix  **A_l;
   hypre_StructMatrix  **P_l;
@@ -101,15 +71,13 @@ hypre_BAMGSetup( void               *bamg_vdata,
 
   hypre_Box            *cbox;
 
-  HYPRE_Real            min_dxyz;
   HYPRE_Int             cdir, periodic, cmaxsize;
   HYPRE_Int             d, l;
-  HYPRE_Int             dxyz_flag;
 
   HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
   HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-#if DEBUG
+#if DEBUG_BAMG
   char                  filename[255];
 #endif
 
@@ -118,110 +86,28 @@ hypre_BAMGSetup( void               *bamg_vdata,
    * Set up coarse grids - full coarsening (i.e., 1 / 2^d )
    *-----------------------------------------------------*/
 
+  bamg_dbgmsg("Set up coarse grids\n");
+
   grid  = hypre_StructMatrixGrid(A);
   ndim  = hypre_StructGridNDim(grid);
 
   /* Compute a new max_levels value based on the grid */
   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
-  max_levels = 1;
-  for (d = 0; d < ndim; d++)
-  {
-    max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
-    //max_levels = hypre_max(max_levels, hypre_Log2(hypre_BoxSizeD(cbox, d)));
-  }
-
-  if ((bamg_data -> max_levels) > 0)
-  {
-    max_levels = hypre_min(max_levels, (bamg_data -> max_levels));
-  }
+  max_levels = 6;
   (bamg_data -> max_levels) = max_levels;
-
-  /* compute dxyz */
-  dxyz_flag= 0;
-  if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
-  {
-    mean = hypre_CTAlloc(HYPRE_Real, 3);
-    deviation = hypre_CTAlloc(HYPRE_Real, 3);
-    hypre_BAMGComputeDxyz(A, dxyz, mean, deviation);
-
-    for (d = 0; d < ndim; d++)
-    {
-      deviation[d] -= mean[d]*mean[d];
-      /* square of coeff. of variation */
-      if (deviation[d]/(mean[d]*mean[d]) > .1)
-      {
-        dxyz_flag= 1;
-        break;
-      }
-    }
-    hypre_TFree(mean);
-    hypre_TFree(deviation);
-  }
 
   grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
   hypre_StructGridRef(grid, &grid_l[0]);
+
   P_grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
   P_grid_l[0] = NULL;
+
   cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
   active_l = hypre_TAlloc(HYPRE_Int, max_levels);
-  relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
-  hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
+
   for (l = 0; ; l++)
   {
-    /* determine cdir */
-    min_dxyz = dxyz[0] + dxyz[1] + dxyz[2] + 1;
-    cdir = -1;
-    alpha = 0.0;
-    for (d = 0; d < ndim; d++)
-    {
-      if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d)) &&
-          (dxyz[d] < min_dxyz))
-      {
-        min_dxyz = dxyz[d];
-        cdir = d;
-      }
-      alpha += 1.0/(dxyz[d]*dxyz[d]);
-    }
-    relax_weights[l] = 1.0;
-
-    /* If it's possible to coarsen, change relax_weights */
-    beta = 0.0;
-    if (cdir != -1)
-    {
-      if (dxyz_flag)
-      {
-        relax_weights[l] = 2.0/3.0;
-      }
-
-      else
-      {
-        for (d = 0; d < ndim; d++)
-        {
-          if (d != cdir)
-          {
-            beta += 1.0/(dxyz[d]*dxyz[d]);
-          }
-        }
-        if (beta == alpha)
-        {
-          alpha = 0.0;
-        }
-        else
-        {
-          alpha = beta/alpha;
-        }
-
-        /* determine level Jacobi weights */
-        if (ndim > 1)
-        {
-          relax_weights[l] = 2.0/(3.0 - alpha);
-        }
-        else
-        {
-          relax_weights[l] = 2.0/3.0; /* always 2/3 for 1-d */
-        }
-      }
-    }
+    cdir = l % ndim;
 
     if (cdir != -1)
     {
@@ -248,32 +134,19 @@ hypre_BAMGSetup( void               *bamg_vdata,
       {
         cmaxsize = hypre_max(cmaxsize, hypre_BoxSizeD(cbox, d));
       }
-
       break;
     }
 
     cdir_l[l] = cdir;
 
-    if (hypre_IndexD(coarsen, cdir) != 0)
-    {
-      /* coarsened previously in this direction, relax level l */
-      active_l[l] = 1;
-      hypre_SetIndex3(coarsen, 0, 0, 0);
-      hypre_IndexD(coarsen, cdir) = 1;
-    }
-    else
-    {
-      active_l[l] = 0;
-      hypre_IndexD(coarsen, cdir) = 1;
-    }
+    active_l[l] = 0;
 
     /* set cindex, findex, and stride */
-    hypre_BAMGSetCIndex(cdir, cindex);
-    hypre_BAMGSetFIndex(cdir, findex);
-    hypre_BAMGSetStride(cdir, stride);
+    hypre_SetIndex(cindex, 0);
+    hypre_SetIndex(findex, 0); hypre_IndexD(findex,cdir)=1;
+    hypre_SetIndex(stride, 1); hypre_IndexD(stride,cdir)=2;
 
-    /* update dxyz and coarsen cbox*/
-    dxyz[cdir] *= 2;
+    /* coarsen cbox*/
     hypre_ProjectBox(cbox, cindex, stride);
     hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride,
         hypre_BoxIMin(cbox));
@@ -331,7 +204,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
   {
     cdir = cdir_l[l];
 
-    hypre_printf("DEBUG: CreateInterpOp\n");
+    bamg_dbgmsg("CreateInterpOp l=%d cdir=%d\n", l, cdir);
 
     P_l[l]  = hypre_BAMGCreateInterpOp(A_l[l], P_grid_l[l+1], cdir);
     hypre_StructMatrixInitializeShell(P_l[l]);
@@ -353,7 +226,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
 #endif
     }
 
-    hypre_printf("DEBUG: CreateRAPOp\n");
+    bamg_dbgmsg("CreateRAPOp\n");
 
     A_l[l+1] = hypre_BAMGCreateRAPOp(RT_l[l], A_l[l], P_l[l],
         grid_l[l+1], cdir);
@@ -425,7 +298,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
    * Set up multigrid operators and call setup routines
    *-----------------------------------------------------*/
 
-  hypre_printf("DEBUG: Set up multigrid operators ...\n");
+  bamg_dbgmsg("Set up multigrid operators ...\n");
 
   relax_data_l    = hypre_TAlloc(void *, num_levels);
   matvec_data_l   = hypre_TAlloc(void *, num_levels);
@@ -436,11 +309,11 @@ hypre_BAMGSetup( void               *bamg_vdata,
   {
     cdir = cdir_l[l];
 
-    hypre_BAMGSetCIndex(cdir, cindex);
-    hypre_BAMGSetFIndex(cdir, findex);
-    hypre_BAMGSetStride(cdir, stride);
+    hypre_SetIndex(cindex, 0);
+    hypre_SetIndex(findex, 0); hypre_IndexD(findex,cdir)=1;
+    hypre_SetIndex(stride, 1); hypre_IndexD(stride,cdir)=2;
 
-    hypre_printf("DEBUG: SetupInterpOp ...\n");
+    bamg_dbgmsg("SetupInterpOp l=%d cdir=%d\n", l, cdir);
 
     /* set up interpolation operator */
     hypre_BAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l]);
@@ -453,7 +326,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
           cdir, cindex, stride, RT_l[l]);
 #endif
 
-    hypre_printf("DEBUG: SetupRAPOp ...\n");
+    bamg_dbgmsg("SetupRAPOp\n");
 
     /* set up the coarse grid operator */
     hypre_BAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
@@ -480,27 +353,23 @@ hypre_BAMGSetup( void               *bamg_vdata,
    * point.
    *-----------------------------------------------------*/
 
-  hypre_printf("DEBUG: ZeroDiagonal ...\n");
-
   if ( hypre_ZeroDiagonal(A_l[l]))
   {
+    bamg_dbgmsg("ZeroDiagonal ...\n");
     active_l[l] = 0;
   }
 
   /* set up fine grid relaxation */
+  bamg_dbgmsg("Set Jacobi weights et al.\n");
+
   relax_data_l[0] = hypre_BAMGRelaxCreate(comm);
   hypre_BAMGRelaxSetTol(relax_data_l[0], 0.0);
-  if (usr_jacobi_weight)
-  {
-    hypre_BAMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
-  }
-  else
-  {
-    hypre_BAMGRelaxSetJacobiWeight(relax_data_l[0], relax_weights[0]);
-  }
+    
+  hypre_BAMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
   hypre_BAMGRelaxSetType(relax_data_l[0], relax_type);
   hypre_BAMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
   hypre_BAMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+
   if (num_levels > 1)
   {
     for (l = 1; l < num_levels; l++)
@@ -510,14 +379,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
       {
         relax_data_l[l] = hypre_BAMGRelaxCreate(comm);
         hypre_BAMGRelaxSetTol(relax_data_l[l], 0.0);
-        if (usr_jacobi_weight)
-        {
-          hypre_BAMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
-        }
-        else
-        {
-          hypre_BAMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
-        }
+        hypre_BAMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
         hypre_BAMGRelaxSetType(relax_data_l[l], relax_type);
         hypre_BAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       }
@@ -550,7 +412,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
       }
     }
   }
-  hypre_TFree(relax_weights);
 
   for (l = 0; l < num_levels; l++)
   {
@@ -576,7 +437,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
     (bamg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
   }
 
-#if DEBUG
+#if DEBUG_BAMG
   for (l = 0; l < (num_levels - 1); l++)
   {
     hypre_sprintf(filename, "zout_A.%02d", l);
@@ -588,275 +449,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
   hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
 
-  return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-  HYPRE_Int
-hypre_BAMGComputeDxyz( hypre_StructMatrix *A,
-    HYPRE_Real         *dxyz,
-    HYPRE_Real         *mean,
-    HYPRE_Real         *deviation)
-{
-  hypre_BoxArray        *compute_boxes;
-  hypre_Box             *compute_box;
-
-  hypre_Box             *A_dbox;
-
-  HYPRE_Int              Ai;
-
-  HYPRE_Real            *Ap;
-  HYPRE_Real             cxyz[3], sqcxyz[3], tcxyz[3];
-  HYPRE_Real             cxyz_max;
-
-  HYPRE_Int              tot_size; 
-
-  hypre_StructStencil   *stencil;
-  hypre_Index           *stencil_shape;
-  HYPRE_Int              stencil_size;
-
-  HYPRE_Int              constant_coefficient;
-
-  HYPRE_Int              Astenc;
-
-  hypre_Index            loop_size;
-  hypre_IndexRef         start;
-  hypre_Index            stride;
-
-  HYPRE_Int              i, si, d, sdiag;
-
-  HYPRE_Real             cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz, diag;
-
-  /*----------------------------------------------------------
-   * Initialize some things
-   *----------------------------------------------------------*/
-
-  stencil       = hypre_StructMatrixStencil(A);
-  stencil_shape = hypre_StructStencilShape(stencil);
-  stencil_size  = hypre_StructStencilSize(stencil);
-
-  hypre_SetIndex3(stride, 1, 1, 1);
-
-  /*----------------------------------------------------------
-   * Compute cxyz (use arithmetic mean)
-   *----------------------------------------------------------*/
-
-  cx = 0.0;
-  cy = 0.0;
-  cz = 0.0;
-
-  sqcx = 0.0;
-  sqcy = 0.0;
-  sqcz = 0.0;
-
-  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-
-  compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-
-  tot_size= hypre_StructGridGlobalSize(hypre_StructMatrixGrid(A));
-
-  /* find diagonal stencil entry */
-  for (si = 0; si < stencil_size; si++)
-  {
-    if ((hypre_IndexD(stencil_shape[si], 0) == 0) &&
-        (hypre_IndexD(stencil_shape[si], 1) == 0) &&
-        (hypre_IndexD(stencil_shape[si], 2) == 0))
-    {
-      sdiag = si;
-      break;
-    }
-  }
-
-  hypre_ForBoxI(i, compute_boxes)
-  {
-    compute_box = hypre_BoxArrayBox(compute_boxes, i);
-
-    A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-
-    start  = hypre_BoxIMin(compute_box);
-
-    hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-    /* all coefficients constant or variable diagonal */
-    if ( constant_coefficient )
-    {
-      Ai = hypre_CCBoxIndexRank( A_dbox, start );
-
-      tcx = 0.0;
-      tcy = 0.0;
-      tcz = 0.0;
-
-      /* get sign of diagonal */
-      Ap = hypre_StructMatrixBoxData(A, i, sdiag);
-      diag = 1.0;
-      if (Ap[Ai] < 0)
-      {
-        diag = -1.0;
-      }
-
-      for (si = 0; si < stencil_size; si++)
-      {
-        Ap = hypre_StructMatrixBoxData(A, i, si);
-
-        /* x-direction */
-        Astenc = hypre_IndexD(stencil_shape[si], 0);
-        if (Astenc)
-        {
-          tcx -= Ap[Ai]*diag;
-        }
-
-        /* y-direction */
-        Astenc = hypre_IndexD(stencil_shape[si], 1);
-        if (Astenc)
-        {
-          tcy -= Ap[Ai]*diag;
-        }
-
-        /* z-direction */
-        Astenc = hypre_IndexD(stencil_shape[si], 2);
-        if (Astenc)
-        {
-          tcz -= Ap[Ai]*diag;
-        }
-      }
-
-      cx += tcx;
-      cy += tcy;
-      cz += tcz;
-
-      sqcx += (tcx*tcx);
-      sqcy += (tcy*tcy);
-      sqcz += (tcz*tcz);
-    }
-
-    /* constant_coefficient==0, all coefficients vary with space */
-    else
-    {
-      hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
-          A_dbox, start, stride, Ai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(Ai)
-      {
-        tcx = 0.0;
-        tcy = 0.0;
-        tcz = 0.0;
-
-        /* get sign of diagonal */
-        Ap = hypre_StructMatrixBoxData(A, i, sdiag);
-        diag = 1.0;
-        if (Ap[Ai] < 0)
-        {
-          diag = -1.0;
-        }
-
-        for (si = 0; si < stencil_size; si++)
-        {
-          Ap = hypre_StructMatrixBoxData(A, i, si);
-
-          /* x-direction */
-          Astenc = hypre_IndexD(stencil_shape[si], 0);
-          if (Astenc)
-          {
-            tcx -= Ap[Ai]*diag;
-          }
-
-          /* y-direction */
-          Astenc = hypre_IndexD(stencil_shape[si], 1);
-          if (Astenc)
-          {
-            tcy -= Ap[Ai]*diag;
-          }
-
-          /* z-direction */
-          Astenc = hypre_IndexD(stencil_shape[si], 2);
-          if (Astenc)
-          {
-            tcz -= Ap[Ai]*diag;
-          }
-        }
-
-        cx += tcx;
-        cy += tcy;
-        cz += tcz;
-
-        sqcx += (tcx*tcx);
-        sqcy += (tcy*tcy);
-        sqcz += (tcz*tcz);
-      }
-      hypre_BoxLoop1End(Ai);
-    }
-  }
-
-  cxyz[0] = cx;
-  cxyz[1] = cy;
-  cxyz[2] = cz;
-
-  sqcxyz[0] = sqcx;
-  sqcxyz[1] = sqcy;
-  sqcxyz[2] = sqcz;
-
-  /*----------------------------------------------------------
-   * Compute dxyz
-   *----------------------------------------------------------*/
-
-  /* all coefficients constant or variable diagonal */
-  if ( constant_coefficient )
-  {
-    for (d= 0; d< 3; d++)
-    {
-      mean[d]= cxyz[d];
-      deviation[d]= sqcxyz[d];
-    }
-  }
-  /* constant_coefficient==0, all coefficients vary with space */
-  else
-  {
-
-    tcxyz[0] = cxyz[0];
-    tcxyz[1] = cxyz[1];
-    tcxyz[2] = cxyz[2];
-    hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
-        hypre_StructMatrixComm(A));
-
-    tcxyz[0] = sqcxyz[0];
-    tcxyz[1] = sqcxyz[1];
-    tcxyz[2] = sqcxyz[2];
-    hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
-        hypre_StructMatrixComm(A));
-
-    for (d= 0; d< 3; d++)
-    {
-      mean[d]= cxyz[d]/tot_size;
-      deviation[d]= sqcxyz[d]/tot_size;
-    }
-  }
-
-  cxyz_max = 0.0;
-  for (d = 0; d < 3; d++)
-  {
-    cxyz_max = hypre_max(cxyz_max, cxyz[d]);
-  }
-  if (cxyz_max == 0.0)
-  {
-    cxyz_max = 1.0;
-  }
-
-  for (d = 0; d < 3; d++)
-  {
-    if (cxyz[d] > 0)
-    {
-      cxyz[d] /= cxyz_max;
-      dxyz[d] = sqrt(1.0 / cxyz[d]);
-    }
-    else
-    {
-      dxyz[d] = 1.0e+123;
-    }
-  }
+  bamg_dbgmsg("BAMGSetup finished.\n");
 
   return hypre_error_flag;
 }

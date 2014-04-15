@@ -24,6 +24,15 @@
 
 #include <assert.h>
 
+
+#define DEBUG_BAMG 1
+
+#define bamg_dbgmsg( format, args... ) \
+{ \
+  if ( DEBUG_BAMG ) hypre_printf( "DEBUG_BAMG: " format, ## args ); fflush(stdout); \
+}
+
+
 /*--------------------------------------------------------------------------
  * hypre_BAMGData:
  *--------------------------------------------------------------------------*/
@@ -46,7 +55,6 @@ typedef struct
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */
    HYPRE_Real            relax_weight;
-   HYPRE_Real            dxyz[3];     /* parameters used to determine cdir */
 
    HYPRE_Int             num_levels;
                       
@@ -84,5 +92,21 @@ typedef struct
    HYPRE_Real           *rel_norms;
 
 } hypre_BAMGData;
+
+
+#define hypre_index2rank(indexRAP, rank, dim) \
+{ \
+  HYPRE_Int d, s; \
+  rank = 0; \
+  for ( d = 0, s = 1; d < dim; d++, s*=3 ) \
+    rank += (hypre_IndexD(indexRAP,d)+1) * s; \
+}
+
+#define hypre_rank2index(rank, indexRAP, dim) \
+{ \
+  HYPRE_Int d, s; \
+  for ( d = 0, s = 1; d < dim; d++, s*=3 ) \
+    hypre_IndexD(indexRAP,d) = ( rank % (3*s) ) / s - 1; \
+}
 
 #endif

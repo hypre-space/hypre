@@ -242,16 +242,6 @@ HYPRE_StructBAMGGetSkipRelax( HYPRE_StructSolver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructBAMGSetDxyz( HYPRE_StructSolver  solver,
-                         HYPRE_Real         *dxyz   )
-{
-   return( hypre_BAMGSetDxyz( (void *) solver, dxyz) );
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
 HYPRE_StructBAMGSetLogging( HYPRE_StructSolver solver,
                             HYPRE_Int          logging )
 {

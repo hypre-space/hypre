@@ -224,7 +224,6 @@ HYPRE_Int HYPRE_StructBAMGSetNumPostRelax ( HYPRE_StructSolver solver , HYPRE_In
 HYPRE_Int HYPRE_StructBAMGGetNumPostRelax ( HYPRE_StructSolver solver , HYPRE_Int *num_post_relax );
 HYPRE_Int HYPRE_StructBAMGSetSkipRelax ( HYPRE_StructSolver solver , HYPRE_Int skip_relax );
 HYPRE_Int HYPRE_StructBAMGGetSkipRelax ( HYPRE_StructSolver solver , HYPRE_Int *skip_relax );
-HYPRE_Int HYPRE_StructBAMGSetDxyz ( HYPRE_StructSolver solver , HYPRE_Real *dxyz );
 HYPRE_Int HYPRE_StructBAMGSetLogging ( HYPRE_StructSolver solver , HYPRE_Int logging );
 HYPRE_Int HYPRE_StructBAMGGetLogging ( HYPRE_StructSolver solver , HYPRE_Int *logging );
 HYPRE_Int HYPRE_StructBAMGSetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int print_level );
@@ -372,7 +371,6 @@ HYPRE_Int hypre_BAMGSetNumPostRelax ( void *bamg_vdata , HYPRE_Int num_post_rela
 HYPRE_Int hypre_BAMGGetNumPostRelax ( void *bamg_vdata , HYPRE_Int *num_post_relax );
 HYPRE_Int hypre_BAMGSetSkipRelax ( void *bamg_vdata , HYPRE_Int skip_relax );
 HYPRE_Int hypre_BAMGGetSkipRelax ( void *bamg_vdata , HYPRE_Int *skip_relax );
-HYPRE_Int hypre_BAMGSetDxyz ( void *bamg_vdata , HYPRE_Real *dxyz );
 HYPRE_Int hypre_BAMGSetLogging ( void *bamg_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_BAMGGetLogging ( void *bamg_vdata , HYPRE_Int *logging );
 HYPRE_Int hypre_BAMGSetPrintLevel ( void *bamg_vdata , HYPRE_Int print_level );
@@ -397,7 +395,6 @@ HYPRE_Int hypre_BAMGRelaxSetTempVec ( void *bamg_relax_vdata , hypre_StructVecto
 
 /* bamg_setup.c */
 HYPRE_Int hypre_BAMGSetup ( void *bamg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_BAMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Real *mean , HYPRE_Real *deviation );
 
 /* bamg_setup_interp.c */
 hypre_StructMatrix *hypre_BAMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir );

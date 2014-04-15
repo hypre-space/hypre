@@ -32,12 +32,9 @@ hypre_BAMGCreate( MPI_Comm  comm )
    (bamg_data -> rel_change)        = 0;
    (bamg_data -> zero_guess)        = 0;
    (bamg_data -> max_levels)        = 0;
-   (bamg_data -> dxyz)[0]           = 0.0;
-   (bamg_data -> dxyz)[1]           = 0.0;
-   (bamg_data -> dxyz)[2]           = 0.0;
-   (bamg_data -> relax_type)        = 1;       /* 1 -> weighted Jacobi */
-   (bamg_data -> jacobi_weight)     = 0.0;
-   (bamg_data -> usr_jacobi_weight) = 0;       /* no user Jacobi weight */
+   (bamg_data -> relax_type)        = 1;
+   (bamg_data -> jacobi_weight)     = 0.6;
+   (bamg_data -> usr_jacobi_weight) = 1;
    (bamg_data -> num_pre_relax)     = 1;
    (bamg_data -> num_post_relax)    = 1;
    (bamg_data -> skip_relax)        = 1;
@@ -370,22 +367,6 @@ hypre_BAMGGetSkipRelax( void *bamg_vdata,
    hypre_BAMGData *bamg_data = bamg_vdata;
  
    *skip_relax = (bamg_data -> skip_relax);
- 
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_BAMGSetDxyz( void   *bamg_vdata,
-                   HYPRE_Real *dxyz       )
-{
-   hypre_BAMGData *bamg_data = bamg_vdata;
-
-   (bamg_data -> dxyz[0]) = dxyz[0];
-   (bamg_data -> dxyz[1]) = dxyz[1];
-   (bamg_data -> dxyz[2]) = dxyz[2];
  
    return hypre_error_flag;
 }
