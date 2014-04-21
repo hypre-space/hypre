@@ -2622,9 +2622,22 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    C_ext_size = 0;
    if (num_procs > 1) 
    {
+      hypre_CSRMatrix *B_tmp_diag;
+      hypre_CSRMatrix *B_tmp_offd;
+      hypre_CSRMatrix *C_int_diag;
+      hypre_CSRMatrix *C_int_offd;
       C_tmp_offd = hypre_CSRMatrixMultiply(AT_diag, B_offd);
-      Btmp = hypre_MergeDiagAndOffd(B);
-      C_int = hypre_CSRMatrixMultiply(AT_offd, Btmp);
+      C_int_diag = hypre_CSRMatrixMultiply(AT_offd, B_diag);
+      C_int_offd = hypre_CSRMatrixMultiply(AT_offd, B_offd);
+      B_tmp_diag = B_diag;
+      B_tmp_offd = B_offd;
+      hypre_ParCSRMatrixDiag(B) = C_int_diag;
+      hypre_ParCSRMatrixOffd(B) = C_int_offd;
+      C_int = hypre_MergeDiagAndOffd(B);
+      hypre_ParCSRMatrixDiag(B) = B_diag;
+      hypre_ParCSRMatrixOffd(B) = B_offd;
+      /*Btmp = hypre_MergeDiagAndOffd(B);
+      C_int = hypre_CSRMatrixMultiply(AT_offd, Btmp);*/
       C_ext = hypre_ExchangeRAPData(C_int, comm_pkg_A);
       C_ext_i = hypre_CSRMatrixI(C_ext);
       C_ext_j = hypre_CSRMatrixJ(C_ext);
@@ -2632,6 +2645,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
       C_ext_size = C_ext_i[hypre_CSRMatrixNumRows(C_ext)];
       hypre_CSRMatrixDestroy(Btmp);
       hypre_CSRMatrixDestroy(C_int);
+      hypre_CSRMatrixDestroy(C_int_diag);
+      hypre_CSRMatrixDestroy(C_int_offd);
    }
    else
    {
