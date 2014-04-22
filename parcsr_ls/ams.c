@@ -2227,6 +2227,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
    if (ams_data -> cycle_type > 10 && ams_data -> cycle_type != 20)
    /* Create the AMG solvers on the range of Pi{x,y,z}^T */
    {
+      HYPRE_Int P_owned_col_starts;
+
       HYPRE_BoomerAMGCreate(&ams_data -> B_Pix);
       HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Pix, ams_data -> B_Pi_coarsen_type);
       HYPRE_BoomerAMGSetAggNumLevels(ams_data -> B_Pix, ams_data -> B_Pi_agg_levels);
@@ -2281,12 +2283,16 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pix))
          hypre_MatvecCommPkgCreate(ams_data -> Pix);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Pix);
       hypre_BoomerAMGBuildCoarseOperator(ams_data -> Pix,
                                          ams_data -> A,
                                          ams_data -> Pix,
                                          &ams_data -> A_Pix);
-      hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Pix) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Pix) = 0;
+      if (!P_owned_col_starts)
+      {
+         hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Pix) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Pix) = 0;
+      }
 
       /* Make sure that A_Pix has no zero rows (this can happen
          for some kinds of boundary conditions with contact). */
@@ -2298,12 +2304,16 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
       if (!hypre_ParCSRMatrixCommPkg(ams_data -> Piy))
          hypre_MatvecCommPkgCreate(ams_data -> Piy);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Piy);
       hypre_BoomerAMGBuildCoarseOperator(ams_data -> Piy,
                                          ams_data -> A,
                                          ams_data -> Piy,
                                          &ams_data -> A_Piy);
-      hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piy) = 0;
-      hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piy) = 0;
+      if (!P_owned_col_starts)
+      {
+         hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piy) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piy) = 0;
+      }
 
       /* Make sure that A_Piy has no zero rows (this can happen
          for some kinds of boundary conditions with contact). */
@@ -2317,12 +2327,16 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       {
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> Piz))
             hypre_MatvecCommPkgCreate(ams_data -> Piz);
+         P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Piz);
          hypre_BoomerAMGBuildCoarseOperator(ams_data -> Piz,
                                             ams_data -> A,
                                             ams_data -> Piz,
                                             &ams_data -> A_Piz);
-         hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piz) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piz) = 0;
+         if (!P_owned_col_starts)
+         {
+            hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piz) = 0;
+            hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piz) = 0;
+         }
 
          /* Make sure that A_Piz has no zero rows (this can happen
             for some kinds of boundary conditions with contact). */

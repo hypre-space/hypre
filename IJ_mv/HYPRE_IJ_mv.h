@@ -109,6 +109,13 @@ HYPRE_Int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
  * (including values generated with AddToValues), and treat it like
  * a zero value. The actual value needs to be set on proc j.
  *
+ * Note that a threaded version (threaded over the number of rows)
+ * will be called if 
+ * HYPRE_IJMatrixSetOMPFlag is set to a value != 0. 
+ * This requires that rows[i] != rows[j] for i!= j
+ * and is only efficient if a large number of rows is set in one call
+ * to HYPRE_IJMatrixSetValues.
+ *
  * Not collective.
  *
  **/
@@ -125,6 +132,13 @@ HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix       matrix,
  * Adds to any previous values at the specified locations, or, if 
  * there was no value there before, inserts a new one. 
  * AddToValues can be used to add to values on other processors.
+ *
+ * Note that a threaded version (threaded over the number of rows)
+ * will be called if 
+ * HYPRE_IJMatrixSetOMPFlag is set to a value != 0. 
+ * This requires that rows[i] != rows[j] for i!= j
+ * and is only efficient if a large number of rows is added in one call
+ * to HYPRE_IJMatrixAddToValues.
  *
  * Not collective.
  *
@@ -210,7 +224,7 @@ HYPRE_Int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix   matrix,
                                     const HYPRE_Int *sizes);
 
 /**
- * (Optional) Set the max number of nonzeros to expect in each row of
+ * (Optional) Sets the exact number of nonzeros in each row of
  * the diagonal and off-diagonal blocks.  The diagonal block is the
  * submatrix whose column numbers correspond to rows owned by this
  * process, and the off-diagonal block is everything else.  The arrays
@@ -243,6 +257,24 @@ HYPRE_Int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix matrix,
  **/
 HYPRE_Int HYPRE_IJMatrixSetPrintLevel(HYPRE_IJMatrix matrix,
                                       HYPRE_Int      print_level);
+
+/**
+ * (Optional) if set, will use a threaded version of 
+ * HYPRE_IJMatrixSetValues and HYPRE_IJMatrixAddToValues.
+ * This is only useful if a large number of rows is set or added to
+ * at once. 
+ *
+ * NOTE that the values in the rows array of HYPRE_IJMatrixSetValues 
+ * or HYPRE_IJMatrixAddToValues must be different from each other !!!
+ * 
+ * This option is VERY inefficient if only a small number of rows 
+ * is set or added at once and/or 
+ * if reallocation of storage is required and/or 
+ * if values are added to off processor values.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixSetOMPFlag(HYPRE_IJMatrix matrix,
+                                   HYPRE_Int      omp_flag);
 
 /**
  * Read the matrix from file.  This is mainly for debugging purposes.

@@ -127,13 +127,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
       {
          /* smoothing step */
 
-         if (level > 0) hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
-         /*if (level == 0)
-	    hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
-                                 1, 1, l1_norms[fine_grid],
-                                 1.0, 1.0 ,0,0,0,0,
-                                 U_array[fine_grid], Vtemp, Ztemp);
-         else*/  
          hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
 #ifdef HYPRE_USING_OPENMP
@@ -154,6 +147,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
       }
       else /* additive version */
       {
+         hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          if (level == 0) /* compute residual */
          {
             /*alpha = -1.0;
@@ -163,8 +157,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             hypre_ParVectorCopy(Vtemp, Rtilde);
             hypre_ParVectorCopy(U_array[fine_grid],Xtilde);
          }
-  	    else 
-               hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          alpha = 1.0;
          beta = 0.0;
          hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
