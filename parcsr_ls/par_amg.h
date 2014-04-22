@@ -74,6 +74,7 @@ typedef struct
    HYPRE_Int      user_coarse_relax_type;   
    HYPRE_Int      user_relax_type;   
    HYPRE_Int      user_num_sweeps;   
+   HYPRE_Int      precond_flag;
    HYPRE_Real     user_relax_weight;   
    HYPRE_Real  *relax_weight; 
    HYPRE_Real  *omega;
@@ -138,6 +139,9 @@ typedef struct
    HYPRE_Int                  cheby_order;
    HYPRE_Real           cheby_fraction;
 
+   /* data needed for non-Galerkin option */
+   HYPRE_Int      num_gamma;
+   HYPRE_Real         *gamma;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -268,6 +272,7 @@ typedef struct
 #define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
 #define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
+#define hypre_ParAMGDataPrecondFlag(amg_data) ((amg_data)->precond_flag)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
@@ -400,6 +405,10 @@ typedef struct
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
 #define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
+
+/* non-Galerkin parameters */
+#define hypre_ParAMGDataNumGamma(amg_data) ((amg_data)->num_gamma)
+#define hypre_ParAMGDataGamma(amg_data) ((amg_data)->gamma)
 
 #endif
 

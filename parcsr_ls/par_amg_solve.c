@@ -67,6 +67,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int      additive;
    HYPRE_Int      mult_additive;
    HYPRE_Int      simple;
+   HYPRE_Int      precond_flag;
 
    HYPRE_Real   alpha = 1.0;
    HYPRE_Real   beta = -1.0;
@@ -108,12 +109,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    additive         = hypre_ParAMGDataAdditive(amg_data);
    simple           = hypre_ParAMGDataSimple(amg_data);
    mult_additive    = hypre_ParAMGDataMultAdditive(amg_data);
+   precond_flag     = hypre_ParAMGDataPrecondFlag(amg_data);
 
-   num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels);
-   num_variables    = hypre_CTAlloc(HYPRE_Real, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
-   num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
- 
    A_array[0] = A;
    F_array[0] = f;
    U_array[0] = u;
@@ -132,27 +129,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
 
-
-   if (block_mode)
-   {
-      for (j = 1; j < num_levels; j++)
-      {
-         num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
-         num_variables[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
-      }
-      num_coeffs[0]    = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
-      num_variables[0] = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
-
-   }
-   else
-   {
-      for (j = 1; j < num_levels; j++)
-      {
-         num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-         num_variables[j] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
-      }
-   }
-   
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -186,7 +162,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
-   if (tol >= 0.)
+   if (tol >= 0. && precond_flag == 0)
    {
      if ( amg_logging > 1 ) {
         hypre_ParVectorCopy(F_array[0], Residual );
@@ -236,7 +212,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
      relative_resid = 1.;
    }
 
-   if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
+   if (my_id == 0 && amg_print_level > 1 && tol >= 0. && precond_flag == 0)
    {     
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
@@ -255,8 +231,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;   
       /* Op count only needed for one cycle */
 
-      if ((additive < 0 || additive >= num_levels) && (mult_additive < 0 
-	   || mult_additive >= num_levels) && (simple < 0 || simple >= num_levels))
+      if (additive < 0  && mult_additive < 0 && simple < 0 )
+      /*if ((additive < 0 || additive >= num_levels) && (mult_additive < 0 
+	   || mult_additive >= num_levels) && (simple < 0 || simple >= num_levels))*/
          hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
       else
          hypre_BoomerAMGAdditiveCycle(amg_data); 
@@ -265,7 +242,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if (tol >= 0.)
+      if (tol >= 0. && precond_flag == 0)
       {
         old_resid = resid_nrm;
 
@@ -314,6 +291,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_error(HYPRE_ERROR_CONV);
    }
 
+   if (precond_flag == 0)
+   {
    /*-----------------------------------------------------------------------
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
@@ -323,6 +302,31 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    else
      conv_factor = 1.;
 
+   num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels);
+   num_variables    = hypre_CTAlloc(HYPRE_Real, num_levels);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
+   num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
+
+   if (block_mode)
+   {
+      for (j = 1; j < num_levels; j++)
+      {
+         num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+         num_variables[j] = (HYPRE_Real) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
+      }
+      num_coeffs[0]    = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
+      num_variables[0] = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
+
+   }
+   else
+   {
+      for (j = 1; j < num_levels; j++)
+      {
+         num_coeffs[j]    = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+         num_variables[j] = (HYPRE_Real) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+      }
+   }
+   
 
    for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
    {
@@ -358,6 +362,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
+   }
 
    return hypre_error_flag;
 }

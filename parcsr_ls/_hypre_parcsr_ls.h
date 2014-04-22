@@ -105,6 +105,7 @@ typedef struct
    HYPRE_Int      user_coarse_relax_type;   
    HYPRE_Int      user_relax_type;   
    HYPRE_Int      user_num_sweeps;   
+   HYPRE_Int      precond_flag;
    HYPRE_Real     user_relax_weight;   
    HYPRE_Real  *relax_weight; 
    HYPRE_Real  *omega;
@@ -169,6 +170,9 @@ typedef struct
    HYPRE_Int                  cheby_order;
    HYPRE_Real           cheby_fraction;
 
+   /* data needed for non-Galerkin option */
+   HYPRE_Int      num_gamma;
+   HYPRE_Real         *gamma;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -299,6 +303,7 @@ typedef struct
 #define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
 #define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
+#define hypre_ParAMGDataPrecondFlag(amg_data) ((amg_data)->precond_flag)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
@@ -431,6 +436,10 @@ typedef struct
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
 #define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
+
+/* non-Galerkin parameters */
+#define hypre_ParAMGDataNumGamma(amg_data) ((amg_data)->num_gamma)
+#define hypre_ParAMGDataGamma(amg_data) ((amg_data)->gamma)
 
 #endif
 
@@ -755,6 +764,8 @@ HYPRE_Int HYPRE_BoomerAMGGetPrintLevel ( HYPRE_Solver solver , HYPRE_Int *print_
 HYPRE_Int HYPRE_BoomerAMGSetPrintFileName ( HYPRE_Solver solver , const char *print_file_name );
 HYPRE_Int HYPRE_BoomerAMGSetDebugFlag ( HYPRE_Solver solver , HYPRE_Int debug_flag );
 HYPRE_Int HYPRE_BoomerAMGGetDebugFlag ( HYPRE_Solver solver , HYPRE_Int *debug_flag );
+HYPRE_Int HYPRE_BoomerAMGSetPrecondFlag ( HYPRE_Solver solver , HYPRE_Int precond_flag );
+HYPRE_Int HYPRE_BoomerAMGGetPrecondFlag ( HYPRE_Solver solver , HYPRE_Int *precond_flag );
 HYPRE_Int HYPRE_BoomerAMGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetCumNumIterations ( HYPRE_Solver solver , HYPRE_Int *cum_num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
@@ -820,6 +831,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAdditive ( HYPRE_Solver solver , HYPRE_Int mult_
 HYPRE_Int HYPRE_BoomerAMGGetMultAdditive ( HYPRE_Solver solver , HYPRE_Int *mult_additive );
 HYPRE_Int HYPRE_BoomerAMGSetSimple ( HYPRE_Solver solver , HYPRE_Int simple );
 HYPRE_Int HYPRE_BoomerAMGGetSimple ( HYPRE_Solver solver , HYPRE_Int *simple );
+HYPRE_Int HYPRE_BoomerAMGSetNumGamma ( HYPRE_Solver solver , HYPRE_Int num_gamma );
+HYPRE_Int HYPRE_BoomerAMGSetGamma ( HYPRE_Solver solver , HYPRE_Real *gamma );
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1167,6 +1180,8 @@ HYPRE_Int hypre_BoomerAMGGetPrintFileName ( void *data , char **print_file_name 
 HYPRE_Int hypre_BoomerAMGSetNumIterations ( void *data , HYPRE_Int num_iterations );
 HYPRE_Int hypre_BoomerAMGSetDebugFlag ( void *data , HYPRE_Int debug_flag );
 HYPRE_Int hypre_BoomerAMGGetDebugFlag ( void *data , HYPRE_Int *debug_flag );
+HYPRE_Int hypre_BoomerAMGSetPrecondFlag ( void *data , HYPRE_Int precond_flag );
+HYPRE_Int hypre_BoomerAMGGetPrecondFlag ( void *data , HYPRE_Int *precond_flag );
 HYPRE_Int hypre_BoomerAMGSetGSMG ( void *data , HYPRE_Int par );
 HYPRE_Int hypre_BoomerAMGSetNumSamples ( void *data , HYPRE_Int par );
 HYPRE_Int hypre_BoomerAMGSetCGCIts ( void *data , HYPRE_Int its );
@@ -1235,6 +1250,8 @@ HYPRE_Int hypre_BoomerAMGSetMultAdditive ( void *data , HYPRE_Int mult_additive 
 HYPRE_Int hypre_BoomerAMGGetMultAdditive ( void *data , HYPRE_Int *mult_additive );
 HYPRE_Int hypre_BoomerAMGSetSimple ( void *data , HYPRE_Int simple );
 HYPRE_Int hypre_BoomerAMGGetSimple ( void *data , HYPRE_Int *simple );
+HYPRE_Int hypre_BoomerAMGSetNumGamma ( void *data , HYPRE_Int num_gamma );
+HYPRE_Int hypre_BoomerAMGSetGamma ( void *data , HYPRE_Real *gamma );
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -1357,6 +1374,18 @@ HYPRE_Int hypre_BoomerAMGBuildMultipass ( hypre_ParCSRMatrix *A , HYPRE_Int *CF_
 HYPRE_Int hypre_BoomerAMGCreateNodalA ( hypre_ParCSRMatrix *A , HYPRE_Int num_functions , HYPRE_Int *dof_func , HYPRE_Int option , HYPRE_Int diag_option , hypre_ParCSRMatrix **AN_ptr );
 HYPRE_Int hypre_BoomerAMGCreateScalarCFS ( hypre_ParCSRMatrix *SN , HYPRE_Int *CFN_marker , HYPRE_Int *col_offd_SN_to_AN , HYPRE_Int num_functions , HYPRE_Int nodal , HYPRE_Int data , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr , HYPRE_Int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
 HYPRE_Int hypre_BoomerAMGCreateScalarCF ( HYPRE_Int *CFN_marker , HYPRE_Int num_functions , HYPRE_Int num_nodes , HYPRE_Int **dof_func_ptr , HYPRE_Int **CF_marker_ptr );
+
+/* par_nongalerkin.c */
+HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int end , HYPRE_Int *array , HYPRE_Int *output );
+HYPRE_Int hypre_Enumerate ( HYPRE_Int *array , HYPRE_Int n );
+void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_ShuffleArray ( HYPRE_Real *array , HYPRE_Int n , HYPRE_Real *temp , HYPRE_Int *indices );
+HYPRE_Int hypre_ArgSort ( HYPRE_Int *indices , HYPRE_Real *array , HYPRE_Int n , HYPRE_Real *temp );
+HYPRE_Real hypre_OneNorm ( HYPRE_Real *array , HYPRE_Int n );
+HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
+HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
+hypre_ParCSRMatrix *hypre_NonGalerkinSparsityPattern ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *RAP , HYPRE_Int *CF_marker , HYPRE_Real droptol , HYPRE_Int sym_collapse , HYPRE_Int collapse_beta );
+HYPRE_Int hypre_BoomerAMGBuildNonGalerkinCoarseOperator ( hypre_ParCSRMatrix **RAP_ptr , hypre_ParCSRMatrix *P , hypre_ParCSRMatrix *A , HYPRE_Real strong_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func_value , HYPRE_Real S_commpkg_switch , HYPRE_Int *CF_marker , HYPRE_Real droptol , HYPRE_Int sym_collapse , HYPRE_Real lump_percent , HYPRE_Int collapse_beta );
 
 /* par_rap.c */
 hypre_CSRMatrix *hypre_ExchangeRAPData ( hypre_CSRMatrix *RAP_int , hypre_ParCSRCommPkg *comm_pkg_RT );

@@ -458,8 +458,13 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
                                      HYPRE_Real     ratio);
 
-
-
+/**
+ * (Optional) If set to a value not equal 0, it will set max_iter to 1
+ * and the tolerance to 0. It will also avoid a matvec per cycle and
+ * improve cycle performance
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetPrecondFlag(HYPRE_Solver solver,
+                                HYPRE_Int          precond_flag);
 
 /**
  * (Optional)
@@ -3002,6 +3007,17 @@ HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
                              HYPRE_Int          IS_type);
+/*
+ * HYPRE_BoomerAMGSetNumGamma
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNumGamma (HYPRE_Solver solver,
+                             HYPRE_Int          num_gamma);
+
+/*
+ * HYPRE_BoomerAMGSetGamma
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetGamma (HYPRE_Solver  solver,
+                                   HYPRE_Real        *gamma);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

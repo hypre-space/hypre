@@ -860,6 +860,24 @@ HYPRE_BoomerAMGGetDebugFlag( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPrecondFlag, HYPRE_BoomerAMGGetPrecondFlag
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetPrecondFlag( HYPRE_Solver solver,
+                             HYPRE_Int          precond_flag  )
+{
+   return( hypre_BoomerAMGSetPrecondFlag( (void *) solver, precond_flag ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetPrecondFlag( HYPRE_Solver solver,
+                             HYPRE_Int        * precond_flag  )
+{
+   return( hypre_BoomerAMGGetPrecondFlag( (void *) solver, precond_flag ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -1545,5 +1563,27 @@ HYPRE_BoomerAMGGetSimple( HYPRE_Solver solver,
                           HYPRE_Int        * simple  )
 {
    return( hypre_BoomerAMGGetSimple( (void *) solver, simple ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNumGamma
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetNumGamma (HYPRE_Solver solver,
+                               HYPRE_Int num_gamma)
+{
+   return (hypre_BoomerAMGSetNumGamma ( (void *) solver, num_gamma ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetGamma
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetGamma (HYPRE_Solver solver,
+                               HYPRE_Real *gamma)
+{
+   return (hypre_BoomerAMGSetGamma ( (void *) solver, gamma ) );
 }
 

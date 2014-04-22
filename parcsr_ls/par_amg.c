@@ -104,6 +104,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int        simple;
    HYPRE_Real   add_trunc_factor;
    HYPRE_Int      add_P_max_elmts;
+   HYPRE_Int      precond_flag;
 
    /* log info */
    HYPRE_Int      num_iterations;
@@ -117,6 +118,8 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      debug_flag;
 
    char     plot_file_name[251] = {0};
+
+   HYPRE_Int num_gamma;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -201,6 +204,7 @@ hypre_BoomerAMGCreate()
    simple = -1;
    add_trunc_factor = 0.0;
    add_P_max_elmts = 0;
+   precond_flag = 0;
 
    /* log info */
    num_iterations = 0;
@@ -213,6 +217,7 @@ hypre_BoomerAMGCreate()
    /* cycle_op_count = 0; */
    debug_flag = 0;
 
+   num_gamma = 0;
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
     *-----------------------------------------------------------------------*/
@@ -306,7 +311,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetLogging(amg_data, logging);
    hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name); 
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
-
+   hypre_BoomerAMGSetPrecondFlag(amg_data, precond_flag);
    hypre_BoomerAMGSetRestriction(amg_data, 0);
 
    hypre_BoomerAMGSetGSMG(amg_data, 0);
@@ -372,6 +377,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataAMat(amg_data) = NULL;
    hypre_ParAMGDataBVec(amg_data) = NULL;
    hypre_ParAMGDataCommInfo(amg_data) = NULL;
+
+   hypre_ParAMGDataNumGamma(amg_data) = num_gamma;
+   hypre_ParAMGDataGamma(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -2387,6 +2395,44 @@ hypre_BoomerAMGGetDebugFlag( void     *data,
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_BoomerAMGSetPrecondFlag( void     *data,
+                          HYPRE_Int       precond_flag )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataPrecondFlag(amg_data) = precond_flag;
+   if (precond_flag)
+   {
+      hypre_ParAMGDataMaxIter(amg_data) = 1;
+      hypre_ParAMGDataTol(amg_data) = 0;
+   }
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetPrecondFlag( void     *data,
+                          HYPRE_Int     * precond_flag )
+{
+   hypre_ParAMGData  *amg_data = data;
+
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   *precond_flag = hypre_ParAMGDataPrecondFlag(amg_data);
+
+   return hypre_error_flag;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGSetGSMG
  *--------------------------------------------------------------------------*/
@@ -3725,5 +3771,27 @@ hypre_BoomerAMGGetSimple( void *data,
    *simple = hypre_ParAMGDataSimple(amg_data);
 
    return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetNumGamma( void *data,
+                          HYPRE_Int num_gamma)
+{
+  HYPRE_Int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataNumGamma(amg_data) = num_gamma;
+  return (ierr);
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetGamma( void *data,
+                             HYPRE_Real *gamma)
+{
+  HYPRE_Int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataGamma(amg_data) = gamma;
+  return (ierr);
 }
 
