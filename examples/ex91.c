@@ -50,7 +50,7 @@
                    is a refinement of part 0 by factor r (pictured above is r=2)
                    and consists of a global box of size r*(N/2) x r*(N/2) and a
                    second box of size r*(N/4) x r*(N/4) .  The value of N is
-                   given by N=(4*n)*M, where n is an input parameter and M is
+                   given by N=(4*s)*M, where s is an input parameter and M is
                    based on the number of processors (see below).
 
                    The discretization is given by the standard 4,-1 stencil on
@@ -86,8 +86,7 @@
 #define RMAX 10
 
 /* Macro to evaluate a function F in the grid point (i,j) */
-#define Eval(F,i,j) (F( (ilower[0]+(i))*h, (ilower[1]+(j))*h ))
-#define bcEval(F,i,j) (F( (bc_ilower[0]+(i))*h, (bc_ilower[1]+(j))*h ))
+#define Eval(F,i,j,ilo) (F( (ilo[0]+(i))*h, (ilo[1]+(j))*h ))
 
 int optionK, optionB, optionC, optionU0, optionF;
 
@@ -215,13 +214,15 @@ int main (int argc, char *argv[])
 
    int myid, num_procs;
 
-   int n, M, pi, pj;
+   int s, M, pi, pj;
    double h, h2;
-   int ilower[2], iupper[2];
-   int coarse_index[2], fine_index[2];
+   int *ilower, *iupper;
+   int ilower0[2], iupper0[2];
+   int ilower1[2], iupper1[2];
+   int ilower2[2], iupper2[2];
 
    int solver_id;
-   int n_pre, n_post;
+   int npre, npost;
    int rap, relax, skip, sym;
    int time_index;
 
@@ -249,11 +250,11 @@ int main (int argc, char *argv[])
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
    /* Set default parameters */
-   n         = 40;
+   s         = 10;
    r         = 2;
    solver_id = 1;
-   n_pre     = 1;
-   n_post    = 1;
+   npre      = 1;
+   npost     = 1;
 
    vis       = 0;
 
@@ -270,10 +271,10 @@ int main (int argc, char *argv[])
 
       while (arg_index < argc)
       {
-         if ( strcmp(argv[arg_index], "-n") == 0 )
+         if ( strcmp(argv[arg_index], "-s") == 0 )
          {
             arg_index++;
-            n = atoi(argv[arg_index++]);
+            s = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-K") == 0 )
          {
@@ -308,8 +309,8 @@ int main (int argc, char *argv[])
          else if ( strcmp(argv[arg_index], "-v") == 0 )
          {
             arg_index++;
-            n_pre = atoi(argv[arg_index++]);
-            n_post = atoi(argv[arg_index++]);
+            npre = atoi(argv[arg_index++]);
+            npost = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-rap") == 0 )
          {
@@ -352,38 +353,38 @@ int main (int argc, char *argv[])
          printf("\n");
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
-         printf("  -n  <n>             : problem size per processor (default: 8)\n");
-         printf("  -K  <K>             : choice for the diffusion coefficient (default: 1)\n");
-         printf("  -B  <B>             : choice for the convection vector (default: 0)\n");
-         printf("  -C  <C>             : choice for the reaction coefficient (default: 0)\n");
-         printf("  -U0 <U0>            : choice for the boundary condition (default: 0)\n");
-         printf("  -F  <F>             : choice for the right-hand side (default: 1) \n");
-         printf("  -solver <ID>        : solver ID\n");
-         printf("                        0  - SMG \n");
-         printf("                        1  - PFMG\n");
-         printf("                        10 - CG with SMG precond (default)\n");
-         printf("                        11 - CG with PFMG precond\n");
-         printf("                        17 - CG with 2-step Jacobi\n");
-         printf("                        18 - CG with diagonal scaling\n");
-         printf("                        19 - CG\n");
-         printf("                        30 - GMRES with SMG precond\n");
-         printf("                        31 - GMRES with PFMG precond\n");
-         printf("                        37 - GMRES with 2-step Jacobi\n");
-         printf("                        38 - GMRES with diagonal scaling\n");
-         printf("                        39 - GMRES\n");
-         printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
-         printf("  -rap <r>            : coarse grid operator type\n");
-         printf("                        0 - Galerkin (default)\n");
-         printf("                        1 - non-Galerkin ParFlow operators\n");
-         printf("                        2 - Galerkin, general operators\n");
-         printf("  -relax <r>          : relaxation type\n");
-         printf("                        0 - Jacobi\n");
-         printf("                        1 - Weighted Jacobi (default)\n");
-         printf("                        2 - R/B Gauss-Seidel\n");
-         printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
-         printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
-         printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
-         printf("  -vis                : save the solution for GLVis visualization\n");
+         printf("  -s  <s>           : scale factor for base grid (default 10)\n");
+         printf("  -K  <K>           : diffusion coefficient choice (default 0)\n");
+         printf("  -B  <B>           : convection vector choice (default 0)\n");
+         printf("  -C  <C>           : reaction coefficient choice (default 0)\n");
+         printf("  -U0 <U0>          : boundary condition choice (default 0)\n");
+         printf("  -F  <F>           : right-hand side choice (default 0) \n");
+         printf("  -solver <ID>      : solver ID\n");
+         printf("                      0  - SMG \n");
+         printf("                      1  - PFMG\n");
+         printf("                      10 - CG with SMG precond (default)\n");
+         printf("                      11 - CG with PFMG precond\n");
+         printf("                      17 - CG with 2-step Jacobi\n");
+         printf("                      18 - CG with diagonal scaling\n");
+         printf("                      19 - CG\n");
+         printf("                      30 - GMRES with SMG precond\n");
+         printf("                      31 - GMRES with PFMG precond\n");
+         printf("                      37 - GMRES with 2-step Jacobi\n");
+         printf("                      38 - GMRES with diagonal scaling\n");
+         printf("                      39 - GMRES\n");
+         printf("  -v <npre> <npost> : number of pre and post relaxations\n");
+         printf("  -rap <r>          : coarse grid operator type\n");
+         printf("                      0 - Galerkin (default)\n");
+         printf("                      1 - non-Galerkin ParFlow operators\n");
+         printf("                      2 - Galerkin, general operators\n");
+         printf("  -relax <r>        : relaxation type\n");
+         printf("                      0 - Jacobi\n");
+         printf("                      1 - Weighted Jacobi (default)\n");
+         printf("                      2 - R/B Gauss-Seidel\n");
+         printf("                      3 - R/B Gauss-Seidel (nonsymmetric)\n");
+         printf("  -skip <s>         : skip levels in PFMG (0 or 1)\n");
+         printf("  -sym <s>          : symmetric storage (1) or not (0)\n");
+         printf("  -vis              : save solution for GLVis visualization\n");
          printf("\n");
       }
 
@@ -394,48 +395,39 @@ int main (int argc, char *argv[])
       }
    }
 
-   /* Figure out the processor grid (M x M).  The local
-      problem size is indicated by n (n x n). pi and pj
-      indicate position in the processor grid. */
+   /* Figure out the processor grid (M x M).  The local problem size is based on
+      s and r, while pi and pj indicate position in the processor grid. */
    M  = sqrt(num_procs);
-   n0 = 4*n;            /* size of box0 is n0 x n0 */
-   n1 = 2*n*r;          /* size of box1 is n1 x n1 */
-   n2 = 1*n*r;          /* size of box2 is n2 x n2 */
+   n0 = 4*s;            /* size of box0 is n0 x n0 */
+   n1 = 2*s*r;          /* size of box1 is n1 x n1 */
+   n2 = 1*s*r;          /* size of box2 is n2 x n2 */
    h0 = 1.0 / (n0*M);   /* grid spacing on part 0  */
    h1 = h0 / r;         /* grid spacing on part 1  */
    pj = myid / M;
    pi = myid - pj*M;
+   offi0 = pi*n0;       /* offset for i index of box0 */
+   offj0 = pj*n0;       /* offset for j index of box0 */
+   offi1 = pi*n1;       /* offset for i index of box1 */
+   offj1 = pj*n1;       /* offset for j index of box1 */
+   offi2 = pi*n2;       /* offset for i index of box2 */
+   offj2 = pj*n2;       /* offset for j index of box2 */
 
-   /* Define the cells owned by the current processor (each processor's
-      piece of the global grid) */
-   ilower0[0] = pi*n0+1;
-   ilower0[1] = pj*n0+1;
-   iupper0[0] = ilower0[0] + n0-1;
-   iupper0[1] = ilower0[1] + n0-1;
-   ilower1[0] = pi*n1+1;
-   ilower1[1] = pj*n1+1;
-   iupper1[0] = ilower1[0] + n1-1;
-   iupper1[1] = ilower1[1] + n1-1;
-   ilower2[0] = n1+pi*n2+1;
-   ilower2[1] = n1+pj*n2+1;
-   iupper2[0] = ilower2[0] + n2-1;
-   iupper2[1] = ilower2[1] + n2-1;
-
-   /* Define the indexes where the two parts align */
-   coarse_index[0] = coarse_index[1] = 1;
-   fine_index[0]   = fine_index[1]   = 1;
-
-   /* Define the refinement factors */
-   rfactors[0] = rfactors[1] = r;
-
+   nmax = ((n0 < n1) ? n0 : n1); /* max box size */
+ 
    /* 1. Set up a 2D grid */
    {
-      int ndim = 2;
-      int nparts = 2;
-      int nvars = 1;
+      int ndim        = 2;
+      int nparts      = 2;
+      int nvars       = 1;
+      int ilower0[2]  = {offi0 + 1 , offj0 + 1 };
+      int iupper0[2]  = {offi0 + n0, offj0 + n0};
+      int ilower1[2]  = {offi1 + 1 , offj1 + 1 };
+      int iupper1[2]  = {offi1 + n1, offj1 + n1};
+      int ilower2[2]  = {offi2 + 1 , offj2 + 1 };
+      int iupper2[2]  = {offi2 + n2, offj2 + n2};
       int coarse_part = 0;
-      int fine_part = 1;
-      int var = 0;
+      int fine_part   = 1;
+      int var         = 0;
       int i;
 
       /* Create an empty 2D grid object */
@@ -449,7 +441,6 @@ int main (int argc, char *argv[])
       HYPRE_SStructGridSetExtents(grid, coarse_part, ilower0, iupper0);
 
       /* Add the boxes on the fine grid part 1 */
-      part = 1;
       HYPRE_SStructGridSetExtents(grid, fine_part, ilower1, iupper1);
       HYPRE_SStructGridSetExtents(grid, fine_part, ilower2, iupper2);
 
@@ -462,10 +453,15 @@ int main (int argc, char *argv[])
       }
 
       /* Declare fine part 1 to be a refinement of coarse part 0 with a given
-       * refinement factor (rfactors) and alignment */
-      HYPRE_SStructGridSetAMRPart(grid, coarse_part, fine_part,
-                                  coarse_index, fine_index, rfactors);
+       * refinement factor (rfactors) and index alignment */
+      {
+         int coarse_index[2] = {1, 1};
+         int fine_index[2]   = {1, 1};
+         int rfactors[2]     = {r, r};
 
+         HYPRE_SStructGridSetAMRPart(grid, coarse_part, fine_part,
+                                     coarse_index, fine_index, rfactors);
+      }
 
       /* Define interpolation and restriction on the reference coarse-fine
        * template and fix up interpolation at certain specific grid locations.
@@ -580,7 +576,7 @@ int main (int argc, char *argv[])
          }
 
 #if 0
-         /* Fix up interpolation at certain specific grid locations (later) */
+         /* Fix up interpolation at certain grid locations (later) */
          HYPRE_SStructGridSetAMRInterp(
             grid, coarse_part, coarse_index, 1, var, index,
             nvalues, vars, cf, indexes, values);
@@ -604,30 +600,15 @@ int main (int argc, char *argv[])
       int ndim = 2;
       int var = 0;
 
-      if (sym == 0)
-      {
-         /* Define the geometry of the stencil */
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
-
-         /* Create an empty 2D, 5-pt stencil object */
-         HYPRE_SStructStencilCreate(ndim, 5, &stencil);
-
-         /* Assign stencil entries */
-         for (i = 0; i < 5; i++)
-            HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
-      }
-      else /* Symmetric storage */
-      {
-         /* Define the geometry of the stencil */
-         int offsets[3][2] = {{0,0}, {1,0}, {0,1}};
-
-         /* Create an empty 2D, 3-pt stencil object */
-         HYPRE_SStructStencilCreate(ndim, 3, &stencil);
-
-         /* Assign stencil entries */
-         for (i = 0; i < 3; i++)
-            HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
-      }
+      /* Define the geometry of the stencil */
+      int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+      
+      /* Create an empty 2D, 5-pt stencil object */
+      HYPRE_SStructStencilCreate(ndim, 5, &stencil);
+      
+      /* Assign stencil entries */
+      for (i = 0; i < 5; i++)
+         HYPRE_SStructStencilSetEntry(stencil, i, offsets[i], var);
    }
 
    /* 3. Set up the Graph  - this determines the non-zero structure
@@ -650,9 +631,6 @@ int main (int argc, char *argv[])
    /* 4. Set up SStruct Vectors for b and x */
    {
       double *values;
-
-      /* We have one part and one variable. */
-      int part = 0;
       int var = 0;
 
       /* Create an empty vector object */
@@ -663,18 +641,27 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorInitialize(b);
       HYPRE_SStructVectorInitialize(x);
 
-      values = calloc((n*n), sizeof(double));
+      values = calloc((nmax*nmax), sizeof(double));
 
-      /* Set the values of b in left-to-right, bottom-to-top order */
-      for (k = 0, j = 0; j < n; j++)
-         for (i = 0; i < n; i++, k++)
-            values[k] = h2 * Eval(F,i,j);
-      HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
+      for (bi = 0; bi < 3; bi++)
+      {
+         part   = bpart[bi];
+         ilower = bilower[bi];
+         iupper = biupper[bi];
+         h2     = bh[bi];
+         n      = iupper-ilower+1;
 
-      /* Set x = 0 */
-      for (i = 0; i < (n*n); i ++)
-         values[i] = 0.0;
-      HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+         /* Set the values of b in left-to-right, bottom-to-top order */
+         for (k = 0, j = 0; j < n; j++)
+            for (i = 0; i < n; i++, k++)
+               values[k] = h2 * Eval(F,i,j,ilower);
+         HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper, var, values);
+         
+         /* Set x = 0 */
+         for (i = 0; i < (n*n); i ++)
+            values[i] = 0.0;
+         HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper, var, values);
+      }
 
       free(values);
 
@@ -683,8 +670,8 @@ int main (int argc, char *argv[])
 
    /* 4. Set up a SStruct Matrix */
    {
-      /* We have one part and one variable. */
-      int part = 0;
+      int stencil_indices[5] = {0, 1, 2, 3, 4}; /* labels correspond to offsets */
+      double *values;
       int var = 0;
 
       /* Create an empty matrix object */
@@ -697,65 +684,42 @@ int main (int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_SStructMatrixInitialize(A);
 
+      values = calloc(5*(n*n), sizeof(double));
+
       /* Set the stencil values in the interior. Here we set the values
          at every node. We will modify the boundary nodes later. */
-      if (sym == 0)
+      for (bi = 0; bi < 3; bi++)
       {
-         int stencil_indices[5] = {0, 1, 2, 3, 4}; /* labels correspond
-                                                      to the offsets */
-         double *values;
-
-         values = calloc(5*(n*n), sizeof(double));
+         part   = bpart[bi];
+         ilower = bilower[bi];
+         iupper = biupper[bi];
+         h2     = bh[bi];
+         n      = iupper-ilower+1;
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
             for (i = 0; i < n; i++, k+=5)
             {
-               values[k+1] = - Eval(K,i-0.5,j) - Eval(B1,i-0.5,j);
+               values[k+1] = - Eval(K,i-0.5,j,ilower) - Eval(B1,i-0.5,j,ilower);
 
-               values[k+2] = - Eval(K,i+0.5,j) + Eval(B1,i+0.5,j);
+               values[k+2] = - Eval(K,i+0.5,j,ilower) + Eval(B1,i+0.5,j,ilower);
 
-               values[k+3] = - Eval(K,i,j-0.5) - Eval(B2,i,j-0.5);
+               values[k+3] = - Eval(K,i,j-0.5,ilower) - Eval(B2,i,j-0.5,ilower);
 
-               values[k+4] = - Eval(K,i,j+0.5) + Eval(B2,i,j+0.5);
+               values[k+4] = - Eval(K,i,j+0.5,ilower) + Eval(B2,i,j+0.5,ilower);
 
-               values[k] = h2 * Eval(C,i,j)
-                  + Eval(K ,i-0.5,j) + Eval(K ,i+0.5,j)
-                  + Eval(K ,i,j-0.5) + Eval(K ,i,j+0.5)
-                  - Eval(B1,i-0.5,j) + Eval(B1,i+0.5,j)
-                  - Eval(B2,i,j-0.5) + Eval(B2,i,j+0.5);
+               values[k] = h2 * Eval(C,i,j,ilower)
+                  + Eval(K ,i-0.5,j,ilower) + Eval(K ,i+0.5,j,ilower)
+                  + Eval(K ,i,j-0.5,ilower) + Eval(K ,i,j+0.5,ilower)
+                  - Eval(B1,i-0.5,j,ilower) + Eval(B1,i+0.5,j,ilower)
+                  - Eval(B2,i,j-0.5,ilower) + Eval(B2,i,j+0.5,ilower);
             }
 
-         HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                         var, 5,
-                                         stencil_indices, values);
-
-         free(values);
+         HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var,
+                                         5, stencil_indices, values);
       }
-      else /* Symmetric storage */
-      {
-         int stencil_indices[3] = {0, 1, 2};
-         double *values;
 
-         values = calloc(3*(n*n), sizeof(double));
-
-         /* The order is left-to-right, bottom-to-top */
-         for (k = 0, j = 0; j < n; j++)
-            for (i = 0; i < n; i++, k+=3)
-            {
-               values[k+1] = - Eval(K,i+0.5,j);
-               values[k+2] = - Eval(K,i,j+0.5);
-               values[k] = h2 * Eval(C,i,j)
-                  + Eval(K,i+0.5,j) + Eval(K,i,j+0.5)
-                  + Eval(K,i-0.5,j) + Eval(K,i,j-0.5);
-            }
-
-         HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
-                                         var, 3,
-                                         stencil_indices, values);
-
-         free(values);
-      }
+      free(values);
    }
 
    /* 5. Set the boundary conditions, while eliminating the coefficients
@@ -774,10 +738,7 @@ int main (int argc, char *argv[])
       int part = 0;
       int var = 0;
 
-      if (sym == 0)
-         nentries = 5;
-      else
-         nentries = 3;
+      nentries = 5;
 
       values  = calloc(nentries*n, sizeof(double));
       bvalues = calloc(n, sizeof(double));
@@ -902,10 +863,9 @@ int main (int argc, char *argv[])
          for (i = 0; i < n; i++)
             bvalues[i] = 0.0;
 
-         if (sym == 0)
-            HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                            var, 1,
-                                            stencil_indices, bvalues);
+         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
+                                         var, 1,
+                                         stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (i = 0; i < n; i++)
@@ -938,10 +898,9 @@ int main (int argc, char *argv[])
          for (j = 0; j < n; j++)
             bvalues[j] = 0.0;
 
-         if (sym == 0)
-            HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
-                                            var, 1,
-                                            stencil_indices, bvalues);
+         HYPRE_SStructMatrixSetBoxValues(A, part, bc_ilower, bc_iupper,
+                                         var, 1,
+                                         stencil_indices, bvalues);
 
          /* Eliminate the boundary conditions in b */
          for (j = 0; j < n; j++)
@@ -965,10 +924,7 @@ int main (int argc, char *argv[])
          bc_iupper[0] = bc_ilower[0] + n-1;
          bc_iupper[1] = bc_ilower[1];
 
-         if (sym == 0)
-            stencil_indices[0] = 4;
-         else
-            stencil_indices[0] = 2;
+         stencil_indices[0] = 4;
 
          /* Modify the matrix */
          for (i = 0; i < n; i++)
@@ -1000,10 +956,7 @@ int main (int argc, char *argv[])
          bc_iupper[0] = bc_ilower[0];
          bc_iupper[1] = bc_ilower[1] + n-1;
 
-         if (sym == 0)
-            stencil_indices[0] = 2;
-         else
-            stencil_indices[0] = 1;
+         stencil_indices[0] = 2;
 
          /* Modify the matrix */
          for (j = 0; j < n; j++)
@@ -1060,8 +1013,8 @@ int main (int argc, char *argv[])
          HYPRE_StructSMGSetMaxIter(solver, 50);
          HYPRE_StructSMGSetTol(solver, 1.0e-06);
          HYPRE_StructSMGSetRelChange(solver, 0);
-         HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
-         HYPRE_StructSMGSetNumPostRelax(solver, n_post);
+         HYPRE_StructSMGSetNumPreRelax(solver, npre);
+         HYPRE_StructSMGSetNumPostRelax(solver, npost);
          HYPRE_StructSMGSetPrintLevel(solver, 1);
          HYPRE_StructSMGSetLogging(solver, 1);
          HYPRE_StructSMGSetup(solver, sA, sb, sx);
@@ -1104,8 +1057,8 @@ int main (int argc, char *argv[])
          HYPRE_StructPFMGSetRelChange(solver, 0);
          HYPRE_StructPFMGSetRAPType(solver, rap);
          HYPRE_StructPFMGSetRelaxType(solver, relax);
-         HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
-         HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
+         HYPRE_StructPFMGSetNumPreRelax(solver, npre);
+         HYPRE_StructPFMGSetNumPostRelax(solver, npost);
          HYPRE_StructPFMGSetSkipRelax(solver, skip);
          HYPRE_StructPFMGSetPrintLevel(solver, 1);
          HYPRE_StructPFMGSetLogging(solver, 1);
@@ -1157,8 +1110,8 @@ int main (int argc, char *argv[])
             HYPRE_StructSMGSetMaxIter(precond, 1);
             HYPRE_StructSMGSetTol(precond, 0.0);
             HYPRE_StructSMGSetZeroGuess(precond);
-            HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+            HYPRE_StructSMGSetNumPreRelax(precond, npre);
+            HYPRE_StructSMGSetNumPostRelax(precond, npost);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
             HYPRE_StructPCGSetPrecond(solver,
@@ -1176,8 +1129,8 @@ int main (int argc, char *argv[])
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
-            HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+            HYPRE_StructPFMGSetNumPreRelax(precond, npre);
+            HYPRE_StructPFMGSetNumPostRelax(precond, npost);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
@@ -1278,8 +1231,8 @@ int main (int argc, char *argv[])
             HYPRE_StructSMGSetMaxIter(precond, 1);
             HYPRE_StructSMGSetTol(precond, 0.0);
             HYPRE_StructSMGSetZeroGuess(precond);
-            HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+            HYPRE_StructSMGSetNumPreRelax(precond, npre);
+            HYPRE_StructSMGSetNumPostRelax(precond, npost);
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
             HYPRE_StructGMRESSetPrecond(solver,
@@ -1297,8 +1250,8 @@ int main (int argc, char *argv[])
             HYPRE_StructPFMGSetZeroGuess(precond);
             HYPRE_StructPFMGSetRAPType(precond, rap);
             HYPRE_StructPFMGSetRelaxType(precond, relax);
-            HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
-            HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+            HYPRE_StructPFMGSetNumPreRelax(precond, npre);
+            HYPRE_StructPFMGSetNumPostRelax(precond, npost);
             HYPRE_StructPFMGSetSkipRelax(precond, skip);
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);

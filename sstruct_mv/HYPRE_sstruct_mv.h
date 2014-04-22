@@ -331,10 +331,10 @@ HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
  * lower left index of zero.  Coarse and fine variables are referenced in the
  * patch by their associated cell indexes (in the same way that variables are
  * referenced on the grid).  For example, in 2D, for a refinement factor of two
- * in both directions and a nodal variable type, the lower left fine nodal
- * variable would be referenced by the index (-1,-1) and the upper right
- * variable by index (1,1).  Similarly, the lower left coarse nodal variable
- * would be referenced by index (-1,-1) and the upper right with index (0,0).
+ * in both directions and a nodal variable type, the lower left fine variable
+ * would be referenced by the index (-1,-1) and the upper right variable by
+ * index (1,1).  Similarly, the lower left coarse variable would be referenced
+ * by index (-1,-1) and the upper right with index (0,0).
  **/
 HYPRE_Int
 HYPRE_SStructGridSetAMRPart(HYPRE_SStructGrid  grid,
