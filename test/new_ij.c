@@ -239,6 +239,9 @@ main( hypre_int argc,
 
    HYPRE_Int rel_change = 0;
 
+   HYPRE_Real     *gamma = NULL;
+   HYPRE_Int       num_gamma = 0;
+
    HYPRE_Int *row_nums = NULL;
    HYPRE_Int *num_cols = NULL;
    HYPRE_Int *col_nums = NULL;
@@ -1049,6 +1052,14 @@ main( hypre_int argc,
          arg_index++;
          add_trunc_factor  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-gamma") == 0 )
+      {
+         arg_index++;
+         num_gamma = atoi(argv[arg_index++]);
+         gamma = hypre_CTAlloc(HYPRE_Real, num_gamma);
+         for (i = 0; i < num_gamma; i++)
+            gamma[i] = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
@@ -1291,6 +1302,7 @@ main( hypre_int argc,
       hypre_printf("  -use_ns            : use non-symm schwarz smoother\n");
       hypre_printf("  -var <val>         : schwarz smoother variant (0-3) \n");
       hypre_printf("  -blk_sm <val>      : same as '-smtype 6 -ov 0 -dom 1 -smlv <val>'\n");
+      hypre_printf("  -gamma <val> <list>    : specify the NonGalerkin drop tolerance\n");
       hypre_printf("                           and list contains the values, where last value\n");
       hypre_printf("                           in list is repeated if val < num_levels in AMG\n");
       exit(1);
@@ -2241,6 +2253,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAddTruncFactor(amg_solver, add_trunc_factor);
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
+      HYPRE_BoomerAMGSetNumGamma(amg_solver, num_gamma);
+      HYPRE_BoomerAMGSetGamma(amg_solver, gamma);
 
       /* BM Oct 23, 2006 */
       if (plot_grids) {
@@ -2375,6 +2389,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
       HYPRE_BoomerAMGSetAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetAddTruncFactor(amg_solver, add_trunc_factor);
+      HYPRE_BoomerAMGSetNumGamma(amg_solver, num_gamma);
+      HYPRE_BoomerAMGSetGamma(amg_solver, gamma);
  
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
  
@@ -2527,6 +2543,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2662,6 +2680,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2869,6 +2889,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2994,6 +3016,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3203,6 +3227,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_LGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_LGMRESSetPrecond(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3365,6 +3391,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_FlexGMRESSetPrecond(pcg_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3533,6 +3561,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_BiCGSTABSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3736,6 +3766,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetNumGamma(pcg_precond, num_gamma);
+         HYPRE_BoomerAMGSetGamma(pcg_precond, gamma);
          HYPRE_CGNRSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_CGNRSetPrecond(pcg_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,

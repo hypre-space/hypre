@@ -1812,14 +1812,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
          if (mult_addlvl > -1 && level >= mult_addlvl)
          {
-            HYPRE_Real *l1_norm;
+            HYPRE_Real *d_diag;
             hypre_ParCSRMatrix *Q = NULL;
             Q = hypre_ParMatmul(A_array[level],P);
-            if (num_threads == 1) 
-		hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &l1_norm);
-            else 
-                hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &l1_norm);
-            hypre_ParCSRMatrixAminvDB(P,Q,l1_norm,&P_array[level]);
+            if (grid_relax_type[1] == 0)
+            {
+               hypre_CSRMatrix *lvl_Adiag = hypre_ParCSRMatrixDiag(A_array[level]);
+               HYPRE_Int lvl_nrows = hypre_CSRMatrixNumRows(lvl_Adiag);
+               HYPRE_Int *lvl_i = hypre_CSRMatrixI(lvl_Adiag);
+               HYPRE_Real *lvl_data = hypre_CSRMatrixData(lvl_Adiag);
+               HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];
+               d_diag = hypre_CTAlloc(HYPRE_Real, lvl_nrows);
+               for (i=0; i < lvl_nrows; i++)
+		  d_diag[i] = lvl_data[lvl_i[i]]*w_inv;
+            }
+            else
+            {
+               if (num_threads == 1) 
+		  hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag);
+               else 
+                  hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
+            }
+            hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
             A_H = hypre_ParTMatmul(P,Q);
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
@@ -1827,7 +1841,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(Q);
             hypre_ParCSRMatrixOwnsColStarts(P) = 0; 
             /*hypre_ParCSRMatrixDestroy(P); */
-            hypre_TFree(l1_norm); 
+            hypre_TFree(d_diag); 
             if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
 	    /*hypre_BoomerAMGBuildCoarseOperator(P, A_array[level] , P, &A_H); 
             hypre_ParCSRMatrix *C = NULL;

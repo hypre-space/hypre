@@ -59,6 +59,8 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    HYPRE_Int       coarse_grid;
    HYPRE_Int       fine_grid;
    HYPRE_Int       relax_type;
+   HYPRE_Int       rlx_down;
+   HYPRE_Int       rlx_up;
    HYPRE_Int      *grid_relax_type;
    HYPRE_Real      **l1_norms;
    HYPRE_Real    alpha, beta;
@@ -70,6 +72,8 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    HYPRE_Real *D_inv;
    HYPRE_Real *x_global;
    HYPRE_Real *r_global;
+   HYPRE_Real *relax_weight;
+   HYPRE_Real *omega;
 
 #if 0
    HYPRE_Real   *D_mat;
@@ -98,6 +102,9 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    Rtilde            = hypre_ParAMGDataRtilde(amg_data);
    l1_norms          = hypre_ParAMGDataL1Norms(amg_data);
    D_inv             = hypre_ParAMGDataDinv(amg_data);
+   grid_relax_type   = hypre_ParAMGDataGridRelaxType(amg_data);
+   relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
+   omega             = hypre_ParAMGDataOmega(amg_data);
 
    /* Initialize */
 
@@ -111,6 +118,8 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
 
    /* down cycle */
    relax_type = grid_relax_type[1];
+   rlx_down = grid_relax_type[1];
+   rlx_up = grid_relax_type[2];
    for (level = 0; level < num_levels-1; level++)
    {
       fine_grid = level;
@@ -127,13 +136,36 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
       {
          /* smoothing step */
 
-         hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
-         num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
+         if (rlx_down == 0)
+         {
+            HYPRE_Real *A_data = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
+            HYPRE_Int *A_i = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
+            hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+            num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
-	 for (i = 0; i < num_rows; i++)
-            u_data[i] += v_data[i] / l1_norms_lvl[i];
+            for (i = 0; i < num_rows; i++)
+               u_data[i] = relax_weight[level]*v_data[i] / A_data[A_i[i]];
+         }
+
+         else if (rlx_down != 18)
+         {
+            hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_down,0,
+             relax_weight[fine_grid], omega[fine_grid],
+             l1_norms_lvl, U_array[fine_grid], Vtemp, Ztemp);
+            hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+         }
+         else
+         {
+            hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
+            num_rows = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[fine_grid]));
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+	    for (i = 0; i < num_rows; i++)
+               u_data[i] += v_data[i] / l1_norms_lvl[i];
+         }
      
          alpha = -1.0;
          beta = 1.0;
@@ -150,10 +182,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
          hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          if (level == 0) /* compute residual */
          {
-            /*alpha = -1.0;
-            beta = 1.0;
-            hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
-                                     beta, Vtemp);*/
             hypre_ParVectorCopy(Vtemp, Rtilde);
             hypre_ParVectorCopy(U_array[fine_grid],Xtilde);
          }
@@ -205,7 +233,12 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
          hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], 
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);            
-         hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
+         if (rlx_up != 18)
+            hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_up,0,
+                relax_weight[fine_grid], omega[fine_grid],
+                l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
+         else
+            hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
                                  1, 1, l1_norms[fine_grid],
                                  1.0, 1.0 ,0,0,0,0,
                                  U_array[fine_grid], Vtemp, Ztemp);
@@ -309,6 +342,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int       num_nonzeros_offd;
 
    HYPRE_Real  **l1_norms_ptr = NULL;
+   HYPRE_Real   *relax_weight = NULL;
+   HYPRE_Real    relax_type;
 
    /* Acquire data and allocate storage */
 
@@ -320,6 +355,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    additive          = hypre_ParAMGDataAdditive(amg_data);
    mult_additive     = hypre_ParAMGDataMultAdditive(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
+   relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
+   relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];
    comm              = hypre_ParCSRMatrixComm(A_array[0]);
 
    hypre_MPI_Comm_size(comm,&num_procs);
@@ -659,9 +696,32 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       }
    
       /* Compute Lambda */ 
-      l1_norms = l1_norms_ptr[level];
-      for (i=0; i < num_rows_tmp; i++)
-         D_data[i] = 1.0/l1_norms[i];
+      if (relax_type == 0)
+      {
+        HYPRE_Real rlx_wt = relax_weight[level];
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i=0; i < num_rows_tmp; i++)
+        {
+           D_data[i] = rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
+           L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
+           L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
+        }
+      }
+      else
+      {
+        l1_norms = l1_norms_ptr[level];
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for private(i) HYPRE_SMP_SCHEDULE
+#endif
+        for (i=0; i < num_rows_tmp; i++)
+        {
+           D_data[i] = 1.0/l1_norms[i];
+           L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
+           L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
+        }
+      }
  
       if (num_procs > 1)
       {
@@ -680,9 +740,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
 
       for (i = 0; i < num_rows_tmp; i++)
       {
-         L_diag_i[cnt_row] =  start_diag + A_tmp_diag_i[i+1];
-         L_offd_i[cnt_row] =  start_offd + A_tmp_offd_i[i+1];
-         cnt_row++;
          j_indx = A_tmp_diag_i[i];
          L_diag_data[cnt_diag] = (2.0 - A_tmp_diag_data[j_indx]*D_data[i])*D_data[i];
          L_diag_j[cnt_diag++] = i+row_start;
@@ -699,6 +756,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
              L_offd_j[cnt_offd++] = remap[j_indx];
          }
       }
+      cnt_row += num_rows_tmp;
    }
 
    if (L_send_ptr)
@@ -771,6 +829,8 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    HYPRE_Real    *r_data;
    HYPRE_Real    *tmp_data;
    HYPRE_Real    *D_inv = NULL;
+   HYPRE_Real    *relax_weight = NULL;
+   HYPRE_Real     relax_type;
 
    HYPRE_Int       addlvl;
    HYPRE_Int       num_levels;
@@ -797,6 +857,8 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    U_array           = hypre_ParAMGDataUArray(amg_data);
    addlvl            = hypre_ParAMGDataSimple(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
+   relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
+   relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];
    num_rows_A        = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));
 
    l1_norms_ptr      = hypre_ParAMGDataL1Norms(amg_data); 
@@ -848,10 +910,27 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
       A_tmp_diag = hypre_ParCSRMatrixDiag(A_tmp);
       num_rows_tmp = hypre_CSRMatrixNumRows(A_tmp_diag);
 
-      l1_norms = l1_norms_ptr[level];
-      for (i=0; i < num_rows_tmp; i++)
-         D_inv[l1_start++] = 1.0/l1_norms[i];
-
+      if (relax_type == 0)
+      {
+         HYPRE_Real rlx_wt = relax_weight[level];
+         HYPRE_Int *A_tmp_diag_i = hypre_CSRMatrixI(A_tmp_diag);
+         HYPRE_Real *A_tmp_diag_data = hypre_CSRMatrixData(A_tmp_diag);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i=0; i < num_rows_tmp; i++)
+            D_inv[l1_start+i] = rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
+      }
+      else
+      {
+         l1_norms = l1_norms_ptr[level];
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i=0; i < num_rows_tmp; i++)
+            D_inv[l1_start+i] = 1.0/l1_norms[i];
+      }
+      l1_start += num_rows_tmp;
    }
 
    hypre_ParAMGDataDinv(amg_data) = D_inv;

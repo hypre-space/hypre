@@ -931,7 +931,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],(2*num_grid_sweeps[3]));
-         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     18   18    18 \n");
+         if (grid_relax_type[1] == 0)
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      0    0     0 \n");
+         else
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     18   18    18 \n");
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
@@ -1001,7 +1004,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],(2*num_grid_sweeps[3]));
-         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     18   18    18 \n");
+         if (grid_relax_type[1] == 0)
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      0    0     0 \n");
+         else
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     18   18    18 \n");
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)

@@ -860,24 +860,6 @@ HYPRE_BoomerAMGGetDebugFlag( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetPrecondFlag, HYPRE_BoomerAMGGetPrecondFlag
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BoomerAMGSetPrecondFlag( HYPRE_Solver solver,
-                             HYPRE_Int          precond_flag  )
-{
-   return( hypre_BoomerAMGSetPrecondFlag( (void *) solver, precond_flag ) );
-}
-
-HYPRE_Int
-HYPRE_BoomerAMGGetPrecondFlag( HYPRE_Solver solver,
-                             HYPRE_Int        * precond_flag  )
-{
-   return( hypre_BoomerAMGGetPrecondFlag( (void *) solver, precond_flag ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGGetNumIterations
  *--------------------------------------------------------------------------*/
 

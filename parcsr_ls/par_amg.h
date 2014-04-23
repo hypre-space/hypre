@@ -74,7 +74,6 @@ typedef struct
    HYPRE_Int      user_coarse_relax_type;   
    HYPRE_Int      user_relax_type;   
    HYPRE_Int      user_num_sweeps;   
-   HYPRE_Int      precond_flag;
    HYPRE_Real     user_relax_weight;   
    HYPRE_Real  *relax_weight; 
    HYPRE_Real  *omega;
@@ -272,7 +271,6 @@ typedef struct
 #define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
 #define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
-#define hypre_ParAMGDataPrecondFlag(amg_data) ((amg_data)->precond_flag)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)

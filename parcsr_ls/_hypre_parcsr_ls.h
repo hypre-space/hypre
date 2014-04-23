@@ -303,7 +303,6 @@ typedef struct
 #define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
 #define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
-#define hypre_ParAMGDataPrecondFlag(amg_data) ((amg_data)->precond_flag)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
@@ -764,8 +763,6 @@ HYPRE_Int HYPRE_BoomerAMGGetPrintLevel ( HYPRE_Solver solver , HYPRE_Int *print_
 HYPRE_Int HYPRE_BoomerAMGSetPrintFileName ( HYPRE_Solver solver , const char *print_file_name );
 HYPRE_Int HYPRE_BoomerAMGSetDebugFlag ( HYPRE_Solver solver , HYPRE_Int debug_flag );
 HYPRE_Int HYPRE_BoomerAMGGetDebugFlag ( HYPRE_Solver solver , HYPRE_Int *debug_flag );
-HYPRE_Int HYPRE_BoomerAMGSetPrecondFlag ( HYPRE_Solver solver , HYPRE_Int precond_flag );
-HYPRE_Int HYPRE_BoomerAMGGetPrecondFlag ( HYPRE_Solver solver , HYPRE_Int *precond_flag );
 HYPRE_Int HYPRE_BoomerAMGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetCumNumIterations ( HYPRE_Solver solver , HYPRE_Int *cum_num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
