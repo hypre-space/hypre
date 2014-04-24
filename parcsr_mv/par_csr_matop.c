@@ -2770,7 +2770,6 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    /*HYPRE_Int              allsquare = 0;*/
    HYPRE_Int              cnt, cnt_offd, cnt_diag;
    HYPRE_Int 		    value;
-   HYPRE_Int 		    nnz_diag, nnz_offd;
    HYPRE_Int 		    num_procs, my_id;
    HYPRE_Int                max_num_threads;
    HYPRE_Int               *C_diag_array = NULL;
@@ -2786,6 +2785,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
+   max_num_threads = hypre_NumThreads();
 
    if (n_rows_A != n_rows_B || num_rows_diag_A != num_rows_diag_B)
    {
@@ -2964,8 +2964,6 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
     *  First generate structure
     *-----------------------------------------------------------------------*/
 
-   nnz_diag = C_tmp_diag_i[num_cols_diag_A];
-   nnz_offd = 0;  
    if (C_ext_size || num_cols_offd_B)
    {
      C_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_diag_A+1);
@@ -3025,7 +3023,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 	     nnz_o++;
           }
           for (jk = 0; jk < num_sends_A; jk++)
-            for (j1 = send_map_starts_A[j]; j1 < send_map_starts_A[j+1]; j1++)
+            for (j1 = send_map_starts_A[jk]; j1 < send_map_starts_A[jk+1]; j1++)
              if (send_map_elmts_A[j1] == ik)
              {
                 for (j2 = C_ext_diag_i[j1]; j2 < C_ext_diag_i[j1+1]; j2++)
@@ -3068,8 +3066,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
           C_diag_i[num_cols_diag_A] = nnz_d;
           C_offd_i[num_cols_diag_A] = nnz_o;
 
-          C_diag = hypre_CSRMatrixCreate(num_cols_diag_A, num_cols_diag_A, nnz_diag);
-          C_offd = hypre_CSRMatrixCreate(num_cols_diag_A, num_cols_offd_C, nnz_offd);
+          C_diag = hypre_CSRMatrixCreate(num_cols_diag_A, num_cols_diag_A, nnz_d);
+          C_offd = hypre_CSRMatrixCreate(num_cols_diag_A, num_cols_offd_C, nnz_o);
           hypre_CSRMatrixI(C_diag) = C_diag_i;
           hypre_CSRMatrixInitialize(C_diag);
           C_diag_j = hypre_CSRMatrixJ(C_diag);
@@ -3230,6 +3228,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
          P_marker[i] = -1;
 
       jj_count_offd = 0;
+      nnz_offd = C_offd_i[num_cols_diag_A];
       for (i=0; i < nnz_offd; i++)
       {
          i1 = C_offd_j[i];
