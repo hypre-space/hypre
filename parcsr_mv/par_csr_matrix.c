@@ -1435,6 +1435,7 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 
    HYPRE_Int          num_nonzeros, i, j;
    HYPRE_Int          count;
+   HYPRE_Int          size, rest, num_threads, ii;
 
    num_nonzeros = diag_i[num_rows] + offd_i[num_rows];
 
@@ -1444,11 +1445,30 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    matrix_i = hypre_CSRMatrixI(matrix);
    matrix_j = hypre_CSRMatrixJ(matrix);
    matrix_data = hypre_CSRMatrixData(matrix);
+   num_threads = hypre_NumThreads();
+   size = num_rows/num_threads;
+   rest = num_rows - size*num_threads;
 
-   count = 0;
-   matrix_i[0] = 0;
-   for (i=0; i < num_rows; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii, i, j, count) HYPRE_SMP_SCHEDULE
+#endif
+  for (ii=0; ii < num_threads; ii++)
+  {
+   HYPRE_Int ns, ne;
+   if (ii < rest)
    {
+       ns = ii*size+ii;
+       ne = (ii+1)*size+ii+1;
+   }
+   else
+   {
+       ns = ii*size+rest;
+       ne = (ii+1)*size+rest;
+   }
+   count = diag_i[ns]+offd_i[ns];;
+   for (i=ns; i < ne; i++)
+   {
+      matrix_i[i] = count;
       for (j=diag_i[i]; j < diag_i[i+1]; j++)
       {
          matrix_data[count] = diag_data[j];
@@ -1459,8 +1479,9 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
          matrix_data[count] = offd_data[j];
          matrix_j[count++] = col_map_offd[offd_j[j]];
       }
-      matrix_i[i+1] = count;
    }
+  } /* end parallel region */
+  matrix_i[num_rows] = num_nonzeros;
 
    return matrix;
 }

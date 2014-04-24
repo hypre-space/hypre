@@ -222,24 +222,10 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
          }
    }
 
-   /*-----------------------------------------------------------------------
-   *  Allocate marker array.
-    *-----------------------------------------------------------------------*/
-
-   B_marker = hypre_CTAlloc(HYPRE_Int, num_cols_diag_B+num_cols_offd_C);
-
-   /*-----------------------------------------------------------------------
-    *  Initialize some stuff.
-    *-----------------------------------------------------------------------*/
-
-   for (i1 = 0; i1 < num_cols_diag_B+num_cols_offd_C; i1++)
-   {      
-      B_marker[i1] = -1;
-   }
-
 
    hypre_ParMatmul_RowSizes(
-      &C_diag_i, &C_offd_i, &B_marker,
+      /*&C_diag_i, &C_offd_i, &B_marker,*/
+      &C_diag_i, &C_offd_i, 
       A_diag_i, A_diag_j, A_offd_i, A_offd_j,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
       B_ext_diag_i, B_ext_diag_j, 
@@ -268,6 +254,12 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
     *  Second Pass: Fill in C_diag_j.
     *  Second Pass: Fill in C_offd_j.
     *-----------------------------------------------------------------------*/
+
+   /*-----------------------------------------------------------------------
+   *  Allocate marker array.
+    *-----------------------------------------------------------------------*/
+
+   B_marker = hypre_CTAlloc(HYPRE_Int, num_cols_diag_B+num_cols_offd_C);
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
