@@ -1835,14 +1835,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
             A_H = hypre_ParTMatmul(P,Q);
+            hypre_ParCSRMatrixDestroy(Q);
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
-            hypre_ParCSRMatrixDestroy(Q);
             hypre_ParCSRMatrixOwnsColStarts(P) = 0; 
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
             /*hypre_ParCSRMatrixDestroy(P); */
             hypre_TFree(d_diag); 
-            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
 	    /*hypre_BoomerAMGBuildCoarseOperator(P, A_array[level] , P, &A_H); 
             hypre_ParCSRMatrix *C = NULL;
             HYPRE_Int *num_grid_sweeps
@@ -1932,7 +1932,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
             hypre_ParCSRMatrixDestroy(Q);
-            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;*/
+            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); */
          hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                         P_array[level], &A_H); 
 
