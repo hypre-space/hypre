@@ -3856,6 +3856,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    if (test_ij || build_matrix_type == -1) HYPRE_IJMatrixDestroy(ij_A);
+   else HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
    if (build_rhs_type ==1 || build_rhs_type ==7)

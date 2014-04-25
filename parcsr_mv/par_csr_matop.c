@@ -2425,8 +2425,6 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
    HYPRE_Int	      num_cols_offd_B = hypre_CSRMatrixNumCols(B_offd);
    HYPRE_Int	      num_sends_B, num_recvs_B;
    HYPRE_Int	      i, j, cnt;
-   HYPRE_Int        num_cols, A_col;
-
 
    HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
@@ -2760,7 +2758,6 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int		    num_cols_offd_C = 0;
    
    HYPRE_Int		   *P_marker;
-   HYPRE_Int		   *B_marker_offd;
 
    HYPRE_Int              i, j;
    HYPRE_Int              i1, j_indx;
