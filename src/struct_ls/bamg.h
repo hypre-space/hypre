@@ -70,6 +70,9 @@ typedef struct
    hypre_StructMatrix  **RT_l;
    hypre_StructVector  **b_l;
    hypre_StructVector  **x_l;
+   
+   // "test vectors" -- i.e., initial vectors and singular vectors
+   HYPRE_Int             num_tv1, num_tv2, num_tv_relax;
 
    /* temp vectors */
    hypre_StructVector  **tx_l;

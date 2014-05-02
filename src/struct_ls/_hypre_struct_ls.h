@@ -231,6 +231,13 @@ HYPRE_Int HYPRE_StructBAMGGetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int 
 HYPRE_Int HYPRE_StructBAMGGetNumIterations ( HYPRE_StructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_StructBAMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , HYPRE_Real *norm );
 
+HYPRE_Int hypre_BAMGSetNumTv1( void *bamg_vdata, HYPRE_Int num_tv1 );
+HYPRE_Int hypre_BAMGGetNumTv1( void *bamg_vdata, HYPRE_Int *num_tv1 );
+HYPRE_Int hypre_BAMGSetNumTv2( void *bamg_vdata, HYPRE_Int num_tv2 );
+HYPRE_Int hypre_BAMGGetNumTv2( void *bamg_vdata, HYPRE_Int *num_tv2 );
+HYPRE_Int hypre_BAMGSetNumTvRelax( void *bamg_vdata, HYPRE_Int num_tv_relax );
+HYPRE_Int hypre_BAMGGetNumTvRelax( void *bamg_vdata, HYPRE_Int *num_tv_relax );
+
 /* HYPRE_struct_pfmg.c */
 HYPRE_Int HYPRE_StructPFMGCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
 HYPRE_Int HYPRE_StructPFMGDestroy ( HYPRE_StructSolver solver );
@@ -398,10 +405,8 @@ HYPRE_Int hypre_BAMGSetup ( void *bamg_vdata , hypre_StructMatrix *A , hypre_Str
 
 /* bamg_setup_interp.c */
 hypre_StructMatrix *hypre_BAMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir );
-HYPRE_Int hypre_BAMGSetupInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P );
-HYPRE_Int hypre_BAMGSetupInterpOp_CC0 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int si0 , HYPRE_Int si1 );
-HYPRE_Int hypre_BAMGSetupInterpOp_CC1 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int si0 , HYPRE_Int si1 );
-HYPRE_Int hypre_BAMGSetupInterpOp_CC2 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 , HYPRE_Int si0 , HYPRE_Int si1 );
+HYPRE_Int hypre_BAMGSetupInterpOp ( hypre_StructMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P , HYPRE_Int num_tv , hypre_StructVector **tv );
+HYPRE_Int hypre_BAMGSetupInterpOp_CC0 ( HYPRE_Int i , hypre_StructMatrix *A , hypre_Box *A_dbox , HYPRE_Int cdir , hypre_Index stride , hypre_Index stridec , hypre_Index start , hypre_IndexRef startc , hypre_Index loop_size , hypre_Box *P_dbox , HYPRE_Int Pstenc0 , HYPRE_Int Pstenc1 , HYPRE_Real *Pp0 , HYPRE_Real *Pp1 );
 
 /* bamg_setup_rap.c */
 hypre_StructMatrix *hypre_BAMGCreateRAPOp ( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );

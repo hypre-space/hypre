@@ -11,6 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.h"
 #include "bamg.h"
 
 #define DEBUG 0
@@ -18,11 +19,11 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-  HYPRE_Int
-hypre_BAMGSetup( void               *bamg_vdata,
+HYPRE_Int hypre_BAMGSetup(
+    void               *bamg_vdata,
     hypre_StructMatrix *A,
     hypre_StructVector *b,
-    hypre_StructVector *x        )
+    hypre_StructVector *x)
 {
   hypre_BAMGData       *bamg_data = bamg_vdata;
 
@@ -31,7 +32,12 @@ hypre_BAMGSetup( void               *bamg_vdata,
   HYPRE_Int             relax_type =       (bamg_data -> relax_type);
   HYPRE_Int             usr_jacobi_weight= (bamg_data -> usr_jacobi_weight);
   HYPRE_Real            jacobi_weight    = (bamg_data -> jacobi_weight);
-  HYPRE_Int             skip_relax =       (bamg_data -> skip_relax);
+
+  HYPRE_Int             num_tv1 = (bamg_data -> num_tv1);
+  HYPRE_Int             num_tv2 = (bamg_data -> num_tv2);
+  HYPRE_Int             num_tv = num_tv1 + num_tv2;
+  HYPRE_Int             num_tv_relax = (bamg_data -> num_tv_relax);
+  void                 *tv_relax;
 
   HYPRE_Int             max_iter;
   HYPRE_Int             max_levels;
@@ -56,6 +62,8 @@ hypre_BAMGSetup( void               *bamg_vdata,
   hypre_StructVector  **b_l;
   hypre_StructVector  **x_l;
 
+  HYPRE_StructVector  **tv;     // tv[l][k] == k'th test vector on level l
+
   /* temp vectors */
   hypre_StructVector  **tx_l;
   hypre_StructVector  **r_l;
@@ -72,10 +80,10 @@ hypre_BAMGSetup( void               *bamg_vdata,
   hypre_Box            *cbox;
 
   HYPRE_Int             cdir, periodic, cmaxsize;
-  HYPRE_Int             d, l;
+  HYPRE_Int             d, l, k;
 
-  HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-  HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
+  HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 #if DEBUG_BAMG
   char                  filename[255];
@@ -83,7 +91,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
 
 
   /*-----------------------------------------------------
-   * Set up coarse grids - full coarsening (i.e., 1 / 2^d )
+   * Set up coarse grids - Semi coarsening, as in PFMG
    *-----------------------------------------------------*/
 
   bamg_dbgmsg("Set up coarse grids\n");
@@ -93,7 +101,7 @@ hypre_BAMGSetup( void               *bamg_vdata,
 
   /* Compute a new max_levels value based on the grid */
   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
-  max_levels = 6;
+  max_levels = 2*ndim+1;
   (bamg_data -> max_levels) = max_levels;
 
   grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
@@ -107,7 +115,9 @@ hypre_BAMGSetup( void               *bamg_vdata,
 
   for (l = 0; ; l++)
   {
-    cdir = l % ndim;
+    cdir_l[l] = cdir = l % ndim;
+
+    active_l[l] = 1;  /* apply relaxation at every level, unless set to zero later */
 
     if (cdir != -1)
     {
@@ -115,12 +125,14 @@ hypre_BAMGSetup( void               *bamg_vdata,
       periodic = hypre_IndexD(hypre_StructGridPeriodic(grid_l[l]), cdir);
       if ((periodic) && (periodic % 2))
       {
+        bamg_dbgmsg("  stop coarsening - periodic = %d\n", periodic);
         cdir = -1;
       }
 
       /* don't coarsen if we've reached max_levels */
       if (l == (max_levels - 1))
       {
+        bamg_dbgmsg("  stop coarsening - l = %d, max_levels = %d\n", l, max_levels);
         cdir = -1;
       }
     }
@@ -128,7 +140,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
     /* stop coarsening */
     if (cdir == -1)
     {
-      active_l[l] = 1; /* forces relaxation on coarsest grid */
       cmaxsize = 0;
       for (d = 0; d < ndim; d++)
       {
@@ -136,10 +147,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
       }
       break;
     }
-
-    cdir_l[l] = cdir;
-
-    active_l[l] = 0;
 
     /* set cindex, findex, and stride */
     hypre_SetIndex(cindex, 0);
@@ -159,19 +166,11 @@ hypre_BAMGSetup( void               *bamg_vdata,
     /* build the coarse grid */
     hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
   }
+
   num_levels = l + 1;
 
   /* free up some things */
   hypre_BoxDestroy(cbox);
-
-  /* set all levels active if skip_relax = 0 */
-  if (!skip_relax)
-  {
-    for (l = 0; l < num_levels; l++)
-    {
-      active_l[l] = 1;
-    }
-  }
 
   (bamg_data -> num_levels)   = num_levels;
   (bamg_data -> cdir_l)       = cdir_l;
@@ -210,26 +209,13 @@ hypre_BAMGSetup( void               *bamg_vdata,
     hypre_StructMatrixInitializeShell(P_l[l]);
     data_size += hypre_StructMatrixDataSize(P_l[l]);
 
-    if (hypre_StructMatrixSymmetric(A))
-    {
-      RT_l[l] = P_l[l];
-    }
-    else
-    {
-      RT_l[l] = P_l[l];
-#if 0
-      /* Allow RT != P for non symmetric case */
-      /* NOTE: Need to create a non-pruned grid for this to work */
-      RT_l[l]   = hypre_BAMGCreateRestrictOp(A_l[l], grid_l[l+1], cdir);
-      hypre_StructMatrixInitializeShell(RT_l[l]);
-      data_size += hypre_StructMatrixDataSize(RT_l[l]);
-#endif
-    }
+
+    // Cannot do non-symmetric case at present (need non-pruned grid, see PFMG)
+    RT_l[l] = P_l[l];
 
     bamg_dbgmsg("CreateRAPOp\n");
 
-    A_l[l+1] = hypre_BAMGCreateRAPOp(RT_l[l], A_l[l], P_l[l],
-        grid_l[l+1], cdir);
+    A_l[l+1] = hypre_BAMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l+1], cdir);
     hypre_StructMatrixInitializeShell(A_l[l+1]);
     data_size += hypre_StructMatrixDataSize(A_l[l+1]);
 
@@ -248,9 +234,11 @@ hypre_BAMGSetup( void               *bamg_vdata,
     hypre_StructVectorInitializeShell(tx_l[l+1]);
   }
 
+  // allocate bamg_data
   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
   (bamg_data -> data) = data;
 
+  // set data pointers
   hypre_StructVectorInitializeData(tx_l[0], data);
   hypre_StructVectorAssemble(tx_l[0]);
   data += hypre_StructVectorDataSize(tx_l[0]);
@@ -259,15 +247,6 @@ hypre_BAMGSetup( void               *bamg_vdata,
   {
     hypre_StructMatrixInitializeData(P_l[l], data);
     data += hypre_StructMatrixDataSize(P_l[l]);
-
-#if 0
-    /* Allow R != PT for non symmetric case */
-    if (!hypre_StructMatrixSymmetric(A))
-    {
-      hypre_StructMatrixInitializeData(RT_l[l], data);
-      data += hypre_StructMatrixDataSize(RT_l[l]);
-    }
-#endif
 
     hypre_StructMatrixInitializeData(A_l[l+1], data);
     data += hypre_StructMatrixDataSize(A_l[l+1]);
@@ -280,8 +259,8 @@ hypre_BAMGSetup( void               *bamg_vdata,
     hypre_StructVectorAssemble(x_l[l+1]);
     data += hypre_StructVectorDataSize(x_l[l+1]);
 
-    hypre_StructVectorInitializeData(tx_l[l+1],
-        hypre_StructVectorData(tx_l[0]));
+    // note: tx_l[l] not persistent, so just overwrite tx_l[0] data
+    hypre_StructVectorInitializeData(tx_l[l+1], hypre_StructVectorData(tx_l[0]));
     hypre_StructVectorAssemble(tx_l[l+1]);
   }
 
@@ -305,6 +284,21 @@ hypre_BAMGSetup( void               *bamg_vdata,
   restrict_data_l = hypre_TAlloc(void *, num_levels);
   interp_data_l   = hypre_TAlloc(void *, num_levels);
 
+  // set up the test vectors (initial + singular)
+  tv = hypre_TAlloc(HYPRE_StructVector*, num_levels);
+  for ( l=0; l<num_levels; l++ )
+  {
+    tv[l] = hypre_TAlloc(HYPRE_StructVector, num_tv);
+    for ( k = 0; k < num_tv; k++ )
+    {
+      HYPRE_StructVectorCreate(comm, grid_l[l], &tv[l][k]);
+      HYPRE_StructVectorInitialize(tv[l][k]);
+      HYPRE_StructVectorAssemble(tv[l][k]);
+      if ( l == 0 )
+        hypre_StructVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0));
+    }
+  }
+
   for (l = 0; l < (num_levels - 1); l++)
   {
     cdir = cdir_l[l];
@@ -313,34 +307,55 @@ hypre_BAMGSetup( void               *bamg_vdata,
     hypre_SetIndex(findex, 0); hypre_IndexD(findex,cdir)=1;
     hypre_SetIndex(stride, 1); hypre_IndexD(stride,cdir)=2;
 
+    // Smooth the test vectors (just once, in place)
+    // 1) set up the rhs for smoothing, zero for now
+    HYPRE_StructVector rhs;
+    HYPRE_StructVectorCreate(comm, grid_l[l], &rhs);
+    HYPRE_StructVectorInitialize(rhs);
+    HYPRE_StructVectorAssemble(rhs);
+    hypre_StructVectorSetConstantValues(rhs, 0.0);
+    // 2) set up the relax struct
+    tv_relax = hypre_BAMGRelaxCreate(comm);
+    hypre_BAMGRelaxSetTol(tv_relax, 0.0);
+    hypre_BAMGRelaxSetJacobiWeight(tv_relax, jacobi_weight);
+    hypre_BAMGRelaxSetType(tv_relax, relax_type);
+    hypre_BAMGRelaxSetTempVec(tv_relax, tx_l[l]);
+    hypre_BAMGRelaxSetup(tv_relax, A_l[l], rhs, tv[l][0]);
+    hypre_BAMGRelaxSetPreRelax(tv_relax);
+    hypre_BAMGRelaxSetMaxIter(tv_relax, num_tv_relax);
+    hypre_BAMGRelaxSetZeroGuess(tv_relax, 0);
+    // 3) smooth
+    for ( k = 0; k < num_tv1; k++ )
+      hypre_BAMGRelax(tv_relax, A_l[l], rhs, tv[l][k]);
+    // 4) destroy relax struct
+    hypre_BAMGRelaxDestroy(tv_relax);
+    // 5) destroy zero vector
+    HYPRE_StructVectorDestroy(rhs);
+
     bamg_dbgmsg("SetupInterpOp l=%d cdir=%d\n", l, cdir);
 
     /* set up interpolation operator */
-    hypre_BAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l]);
-
-    /* set up the restriction operator */
-#if 0
-    /* Allow R != PT for non symmetric case */
-    if (!hypre_StructMatrixSymmetric(A))
-      hypre_BAMGSetupRestrictOp(A_l[l], tx_l[l],
-          cdir, cindex, stride, RT_l[l]);
-#endif
+    hypre_BAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], num_tv1, tv[l]);
 
     bamg_dbgmsg("SetupRAPOp\n");
 
     /* set up the coarse grid operator */
-    hypre_BAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
-        cdir, cindex, stride, A_l[l+1]);
+    hypre_BAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, A_l[l+1]);
 
     /* set up the interpolation routine */
     interp_data_l[l] = hypre_SemiInterpCreate();
-    hypre_SemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l],
-        cindex, findex, stride);
+    hypre_SemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l], cindex, findex, stride);
 
     /* set up the restriction routine */
     restrict_data_l[l] = hypre_SemiRestrictCreate();
-    hypre_SemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1],
-        cindex, findex, stride);
+    hypre_SemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1], cindex, findex, stride);
+
+    // restrict the tv[l] to tv[l+1] (NB: don't need tv's on the coarsest grid)
+    if ( l < num_levels-2 )
+    {
+      for ( k = 0; k < num_tv1; k++ )
+        hypre_SemiRestrict(restrict_data_l[l], RT_l[l], tv[l][k], tv[l+1][k]);
+    }
   }
 
   /*-----------------------------------------------------
@@ -360,31 +375,27 @@ hypre_BAMGSetup( void               *bamg_vdata,
   }
 
   /* set up fine grid relaxation */
-  bamg_dbgmsg("Set Jacobi weights et al.\n");
+  bamg_dbgmsg("set relaxation parameters (relax_type=%d)\n", relax_type);
 
-  relax_data_l[0] = hypre_BAMGRelaxCreate(comm);
-  hypre_BAMGRelaxSetTol(relax_data_l[0], 0.0);
-    
-  hypre_BAMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
-  hypre_BAMGRelaxSetType(relax_data_l[0], relax_type);
-  hypre_BAMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
-  hypre_BAMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+  for (l = 0; l < num_levels; l++)
+  {
+    /* set relaxation parameters */
+    if (active_l[l])
+    {
+      relax_data_l[l] = hypre_BAMGRelaxCreate(comm);
+      hypre_BAMGRelaxSetTol(relax_data_l[l], 0.0);
+      hypre_BAMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+      hypre_BAMGRelaxSetType(relax_data_l[l], relax_type);
+      hypre_BAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
+    }
+    if (l == 0)
+    {
+      hypre_BAMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+    }
+  }
 
   if (num_levels > 1)
   {
-    for (l = 1; l < num_levels; l++)
-    {
-      /* set relaxation parameters */
-      if (active_l[l])
-      {
-        relax_data_l[l] = hypre_BAMGRelaxCreate(comm);
-        hypre_BAMGRelaxSetTol(relax_data_l[l], 0.0);
-        hypre_BAMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
-        hypre_BAMGRelaxSetType(relax_data_l[l], relax_type);
-        hypre_BAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
-      }
-    }
-
     /* change coarsest grid relaxation parameters */
     l = num_levels - 1;
     if (active_l[l])
@@ -448,6 +459,16 @@ hypre_BAMGSetup( void               *bamg_vdata,
   hypre_sprintf(filename, "zout_A.%02d", l);
   hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
+
+  for ( l = 0; l < num_levels; l++ )
+  {
+    for ( k = 0; k < num_tv; k++ )
+    {
+      HYPRE_StructVectorDestroy(tv[l][k]);
+    }
+    hypre_TFree(tv[l]);
+  }
+  hypre_TFree(tv);
 
   bamg_dbgmsg("BAMGSetup finished.\n");
 
