@@ -1548,24 +1548,24 @@ HYPRE_BoomerAMGGetSimple( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetNumGamma
+ * HYPRE_BoomerAMGSetNonGalerkNumTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetNumGamma (HYPRE_Solver solver,
-                               HYPRE_Int num_gamma)
+HYPRE_BoomerAMGSetNonGalerkNumTol (HYPRE_Solver solver,
+                                   HYPRE_Int nongalerk_num_tol)
 {
-   return (hypre_BoomerAMGSetNumGamma ( (void *) solver, num_gamma ) );
+   return (hypre_BoomerAMGSetNonGalerkNumTol ( (void *) solver, nongalerk_num_tol ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetGamma
+ * HYPRE_BoomerAMGSetNonGalerkTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_BoomerAMGSetGamma (HYPRE_Solver solver,
-                               HYPRE_Real *gamma)
+HYPRE_BoomerAMGSetNonGalerkTol (HYPRE_Solver solver,
+                                HYPRE_Real *nongalerk_tol)
 {
-   return (hypre_BoomerAMGSetGamma ( (void *) solver, gamma ) );
+   return (hypre_BoomerAMGSetNonGalerkTol ( (void *) solver, nongalerk_tol ) );
 }
 

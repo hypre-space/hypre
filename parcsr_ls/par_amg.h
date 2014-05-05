@@ -139,8 +139,8 @@ typedef struct
    HYPRE_Real           cheby_fraction;
 
    /* data needed for non-Galerkin option */
-   HYPRE_Int      num_gamma;
-   HYPRE_Real         *gamma;
+   HYPRE_Int           nongalerk_num_tol;
+   HYPRE_Real         *nongalerk_tol;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -405,8 +405,8 @@ typedef struct
 #define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
 
 /* non-Galerkin parameters */
-#define hypre_ParAMGDataNumGamma(amg_data) ((amg_data)->num_gamma)
-#define hypre_ParAMGDataGamma(amg_data) ((amg_data)->gamma)
+#define hypre_ParAMGDataNonGalerkNumTol(amg_data) ((amg_data)->nongalerk_num_tol)
+#define hypre_ParAMGDataNonGalerkTol(amg_data) ((amg_data)->nongalerk_tol)
 
 #endif
 

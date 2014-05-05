@@ -119,7 +119,7 @@ hypre_BoomerAMGCreate()
 
    char     plot_file_name[251] = {0};
 
-   HYPRE_Int num_gamma;
+   HYPRE_Int nongalerk_num_tol;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -217,7 +217,7 @@ hypre_BoomerAMGCreate()
    /* cycle_op_count = 0; */
    debug_flag = 0;
 
-   num_gamma = 0;
+   nongalerk_num_tol = 0;
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
     *-----------------------------------------------------------------------*/
@@ -377,8 +377,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataBVec(amg_data) = NULL;
    hypre_ParAMGDataCommInfo(amg_data) = NULL;
 
-   hypre_ParAMGDataNumGamma(amg_data) = num_gamma;
-   hypre_ParAMGDataGamma(amg_data) = NULL;
+   hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
+   hypre_ParAMGDataNonGalerkTol(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -3735,24 +3735,24 @@ hypre_BoomerAMGGetSimple( void *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetNumGamma( void *data,
-                          HYPRE_Int num_gamma)
+hypre_BoomerAMGSetNonGalerkNumTol( void *data,
+                          HYPRE_Int nongalerk_num_tol)
 {
   HYPRE_Int ierr = 0;
   hypre_ParAMGData *amg_data = data;
 
-  hypre_ParAMGDataNumGamma(amg_data) = num_gamma;
+  hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
   return (ierr);
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetGamma( void *data,
-                             HYPRE_Real *gamma)
+hypre_BoomerAMGSetNonGalerkTol ( void *data,
+                             HYPRE_Real *nongalerk_tol)
 {
   HYPRE_Int ierr = 0;
   hypre_ParAMGData *amg_data = data;
 
-  hypre_ParAMGDataGamma(amg_data) = gamma;
+  hypre_ParAMGDataNonGalerkTol(amg_data) = nongalerk_tol;
   return (ierr);
 }
 

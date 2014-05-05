@@ -558,7 +558,7 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
 
 
 /*
- * Construct sparsity pattern based on R_I A P, plus entries required by drop tolerance, gamma
+ * Construct sparsity pattern based on R_I A P, plus entries required by drop tolerance
  */
 hypre_ParCSRMatrix *
 hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
@@ -710,7 +710,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
     /*
      * Use drop-tolerance to compute new entries for sparsity pattern
      * We drop the entries in RAP starting with the smallest entries in the row, until the
-     * amount dropped is >= gamma || row_i(RAP) ||_1
+     * amount dropped is >= droptol || row_i(RAP) ||_1
      * Because of this cumulative dropping, we have to consider the diag and offd portions
      * simultaneously
      */
