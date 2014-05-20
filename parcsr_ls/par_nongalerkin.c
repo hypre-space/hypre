@@ -189,11 +189,11 @@ hypre_IntersectTwoArrays(HYPRE_Int * x,
  */
 HYPRE_Int
 hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
-                          HYPRE_Real             strength_threshold,
-                          HYPRE_Real             max_row_sum,
-                          HYPRE_Int              num_functions,
-                          HYPRE_Int              *dof_func,
-                          hypre_ParCSRMatrix     **S_ptr)
+                          HYPRE_Real           strength_threshold,
+                          HYPRE_Real           max_row_sum,
+                          HYPRE_Int            num_functions,
+                          HYPRE_Int           *dof_func,
+                          hypre_ParCSRMatrix  **S_ptr)
 {
     MPI_Comm                 comm            = hypre_ParCSRMatrixComm(A);
     hypre_ParCSRCommPkg     *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
@@ -561,8 +561,7 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
  * Construct sparsity pattern based on R_I A P, plus entries required by drop tolerance
  */
 hypre_ParCSRMatrix *
-hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
-                                 hypre_ParCSRMatrix *P,
+hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
                                  hypre_ParCSRMatrix *RAP,
                                  HYPRE_Int * CF_marker,
                                  HYPRE_Real droptol,
@@ -570,18 +569,17 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
                                  HYPRE_Int collapse_beta )
 {
     /* MPI Communicator */
-    MPI_Comm            comm                      = hypre_ParCSRMatrixComm(P);
+    MPI_Comm            comm                      = hypre_ParCSRMatrixComm(RAP);
     
     /* Declare R_IAP */
-    hypre_ParCSRMatrix  *R_IAP                    = NULL;
-    hypre_CSRMatrix     *R_IAP_diag               = NULL;
-    HYPRE_Int           *R_IAP_diag_i             = NULL;
-    HYPRE_Int           *R_IAP_diag_j             = NULL;
+    hypre_CSRMatrix     *R_IAP_diag               = hypre_ParCSRMatrixDiag(R_IAP);
+    HYPRE_Int           *R_IAP_diag_i             = hypre_CSRMatrixI(R_IAP_diag);
+    HYPRE_Int           *R_IAP_diag_j             = hypre_CSRMatrixJ(R_IAP_diag);
     
-    hypre_CSRMatrix     *R_IAP_offd               = NULL;
-    HYPRE_Int           *R_IAP_offd_i             = NULL;
-    HYPRE_Int           *R_IAP_offd_j             = NULL;
-    HYPRE_Int           *col_map_offd_R_IAP       = NULL;
+    hypre_CSRMatrix     *R_IAP_offd               = hypre_ParCSRMatrixOffd(R_IAP);
+    HYPRE_Int           *R_IAP_offd_i             = hypre_CSRMatrixI(R_IAP_offd);
+    HYPRE_Int           *R_IAP_offd_j             = hypre_CSRMatrixJ(R_IAP_offd);
+    HYPRE_Int           *col_map_offd_R_IAP       = hypre_ParCSRMatrixColMapOffd(R_IAP);
     
     /* Declare RAP */
     hypre_CSRMatrix     *RAP_diag             = hypre_ParCSRMatrixDiag(RAP);
@@ -602,8 +600,7 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
     HYPRE_Int            num_variables        = hypre_CSRMatrixNumRows(RAP_diag);
     
     /* Declare A */
-    hypre_CSRMatrix     *A_diag               = hypre_ParCSRMatrixDiag(A);
-    HYPRE_Int            num_fine_variables   = hypre_CSRMatrixNumRows(A_diag);
+    HYPRE_Int            num_fine_variables   = hypre_CSRMatrixNumRows(R_IAP_diag);
     
     /* Declare IJ matrices */
     HYPRE_IJMatrix      Pattern;
@@ -637,19 +634,6 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
     if (num_cols_RAP_offd)
     { RAP_offd_data        = hypre_CSRMatrixData(RAP_offd); }
     
-    
-    /*
-     * Build R_IAP
-     */
-    R_IAP                    = hypre_ParMatmul(A, P);
-    R_IAP_diag               = hypre_ParCSRMatrixDiag(R_IAP);
-    R_IAP_diag_i             = hypre_CSRMatrixI(R_IAP_diag);
-    R_IAP_diag_j             = hypre_CSRMatrixJ(R_IAP_diag);
-    
-    R_IAP_offd               = hypre_ParCSRMatrixOffd(R_IAP);
-    R_IAP_offd_i             = hypre_CSRMatrixI(R_IAP_offd);
-    R_IAP_offd_j             = hypre_CSRMatrixJ(R_IAP_offd);
-    col_map_offd_R_IAP       = hypre_ParCSRMatrixColMapOffd(R_IAP);
     
     /*
      * Initialize the IJ matrix, leveraging our rough knowledge of the
@@ -894,7 +878,6 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
     ierr += HYPRE_IJMatrixGetObject( Pattern, (void**) &Pattern_CSR );
     
     /* Deallocate */
-    ierr += hypre_ParCSRMatrixDestroy(R_IAP);
     if(argsort_offd_allocated_len)
     {   hypre_TFree(argsort_offd);}
     if(argsort_diag_allocated_len)
@@ -909,19 +892,18 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *A,
 
 HYPRE_Int
 hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,  
-						hypre_ParCSRMatrix *P,
-                                              	hypre_ParCSRMatrix *A, 
-						HYPRE_Real strong_threshold, 
-						HYPRE_Real max_row_sum,
-                                              	HYPRE_Int num_functions, 
-						HYPRE_Int * dof_func_value, 
-						HYPRE_Real S_commpkg_switch,
-                                                HYPRE_Int * CF_marker, 
-						HYPRE_Real droptol, HYPRE_Int sym_collapse, 
-                                              	HYPRE_Real lump_percent, HYPRE_Int collapse_beta )
+                                               hypre_ParCSRMatrix *AP,
+                                               HYPRE_Real strong_threshold, 
+                                               HYPRE_Real max_row_sum,
+                                               HYPRE_Int num_functions, 
+                                               HYPRE_Int * dof_func_value, 
+                                               HYPRE_Real S_commpkg_switch,
+                                               HYPRE_Int * CF_marker, 
+                                               HYPRE_Real droptol, HYPRE_Int sym_collapse, 
+                                               HYPRE_Real lump_percent, HYPRE_Int collapse_beta )
 {
     /* Initializations */
-    MPI_Comm            comm                  = hypre_ParCSRMatrixComm(P);
+    MPI_Comm            comm                  = hypre_ParCSRMatrixComm(*RAP_ptr);
     hypre_ParCSRMatrix  *S                    = NULL;
     hypre_ParCSRMatrix  *RAP                  = *RAP_ptr;
     HYPRE_Int           *col_offd_S_to_A      = NULL;
@@ -958,8 +940,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     HYPRE_Real          diagonal_lump_value             = 0.;
     HYPRE_Real          neg_lump_value                  = 0.;
     HYPRE_Real          sum_strong_neigh                = 0.;
-    HYPRE_Int           * rownz_diag                    = NULL;
-    HYPRE_Int           * rownz_offd                    = NULL;
+    HYPRE_Int           * rownz                         = NULL;
     
     /* offd and diag portions of RAP */
     hypre_CSRMatrix     *RAP_diag             = hypre_ParCSRMatrixDiag(RAP);
@@ -1033,7 +1014,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     /* Further Initializations */
     if (num_cols_RAP_offd)
     {   RAP_offd_data = hypre_CSRMatrixData(RAP_offd); }
-    hypre_MPI_Comm_size(comm,&num_procs);
+    hypre_MPI_Comm_size(comm, &num_procs);
     hypre_MPI_Comm_rank(comm, &my_id);
     
     /* Create Strength matrix based on RAP */
@@ -1068,7 +1049,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     /* num_nonzeros_S_diag  = S_diag_i[num_variables]; */
     
     /* Compute Sparsity Pattern  */
-    Pattern                    = hypre_NonGalerkinSparsityPattern(A, P, RAP, CF_marker, droptol, sym_collapse, collapse_beta);
+    Pattern                    = hypre_NonGalerkinSparsityPattern(AP, RAP, CF_marker, droptol, sym_collapse, collapse_beta);
     Pattern_diag               = hypre_ParCSRMatrixDiag(Pattern);
     Pattern_diag_i             = hypre_CSRMatrixI(Pattern_diag);
     Pattern_diag_data          = hypre_CSRMatrixData(Pattern_diag);
@@ -1304,18 +1285,13 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     ierr += HYPRE_IJMatrixCreate(comm, first_col_diag_RAP, last_col_diag_RAP,
                                  first_col_diag_RAP, last_col_diag_RAP, &ijmatrix);
     ierr += HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
-    rownz_diag = hypre_CTAlloc (HYPRE_Int, num_variables);
-    rownz_offd = hypre_CTAlloc (HYPRE_Int, num_variables);
+    rownz = hypre_CTAlloc (HYPRE_Int, num_variables);
     for(i = 0; i < num_variables; i++)
-    {
-        rownz_diag[i] = Pattern_diag_i[i+1] - Pattern_diag_i[i];
-        rownz_offd[i] = Pattern_offd_i[i+1] - Pattern_offd_i[i];
-    }
-    HYPRE_IJMatrixSetDiagOffdSizes (ijmatrix, rownz_diag, rownz_offd);
+    {   rownz[i] = 1.2*(Pattern_diag_i[i+1] - Pattern_diag_i[i]) + 1.2*(Pattern_offd_i[i+1] - Pattern_offd_i[i]); }
+    HYPRE_IJMatrixSetRowSizes(ijmatrix, rownz);
     ierr += HYPRE_IJMatrixInitialize(ijmatrix);
-    hypre_TFree(rownz_diag);
-    hypre_TFree(rownz_offd);
-    
+    hypre_TFree(rownz);
+
     /*
      * Eliminate Entries In RAP_diag
      * */
@@ -1404,8 +1380,6 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                          offd_intersection_data,
                                          &offd_intersection_len);
                 
-                /* JBS: left off here, need to read through the code and insert
-                 * JBS comments on what needs to be done. */
                 
                 /* Now, intersect the indices for the diag block.  Note that S_diag_j does
                  * not have a diagonal entry, so no lumping occurs to the diagonal. */
@@ -1445,7 +1419,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                     {   sum_strong_neigh += fabs(offd_intersection_data[k]); }
                     sum_strong_neigh = RAP_diag_data[j]/sum_strong_neigh;
                     
-                    /* When lumping with the diag_interseciton, must offset column index */
+                    /* When lumping with the diag_intersection, must offset column index */
                     for(k = 0; k < diag_intersection_len; k++)
                     {
                         lump_value = lump_percent * fabs(diag_intersection_data[k])*sum_strong_neigh;
@@ -1483,11 +1457,23 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                         }
                     }
                 }
-                /* If intersection is empty, lump to diagonal */
+                /* If intersection is empty, do not eliminate entry */
                 else
-                {
+                {   
+                    /* Don't forget to update mirror entry if collapsing symmetrically */
+                    if (sym_collapse)
+                    {   lump_value = 0.5*RAP_diag_data[j]; }
+                    else
+                    {   lump_value = RAP_offd_data[j]; }
+
+                    cnt = col_indx_RAP+first_col_diag_RAP;
                     ierr += HYPRE_IJMatrixAddToValues(ijmatrix, 1, &one,
-                                                      &global_row_num, &global_row_num, &(RAP_diag_data[j]) );
+                                          &global_row_num, &cnt, &lump_value );
+                    if (sym_collapse)
+                    {
+                        ierr += HYPRE_IJMatrixAddToValues(ijmatrix, 1, &one,
+                                              &cnt, &global_row_num, &lump_value );
+                    }
                 }
             }
             /* The entry in RAP appears in Pattern, so keep it */
@@ -1695,11 +1681,22 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                             }
                         }
                     }
-                    /* If intersection is empty, lump to diagonal */
+                    /* If intersection is empty, do not eliminate entry */
                     else
                     {
+                        /* Don't forget to update mirror entry if collapsing symmetrically */
+                        if (sym_collapse)
+                        {   lump_value = 0.5*RAP_offd_data[j]; }
+                        else
+                        {   lump_value = RAP_offd_data[j]; }
+
                         ierr += HYPRE_IJMatrixAddToValues(ijmatrix, 1, &one,
-                                                          &global_row_num, &global_row_num, &(RAP_offd_data[j]) );
+                                          &global_row_num, &col_indx_RAP, &lump_value );
+                        if (sym_collapse)
+                        {
+                            ierr += HYPRE_IJMatrixAddToValues(ijmatrix, 1, &one,
+                                          &col_indx_RAP, &global_row_num, &lump_value );
+                        }
                     }
                 }
                 /* The entry in RAP appears in Pattern, so keep it */
@@ -1759,10 +1756,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         hypre_ParCSRMatrixPrintIJ(RAP, 0, 0, filename);
         hypre_sprintf(filename, "RAPc_%d.ij", global_num_vars);
         hypre_ParCSRMatrixPrintIJ(*RAP_ptr, 0, 0, filename);
-        hypre_sprintf(filename, "P_%d.ij", global_num_vars);
-        hypre_ParCSRMatrixPrintIJ(P, 0, 0, filename);
-        hypre_sprintf(filename, "Af_%d.ij", global_num_vars);
-        hypre_ParCSRMatrixPrintIJ(A, 0, 0, filename);
+        hypre_sprintf(filename, "AP_%d.ij", global_num_vars);
+        hypre_ParCSRMatrixPrintIJ(AP, 0, 0, filename);
     }
     
     /* Free matrices and variables and arrays */

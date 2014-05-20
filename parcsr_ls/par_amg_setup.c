@@ -1835,7 +1835,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
             A_H = hypre_ParTMatmul(P,Q);
-            hypre_ParCSRMatrixDestroy(Q);
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
@@ -1869,17 +1868,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (nongalerk_tol_l > 0.0)
          {
             /* Build Non-Galerkin Coarse Grid */
-            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, P, A_array[level], 
+            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
                     strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
-                      nongalerk_tol_l,      1,            0.5,    1.0 );
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
-            hypre_ParCSRMatrixColStarts(P_array[level])
-			= hypre_ParCSRMatrixRowStarts(A_H);
+                      nongalerk_tol_l,      1,            0.5,    1.0 );
+            
+            hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
             if (!hypre_ParCSRMatrixCommPkg(A_H))
                 hypre_MatvecCommPkgCreate(A_H);
 			
          }
+         hypre_ParCSRMatrixDestroy(Q);
+
+
             if (add_P_max_elmts || add_trunc_factor)
             {
                 hypre_BoomerAMGTruncandBuild(P_array[level],
@@ -1927,17 +1929,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if (mult_addlvl == -1 || level < mult_addlvl)
       {
-            /*hypre_ParCSRMatrix *Q = NULL;
-            Q = hypre_ParMatmul(A_array[level],P_array[level]);
-            A_H = hypre_ParTMatmul(P_array[level],Q);
-            hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
-            hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
-            hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
-            hypre_ParCSRMatrixDestroy(Q);
-            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
-            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); */
-         hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                        P_array[level], &A_H); 
+         hypre_ParCSRMatrix *Q = NULL;
+         Q = hypre_ParMatmul(A_array[level],P_array[level]);
+         A_H = hypre_ParTMatmul(P_array[level],Q);
+         hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
+         hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+         hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+         if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+         /* hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
+                                        P_array[level], &A_H); */
 
          /* Set NonGalerkin drop tol on each level */
          if (level < nongalerk_num_tol)
@@ -1946,16 +1947,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          if (nongalerk_tol_l > 0.0)
          {
             /* Build Non-Galerkin Coarse Grid */
-            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, P_array[level], A_array[level], 
+            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
                     strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
-                      nongalerk_tol_l,      1,            0.5,    1.0 );
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
-            hypre_ParCSRMatrixColStarts(P_array[level])
-			= hypre_ParCSRMatrixRowStarts(A_H);
+                      nongalerk_tol_l,      1,            0.5,    1.0 );
+            
             if (!hypre_ParCSRMatrixCommPkg(A_H))
                 hypre_MatvecCommPkgCreate(A_H);
          }
+         hypre_ParCSRMatrixDestroy(Q);
 
       }
  
