@@ -96,10 +96,10 @@ HYPRE_Int hypre_BAMGSetup(
 
   bamg_dbgmsg("Set up coarse grids\n");
 
-  grid  = hypre_StructMatrixGrid(A);
-  ndim  = hypre_StructGridNDim(grid);
+  grid = hypre_StructMatrixGrid(A);
+  ndim = hypre_StructGridNDim(grid);
 
-  /* Compute a new max_levels value based on the grid */
+  /* Set 'max_levels' based on grid */
   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
   max_levels = 2*ndim+1;
   (bamg_data -> max_levels) = max_levels;
@@ -142,23 +142,40 @@ HYPRE_Int hypre_BAMGSetup(
     {
       cmaxsize = 0;
       for (d = 0; d < ndim; d++)
-      {
         cmaxsize = hypre_max(cmaxsize, hypre_BoxSizeD(cbox, d));
-      }
       break;
+    }
+
+    // NB: fail if BoxIMin != (0,0,0,...)! Otherwise, have to change a lot to keep track of offset.
+    for ( d = 0; d < ndim; d++ )
+    {
+      int min_d = hypre_IndexD(hypre_BoxIMin(cbox),d);
+      if ( min_d != 0 )
+      {
+        hypre_printf("Error!\n");
+        hypre_printf("    hypre_IndexD(hypre_BoxIMin(cbox),%d) = %d.\n", d, min_d);
+        hypre_printf("    All IMin must be 0 for BAMG.\n");
+        exit(1);
+      }
     }
 
     /* set cindex, findex, and stride */
     hypre_SetIndex(cindex, 0);
-    hypre_SetIndex(findex, 0); hypre_IndexD(findex,cdir)=1;
-    hypre_SetIndex(stride, 1); hypre_IndexD(stride,cdir)=2;
+    hypre_SetIndex(findex, 0);  hypre_IndexD(findex,cdir) = 1;
+    hypre_SetIndex(stride, 1);  hypre_IndexD(stride,cdir) = 2;
 
-    /* coarsen cbox*/
+    /* coarsen cbox
+      ProjectBox : BoxI{Min,Max} -> stride * coarse BoxI{Min,Max}, e.g., 1:8 -> 2:8, 0:7 -> 0:6
+      MapFinetoCoarse : divide by the stride, e.g., 2:8 -> 1:4, 0:6 -> 0:3
+    */
     hypre_ProjectBox(cbox, cindex, stride);
-    hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride,
-        hypre_BoxIMin(cbox));
-    hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride,
-        hypre_BoxIMax(cbox));
+
+    hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride, hypre_BoxIMin(cbox));
+    hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
+
+    bamg_dbgmsg("2) IMin(cbox): %d %d %d    IMax(cbox): %d %d %d\n",
+                hypre_IndexD(hypre_BoxIMin(cbox),0), hypre_IndexD(hypre_BoxIMin(cbox),1), hypre_IndexD(hypre_BoxIMin(cbox),2),
+                hypre_IndexD(hypre_BoxIMax(cbox),0), hypre_IndexD(hypre_BoxIMax(cbox),1), hypre_IndexD(hypre_BoxIMax(cbox),2));
 
     /* build the interpolation grid */
     hypre_StructCoarsen(grid_l[l], findex, stride, 0, &P_grid_l[l+1]);
@@ -295,7 +312,7 @@ HYPRE_Int hypre_BAMGSetup(
       HYPRE_StructVectorInitialize(tv[l][k]);
       HYPRE_StructVectorAssemble(tv[l][k]);
       if ( l == 0 )
-        hypre_StructVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0));
+        hypre_StructVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0)+k);
     }
   }
 
@@ -303,9 +320,10 @@ HYPRE_Int hypre_BAMGSetup(
   {
     cdir = cdir_l[l];
 
+    /* set cindex, findex, and stride */
     hypre_SetIndex(cindex, 0);
-    hypre_SetIndex(findex, 0); hypre_IndexD(findex,cdir)=1;
-    hypre_SetIndex(stride, 1); hypre_IndexD(stride,cdir)=2;
+    hypre_SetIndex(findex, 0);  hypre_IndexD(findex,cdir) = 1;
+    hypre_SetIndex(stride, 1);  hypre_IndexD(stride,cdir) = 2;
 
     // Smooth the test vectors (just once, in place)
     // 1) set up the rhs for smoothing, zero for now
@@ -333,6 +351,13 @@ HYPRE_Int hypre_BAMGSetup(
     HYPRE_StructVectorDestroy(rhs);
 
     bamg_dbgmsg("SetupInterpOp l=%d cdir=%d\n", l, cdir);
+
+#if DEBUG_BAMG
+  for ( k = 0; k < num_tv1; k++ ) {
+    hypre_sprintf(filename, "tv_l=%d,k=%d.dat", l, k);
+    HYPRE_StructVectorPrint(filename, tv[l][k], 0);
+  }
+#endif
 
     /* set up interpolation operator */
     hypre_BAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], num_tv1, tv[l]);
@@ -368,7 +393,7 @@ HYPRE_Int hypre_BAMGSetup(
    * point.
    *-----------------------------------------------------*/
 
-  if ( hypre_ZeroDiagonal(A_l[l]))
+  if ( hypre_ZeroDiagonal(A_l[l]) )
   {
     bamg_dbgmsg("ZeroDiagonal ...\n");
     active_l[l] = 0;
