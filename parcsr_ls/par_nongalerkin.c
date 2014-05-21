@@ -75,20 +75,6 @@ void hypre_qsort2_abs( HYPRE_Int *v,
     hypre_qsort2_abs(v, w, last+1, right);
 }
 
-/* Re-shuffle array of n entries according to indices, requires a temp array of
- * length n */
-void hypre_ShuffleArray(HYPRE_Real * array, HYPRE_Int n, HYPRE_Real *temp, HYPRE_Int * indices)
-{
-    HYPRE_Int i;
-    
-    for(i = 0; i < n; i++)
-    { temp[indices[i]] = array[i]; }
-    
-    for(i = 0; i < n; i++)
-    { array[i] = temp[i]; }
-    
-}
-
 /* Do an argsort on array.  array is not modified, but the accompanying integer
  * array indices is sorted according array, such that  the indices[k] equals
  * the index for the k-th smallest _in_magnitude_ entry in array */
@@ -97,10 +83,10 @@ hypre_ArgSort(HYPRE_Int * indices, HYPRE_Real * array, HYPRE_Int n, HYPRE_Real *
 {
     /* Create array of indices */
     hypre_Enumerate(indices, n);
-    /* Sort indices and array */
-    hypre_qsort2_abs(indices, array, 0, n-1);
-    /* Put array back into it's original order */
-    hypre_ShuffleArray(array, n, temp, indices);
+    
+    /* Sort indices and temporary copy of array */
+    memcpy(temp, array, sizeof(HYPRE_Real)*n);
+    hypre_qsort2_abs(indices, temp, 0, n-1);
     
     return 0;
 }
@@ -127,55 +113,41 @@ hypre_OneNorm(HYPRE_Real * array, HYPRE_Int n)
  * Assumptions:
  *      z is of length min(x_length, y_length)
  *      x and y are sorted
+ *      x_length and y_length are similar in size, otherwise, 
+ *          looping over the smaller array and doing binary search
+ *          in the longer array is faster.
  * */
 HYPRE_Int
-hypre_IntersectTwoArrays(HYPRE_Int * x,
-                         HYPRE_Real *  x_data,
-                         HYPRE_Int x_length,
-                         HYPRE_Int * y,
-                         HYPRE_Int y_length,
-                         HYPRE_Int * z,
-                         HYPRE_Real    * output_x_data,
-                         HYPRE_Int *intersect_length)
+hypre_IntersectTwoArrays(HYPRE_Int  *x,
+                         HYPRE_Real *x_data,
+                         HYPRE_Int  x_length,
+                         HYPRE_Int  *y,
+                         HYPRE_Int  y_length,
+                         HYPRE_Int  *z,
+                         HYPRE_Real *output_x_data,
+                         HYPRE_Int  *intersect_length)
 {
-    HYPRE_Int * smaller;
-    HYPRE_Int * larger;
-    HYPRE_Int smaller_length, larger_length, i, found;
+    HYPRE_Int x_index = 0;
+    HYPRE_Int y_index = 0;
     *intersect_length = 0;
     
-    
-    /* Which array is smaller? */
-    if(x_length > y_length)
+    /* Compute Intersection, looping over each array */
+    while ( (x_index < x_length) && (y_index < y_length) )
     {
-        smaller = y;
-        smaller_length = y_length;
-        larger = x;
-        larger_length = x_length;
-    }
-    else
-    {
-        smaller = x;
-        smaller_length = x_length;
-        larger = y;
-        larger_length = y_length;
-    }
-    
-    /* Compute Intersection, looping over the smaller array while searching
-     * over the larger array */
-    for(i = 0; i < smaller_length; i++)
-    {
-        
-        found = hypre_BinarySearch(larger, smaller[i], larger_length);
-        if(found != -1)
+        if (x[x_index] > y[y_index]) 
         {
-            /* Update x_data */
-            if( smaller_length == x_length)
-            {   output_x_data[*intersect_length] = x_data[i]; }
-            else
-            {   output_x_data[*intersect_length] = x_data[found]; }
-            
-            /* Update intersection */
-            z[*intersect_length] = smaller[i];
+            y_index = y_index + 1;
+        } 
+        else if (x[x_index] < y[y_index]) 
+        {
+            x_index = x_index + 1;
+        } 
+        else 
+        {
+            z[*intersect_length] = x[x_index];
+            output_x_data[*intersect_length] = x_data[x_index];
+            x_index = x_index + 1;
+            y_index = y_index + 1;
             *intersect_length = *intersect_length + 1;
         }
     }
