@@ -28,6 +28,7 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_struct_ls.h\
  _hypre_struct_ls.h\
+ bamg.h\
  pfmg.h\
  red_black_gs.h\
  smg.h\
@@ -42,6 +43,7 @@ FILES =\
  F90_HYPRE_struct_int.c\
  F90_HYPRE_struct_jacobi.c\
  F90_HYPRE_struct_pcg.c\
+ F90_HYPRE_struct_bamg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
  F90_HYPRE_struct_sparse_msg.c\
@@ -51,6 +53,7 @@ FILES =\
  HYPRE_struct_hybrid.c\
  HYPRE_struct_int.c\
  HYPRE_struct_jacobi.c\
+ HYPRE_struct_bamg.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_sparse_msg.c\
@@ -58,6 +61,12 @@ FILES =\
  HYPRE_struct_gmres.c\
  HYPRE_struct_flexgmres.c\
  HYPRE_struct_lgmres.c\
+ bamg.c\
+ bamg_relax.c\
+ bamg_setup.c\
+ bamg_setup_interp.c\
+ bamg_setup_rap.c\
+ bamg_solve.c\
  jacobi.c\
  pcg_struct.c\
  pfmg2_setup_rap.c\
