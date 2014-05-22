@@ -1285,6 +1285,177 @@ hypre_SStructSetRandomValues(void *v, HYPRE_Int seed);
  *--------------------------------------------------------------------------*/
 /*@}*/
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name SStruct SysBAMG Solver
+ *
+ * SysBAMG is a semicoarsening multigrid solver similar to BAMG, but for systems
+ * of PDEs.  For periodic problems, users should try to set the grid size in
+ * periodic dimensions to be as close to a power-of-two as possible (for more
+ * details, see \Ref{Struct BAMG Solver}).
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGCreate(MPI_Comm             comm,
+                           HYPRE_SStructSolver *solver);
+
+/**
+ * Destroy a solver object.  An object should be explicitly destroyed
+ * using this destructor when the user's code no longer needs direct
+ * access to it.  Once destroyed, the object must not be referenced
+ * again.  Note that the object may not be deallocated at the
+ * completion of this call, since there may be internal package
+ * references to the object.  The object will then be destroyed when
+ * all internal reference counts go to zero.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGDestroy(HYPRE_SStructSolver solver);
+
+/**
+ * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * ignored here, but information about the layout of the data may be used.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetup(HYPRE_SStructSolver solver,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector b,
+                          HYPRE_SStructVector x);
+
+/**
+ * Solve the system.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSolve(HYPRE_SStructSolver solver,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector b,
+                          HYPRE_SStructVector x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetTol(HYPRE_SStructSolver solver,
+                           HYPRE_Real          tol);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetMaxIter(HYPRE_SStructSolver solver,
+                               HYPRE_Int           max_iter);
+
+/**
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetRelChange(HYPRE_SStructSolver solver,
+                                 HYPRE_Int           rel_change);
+
+/**
+ * (Optional) Use a zero initial guess.  This allows the solver to cut corners
+ * in the case where a zero initial guess is needed (e.g., for preconditioning)
+ * to reduce compuational cost.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * (Optional) Use a nonzero initial guess.  This is the default behavior, but
+ * this routine allows the user to switch back after using {\tt SetZeroGuess}.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetNonZeroGuess(HYPRE_SStructSolver solver);
+
+/**
+ * (Optional) Set relaxation type.
+ *
+ * Current relaxation methods set by {\tt relax\_type} are:
+ *
+ * \begin{tabular}{l@{ -- }l}
+ * 0 & Jacobi \\
+ * 1 & Weighted Jacobi (default) \\
+ * 2 & Red/Black Gauss-Seidel (symmetric: RB pre-relaxation, BR post-relaxation) \\
+ * \end{tabular}
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetRelaxType(HYPRE_SStructSolver solver,
+                                 HYPRE_Int           relax_type);
+
+/**
+ * (Optional) Set Jacobi Weight.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetJacobiWeight(HYPRE_SStructSolver solver,
+                                    HYPRE_Real          weight);
+
+/**
+ * (Optional) Set number of relaxation sweeps before coarse-grid correction.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetNumPreRelax(HYPRE_SStructSolver solver,
+                                   HYPRE_Int           num_pre_relax);
+
+/**
+ * (Optional) Set number of relaxation sweeps after coarse-grid correction.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetNumPostRelax(HYPRE_SStructSolver solver,
+                                    HYPRE_Int           num_post_relax);
+
+/**
+ * (Optional) Skip relaxation on certain grids for isotropic problems.  This can
+ * greatly improve efficiency by eliminating unnecessary relaxations when the
+ * underlying problem is isotropic.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetSkipRelax(HYPRE_SStructSolver solver,
+                                 HYPRE_Int           skip_relax);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetDxyz(HYPRE_SStructSolver  solver,
+                            HYPRE_Real          *dxyz);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetLogging(HYPRE_SStructSolver solver,
+                               HYPRE_Int           logging);
+
+/**
+ * (Optional) Set the amount of printing to do to the screen.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGSetPrintLevel(HYPRE_SStructSolver solver,
+                                  HYPRE_Int           print_level);
+
+
+/**
+ * Return the number of iterations taken.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGGetNumIterations(HYPRE_SStructSolver  solver,
+                                     HYPRE_Int           *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+HYPRE_Int
+HYPRE_SStructSysBAMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
+                                                 HYPRE_Real         *norm);
+
+/*@}*/
+
 #ifdef __cplusplus
 }
 #endif

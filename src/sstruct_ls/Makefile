@@ -40,7 +40,8 @@ HEADERS =\
  sstruct_owninfo.h\
  sstruct_recvinfo.h\
  sstruct_sendinfo.h\
- sys_pfmg.h
+ sys_pfmg.h\
+ sys_bamg.h
 
 FILES =\
  F90_HYPRE_sstruct_bicgstab.c\
@@ -53,6 +54,7 @@ FILES =\
  F90_HYPRE_sstruct_pcg.c\
  F90_HYPRE_sstruct_split.c\
  F90_HYPRE_sstruct_sys_pfmg.c\
+ F90_HYPRE_sstruct_sys_bamg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_flexgmres.c\
@@ -63,6 +65,7 @@ FILES =\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
+ HYPRE_sstruct_sys_bamg.c\
  fac.c\
  fac_amr_rap.c\
  fac_amr_fcoarsen.c\
@@ -104,6 +107,12 @@ FILES =\
  sys_pfmg_setup_interp.c\
  sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
+ sys_bamg.c\
+ sys_bamg_relax.c\
+ sys_bamg_setup.c\
+ sys_bamg_setup_interp.c\
+ sys_bamg_setup_rap.c\
+ sys_bamg_solve.c\
  sys_semi_interp.c\
  sys_semi_restrict.c
 

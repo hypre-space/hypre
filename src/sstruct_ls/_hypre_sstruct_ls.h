@@ -748,6 +748,76 @@ HYPRE_Int hypre_SysSemiRestrictSetup ( void *sys_restrict_vdata , hypre_SStructP
 HYPRE_Int hypre_SysSemiRestrict ( void *sys_restrict_vdata , hypre_SStructPMatrix *R , hypre_SStructPVector *r , hypre_SStructPVector *rc );
 HYPRE_Int hypre_SysSemiRestrictDestroy ( void *sys_restrict_vdata );
 
+
+/* HYPRE_sstruct_sys_bamg.c */
+HYPRE_Int HYPRE_SStructSysBAMGCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
+HYPRE_Int HYPRE_SStructSysBAMGDestroy ( HYPRE_SStructSolver solver );
+HYPRE_Int HYPRE_SStructSysBAMGSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+HYPRE_Int HYPRE_SStructSysBAMGSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+HYPRE_Int HYPRE_SStructSysBAMGSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
+HYPRE_Int HYPRE_SStructSysBAMGSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_SStructSysBAMGSetRelChange ( HYPRE_SStructSolver solver , HYPRE_Int rel_change );
+HYPRE_Int HYPRE_SStructSysBAMGSetZeroGuess ( HYPRE_SStructSolver solver );
+HYPRE_Int HYPRE_SStructSysBAMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
+HYPRE_Int HYPRE_SStructSysBAMGSetRelaxType ( HYPRE_SStructSolver solver , HYPRE_Int relax_type );
+HYPRE_Int HYPRE_SStructSysBAMGSetJacobiWeight ( HYPRE_SStructSolver solver , HYPRE_Real weight );
+HYPRE_Int HYPRE_SStructSysBAMGSetNumPreRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_pre_relax );
+HYPRE_Int HYPRE_SStructSysBAMGSetNumPostRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_post_relax );
+HYPRE_Int HYPRE_SStructSysBAMGSetSkipRelax ( HYPRE_SStructSolver solver , HYPRE_Int skip_relax );
+HYPRE_Int HYPRE_SStructSysBAMGSetDxyz ( HYPRE_SStructSolver solver , HYPRE_Real *dxyz );
+HYPRE_Int HYPRE_SStructSysBAMGSetLogging ( HYPRE_SStructSolver solver , HYPRE_Int logging );
+HYPRE_Int HYPRE_SStructSysBAMGSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int print_level );
+HYPRE_Int HYPRE_SStructSysBAMGGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_SStructSysBAMGGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
+
+/* sys_bamg.c */
+void *hypre_SysBAMGCreate ( MPI_Comm comm );
+HYPRE_Int hypre_SysBAMGDestroy ( void *sys_bamg_vdata );
+HYPRE_Int hypre_SysBAMGSetTol ( void *sys_bamg_vdata , HYPRE_Real tol );
+HYPRE_Int hypre_SysBAMGSetMaxIter ( void *sys_bamg_vdata , HYPRE_Int max_iter );
+HYPRE_Int hypre_SysBAMGSetRelChange ( void *sys_bamg_vdata , HYPRE_Int rel_change );
+HYPRE_Int hypre_SysBAMGSetZeroGuess ( void *sys_bamg_vdata , HYPRE_Int zero_guess );
+HYPRE_Int hypre_SysBAMGSetRelaxType ( void *sys_bamg_vdata , HYPRE_Int relax_type );
+HYPRE_Int hypre_SysBAMGSetJacobiWeight ( void *sys_bamg_vdata , HYPRE_Real weight );
+HYPRE_Int hypre_SysBAMGSetNumPreRelax ( void *sys_bamg_vdata , HYPRE_Int num_pre_relax );
+HYPRE_Int hypre_SysBAMGSetNumPostRelax ( void *sys_bamg_vdata , HYPRE_Int num_post_relax );
+HYPRE_Int hypre_SysBAMGSetSkipRelax ( void *sys_bamg_vdata , HYPRE_Int skip_relax );
+HYPRE_Int hypre_SysBAMGSetDxyz ( void *sys_bamg_vdata , HYPRE_Real *dxyz );
+HYPRE_Int hypre_SysBAMGSetLogging ( void *sys_bamg_vdata , HYPRE_Int logging );
+HYPRE_Int hypre_SysBAMGSetPrintLevel ( void *sys_bamg_vdata , HYPRE_Int print_level );
+HYPRE_Int hypre_SysBAMGGetNumIterations ( void *sys_bamg_vdata , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SysBAMGPrintLogging ( void *sys_bamg_vdata , HYPRE_Int myid );
+HYPRE_Int hypre_SysBAMGGetFinalRelativeResidualNorm ( void *sys_bamg_vdata , HYPRE_Real *relative_residual_norm );
+
+/* sys_bamg_relax.c */
+void *hypre_SysBAMGRelaxCreate ( MPI_Comm comm );
+HYPRE_Int hypre_SysBAMGRelaxDestroy ( void *sys_bamg_relax_vdata );
+HYPRE_Int hypre_SysBAMGRelax ( void *sys_bamg_relax_vdata , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
+HYPRE_Int hypre_SysBAMGRelaxSetup ( void *sys_bamg_relax_vdata , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
+HYPRE_Int hypre_SysBAMGRelaxSetType ( void *sys_bamg_relax_vdata , HYPRE_Int relax_type );
+HYPRE_Int hypre_SysBAMGRelaxSetJacobiWeight ( void *sys_bamg_relax_vdata , HYPRE_Real weight );
+HYPRE_Int hypre_SysBAMGRelaxSetPreRelax ( void *sys_bamg_relax_vdata );
+HYPRE_Int hypre_SysBAMGRelaxSetPostRelax ( void *sys_bamg_relax_vdata );
+HYPRE_Int hypre_SysBAMGRelaxSetTol ( void *sys_bamg_relax_vdata , HYPRE_Real tol );
+HYPRE_Int hypre_SysBAMGRelaxSetMaxIter ( void *sys_bamg_relax_vdata , HYPRE_Int max_iter );
+HYPRE_Int hypre_SysBAMGRelaxSetZeroGuess ( void *sys_bamg_relax_vdata , HYPRE_Int zero_guess );
+HYPRE_Int hypre_SysBAMGRelaxSetTempVec ( void *sys_bamg_relax_vdata , hypre_SStructPVector *t );
+
+/* sys_bamg_setup.c */
+HYPRE_Int hypre_SysBAMGSetup ( void *sys_bamg_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *b_in , hypre_SStructVector *x_in );
+HYPRE_Int hypre_SysBAMGCoarsen ( hypre_SStructPGrid *fgrid , hypre_Index index , hypre_Index stride , HYPRE_Int prune , hypre_SStructPGrid **cgrid_ptr );
+
+/* sys_bamg_setup_interp.c */
+hypre_SStructPMatrix *hypre_SysBAMGCreateInterpOp ( hypre_SStructPMatrix *A , hypre_SStructPGrid *cgrid , HYPRE_Int cdir );
+HYPRE_Int hypre_SysBAMGSetupInterpOp ( hypre_SStructPMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_SStructPMatrix *P );
+
+/* sys_bamg_setup_rap.c */
+hypre_SStructPMatrix *hypre_SysBAMGCreateRAPOp ( hypre_SStructPMatrix *R , hypre_SStructPMatrix *A , hypre_SStructPMatrix *P , hypre_SStructPGrid *coarse_grid , HYPRE_Int cdir );
+HYPRE_Int hypre_SysBAMGSetupRAPOp ( hypre_SStructPMatrix *R , hypre_SStructPMatrix *A , hypre_SStructPMatrix *P , HYPRE_Int cdir , hypre_Index cindex , hypre_Index cstride , hypre_SStructPMatrix *Ac );
+
+/* sys_bamg_solve.c */
+HYPRE_Int hypre_SysBAMGSolve ( void *sys_bamg_vdata , hypre_SStructMatrix *A_in , hypre_SStructVector *b_in , hypre_SStructVector *x_in );
+
 #ifdef __cplusplus
 }
 #endif

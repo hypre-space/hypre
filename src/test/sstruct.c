@@ -2156,6 +2156,7 @@ PrintUsage( char *progname,
       hypre_printf("                        10 - PCG with SMG split precond\n");
       hypre_printf("                        11 - PCG with PFMG split precond\n");
       hypre_printf("                        13 - PCG with SysPFMG precond\n");
+      hypre_printf("                        14 - PCG with SysBAMG precond\n");
       hypre_printf("                        18 - PCG with diagonal scaling\n");
       hypre_printf("                        19 - PCG\n");
       hypre_printf("                        20 - PCG with BoomerAMG precond\n");
@@ -3687,6 +3688,7 @@ main( hypre_int argc,
 
       else if (solver_id == 13)
       {
+         hypre_printf("Use SysPFMG solver as preconditioner\n");
          /* use SysPFMG solver as preconditioner */
          HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
@@ -3705,6 +3707,30 @@ main( hypre_int argc,
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+                              (HYPRE_Solver) precond);
+
+      }
+      else if (solver_id == 14)
+      {
+         hypre_printf("Use SysBAMG solver as preconditioner\n");
+         /* use SysBAMG solver as preconditioner */
+         HYPRE_SStructSysBAMGCreate(hypre_MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSysBAMGSetMaxIter(precond, 1);
+         HYPRE_SStructSysBAMGSetTol(precond, 0.0);
+         HYPRE_SStructSysBAMGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_SStructSysBAMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_SStructSysBAMGSetJacobiWeight(precond, jacobi_weight);
+         }
+         HYPRE_SStructSysBAMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSysBAMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSysBAMGSetSkipRelax(precond, skip);
+         /*HYPRE_StructBAMGSetDxyz(precond, dxyz);*/
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSysBAMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSysBAMGSetup,
                               (HYPRE_Solver) precond);
 
       }
@@ -3748,6 +3774,10 @@ main( hypre_int argc,
       else if (solver_id == 13)
       {
          HYPRE_SStructSysPFMGDestroy(precond);
+      }
+      else if (solver_id == 14)
+      {
+         HYPRE_SStructSysBAMGDestroy(precond);
       }
    }
 
