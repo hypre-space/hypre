@@ -1929,23 +1929,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if (mult_addlvl == -1 || level < mult_addlvl)
       {
-         hypre_ParCSRMatrix *Q = NULL;
-         Q = hypre_ParMatmul(A_array[level],P_array[level]);
-         A_H = hypre_ParTMatmul(P_array[level],Q);
-         hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
-         hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
-         hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
-         hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
-         if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
-         /* hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                        P_array[level], &A_H); */
-
          /* Set NonGalerkin drop tol on each level */
          if (level < nongalerk_num_tol)
             nongalerk_tol_l = nongalerk_tol[level];
 
          if (nongalerk_tol_l > 0.0)
          {
+            /* Construct AP, and then RAP */
+            hypre_ParCSRMatrix *Q = NULL;
+            Q = hypre_ParMatmul(A_array[level],P_array[level]);
+            A_H = hypre_ParTMatmul(P_array[level],Q);
+            hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
+            hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+            hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+            
             /* Build Non-Galerkin Coarse Grid */
             hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
                     strong_threshold, max_row_sum, num_functions, 
@@ -1955,8 +1954,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             
             if (!hypre_ParCSRMatrixCommPkg(A_H))
                 hypre_MatvecCommPkgCreate(A_H);
+            
+            /* Delete AP */
+            hypre_ParCSRMatrixDestroy(Q);
          }
-         hypre_ParCSRMatrixDestroy(Q);
+         else
+         {
+            /* Compute standard Galerkin coarse-grid product */
+            hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
+                                        P_array[level], &A_H);
+         }
 
       }
  
