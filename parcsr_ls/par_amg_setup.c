@@ -1869,7 +1869,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             /* Build Non-Galerkin Coarse Grid */
             hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
-                    strong_threshold, max_row_sum, num_functions, 
+                    0.333*strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
@@ -1947,7 +1947,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             
             /* Build Non-Galerkin Coarse Grid */
             hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
-                    strong_threshold, max_row_sum, num_functions, 
+                    0.333*strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
