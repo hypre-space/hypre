@@ -1377,8 +1377,6 @@ HYPRE_Int hypre_GrabSubArray ( HYPRE_Int *indices , HYPRE_Int start , HYPRE_Int 
 HYPRE_Int hypre_Enumerate ( HYPRE_Int *array , HYPRE_Int n );
 void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_ShuffleArray ( HYPRE_Real *array , HYPRE_Int n , HYPRE_Real *temp , HYPRE_Int *indices );
-HYPRE_Int hypre_ArgSort ( HYPRE_Int *indices , HYPRE_Real *array , HYPRE_Int n , HYPRE_Real *temp );
-HYPRE_Real hypre_OneNorm ( HYPRE_Real *array , HYPRE_Int n );
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
 hypre_ParCSRMatrix *hypre_NonGalerkinSparsityPattern ( hypre_ParCSRMatrix *R_IAP , hypre_ParCSRMatrix *RAP , HYPRE_Int *CF_marker , HYPRE_Real droptol , HYPRE_Int sym_collapse , HYPRE_Int collapse_beta );

@@ -61,37 +61,6 @@ void hypre_qsort2_abs( HYPRE_Int *v,
     hypre_qsort2_abs(v, w, last+1, right);
 }
 
-/* Do an argsort on array.  array is not modified, but the accompanying integer
- * array indices is sorted according array, such that  the indices[k] equals
- * the index for the k-th smallest _in_magnitude_ entry in array */
-HYPRE_Int
-hypre_ArgSort(HYPRE_Int * indices, HYPRE_Real * array, HYPRE_Int n, HYPRE_Real * temp)
-{
-    HYPRE_Int i;
-
-    /* Create array of indices */
-    for(i = 0; i < n; i++)
-    {   indices[i] = i; }
-    
-    /* Sort indices and temporary copy of array */
-    memcpy(temp, array, sizeof(HYPRE_Real)*n);
-    hypre_qsort2_abs(indices, temp, 0, n-1);
-    
-    return 0;
-}
-
-/* Compute the one-norm of this array */
-HYPRE_Real
-hypre_OneNorm(HYPRE_Real * array, HYPRE_Int n)
-{
-    HYPRE_Int i;
-    HYPRE_Real onenorm = 0.0;
-    
-    for(i = 0; i < n; i++)
-    {   onenorm += fabs(array[i]); }
-    return onenorm;
-}
-
 /* Compute the intersection of x and y, placing
  * the intersection in z.  Additionally, the array
  * x_data is associated with x, i.e., the entries
@@ -1445,7 +1414,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
              * col_ind_RAP value */
             else if(col_indx_RAP > col_indx_Pattern)
             {
-                for(current_Pattern_j = Pattern_diag_i[i]; current_Pattern_j < Pattern_diag_i[i+1]; current_Pattern_j++)
+                for(current_Pattern_j; current_Pattern_j < Pattern_diag_i[i+1]; current_Pattern_j++)
                 {
                     col_indx_Pattern = Pattern_diag_j[current_Pattern_j];
                     if(col_indx_RAP <= col_indx_Pattern)
@@ -1668,7 +1637,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                  * col_ind_RAP value */
                 else if(col_indx_RAP > col_indx_Pattern)
                 {
-                    for(current_Pattern_j=Pattern_offd_i[i]; current_Pattern_j < Pattern_offd_i[i+1]; current_Pattern_j++)
+                    for(current_Pattern_j; current_Pattern_j < Pattern_offd_i[i+1]; current_Pattern_j++)
                     {
                         col_indx_Pattern = col_map_offd_Pattern[ Pattern_offd_j[current_Pattern_j] ];
                         if(col_indx_RAP <= col_indx_Pattern)
