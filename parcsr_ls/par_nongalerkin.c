@@ -598,12 +598,10 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
     hypre_CSRMatrix     *R_IAP_diag               = hypre_ParCSRMatrixDiag(R_IAP);
     HYPRE_Int           *R_IAP_diag_i             = hypre_CSRMatrixI(R_IAP_diag);
     HYPRE_Int           *R_IAP_diag_j             = hypre_CSRMatrixJ(R_IAP_diag);
-    HYPRE_Real          *R_IAP_diag_data          = hypre_CSRMatrixData(R_IAP_diag);
     
     hypre_CSRMatrix     *R_IAP_offd               = hypre_ParCSRMatrixOffd(R_IAP);
     HYPRE_Int           *R_IAP_offd_i             = hypre_CSRMatrixI(R_IAP_offd);
     HYPRE_Int           *R_IAP_offd_j             = hypre_CSRMatrixJ(R_IAP_offd);
-    HYPRE_Real          *R_IAP_offd_data          = hypre_CSRMatrixData(R_IAP_offd);
     HYPRE_Int           *col_map_offd_R_IAP       = hypre_ParCSRMatrixColMapOffd(R_IAP);
     
     /* Declare RAP */
@@ -1414,7 +1412,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
              * col_ind_RAP value */
             else if(col_indx_RAP > col_indx_Pattern)
             {
-                for(current_Pattern_j; current_Pattern_j < Pattern_diag_i[i+1]; current_Pattern_j++)
+                for(; current_Pattern_j < Pattern_diag_i[i+1]; current_Pattern_j++)
                 {
                     col_indx_Pattern = Pattern_diag_j[current_Pattern_j];
                     if(col_indx_RAP <= col_indx_Pattern)
@@ -1637,7 +1635,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                  * col_ind_RAP value */
                 else if(col_indx_RAP > col_indx_Pattern)
                 {
-                    for(current_Pattern_j; current_Pattern_j < Pattern_offd_i[i+1]; current_Pattern_j++)
+                    for(; current_Pattern_j < Pattern_offd_i[i+1]; current_Pattern_j++)
                     {
                         col_indx_Pattern = col_map_offd_Pattern[ Pattern_offd_j[current_Pattern_j] ];
                         if(col_indx_RAP <= col_indx_Pattern)
