@@ -1,0 +1,32 @@
+
+# The following describes the format of the input file
+
+ndim  <num matrices>
+
+0 <matrix 0 name>
+ncoeffs
+rmap
+dmap
+shape[0]
+shape[1]
+...
+
+1 <matrix 1 name>
+ncoeffs
+rmap
+dmap
+shape[0]
+shape[1]
+...
+
+  .
+  .
+  .
+
+<num matrix products>
+<num terms in product 0> <matrix id>[t] <matrix id>[t] ...
+<num terms in product 1> <matrix id>[t] <matrix id>[t] ...
+
+  .
+  .
+  .

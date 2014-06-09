@@ -10,34 +10,32 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-CDEFS = ${HYPREDEFS} -DHYPRE_TIMING
+CDEFS = 
 
-C_COMPILE_FLAGS =\
- -I$(srcdir)/../utilities\
- -I$(srcdir)/../struct_mv\
- ${CINCLUDES} ${CDEFS}
+C_COMPILE_FLAGS = \
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I${HYPRE_BUILD_DIR}/include\
+ ${CINCLUDES}\
+ ${CDEFS}
 
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LIBFLAGS = ${LIBDIRS} ${LIBS}
-LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS}
 
 LFLAGS =\
- -L../struct_mv\
- -L../utilities\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ -L${HYPRE_BUILD_DIR}/lib\
+ -lHYPRE\
+ ${MPILIBFLAGS}\
+ ${LIBFLAGS}
 
 ##################################################################
 # Targets
 ##################################################################
 
-all: 
+all: stencilmult
 
 install: all
 	cp -f V[1-9]* $$HYPRE_INSTALL_DIR/bin/.
@@ -55,6 +53,10 @@ veryclean: clean
 ##################################################################
 # Rules
 ##################################################################
+
+stencilmult: stencilmult.o
+	@echo  "Linking" $@ "... "
+	${CC} -o stencilmult stencilmult.o ${LFLAGS}
 
 one_to_many: one_to_many.o
 	@echo  "Linking" $@ "... "

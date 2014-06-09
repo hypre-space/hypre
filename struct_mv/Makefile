@@ -32,6 +32,7 @@ HEADERS =\
  struct_grid.h\
  struct_matrix.h\
  struct_stencil.h\
+ struct_stmatrix.h\
  struct_vector.h
 
 FILES =\
@@ -62,6 +63,7 @@ FILES =\
  struct_matvec.c\
  struct_scale.c\
  struct_stencil.c\
+ struct_stmatrix.c\
  struct_vector.c
 
 OBJS = ${FILES:.c=.o}
