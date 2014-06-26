@@ -35,6 +35,11 @@
  * macros are also row-stencil based, regardless of the underlying storage.
  * Each stencil entry can have either constant or variable coefficients as
  * indicated by the stencil-sized array 'constant'.
+ *
+ * The 'data' pointer below has space at the beginning for constant stencil
+ * coefficient values followed by the stored variable coefficient values.
+ * Accessing coefficients is done via 'data_indices' through the interface
+ * routine hypre_StructMatrixBoxData().
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructMatrix_struct
@@ -45,24 +50,22 @@ typedef struct hypre_StructMatrix_struct
    hypre_StructGrid     *domain_grid;  /* Same as grid by default */
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int             num_values;   /* Number of "stored" coefficients */
    HYPRE_Int            *constant;     /* Which stencil entries are constant? */
    hypre_Index           rmap, dmap;   /* Range and domain coarsening maps */
 
    hypre_BoxArray       *data_space;
 
-   /* RDF: Idea - always leave space at the beginning of the 'data' array for
-    * constant stencil coefficient values, then use 'data_indices' to provide a
-    * uniform data interface in hypre_StructMatrixBoxData() */
-
    HYPRE_Complex        *data;         /* Pointer to matrix data */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of matrix data */
-   HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
+   HYPRE_Int           **data_indices; /* Num boxes by stencil-size array
                                           of indices into the data array.
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
+   HYPRE_Int             vdata_offset; /* Offset to variable-coeff matrix data */
+   HYPRE_Int             num_values;   /* Number of "stored" variable coeffs */
+   HYPRE_Int             num_cvalues;  /* Number of "stored" constant coeffs */
    HYPRE_Int             israngedata;  /* {1, 0} -> {range, domain}-based data */
 
    HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
@@ -92,7 +95,6 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDomainGrid(matrix)    ((matrix) -> domain_grid)
 #define hypre_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
 #define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)
-#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixConstant(matrix)      ((matrix) -> constant)
 #define hypre_StructMatrixConstEntry(matrix, s) ((matrix) -> constant[s])
 #define hypre_StructMatrixRMap(matrix)          ((matrix) -> rmap)
@@ -102,6 +104,9 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
+#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
+#define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
 #define hypre_StructMatrixIsRangeData(matrix)   ((matrix) -> israngedata)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
@@ -117,17 +122,14 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 
+#define hypre_StructMatrixVData(matrix) \
+(hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
+
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-
-/* RDF: Try to phase out the following macros */
 
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
-
-#define hypre_CCStructMatrixBoxDataValue(matrix, b, s, index) \
-(hypre_StructMatrixBoxData(matrix, b, s) + \
- hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif

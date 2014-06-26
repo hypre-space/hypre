@@ -189,8 +189,10 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int         *stencil_indices,
                                      HYPRE_Complex     *values )
 {
-   return hypre_StructMatrixSetConstantValues(
-      matrix, num_stencil_indices, stencil_indices, values, 0 );
+   hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
+                                       stencil_indices, values, 0);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -266,8 +268,10 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Int         *stencil_indices,
                                        HYPRE_Complex     *values )
 {
-   return hypre_StructMatrixSetConstantValues(
-      matrix, num_stencil_indices, stencil_indices, values, 1 );
+   hypre_StructMatrixSetConstantValues(matrix, num_stencil_indices,
+                                       stencil_indices, values, 1);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -318,25 +322,16 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructMatrixSetConstantEntries
- * Call this function to declare that certain stencil points are constant
- * throughout the mesh.
- * - nentries is the number of array entries
- * - Each HYPRE_Int entries[i] is an index into the shape array of the stencil of the
- * matrix.
- * In the present version, only three possibilites are recognized:
- * - no entries constant                 (constant_coefficient==0)
- * - all entries constant                (constant_coefficient==1)
- * - all but the diagonal entry constant (constant_coefficient==2)
- * If something else is attempted, this function will return a nonzero error.
- * In the present version, if this function is called more than once, only
- * the last call will take effect.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
-                                           HYPRE_Int           nentries,
-                                           HYPRE_Int          *entries )
+HYPRE_Int
+HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
+                                      HYPRE_Int           nentries,
+                                      HYPRE_Int          *entries )
 {
-   return hypre_StructMatrixSetConstantEntries( matrix, nentries, entries );
+   hypre_StructMatrixSetConstantEntries(matrix, nentries, entries);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

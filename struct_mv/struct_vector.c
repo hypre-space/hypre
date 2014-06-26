@@ -1030,9 +1030,8 @@ hypre_StructVectorPrint( const char         *filename,
 
    hypre_StructGrid  *grid;
    hypre_BoxArray    *boxes;
-
    hypre_BoxArray    *data_space;
-
+   HYPRE_Int          value_id;
    HYPRE_Int          myid;
 
    /*----------------------------------------
@@ -1067,12 +1066,17 @@ hypre_StructVectorPrint( const char         *filename,
    data_space = hypre_StructVectorDataSpace(vector);
 
    if (all)
+   {
       boxes = data_space;
+   }
    else
+   {
       boxes = hypre_StructGridBoxes(grid);
+   }
 
    hypre_fprintf(file, "\nData:\n");
-   hypre_PrintBoxArrayData(file, boxes, data_space, 1,
+   value_id = 0;
+   hypre_PrintBoxArrayData(file, boxes, data_space, 1, &value_id,
                            hypre_StructGridNDim(grid),
                            hypre_StructVectorData(vector));
  

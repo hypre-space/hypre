@@ -227,7 +227,7 @@ HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
-HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
+HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int *value_ids , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_elements , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_PrintCCBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
@@ -248,7 +248,6 @@ HYPRE_Int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix , hypre_Ind
 HYPRE_Int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix , hypre_Box *clear_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_StructMatrixSetConstantCoefficient ( hypre_StructMatrix *matrix , HYPRE_Int constant_coefficient );
 HYPRE_Int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix , HYPRE_Int nentries , HYPRE_Int *entries );
 HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *matrix , HYPRE_Int all );
@@ -263,9 +262,6 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , 
 void *hypre_StructMatvecCreate ( void );
 HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecCC0 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
-HYPRE_Int hypre_StructMatvecCC1 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
-HYPRE_Int hypre_StructMatvecCC2 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 

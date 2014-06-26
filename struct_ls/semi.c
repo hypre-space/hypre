@@ -134,8 +134,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_StructMatrixCommPkg(P) = comm_pkg;
 
    hypre_InitializeCommunication(comm_pkg,
-                                 hypre_StructMatrixData(P),
-                                 hypre_StructMatrixData(P), 0, 0,
+                                 hypre_StructMatrixVData(P),
+                                 hypre_StructMatrixVData(P), 0, 0,
                                  &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 

@@ -39,8 +39,8 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
-   HYPRE_Int              P_stored_as_transpose = 0;
    HYPRE_Int              constant_coefficient;
+   HYPRE_Int              P_stored_as_transpose = 0;
 
    stencil = hypre_StructMatrixStencil(A);
 
@@ -77,17 +77,37 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                                   P_stored_as_transpose);
    }
 
-
+   /* Set up constant stencil entries */
+   /* Exclude the Galerkin case (rap_type == 0) when A has variable diagonal,
+    * because then RAP is entirely variable coefficient. */
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient==2 && rap_type==0 )
+   if ((constant_coefficient) && !(constant_coefficient == 2 && rap_type == 0))
    {
-      /* A has variable diagonal, so, in the Galerkin case, P (and R) is
-         entirely variable coefficient.  Thus RAP will be variable coefficient */
-      hypre_StructMatrixSetConstantCoefficient( RAP, 0 );
-   }
-   else
-   {
-      hypre_StructMatrixSetConstantCoefficient( RAP, constant_coefficient );
+      HYPRE_Int *entries, nentries, i;
+
+      stencil = hypre_StructMatrixUserStencil(RAP);
+      nentries = hypre_StructStencilSize(stencil);
+      entries = hypre_TAlloc(HYPRE_Int, nentries);
+      for (i = 0; i < nentries; i++)
+      {
+         entries[i] = i;
+      }
+      if (constant_coefficient == 2)
+      {
+         hypre_Index  diag_index;
+         HYPRE_Int    diag_rank;
+
+         /* Make the diagonal variable */
+         hypre_SetIndex(diag_index, 0);
+         diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+         nentries -= 1;
+         for (i = diag_rank; i < nentries; i++)
+         {
+            entries[i] = entries[i+1];
+         }
+      }
+      hypre_StructMatrixSetConstantEntries(RAP, nentries, entries);
+      hypre_TFree(entries);
    }
 
    return RAP;

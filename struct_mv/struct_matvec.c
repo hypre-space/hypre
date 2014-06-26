@@ -129,7 +129,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int                Ai;
    HYPRE_Int                xi;
    hypre_BoxArray          *compute_box_a;
-   hypre_Box               *compute_box, *rbox;
+   hypre_Box               *compute_box;
                           
    hypre_Box               *A_data_box;
    hypre_Box               *x_data_box;
@@ -192,7 +192,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     * ghost layers for communication, then copy the original x into that.
     * Alternatively (and maybe even better), write a "grow" and "shrink" routine
     * that will add or remove ghost layers from a given vector, possibly doing
-    * it "in place" using ReAlloc() and careful reorginazation of the data.  For
+    * it "in place" using ReAlloc() and careful reorganization of the data.  For
     * now, just assume that x has already been modified appropriately. */
    /* xorig = x; */
    /* create new x */
@@ -313,25 +313,40 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   start = hypre_BoxIMin(box);
                }
 
-               /* TODO: Check hypre_StructMatrixConstEntry(A, si) to see if this
-                * is a constant coefficient, and if so, branch to a different
-                * boxloop computation */
-
                Ap = hypre_StructMatrixBoxData(A, i, si);
                xoff = hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
-               hypre_BoxLoop3Begin(ndim, loop_size,
-                                   A_data_box, start, stride, Ai,
-                                   x_data_box, start, stride, xi,
-                                   y_data_box, start, stride, yi);
+               if (hypre_StructMatrixConstEntry(A, si))
+               {
+                  /* Constant coefficient case */
+                  hypre_BoxLoop2Begin(ndim, loop_size,
+                                      x_data_box, start, stride, xi,
+                                      y_data_box, start, stride, yi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop2For(xi, yi)
+                  {
+                     yp[yi] += Ap[0] * xp[xi + xoff];
+                  }
+                  hypre_BoxLoop2End(xi, yi);
+               }
+               else
+               {
+                  /* Variable coefficient case */
+                  hypre_BoxLoop3Begin(ndim, loop_size,
+                                      A_data_box, start, stride, Ai,
+                                      x_data_box, start, stride, xi,
+                                      y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop3For(Ai, xi, yi)
-               {
-                  yp[yi] += Ap[Ai] * xp[xi + xoff];
+                  hypre_BoxLoop3For(Ai, xi, yi)
+                  {
+                     yp[yi] += Ap[Ai] * xp[xi + xoff];
+                  }
+                  hypre_BoxLoop3End(Ai, xi, yi);
                }
-               hypre_BoxLoop3End(Ai, xi, yi);
             }
 
             if (alpha != 1.0)
@@ -351,7 +366,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       }
    }
    
-   hypre_StructVectorDestroy(x);
+   /* hypre_StructVectorDestroy(x); */
 
    return hypre_error_flag;
 }

@@ -52,22 +52,17 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_StructMatrixSetNumGhost(P, num_ghost);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient==2 )
+   if ((constant_coefficient) && !(constant_coefficient == 2 && rap_type == 0))
    {
-      if ( rap_type==0 )
-         /* A has variable diagonal, which will force all P coefficients to be variable */
-         hypre_StructMatrixSetConstantCoefficient(P, 0 );
-      else
+      HYPRE_Int *entries;
+
+      entries = hypre_TAlloc(HYPRE_Int, stencil_size);
+      for (i = 0; i < stencil_size; i++)
       {
-         /* We will force P to be 0.5's everywhere, ignoring A. */
-         hypre_StructMatrixSetConstantCoefficient(P, 1);
+         entries[i] = i;
       }
-   }
-   else
-   {
-      /* constant_coefficient = 0 or 1: A is entirely constant or entirely
-         variable coefficient */
-      hypre_StructMatrixSetConstantCoefficient( P, constant_coefficient );
+      hypre_StructMatrixSetConstantEntries(P, stencil_size, entries);
+      hypre_TFree(entries);
    }
 
    hypre_StructStencilDestroy(stencil);

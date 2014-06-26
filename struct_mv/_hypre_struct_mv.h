@@ -1832,6 +1832,11 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
  * macros are also row-stencil based, regardless of the underlying storage.
  * Each stencil entry can have either constant or variable coefficients as
  * indicated by the stencil-sized array 'constant'.
+ *
+ * The 'data' pointer below has space at the beginning for constant stencil
+ * coefficient values followed by the stored variable coefficient values.
+ * Accessing coefficients is done via 'data_indices' through the interface
+ * routine hypre_StructMatrixBoxData().
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructMatrix_struct
@@ -1842,24 +1847,22 @@ typedef struct hypre_StructMatrix_struct
    hypre_StructGrid     *domain_grid;  /* Same as grid by default */
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int             num_values;   /* Number of "stored" coefficients */
    HYPRE_Int            *constant;     /* Which stencil entries are constant? */
    hypre_Index           rmap, dmap;   /* Range and domain coarsening maps */
 
    hypre_BoxArray       *data_space;
 
-   /* RDF: Idea - always leave space at the beginning of the 'data' array for
-    * constant stencil coefficient values, then use 'data_indices' to provide a
-    * uniform data interface in hypre_StructMatrixBoxData() */
-
    HYPRE_Complex        *data;         /* Pointer to matrix data */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of matrix data */
-   HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
+   HYPRE_Int           **data_indices; /* Num boxes by stencil-size array
                                           of indices into the data array.
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
+   HYPRE_Int             vdata_offset; /* Offset to variable-coeff matrix data */
+   HYPRE_Int             num_values;   /* Number of "stored" variable coeffs */
+   HYPRE_Int             num_cvalues;  /* Number of "stored" constant coeffs */
    HYPRE_Int             israngedata;  /* {1, 0} -> {range, domain}-based data */
 
    HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
@@ -1889,7 +1892,6 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDomainGrid(matrix)    ((matrix) -> domain_grid)
 #define hypre_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
 #define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)
-#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixConstant(matrix)      ((matrix) -> constant)
 #define hypre_StructMatrixConstEntry(matrix, s) ((matrix) -> constant[s])
 #define hypre_StructMatrixRMap(matrix)          ((matrix) -> rmap)
@@ -1899,6 +1901,9 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
+#define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
+#define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
 #define hypre_StructMatrixIsRangeData(matrix)   ((matrix) -> israngedata)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
@@ -1914,18 +1919,15 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 
+#define hypre_StructMatrixVData(matrix) \
+(hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
+
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-
-/* RDF: Try to phase out the following macros */
 
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
-
-#define hypre_CCStructMatrixBoxDataValue(matrix, b, s, index) \
-(hypre_StructMatrixBoxData(matrix, b, s) + \
- hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif
 /*BHEADER**********************************************************************
@@ -2238,7 +2240,7 @@ HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
-HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
+HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int *value_ids , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_elements , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_PrintCCBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
@@ -2259,7 +2261,6 @@ HYPRE_Int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix , hypre_Ind
 HYPRE_Int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix , hypre_Box *clear_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_StructMatrixSetConstantCoefficient ( hypre_StructMatrix *matrix , HYPRE_Int constant_coefficient );
 HYPRE_Int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix , HYPRE_Int nentries , HYPRE_Int *entries );
 HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *matrix , HYPRE_Int all );
@@ -2274,9 +2275,6 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , 
 void *hypre_StructMatvecCreate ( void );
 HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecCC0 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
-HYPRE_Int hypre_StructMatvecCC1 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
-HYPRE_Int hypre_StructMatvecCC2 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 
