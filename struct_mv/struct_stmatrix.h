@@ -75,6 +75,8 @@ hypre_StIndexShift( hypre_Index index,
                     HYPRE_Int   ndim );
 HYPRE_Int
 hypre_StIndexPrint( hypre_Index index,
+                    char        lchar,
+                    char        rchar,
                     HYPRE_Int   ndim );
 HYPRE_Int
 hypre_StCoeffTermCopy( hypre_StCoeffTerm *term1,

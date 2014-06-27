@@ -70,16 +70,20 @@ hypre_StIndexShift( hypre_Index index,
 
 HYPRE_Int
 hypre_StIndexPrint( hypre_Index index,
+                    char        lchar,
+                    char        rchar,
                     HYPRE_Int   ndim )
 {
    HYPRE_Int d;
 
-   hypre_printf("(% d", index[0]);
+/*   hypre_printf("(% d", index[0]);*/
+   hypre_printf("%c% d", lchar, index[0]);
    for (d = 1; d < ndim; d++)
    {
       hypre_printf(",% d", index[d]);
    }
-   hypre_printf(")");
+/*   hypre_printf(")");*/
+   hypre_printf("%c", rchar);
 
    return hypre_error_flag;
 }
@@ -113,7 +117,7 @@ hypre_StCoeffTermPrint( hypre_StCoeffTerm *term,
                         HYPRE_Int          ndim )
 {
    hypre_printf("%c%d", matnames[(term->id)], (term->entry));
-   hypre_StIndexPrint((term->offset), ndim);
+   hypre_StIndexPrint((term->offset), '(', ')', ndim);
 
    return hypre_error_flag;
 }
@@ -667,17 +671,17 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
    hypre_printf("size = %d\n", (matrix->size));
 
    hypre_printf("rmap = ");
-   hypre_StIndexPrint((matrix->rmap), ndim);
+   hypre_StIndexPrint((matrix->rmap), '(', ')', ndim);
    hypre_printf("\n");
 
    hypre_printf("dmap = ");
-   hypre_StIndexPrint((matrix->dmap), ndim);
+   hypre_StIndexPrint((matrix->dmap), '(', ')', ndim);
    hypre_printf("\n");
 
    for (entry = 0; entry < (matrix->size); entry++)
    {
       hypre_printf("X%02d", entry);
-      hypre_StIndexPrint((matrix->shapes[entry]), ndim);
+      hypre_StIndexPrint((matrix->shapes[entry]), '[', ']', ndim);
       hypre_printf(" = ");
       hypre_StCoeffPrint((matrix->coeffs[entry]), matnames, ndim);
       hypre_printf("\n");
