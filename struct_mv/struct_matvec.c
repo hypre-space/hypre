@@ -299,9 +299,9 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             /* TODO (later, for optimization): Unroll these loops */
             for (si = 0; si < stencil_size; si++)
             {
-               /* If the data is stored on the domain grid, loop over a subset
-                * of the range compute box based on the current stencil entry */
-               if (!hypre_StructMatrixIsRangeData(A))
+               /* If the the domain grid is coarse, loop over a subset of the
+                * range compute box based on the current stencil entry */
+               if (hypre_StructMatrixDomainIsCoarse(A))
                {
                   stride = hypre_StructMatrixDMap(A);
                   hypre_CopyBox(compute_box, box);

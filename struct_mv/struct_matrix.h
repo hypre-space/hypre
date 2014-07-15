@@ -27,9 +27,9 @@
  * Rectangular matrices are supported by allowing different range and domain
  * grids.  Either the range is a coarsening of the domain or vice-versa, and
  * both the domain and range are coarsenings of some common index space with
- * coarsening factors 'rmap' and 'dmap' respectively.  The data is stored
- * relative to the coarsest grid, and the boolean 'israngedata' indicates
- * whether that happens to be the range or the domain grid.  The stencil,
+ * coarsening factors 'rmap' and 'dmap' respectively.  The data storage is
+ * dictated by the coarsest grid, and the boolean 'domain_is_coarse' indicates
+ * whether that happens to be the domain or the range grid.  The stencil,
  * however, always represents a "row" stencil that operates on the domain grid
  * and produces a value on the range grid.  The data interface and accessor
  * macros are also row-stencil based, regardless of the underlying storage.
@@ -47,36 +47,36 @@ typedef struct hypre_StructMatrix_struct
    MPI_Comm              comm;
 
    hypre_StructGrid     *grid;
-   hypre_StructGrid     *domain_grid;  /* Same as grid by default */
+   hypre_StructGrid     *domain_grid;   /* Same as grid by default */
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int            *constant;     /* Which stencil entries are constant? */
-   hypre_Index           rmap, dmap;   /* Range and domain coarsening maps */
+   HYPRE_Int            *constant;      /* Which stencil entries are constant? */
+   hypre_Index           rmap, dmap;    /* Range and domain coarsening maps */
 
-   hypre_BoxArray       *data_space;
+   hypre_BoxArray       *data_boxes;    /* Original fine data space */
+   hypre_BoxArray       *data_space;    /* Mapped coarse data space */
 
-   HYPRE_Complex        *data;         /* Pointer to matrix data */
-   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int             data_size;    /* Size of matrix data */
-   HYPRE_Int           **data_indices; /* Num boxes by stencil-size array
-                                          of indices into the data array.
-                                          data_indices[b][s] is the starting
-                                          index of matrix data corresponding
-                                          to box b and stencil coefficient s */
-   HYPRE_Int             vdata_offset; /* Offset to variable-coeff matrix data */
-   HYPRE_Int             num_values;   /* Number of "stored" variable coeffs */
-   HYPRE_Int             num_cvalues;  /* Number of "stored" constant coeffs */
-   HYPRE_Int             israngedata;  /* {1, 0} -> {range, domain}-based data */
-
-   HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
-                                                   constant coefficient matrices
-                                                   or 2 for constant coefficient
-                                                   with variable diagonal */
-                      
-   HYPRE_Int             symmetric;    /* Is the matrix symmetric */
-   HYPRE_Int            *symm_elements;/* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
-                                                     * direction */
+   HYPRE_Complex        *data;          /* Pointer to matrix data */
+   HYPRE_Int             data_alloced;  /* Boolean used for freeing data */
+   HYPRE_Int             data_size;     /* Size of matrix data */
+   HYPRE_Int           **data_indices;  /* Num boxes by stencil-size array of
+                                           indices into the data array.
+                                           data_indices[b][s] is the starting
+                                           index of matrix data corresponding to
+                                           box b and stencil coefficient s */
+   HYPRE_Int             vdata_offset;  /* Offset to variable-coeff matrix data */
+   HYPRE_Int             num_values;    /* Number of "stored" variable coeffs */
+   HYPRE_Int             num_cvalues;   /* Number of "stored" constant coeffs */
+   HYPRE_Int             domain_is_coarse;  /* 1 -> the domain is coarse */
+   HYPRE_Int             constant_coefficient;  /* RDF: Phase this out in favor
+                                                   of 'constant' array above.
+                                                   Values can be {0, 1, 2} ->
+                                                   {variable, constant, constant
+                                                   with variable diagonal} */
+   HYPRE_Int             symmetric;      /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;  /* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Num ghost layers in each
+                                                      * direction */
                       
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
@@ -99,6 +99,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixConstEntry(matrix, s) ((matrix) -> constant[s])
 #define hypre_StructMatrixRMap(matrix)          ((matrix) -> rmap)
 #define hypre_StructMatrixDMap(matrix)          ((matrix) -> dmap)
+#define hypre_StructMatrixDataBoxes(matrix)     ((matrix) -> data_boxes)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
@@ -107,7 +108,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
-#define hypre_StructMatrixIsRangeData(matrix)   ((matrix) -> israngedata)
+#define hypre_StructMatrixDomainIsCoarse(matrix)((matrix) -> domain_is_coarse)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
@@ -119,17 +120,10 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
-#define hypre_StructMatrixBox(matrix, b) \
-hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
-
 #define hypre_StructMatrixVData(matrix) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-
-#define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
-(hypre_StructMatrixBoxData(matrix, b, s) + \
- hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif

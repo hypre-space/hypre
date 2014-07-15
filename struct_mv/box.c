@@ -61,6 +61,23 @@ hypre_CopyIndex( hypre_Index  in_index,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_CopyToIndex( hypre_Index  in_index,
+                   HYPRE_Int    ndim,
+                   hypre_Index  out_index )
+{
+   HYPRE_Int d;
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_IndexD(out_index, d) = hypre_IndexD(in_index, d);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 hypre_CopyToCleanIndex( hypre_Index  in_index,
                         HYPRE_Int    ndim,
                         hypre_Index  out_index )

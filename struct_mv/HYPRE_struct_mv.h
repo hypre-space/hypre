@@ -173,6 +173,33 @@ HYPRE_Int HYPRE_StructMatrixCreate(MPI_Comm             comm,
 HYPRE_Int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
 
 /**
+ * (Optional) Set the domain grid.  By default, the range and domain grids are
+ * the same as the argument {\tt grid} in \Ref{HYPRE_StructMatrixCreate}.  Both
+ * grids live on a common fine index space and should have the same number of
+ * boxes.  The actual range is a coarsening of the range grid with coarsening
+ * factor {\tt rmap} specified in \Ref{HYPRE_StructMatrixSetRMap}.  Similarly,
+ * the actual domain is a coarsening of the domain grid with factor {\tt dmap}
+ * specified in \Ref{HYPRE_StructMatrixSetDMap}.  Currently, either {\tt rmap}
+ * or {\tt dmap} or both must be all ones (i.e., no coarsening).
+ **/
+HYPRE_Int HYPRE_StructMatrixSetDomainGrid(HYPRE_StructMatrix matrix,
+                                          HYPRE_StructGrid   domain_grid);
+
+/**
+ * (Optional) Set the range coarsening map.  For more information, see
+ * \Ref{HYPRE_StructMatrixSetDomainGrid}.
+ **/
+HYPRE_Int HYPRE_StructMatrixSetRMap(HYPRE_StructMatrix matrix,
+                                    HYPRE_Int         *rmap);
+
+/**
+ * (Optional) Set the domain coarsening map.  For more information, see
+ * \Ref{HYPRE_StructMatrixSetDomainGrid}.
+ **/
+HYPRE_Int HYPRE_StructMatrixSetDMap(HYPRE_StructMatrix matrix,
+                                    HYPRE_Int         *dmap);
+
+/**
  * Prepare a matrix object for setting coefficient values.
  **/
 HYPRE_Int HYPRE_StructMatrixInitialize(HYPRE_StructMatrix matrix);
@@ -292,16 +319,9 @@ HYPRE_Int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
 
 /**
  * Specify which stencil entries are constant over the grid.  Declaring entries
- * to be ``constant over the grid'' yields significant memory savings because
- * the value for each declared entry will only be stored once.  However, not all
- * solvers are able to utilize this feature.
- *
- * Presently supported:
- * \begin{itemize}
- * \item no entries constant (this function need not be called)
- * \item all entries constant
- * \item all but the diagonal entry constant
- * \end{itemize}
+ * to be constant over the grid yields significant memory savings and improves
+ * performance, because the value for each declared entry is only stored once.
+ * Note that not all solvers are able to utilize this feature.
  **/
 HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
                                                 HYPRE_Int          nentries,
@@ -446,6 +466,10 @@ HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
                                   HYPRE_StructVector  vector,
                                   HYPRE_Int           all);
 
+/* Revisit these interface routines */
+HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector , HYPRE_Complex factor );
+HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x , HYPRE_StructVector y );
+
 /*@}*/
 /*@}*/
 
@@ -455,6 +479,7 @@ HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
 
 HYPRE_Int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
                                     HYPRE_StructGrid   *grid);
+HYPRE_Int HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix );
 
 struct hypre_CommPkg_struct;
 typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;

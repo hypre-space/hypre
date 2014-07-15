@@ -1826,9 +1826,9 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
  * Rectangular matrices are supported by allowing different range and domain
  * grids.  Either the range is a coarsening of the domain or vice-versa, and
  * both the domain and range are coarsenings of some common index space with
- * coarsening factors 'rmap' and 'dmap' respectively.  The data is stored
- * relative to the coarsest grid, and the boolean 'israngedata' indicates
- * whether that happens to be the range or the domain grid.  The stencil,
+ * coarsening factors 'rmap' and 'dmap' respectively.  The data storage is
+ * dictated by the coarsest grid, and the boolean 'domain_is_coarse' indicates
+ * whether that happens to be the domain or the range grid.  The stencil,
  * however, always represents a "row" stencil that operates on the domain grid
  * and produces a value on the range grid.  The data interface and accessor
  * macros are also row-stencil based, regardless of the underlying storage.
@@ -1846,36 +1846,36 @@ typedef struct hypre_StructMatrix_struct
    MPI_Comm              comm;
 
    hypre_StructGrid     *grid;
-   hypre_StructGrid     *domain_grid;  /* Same as grid by default */
+   hypre_StructGrid     *domain_grid;   /* Same as grid by default */
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int            *constant;     /* Which stencil entries are constant? */
-   hypre_Index           rmap, dmap;   /* Range and domain coarsening maps */
+   HYPRE_Int            *constant;      /* Which stencil entries are constant? */
+   hypre_Index           rmap, dmap;    /* Range and domain coarsening maps */
 
-   hypre_BoxArray       *data_space;
+   hypre_BoxArray       *data_boxes;    /* Original fine data space */
+   hypre_BoxArray       *data_space;    /* Mapped coarse data space */
 
-   HYPRE_Complex        *data;         /* Pointer to matrix data */
-   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int             data_size;    /* Size of matrix data */
-   HYPRE_Int           **data_indices; /* Num boxes by stencil-size array
-                                          of indices into the data array.
-                                          data_indices[b][s] is the starting
-                                          index of matrix data corresponding
-                                          to box b and stencil coefficient s */
-   HYPRE_Int             vdata_offset; /* Offset to variable-coeff matrix data */
-   HYPRE_Int             num_values;   /* Number of "stored" variable coeffs */
-   HYPRE_Int             num_cvalues;  /* Number of "stored" constant coeffs */
-   HYPRE_Int             israngedata;  /* {1, 0} -> {range, domain}-based data */
-
-   HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
-                                                   constant coefficient matrices
-                                                   or 2 for constant coefficient
-                                                   with variable diagonal */
-                      
-   HYPRE_Int             symmetric;    /* Is the matrix symmetric */
-   HYPRE_Int            *symm_elements;/* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
-                                                     * direction */
+   HYPRE_Complex        *data;          /* Pointer to matrix data */
+   HYPRE_Int             data_alloced;  /* Boolean used for freeing data */
+   HYPRE_Int             data_size;     /* Size of matrix data */
+   HYPRE_Int           **data_indices;  /* Num boxes by stencil-size array of
+                                           indices into the data array.
+                                           data_indices[b][s] is the starting
+                                           index of matrix data corresponding to
+                                           box b and stencil coefficient s */
+   HYPRE_Int             vdata_offset;  /* Offset to variable-coeff matrix data */
+   HYPRE_Int             num_values;    /* Number of "stored" variable coeffs */
+   HYPRE_Int             num_cvalues;   /* Number of "stored" constant coeffs */
+   HYPRE_Int             domain_is_coarse;  /* 1 -> the domain is coarse */
+   HYPRE_Int             constant_coefficient;  /* RDF: Phase this out in favor
+                                                   of 'constant' array above.
+                                                   Values can be {0, 1, 2} ->
+                                                   {variable, constant, constant
+                                                   with variable diagonal} */
+   HYPRE_Int             symmetric;      /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;  /* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Num ghost layers in each
+                                                      * direction */
                       
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
@@ -1898,6 +1898,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixConstEntry(matrix, s) ((matrix) -> constant[s])
 #define hypre_StructMatrixRMap(matrix)          ((matrix) -> rmap)
 #define hypre_StructMatrixDMap(matrix)          ((matrix) -> dmap)
+#define hypre_StructMatrixDataBoxes(matrix)     ((matrix) -> data_boxes)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
@@ -1906,7 +1907,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
-#define hypre_StructMatrixIsRangeData(matrix)   ((matrix) -> israngedata)
+#define hypre_StructMatrixDomainIsCoarse(matrix)((matrix) -> domain_is_coarse)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
@@ -1918,18 +1919,11 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
-#define hypre_StructMatrixBox(matrix, b) \
-hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
-
 #define hypre_StructMatrixVData(matrix) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixVDataOffset(matrix))
 
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-
-#define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
-(hypre_StructMatrixBoxData(matrix, b, s) + \
- hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif
 /*BHEADER**********************************************************************
@@ -2054,6 +2048,7 @@ HYPRE_Int hypre_GeneralBoxBoundaryIntersect( hypre_Box *box, hypre_StructGrid *g
 /* box.c */
 HYPRE_Int hypre_SetIndex ( hypre_Index index , HYPRE_Int val );
 HYPRE_Int hypre_CopyIndex( hypre_Index in_index , hypre_Index out_index );
+HYPRE_Int hypre_CopyToIndex( hypre_Index in_index , HYPRE_Int ndim , hypre_Index out_index );
 HYPRE_Int hypre_CopyToCleanIndex( hypre_Index in_index , HYPRE_Int ndim , hypre_Index out_index );
 HYPRE_Int hypre_IndexEqual ( hypre_Index index , HYPRE_Int val , HYPRE_Int ndim );
 HYPRE_Int hypre_IndexMin( hypre_Index index , HYPRE_Int ndim );
@@ -2145,60 +2140,6 @@ HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg , HYPRE_Complex *data , hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeIndtComputations ( hypre_CommHandle *comm_handle );
 
-/* HYPRE_struct_grid.c */
-HYPRE_Int HYPRE_StructGridCreate ( MPI_Comm comm , HYPRE_Int dim , HYPRE_StructGrid *grid );
-HYPRE_Int HYPRE_StructGridDestroy ( HYPRE_StructGrid grid );
-HYPRE_Int HYPRE_StructGridSetExtents ( HYPRE_StructGrid grid , HYPRE_Int *ilower , HYPRE_Int *iupper );
-HYPRE_Int HYPRE_StructGridSetPeriodic ( HYPRE_StructGrid grid , HYPRE_Int *periodic );
-HYPRE_Int HYPRE_StructGridAssemble ( HYPRE_StructGrid grid );
-HYPRE_Int HYPRE_StructGridSetNumGhost ( HYPRE_StructGrid grid , HYPRE_Int *num_ghost );
-
-/* HYPRE_struct_matrix.c */
-HYPRE_Int HYPRE_StructMatrixCreate ( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix );
-HYPRE_Int HYPRE_StructMatrixDestroy ( HYPRE_StructMatrix matrix );
-HYPRE_Int HYPRE_StructMatrixInitialize ( HYPRE_StructMatrix matrix );
-HYPRE_Int HYPRE_StructMatrixSetValues ( HYPRE_StructMatrix matrix , HYPRE_Int *grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixGetValues ( HYPRE_StructMatrix matrix , HYPRE_Int *grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixSetBoxValues ( HYPRE_StructMatrix matrix , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixGetBoxValues ( HYPRE_StructMatrix matrix , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixSetConstantValues ( HYPRE_StructMatrix matrix , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixAddToValues ( HYPRE_StructMatrix matrix , HYPRE_Int *grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixAddToBoxValues ( HYPRE_StructMatrix matrix , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixAddToConstantValues ( HYPRE_StructMatrix matrix , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructMatrixAssemble ( HYPRE_StructMatrix matrix );
-HYPRE_Int HYPRE_StructMatrixSetNumGhost ( HYPRE_StructMatrix matrix , HYPRE_Int *num_ghost );
-HYPRE_Int HYPRE_StructMatrixGetGrid ( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
-HYPRE_Int HYPRE_StructMatrixSetSymmetric ( HYPRE_StructMatrix matrix , HYPRE_Int symmetric );
-HYPRE_Int HYPRE_StructMatrixSetConstantEntries ( HYPRE_StructMatrix matrix , HYPRE_Int nentries , HYPRE_Int *entries );
-HYPRE_Int HYPRE_StructMatrixPrint ( const char *filename , HYPRE_StructMatrix matrix , HYPRE_Int all );
-HYPRE_Int HYPRE_StructMatrixMatvec ( HYPRE_Complex alpha , HYPRE_StructMatrix A , HYPRE_StructVector x , HYPRE_Complex beta , HYPRE_StructVector y );
-HYPRE_Int HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix );
-
-/* HYPRE_struct_stencil.c */
-HYPRE_Int HYPRE_StructStencilCreate ( HYPRE_Int dim , HYPRE_Int size , HYPRE_StructStencil *stencil );
-HYPRE_Int HYPRE_StructStencilSetElement ( HYPRE_StructStencil stencil , HYPRE_Int element_index , HYPRE_Int *offset );
-HYPRE_Int HYPRE_StructStencilDestroy ( HYPRE_StructStencil stencil );
-
-/* HYPRE_struct_vector.c */
-HYPRE_Int HYPRE_StructVectorCreate ( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructVector *vector );
-HYPRE_Int HYPRE_StructVectorDestroy ( HYPRE_StructVector struct_vector );
-HYPRE_Int HYPRE_StructVectorInitialize ( HYPRE_StructVector vector );
-HYPRE_Int HYPRE_StructVectorSetValues ( HYPRE_StructVector vector , HYPRE_Int *grid_index , HYPRE_Complex values );
-HYPRE_Int HYPRE_StructVectorSetBoxValues ( HYPRE_StructVector vector , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructVectorAddToValues ( HYPRE_StructVector vector , HYPRE_Int *grid_index , HYPRE_Complex values );
-HYPRE_Int HYPRE_StructVectorAddToBoxValues ( HYPRE_StructVector vector , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector , HYPRE_Complex factor );
-HYPRE_Int HYPRE_StructVectorGetValues ( HYPRE_StructVector vector , HYPRE_Int *grid_index , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructVectorGetBoxValues ( HYPRE_StructVector vector , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Complex *values );
-HYPRE_Int HYPRE_StructVectorAssemble ( HYPRE_StructVector vector );
-HYPRE_Int HYPRE_StructVectorPrint ( const char *filename , HYPRE_StructVector vector , HYPRE_Int all );
-HYPRE_Int HYPRE_StructVectorSetNumGhost ( HYPRE_StructVector vector , HYPRE_Int *num_ghost );
-HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x , HYPRE_StructVector y );
-HYPRE_Int HYPRE_StructVectorSetConstantValues ( HYPRE_StructVector vector , HYPRE_Complex values );
-HYPRE_Int HYPRE_StructVectorGetMigrateCommPkg ( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
-HYPRE_Int HYPRE_StructVectorMigrate ( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
-HYPRE_Int HYPRE_CommPkgDestroy ( HYPRE_CommPkg comm_pkg );
-
 /* project.c */
 HYPRE_Int hypre_ProjectBox ( hypre_Box *box , hypre_Index index , hypre_Index stride );
 HYPRE_Int hypre_ProjectBoxArray ( hypre_BoxArray *box_array , hypre_Index index , hypre_Index stride );
@@ -2249,10 +2190,15 @@ HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypr
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matrix.c */
+HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index index );
+HYPRE_Int hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix , hypre_Box *box );
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );
 hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixDestroy ( hypre_StructMatrix *matrix );
+HYPRE_Int hypre_StructMatrixSetDomainGrid( hypre_StructMatrix *matrix , hypre_StructGrid *domain_grid );
+HYPRE_Int hypre_StructMatrixSetRMap( hypre_StructMatrix *matrix , HYPRE_Int *rmap );
+HYPRE_Int hypre_StructMatrixSetDMap( hypre_StructMatrix *matrix , HYPRE_Int *dmap );
 HYPRE_Int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data );
 HYPRE_Int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
