@@ -2659,6 +2659,9 @@ main( hypre_int argc,
       }
       else
       {
+         hypre_printf("Unrecognized arg: argv[%d] = %s\n", arg_index, argv[arg_index]);
+         hypre_printf("run with '-help' for usage message\n");
+         exit(1);
          arg_index++;
          /*break;*/
       }
@@ -3688,7 +3691,7 @@ main( hypre_int argc,
 
       else if (solver_id == 13)
       {
-         hypre_printf("Use SysPFMG solver as preconditioner\n");
+         hypre_printf("Use PCG solver with SysPFMG preconditioner\n");
          /* use SysPFMG solver as preconditioner */
          HYPRE_SStructSysPFMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
@@ -3712,7 +3715,7 @@ main( hypre_int argc,
       }
       else if (solver_id == 14)
       {
-         hypre_printf("Use SysBAMG solver as preconditioner\n");
+         hypre_printf("Use PCG solver with SysBAMG preconditioner\n");
          /* use SysBAMG solver as preconditioner */
          HYPRE_SStructSysBAMGCreate(hypre_MPI_COMM_WORLD, &precond);
          HYPRE_SStructSysBAMGSetMaxIter(precond, 1);

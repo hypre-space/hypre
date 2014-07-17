@@ -306,12 +306,13 @@ HYPRE_Int hypre_BAMGSetup(
   for ( l=0; l<num_levels; l++ )
   {
     tv[l] = hypre_TAlloc(HYPRE_StructVector, num_tv);
-    for ( k = 0; k < num_tv; k++ )
+    for ( k = 0; k < num_tv1; k++ )
     {
       HYPRE_StructVectorCreate(comm, grid_l[l], &tv[l][k]);
       HYPRE_StructVectorInitialize(tv[l][k]);
       HYPRE_StructVectorAssemble(tv[l][k]);
-      if ( l == 0 )
+
+      if ( l == 0 && k < num_tv1 )
         hypre_StructVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0)+k);
     }
   }

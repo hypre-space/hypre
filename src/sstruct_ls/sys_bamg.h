@@ -22,6 +22,15 @@
 #ifndef hypre_SYS_BAMG_HEADER
 #define hypre_SYS_BAMG_HEADER
 
+
+#define DEBUG_SYSBAMG 1
+
+#define sysbamg_dbgmsg( format, args... ) \
+{ \
+  if ( DEBUG_SYSBAMG ) hypre_printf( "DEBUG_SYSBAMG: " format, ## args ); fflush(stdout); \
+}
+
+
 /*--------------------------------------------------------------------------
  * hypre_SysBAMGData:
  *--------------------------------------------------------------------------*/
@@ -29,36 +38,39 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
-                      
+
    HYPRE_Int             relax_type;     /* type of relaxation to use */
    HYPRE_Real            jacobi_weight;  /* weighted jacobi weight */
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
-                                                                                                                                     
+
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */
    HYPRE_Real            dxyz[3];     /* parameters used to determine cdir */
 
    HYPRE_Int             num_levels;
-                      
+
    HYPRE_Int            *cdir_l;  /* coarsening directions */
    HYPRE_Int            *active_l;  /* flags to relax on level l*/
 
    hypre_SStructPGrid    **grid_l;
    hypre_SStructPGrid    **P_grid_l;
-                    
+
    HYPRE_Real             *data;
    hypre_SStructPMatrix  **A_l;
    hypre_SStructPMatrix  **P_l;
    hypre_SStructPMatrix  **RT_l;
    hypre_SStructPVector  **b_l;
    hypre_SStructPVector  **x_l;
+
+   // "test vectors" -- i.e., initial vectors and singular vectors
+   HYPRE_Int             num_tv1, num_tv2, num_tv_relax;
 
    /* temp vectors */
    hypre_SStructPVector  **tx_l;

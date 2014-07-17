@@ -13,7 +13,7 @@
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \
@@ -542,12 +542,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 #if DEBUG
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_sprintf(filename, "zout_A.%02d", l);
+      hypre_sprintf(filename, "syspfmg_A.%02d", l);
       hypre_SStructPMatrixPrint(filename, A_l[l], 0);
-      hypre_sprintf(filename, "zout_P.%02d", l);
+      hypre_sprintf(filename, "syspfmg_P.%02d", l);
       hypre_SStructPMatrixPrint(filename, P_l[l], 0);
    }
-   hypre_sprintf(filename, "zout_A.%02d", l);
+   hypre_sprintf(filename, "syspfmg_A.%02d", l);
    hypre_SStructPMatrixPrint(filename, A_l[l], 0);
 #endif
 

@@ -143,10 +143,16 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
     for ( j = 0; j < P_stencil_size; j++ )
       Pp[j] = hypre_StructMatrixBoxData(P, i, j);
 
+    bamg_dbgmsg("tv_dbox\n");
+
     tv_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(tv[0]),i);
+
+    bamg_dbgmsg("vp[k]\n");
 
     for ( k = 0; k < num_tv; k++ )
       vp[k] = hypre_StructVectorBoxData(tv[k],i);
+    
+    bamg_dbgmsg("v_offsets[j]\n");
 
     for ( j = 0; j < P_stencil_size; j++ )
       v_offsets[j] = hypre_BoxOffsetDistance( tv_dbox, P_stencil_shape[j] );
@@ -182,17 +188,26 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
         spz += vkp * vkz;
         bamg_dbgmsg("vi: %d k: %d v{-,0,+}: %12.5e %12.5e %12.5e\n", vi, k, vkm, vkz, vkp);
       }
-#if 0
-      Pp[0][Pi] = ( smz / smp - spz / spp ) / ( smm / smp - smp / spp );
-      Pp[1][Pi] = ( spz / smp - smz / smm ) / ( spp / smp - smp / smm );
-#elif 1
-      HYPRE_Real P_limit = 0.25;
-      Pp[1][Pi] = ( smz - smm ) / (smp - smm);
-      if ( Pp[1][Pi] < 0.50 - P_limit ) Pp[1][Pi] = 0.50 - P_limit;
-      if ( Pp[1][Pi] > 0.50 + P_limit ) Pp[1][Pi] = 0.50 + P_limit;
+#if 1
+      if ( spp == 0.0 ) {
+        Pp[1][Pi] = 0.0;
+      }
+      else if ( smm == 0.0 ) {
+        Pp[1][Pi] = 1.0;
+      }
+      else if ( fabs( 1 - smm/smp ) < 1e-8 || fabs( 1 - smm/smz ) < 1e-8 ) {
+        Pp[1][Pi] = 0.0;
+      }
+      else {
+        Pp[1][Pi] = ( smz - smm ) / (smp - smm);
+        HYPRE_Real P_limit = 0.25;
+        if ( Pp[1][Pi] < 0.50 - P_limit ) Pp[1][Pi] = 0.50 - P_limit;
+        if ( Pp[1][Pi] > 0.50 + P_limit ) Pp[1][Pi] = 0.50 + P_limit;
+      }
       Pp[0][Pi] = 1.0 - Pp[1][Pi];
 #else
-      Pp[0][Pi] = Pp[1][Pi] = 0.5;
+      Pp[0][Pi] = ( smz / smp - spz / spp ) / ( smm / smp - smp / spp );
+      Pp[1][Pi] = ( spz / smp - smz / smm ) / ( spp / smp - smp / smm );
 #endif
       bamg_dbgmsg("%12.5e %12.5e %12.5e %12.5e %12.5e . %12.5e %12.5e\n",
                    smm, smp, smz, spp, spz,        Pp[0][Pi], Pp[1][Pi]);

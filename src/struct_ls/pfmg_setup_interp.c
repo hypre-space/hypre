@@ -12,7 +12,7 @@
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
-#include "bamg.h"
+//#include "bamg.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -184,11 +184,11 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
       startc  = hypre_BoxIMin(compute_box);
       hypre_StructMapCoarseToFine(startc, findex, stride, start);
     
-    bamg_dbgmsg("findex:  %d %d %d\n", hypre_IndexD(findex, 0), hypre_IndexD(findex, 1), hypre_IndexD(findex, 2));
-    bamg_dbgmsg("stride:  %d %d %d\n", hypre_IndexD(stride, 0), hypre_IndexD(stride, 1), hypre_IndexD(stride, 2));
-    bamg_dbgmsg("stridec: %d %d %d\n", hypre_IndexD(stridec,0), hypre_IndexD(stridec,1), hypre_IndexD(stridec,2));
-    bamg_dbgmsg("startc:  %d %d %d\n", hypre_IndexD(startc, 0), hypre_IndexD(startc, 1), hypre_IndexD(startc, 2));
-    bamg_dbgmsg("start:   %d %d %d\n", hypre_IndexD(start,  0), hypre_IndexD(start,  1), hypre_IndexD(start,  2));
+//  bamg_dbgmsg("findex:  %d %d %d\n", hypre_IndexD(findex, 0), hypre_IndexD(findex, 1), hypre_IndexD(findex, 2));
+//  bamg_dbgmsg("stride:  %d %d %d\n", hypre_IndexD(stride, 0), hypre_IndexD(stride, 1), hypre_IndexD(stride, 2));
+//  bamg_dbgmsg("stridec: %d %d %d\n", hypre_IndexD(stridec,0), hypre_IndexD(stridec,1), hypre_IndexD(stridec,2));
+//  bamg_dbgmsg("startc:  %d %d %d\n", hypre_IndexD(startc, 0), hypre_IndexD(startc, 1), hypre_IndexD(startc, 2));
+//  bamg_dbgmsg("start:   %d %d %d\n", hypre_IndexD(start,  0), hypre_IndexD(start,  1), hypre_IndexD(start,  2));
 
       hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 

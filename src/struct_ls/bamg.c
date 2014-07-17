@@ -314,27 +314,6 @@ HYPRE_Int hypre_BAMGGetNumPostRelax( void *bamg_vdata, HYPRE_Int *num_post_relax
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BAMGSetSkipRelax( void *bamg_vdata, HYPRE_Int skip_relax )
-{
-  hypre_BAMGData *bamg_data = bamg_vdata;
-
-  (bamg_data -> skip_relax) = skip_relax;
-
-  return hypre_error_flag;
-}
-
-HYPRE_Int hypre_BAMGGetSkipRelax( void *bamg_vdata, HYPRE_Int *skip_relax )
-{
-  hypre_BAMGData *bamg_data = bamg_vdata;
-
-  *skip_relax = (bamg_data -> skip_relax);
-
-  return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
 HYPRE_Int hypre_BAMGSetNumTv1( void *bamg_vdata, HYPRE_Int num_tv1 )
 {
   hypre_BAMGData *bamg_data = bamg_vdata;
@@ -367,6 +346,27 @@ HYPRE_Int hypre_BAMGGetNumTv2( void *bamg_vdata, HYPRE_Int *num_tv2 )
   hypre_BAMGData *bamg_data = bamg_vdata;
 
   *num_tv2 = (bamg_data -> num_tv2);
+
+  return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_BAMGSetSkipRelax( void *bamg_vdata, HYPRE_Int skip_relax )
+{
+  hypre_BAMGData *bamg_data = bamg_vdata;
+
+  (bamg_data -> skip_relax) = skip_relax;
+
+  return hypre_error_flag;
+}
+
+HYPRE_Int hypre_BAMGGetSkipRelax( void *bamg_vdata, HYPRE_Int *skip_relax )
+{
+  hypre_BAMGData *bamg_data = bamg_vdata;
+
+  *skip_relax = (bamg_data -> skip_relax);
 
   return hypre_error_flag;
 }

@@ -40,13 +40,13 @@
 typedef struct
 {
    MPI_Comm              comm;
-                      
+
    HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
-                      
+
    HYPRE_Int             relax_type;     /* type of relaxation to use */
    HYPRE_Real            jacobi_weight;  /* weighted jacobi weight */
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
@@ -57,20 +57,20 @@ typedef struct
    HYPRE_Real            relax_weight;
 
    HYPRE_Int             num_levels;
-                      
+
    HYPRE_Int            *cdir_l;  /* coarsening directions */
    HYPRE_Int            *active_l;  /* flags to relax on level l*/
 
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
-                    
+
    HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;
    hypre_StructVector  **b_l;
    hypre_StructVector  **x_l;
-   
+
    // "test vectors" -- i.e., initial vectors and singular vectors
    HYPRE_Int             num_tv1, num_tv2, num_tv_relax;
 
