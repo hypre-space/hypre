@@ -741,6 +741,16 @@ main( hypre_int  argc,
       HYPRE_StructGridSetExtents(grid, data.ilowers[box], data.iuppers[box]);
    }
    HYPRE_StructGridSetPeriodic(grid, data.periodic);
+#if 1 /* Remove eventually */
+   {
+      HYPRE_Int num_ghost[2*MAXDIM];
+      for (i = 0; i < 2*MAXDIM; i++)
+      {
+         num_ghost[i] = 0;
+      }
+      HYPRE_StructGridSetNumGhost(grid, num_ghost);
+   }
+#endif
    HYPRE_StructGridAssemble(grid);
 
    /*-----------------------------------------------------------
@@ -778,7 +788,7 @@ main( hypre_int  argc,
          {
             if (data.matrix_dstrides[mi][d] > 1)
             {
-               origin[d] = abs(data.matrix_offsets[mi][ei][d]);
+               origin[d] = data.matrix_offsets[mi][ei][d];
                stride[d] = data.matrix_dstrides[mi][d];
             }
             else
