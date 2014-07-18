@@ -41,6 +41,7 @@ FILES =\
  box_boundary.c\
  box.c\
  box_manager.c\
+ coarsen.c\
  communication_info.c\
  computation.c\
  F90_HYPRE_struct_grid.c\

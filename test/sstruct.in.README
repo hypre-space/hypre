@@ -1,7 +1,7 @@
 
 ##############################################################################
 #
-# This file describes the input file for the 'struct.c' driver.
+# This file describes the input file for the 'sstruct.c' driver.
 #
 # The input file is line-based.  Any line beginning with a '#' character is
 # considered a comment and ignored by the driver.  For all non-comment lines,

@@ -27,7 +27,7 @@
  * Rectangular matrices are supported by allowing different range and domain
  * grids.  Either the range is a coarsening of the domain or vice-versa, and
  * both the domain and range are coarsenings of some common index space with
- * coarsening factors 'rmap' and 'dmap' respectively.  The data storage is
+ * coarsening factors 'rstride' and 'dstride' respectively.  The data storage is
  * dictated by the coarsest grid, and the boolean 'domain_is_coarse' indicates
  * whether that happens to be the domain or the range grid.  The stencil,
  * however, always represents a "row" stencil that operates on the domain grid
@@ -51,7 +51,8 @@ typedef struct hypre_StructMatrix_struct
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
    HYPRE_Int            *constant;      /* Which stencil entries are constant? */
-   hypre_Index           rmap, dmap;    /* Range and domain coarsening maps */
+   hypre_Index           rstride;       /* Range coarsening stride */
+   hypre_Index           dstride;       /* Domain coarsening stride */
 
    hypre_BoxArray       *data_boxes;    /* Original fine data space */
    hypre_BoxArray       *data_space;    /* Mapped coarse data space */
@@ -67,6 +68,7 @@ typedef struct hypre_StructMatrix_struct
    HYPRE_Int             vdata_offset;  /* Offset to variable-coeff matrix data */
    HYPRE_Int             num_values;    /* Number of "stored" variable coeffs */
    HYPRE_Int             num_cvalues;   /* Number of "stored" constant coeffs */
+   HYPRE_Int             range_is_coarse;   /* 1 -> the range is coarse */
    HYPRE_Int             domain_is_coarse;  /* 1 -> the domain is coarse */
    HYPRE_Int             constant_coefficient;  /* RDF: Phase this out in favor
                                                    of 'constant' array above.
@@ -97,8 +99,8 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)
 #define hypre_StructMatrixConstant(matrix)      ((matrix) -> constant)
 #define hypre_StructMatrixConstEntry(matrix, s) ((matrix) -> constant[s])
-#define hypre_StructMatrixRMap(matrix)          ((matrix) -> rmap)
-#define hypre_StructMatrixDMap(matrix)          ((matrix) -> dmap)
+#define hypre_StructMatrixRStride(matrix)       ((matrix) -> rstride)
+#define hypre_StructMatrixDStride(matrix)       ((matrix) -> dstride)
 #define hypre_StructMatrixDataBoxes(matrix)     ((matrix) -> data_boxes)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
@@ -108,6 +110,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
+#define hypre_StructMatrixRangeIsCoarse(matrix) ((matrix) -> range_is_coarse)
 #define hypre_StructMatrixDomainIsCoarse(matrix)((matrix) -> domain_is_coarse)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)

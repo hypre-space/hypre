@@ -55,20 +55,20 @@ HYPRE_StructMatrixSetDomainGrid(HYPRE_StructMatrix matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructMatrixSetRMap(HYPRE_StructMatrix matrix,
-                          HYPRE_Int         *rmap)
+HYPRE_StructMatrixSetRStride(HYPRE_StructMatrix matrix,
+                             HYPRE_Int         *rstride)
 {
-   return ( hypre_StructMatrixSetRMap(matrix, rmap) );
+   return ( hypre_StructMatrixSetRStride(matrix, rstride) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructMatrixSetDMap(HYPRE_StructMatrix matrix,
-                          HYPRE_Int         *dmap)
+HYPRE_StructMatrixSetDStride(HYPRE_StructMatrix matrix,
+                             HYPRE_Int         *dstride)
 {
-   return ( hypre_StructMatrixSetDMap(matrix, dmap) );
+   return ( hypre_StructMatrixSetDStride(matrix, dstride) );
 }
 
 /*--------------------------------------------------------------------------

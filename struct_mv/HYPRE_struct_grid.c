@@ -19,7 +19,6 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGridCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -33,7 +32,6 @@ HYPRE_StructGridCreate( MPI_Comm          comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGridDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -43,7 +41,6 @@ HYPRE_StructGridDestroy( HYPRE_StructGrid grid )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGridSetExtents
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -68,7 +65,6 @@ HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructGridPeriodicity
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -89,7 +85,6 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGridAssemble
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -99,13 +94,50 @@ HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 }
 
 /*---------------------------------------------------------------------------
- * GEC0902
- * HYPRE_StructGridSetNumGhost
- * to set the numghost array inside the struct_grid_struct using an internal
- * function. This is just a wrapper.
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid, HYPRE_Int *num_ghost )
+HYPRE_StructGridSetNumGhost( HYPRE_StructGrid  grid,
+                             HYPRE_Int        *num_ghost )
 {
    return ( hypre_StructGridSetNumGhost(grid, num_ghost) );
 }
+
+/*---------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructGridCoarsen(HYPRE_StructGrid  grid,
+                        HYPRE_Int        *stride,
+                        HYPRE_StructGrid *cgrid)
+{
+   hypre_Index origin;
+
+   hypre_SetIndex(origin, 0);
+   hypre_StructCoarsen(grid, origin, stride, 1, cgrid);
+   
+   return hypre_error_flag;
+}
+
+/*---------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructGridProjectBox(HYPRE_StructGrid  grid,
+                           HYPRE_Int        *ilower,
+                           HYPRE_Int        *iupper,
+                           HYPRE_Int        *origin,
+                           HYPRE_Int        *stride)
+{
+   hypre_Box *box;
+
+   box = hypre_BoxCreate(hypre_StructGridNDim(grid));
+   hypre_CopyIndex(ilower, hypre_BoxIMin(box));
+   hypre_CopyIndex(iupper, hypre_BoxIMax(box));
+   hypre_ProjectBox(box, origin, stride);
+   hypre_CopyIndex(hypre_BoxIMin(box), ilower);
+   hypre_CopyIndex(hypre_BoxIMax(box), iupper);
+   
+   return hypre_error_flag;
+}
+

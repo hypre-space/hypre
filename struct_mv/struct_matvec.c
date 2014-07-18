@@ -303,7 +303,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                 * range compute box based on the current stencil entry */
                if (hypre_StructMatrixDomainIsCoarse(A))
                {
-                  stride = hypre_StructMatrixDMap(A);
+                  stride = hypre_StructMatrixDStride(A);
                   hypre_CopyBox(compute_box, box);
                   hypre_BoxShiftPos(box, stencil_shape[si]);
                   hypre_ProjectBox(box, origin, stride);

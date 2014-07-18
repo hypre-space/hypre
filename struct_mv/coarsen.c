@@ -10,16 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TIME_DEBUG 0
-
-#if TIME_DEBUG
-static HYPRE_Int s_coarsen_num = 0;
-#endif
-
-
-#include "_hypre_struct_ls.h"
+#include "_hypre_struct_mv.h"
 
 #define DEBUG 0
+#define TIME_DEBUG 0
 
 #if DEBUG
 char       filename[255];
@@ -27,66 +21,164 @@ FILE      *file;
 static HYPRE_Int debug_count = 0;
 #endif
 
+#if TIME_DEBUG
+static HYPRE_Int s_coarsen_num = 0;
+#endif
+
 /*--------------------------------------------------------------------------
- * hypre_StructMapFineToCoarse
- *
- * NOTE: findex and cindex are indexes on the fine and coarse index space, and
- * do not stand for "F-pt index" and "C-pt index".
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MapToCoarseIndex( hypre_Index    index,
+                        hypre_IndexRef origin,
+                        hypre_Index    stride,
+                        HYPRE_Int      ndim )
+{
+   HYPRE_Int d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      if (origin != NULL)
+      {
+         index[d] -= origin[d];
+      }
+      if ((index[d]%stride[d]) != 0)
+      {
+         /* This index doesn't map directly to a coarse index */
+         hypre_error(HYPRE_ERROR_GENERIC);
+      }
+      index[d] /= stride[d];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_MapToFineIndex( hypre_Index    index,
+                      hypre_IndexRef origin,
+                      hypre_Index    stride,
+                      HYPRE_Int      ndim )
+{
+   HYPRE_Int d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      index[d] *= stride[d];
+      if (origin != NULL)
+      {
+         index[d] += origin[d];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * TODO: Start phasing out the following two routines.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMapFineToCoarse( hypre_Index findex,
-                             hypre_Index index,
+                             hypre_Index origin,
                              hypre_Index stride,
                              hypre_Index cindex )
 {
-   hypre_IndexX(cindex) =
-      (hypre_IndexX(findex) - hypre_IndexX(index)) / hypre_IndexX(stride);
-   hypre_IndexY(cindex) =
-      (hypre_IndexY(findex) - hypre_IndexY(index)) / hypre_IndexY(stride);
-   hypre_IndexZ(cindex) =
-      (hypre_IndexZ(findex) - hypre_IndexZ(index)) / hypre_IndexZ(stride);
+   hypre_CopyToIndex(findex, 3, cindex);
+   hypre_MapToCoarseIndex(cindex, origin, stride, 3);
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------------
- * hypre_StructMapCoarseToFine
- *
- * NOTE: findex and cindex are indexes on the fine and coarse index space, and
- * do not stand for "F-pt index" and "C-pt index".
- *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructMapCoarseToFine( hypre_Index cindex,
-                             hypre_Index index,
+                             hypre_Index origin,
                              hypre_Index stride,
-                             hypre_Index findex ) 
+                             hypre_Index findex )
 {
-   hypre_IndexX(findex) =
-      hypre_IndexX(cindex) * hypre_IndexX(stride) + hypre_IndexX(index);
-   hypre_IndexY(findex) =
-      hypre_IndexY(cindex) * hypre_IndexY(stride) + hypre_IndexY(index);
-   hypre_IndexZ(findex) =
-      hypre_IndexZ(cindex) * hypre_IndexZ(stride) + hypre_IndexZ(index);
+   hypre_CopyToIndex(cindex, 3, findex);
+   hypre_MapToFineIndex(findex, origin, stride, 3);
 
    return hypre_error_flag;
 }
 
-#define hypre_StructCoarsenBox(box, index, stride)                      \
-   hypre_ProjectBox(box, index, stride);                                \
-   hypre_StructMapFineToCoarse(hypre_BoxIMin(box), index, stride,       \
-                               hypre_BoxIMin(box));                     \
-   hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,       \
-                               hypre_BoxIMax(box))
+/*--------------------------------------------------------------------------
+ * This may produce an empty box, i.e., one with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CoarsenBox( hypre_Box      *box,
+                  hypre_IndexRef  origin,
+                  hypre_Index     stride )
+{
+   hypre_ProjectBox(box, origin, stride);
+   hypre_MapToCoarseIndex(hypre_BoxIMin(box), origin, stride, hypre_BoxNDim(box));
+   hypre_MapToCoarseIndex(hypre_BoxIMax(box), origin, stride, hypre_BoxNDim(box));
+
+   return hypre_error_flag;
+}
 
 /*--------------------------------------------------------------------------
- * New version of hypre_StructCoarsen that uses the BoxManager (AHB 12/06)
- *
+ * The dimensions of the modified box array are not changed.
+ * It is possible to have boxes with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CoarsenBoxArray( hypre_BoxArray  *box_array,
+                       hypre_IndexRef   origin,
+                       hypre_Index      stride )
+{
+   hypre_Box  *box;
+   HYPRE_Int   i;
+
+   hypre_ForBoxI(i, box_array)
+   {
+      box = hypre_BoxArrayBox(box_array, i);
+      hypre_CoarsenBox(box, origin, stride);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * The dimensions of the modified box array-array are not changed.
+ * It is possible to have boxes with volume 0.
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
+                            hypre_IndexRef        origin,
+                            hypre_Index           stride )
+{
+   hypre_BoxArray  *box_array;
+   hypre_Box       *box;
+   HYPRE_Int        i, j;
+
+   hypre_ForBoxArrayI(i, box_array_array)
+   {
+      box_array = hypre_BoxArrayArrayBoxArray(box_array_array, i);
+      hypre_ForBoxI(j, box_array)
+      {
+         box = hypre_BoxArrayBox(box_array, j);
+         hypre_CoarsenBox(box, origin, stride);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This routine coarsens the grid, 'fgrid', by the coarsening factor, 'stride',
- * using the index mapping in 'hypre_StructMapFineToCoarse'.
+ * using the index mapping in 'hypre_MapToCoarseIndex'.
  *  
- *  1.  A coarse grid is created with boxes that result from coarsening the fine
+ *  1. A coarse grid is created with boxes that result from coarsening the fine
  *  grid boxes, bounding box, and periodicity information.
  *
  *  2. If "sufficient" neighbor information exists in the fine grid to be
@@ -94,17 +186,18 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
  *  created by simply coarsening all of the entries in the fine grid manager.
  *  ("Sufficient" is determined by checking max_distance in the fine grid.)
  *
- *  3.  Otherwise, neighbor information will be collected during the
+ *  3. Otherwise, neighbor information will be collected during the
  *  StructGridAssemble according to the choosen value of max_distance for the
  *  coarse grid.
  *
- *   4. We do not need a separate version for the assumed partition case
+ *  4. We do not need a separate version for the assumed partition case
  *
+ * If 'origin' is NULL, a zero origin is used.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructCoarsen( hypre_StructGrid  *fgrid,
-                     hypre_Index        index,
+                     hypre_IndexRef     origin,
                      hypre_Index        stride,
                      HYPRE_Int          prune,
                      hypre_StructGrid **cgrid_ptr )
@@ -171,12 +264,11 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    for (i = 0; i < hypre_BoxArraySize(my_boxes); i++)
    {
       box = hypre_BoxArrayBox(my_boxes, i);
-      hypre_StructCoarsenBox(box, index, stride);
+      hypre_CoarsenBox(box, origin, stride);
       cids[i] = fids[i];
    }
    
-   /* prune? */
-   /* zero volume boxes are needed when forming P and P^T */ 
+   /* eliminate zero volume boxes */
    if (prune)
    {
       count = 0;    
@@ -244,7 +336,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* update the new bounding box */
    bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
-   hypre_StructCoarsenBox(bounding_box, index, stride);
+   hypre_CoarsenBox(bounding_box, origin, stride);
    
    hypre_StructGridSetBoundingBox(cgrid, bounding_box);
    
@@ -281,7 +373,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       {
          hypre_BoxManEntryGetExtents(entry, ilower, iupper);
          hypre_BoxSetExtents(new_box, ilower, iupper);
-         hypre_StructCoarsenBox(new_box, index, stride);
+         hypre_CoarsenBox(new_box, origin, stride);
          id =  hypre_BoxManEntryId(entry);
          /* if there is pruning we need to adjust the ids if any boxes drop out
             (we want these ids sequential - no gaps) - and zero boxes are not
@@ -295,10 +387,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
             }
             if (hypre_BoxVolume(new_box))
             {
-               
-               hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(new_box) ,
-                                     hypre_BoxIMax(new_box), proc, num,
-                                     entry_info);
+               hypre_BoxManAddEntry(cboxman, hypre_BoxIMin(new_box),
+                                    hypre_BoxIMax(new_box), proc, num, entry_info);
                num++;
             }
          }
@@ -306,9 +396,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                  saved in the box manager, so we will have gaps in the box
                  numbers) */
          {
-            hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(new_box) ,
-                                  hypre_BoxIMax(new_box), proc, id,
-                                  entry_info);
+            hypre_BoxManAddEntry(cboxman, hypre_BoxIMin(new_box),
+                                 hypre_BoxIMax(new_box), proc, id, entry_info);
          }
       } 
       else /* my boxes */
@@ -321,9 +410,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
             hypre_ForBoxI(j, my_boxes)
             {
                box = hypre_BoxArrayBox(my_boxes, j);
-               hypre_BoxManAddEntry( cboxman, hypre_BoxIMin(box),
-                                     hypre_BoxIMax(box), myid, j,
-                                     entry_info );
+               hypre_BoxManAddEntry(cboxman, hypre_BoxIMin(box),
+                                    hypre_BoxIMax(box), myid, j, entry_info );
             }
             last_proc = proc;
          }
@@ -338,7 +426,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 #if 0   
    /* if there is an assumed partition in the fg, then coarsen those boxes as
       well and add to cg */
-   hypre_BoxManGetAssumedPartition ( fboxman, &fap);
+   hypre_BoxManGetAssumedPartition (fboxman, &fap);
     
    if (fap)
    {
@@ -364,5 +452,3 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    return hypre_error_flag;
 }
-
-#undef hypre_StructCoarsenBox

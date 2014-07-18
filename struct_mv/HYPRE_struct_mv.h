@@ -58,8 +58,8 @@ typedef struct hypre_StructGrid_struct *HYPRE_StructGrid;
  * Create an {\tt ndim}-dimensional grid object.
  **/
 HYPRE_Int HYPRE_StructGridCreate(MPI_Comm          comm,
-                           HYPRE_Int         ndim,
-                           HYPRE_StructGrid *grid);
+                                 HYPRE_Int         ndim,
+                                 HYPRE_StructGrid *grid);
 
 /**
  * Destroy a grid object.  An object should be explicitly destroyed using this
@@ -99,10 +99,31 @@ HYPRE_Int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
                                       HYPRE_Int        *periodic);
 
 /**
- * Set the ghost layer in the grid object
+ * Set the ghost layer in the grid object.
  **/
 HYPRE_Int HYPRE_StructGridSetNumGhost(HYPRE_StructGrid  grid,
                                       HYPRE_Int        *num_ghost);
+
+/**
+ * Coarsen {\tt grid} by factor {\tt stride} to create {\tt cgrid}.
+ **/
+HYPRE_Int HYPRE_StructGridCoarsen(HYPRE_StructGrid  grid,
+                                  HYPRE_Int        *stride,
+                                  HYPRE_StructGrid *cgrid);
+
+/**
+ * Project the box described by {\tt ilower} and {\tt iupper} onto the strided
+ * index space that contains the index {\tt origin} and has stride {\tt stride}.
+ * This routine is useful in combination with \Ref{HYPRE_StructGridCoarsen} when
+ * dealing with rectangular matrices.
+ **/
+HYPRE_Int
+HYPRE_StructGridProjectBox(HYPRE_StructGrid  grid,
+                           HYPRE_Int        *ilower,
+                           HYPRE_Int        *iupper,
+                           HYPRE_Int        *origin,
+                           HYPRE_Int        *stride);
+
 
 /*@}*/
 
@@ -177,27 +198,28 @@ HYPRE_Int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
  * the same as the argument {\tt grid} in \Ref{HYPRE_StructMatrixCreate}.  Both
  * grids live on a common fine index space and should have the same number of
  * boxes.  The actual range is a coarsening of the range grid with coarsening
- * factor {\tt rmap} specified in \Ref{HYPRE_StructMatrixSetRMap}.  Similarly,
- * the actual domain is a coarsening of the domain grid with factor {\tt dmap}
- * specified in \Ref{HYPRE_StructMatrixSetDMap}.  Currently, either {\tt rmap}
- * or {\tt dmap} or both must be all ones (i.e., no coarsening).
+ * factor {\tt rstride} specified in \Ref{HYPRE_StructMatrixSetRStride}.
+ * Similarly, the actual domain is a coarsening of the domain grid with factor
+ * {\tt dstride} specified in \Ref{HYPRE_StructMatrixSetDStride}.  Currently,
+ * either {\tt rstride} or {\tt dstride} or both must be all ones (i.e., no
+ * coarsening).
  **/
 HYPRE_Int HYPRE_StructMatrixSetDomainGrid(HYPRE_StructMatrix matrix,
                                           HYPRE_StructGrid   domain_grid);
 
 /**
- * (Optional) Set the range coarsening map.  For more information, see
+ * (Optional) Set the range coarsening stride.  For more information, see
  * \Ref{HYPRE_StructMatrixSetDomainGrid}.
  **/
-HYPRE_Int HYPRE_StructMatrixSetRMap(HYPRE_StructMatrix matrix,
-                                    HYPRE_Int         *rmap);
+HYPRE_Int HYPRE_StructMatrixSetRStride(HYPRE_StructMatrix matrix,
+                                       HYPRE_Int         *rstride);
 
 /**
- * (Optional) Set the domain coarsening map.  For more information, see
+ * (Optional) Set the domain coarsening stride.  For more information, see
  * \Ref{HYPRE_StructMatrixSetDomainGrid}.
  **/
-HYPRE_Int HYPRE_StructMatrixSetDMap(HYPRE_StructMatrix matrix,
-                                    HYPRE_Int         *dmap);
+HYPRE_Int HYPRE_StructMatrixSetDStride(HYPRE_StructMatrix matrix,
+                                       HYPRE_Int         *dstride);
 
 /**
  * Prepare a matrix object for setting coefficient values.

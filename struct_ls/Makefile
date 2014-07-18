@@ -34,7 +34,6 @@ HEADERS =\
  sparse_msg.h
 
 FILES =\
- coarsen.c\
  cyclic_reduction.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_gmres.c\

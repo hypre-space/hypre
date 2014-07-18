@@ -2713,6 +2713,36 @@ main( hypre_int argc,
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
+    * Determine object type
+    *-----------------------------------------------------------*/
+
+   object_type = HYPRE_SSTRUCT;
+
+   /* determine if we build a gradient matrix */
+   gradient_matrix = 0;
+   if (solver_id == 150)
+   {
+      gradient_matrix = 1;
+      /* for now, change solver 150 to solver 28 */
+      solver_id = 28;
+   }
+
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        ((solver_id >= 60) && (solver_id < 70)) ||
+        ((solver_id >= 80) && (solver_id < 90)) ||
+        ((solver_id >= 90) && (solver_id < 100)) ||
+        (solver_id == 120) )
+   {
+      object_type = HYPRE_PARCSR;  
+   }
+
+   if (solver_id >= 200)
+   {
+      object_type = HYPRE_STRUCT;
+   }
+
+   /*-----------------------------------------------------------
     * Set up the grid
     *-----------------------------------------------------------*/
 
@@ -2786,36 +2816,6 @@ main( hypre_int argc,
                                       data.stencil_offsets[s][entry],
                                       data.stencil_vars[s][entry]);
       }
-   }
-
-   /*-----------------------------------------------------------
-    * Set object type
-    *-----------------------------------------------------------*/
-
-   object_type = HYPRE_SSTRUCT;
-
-   /* determine if we build a gradient matrix */
-   gradient_matrix = 0;
-   if (solver_id == 150)
-   {
-      gradient_matrix = 1;
-      /* for now, change solver 150 to solver 28 */
-      solver_id = 28;
-   }
-
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        ((solver_id >= 80) && (solver_id < 90)) ||
-        ((solver_id >= 90) && (solver_id < 100)) ||
-        (solver_id == 120) )
-   {
-      object_type = HYPRE_PARCSR;  
-   }
-
-   if (solver_id >= 200)
-   {
-      object_type = HYPRE_STRUCT;
    }
 
    /*-----------------------------------------------------------
