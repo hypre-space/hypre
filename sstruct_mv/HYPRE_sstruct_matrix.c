@@ -627,8 +627,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                              hypre_StructMatrixComm(send_matrix), &comm_pkg);
          /* note reversal of send/recv data here */
          hypre_InitializeCommunication(comm_pkg,
-                                       hypre_StructMatrixData(recv_matrix),
-                                       hypre_StructMatrixData(send_matrix),
+                                       hypre_StructMatrixVData(recv_matrix),
+                                       hypre_StructMatrixVData(send_matrix),
                                        1, 0, &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
          hypre_CommPkgDestroy(comm_pkg);

@@ -533,8 +533,8 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
                                 hypre_StructMatrixComm(smatrix),
                                 &comm_pkg);
             hypre_InitializeCommunication(comm_pkg,
-                                          hypre_StructMatrixData(smatrix),
-                                          hypre_StructMatrixData(smatrix),
+                                          hypre_StructMatrixVData(smatrix),
+                                          hypre_StructMatrixVData(smatrix),
                                           1, 0, &comm_handle);
             hypre_FinalizeCommunication(comm_handle);
 
