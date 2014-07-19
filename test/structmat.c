@@ -788,8 +788,8 @@ main( hypre_int  argc,
          {
             if (data.matrix_dstrides[mi][d] > 1)
             {
-               origin[d] = data.matrix_offsets[mi][ei][d];
-               stride[d] = data.matrix_dstrides[mi][d];
+               origin[d] = -data.matrix_offsets[mi][ei][d];
+               stride[d] =  data.matrix_dstrides[mi][d];
             }
             else
             {
