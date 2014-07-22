@@ -1112,7 +1112,6 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 HYPRE_Int 
 hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 {
-   HYPRE_Int              ndim         = hypre_StructMatrixNDim(matrix);
    HYPRE_Int              num_values   = hypre_StructMatrixNumValues(matrix);
    HYPRE_Complex         *matrix_vdata = hypre_StructMatrixVData(matrix);
    HYPRE_Int             *num_ghost    = hypre_StructMatrixNumGhost(matrix);
@@ -1120,29 +1119,6 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
-
-   /* BEGIN - variables for ghost layer identity code below */
-   hypre_StructGrid      *grid;
-   hypre_BoxArray        *boxes;
-   hypre_BoxManager      *boxman;
-   hypre_BoxArray        *data_space;
-   hypre_BoxArrayArray   *boundary_boxes;
-   hypre_BoxArray        *boundary_box_a;
-   hypre_BoxArray        *entry_box_a;
-   hypre_BoxArray        *tmp_box_a;
-   hypre_Box             *data_box;
-   hypre_Box             *boundary_box;
-   hypre_Box             *entry_box;
-   hypre_BoxManEntry    **entries;
-   hypre_IndexRef         periodic;
-   hypre_Index            loop_size;
-   hypre_Index            index;
-   hypre_IndexRef         start;
-   hypre_Index            stride;
-   HYPRE_Complex         *datap;
-   HYPRE_Int              i, j, ei, datai;
-   HYPRE_Int              num_entries;
-   /* End - variables for ghost layer identity code below */
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient( matrix );
 
