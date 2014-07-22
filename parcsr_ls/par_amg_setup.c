@@ -168,9 +168,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real        *expandp_weights =  hypre_ParAMGDataExpandPWeights(amg_data);
 
    /* parameters for non-Galerkin stuff */
-   HYPRE_Int num_gamma = hypre_ParAMGDataNumGamma (amg_data);
-   HYPRE_Real *gamma = hypre_ParAMGDataGamma (amg_data);
-   HYPRE_Real level_gamma = 0.0;
+   HYPRE_Int nongalerk_num_tol = hypre_ParAMGDataNonGalerkNumTol (amg_data);
+   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data);
+   HYPRE_Real nongalerk_tol_l = 0.0;
 
    hypre_ParCSRBlockMatrix *A_H_block;
 
@@ -1835,7 +1835,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
             hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
             A_H = hypre_ParTMatmul(P,Q);
-            hypre_ParCSRMatrixDestroy(Q);
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
@@ -1861,23 +1860,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             else
                   P_array[level] = hypre_ParMatmul(C,P);
             hypre_ParCSRMatrixDestroy(C); */
-         if (level < num_gamma)
-            level_gamma = gamma[level];
 
-         if (level_gamma > 0.0)
+         /* Set NonGalerkin drop tol on each level */
+         if (level < nongalerk_num_tol)
+            nongalerk_tol_l = nongalerk_tol[level];
+
+         if (nongalerk_tol_l > 0.0)
          {
             /* Build Non-Galerkin Coarse Grid */
-            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, P, A_array[level], 
-                    strong_threshold, max_row_sum, num_functions, 
+            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
+                    0.333*strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
-                    level_gamma, 1, 0.5, 1.0 );
-                    /*gamma, sym_collapse, lump_percent, beta );*/
-            hypre_ParCSRMatrixColStarts(P_array[level])
-			= hypre_ParCSRMatrixRowStarts(A_H);
+                    /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
+                      nongalerk_tol_l,      1,            0.5,    1.0 );
+            
+            hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
             if (!hypre_ParCSRMatrixCommPkg(A_H))
                 hypre_MatvecCommPkgCreate(A_H);
 			
          }
+         hypre_ParCSRMatrixDestroy(Q);
+
+
             if (add_P_max_elmts || add_trunc_factor)
             {
                 hypre_BoomerAMGTruncandBuild(P_array[level],
@@ -1925,41 +1929,40 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if (mult_addlvl == -1 || level < mult_addlvl)
       {
-            /*hypre_ParCSRMatrix *Q = NULL;
+         /* Set NonGalerkin drop tol on each level */
+         if (level < nongalerk_num_tol)
+            nongalerk_tol_l = nongalerk_tol[level];
+
+         if (nongalerk_tol_l > 0.0)
+         {
+            /* Construct AP, and then RAP */
+            hypre_ParCSRMatrix *Q = NULL;
             Q = hypre_ParMatmul(A_array[level],P_array[level]);
             A_H = hypre_ParTMatmul(P_array[level],Q);
             hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
-            hypre_ParCSRMatrixDestroy(Q);
             hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
-            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); */
-         hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                        P_array[level], &A_H); 
-
-         /* We can make gamma a command line parameter, if we want.  The other
-          * values we can hard code (they are/were there for experimentation). 
-          *  --  gamma:        the row-wise drop-tolerance and is typically [0.01, 0.1]
-          *  --  sym_collapse: should always be True  (experimental parameter)
-          *  --  lump_percent: should always be 0.5   (experimental parameter)
-          *  --  beta:         should always be 1.0   (experimental parameter)
-          */
-         /* NonGalerkin Set Level's Gamma */
-         if (level < num_gamma)
-            level_gamma = gamma[level];
-
-         if (level_gamma > 0.0)
-         {
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+            
             /* Build Non-Galerkin Coarse Grid */
-            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, P_array[level], A_array[level], 
-                    strong_threshold, max_row_sum, num_functions, 
+            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
+                    0.333*strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
-                    level_gamma, 1, 0.5, 1.0 );
-                    /*gamma, sym_collapse, lump_percent, beta );*/
-            hypre_ParCSRMatrixColStarts(P_array[level])
-			= hypre_ParCSRMatrixRowStarts(A_H);
+                    /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
+                      nongalerk_tol_l,      1,            0.5,    1.0 );
+            
             if (!hypre_ParCSRMatrixCommPkg(A_H))
                 hypre_MatvecCommPkgCreate(A_H);
+            
+            /* Delete AP */
+            hypre_ParCSRMatrixDestroy(Q);
+         }
+         else
+         {
+            /* Compute standard Galerkin coarse-grid product */
+            hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
+                                        P_array[level], &A_H);
          }
 
       }

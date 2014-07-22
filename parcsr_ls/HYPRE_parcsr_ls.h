@@ -3000,16 +3000,16 @@ HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
                              HYPRE_Int          IS_type);
 /*
- * HYPRE_BoomerAMGSetNumGamma
+ * HYPRE_BoomerAMGSetNonGalerkNumTol
  **/
-HYPRE_Int HYPRE_BoomerAMGSetNumGamma (HYPRE_Solver solver,
-                             HYPRE_Int          num_gamma);
+HYPRE_Int HYPRE_BoomerAMGSetNonGalerkNumTol (HYPRE_Solver solver,
+                             HYPRE_Int          nongalerk_num_tol);
 
 /*
- * HYPRE_BoomerAMGSetGamma
+ * HYPRE_BoomerAMGSetNonGalerkTol 
  **/
-HYPRE_Int HYPRE_BoomerAMGSetGamma (HYPRE_Solver  solver,
-                                   HYPRE_Real        *gamma);
+HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol (HYPRE_Solver  solver,
+                                   HYPRE_Real        *nongalerk_tol);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
