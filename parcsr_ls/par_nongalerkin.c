@@ -692,7 +692,6 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
         row_end = R_IAP_offd_i[Cpt+1];
         for(j = row_start; j < row_end; j++)
         {
-            global_col = R_IAP_diag_j[j] + first_col_diag_RAP;
             global_col = col_map_offd_R_IAP[ R_IAP_offd_j[j] ];
             /* This call adds a                        1 x 1 to  i            j           data */
             ierr += HYPRE_IJMatrixAddToValues(Pattern, 1, &one, &global_row, &global_col, &one_float);
