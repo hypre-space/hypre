@@ -862,6 +862,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 HYPRE_Int
 hypre_ZeroDiagonal( hypre_StructMatrix *A )
 {
+   hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
+
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
 
@@ -873,7 +875,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    hypre_Box             *A_dbox;
    HYPRE_Int              Ai;
 
-   HYPRE_Int              i;
+   HYPRE_Int              i, si;
 
    hypre_Index            diag_index;
    HYPRE_Real             diag_product = 1.0;
@@ -897,13 +899,13 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
       start  = hypre_BoxIMin(compute_box);
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-      Ap = hypre_StructMatrixExtractPointerByIndex(A, i, diag_index);
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-      if ( constant_coefficient )
+      si = hypre_StructStencilElementRank(stencil, diag_index);
+      Ap = hypre_StructMatrixBoxData(A, i, si);
+      if (hypre_StructMatrixConstEntry(A, si))
       {
-         Ai = hypre_CCBoxIndexRank( A_dbox, start );
-         diag_product *= Ap[Ai];
+         diag_product = *Ap;
       }
       else
       {

@@ -12,7 +12,6 @@
 
 /******************************************************************************
  * Cyclic reduction algorithm (coded as if it were a 1D MG method)
- *
  *****************************************************************************/
 
 #include "_hypre_struct_ls.h"
@@ -26,7 +25,7 @@
 #define hypre_CycRedSetCIndex(base_index, base_stride, level, cdir, cindex) \
    {                                                                    \
       if (level > 0)                                                    \
-         hypre_SetIndex3(cindex, 0, 0, 0);                               \
+         hypre_SetIndex3(cindex, 0, 0, 0);                              \
       else                                                              \
          hypre_CopyIndex(base_index,  cindex);                          \
       hypre_IndexD(cindex, cdir) += 0;                                  \
@@ -35,7 +34,7 @@
 #define hypre_CycRedSetFIndex(base_index, base_stride, level, cdir, findex) \
    {                                                                    \
       if (level > 0)                                                    \
-         hypre_SetIndex3(findex, 0, 0, 0);                               \
+         hypre_SetIndex3(findex, 0, 0, 0);                              \
       else                                                              \
          hypre_CopyIndex(base_index,  findex);                          \
       hypre_IndexD(findex, cdir) += 1;                                  \
@@ -44,7 +43,7 @@
 #define hypre_CycRedSetStride(base_index, base_stride, level, cdir, stride) \
    {                                                                    \
       if (level > 0)                                                    \
-         hypre_SetIndex3(stride, 1, 1, 1);                               \
+         hypre_SetIndex3(stride, 1, 1, 1);                              \
       else                                                              \
          hypre_CopyIndex(base_stride, stride);                          \
       hypre_IndexD(stride, cdir) *= 2;                                  \
@@ -238,6 +237,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
    HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real              accm1, accp1;
                     
    HYPRE_Int               iA, iAm1, iAp1;
    HYPRE_Int               iAc;
@@ -340,13 +340,25 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             iAm1 = iA - xOffsetA;
             iAp1 = iA + xOffsetA;
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            /* Avoid division by zero along domain boundaries */
+            accm1 = 1.0;
+            accp1 = 1.0;
+            if (a_cc[iAm1] != 0.0)
+            {
+               accm1 = a_cc[iAm1];
+            }
+            if (a_cc[iAp1] != 0.0)
+            {
+               accp1 = a_cc[iAp1];
+            }
+
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
 
             ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+               - a_cw[iA] * a_ce[iAm1] / accm1
+               - a_ce[iA] * a_cw[iAp1] / accp1;
 
-            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
+            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / accp1;
 
          }
          hypre_BoxLoop2End(iA, iAc);
@@ -371,11 +383,23 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             iAm1 = iA - xOffsetA;
             iAp1 = iA + xOffsetA;
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            /* Avoid division by zero along domain boundaries */
+            accm1 = 1.0;
+            accp1 = 1.0;
+            if (a_cc[iAm1] != 0.0)
+            {
+               accm1 = a_cc[iAm1];
+            }
+            if (a_cc[iAp1] != 0.0)
+            {
+               accp1 = a_cc[iAp1];
+            }
+
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
 
             ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+               - a_cw[iA] * a_ce[iAm1] / accm1
+               - a_ce[iA] * a_cw[iAp1] / accp1;
          }
          hypre_BoxLoop2End(iA, iAc);
       }
@@ -983,6 +1007,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          }
       }
    }
+
    /*--------------------------------------------------
     * Coarsest grid:
     *

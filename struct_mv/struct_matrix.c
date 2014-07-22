@@ -1147,95 +1147,6 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    constant_coefficient = hypre_StructMatrixConstantCoefficient( matrix );
 
    /*-----------------------------------------------------------------------
-    * Set ghost zones along the domain boundary to the identity to enable code
-    * simplifications elsewhere in hypre (e.g., CyclicReduction).
-    *
-    * Intersect each data box with the BoxMan to get neighbors, then subtract
-    * the neighbors from the box to get the boundary boxes.
-    *-----------------------------------------------------------------------*/
-
-   /* RDF TODO: Rewrite to execute when diagonal coefficient is not constant, or
-    * fix CyclicReduction to avoid division by zero along boundary. */
-   if ( constant_coefficient!=1 )
-   {
-      data_space = hypre_StructMatrixDataSpace(matrix);
-      grid       = hypre_StructMatrixGrid(matrix);
-      boxes      = hypre_StructGridBoxes(grid);
-      boxman     = hypre_StructGridBoxMan(grid);
-      periodic   = hypre_StructGridPeriodic(grid);
-
-      boundary_boxes = hypre_BoxArrayArrayCreate(
-         hypre_BoxArraySize(data_space), ndim);
-      entry_box_a    = hypre_BoxArrayCreate(0, ndim);
-      tmp_box_a      = hypre_BoxArrayCreate(0, ndim);
-      hypre_ForBoxI(i, data_space)
-      {
-         /* copy data box to boundary_box_a */
-         boundary_box_a = hypre_BoxArrayArrayBoxArray(boundary_boxes, i);
-         hypre_BoxArraySetSize(boundary_box_a, 1);
-         boundary_box = hypre_BoxArrayBox(boundary_box_a, 0);
-         hypre_CopyBox(hypre_BoxArrayBox(data_space, i), boundary_box);
-
-         hypre_BoxManIntersect(boxman,
-                               hypre_BoxIMin(boundary_box),
-                               hypre_BoxIMax(boundary_box),
-                               &entries , &num_entries);
-
-         /* put neighbor boxes into entry_box_a */
-         hypre_BoxArraySetSize(entry_box_a, num_entries);
-         for (ei = 0; ei < num_entries; ei++)
-         {
-            entry_box = hypre_BoxArrayBox(entry_box_a, ei);
-            hypre_BoxManEntryGetExtents(entries[ei],
-                                        hypre_BoxIMin(entry_box),
-                                        hypre_BoxIMax(entry_box));
-         }
-         hypre_TFree(entries);
-
-         /* subtract neighbor boxes (entry_box_a) from data box (boundary_box_a) */
-         hypre_SubtractBoxArrays(boundary_box_a, entry_box_a, tmp_box_a);
-      }
-      hypre_BoxArrayDestroy(entry_box_a);
-      hypre_BoxArrayDestroy(tmp_box_a);
-
-      /* set boundary ghost zones to the identity equation */
-
-      hypre_SetIndex(index, 0);
-      hypre_SetIndex(stride, 1);
-      data_space = hypre_StructMatrixDataSpace(matrix);
-      hypre_ForBoxI(i, data_space)
-      {
-         datap = hypre_StructMatrixExtractPointerByIndex(matrix, i, index);
-
-         if (datap)
-         {
-            data_box = hypre_BoxArrayBox(data_space, i);
-            boundary_box_a = hypre_BoxArrayArrayBoxArray(boundary_boxes, i);
-            hypre_ForBoxI(j, boundary_box_a)
-            {
-               boundary_box = hypre_BoxArrayBox(boundary_box_a, j);
-               start = hypre_BoxIMin(boundary_box);
-
-               hypre_BoxGetSize(boundary_box, loop_size);
-
-               hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
-                                   data_box, start, stride, datai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(datai)
-               {
-                  datap[datai] = 1.0;
-               }
-               hypre_BoxLoop1End(datai);
-            }
-         }
-      }
-
-      hypre_BoxArrayArrayDestroy(boundary_boxes);
-   }
-
-   /*-----------------------------------------------------------------------
     * If the CommPkg has not been set up, set it up
     *-----------------------------------------------------------------------*/
 
@@ -1245,6 +1156,9 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    {
       hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix),
                                        num_ghost, &comm_info);
+      /* RDF TODO: Use hypre_CommInfoProjectSend()/hypre_CommInfoProjectRecv()
+       * along with hypre_StructMatrixMapDataBox()?  Also need to "project"
+       * num_values, which means changing communication routines. */
       hypre_CommPkgCreate(comm_info,
                           hypre_StructMatrixDataSpace(matrix),
                           hypre_StructMatrixDataSpace(matrix),

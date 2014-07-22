@@ -3205,7 +3205,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
          if (hypre_BoxArraySize(gridboxes) > 0)
          {
-            HYPRE_StructMatrixSetConstantValues(A, stencil_size,
+            HYPRE_StructMatrixSetConstantValues(A, stencil_size-1,
                                                 stencil_indices, values);
          }
          hypre_TFree(values);
