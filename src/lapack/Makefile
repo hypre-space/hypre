@@ -84,10 +84,15 @@ LAPACK_FILES = \
  dsygv.c\
  dsytd2.c\
  dsytrd.c\
+ dtrtrs.c\
  ieeeck.c\
  ilaenv.c\
  lapack_utils.c\
  lsame.c\
+ zgeqrf.c\
+ ztrtrs.c\
+ zungqr.c\
+ zunmqr.c\
  xerbla.c
 
 OBJS = ${LAPACK_FILES:.c=.o}
