@@ -25,13 +25,10 @@
 
 /*--------------------------------------------------------------------------
  * hypre_Index:
- *   This is used to define indices in index space, or dimension
- *   sizes of boxes.
  *
- *   The spatial dimensions x, y, and z may be specified by the
- *   integers 0, 1, and 2, respectively (see the hypre_IndexD macro below).
- *   This simplifies the code in the hypre_Box class by reducing code
- *   replication.
+ * This is used to define indices in index space, or dimension sizes of boxes.
+ * The hypre_IndexD macro is used to access integer values in each dimension,
+ * but it is okay to use standard array syntax, i.e., index[i].
  *--------------------------------------------------------------------------*/
 
 typedef HYPRE_Int  hypre_Index[HYPRE_MAXDIM];

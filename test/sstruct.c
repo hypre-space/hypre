@@ -18,7 +18,6 @@
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
-#include "_hypre_sstruct_mv.h"
 
 /* begin lobpcg */
 

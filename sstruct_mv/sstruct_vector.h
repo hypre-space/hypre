@@ -52,7 +52,6 @@ typedef struct hypre_SStructVector_struct
    /* s-vector info */
    HYPRE_Int               nparts;
    hypre_SStructPVector  **pvectors;
-   hypre_CommPkg        ***comm_pkgs;    /* nvar array of comm pkgs */
 
    /* u-vector info */
    HYPRE_IJVector          ijvector;
@@ -66,7 +65,7 @@ typedef struct hypre_SStructVector_struct
    HYPRE_Complex           *data;        /* GEC1002 pointer to chunk data  */
    HYPRE_Int               *dataindices; /* GEC1002 dataindices[partx] is the starting index
                                           of vector data for the part=partx    */
-   HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
+   HYPRE_Int               datasize;     /* GEC1002 size of all data = ghlocalsize */
 
    HYPRE_Int               global_size;  /* Total number coefficients */
 
@@ -108,7 +107,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
 #define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
-#define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )
-#define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize  )
+#define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices)
+#define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize)
 
 #endif
