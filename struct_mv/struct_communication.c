@@ -30,8 +30,12 @@ FILE      *file;
  * intermediate processor-based description is used directly to pack and unpack
  * buffers during the communications.
  *
- * The 'orders' argument is dimension 'num_transforms' x 'num_values' and should
- * have a one-to-one correspondence with the transform data in 'comm_info'.
+ * The 'orders' argument is a number-of-orders x num_values array of integers.
+ * If orders is NULL, the incremental order from 0 to (num_values-1) is used.
+ * If orders is not NULL and there are no transforms in comm_info, then
+ * orders[0] is used.  Otherwise, number-of-orders must equal the number of
+ * transforms and there should be a one-to-one correspondence with the transform
+ * data in comm_info.
  *
  * If 'reverse' is > 0, then the meaning of send/recv is reversed
  *
@@ -61,7 +65,6 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    hypre_Index          *coords;
    hypre_Index          *dirs;
    HYPRE_Int           **send_transforms;
-   HYPRE_Int           **cp_orders;
 
    hypre_CommPkg        *comm_pkg;
    hypre_CommType       *comm_types;
@@ -133,24 +136,8 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    hypre_CommPkgFirstComm(comm_pkg) = 1;
    hypre_CommPkgNDim(comm_pkg)      = ndim;
    hypre_CommPkgNumValues(comm_pkg) = num_values;
-   hypre_CommPkgNumOrders(comm_pkg) = 0;
-   hypre_CommPkgOrders(comm_pkg)    = NULL;
-   if ( (send_transforms != NULL) && (orders != NULL) )
-   {
-      hypre_CommPkgNumOrders(comm_pkg) = num_transforms;
-      cp_orders = hypre_TAlloc(HYPRE_Int *, num_transforms);
-      for (i = 0; i < num_transforms; i++)
-      {
-         cp_orders[i] = hypre_TAlloc(HYPRE_Int, num_values);
-         for (j = 0; j < num_values; j++)
-         {
-            cp_orders[i][j] = orders[i][j];
-         }
-      }
-      hypre_CommPkgOrders(comm_pkg) = cp_orders;
-   }
 
-   /* set default identity transform */
+   /* set up identity transform and order */
    identity_order = hypre_TAlloc(HYPRE_Int, num_values);
    for (i = 0; i < ndim; i++)
    {
@@ -166,10 +153,15 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
     * Set up send CommType information
     *------------------------------------------------------*/
 
-   /* set transform to default identity transform */
+   /* set the default send transform and order (may be changed below) */
    send_coord = identity_coord;
    send_dir   = identity_dir;
    send_order = identity_order;
+   if (orders != NULL)
+   {
+      /* use the order passed in */
+      send_order = orders[0];
+   }
 
    /* set data_offsets and compute num_boxes, num_entries */
    data_offsets = hypre_TAlloc(HYPRE_Int, hypre_BoxArraySize(send_data_space));
@@ -267,13 +259,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
          comm_bufsize                     += (size*num_values);
          rbox_array = hypre_BoxArrayArrayBoxArray(send_rboxes, i);
          data_box = hypre_BoxArrayBox(send_data_space, i);
-         if (send_transforms != NULL)
+         if (num_transforms != 0)
          {
             send_coord = coords[send_transforms[i][j]];
             send_dir   = dirs[send_transforms[i][j]];
             if (orders != NULL)
             {
-               send_order = cp_orders[send_transforms[i][j]];
+               send_order = orders[send_transforms[i][j]];
             }
          }
          hypre_CommTypeSetEntry(box, send_stride, send_coord, send_dir, num_values,
@@ -812,7 +804,6 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 {
    hypre_CommHandle    *comm_handle;
 
-   HYPRE_Int            num_values = hypre_CommPkgNumValues(comm_pkg);
    HYPRE_Int            num_sends  = hypre_CommPkgNumSends(comm_pkg);
    HYPRE_Int            num_recvs  = hypre_CommPkgNumRecvs(comm_pkg);
    MPI_Comm             comm       = hypre_CommPkgComm(comm_pkg);
@@ -913,7 +904,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          order = hypre_CommEntryTypeOrder(comm_entry);
 
          lptr = send_data + hypre_CommEntryTypeOffset(comm_entry);
-         for (ll = 0; ll < num_values; ll++)
+         for (ll = 0; ll < length_array[dim]; ll++)
          {
             if (order[ll] > -1)
             {
@@ -1153,7 +1144,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
          lptr = hypre_CommHandleRecvData(comm_handle) +
             hypre_CommEntryTypeOffset(comm_entry);
-         for (ll = 0; ll < num_values; ll++)
+         for (ll = 0; ll < length_array[dim]; ll++)
          {
             kptr = lptr + ll*stride_array[dim];
 
@@ -1292,7 +1283,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
          to_stride_array = hypre_CommEntryTypeStrideArray(copy_to_entry);
          order = hypre_CommEntryTypeOrder(copy_fr_entry);
 
-         for (ll = 0; ll < num_values; ll++)
+         for (ll = 0; ll < length_array[dim]; ll++)
          {
             if (order[ll] > -1)
             {
@@ -1370,7 +1361,6 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
 {
    hypre_CommType       *comm_type;
    hypre_CommEntryType  *entry;
-   HYPRE_Int           **orders;
    HYPRE_Int             i, j, num_comms, num_entries;
 
    if (comm_pkg)
@@ -1387,9 +1377,9 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
             hypre_TFree(hypre_CommEntryTypeOrder(entry));
          }
       }
-      /* This is only set up if a communication is done */
       if (!hypre_CommPkgFirstComm(comm_pkg))
       {
+         /* This is only set up if a communication is done */
          num_comms = hypre_CommPkgNumRecvs(comm_pkg);
          for (i = 0; i < num_comms; i++)
          {
@@ -1434,13 +1424,6 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
 
       hypre_TFree(hypre_CommPkgRecvDataOffsets(comm_pkg));
       hypre_BoxArrayDestroy(hypre_CommPkgRecvDataSpace(comm_pkg));
-
-      orders = hypre_CommPkgOrders(comm_pkg);
-      for (i = 0; i < hypre_CommPkgNumOrders(comm_pkg); i++)
-      {
-         hypre_TFree(orders[i]);
-      }
-      hypre_TFree(orders);
 
       hypre_TFree(comm_pkg);
    }
