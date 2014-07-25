@@ -216,6 +216,8 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    ct_rem_boxnums = hypre_TAlloc(HYPRE_Int, num_entries);
    ct_rem_boxes = hypre_TAlloc(hypre_Box, num_entries);
    hypre_CommPkgEntries(comm_pkg)    = ct_entries;
+   hypre_CommPkgRemBoxnums(comm_pkg) = ct_rem_boxnums;
+   hypre_CommPkgRemBoxes(comm_pkg)   = ct_rem_boxes;
 
    p_old = -1;
    num_comms = 0;
@@ -1242,7 +1244,6 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                          HYPRE_Complex *recv_data,
                          HYPRE_Int      action )
 {
-   HYPRE_Int            num_values = hypre_CommPkgNumValues(comm_pkg);
    hypre_CommType      *copy_fr_type;
    hypre_CommType      *copy_to_type;
    hypre_CommEntryType *copy_fr_entry;
@@ -1421,6 +1422,8 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
       hypre_TFree(comm_type);
 
       hypre_TFree(hypre_CommPkgEntries(comm_pkg));
+      hypre_TFree(hypre_CommPkgRemBoxnums(comm_pkg));
+      hypre_TFree(hypre_CommPkgRemBoxes(comm_pkg));
 
       hypre_TFree(hypre_CommPkgRecvDataOffsets(comm_pkg));
       hypre_BoxArrayDestroy(hypre_CommPkgRecvDataSpace(comm_pkg));
