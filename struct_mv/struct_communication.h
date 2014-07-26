@@ -109,11 +109,6 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType   *copy_from_type;
    hypre_CommType   *copy_to_type;
 
-   /* these pointers are just to help free up memory */
-   hypre_CommEntryType *entries;
-   HYPRE_Int           *rem_boxnums;
-   hypre_Box           *rem_boxes;
-
    /* needed for setting recv entries after the first communication */
    hypre_Index       recv_stride;
    HYPRE_Int        *recv_data_offsets; /* offsets into recv data (by box) */
@@ -216,10 +211,6 @@ typedef struct hypre_CommHandle_struct
 
 #define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
-
-#define hypre_CommPkgEntries(comm_pkg)         (comm_pkg -> entries)
-#define hypre_CommPkgRemBoxnums(comm_pkg)      (comm_pkg -> rem_boxnums)
-#define hypre_CommPkgRemBoxes(comm_pkg)        (comm_pkg -> rem_boxes)
 
 #define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
 #define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
