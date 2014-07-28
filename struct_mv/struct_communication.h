@@ -63,7 +63,7 @@ typedef struct hypre_CommEntryType_struct
    HYPRE_Int  dim;                          /* dimension of the data */
    HYPRE_Int  length_array[HYPRE_MAXDIM+1];
    HYPRE_Int  stride_array[HYPRE_MAXDIM+1];
-   HYPRE_Int *order;                        /* order of last dim values */
+   HYPRE_Int *imap;                         /* index map for last dim values */
 
 } hypre_CommEntryType;
 
@@ -78,6 +78,7 @@ typedef struct hypre_CommType_struct
    HYPRE_Int             ndim;
    HYPRE_Int             num_entries;
    hypre_CommEntryType  *entries;
+   HYPRE_Int            *imaps;
 
    /* this is only needed until first send buffer prefix is packed */
    HYPRE_Int            *rem_boxnums; /* entry remote box numbers */
@@ -171,7 +172,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommEntryTypeDim(entry)          (entry -> dim)
 #define hypre_CommEntryTypeLengthArray(entry)  (entry -> length_array)
 #define hypre_CommEntryTypeStrideArray(entry)  (entry -> stride_array)
-#define hypre_CommEntryTypeOrder(entry)        (entry -> order)
+#define hypre_CommEntryTypeIMap(entry)         (entry -> imap)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
@@ -183,6 +184,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommTypeNumEntries(type)    (type -> num_entries)
 #define hypre_CommTypeEntries(type)       (type -> entries)
 #define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
+#define hypre_CommTypeIMaps(type)         (type -> imaps)
 
 #define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
 #define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
