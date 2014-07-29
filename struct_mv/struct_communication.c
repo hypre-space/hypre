@@ -20,8 +20,8 @@ FILE      *file;
 #endif
 
 /* this computes a (large enough) size (in doubles) for the message prefix */
-#define hypre_CommPrefixSize(ne)                                        \
-   ( (((1+ne)*sizeof(HYPRE_Int) + ne*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + 1 )
+#define hypre_CommPrefixSize(ne,nv)                                     \
+   ( (((1+ne+ne*nv)*sizeof(HYPRE_Int) + ne*sizeof(hypre_Box))/sizeof(HYPRE_Complex)) + 1 )
 
 /*--------------------------------------------------------------------------
  * Create a communication package.  A grid-based description of a communication
@@ -35,9 +35,13 @@ FILE      *file;
  * If orders is not NULL and there are no transforms in comm_info, then
  * orders[0] is used.  Otherwise, number-of-orders must equal the number of
  * transforms and there should be a one-to-one correspondence with the transform
- * data in comm_info.
+ * data in comm_info.  Negative order numbers indicate skipped indices, which
+ * allows a subset of values to be communicated.
  *
  * If 'reverse' is > 0, then the meaning of send/recv is reversed
+ *
+ * RDF NOTE: The buffer size will be too large in the case where a subset of
+ * values is communicated using negative order numbers.
  *
  *--------------------------------------------------------------------------*/
 
@@ -80,7 +84,6 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    HYPRE_Int            *data_offsets;
    HYPRE_Int             data_offset;
    hypre_Index           identity_coord, identity_dir;
-   HYPRE_Int            *identity_order;
    hypre_IndexRef        send_coord, send_dir;
    HYPRE_Int            *send_order;
 
@@ -136,15 +139,10 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    hypre_CommPkgNumValues(comm_pkg) = num_values;
 
    /* set up identity transform and order */
-   identity_order = hypre_TAlloc(HYPRE_Int, num_values);
    for (i = 0; i < ndim; i++)
    {
       identity_coord[i] = i;
       identity_dir[i] = 1;
-   }
-   for (i = 0; i < num_values; i++)
-   {
-      identity_order[i] = i;
    }
 
    /*------------------------------------------------------
@@ -154,7 +152,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    /* set the default send transform and order (may be changed below) */
    send_coord = identity_coord;
    send_dir   = identity_dir;
-   send_order = identity_order;
+   send_order = NULL;
    if (orders != NULL)
    {
       /* use the order passed in */
@@ -262,6 +260,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
             hypre_CommTypeProc(comm_type)       = p;
             hypre_CommTypeBufsize(comm_type)    = 0;
             hypre_CommTypeNDim(comm_type)       = ndim;
+            hypre_CommTypeNumValues(comm_type)  = num_values;
             hypre_CommTypeNumEntries(comm_type) = num_entries;
             hypre_CommTypeEntries(comm_type)    =
                hypre_TAlloc(hypre_CommEntryType, num_entries);
@@ -271,6 +270,8 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                hypre_TAlloc(HYPRE_Int, num_entries);
             hypre_CommTypeRemBoxes(comm_type)   =
                hypre_TAlloc(hypre_Box, num_entries);
+            hypre_CommTypeRemOrders(comm_type)  =
+               hypre_TAlloc(HYPRE_Int, (num_entries*num_values));
             p_old = p;
          }
 
@@ -288,9 +289,10 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
                send_order = orders[send_transforms[i][j]];
             }
          }
-         hypre_CommTypeSetEntry(comm_type, k, box, send_stride,
-                                send_coord, send_dir, num_values,
-                                send_order, data_box, data_offsets[i]);
+         hypre_CommTypeSetEntry(comm_type, k,
+                                box, send_stride, send_coord, send_dir,
+                                send_order, hypre_CommTypeRemOrder(comm_type, k),
+                                data_box, data_offsets[i]);
          hypre_CommTypeRemBoxnum(comm_type, k) = send_rboxnums[i][j];
          hypre_CopyBox(hypre_BoxArrayBox(rbox_array, j),
                        hypre_CommTypeRemBox(comm_type, k));
@@ -303,7 +305,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    {
       comm_type = &comm_types[m];
       k = hypre_CommTypeNumEntries(comm_type);
-      size = hypre_CommPrefixSize(k);
+      size = hypre_CommPrefixSize(k, num_values);
       hypre_CommTypeBufsize(comm_type) += size;
       comm_bufsize                     += size;
    }
@@ -396,6 +398,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
             hypre_CommTypeProc(comm_type)       = p;
             hypre_CommTypeBufsize(comm_type)    = 0;
             hypre_CommTypeNDim(comm_type)       = ndim;
+            hypre_CommTypeNumValues(comm_type)  = num_values;
             hypre_CommTypeNumEntries(comm_type) = 0;
             p_old = p;
          }
@@ -413,7 +416,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    {
       comm_type = &comm_types[m];
       k = hypre_CommTypeNumEntries(comm_type);
-      size = hypre_CommPrefixSize(k);
+      size = hypre_CommPrefixSize(k, num_values);
       hypre_CommTypeBufsize(comm_type) += size;
       comm_bufsize                     += size;
    }
@@ -435,12 +438,13 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
          /* subtract off old (incorrect) prefix size */
          num_entries = hypre_CommTypeNumEntries(comm_type);
-         hypre_CommTypeBufsize(comm_type) -= hypre_CommPrefixSize(num_entries);
+         hypre_CommTypeBufsize(comm_type) -=
+            hypre_CommPrefixSize(num_entries, num_values);
 
          /* set num_entries to number of grid points and add new prefix size */
          num_entries = hypre_CommTypeBufsize(comm_type);
          hypre_CommTypeNumEntries(comm_type) = num_entries;
-         size = hypre_CommPrefixSize(num_entries);
+         size = hypre_CommPrefixSize(num_entries, num_values);
          hypre_CommTypeBufsize(comm_type) += size;
          hypre_CommPkgRecvBufsize(comm_pkg) += hypre_CommTypeBufsize(comm_type);
       }
@@ -457,12 +461,14 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
          hypre_TAlloc(hypre_CommEntryType, num_entries);
       hypre_CommTypeIMaps(to_type) =
          hypre_TAlloc(HYPRE_Int, (num_entries*num_values));
-      hypre_CommTypeSetEntries(to_type, num_values,
+      hypre_CommTypeSetEntries(to_type,
                                hypre_CommTypeRemBoxnums(from_type),
                                hypre_CommTypeRemBoxes(from_type),
+                               hypre_CommTypeRemOrders(from_type),
                                recv_stride, recv_data_space, data_offsets);
       hypre_TFree(hypre_CommTypeRemBoxnums(from_type));
       hypre_TFree(hypre_CommTypeRemBoxes(from_type));
+      hypre_TFree(hypre_CommTypeRemOrders(from_type));
    }
 
    /*------------------------------------------------------
@@ -627,7 +633,6 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
     * Clean up
     *------------------------------------------------------*/
 
-   hypre_TFree(identity_order);
    hypre_TFree(comm_boxes_p);
    hypre_TFree(comm_boxes_i);
    hypre_TFree(comm_boxes_j);
@@ -643,70 +648,68 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
 
 HYPRE_Int
 hypre_CommTypeSetEntries( hypre_CommType  *comm_type,
-                          HYPRE_Int        num_values,
                           HYPRE_Int       *boxnums,
                           hypre_Box       *boxes,
+                          HYPRE_Int       *orders,
                           hypre_Index      stride,
                           hypre_BoxArray  *data_space,
                           HYPRE_Int       *data_offsets )
 {
    HYPRE_Int             ndim        = hypre_CommTypeNDim(comm_type);
+   HYPRE_Int             num_values  = hypre_CommTypeNumValues(comm_type);
    HYPRE_Int             num_entries = hypre_CommTypeNumEntries(comm_type);
    hypre_Box            *box;
    hypre_Box            *data_box;
    hypre_Index           coord, dir;
    HYPRE_Int            *order;
-   HYPRE_Int             i, j;
+   HYPRE_Int             i, j, k;
                 
    /* set identity transform */
-   order = hypre_TAlloc(HYPRE_Int, num_values);
    for (i = 0; i < ndim; i++)
    {
       coord[i] = i;
       dir[i] = 1;
    }
-   for (i = 0; i < num_values; i++)
-   {
-      order[i] = i;
-   }
 
    for (j = 0; j < num_entries; j++)
    {
-      i = boxnums[j];
+      k = boxnums[j];
       box = &boxes[j];
-      data_box = hypre_BoxArrayBox(data_space, i);
+      order = &orders[j*num_values];
+      data_box = hypre_BoxArrayBox(data_space, k);
 
       hypre_CommTypeSetEntry(comm_type, j, box, stride, coord, dir,
-                             num_values, order, data_box, data_offsets[i]);
+                             order, NULL, data_box, data_offsets[k]);
    }
-
-   hypre_TFree(order);
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
+ * If order is NULL, a natural incremental order is used.  If rem_order is not
+ * NULL, then it is set to the equivalent remote ordering.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_CommTypeSetEntry( hypre_CommType      *comm_type,
-                        HYPRE_Int            entry_num,
+                        HYPRE_Int            comm_num,
                         hypre_Box           *box,
                         hypre_Index          stride,
                         hypre_Index          coord,
                         hypre_Index          dir,
-                        HYPRE_Int            num_values, /* generalize this */
                         HYPRE_Int           *order,
+                        HYPRE_Int           *rem_order,
                         hypre_Box           *data_box,
                         HYPRE_Int            data_box_offset )
 {
-   hypre_CommEntryType *comm_entry = hypre_CommTypeEntry(comm_type, entry_num);
+   hypre_CommEntryType *comm_entry = hypre_CommTypeEntry(comm_type, comm_num);
+   HYPRE_Int            num_values = hypre_CommTypeNumValues(comm_type);
 
    HYPRE_Int     dim, ndim = hypre_BoxNDim(box);
    HYPRE_Int     offset;
    HYPRE_Int    *length_array, tmp_length_array[HYPRE_MAXDIM];
    HYPRE_Int    *stride_array, tmp_stride_array[HYPRE_MAXDIM];
-   HYPRE_Int    *entry_imaps, *entry_imap;
+   HYPRE_Int    *entry_imap;
    hypre_Index   size;
    HYPRE_Int     i, j;
 
@@ -797,11 +800,39 @@ hypre_CommTypeSetEntry( hypre_CommType      *comm_type,
 
    hypre_CommEntryTypeOffset(comm_entry) = offset;
    hypre_CommEntryTypeDim(comm_entry) = dim;
-   entry_imaps = hypre_CommTypeIMaps(comm_type);
-   entry_imap  = &entry_imaps[entry_num*num_values];
-   for (i = 0; i < length_array[dim]; i++)
+   entry_imap = hypre_CommTypeIMap(comm_type, comm_num);
+   if (order != NULL)
    {
-      entry_imap[i] = order[i];
+      /* Set imap to order and compress */
+      j = 0;
+      for (i = 0; i < num_values; i++)
+      {
+         if (order[i] > -1)
+         {
+            entry_imap[j++] = order[i];
+         }
+         if (rem_order != NULL)
+         {
+            rem_order[i] = -1;
+            if (order[i] > -1)
+            {
+               rem_order[i] = i;
+            }
+         }
+      }
+      length_array[dim] = j;
+   }
+   else
+   {
+      /* Set imap to natural incremental order */
+      for (i = 0; i < num_values; i++)
+      {
+         entry_imap[i] = i;
+         if (rem_order != NULL)
+         {
+            rem_order[i] = i;
+         }
+      }
    }
    hypre_CommEntryTypeIMap(comm_entry) = entry_imap;
  
@@ -841,7 +872,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    hypre_CommType      *comm_type;
    hypre_CommEntryType *comm_entry;
-   HYPRE_Int            num_entries;
+   HYPRE_Int            num_values, num_entries;
 
    HYPRE_Int           *length_array;
    HYPRE_Int           *stride_array;
@@ -899,6 +930,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    for (i = 0; i < num_sends; i++)
    {
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
+      num_values = hypre_CommTypeNumValues(comm_type);
       num_entries = hypre_CommTypeNumEntries(comm_type);
 
       dptr = (HYPRE_Complex *) send_buffers[i];
@@ -908,6 +940,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          qptr = (HYPRE_Int *) send_buffers[i];
          *qptr = num_entries;
          qptr ++;
+         memcpy(qptr, hypre_CommTypeRemOrders(comm_type),
+                num_entries*num_values*sizeof(HYPRE_Int));
+         qptr += num_entries*num_values;
          memcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
                 num_entries*sizeof(HYPRE_Int));
          qptr += num_entries;
@@ -916,8 +951,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
          hypre_TFree(hypre_CommTypeRemBoxnums(comm_type));
          hypre_TFree(hypre_CommTypeRemBoxes(comm_type));
+         hypre_TFree(hypre_CommTypeRemOrders(comm_type));
 
-         dptr += hypre_CommPrefixSize(num_entries);
+         dptr += hypre_CommPrefixSize(num_entries, num_values);
       }
 
       for (j = 0; j < num_entries; j++)
@@ -1008,7 +1044,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                       tag, comm, &requests[j++]);
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-         size = hypre_CommPrefixSize(hypre_CommTypeNumEntries(comm_type));
+         num_values = hypre_CommTypeNumValues(comm_type);
+         num_entries = hypre_CommTypeNumEntries(comm_type);
+         size = hypre_CommPrefixSize(num_entries, num_values);
          hypre_CommTypeBufsize(comm_type)   -= size;
          hypre_CommPkgRecvBufsize(comm_pkg) -= size;
       }
@@ -1023,7 +1061,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                       tag, comm, &requests[j++]);
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-         size = hypre_CommPrefixSize(hypre_CommTypeNumEntries(comm_type));
+         num_values = hypre_CommTypeNumValues(comm_type);
+         num_entries = hypre_CommTypeNumEntries(comm_type);
+         size = hypre_CommPrefixSize(num_entries, num_values);
          hypre_CommTypeBufsize(comm_type)   -= size;
          hypre_CommPkgSendBufsize(comm_pkg) -= size;
       }
@@ -1089,6 +1129,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int           *boxnums;
    hypre_Box           *boxes;
+   HYPRE_Int           *orders;
 
    HYPRE_Int            i, j, d, ll, dim;
 
@@ -1118,6 +1159,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          qptr = (HYPRE_Int *) recv_buffers[i];
          num_entries = *qptr;
          qptr ++;
+         orders = qptr;
+         qptr += num_entries*num_values;
          boxnums = qptr;
          qptr += num_entries;
          boxes = (hypre_Box *) qptr;
@@ -1126,7 +1169,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                                                          num_entries);
          hypre_CommTypeIMaps(comm_type) = hypre_TAlloc(HYPRE_Int,
                                                        (num_entries*num_values));
-         hypre_CommTypeSetEntries(comm_type, num_values, boxnums, boxes,
+         hypre_CommTypeSetEntries(comm_type, boxnums, boxes, orders,
                                   hypre_CommPkgRecvStride(comm_pkg),
                                   hypre_CommPkgRecvDataSpace(comm_pkg),
                                   hypre_CommPkgRecvDataOffsets(comm_pkg));
@@ -1140,12 +1183,13 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    for (i = 0; i < num_recvs; i++)
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
+      num_values = hypre_CommTypeNumValues(comm_type);
       num_entries = hypre_CommTypeNumEntries(comm_type);
 
       dptr = (HYPRE_Complex *) recv_buffers[i];
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-         dptr += hypre_CommPrefixSize(num_entries);
+         dptr += hypre_CommPrefixSize(num_entries, num_values);
       }
 
       for (j = 0; j < num_entries; j++)
@@ -1385,6 +1429,7 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
          hypre_TFree(hypre_CommTypeIMaps(comm_type));
          hypre_TFree(hypre_CommTypeRemBoxnums(comm_type));
          hypre_TFree(hypre_CommTypeRemBoxes(comm_type));
+         hypre_TFree(hypre_CommTypeRemOrders(comm_type));
       }
 
       /* Recv: This is only set up if a communication is done */
@@ -1405,6 +1450,7 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
       hypre_TFree(hypre_CommTypeIMaps(comm_type));
       hypre_TFree(hypre_CommTypeRemBoxnums(comm_type));
       hypre_TFree(hypre_CommTypeRemBoxes(comm_type));
+      hypre_TFree(hypre_CommTypeRemOrders(comm_type));
       hypre_TFree(comm_type);
 
       /* CopyTo */

@@ -76,13 +76,15 @@ typedef struct hypre_CommType_struct
    HYPRE_Int             proc;
    HYPRE_Int             bufsize;     /* message buffer size (in doubles) */
    HYPRE_Int             ndim;
+   HYPRE_Int             num_values;
    HYPRE_Int             num_entries;
    hypre_CommEntryType  *entries;
-   HYPRE_Int            *imaps;
+   HYPRE_Int            *imaps;       /* length = (num_entries*num_values) */
 
-   /* this is only needed until first send buffer prefix is packed */
+   /* This is only needed until first send buffer prefix is packed */
    HYPRE_Int            *rem_boxnums; /* entry remote box numbers */
    hypre_Box            *rem_boxes;   /* entry remote boxes */
+   HYPRE_Int            *rem_orders;  /* length = (num_entries*num_values) */
 
 } hypre_CommType;
 
@@ -112,8 +114,8 @@ typedef struct hypre_CommPkg_struct
 
    /* needed for setting recv entries after the first communication */
    hypre_Index       recv_stride;
-   HYPRE_Int        *recv_data_offsets; /* offsets into recv data (by box) */
    hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
+   HYPRE_Int        *recv_data_offsets; /* offsets into recv data (by box) */
 
 } hypre_CommPkg;
 
@@ -181,15 +183,19 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommTypeProc(type)          (type -> proc)
 #define hypre_CommTypeBufsize(type)       (type -> bufsize)
 #define hypre_CommTypeNDim(type)          (type -> ndim)
+#define hypre_CommTypeNumValues(type)     (type -> num_values)
 #define hypre_CommTypeNumEntries(type)    (type -> num_entries)
 #define hypre_CommTypeEntries(type)       (type -> entries)
 #define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
 #define hypre_CommTypeIMaps(type)         (type -> imaps)
+#define hypre_CommTypeIMap(type, i)      &(type -> imaps[i*(type->num_values)])
 
 #define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
 #define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
 #define hypre_CommTypeRemBoxes(type)      (type -> rem_boxes)
 #define hypre_CommTypeRemBox(type, i)    &(type -> rem_boxes[i])
+#define hypre_CommTypeRemOrders(type)     (type -> rem_orders)
+#define hypre_CommTypeRemOrder(type, i)  &(type -> rem_orders[i*(type->num_values)])
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommPkg
@@ -215,8 +221,8 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
 #define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
-#define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
 #define hypre_CommPkgRecvDataSpace(comm_pkg)   (comm_pkg -> recv_data_space)
+#define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommHandle
