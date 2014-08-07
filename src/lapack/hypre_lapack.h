@@ -80,6 +80,7 @@
 #define dsygv_   hypre_dsygv
 #define dsytd2_  hypre_dsytd2
 #define dsytrd_  hypre_dsytrd
+#define dtrtrs_  hypre_dtrtrs
 #define ieeeck_  hypre_ieeeck
 #define ilaenv_  hypre_ilaenv
 #define d_lg10_  hypre_d_lg10
@@ -104,6 +105,11 @@
 #define dlasq4_  hypre_dlasq4
 #define dlasq5_  hypre_dlasq5
 #define dlasq6_  hypre_dlasq6
+
+#define zgeqrf_  hypre_zgeqrf
+#define ztrtrs_  hypre_ztrtrs
+#define zungqr_  hypre_zungqr
+#define zunmqr_  hypre_zunmqr
 
 #define s_cmp    hypre_F90_NAME_BLAS(s_cmp,S_CMP)
 #define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)

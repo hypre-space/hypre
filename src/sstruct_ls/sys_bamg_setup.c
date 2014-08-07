@@ -713,6 +713,8 @@ hypre_SysBAMGCoarsen( hypre_SStructPGrid  *fgrid,
 
   *cgrid_ptr = cgrid;
 
+  //hypre_TFree( //new_vartypes ); // Cannot free this here!
+
   return hypre_error_flag;
 }
 

@@ -29,6 +29,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../sstruct_mv\
  -I$(srcdir)/../struct_ls\
  -I$(srcdir)/../parcsr_ls\
+ -I$(srcdir)/../lapack\
  ${CINCLUDES}
 
 HEADERS =\
@@ -127,11 +128,13 @@ SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}.so
 all: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/../lapack/hypre_lapack.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/../lapack/hypre_lapack.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

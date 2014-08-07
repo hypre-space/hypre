@@ -85,7 +85,7 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1;
     /* Local variables */
     extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int hypre_dtrsm(char *, char *, char *, char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), xerbla_(
 	    char *, integer *);
@@ -145,8 +145,7 @@
 
 /*     Solve A * x = b  or  A' * x = b. */
 
-    dtrsm_("Left", uplo, trans, diag, n, nrhs, &c_b12, &a[a_offset], lda, &b[
-	    b_offset], ldb);
+    hypre_dtrsm("Left", uplo, trans, diag, n, nrhs, &c_b12, &a[a_offset], lda, &b[ b_offset], ldb);
 
     return 0;
 

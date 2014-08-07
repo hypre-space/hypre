@@ -12,6 +12,7 @@
 
 #include "_hypre_sstruct_ls.h"
 #include "sys_bamg.h"
+#include "hypre_lapack.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -61,6 +62,7 @@ hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp(
   /* create interpolation matrix */
   hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid, P_Stencils, &P);
 
+  //hypre_TFree( //P_Stencils ); // Cannot free this here!
   hypre_TFree(stencil_shape);
 
   return P;
@@ -135,6 +137,20 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp(
 
   hypre_SysBAMGSetupInterpOpLS(sA, sP, nvars, cdir, findex, stride, nvecs, sv);
 
+  for ( i = 0; i < nvars; i++ ) {
+    hypre_TFree( sA[i] );
+    hypre_TFree( sP[i] );
+  }
+
+  hypre_TFree( sA );
+  hypre_TFree( sP );
+
+  for ( k = 0; k < nvecs; k++ ) {
+    hypre_TFree( sv[k] );
+  }
+
+  hypre_TFree( sv );
+
   return hypre_error_flag;
 }
 
@@ -170,18 +186,18 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 
   HYPRE_Int            *v_offsets;
 
-  HYPRE_Complex        *M;
+  HYPRE_Complex        *M, *C, *work, *tau;
 
-  HYPRE_Int             ndims;
+  HYPRE_Int             ndims, Mrows, Mcols, Mi, Mj, Crows, Ccols, lwork, info;
 
-  HYPRE_Int             b, I, J, i, j, k, si, iP, iv;
+  HYPRE_Int             b, I, J, i, j, k, sj, iP, iv;
 
-  // XXX: NB: Assume structure of all vars is the same -> use [0][0] as representative.
+  // XXX: NB: Assume same structure for all I,J; i.e., use [0][0] as representative.
 
-  //  for each row, i = (i_var,i_grid), 
-  //    for each vector, k, and col, j = (j_var,j_grid), s.t. P[i][j] != 0,
-  //      compute P[i][j] by miminizing sum_k ( weight[k] * | P[i][j] v_c[j] - v_f[i] |^2 )
-  //                      by QR factorizing M[j][k] = v[j][k], etc.
+  //  for each row, i = (I = i_vars, iP = i_grid),
+  //    for each vector, k, and col, j = (J = j_vars, sj = j_grid), s.t. P[i][j] != 0,
+  //      compute P[_i_][j] by minimizing l2norm( weight[k] * (v_c[k][j] P[_i_][j] - v_f[k][_i_]) )
+  //                      by QR factorizing M[j][k] = v_c[k][j], etc.
 
   // P_Stencil dictates which P[i][j] != 0
 
@@ -195,7 +211,13 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 
   v_offsets = (HYPRE_Int*) hypre_TAlloc(HYPRE_Int, P_StencilSize);
 
-  M         = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, nvars*nvecs*P_StencilSize);
+  Mrows = nvecs;
+  Mcols = nvars * P_StencilSize;
+  M     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows*Mcols);
+
+  Crows = Mrows;
+  Ccols = 1;
+  C     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Crows*Ccols);
 
   GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
@@ -214,8 +236,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
       PDataBox = hypre_BoxArrayBox( hypre_StructMatrixDataSpace(sP[0][0]), b );
       vDataBox = hypre_BoxArrayBox( hypre_StructVectorDataSpace(sv[0][I]), b );
 
-      for ( si = 0; si < P_StencilSize; si++ )
-        v_offsets[si] = hypre_BoxOffsetDistance( vDataBox, P_StencilShape[si] );
+      for ( sj = 0; sj < P_StencilSize; sj++ )
+        v_offsets[sj] = hypre_BoxOffsetDistance( vDataBox, P_StencilShape[sj] );
 
       hypre_BoxLoop2Begin( ndims, BoxSize, PDataBox, startc, stridec, iP, vDataBox, start, stride, iv );
 
@@ -224,27 +246,125 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 #endif
       hypre_BoxLoop2For(iP, iv)
       {
-        for ( J = 0; J < nvars; J++ )
+        // Use QR to determine P[i][j] - see http://www.netlib.org/lapack/lug/node40.html and
+        // http://people.sc.fsu.edu/~jburkardt/f_src/qr_solve/qr_solve.html
+        //
+        // compute c_1 = Q^T b    (dim: (Mrows * Mrows) * (Mrows * 1) -> (Mrows * 1)),
+        // compute x | R x = c_1  (dim: (Mcols*Mcols) (Mcols * 1) -> (Mcols * 1))
+        //
+        // M is Mrows by Mcols with Mrows > Mcols. Must be column-major order (Fortran style).
+        // Q is Mrows by Mrows.
+        // R is Mcols by Mcols.
+
+#if HYPRE_Complex == HYPRE_Real
+  #define hypre_xgeqrf hypre_dgeqrf
+  #define hypre_xxxmqr hypre_dormqr
+  #define hypre_xtrtrs hypre_dtrtrs
+#else
+  #define hypre_xgeqrf hypre_zgeqrf
+  #define hypre_xxxmqr hypre_zunmqr
+  #define hypre_xtrtrs hypre_ztrtrs
+#endif
+
+        for ( k = 0; k < nvecs; k++ )
         {
-          for ( si = 0; si < P_StencilSize; si++ )
+          Mi = k;
+
+          C[Mi] = hypre_StructVectorData( sv[k][I] )[iv];
+
+          for ( J = 0; J < nvars; J++ )
           {
-            for ( k = 0; k < nvecs; k++ )
+            for ( sj = 0; sj < P_StencilSize; sj++ )
             {
-              M[(J*P_StencilSize + j)*nvecs + k] = hypre_StructVectorData( sv[k][J] )[iv + v_offsets[si]];
-              if ( k == 0 )
-                sysbamg_dbgmsg( "I = %d iv = %d J = %d si = %d k = %d M[k][j] = %f\n",
-                                I, iv, J, si, k, hypre_StructVectorData( sv[k][J] )[iv + v_offsets[si]] );
+              Mj = J*P_StencilSize + sj;
+
+              M[Mi + Mj*Mrows] = hypre_StructVectorData( sv[k][J] )[iv + v_offsets[sj]];
             }
           }
         }
 
-        // Use QR to determine P[i][j] - see http://www.netlib.org/lapack/lug/node40.html
+#if DEBUG_SYSBAMG > 1
+        // print M and b to check
+        hypre_printf("M | b for I=%d, iv=%d, k=%d\n", I, iv, k);
+        for ( Mi = 0; Mi < Mrows; Mi++ ) {
+          for ( Mj = 0; Mj < Mcols; Mj++ ) {
+            hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
+          }
+          hypre_printf("  | %16.6e\n", C[Mi]);
+        }
+        hypre_printf("\n");
+#endif
+
+        HYPRE_Int       lwork = Mcols * 8;
+        HYPRE_Complex*  work  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, lwork);
+        HYPRE_Complex*  tau   = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows*Mcols);;
+        HYPRE_Int       info;
+
+        // NB: R and Q (via reflectors) are written to M
+        hypre_xgeqrf( &Mrows, &Mcols, M, &Mrows, tau, work, &lwork, &info );
+
+        if ( info != 0 ) {
+          hypre_printf( "xgeqrf error. info = %d\n", info );
+          exit(9);
+        }
+
+#if DEBUG_SYSBAMG > 1
+        // print Q\R to check
+        hypre_printf("Q\\R for I=%d, iv=%d, k=%d\n", I, iv, k);
+        for ( Mi = 0; Mi < Mrows; Mi++ ) {
+          for ( Mj = 0; Mj < Mcols; Mj++ ) {
+            hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
+          }
+          hypre_printf("\n");
+        }
+        hypre_printf("\n");
+#endif
+
+
+        // Q is Mrows x Mrows, 'M' = Mrows, 'N' = 1, 'K' = Mrows, 'A' = elementary reflector array = M
+        hypre_xxxmqr( "Left", "Transpose", &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
+
+        if ( info != 0 ) {
+          hypre_printf( "xxxmqr error. info = %d\n", info );
+          exit(9);
+        }
+        
+#if DEBUG_SYSBAMG > 1
+        // print c to check
+        hypre_printf("c for I=%d, iv=%d, k=%d\n", I, iv, k);
+        for ( Mj = 0; Mj < Mcols; Mj++ ) {
+          hypre_printf("  %16.6e\n", C[Mj]);
+        }
+        hypre_printf("\n");
+#endif
+
+        // Here, the matrix is R, which is Mcols by Mcols, upper triangular, and stored in M.
+        hypre_xtrtrs( "Upper", "No transpose", "Non-unit", &Mcols, &Ccols, M, &Mrows, C, &Crows, &info );
+
+        if ( info != 0 ) {
+          hypre_printf( "xtrtrs error. info = %d\n", info );
+          if ( info > 0 ) {
+            hypre_printf( "              M is singular\n" );
+          }
+          exit(9);
+        }
+
+#if DEBUG_SYSBAMG > 1
+        // print x to check
+        hypre_printf("x for I=%d, iv=%d, k=%d\n", I, iv, k);
+        for ( Mj = 0; Mj < Mcols; Mj++ ) {
+          hypre_printf("  %16.6e\n", C[Mj]);
+        }
+        hypre_printf("\n");
+#endif
 
         for ( J = 0; J < nvars; J++ )
         {
-          for ( si = 0; si < P_StencilSize; si++ )
+          for ( sj = 0; sj < P_StencilSize; sj++ )
           {
-            hypre_StructMatrixBoxData(sP[I][J], b, si)[iP] = 0.5;
+            Mj = J*P_StencilSize + sj;
+            // hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;
+            hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];
           }
         }
       }
@@ -261,7 +381,10 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
     }
   }
 
+  hypre_TFree( tau );
+  hypre_TFree( work );
   hypre_TFree( v_offsets );
+  hypre_TFree( C );
   hypre_TFree( M );
 
   return hypre_error_flag;

@@ -118,6 +118,7 @@ hypre_SysBAMGCreateRAPOp( hypre_SStructPMatrix *R,
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
                               coarse_grid, RAP_stencils, &RAP);
 
+   //hypre_TFree( //RAP_stencils ); // Cannot free this here!
    hypre_TFree(RAP_shapes);
    hypre_TFree(sstencil_sizes);
 
