@@ -998,19 +998,19 @@ hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector,
 
 HYPRE_Int 
 hypre_StructVectorMigrate( hypre_CommPkg      *comm_pkg,
-                           hypre_StructVector *from_vector,
-                           hypre_StructVector *to_vector   )
+                           hypre_StructVector *fr_vector,
+                           hypre_StructVector *to_vector )
 {
-   hypre_CommHandle      *comm_handle;
+   hypre_CommHandle  *comm_handle;
+   HYPRE_Complex     *fr_data, *to_data;
 
    /*-----------------------------------------------------------------------
     * Migrate the vector data
     *-----------------------------------------------------------------------*/
  
-   hypre_InitializeCommunication(comm_pkg,
-                                 hypre_StructVectorData(from_vector),
-                                 hypre_StructVectorData(to_vector), 0, 0,
-                                 &comm_handle);
+   fr_data = hypre_StructVectorData(fr_vector);
+   to_data = hypre_StructVectorData(to_vector);
+   hypre_InitializeCommunication(comm_pkg, &fr_data, &to_data, 0, 0, &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 
    return hypre_error_flag;

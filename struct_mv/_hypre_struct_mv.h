@@ -1339,7 +1339,6 @@ hypre_StructStencilShape(stencil)[i]
 #define hypre_COMMUNICATION_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_CommInfo:
  *
  * For "reverse" communication, the following are not needed (may be NULL)
  *    send_rboxnums, send_rboxes, send_transforms
@@ -1376,13 +1375,11 @@ typedef struct hypre_CommInfo_struct
 } hypre_CommInfo;
 
 /*--------------------------------------------------------------------------
- * hypre_CommEntryType:
- *
- * Note: The dimension of the data represented by CommEntryType will often be
+ * Note: The dimension of the data represented by CommEntry will often be
  * smaller than the original problem dimension.
  *--------------------------------------------------------------------------*/
 
-typedef struct hypre_CommEntryType_struct
+typedef struct hypre_CommEntry_struct
 {
    HYPRE_Int  offset;                       /* offset for the data */
    HYPRE_Int  dim;                          /* dimension of the data */
@@ -1390,42 +1387,49 @@ typedef struct hypre_CommEntryType_struct
    HYPRE_Int  stride_array[HYPRE_MAXDIM+1];
    HYPRE_Int *imap;                         /* index map for last dim values */
 
-} hypre_CommEntryType;
+} hypre_CommEntry;
 
 /*--------------------------------------------------------------------------
- * hypre_CommType:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_CommBlock_struct
+{
+   HYPRE_Int         bufsize;     /* message buffer size (in doubles) */
+   HYPRE_Int         ndim;
+   HYPRE_Int         num_values;
+   HYPRE_Int         num_entries;
+   hypre_CommEntry  *entries;
+   HYPRE_Int        *imaps;       /* length = (num_entries*num_values) */
+
+   /* This is only needed until first send buffer prefix is packed */
+   HYPRE_Int        *rem_boxnums; /* entry remote box numbers */
+   hypre_Box        *rem_boxes;   /* entry remote boxes */
+   HYPRE_Int        *rem_orders;  /* length = (num_entries*num_values) */
+
+} hypre_CommBlock;
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommType_struct
 {
-   HYPRE_Int             proc;
-   HYPRE_Int             bufsize;     /* message buffer size (in doubles) */
-   HYPRE_Int             ndim;
-   HYPRE_Int             num_values;
-   HYPRE_Int             num_entries;
-   hypre_CommEntryType  *entries;
-   HYPRE_Int            *imaps;       /* length = (num_entries*num_values) */
-
-   /* This is only needed until first send buffer prefix is packed */
-   HYPRE_Int            *rem_boxnums; /* entry remote box numbers */
-   hypre_Box            *rem_boxes;   /* entry remote boxes */
-   HYPRE_Int            *rem_orders;  /* length = (num_entries*num_values) */
+   HYPRE_Int         first_comm;  /* is this the first communication? */
+   HYPRE_Int         proc;
+   HYPRE_Int         bufsize;     /* message buffer size (in doubles) */
+   HYPRE_Int         ndim;
+   HYPRE_Int         num_blocks;
+   hypre_CommBlock  *blocks;
 
 } hypre_CommType;
 
 /*--------------------------------------------------------------------------
- * hypre_CommPkg:
- *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommPkg_struct
 {
    MPI_Comm          comm;
-
-   HYPRE_Int         first_comm; /* is this the first communication? */
                    
    HYPRE_Int         ndim;
-   HYPRE_Int         num_values;
    HYPRE_Int         send_bufsize; /* total send buffer size (in doubles) */
    HYPRE_Int         recv_bufsize; /* total recv buffer size (in doubles) */
 
@@ -1438,21 +1442,21 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType   *copy_to_type;
 
    /* needed for setting recv entries after the first communication */
-   hypre_Index       recv_stride;
-   hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
-   HYPRE_Int        *recv_data_offsets; /* offsets into recv data (by box) */
+   HYPRE_Int         num_blocks;  /* arrays below are num_blocks x ... */
+   hypre_Index      *recv_strides;
+   hypre_BoxArray  **recv_data_spaces;  /* recv data dimensions (by box) */
+   HYPRE_Int       **recv_data_offsets; /* offsets into recv data (by box) */
 
 } hypre_CommPkg;
 
 /*--------------------------------------------------------------------------
- * CommHandle:
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommHandle_struct
 {
    hypre_CommPkg     *comm_pkg;
-   HYPRE_Complex     *send_data;
-   HYPRE_Complex     *recv_data;
+   HYPRE_Complex    **send_data;
+   HYPRE_Complex    **recv_data;
 
    HYPRE_Int          num_requests;
    hypre_MPI_Request *requests;
@@ -1492,35 +1496,46 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommInfoBoxesMatch(info)     (info -> boxes_match)
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_CommEntryType
+ * Accessor macros: hypre_CommEntry
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommEntryTypeOffset(entry)       (entry -> offset)
-#define hypre_CommEntryTypeDim(entry)          (entry -> dim)
-#define hypre_CommEntryTypeLengthArray(entry)  (entry -> length_array)
-#define hypre_CommEntryTypeStrideArray(entry)  (entry -> stride_array)
-#define hypre_CommEntryTypeIMap(entry)         (entry -> imap)
+#define hypre_CommEntryOffset(entry)       (entry -> offset)
+#define hypre_CommEntryDim(entry)          (entry -> dim)
+#define hypre_CommEntryLengthArray(entry)  (entry -> length_array)
+#define hypre_CommEntryStrideArray(entry)  (entry -> stride_array)
+#define hypre_CommEntryIMap(entry)         (entry -> imap)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_CommBlock
+ *--------------------------------------------------------------------------*/
+ 
+#define hypre_CommBlockBufsize(blk)       (blk -> bufsize)
+#define hypre_CommBlockNDim(blk)          (blk -> ndim)
+#define hypre_CommBlockNumValues(blk)     (blk -> num_values)
+#define hypre_CommBlockNumEntries(blk)    (blk -> num_entries)
+#define hypre_CommBlockEntries(blk)       (blk -> entries)
+#define hypre_CommBlockEntry(blk, i)     &(blk -> entries[i])
+#define hypre_CommBlockIMaps(blk)         (blk -> imaps)
+#define hypre_CommBlockIMap(blk, i)      &(blk -> imaps[i*(blk->num_values)])
+
+#define hypre_CommBlockRemBoxnums(blk)    (blk -> rem_boxnums)
+#define hypre_CommBlockRemBoxnum(blk, i)  (blk -> rem_boxnums[i])
+#define hypre_CommBlockRemBoxes(blk)      (blk -> rem_boxes)
+#define hypre_CommBlockRemBox(blk, i)    &(blk -> rem_boxes[i])
+#define hypre_CommBlockRemOrders(blk)     (blk -> rem_orders)
+#define hypre_CommBlockRemOrder(blk, i)  &(blk -> rem_orders[i*(blk->num_values)])
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
  *--------------------------------------------------------------------------*/
  
+#define hypre_CommTypeFirstComm(type)     (type -> first_comm)
 #define hypre_CommTypeProc(type)          (type -> proc)
 #define hypre_CommTypeBufsize(type)       (type -> bufsize)
 #define hypre_CommTypeNDim(type)          (type -> ndim)
-#define hypre_CommTypeNumValues(type)     (type -> num_values)
-#define hypre_CommTypeNumEntries(type)    (type -> num_entries)
-#define hypre_CommTypeEntries(type)       (type -> entries)
-#define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
-#define hypre_CommTypeIMaps(type)         (type -> imaps)
-#define hypre_CommTypeIMap(type, i)      &(type -> imaps[i*(type->num_values)])
-
-#define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
-#define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
-#define hypre_CommTypeRemBoxes(type)      (type -> rem_boxes)
-#define hypre_CommTypeRemBox(type, i)    &(type -> rem_boxes[i])
-#define hypre_CommTypeRemOrders(type)     (type -> rem_orders)
-#define hypre_CommTypeRemOrder(type, i)  &(type -> rem_orders[i*(type->num_values)])
+#define hypre_CommTypeNumBlocks(type)     (type -> num_blocks)
+#define hypre_CommTypeBlocks(type)        (type -> blocks)
+#define hypre_CommTypeBlock(type, i)     &(type -> blocks[i])
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommPkg
@@ -1528,10 +1543,7 @@ typedef struct hypre_CommHandle_struct
  
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
 
-#define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
-
 #define hypre_CommPkgNDim(comm_pkg)            (comm_pkg -> ndim)
-#define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgSendBufsize(comm_pkg)     (comm_pkg -> send_bufsize)
 #define hypre_CommPkgRecvBufsize(comm_pkg)     (comm_pkg -> recv_bufsize)
                                                
@@ -1545,8 +1557,9 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
-#define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
-#define hypre_CommPkgRecvDataSpace(comm_pkg)   (comm_pkg -> recv_data_space)
+#define hypre_CommPkgNumBlocks(comm_pkg)       (comm_pkg -> num_blocks)
+#define hypre_CommPkgRecvStrides(comm_pkg)     (comm_pkg -> recv_strides)
+#define hypre_CommPkgRecvDataSpaces(comm_pkg)  (comm_pkg -> recv_data_spaces)
 #define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
 
 /*--------------------------------------------------------------------------
@@ -2151,11 +2164,11 @@ HYPRE_Int hypre_StructAxpy ( HYPRE_Complex alpha , hypre_StructVector *x , hypre
 
 /* struct_communication.c */
 HYPRE_Int hypre_CommPkgCreate ( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , HYPRE_Int num_values , HYPRE_Int **orders , HYPRE_Int reverse , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
-HYPRE_Int hypre_CommTypeSetEntries ( hypre_CommType *comm_type , HYPRE_Int *boxnums , hypre_Box *boxes , HYPRE_Int *orders , hypre_Index stride , hypre_BoxArray *data_space , HYPRE_Int *data_offsets );
-HYPRE_Int hypre_CommTypeSetEntry ( hypre_CommType *comm_type , HYPRE_Int comm_num , hypre_Box *box , hypre_Index stride , hypre_Index coord , hypre_Index dir , HYPRE_Int *order , HYPRE_Int *rem_order , hypre_Box *data_box , HYPRE_Int data_box_offset );
-HYPRE_Int hypre_InitializeCommunication ( hypre_CommPkg *comm_pkg , HYPRE_Complex *send_data , HYPRE_Complex *recv_data , HYPRE_Int action , HYPRE_Int tag , hypre_CommHandle **comm_handle_ptr );
+HYPRE_Int hypre_CommBlockSetEntries ( hypre_CommBlock *comm_block , HYPRE_Int *boxnums , hypre_Box *boxes , HYPRE_Int *orders , hypre_Index stride , hypre_BoxArray *data_space , HYPRE_Int *data_offsets );
+HYPRE_Int hypre_CommBlockSetEntry ( hypre_CommBlock *comm_block , HYPRE_Int comm_num , hypre_Box *box , hypre_Index stride , hypre_Index coord , hypre_Index dir , HYPRE_Int *order , HYPRE_Int *rem_order , hypre_Box *data_box , HYPRE_Int data_box_offset );
+HYPRE_Int hypre_InitializeCommunication ( hypre_CommPkg *comm_pkg , HYPRE_Complex **send_data , HYPRE_Complex **recv_data , HYPRE_Int action , HYPRE_Int tag , hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeCommunication ( hypre_CommHandle *comm_handle );
-HYPRE_Int hypre_ExchangeLocalData ( hypre_CommPkg *comm_pkg , HYPRE_Complex *send_data , HYPRE_Complex *recv_data , HYPRE_Int action );
+HYPRE_Int hypre_ExchangeLocalData ( hypre_CommPkg *comm_pkg , HYPRE_Complex **send_data , HYPRE_Complex **recv_data , HYPRE_Int action );
 HYPRE_Int hypre_CommPkgDestroy ( hypre_CommPkg *comm_pkg );
 
 /* struct_copy.c */

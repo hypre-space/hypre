@@ -498,6 +498,7 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
+   HYPRE_Complex         *data;
 
    /* if values already accumulated, just return */
    if (hypre_SStructPMatrixAccumulated(pmatrix))
@@ -532,10 +533,9 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
                                 hypre_StructMatrixNumValues(smatrix), NULL, 1,
                                 hypre_StructMatrixComm(smatrix),
                                 &comm_pkg);
-            hypre_InitializeCommunication(comm_pkg,
-                                          hypre_StructMatrixVData(smatrix),
-                                          hypre_StructMatrixVData(smatrix),
-                                          1, 0, &comm_handle);
+            data = hypre_StructMatrixVData(smatrix);
+            hypre_InitializeCommunication(comm_pkg, &data, &data, 1, 0,
+                                          &comm_handle);
             hypre_FinalizeCommunication(comm_handle);
 
             hypre_CommInfoDestroy(comm_info);

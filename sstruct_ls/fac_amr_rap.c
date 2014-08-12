@@ -52,6 +52,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_StructMatrix          *smatrix, *fac_smatrix;
    hypre_Box                   *smatrix_dbox, *fac_smatrix_dbox;
    HYPRE_Real                  *smatrix_vals, *fac_smatrix_vals;
+   HYPRE_Complex               *sdata, *rdata;
 
    hypre_SStructGrid           *fac_grid;
    hypre_SStructGraph          *fac_graph;
@@ -465,9 +466,9 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                comm,
                                                &amrA_comm_pkg);
 
-            hypre_InitializeCommunication(amrA_comm_pkg,
-                                          hypre_StructMatrixData(smatrix),
-                                          hypre_StructMatrixData(fac_smatrix), 0, 0,
+            sdata = hypre_StructMatrixData(smatrix);
+            rdata = hypre_StructMatrixData(fac_smatrix);
+            hypre_InitializeCommunication(amrA_comm_pkg, &sdata, &rdata, 0, 0,
                                           &comm_handle);
             hypre_FinalizeCommunication(comm_handle);
 

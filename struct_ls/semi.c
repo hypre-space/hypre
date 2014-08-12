@@ -56,6 +56,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommInfo       *comm_info;
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
+   HYPRE_Complex        *data;
 
    HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             i, j, s, dim;
@@ -133,10 +134,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommInfoDestroy(comm_info);
    hypre_StructMatrixCommPkg(P) = comm_pkg;
 
-   hypre_InitializeCommunication(comm_pkg,
-                                 hypre_StructMatrixVData(P),
-                                 hypre_StructMatrixVData(P), 0, 0,
-                                 &comm_handle);
+   data = hypre_StructMatrixVData(P);
+   hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, &comm_handle);
    hypre_FinalizeCommunication(comm_handle);
 
    return hypre_error_flag;

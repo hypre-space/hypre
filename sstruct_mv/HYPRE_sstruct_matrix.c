@@ -555,6 +555,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       {
          hypre_StructStencil *send_stencil = hypre_StructMatrixStencil(send_matrix);
          hypre_StructStencil *recv_stencil = hypre_StructMatrixStencil(recv_matrix);
+         HYPRE_Complex       *sdata, *rdata;
          HYPRE_Int            num_values, stencil_size, num_transforms;
          HYPRE_Int           *symm;
          HYPRE_Int           *v_to_s, *s_to_v;
@@ -626,10 +627,10 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                              num_values, orders, 1,
                              hypre_StructMatrixComm(send_matrix), &comm_pkg);
          /* note reversal of send/recv data here */
-         hypre_InitializeCommunication(comm_pkg,
-                                       hypre_StructMatrixVData(recv_matrix),
-                                       hypre_StructMatrixVData(send_matrix),
-                                       1, 0, &comm_handle);
+         sdata = hypre_StructMatrixVData(send_matrix);
+         rdata = hypre_StructMatrixVData(recv_matrix);
+         hypre_InitializeCommunication(comm_pkg, &rdata, &sdata, 1, 0,
+                                       &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
          hypre_CommPkgDestroy(comm_pkg);
 

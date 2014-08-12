@@ -518,6 +518,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_StructVector     *xc_temp;
    hypre_StructVector     *xc_var;
    hypre_StructVector     *xf_var;
+   HYPRE_Complex          *sdata, *rdata;
 
    HYPRE_Int               xci;
    HYPRE_Int               xfi;
@@ -819,9 +820,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    {
       xc_temp= hypre_SStructPVectorSVector(fgrid_cvectors, var);
       xc_var= hypre_SStructPVectorSVector(xc, var);
-      hypre_InitializeCommunication(interlevel_comm[var], 
-                                    hypre_StructVectorData(xc_temp),
-                                    hypre_StructVectorData(xc_var), 0, 0,
+      sdata = hypre_StructVectorData(xc_temp);
+      rdata = hypre_StructVectorData(xc_var);
+      hypre_InitializeCommunication(interlevel_comm[var], &sdata, &rdata, 0, 0,
                                     &comm_handle);
 
       hypre_FinalizeCommunication(comm_handle);

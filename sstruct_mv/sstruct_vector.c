@@ -345,6 +345,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
    hypre_CommHandle      *comm_handle;
+   HYPRE_Complex         *data;
 
    HYPRE_Int              ndim      = hypre_SStructPGridNDim(pgrid);
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
@@ -389,10 +390,8 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
                              hypre_StructVectorDataSpace(svectors[var]),
                              1, NULL, 1, hypre_StructVectorComm(svectors[var]),
                              &comm_pkg);
-         hypre_InitializeCommunication(comm_pkg,
-                                       hypre_StructVectorData(svectors[var]),
-                                       hypre_StructVectorData(svectors[var]), 1, 0,
-                                       &comm_handle);
+         data = hypre_StructVectorData(svectors[var]);
+         hypre_InitializeCommunication(comm_pkg, &data, &data, 1, 0, &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
 
          hypre_CommInfoDestroy(comm_info);
@@ -436,15 +435,15 @@ hypre_SStructPVectorGather( hypre_SStructPVector *pvector )
    hypre_StructVector   **svectors  = hypre_SStructPVectorSVectors(pvector);
    hypre_CommPkg        **comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
    hypre_CommHandle      *comm_handle;
+   HYPRE_Complex         *data;
    HYPRE_Int              var;
 
    for (var = 0; var < nvars; var++)
    {
       if (comm_pkgs[var] != NULL)
       {
-         hypre_InitializeCommunication(comm_pkgs[var],
-                                       hypre_StructVectorData(svectors[var]),
-                                       hypre_StructVectorData(svectors[var]), 0, 0,
+         data = hypre_StructVectorData(svectors[var]);
+         hypre_InitializeCommunication(comm_pkgs[var], &data, &data, 0, 0,
                                        &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
       }

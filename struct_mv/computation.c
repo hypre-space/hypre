@@ -346,7 +346,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
 {
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
-   hypre_InitializeCommunication(comm_pkg, data, data, 0, 0, comm_handle_ptr);
+   hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, comm_handle_ptr);
 
    return hypre_error_flag;
 }

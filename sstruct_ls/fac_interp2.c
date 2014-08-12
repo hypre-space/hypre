@@ -738,6 +738,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_StructVector     *xc_var;
    hypre_StructVector     *e_var;
    hypre_StructVector     *recv_var;
+   HYPRE_Complex          *sdata, *rdata;
 
    HYPRE_Int               xci;
    HYPRE_Int               ei;
@@ -799,18 +800,16 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    for (var= 0; var< nvars; var++)
    {
       xc_var= hypre_SStructPVectorSVector(xc, var);
-      hypre_InitializeCommunication(comm_pkg[var],
-                                    hypre_StructVectorData(xc_var),
-                                    hypre_StructVectorData(xc_var), 0, 0,
+      sdata = hypre_StructVectorData(xc_var);
+      hypre_InitializeCommunication(comm_pkg[var], &sdata, &sdata, 0, 0,
                                     &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
 
       if (recv_cvectors != NULL)
       {
          recv_var= hypre_SStructPVectorSVector(recv_cvectors, var);
-         hypre_InitializeCommunication(interlevel_comm[var],
-                                       hypre_StructVectorData(xc_var),
-                                       hypre_StructVectorData(recv_var), 0, 0,
+         rdata = hypre_StructVectorData(recv_var);
+         hypre_InitializeCommunication(interlevel_comm[var], &sdata, &rdata, 0, 0,
                                        &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
       }

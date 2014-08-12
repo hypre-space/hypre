@@ -1158,7 +1158,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    if (constant_coefficient != 1)
    {
-      hypre_InitializeCommunication(comm_pkg, matrix_vdata, matrix_vdata, 0, 0,
+      hypre_InitializeCommunication(comm_pkg, &matrix_vdata, &matrix_vdata, 0, 0,
                                     &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
    }
@@ -1567,8 +1567,8 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
    if ( constant_coefficient!=1 )
    {
       hypre_InitializeCommunication( comm_pkg,
-                                     matrix_data_comm_from,
-                                     matrix_data_comm_to, 0, 0,
+                                     &matrix_data_comm_from,
+                                     &matrix_data_comm_to, 0, 0,
                                      &comm_handle );
       hypre_FinalizeCommunication( comm_handle );
    }
