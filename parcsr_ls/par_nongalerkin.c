@@ -899,7 +899,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     {   RAP_offd_data = hypre_CSRMatrixData(RAP_offd); }
     hypre_MPI_Comm_size(comm, &num_procs);
     hypre_MPI_Comm_rank(comm, &my_id);
-       
+
     /* Compute Sparsity Pattern  */
     Pattern                    = hypre_NonGalerkinSparsityPattern(AP, RAP, CF_marker, droptol, sym_collapse, collapse_beta);
     Pattern_diag               = hypre_ParCSRMatrixDiag(Pattern);
@@ -1379,7 +1379,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                     if (sym_collapse)
                     {   lump_value = 0.5*RAP_diag_data[j]; }
                     else
-                    {   lump_value = RAP_offd_data[j]; }
+                    {   lump_value = RAP_diag_data[j]; }
 
                     cnt = col_indx_RAP+first_col_diag_RAP;
                     ierr += HYPRE_IJMatrixAddToValues(ijmatrix, 1, &one,
