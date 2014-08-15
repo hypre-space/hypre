@@ -1171,7 +1171,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     {   RAP_offd_data = hypre_CSRMatrixData(RAP_offd); }
     hypre_MPI_Comm_size(comm, &num_procs);
     hypre_MPI_Comm_rank(comm, &my_id);
-       
+
     /* Compute Sparsity Pattern  */
     Pattern                    = hypre_NonGalerkinSparsityPattern(AP, RAP, CF_marker, droptol, sym_collapse, collapse_beta);
     Pattern_diag               = hypre_ParCSRMatrixDiag(Pattern);
