@@ -685,8 +685,6 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled
                                 HYPRE_Real    val_to_write )      /*          Ditto             */
 {
     HYPRE_Int                ierr = 0;
-    HYPRE_Int                i;
-    
 
     if( (*ijbuf_cnt) == 0 ) 
     {
