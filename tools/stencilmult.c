@@ -57,8 +57,10 @@ main( int argc,
    FILE            *file;
    hypre_StMatrix **matrices, *A, *B, *C;
    char            *matnames, transposechar;
-   int             *termids, *termtrs;
-   int              ndim, nmatrices, nprods, nterms, i, j, id, transpose;
+   hypre_StMatrix **terms;
+   int             *termtrs;
+   char            *termnms;
+   int              ndim, nmatrices, nprods, nterms, i, j, id;
 
    infile = infile_default;
    if (argc > 1)
@@ -91,43 +93,27 @@ main( int argc,
    for (i = 0; i < nprods; i++)
    {
       fscanf(file, "%d", &nterms);
-      termids = hypre_CTAlloc(int, nterms);
+      terms   = hypre_CTAlloc(hypre_StMatrix *, nterms);
       termtrs = hypre_CTAlloc(int, nterms);
+      termnms = hypre_CTAlloc(char, nterms);
       for (j = 0; j < nterms; j++)
       {
-         fscanf(file, "%d%c", &termids[j], &transposechar);
+         fscanf(file, "%d%c", &id, &transposechar);
          if (transposechar == 't')
          {
             termtrs[j] = 1;
          }
+         terms[j]   = matrices[id];
+         termnms[j] = matnames[id];
       }
 
-      id = termids[0]; transpose = termtrs[0];
-      hypre_StMatrixClone(matrices[id], ndim, &C);
-      if (transpose)
-      {
-         hypre_StMatrixTranspose(C, ndim);
-      }
-      for (j = 1; j < nterms; j++)
-      {
-         A = C;
-         id = termids[j]; transpose = termtrs[j];
-         hypre_StMatrixClone(matrices[id], ndim, &B);
-         if (transpose)
-         {
-            hypre_StMatrixTranspose(B, ndim);
-         }
-         hypre_StMatrixMult(A, B, nmatrices, ndim, &C);
-         hypre_StMatrixDestroy(A);
-         hypre_StMatrixDestroy(B);
-      }
+      hypre_StMatrixMatmult(nterms, terms, termtrs, nmatrices, ndim, &C);
 
       printf("\nMatrix product %d:", i);
       for (j = 0; j < nterms; j++)
       {
-         id = termids[j]; transpose = termtrs[j];
-         printf(" %c", matnames[id]);
-         if (transpose)
+         printf(" %c", termnms[j]);
+         if (termtrs[j])
          {
             printf("t");
          }
@@ -135,8 +121,9 @@ main( int argc,
       printf("\n\n");
       hypre_StMatrixPrint(C, matnames, ndim);
 
-      hypre_TFree(termids);
+      hypre_TFree(terms);
       hypre_TFree(termtrs);
+      hypre_TFree(termnms);
       hypre_StMatrixDestroy(C);
    }
 

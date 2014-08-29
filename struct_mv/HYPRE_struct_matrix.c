@@ -367,6 +367,24 @@ HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
+                          HYPRE_Int           Atranspose,
+                          HYPRE_StructMatrix  B,
+                          HYPRE_Int           Btranspose,
+                          HYPRE_StructMatrix *C )
+{
+   hypre_StructMatrix *matrices[2]   = {A, B};
+   HYPRE_Int           transposes[2] = {Atranspose, Btranspose};
+
+   hypre_StructMatmult(2, matrices, transposes, C);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
 {
    *grid = hypre_StructMatrixGrid(matrix);

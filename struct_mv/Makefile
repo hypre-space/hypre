@@ -59,6 +59,7 @@ FILES =\
  struct_grid.c\
  struct_innerprod.c\
  struct_io.c\
+ struct_matmult.c\
  struct_matrix.c\
  struct_matrix_mask.c\
  struct_matvec.c\

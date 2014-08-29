@@ -374,6 +374,16 @@ HYPRE_Int HYPRE_StructMatrixMatvec ( HYPRE_Complex alpha,
                                      HYPRE_Complex beta,
                                      HYPRE_StructVector y );
 
+/**
+ * Matrix-matrix multiply.  Returns $C=AB$, $C=A^TB$, $C=AB^T$, or $C=A^TB^T$,
+ * depending on the boolean arguments {\tt Atranspose} and {\tt Btranspose}.
+ **/
+HYPRE_Int HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
+                                    HYPRE_Int           Atranspose,
+                                    HYPRE_StructMatrix  B,
+                                    HYPRE_Int           Btranspose,
+                                    HYPRE_StructMatrix *C );
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

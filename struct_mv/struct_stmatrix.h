@@ -126,11 +126,18 @@ HYPRE_Int
 hypre_StMatrixTranspose( hypre_StMatrix *matrix,
                          HYPRE_Int       ndim );
 HYPRE_Int
-hypre_StMatrixMult( hypre_StMatrix  *A,
-                    hypre_StMatrix  *B,
-                    HYPRE_Int        Cid,
-                    HYPRE_Int        ndim,
-                    hypre_StMatrix **C_ptr );
+hypre_StMatrixMatmat( hypre_StMatrix  *A,
+                      hypre_StMatrix  *B,
+                      HYPRE_Int        Cid,
+                      HYPRE_Int        ndim,
+                      hypre_StMatrix **C_ptr );
+HYPRE_Int
+hypre_StMatrixMatmult( HYPRE_Int        nmatrices,
+                       hypre_StMatrix **matrices,
+                       HYPRE_Int       *transposes,
+                       HYPRE_Int        Cid,
+                       HYPRE_Int        ndim,
+                       hypre_StMatrix **C_ptr );
 HYPRE_Int
 hypre_StMatrixPrint( hypre_StMatrix *matrix,
                      char           *matnames,

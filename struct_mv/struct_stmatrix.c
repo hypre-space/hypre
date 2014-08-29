@@ -448,12 +448,15 @@ hypre_StBoxRank( hypre_Index i,
    return rank;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-hypre_StMatrixMult( hypre_StMatrix  *A,
-                    hypre_StMatrix  *B,
-                    HYPRE_Int        Cid,
-                    HYPRE_Int        ndim,
-                    hypre_StMatrix **C_ptr )
+hypre_StMatrixMatmat( hypre_StMatrix  *A,
+                      hypre_StMatrix  *B,
+                      HYPRE_Int        Cid,
+                      HYPRE_Int        ndim,
+                      hypre_StMatrix **C_ptr )
 {
    hypre_StMatrix *C, *Aclone, *Bclone;
    hypre_StCoeff  *Acoeff;
@@ -651,6 +654,43 @@ hypre_StMatrixMult( hypre_StMatrix  *A,
 
    /* Clean up */
    hypre_TFree(ABbox);
+
+   *C_ptr = C;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixMatmult( HYPRE_Int        nmatrices,
+                       hypre_StMatrix **matrices,
+                       HYPRE_Int       *transposes,
+                       HYPRE_Int        Cid,
+                       HYPRE_Int        ndim,
+                       hypre_StMatrix **C_ptr )
+{
+   hypre_StMatrix *A, *B, *C;
+   HYPRE_Int       i;
+
+   hypre_StMatrixClone(matrices[0], ndim, &C);
+   if (transposes[0])
+   {
+      hypre_StMatrixTranspose(C, ndim);
+   }
+   for (i = 1; i < nmatrices; i++)
+   {
+      A = C;
+      hypre_StMatrixClone(matrices[i], ndim, &B);
+      if (transposes[i])
+      {
+         hypre_StMatrixTranspose(B, ndim);
+      }
+      hypre_StMatrixMatmat(A, B, Cid, ndim, &C);
+      hypre_StMatrixDestroy(A);
+      hypre_StMatrixDestroy(B);
+   }
 
    *C_ptr = C;
 

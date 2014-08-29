@@ -28,13 +28,13 @@
  * grids.  Either the range is a coarsening of the domain or vice-versa, and
  * both the domain and range are coarsenings of some common index space with
  * coarsening factors 'rstride' and 'dstride' respectively.  The data storage is
- * dictated by the coarsest grid, and the boolean 'domain_is_coarse' indicates
- * whether that happens to be the domain or the range grid.  The stencil,
- * however, always represents a "row" stencil that operates on the domain grid
- * and produces a value on the range grid.  The data interface and accessor
- * macros are also row-stencil based, regardless of the underlying storage.
- * Each stencil entry can have either constant or variable coefficients as
- * indicated by the stencil-sized array 'constant'.
+ * dictated by the coarsest grid as indicated (for convenience) by the two
+ * booleans 'range_is_coarse' and 'domain_is_coarse'.  The stencil always
+ * represents a "row" stencil that operates on the domain grid and produces a
+ * value on the range grid.  The data interface and accessor macros are also
+ * row-stencil based, regardless of the underlying storage.  Each stencil entry
+ * can have either constant or variable coefficients as indicated by the
+ * stencil-sized array 'constant'.
  *
  * The 'data' pointer below has space at the beginning for constant stencil
  * coefficient values followed by the stored variable coefficient values.

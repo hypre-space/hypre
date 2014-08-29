@@ -1784,11 +1784,18 @@ HYPRE_Int
 hypre_StMatrixTranspose( hypre_StMatrix *matrix,
                          HYPRE_Int       ndim );
 HYPRE_Int
-hypre_StMatrixMult( hypre_StMatrix  *A,
-                    hypre_StMatrix  *B,
-                    HYPRE_Int        Cid,
-                    HYPRE_Int        ndim,
-                    hypre_StMatrix **C_ptr );
+hypre_StMatrixMatmat( hypre_StMatrix  *A,
+                      hypre_StMatrix  *B,
+                      HYPRE_Int        Cid,
+                      HYPRE_Int        ndim,
+                      hypre_StMatrix **C_ptr );
+HYPRE_Int
+hypre_StMatrixMatmult( HYPRE_Int        nmatrices,
+                       hypre_StMatrix **matrices,
+                       HYPRE_Int       *transposes,
+                       HYPRE_Int        Cid,
+                       HYPRE_Int        ndim,
+                       hypre_StMatrix **C_ptr );
 HYPRE_Int
 hypre_StMatrixPrint( hypre_StMatrix *matrix,
                      char           *matnames,
@@ -1825,13 +1832,13 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
  * grids.  Either the range is a coarsening of the domain or vice-versa, and
  * both the domain and range are coarsenings of some common index space with
  * coarsening factors 'rstride' and 'dstride' respectively.  The data storage is
- * dictated by the coarsest grid, and the boolean 'domain_is_coarse' indicates
- * whether that happens to be the domain or the range grid.  The stencil,
- * however, always represents a "row" stencil that operates on the domain grid
- * and produces a value on the range grid.  The data interface and accessor
- * macros are also row-stencil based, regardless of the underlying storage.
- * Each stencil entry can have either constant or variable coefficients as
- * indicated by the stencil-sized array 'constant'.
+ * dictated by the coarsest grid as indicated (for convenience) by the two
+ * booleans 'range_is_coarse' and 'domain_is_coarse'.  The stencil always
+ * represents a "row" stencil that operates on the domain grid and produces a
+ * value on the range grid.  The data interface and accessor macros are also
+ * row-stencil based, regardless of the underlying storage.  Each stencil entry
+ * can have either constant or variable coefficients as indicated by the
+ * stencil-sized array 'constant'.
  *
  * The 'data' pointer below has space at the beginning for constant stencil
  * coefficient values followed by the stored variable coefficient values.
@@ -2203,6 +2210,9 @@ HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array ,
 HYPRE_Int hypre_PrintCCBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
+
+/* struct_matmult.c */
+HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int *transposes , hypre_StructMatrix **C_ptr );
 
 /* struct_matrix.c */
 HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index index );
