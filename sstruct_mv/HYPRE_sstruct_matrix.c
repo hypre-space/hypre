@@ -516,9 +516,10 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
    HYPRE_Int               send_part,    recv_part;
    HYPRE_Int               send_var,     recv_var;
    hypre_StructMatrix     *send_matrix, *recv_matrix;
-   hypre_CommPkg          *comm_pkg;
+   hypre_CommPkg          *comm_pkg, **comm_pkgs;
+   HYPRE_Complex         **send_data, **recv_data;
    hypre_CommHandle       *comm_handle;
-   HYPRE_Int               ci;
+   HYPRE_Int               ci, num_comm_pkgs;
 
 
    /*------------------------------------------------------
@@ -538,6 +539,11 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
     * Communicate and accumulate between parts
     *------------------------------------------------------*/
 
+   send_data = hypre_TAlloc(HYPRE_Complex *, vnbor_ncomms);
+   recv_data = hypre_TAlloc(HYPRE_Complex *, vnbor_ncomms);
+   comm_pkgs = hypre_TAlloc(hypre_CommPkg *, vnbor_ncomms);
+
+   num_comm_pkgs = 0;
    for (ci = 0; ci < vnbor_ncomms; ci++)
    {
       comm_info = hypre_SStructCommInfoCommInfo(vnbor_comm_info[ci]);
@@ -555,7 +561,6 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       {
          hypre_StructStencil *send_stencil = hypre_StructMatrixStencil(send_matrix);
          hypre_StructStencil *recv_stencil = hypre_StructMatrixStencil(recv_matrix);
-         HYPRE_Complex       *sdata, *rdata;
          HYPRE_Int            num_values, stencil_size, num_transforms;
          HYPRE_Int           *symm;
          HYPRE_Int           *v_to_s, *s_to_v;
@@ -625,14 +630,11 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                              hypre_StructMatrixDataSpace(send_matrix),
                              hypre_StructMatrixDataSpace(recv_matrix),
                              num_values, orders, 1,
-                             hypre_StructMatrixComm(send_matrix), &comm_pkg);
-         /* note reversal of send/recv data here */
-         sdata = hypre_StructMatrixVData(send_matrix);
-         rdata = hypre_StructMatrixVData(recv_matrix);
-         hypre_InitializeCommunication(comm_pkg, &rdata, &sdata, 1, 0,
-                                       &comm_handle);
-         hypre_FinalizeCommunication(comm_handle);
-         hypre_CommPkgDestroy(comm_pkg);
+                             hypre_StructMatrixComm(send_matrix),
+                             &comm_pkgs[num_comm_pkgs]);
+         send_data[num_comm_pkgs] = hypre_StructMatrixVData(send_matrix);
+         recv_data[num_comm_pkgs] = hypre_StructMatrixVData(recv_matrix);
+         num_comm_pkgs++;
 
          for (ti = 0; ti < num_transforms; ti++)
          {
@@ -641,6 +643,34 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
          hypre_TFree(orders);
       }
    }
+
+   /* Communicate */
+   if (num_comm_pkgs > 0)
+   {
+      /* Agglomerate comm_pkgs into one comm_pkg */
+      if (num_comm_pkgs > 1)
+      {
+         hypre_CommPkgAgglomerate(num_comm_pkgs, comm_pkgs, &comm_pkg);
+         for (ci = 0; ci < num_comm_pkgs; ci++)
+         {
+            hypre_CommPkgDestroy(comm_pkgs[ci]);
+         }
+      }
+      else if (num_comm_pkgs > 0)
+      {
+         comm_pkg = comm_pkgs[0];
+      }
+
+      /* Note reversal of send/recv data */
+      hypre_InitializeCommunication(comm_pkg, recv_data, send_data, 1, 0,
+                                    &comm_handle);
+      hypre_FinalizeCommunication(comm_handle);
+      hypre_CommPkgDestroy(comm_pkg);
+   }
+
+   hypre_TFree(comm_pkgs);
+   hypre_TFree(send_data);
+   hypre_TFree(recv_data);
 
    /*------------------------------------------------------
     * Assemble P and U matrices
