@@ -54,9 +54,9 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
   HYPRE_Int               skip_relax = (sys_bamg_data -> skip_relax);
   HYPRE_Real             *dxyz       = (sys_bamg_data -> dxyz);
 
-  HYPRE_Int               num_tv1 = (sys_bamg_data -> num_tv1);
-  HYPRE_Int               num_tv2 = (sys_bamg_data -> num_tv2);
-  HYPRE_Int               num_tv = num_tv1 + num_tv2;
+  HYPRE_Int               num_rtv = (sys_bamg_data -> num_rtv);
+  HYPRE_Int               num_stv = (sys_bamg_data -> num_stv);
+  HYPRE_Int               num_tv = num_rtv + num_stv;
   HYPRE_Int               num_tv_relax = (sys_bamg_data -> num_tv_relax);
   void                   *tv_relax;
 
@@ -211,11 +211,11 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     alpha = 0.0;
     for (d = 0; d < dim; d++)
     {
-      if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d)) &&
-          (dxyz[d] < min_dxyz))
+      if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d) + 3) && (dxyz[d] < min_dxyz))
       {
         min_dxyz = dxyz[d];
         cdir = d;
+        sysbamg_dbgmsg( "cdir <- %d  Min = %d Max = %d\n", d, hypre_BoxIMinD(cbox,d), hypre_BoxIMaxD(cbox,d) );
       }
       alpha += 1.0/(dxyz[d]*dxyz[d]);
     }
@@ -442,7 +442,7 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
 
   // set up the test vectors (initial + singular)
 
-  sysbamg_dbgmsg("num_tv = %d = %d + %d\n", num_tv, num_tv1, num_tv2);
+  sysbamg_dbgmsg("num_tv = %d = %d + %d\n", num_tv, num_rtv, num_stv);
   tv = hypre_TAlloc(hypre_SStructPVector**, num_levels);
   for ( l=0; l<num_levels; l++ )
   {
@@ -453,7 +453,7 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
       hypre_SStructPVectorInitialize(tv[l][k]);
       hypre_SStructPVectorAssemble(tv[l][k]);
       
-      if ( l == 0 && k < num_tv1 )
+      if ( l == 0 && k < num_rtv )
         hypre_SStructPVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0)+k);
     }
   }
@@ -487,7 +487,7 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     hypre_SysBAMGRelaxSetZeroGuess(tv_relax, 0);
     hypre_SysBAMGRelaxSetup(tv_relax, A_l[l], rhs, x_l[l]);
     // 3) smooth
-    for ( k = 0; k < num_tv1; k++ )
+    for ( k = 0; k < num_rtv; k++ )
       hypre_SysBAMGRelax( tv_relax, A_l[l], rhs, tv[l][k] );
     // 4) destroy the relax struct
     hypre_SysBAMGRelaxDestroy( tv_relax );
@@ -495,14 +495,14 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     hypre_SStructPVectorDestroy( rhs );
 
 #if DEBUG_SYSBAMG
-  for ( k = 0; k < num_tv1; k++ ) {
+  for ( k = 0; k < num_rtv; k++ ) {
     hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);
     hypre_SStructPVectorPrint(filename, tv[l][k], 0);
   }
 #endif
 
     /* set up interpolation operator */
-    hypre_SysBAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], num_tv1, tv[l]);
+    hypre_SysBAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], num_rtv, tv[l]);
 
     /* set up the coarse grid operator */
     hypre_SysBAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
@@ -521,10 +521,13 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     // restrict the tv[l] to tv[l+1] (NB: don't need tv's on the coarsest grid)
     if ( l < num_levels-2 )
     {
-      for ( k = 0; k < num_tv1; k++ )
+      for ( k = 0; k < num_rtv; k++ )
         hypre_SysSemiRestrict(restrict_data_l[l], RT_l[l], tv[l][k], tv[l+1][k]);
     }
   }
+
+  // now have operator on the coarsest grid; compute ev's/sv's
+  hypre_SysBAMGComputeSVecs( A_l[l+1], num_stv, &(tv[l+1][num_rtv]) );
 
   /* set up fine grid relaxation */
   relax_data_l[0] = hypre_SysBAMGRelaxCreate(comm);

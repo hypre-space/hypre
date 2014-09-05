@@ -810,6 +810,7 @@ HYPRE_Int hypre_SysBAMGCoarsen ( hypre_SStructPGrid *fgrid , hypre_Index index ,
 /* sys_bamg_setup_interp.c */
 hypre_SStructPMatrix *hypre_SysBAMGCreateInterpOp ( hypre_SStructPMatrix *A , hypre_SStructPGrid *cgrid , HYPRE_Int cdir );
 HYPRE_Int hypre_SysBAMGSetupInterpOp ( hypre_SStructPMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_SStructPMatrix *P, HYPRE_Int num_tv, hypre_SStructPVector** tv );
+HYPRE_Int hypre_SysBAMGComputeSVecs ( hypre_SStructPMatrix *A , HYPRE_Int num_stv, hypre_SStructPVector** stv );
 
 /* sys_bamg_setup_rap.c */
 hypre_SStructPMatrix *hypre_SysBAMGCreateRAPOp ( hypre_SStructPMatrix *R , hypre_SStructPMatrix *A , hypre_SStructPMatrix *P , hypre_SStructPGrid *coarse_grid , HYPRE_Int cdir );

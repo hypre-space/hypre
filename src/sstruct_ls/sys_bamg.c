@@ -41,8 +41,8 @@ hypre_SysBAMGCreate( MPI_Comm  comm )
   (sys_bamg_data -> num_pre_relax)     = 1;
   (sys_bamg_data -> num_post_relax)    = 1;
 
-  (sys_bamg_data -> num_tv1)           = 10;
-  (sys_bamg_data -> num_tv2)           = 10;
+  (sys_bamg_data -> num_rtv)           = 10;
+  (sys_bamg_data -> num_stv)           = 10;
   (sys_bamg_data -> num_tv_relax)      = 20;
 
   (sys_bamg_data -> skip_relax)       = 1;
@@ -239,38 +239,38 @@ hypre_SysBAMGSetNumPostRelax( void *sys_bamg_vdata,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SysBAMGSetNumTv1( void *bamg_vdata, HYPRE_Int num_tv1 )
+HYPRE_Int hypre_SysBAMGSetNumTv1( void *bamg_vdata, HYPRE_Int num_rtv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
-  (bamg_data -> num_tv1) = num_tv1;
+  (bamg_data -> num_rtv) = num_rtv;
 
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SysBAMGGetNumTv1( void *bamg_vdata, HYPRE_Int *num_tv1 )
+HYPRE_Int hypre_SysBAMGGetNumTv1( void *bamg_vdata, HYPRE_Int *num_rtv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
-  *num_tv1 = (bamg_data -> num_tv1);
+  *num_rtv = (bamg_data -> num_rtv);
 
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SysBAMGSetNumTv2( void *bamg_vdata, HYPRE_Int num_tv2 )
+HYPRE_Int hypre_SysBAMGSetNumStv( void *bamg_vdata, HYPRE_Int num_stv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
-  (bamg_data -> num_tv2) = num_tv2;
+  (bamg_data -> num_stv) = num_stv;
 
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SysBAMGGetNumTv2( void *bamg_vdata, HYPRE_Int *num_tv2 )
+HYPRE_Int hypre_SysBAMGGetNumStv( void *bamg_vdata, HYPRE_Int *num_stv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
-  *num_tv2 = (bamg_data -> num_tv2);
+  *num_stv = (bamg_data -> num_stv);
 
   return hypre_error_flag;
 }
