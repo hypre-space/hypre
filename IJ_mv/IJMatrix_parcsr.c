@@ -2489,8 +2489,25 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    HYPRE_Int current_i;
    HYPRE_Int row_len;
    HYPRE_Int max_num_threads;
+   HYPRE_Int aux_flag, aux_flag_global, size;
 
    max_num_threads = hypre_NumThreads();
+
+   /* first find out if anyone has an aux_matrix, and create one if you don't
+    * have one, but other procs do */
+   aux_flag = 0;
+   aux_flag_global = 0;
+   if(aux_matrix)
+   {   aux_flag = 1; }
+   hypre_MPI_Allreduce(&aux_flag, &aux_flag_global, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   if(aux_flag_global && (!aux_flag))
+   {
+      hypre_MPI_Comm_rank(comm, &my_id);
+      num_rows = row_partitioning[my_id+1] - row_partitioning[my_id]; 
+	   hypre_AuxParCSRMatrixCreate(&aux_matrix, num_rows, num_rows, NULL);
+      hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
 
    if (aux_matrix)
    {

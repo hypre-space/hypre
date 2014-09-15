@@ -626,12 +626,12 @@ hypre_NonGalerkinIJBufferNewRow(HYPRE_Int     *ijbuf_rownums, /* See NonGalerkin
  * Compress the current row in an IJ Buffer by removing duplicate entries 
  **/
 inline HYPRE_Int
-hypre_NonGalerkinIJBufferCompress( HYPRE_Int      *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
-                                   HYPRE_Int      ijbuf_rowcounter, 
-                                   HYPRE_Real     *ijbuf_data, 
-                                   HYPRE_Int      *ijbuf_cols, 
-                                   HYPRE_Int      *ijbuf_rownums, 
-                                   HYPRE_Int      *ijbuf_numcols)
+hypre_NonGalerkinIJBufferCompressRow( HYPRE_Int      *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
+                                      HYPRE_Int      ijbuf_rowcounter, 
+                                      HYPRE_Real     *ijbuf_data, 
+                                      HYPRE_Int      *ijbuf_cols, 
+                                      HYPRE_Int      *ijbuf_rownums, 
+                                      HYPRE_Int      *ijbuf_numcols)
 {
     HYPRE_Int                ierr = 0;
     HYPRE_Int                nentries, i, nduplicate;
@@ -662,6 +662,137 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_Int      *ijbuf_cnt,      /* See NonGal
     return ierr;
 }
 
+
+
+/**
+ * Compress the entire buffer, removing duplicate rows
+ **/
+inline HYPRE_Int
+hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
+                                   HYPRE_Int      *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
+                                   HYPRE_Int      *ijbuf_rowcounter, 
+                                   HYPRE_Real     **ijbuf_data, 
+                                   HYPRE_Int      **ijbuf_cols, 
+                                   HYPRE_Int      **ijbuf_rownums, 
+                                   HYPRE_Int      **ijbuf_numcols)
+{
+    HYPRE_Int                ierr       = 0;
+    HYPRE_Int                *indys     = hypre_CTAlloc(HYPRE_Int, (*ijbuf_rowcounter) );
+    
+    HYPRE_Int                i, j, duplicate, cnt_new, rowcounter_new, prev_row;
+    HYPRE_Int                row_start, row_stop, row_loc, row;
+
+    HYPRE_Real               *data_new;
+    HYPRE_Int                *cols_new;
+    HYPRE_Int                *rownums_new;
+    HYPRE_Int                *numcols_new;
+
+
+    /* Do a sort on rownums, but store the original order in indys. 
+     * Then see if there are any duplicate rows */
+    for(i = 0; i < (*ijbuf_rowcounter); i++)
+    {   indys[i] = i; }
+    hypre_qsort2i((*ijbuf_rownums), indys, 0, (*ijbuf_rowcounter)-1);
+    duplicate = 0;
+    for(i = 1; i < (*ijbuf_rowcounter); i++)
+    {
+        if(indys[i] != (indys[i-1]+1))
+        {
+            duplicate = 1;
+            break;
+        }
+    }
+    
+    /* Compress duplicate rows */
+    if(duplicate)
+    {
+
+        /* Accumulate numcols, so that it functions like a CSR row-pointer */
+        for(i = 1; i < (*ijbuf_rowcounter); i++)
+        {   (*ijbuf_numcols)[i] += (*ijbuf_numcols)[i-1]; }
+        
+        /* Initialize new buffer */
+        prev_row         = -1;
+        rowcounter_new   = 0;
+        cnt_new          = 0;
+        data_new         = hypre_CTAlloc(HYPRE_Real, ijbuf_size);
+        cols_new         = hypre_CTAlloc(HYPRE_Int, ijbuf_size);
+        rownums_new      = hypre_CTAlloc(HYPRE_Int, ijbuf_size);
+        numcols_new      = hypre_CTAlloc(HYPRE_Int, ijbuf_size);
+        numcols_new[0]   = 0;
+        
+        /* Cycle through each row */
+        for(i = 0; i < (*ijbuf_rowcounter); i++)
+        {
+         
+            /* Find which row this is in local and global numberings, and where
+             * this row's data starts and stops in the buffer*/
+            row_loc = indys[i];
+            row = (*ijbuf_rownums)[i];
+            if(row_loc > 0)
+            {   
+                row_start = (*ijbuf_numcols)[row_loc-1];
+                row_stop  = (*ijbuf_numcols)[row_loc]; 
+            }
+            else
+            {   
+                row_start = 0;
+                row_stop  = (*ijbuf_numcols)[row_loc]; 
+            }
+            
+            /* Is this a new row?  If so, compress previous row, and add a new
+             * one.  Noting that prev_row = -1 is a special value */
+            if(row != prev_row)
+            {
+                if(prev_row != -1)
+                { 
+                    /* Compress previous row */
+                    hypre_NonGalerkinIJBufferCompressRow(&cnt_new, rowcounter_new, data_new, 
+                                          cols_new, rownums_new, numcols_new);
+                }
+                prev_row = row;
+                numcols_new[rowcounter_new] = 0;
+                rownums_new[rowcounter_new] = row;
+                rowcounter_new++;
+            }
+            
+            /* Copy row into new buffer */
+            for(j = row_start; j < row_stop; j++)
+            {
+                data_new[cnt_new] = (*ijbuf_data)[j];
+                cols_new[cnt_new] = (*ijbuf_cols)[j];
+                numcols_new[rowcounter_new-1]++;
+                cnt_new++;
+            }
+        }
+        
+        /* Compress the final row */
+        if(i > 1)
+        {
+            hypre_NonGalerkinIJBufferCompressRow(&cnt_new, rowcounter_new, data_new, 
+                                       cols_new, rownums_new, numcols_new);
+        }
+
+        *ijbuf_cnt = cnt_new;
+        *ijbuf_rowcounter = rowcounter_new;
+
+        /* Point to the new buffer */
+        hypre_TFree(*ijbuf_data);
+        hypre_TFree(*ijbuf_cols);
+        hypre_TFree(*ijbuf_rownums);
+        hypre_TFree(*ijbuf_numcols);
+        (*ijbuf_data) = data_new;
+        (*ijbuf_cols) = cols_new;
+        (*ijbuf_rownums) = rownums_new;
+        (*ijbuf_numcols) = numcols_new;
+    }
+
+    hypre_TFree(indys);
+   
+    return ierr;
+}
+
+
 /**
  * Do a buffered write to an IJ matrix.  
  * That is, write to the buffer, until the buffer is full. Then when the 
@@ -675,53 +806,56 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled
                                 HYPRE_Int     ijbuf_size,         /* max buffer size */
                                 HYPRE_Int    *ijbuf_rowcounter,   /* num of rows in rownums, (i.e., size of rownums) */
                                                                   /* This counter will increase as you call this function for multiple rows */
-                                HYPRE_Real   *ijbuf_data,         /* Array of values, of size ijbuf_size */
-                                HYPRE_Int    *ijbuf_cols,         /* Array of col indices, of size ijbuf_size */
-                                HYPRE_Int    *ijbuf_rownums,      /* Holds row-indices that with numcols makes for a CSR-like data structure*/
-                                HYPRE_Int    *ijbuf_numcols,      /* rownums[i] is the row num, and numcols holds the number of entries being added */
+                                HYPRE_Real   **ijbuf_data,         /* Array of values, of size ijbuf_size */
+                                HYPRE_Int    **ijbuf_cols,         /* Array of col indices, of size ijbuf_size */
+                                HYPRE_Int    **ijbuf_rownums,      /* Holds row-indices that with numcols makes for a CSR-like data structure*/
+                                HYPRE_Int    **ijbuf_numcols,      /* rownums[i] is the row num, and numcols holds the number of entries being added */
                                                                   /* for that row. Note numcols is not cumulative like an actual CSR data structure*/
                                 HYPRE_Int     row_to_write,       /* Entry to add to the buffer */
                                 HYPRE_Int     col_to_write,       /*          Ditto             */
                                 HYPRE_Real    val_to_write )      /*          Ditto             */
 {
     HYPRE_Int                ierr = 0;
+    
 
     if( (*ijbuf_cnt) == 0 ) 
     {
         /* brand new buffer: increment buffer structures for the new row */
-        hypre_NonGalerkinIJBufferNewRow(ijbuf_rownums, ijbuf_numcols, ijbuf_rowcounter, row_to_write);
+        hypre_NonGalerkinIJBufferNewRow((*ijbuf_rownums), (*ijbuf_numcols), ijbuf_rowcounter, row_to_write);
         
     }
-    else if(ijbuf_rownums[ (*ijbuf_rowcounter)-1 ] != row_to_write)
+    else if((*ijbuf_rownums)[ (*ijbuf_rowcounter)-1 ] != row_to_write)
     {
         /* If this is a new row, compress the previous row */
-        hypre_NonGalerkinIJBufferCompress(ijbuf_cnt, (*ijbuf_rowcounter), ijbuf_data, 
-                                          ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
+        hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, (*ijbuf_rowcounter), (*ijbuf_data), 
+                                          (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
         /* increment buffer structures for the new row */
-        hypre_NonGalerkinIJBufferNewRow(ijbuf_rownums, ijbuf_numcols, ijbuf_rowcounter, row_to_write);
+        hypre_NonGalerkinIJBufferNewRow( (*ijbuf_rownums), (*ijbuf_numcols), ijbuf_rowcounter, row_to_write);
     }
     
     /* Add new entry to buffer */
-    ijbuf_cols[(*ijbuf_cnt)] = col_to_write;
-    ijbuf_data[(*ijbuf_cnt)] = val_to_write;
-    ijbuf_numcols[ (*ijbuf_rowcounter)-1 ]++;
+    (*ijbuf_cols)[(*ijbuf_cnt)] = col_to_write;
+    (*ijbuf_data)[(*ijbuf_cnt)] = val_to_write;
+    (*ijbuf_numcols)[ (*ijbuf_rowcounter)-1 ]++;
     (*ijbuf_cnt)++;
 
     /* Buffer is full, write to the matrix object */
     if ( (*ijbuf_cnt) == (ijbuf_size-1) )
     {
        /* If the last row is empty, decrement rowcounter */
-       if( ijbuf_numcols[ (*ijbuf_rowcounter)-1 ] == 0)
+       if( (*ijbuf_numcols)[ (*ijbuf_rowcounter)-1 ] == 0)
        {    (*ijbuf_rowcounter)--; }
 
        /* Compress and Add Entries */
-       hypre_NonGalerkinIJBufferCompress(ijbuf_cnt, (*ijbuf_rowcounter), ijbuf_data, 
+       hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, (*ijbuf_rowcounter), (*ijbuf_data), 
+                                         (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
+       hypre_NonGalerkinIJBufferCompress(ijbuf_size, ijbuf_cnt, ijbuf_rowcounter, ijbuf_data,
                                          ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
-       ierr += HYPRE_IJMatrixAddToValues(B, *ijbuf_rowcounter, ijbuf_numcols, ijbuf_rownums, ijbuf_cols, ijbuf_data);
+       ierr += HYPRE_IJMatrixAddToValues(B, *ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums), (*ijbuf_cols), (*ijbuf_data));
        
        /* Reinitialize the buffer */
-       hypre_NonGalerkinIJBufferInit( ijbuf_cnt, ijbuf_rowcounter, ijbuf_numcols);
-       hypre_NonGalerkinIJBufferNewRow(ijbuf_rownums, ijbuf_numcols, ijbuf_rowcounter, row_to_write);
+       hypre_NonGalerkinIJBufferInit( ijbuf_cnt, ijbuf_rowcounter, (*ijbuf_numcols));
+       hypre_NonGalerkinIJBufferNewRow((*ijbuf_rownums), (*ijbuf_numcols), ijbuf_rowcounter, row_to_write);
     }
 
     return ierr;
@@ -733,21 +867,24 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled
  **/
 inline HYPRE_Int
 hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix B,             /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
+                               HYPRE_Int      ijbuf_size,
                                HYPRE_Int      *ijbuf_cnt, 
                                HYPRE_Int      ijbuf_rowcounter, 
-                               HYPRE_Real     *ijbuf_data, 
-                               HYPRE_Int      *ijbuf_cols, 
-                               HYPRE_Int      *ijbuf_rownums, 
-                               HYPRE_Int      *ijbuf_numcols)
+                               HYPRE_Real     **ijbuf_data, 
+                               HYPRE_Int      **ijbuf_cols, 
+                               HYPRE_Int      **ijbuf_rownums, 
+                               HYPRE_Int      **ijbuf_numcols)
 {
     HYPRE_Int                ierr = 0;
 
     if( (*ijbuf_cnt) > 0)
     {   
        /* Compress the last row and then write */
-       hypre_NonGalerkinIJBufferCompress(ijbuf_cnt, ijbuf_rowcounter, ijbuf_data, 
+       hypre_NonGalerkinIJBufferCompressRow(ijbuf_cnt, ijbuf_rowcounter, (*ijbuf_data), 
+                                         (*ijbuf_cols), (*ijbuf_rownums), (*ijbuf_numcols));
+       hypre_NonGalerkinIJBufferCompress(ijbuf_size, ijbuf_cnt, &ijbuf_rowcounter, ijbuf_data,
                                          ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
-       ierr += HYPRE_IJMatrixAddToValues(B, ijbuf_rowcounter, ijbuf_numcols, ijbuf_rownums, ijbuf_cols, ijbuf_data); 
+       ierr += HYPRE_IJMatrixAddToValues(B, ijbuf_rowcounter, (*ijbuf_numcols), (*ijbuf_rownums), (*ijbuf_cols), (*ijbuf_data)); 
     }
     (*ijbuf_cnt = 0);
 
@@ -886,13 +1023,13 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
             global_col = R_IAP_diag_j[j] + first_col_diag_RAP;
             /* This call adds a                        1 x 1 to  i            j           data */
             hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                              ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                              &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                               global_col, 1.0); 
             if (sym_collapse) 
             {
                hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_sym_cnt,
-                  ijbuf_size, &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                  ijbuf_sym_cols, ijbuf_sym_rownums, ijbuf_sym_numcols,
+                  ijbuf_size, &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                  &ijbuf_sym_cols, &ijbuf_sym_rownums, &ijbuf_sym_numcols,
                   global_col, global_row, 1.0); 
             }
         }
@@ -905,14 +1042,14 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
             global_col = col_map_offd_R_IAP[ R_IAP_offd_j[j] ];
             /* This call adds a                        1 x 1 to  i            j           data */
             hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                           ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                           &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                            global_col, 1.0); 
 
             if (sym_collapse)
             {  
                hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_sym_cnt,
-                  ijbuf_size, &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                  ijbuf_sym_cols, ijbuf_sym_rownums, ijbuf_sym_numcols,
+                  ijbuf_size, &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                  &ijbuf_sym_cols, &ijbuf_sym_rownums, &ijbuf_sym_numcols,
                   global_col, global_row, 1.0); 
             }
         }
@@ -961,13 +1098,13 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
               /* For efficiency, we do a buffered IJAddToValues
                * A[global_row, global_col] += 1.0 */
               hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                 global_col, 1.0 ); 
               if(sym_collapse)
               {
                 hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_sym_cnt,
-                   ijbuf_size, &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                   ijbuf_sym_cols, ijbuf_sym_rownums, ijbuf_sym_numcols,
+                   ijbuf_size, &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                   &ijbuf_sym_cols, &ijbuf_sym_rownums, &ijbuf_sym_numcols,
                    global_col, global_row, 1.0 );
               }
 /*}*/ 
@@ -987,13 +1124,13 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
                 /* For efficiency, we do a buffered IJAddToValues
                  * A[global_row, global_col] += 1.0 */
                 hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                  ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                  &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                   global_col, 1.0 ); 
                 if(sym_collapse)
                 {
                     hypre_NonGalerkinIJBufferWrite( Pattern, &ijbuf_sym_cnt,
-                       ijbuf_size, &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                       ijbuf_sym_cols, ijbuf_sym_rownums, ijbuf_sym_numcols,
+                       ijbuf_size, &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                       &ijbuf_sym_cols, &ijbuf_sym_rownums, &ijbuf_sym_numcols,
                        global_col, global_row, 1.0 );
                 }
 /*}*/ 
@@ -1004,12 +1141,12 @@ hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP,
     
     /* For efficiency, we do a buffered IJAddToValues.
      * This empties the buffer of any remaining values */
-    hypre_NonGalerkinIJBufferEmpty(Pattern, &ijbuf_cnt, ijbuf_rowcounter, 
-                                ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
+    hypre_NonGalerkinIJBufferEmpty(Pattern, ijbuf_size, &ijbuf_cnt, ijbuf_rowcounter, 
+                                &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols);
     if(sym_collapse)
-        hypre_NonGalerkinIJBufferEmpty(Pattern, &ijbuf_sym_cnt, ijbuf_sym_rowcounter, 
-                                ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums, 
-                                ijbuf_sym_numcols);
+        hypre_NonGalerkinIJBufferEmpty(Pattern, ijbuf_size, &ijbuf_sym_cnt, ijbuf_sym_rowcounter, 
+                                &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums, 
+                                &ijbuf_sym_numcols);
     
     /* Finalize Construction of Pattern */
     ierr += HYPRE_IJMatrixAssemble(Pattern);
@@ -1054,6 +1191,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     HYPRE_Int           i, j, k, row_start, row_end, value, num_cols_offd_Sext, num_procs;
     HYPRE_Int           S_ext_diag_size, S_ext_offd_size, last_col_diag_RAP, cnt_offd, cnt_diag, cnt;
     HYPRE_Int           col_indx_Pattern, current_Pattern_j, col_indx_RAP;
+    /* HYPRE_Real          start_time            = hypre_MPI_Wtime(); */
+    /* HYPRE_Real          end_time; */
     HYPRE_Int           * temp                = NULL;
     HYPRE_Int           ierr                  = 0;
     char                filename[256];
@@ -1207,6 +1346,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         
         /* Sort diag portion of Pattern */
         row_start = Pattern_diag_i[i];
+        
         if( Pattern_diag_j[row_start] == i)
         {   row_start = row_start + 1; }
         row_end = Pattern_diag_i[i+1];
@@ -1550,7 +1690,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                  /* For efficiency, we do a buffered IJAddToValues.
                   * A[global_row, global_row] += RAP_diag_data[j] */
                  hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                   ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                   &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                    global_row, RAP_diag_data[j] ); 
 /*}*/ 
 
@@ -1651,13 +1791,13 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                            /* For efficiency, we do a buffered IJAddToValues.
                             * A[global_row, cnt] += RAP_diag_data[j] */
                            hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                             ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                             &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                              cnt, lump_value ); 
                            if (lump_percent < 1.0) 
                            {   
                                /* Preserve row sum by updating diagonal */
                                hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                             ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                             &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                              global_row, diagonal_lump_value );
                            }
                            
@@ -1667,13 +1807,13 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                               /* Update mirror entry */
                               hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                  &ijbuf_sym_cnt, ijbuf_size, &ijbuf_sym_rowcounter,
-                                 ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums,
-                                 ijbuf_sym_numcols, cnt, global_row, lump_value );
+                                 &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                 &ijbuf_sym_numcols, cnt, global_row, lump_value );
                               /* Update mirror entry diagonal */
                               hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                  &ijbuf_sym_cnt, ijbuf_size, &ijbuf_sym_rowcounter,
-                                 ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums,
-                                 ijbuf_sym_numcols, cnt, cnt, neg_lump_value );
+                                 &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                 &ijbuf_sym_numcols, cnt, cnt, neg_lump_value );
                            }
 /*}*/
                        }
@@ -1687,13 +1827,13 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                            neg_lump_value = -1.0 * lump_value;
                            
                            hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                   ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                   &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                    offd_intersection[k], lump_value ); 
                            
                            if (lump_percent < 1.0) 
                            {   
                               hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                      ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                      &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                       global_row, diagonal_lump_value ); 
                            }
                            
@@ -1702,13 +1842,13 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                            {
                                hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                   &ijbuf_sym_cnt, ijbuf_size, &ijbuf_sym_rowcounter,
-                                  ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums,
-                                  ijbuf_sym_numcols, offd_intersection[k],
+                                  &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                  &ijbuf_sym_numcols, offd_intersection[k],
                                   global_row, lump_value ); 
                                hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                   &ijbuf_sym_cnt, ijbuf_size, &ijbuf_sym_rowcounter,
-                                  ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums,
-                                  ijbuf_sym_numcols, offd_intersection[k],
+                                  &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                  &ijbuf_sym_numcols, offd_intersection[k],
                                   offd_intersection[k], neg_lump_value );
                            }
                        }
@@ -1724,14 +1864,14 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
 
                        cnt = col_indx_RAP+first_col_diag_RAP;
                        hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                              ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                              &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                               cnt, lump_value ); 
                        if (sym_collapse)
                        {
                            hypre_NonGalerkinIJBufferWrite( ijmatrix,
                               &ijbuf_sym_cnt, ijbuf_size, &ijbuf_sym_rowcounter,
-                              ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums,
-                              ijbuf_sym_numcols, cnt, global_row, lump_value ); 
+                              &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                              &ijbuf_sym_numcols, cnt, global_row, lump_value ); 
                        }
                    }
                }
@@ -1740,7 +1880,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                {
                    cnt = col_indx_RAP+first_col_diag_RAP;
                    hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                      ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row,
+                      &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row,
                       cnt, RAP_diag_data[j] ); 
                    
                    /* Only go to the next entry in Pattern, if this is not the end of a row */
@@ -1918,11 +2058,11 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                cnt = diag_intersection[k]+first_col_diag_RAP;
                                
                                hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                  ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, cnt, lump_value ); 
+                                  &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, cnt, lump_value ); 
                                if (lump_percent < 1.0) 
                                {   
                                    hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                      ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, global_row, 
+                                      &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, global_row, 
                                       diagonal_lump_value ); 
                                }
                                
@@ -1931,14 +2071,14 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                {
                                    hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                       &ijbuf_sym_cnt, ijbuf_size,
-                                      &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                                      ijbuf_sym_cols, ijbuf_sym_rownums,
-                                      ijbuf_sym_numcols, cnt, global_row, lump_value); 
+                                      &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                                      &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                      &ijbuf_sym_numcols, cnt, global_row, lump_value); 
                                    hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                       &ijbuf_sym_cnt, ijbuf_size,
-                                      &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                                      ijbuf_sym_cols, ijbuf_sym_rownums,
-                                      ijbuf_sym_numcols, cnt, cnt, neg_lump_value ); 
+                                      &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                                      &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                      &ijbuf_sym_numcols, cnt, cnt, neg_lump_value ); 
                               }
                            }
                            
@@ -1951,12 +2091,12 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                neg_lump_value = -1.0 * lump_value;
                                
                                hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                  ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, 
+                                  &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, 
                                   offd_intersection[k], lump_value ); 
                                if (lump_percent < 1.0) 
                                {   
                                    hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                                      ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, global_row, 
+                                      &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, global_row, 
                                       diagonal_lump_value ); 
                                }
                                
@@ -1966,15 +2106,15 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                {
                                    hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                       &ijbuf_sym_cnt, ijbuf_size,
-                                      &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                                      ijbuf_sym_cols, ijbuf_sym_rownums,
-                                      ijbuf_sym_numcols, offd_intersection[k],
+                                      &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                                      &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                      &ijbuf_sym_numcols, offd_intersection[k],
                                       global_row, lump_value ); 
                                    hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                       &ijbuf_sym_cnt, ijbuf_size,
-                                      &ijbuf_sym_rowcounter, ijbuf_sym_data,
-                                      ijbuf_sym_cols, ijbuf_sym_rownums,
-                                      ijbuf_sym_numcols, offd_intersection[k],
+                                      &ijbuf_sym_rowcounter, &ijbuf_sym_data,
+                                      &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                      &ijbuf_sym_numcols, offd_intersection[k],
                                       offd_intersection[k], neg_lump_value ); 
                                }
                            }
@@ -1989,14 +2129,14 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                            {   lump_value = RAP_offd_data[j]; }
 
                            hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                              ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, col_indx_RAP, 
+                              &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, col_indx_RAP, 
                               lump_value ); 
                            if (sym_collapse)
                            {
                                hypre_NonGalerkinIJBufferWrite( ijmatrix,
                                   &ijbuf_sym_cnt, ijbuf_size, &ijbuf_sym_rowcounter,
-                                  ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums,
-                                  ijbuf_sym_numcols, col_indx_RAP, global_row,
+                                  &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums,
+                                  &ijbuf_sym_numcols, col_indx_RAP, global_row,
                                   lump_value ); 
                            }
                        }
@@ -2006,7 +2146,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                    {
                        /* For the offd structure, col_indx_RAP is a global dof number */
                        hypre_NonGalerkinIJBufferWrite( ijmatrix, &ijbuf_cnt, ijbuf_size, &ijbuf_rowcounter, 
-                          ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols, global_row, col_indx_RAP, 
+                          &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols, global_row, col_indx_RAP, 
                           RAP_offd_data[j]); 
                        
                        /* Only go to the next entry in Pattern, if this is not the end of a row */
@@ -2047,12 +2187,12 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     
     /* For efficiency, we do a buffered IJAddToValues.
      * This empties the buffer of any remaining values */
-    hypre_NonGalerkinIJBufferEmpty(ijmatrix, &ijbuf_cnt, ijbuf_rowcounter, 
-                                ijbuf_data, ijbuf_cols, ijbuf_rownums, ijbuf_numcols);
+    hypre_NonGalerkinIJBufferEmpty(ijmatrix, ijbuf_size, &ijbuf_cnt, ijbuf_rowcounter, 
+                                &ijbuf_data, &ijbuf_cols, &ijbuf_rownums, &ijbuf_numcols);
     if(sym_collapse)
-        hypre_NonGalerkinIJBufferEmpty(ijmatrix, &ijbuf_sym_cnt, ijbuf_sym_rowcounter, 
-                                ijbuf_sym_data, ijbuf_sym_cols, ijbuf_sym_rownums, 
-                                ijbuf_sym_numcols);
+        hypre_NonGalerkinIJBufferEmpty(ijmatrix, ijbuf_size, &ijbuf_sym_cnt, ijbuf_sym_rowcounter, 
+                                &ijbuf_sym_data, &ijbuf_sym_cols, &ijbuf_sym_rownums, 
+                                &ijbuf_sym_numcols);
 
     /* Assemble non-Galerkin Matrix, and overwrite current RAP*/
     ierr += HYPRE_IJMatrixAssemble (ijmatrix);
@@ -2114,6 +2254,10 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     ierr += hypre_ParCSRMatrixDestroy(S);
     ierr += HYPRE_IJMatrixSetObjectType(ijmatrix, -1);
     ierr += HYPRE_IJMatrixDestroy(ijmatrix);
+    
+    /*end_time = hypre_MPI_Wtime();
+      if(my_id == 0)
+      {   fprintf(stdout, "NonGalerkin Time:  %1.2e\n", end_time-start_time); } */
     
     return ierr;
 }
