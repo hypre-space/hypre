@@ -449,7 +449,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       }
       else
       {
-         HYPRE_Real *local_data;
+         HYPRE_Real *local_data=NULL;
 
          if (my_id == 0)
             local_data =  hypre_VectorData(hypre_ParVectorLocalVector(U_coarse));

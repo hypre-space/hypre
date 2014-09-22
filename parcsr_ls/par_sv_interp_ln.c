@@ -2295,7 +2295,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
                       {
                          /* keep and add to the q values (copy q)*/
                          value =  aux_data[j_counter];
-                         if ((is_q[j_counter] == (k+1)))
+                         if (is_q[j_counter] == (k+1))
                             value += q_dist_value; 
 
                          if (is_diag[j])

@@ -99,14 +99,19 @@ class MLI_FEData : public MLI_FEBase
    int           numFields_;
    int           *fieldIDs_;
    int           *fieldSizes_;
+
+   // The private fields below appear to be unused
+   /*
    int           elemsAssembled_;
    int           nodesAssembled_;
    int           facesAssembled_;
 
+   void          *USR_FEMatrixObj_;
+   */
+
    void          *USR_FEGridObj_;
    int           (*USR_computeShapeFuncInterpolant)(void*, int eGlobalID, 
                        int nNodes, const double *coord, double *coef);
-   void          *USR_FEMatrixObj_;
    int           (*USR_getElemMatrix)(void*, int eGlobalID, int sMatDim,
                        double *stiffMat);
 

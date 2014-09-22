@@ -263,7 +263,7 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       /* Wtemp = coef * Vtemp */
 
-      for ( deg = 1; deg < deg; deg++ ) 
+      for ( deg = 1; deg < mlsDeg_; deg++ ) 
       {
          hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, 0.0, Wtemp);
          hypre_ParVectorCopy(Wtemp,Vtemp); 

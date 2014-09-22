@@ -283,7 +283,7 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
 {
    int    i, *fList;
-   double *weights;
+   double *weights=NULL;
 
    if ( !strcmp(paramString, "numSweeps") )
    {

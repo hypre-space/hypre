@@ -307,7 +307,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
          hypre_SStructPMatvecCompute(pdata, alpha, pA, px, beta, py);
       }
 
-      if ( (x_object_type == HYPRE_SSTRUCT) )
+      if (x_object_type == HYPRE_SSTRUCT)
       {
 
          /* do U-matrix computations */

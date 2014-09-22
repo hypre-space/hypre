@@ -54,8 +54,8 @@ main( hypre_int argc,
    void		      *object;
 
    HYPRE_IJMatrix      ij_A; 
-   HYPRE_IJVector      ij_b;
-   HYPRE_IJVector      ij_x;
+   HYPRE_IJVector      ij_b=NULL;
+   HYPRE_IJVector      ij_x=NULL;
    HYPRE_IJVector      ij_v;
 
    HYPRE_ParCSRMatrix  parcsr_A;
@@ -1251,7 +1251,7 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
    char           *filename;
 
    HYPRE_ParVector b;
-   HYPRE_Vector    b_CSR;
+   HYPRE_Vector    b_CSR=NULL;
 
    HYPRE_Int             myid;
 

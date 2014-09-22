@@ -2679,7 +2679,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    HYPRE_Int next_open;
    HYPRE_Int now_checking;
    HYPRE_Int num_lost;
-   HYPRE_Int num_lost_global;
+   HYPRE_Int num_lost_global=0;
    HYPRE_Int next_open_offd;
    HYPRE_Int now_checking_offd;
    HYPRE_Int num_lost_offd;
@@ -4220,7 +4220,7 @@ hypre_BoomerAMGTruncandBuild( hypre_ParCSRMatrix   *P,
 
    HYPRE_Int             *new_col_map_offd;
 
-   HYPRE_Int              P_offd_size, new_num_cols_offd;
+   HYPRE_Int              P_offd_size=0, new_num_cols_offd;
 
    HYPRE_Int             *P_marker;
 

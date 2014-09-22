@@ -98,7 +98,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_Int              start_rank1, start_rank2, rank;
 
    HYPRE_Int              myproc;
-   HYPRE_Int              ierr;
+   HYPRE_Int              ierr=0;
 
    hypre_BoxInit(&layer, ndim);
    hypre_BoxInit(&interior_box, ndim);

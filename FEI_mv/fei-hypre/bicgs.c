@@ -213,7 +213,7 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    int               logging       = (bicgs_data -> logging);
    double           *norms         = (bicgs_data -> norms);
    
-   int               ierr, my_id, num_procs, iter;
+   int               ierr=0, my_id, num_procs, iter;
    double            rho1, rho2, sigma, alpha, dtmp, r_norm, b_norm;
    double            beta, epsilon; 
 

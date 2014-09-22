@@ -48,7 +48,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 
    hypre_ParCSRBooleanMatrix *C;
    HYPRE_Int		      *col_map_offd_C;
-   HYPRE_Int		      *map_B_to_C;
+   HYPRE_Int		      *map_B_to_C=NULL;
 
    hypre_CSRBooleanMatrix *C_diag;
    HYPRE_Int             *C_diag_i;

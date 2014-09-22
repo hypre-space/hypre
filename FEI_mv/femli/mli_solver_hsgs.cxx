@@ -120,7 +120,7 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
 int MLI_Solver_HSGS::setParams(char *paramString, int argc, char **argv)
 {
-   double *weights;
+   double *weights=NULL;
    char   param1[100];
 
    sscanf(paramString, "%s", param1);

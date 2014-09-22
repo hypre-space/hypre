@@ -27,7 +27,9 @@ class MLI_Solver_HSGS : public MLI_Solver
 {
    MLI_Matrix  *Amat_;
    int         nSweeps_;
-   int         printRNorm_;
+   // The private field below appears to be unused
+   // int         printRNorm_;
+
    int         calcOmega_;
    double      relaxWeights_;
    double      relaxOmega_;

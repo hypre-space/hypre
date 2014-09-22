@@ -139,7 +139,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    hypre_BoxManager      *node_boxman;
    hypre_BoxManEntry     *entry;
-   HYPRE_Int              kstart, kend;
+   HYPRE_Int              kstart=0, kend=0;
    HYPRE_Int              ilower, iupper;
    HYPRE_Int              jlower, jupper;
    HYPRE_Int              myproc;

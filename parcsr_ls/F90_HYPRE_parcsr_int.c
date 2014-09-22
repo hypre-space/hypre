@@ -67,9 +67,9 @@ hypre_F90_IFACE(hypre_parreadvector, HYPRE_PARREADVECTOR)
 {
    *ierr = 0;
 
-   (void*) (hypre_ParReadVector(
-               hypre_F90_PassComm (comm), 
-               (char *) file ));
+   hypre_ParReadVector(
+               hypre_F90_PassComm (comm),
+               (char *) file );
 }
 
 /*--------------------------------------------------------------------------
@@ -115,9 +115,9 @@ hypre_F90_IFACE(hypre_parcsrmultivectorread, HYPRE_PARCSRMULTIVECTORREAD)
 {
    *ierr = 0;
 
-   (void *) hypre_ParCSRMultiVectorRead(
+   hypre_ParCSRMultiVectorRead(
       hypre_F90_PassComm (comm),
-      (void *)       ii, 
+      (void *)       ii,
       (char *) file );
 }
 

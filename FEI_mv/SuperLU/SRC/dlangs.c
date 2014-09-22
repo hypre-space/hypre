@@ -61,7 +61,7 @@ double dlangs(char *norm, SuperMatrix *A)
     NCformat *Astore;
     double   *Aval;
     int      i, j, irow;
-    double   value, sum;
+    double   value=0.0, sum;
     double   *rwork;
 
     Astore = A->Store;

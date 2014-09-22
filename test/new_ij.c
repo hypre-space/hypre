@@ -111,7 +111,7 @@ main( hypre_int argc,
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
-   HYPRE_Solver        pcg_precond, pcg_precond_gotten;
+   HYPRE_Solver        pcg_precond=NULL, pcg_precond_gotten;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 num_threads;
@@ -4874,7 +4874,7 @@ BuildRhsParFromOneFile( HYPRE_Int                  argc,
    char           *filename;
 
    HYPRE_ParVector b;
-   HYPRE_Vector    b_CSR;
+   HYPRE_Vector    b_CSR=NULL;
 
    HYPRE_Int             myid;
 

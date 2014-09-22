@@ -88,8 +88,8 @@ hypre_FacSetup2( void                 *fac_vdata,
 
    /* coarsest grid solver */
    HYPRE_Int               csolver_type       =(fac_data-> csolver_type);
-   HYPRE_SStructSolver     crse_solver;
-   HYPRE_SStructSolver     crse_precond;
+   HYPRE_SStructSolver     crse_solver=NULL;
+   HYPRE_SStructSolver     crse_precond=NULL;
    
    HYPRE_Int               max_level        =  hypre_FACDataMaxLevels(fac_data);
    HYPRE_Int               relax_type       =  fac_data -> relax_type;

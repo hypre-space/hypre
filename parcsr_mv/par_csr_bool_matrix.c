@@ -770,7 +770,7 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
    HYPRE_Int          *local_num_rows;
 
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int          *local_num_nonzeros;
+   HYPRE_Int          *local_num_nonzeros=NULL;
    HYPRE_Int          num_nonzeros;
   
    HYPRE_Int          *a_i;

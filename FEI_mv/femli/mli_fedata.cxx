@@ -3905,7 +3905,7 @@ int MLI_FEData::readFromFile(char *infile)
    int    nodeNumFields, *nodeFieldIDs=NULL;
    int    elemNumFields, *elemFieldIDs=NULL;
    int    *nodeIDs=NULL, **IDLists=NULL, *numProcs=NULL, **procLists=NULL;
-   int    spaceDim, *nodeIDAux=NULL, mypid;
+   int    spaceDim=0, *nodeIDAux=NULL, mypid;
    char   **nodeBCFlags=NULL;
    double *nodeCoords=NULL, **newCoords=NULL, **elemMat, **nodeBCVals;
    char   filename[80], inputString[256];;

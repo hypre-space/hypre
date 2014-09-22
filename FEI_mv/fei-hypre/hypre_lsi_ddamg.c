@@ -893,7 +893,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
 {
    int             i, j, k, *row_partition, local_nrows, num_procs, rowSize;
    int             *colInd, *newColInd, rowCnt, eqnNum, *rowLengths;
-   int             nnz, relaxType[4], maxRowSize, global_nrows;
+   int             nnz=0, relaxType[4], maxRowSize, global_nrows;
    int             myBegin_int, myEnd_int, *itemp_vec, *itemp_vec2;
    int             local_intface_nrows, global_intface_nrows;
    int             num_iterations;

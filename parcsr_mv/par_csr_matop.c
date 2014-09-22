@@ -353,7 +353,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *C;
    HYPRE_Int          *col_map_offd_C;
-   HYPRE_Int          *map_B_to_C;
+   HYPRE_Int          *map_B_to_C=NULL;
 
    hypre_CSRMatrix *C_diag;
 

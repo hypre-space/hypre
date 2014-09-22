@@ -429,7 +429,7 @@ int MLI_Method_AMGCR::setNumLevels( int nlevels )
 int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
 {
    int    irow, localNRows, numColsOffd, graphArraySize;
-   int    *graphArray, *graphArrayOffd, *ISMarker, *ISMarkerOffd;
+   int    *graphArray, *graphArrayOffd, *ISMarker, *ISMarkerOffd=NULL;
    int    nprocs, *ADiagI, *ADiagJ;
    double *measureArray;
    hypre_ParCSRMatrix *hypreA, *hypreS;
@@ -1010,7 +1010,7 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    double *tPDiagA, *ADDiagA, *AD2DiagA, omega=1, dtemp;
    char   paramString[100];
    HYPRE_IJMatrix     IJInvD, IJP;
-   hypre_ParCSRMatrix *hypreA, *hypreAff, *hypreInvD, *hypreP, *hypreAD;
+   hypre_ParCSRMatrix *hypreA, *hypreAff, *hypreInvD, *hypreP=NULL, *hypreAD;
    hypre_ParCSRMatrix *hypreAD2, *hypreAfc, *hypreTmp;
    hypre_CSRMatrix    *ADiag, *DDiag, *tPDiag, *ADDiag, *AD2Diag;
    MLI_Function       *funcPtr;

@@ -386,7 +386,7 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 int MLI_Solver_BJacobi::setParams(char *paramString, int argc, char **argv)
 {
    int    i;
-   double *weights;
+   double *weights=NULL;
    char   param1[200];
 
    sscanf(paramString, "%s", param1);

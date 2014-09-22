@@ -37,7 +37,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                        HYPRE_Int           cdir,
                        HYPRE_Int           rap_type    )
 {
-   hypre_StructMatrix    *RAP;
+   hypre_StructMatrix    *RAP=NULL;
    hypre_StructStencil   *stencil;
    HYPRE_Int              P_stored_as_transpose = 0;
    HYPRE_Int              constant_coefficient;

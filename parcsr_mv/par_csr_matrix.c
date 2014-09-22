@@ -1069,7 +1069,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm         comm,
    HYPRE_Int          *local_num_rows;
 
    HYPRE_Int           num_procs, my_id;
-   HYPRE_Int          *local_num_nonzeros;
+   HYPRE_Int          *local_num_nonzeros=NULL;
    HYPRE_Int           num_nonzeros;
   
    HYPRE_Complex      *a_data;
