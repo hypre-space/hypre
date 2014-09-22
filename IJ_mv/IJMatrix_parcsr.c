@@ -2489,7 +2489,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
    HYPRE_Int current_i;
    HYPRE_Int row_len;
    HYPRE_Int max_num_threads;
-   HYPRE_Int aux_flag, aux_flag_global, size;
+   HYPRE_Int aux_flag, aux_flag_global;
 
    max_num_threads = hypre_NumThreads();
 
