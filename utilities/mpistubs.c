@@ -784,7 +784,12 @@ HYPRE_Int
 hypre_MPI_Address( void           *location,
                    hypre_MPI_Aint *address )
 {
+#ifdef MPI_VERSION
+   if (MPI_VERSION > 1)
+      return (HYPRE_Int) MPI_Get_address(location, address);
+#else
    return (HYPRE_Int) MPI_Address(location, address);
+#endif
 }
 
 HYPRE_Int
@@ -1221,8 +1226,14 @@ hypre_MPI_Type_hvector( HYPRE_Int           count,
                         hypre_MPI_Datatype  oldtype,
                         hypre_MPI_Datatype *newtype )
 {
+#ifdef MPI_VERSION
+   if (MPI_VERSION > 1)
+      return (HYPRE_Int) MPI_Type_create_hvector((hypre_int)count, (hypre_int)blocklength,
+                                                 stride, oldtype, newtype);
+#else
    return (HYPRE_Int) MPI_Type_hvector((hypre_int)count, (hypre_int)blocklength,
                                        stride, oldtype, newtype);
+#endif
 }
 
 HYPRE_Int
@@ -1241,9 +1252,18 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
    {
       mpi_array_of_blocklengths[i] = (hypre_int) array_of_blocklengths[i];
    }
-   ierr = (HYPRE_Int) MPI_Type_struct((hypre_int)count, mpi_array_of_blocklengths,
-                                      array_of_displacements, array_of_types,
-                                      newtype);
+
+#ifdef MPI_VERSION
+   if (MPI_VERSION > 1)
+      ierr = (HYPRE_Int) MPI_Type_create_struct((hypre_int)count, mpi_array_of_blocklengths,
+                                                array_of_displacements, array_of_types,
+                                                newtype);
+#else
+      ierr = (HYPRE_Int) MPI_Type_struct((hypre_int)count, mpi_array_of_blocklengths,
+                                         array_of_displacements, array_of_types,
+                                         newtype);
+#endif
+
    hypre_TFree(mpi_array_of_blocklengths);
 
    return ierr;
