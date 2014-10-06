@@ -450,12 +450,12 @@ hypre_PFMGSetupInterpOp_CC2
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
-   hypre_Index            diag_index;
-   HYPRE_Int              diag_rank;
+   hypre_Index            diag_offset;
+   HYPRE_Int              diag_entry;
    HYPRE_Int              warning_cnt= 0;
 
-   hypre_SetIndex3(diag_index, 0, 0, 0);
-   diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+   hypre_SetIndex3(diag_offset, 0, 0, 0);
+   diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
 
    if ( rap_type!=0 )
    {
@@ -481,7 +481,7 @@ hypre_PFMGSetupInterpOp_CC2
 
       for (si = 0; si < stencil_size; si++)
       {
-         if ( si != diag_rank )
+         if ( si != diag_entry )
          {
             Ap = hypre_StructMatrixBoxData(A, i, si);
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
@@ -506,7 +506,7 @@ hypre_PFMGSetupInterpOp_CC2
          }
       }
 
-      si = diag_rank;
+      si = diag_entry;
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);

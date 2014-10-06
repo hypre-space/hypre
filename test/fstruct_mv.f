@@ -46,8 +46,8 @@ c******************************************
       integer foffset(*)
       integer*8 fstencil
 
-      call HYPRE_StructStencilSetElement(fstencil, findx, foffset,
-     1                                   ierr)
+      call HYPRE_StructStencilSetEntry(fstencil, findx, foffset,
+     1                                 ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structstencilsetelement: error = ', ierr
       endif

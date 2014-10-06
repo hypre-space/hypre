@@ -50,7 +50,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
 
    hypre_Index            index_temp;
    HYPRE_Int              k, j, i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
  
    RAP_stencil_dim = 3;
 
@@ -58,7 +58,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * non-symmetric case
@@ -80,13 +80,13 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
             {
 
                /*--------------------------------------------------------------
-                * Storage for 7 elements (c,w,e,n,s,a,b)
+                * Storage for 7 entries (c,w,e,n,s,a,b)
                 *--------------------------------------------------------------*/
                if (i*j == 0 && i*k == 0 && j*k == 0)
                {
                   hypre_SetIndex3(index_temp,i,j,k);
-                  MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
-                  stencil_rank++;
+                  MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
+                  stencil_entry++;
                }
             }
          }
@@ -116,13 +116,13 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
             {
 
                /*--------------------------------------------------------------
-                * Store 4 elements in (c,w,s,b)
+                * Store 4 entries in (c,w,s,b)
                 *--------------------------------------------------------------*/
                if (i*j == 0 && i*k == 0 && j*k == 0)
                {
                   hypre_SetIndex3(index_temp,i,j,k);
-                  MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
-                  stencil_rank++;
+                  MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
+                  stencil_entry++;
                }
             }
          }

@@ -31,7 +31,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              max_iter    = (relax_data -> max_iter);
    HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
-   HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
+   HYPRE_Int              diag_entry  = (relax_data -> diag_entry);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
@@ -108,7 +108,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
       i = 0;
       for (j = 0; j < stencil_size; j++)
       {
-         if (j != diag_rank)
+         if (j != diag_entry)
          {
             offd[i] = j;
             i++;
@@ -152,7 +152,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
             b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 
@@ -276,7 +276,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
             b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 

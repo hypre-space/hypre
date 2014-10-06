@@ -766,8 +766,8 @@ main( hypre_int  argc,
       HYPRE_StructStencilCreate(ndim, data.matrix_sizes[mi], &stencils[mi]);
       for (ei = 0; ei < data.matrix_sizes[mi]; ei++)
       {
-         HYPRE_StructStencilSetElement(stencils[mi], ei,
-                                       data.matrix_offsets[mi][ei]);
+         HYPRE_StructStencilSetEntry(stencils[mi], ei,
+                                     data.matrix_offsets[mi][ei]);
       }
 
       HYPRE_StructMatrixCreate(

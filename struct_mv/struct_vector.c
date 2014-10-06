@@ -666,7 +666,7 @@ hypre_StructVectorCopy( hypre_StructVector *x,
 
 HYPRE_Int 
 hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
-                                     HYPRE_Complex       values )
+                                     HYPRE_Complex       value )
 {
    hypre_Box          *v_data_box;
                     
@@ -690,11 +690,10 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    hypre_ForBoxI(i, boxes)
    {
-      box      = hypre_BoxArrayBox(boxes, i);
+      box   = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
 
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
       vp = hypre_StructVectorBoxData(vector, i);
  
       hypre_BoxGetSize(box, loop_size);
@@ -706,7 +705,7 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 #endif
       hypre_BoxLoop1For(vi)
       {
-         vp[vi] = values;
+         vp[vi] = value;
       }
       hypre_BoxLoop1End(vi);
    }

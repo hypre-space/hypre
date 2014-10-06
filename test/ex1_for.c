@@ -126,10 +126,10 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          /* Assign each of the 5 stencil entries */
 #ifdef HYPRE_FORTRAN
          for (entry = 0; entry < 5; entry++)
-            HYPRE_StructStencilSetElement(&stencil, &entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(&stencil, &entry, offsets[entry]);
 #else
          for (entry = 0; entry < 5; entry++)
-            HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
 #endif
       }
    }

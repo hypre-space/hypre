@@ -34,7 +34,7 @@ HYPRE_Int hypre_MinUnionBoxes ( hypre_BoxArray *boxes );
 HYPRE_Int hypre_BoxBoundaryIntersect ( hypre_Box *box , hypre_StructGrid *grid , HYPRE_Int d , HYPRE_Int dir , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryDG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , HYPRE_Int d );
-HYPRE_Int hypre_GeneralBoxBoundaryIntersect( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_element, hypre_BoxArray *boundary );
+HYPRE_Int hypre_GeneralBoxBoundaryIntersect( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_offset, hypre_BoxArray *boundary );
 
 /* box.c */
 HYPRE_Int hypre_SetIndex ( hypre_Index index , HYPRE_Int val );
@@ -189,17 +189,18 @@ HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y
 
 /* struct_io.c */
 HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int *value_ids , HYPRE_Int dim , HYPRE_Complex *data );
-HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_elements , HYPRE_Int dim , HYPRE_Complex *data );
+HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_offsets , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_PrintCCBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matmult.c */
-HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int *transposes , hypre_StructMatrix **C_ptr );
+HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_StructMatrix **C_ptr );
 
 /* struct_matrix.c */
-HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index index );
-HYPRE_Int hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix , hypre_Box *box );
+HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index dindex );
+HYPRE_Int hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix , hypre_Box *dbox );
+HYPRE_Int  hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix , hypre_Index dstride );
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );
 hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
@@ -241,8 +242,8 @@ HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha , hypre_StructVector *y );
 hypre_StructStencil *hypre_StructStencilCreate ( HYPRE_Int dim , HYPRE_Int size , hypre_Index *shape );
 hypre_StructStencil *hypre_StructStencilRef ( hypre_StructStencil *stencil );
 HYPRE_Int hypre_StructStencilDestroy ( hypre_StructStencil *stencil );
-HYPRE_Int hypre_StructStencilElementRank ( hypre_StructStencil *stencil , hypre_Index stencil_element );
-HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil , hypre_StructStencil **symm_stencil_ptr , HYPRE_Int **symm_elements_ptr );
+HYPRE_Int hypre_StructStencilOffsetEntry ( hypre_StructStencil *stencil , hypre_Index stencil_offset );
+HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil , hypre_StructStencil **symm_stencil_ptr , HYPRE_Int **symm_offsets_ptr );
 
 /* struct_vector.c */
 hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm , hypre_StructGrid *grid );

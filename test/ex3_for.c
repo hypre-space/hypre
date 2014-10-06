@@ -230,7 +230,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          for (entry = 0; entry < 5; entry++)
-            HYPRE_StructStencilSetElement(&stencil, &entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(&stencil, &entry, offsets[entry]);
       }
 #else
       /* Create an empty 2D, 5-pt stencil object */
@@ -242,7 +242,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          for (entry = 0; entry < 5; entry++)
-            HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
       }
 #endif
    }

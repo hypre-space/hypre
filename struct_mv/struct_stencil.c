@@ -72,48 +72,49 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_StructStencilElementRank
- *    Returns the rank of the `stencil_element' in `stencil'.
- *    If the element is not found, a -1 is returned.
+ * hypre_StructStencilOffsetEntry
+ *
+ * Returns the entry number of the 'stencil_offset' in 'stencil'.  If the offset
+ * is not found, a -1 is returned.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructStencilElementRank( hypre_StructStencil *stencil,
-                                hypre_Index          stencil_element )
+hypre_StructStencilOffsetEntry( hypre_StructStencil *stencil,
+                                hypre_Index          stencil_offset )
 {
    hypre_Index  *stencil_shape;
-   HYPRE_Int     rank;
+   HYPRE_Int     entry;
    HYPRE_Int     i, ndim;
 
-   rank = -1;
+   entry = -1;
    ndim = hypre_StructStencilNDim(stencil);
    stencil_shape = hypre_StructStencilShape(stencil);
    for (i = 0; i < hypre_StructStencilSize(stencil); i++)
    {
-      if (hypre_IndexesEqual(stencil_shape[i], stencil_element, ndim))
+      if (hypre_IndexesEqual(stencil_shape[i], stencil_offset, ndim))
       {
-         rank = i;
+         entry = i;
          break;
       }
    }
 
-   return rank;
+   return entry;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_StructStencilSymmetrize:
- *    Computes a new "symmetrized" stencil.
  *
- *    An integer array called `symm_elements' is also set up.  A non-negative
- *    value of `symm_elements[i]' indicates that the `i'th stencil element
- *    is a "symmetric element".  That is, this stencil element is the
- *    transpose element of an element that is not a "symmetric element".
+ * Computes a new "symmetrized" stencil.  An integer array called 'symm_entries'
+ * is also set up.  A non-negative value j = symm_entries[i] indicates that the
+ * ith stencil entry is a "symmetric entry" of the jth stencil entry, that is,
+ * stencil entry i is the transpose of stencil entry j (and symm_entries[j] is
+ * assigned a negative value).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
                                hypre_StructStencil **symm_stencil_ptr,
-                               HYPRE_Int           **symm_elements_ptr )
+                               HYPRE_Int           **symm_entries_ptr )
 {
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
@@ -121,13 +122,13 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
    hypre_StructStencil  *symm_stencil;
    hypre_Index          *symm_stencil_shape;
    HYPRE_Int             symm_stencil_size;
-   HYPRE_Int            *symm_elements;
+   HYPRE_Int            *symm_entries;
 
-   HYPRE_Int             no_symmetric_stencil_element, symmetric;
+   HYPRE_Int             no_symmetric_stencil_entry, symmetric;
    HYPRE_Int             i, j, d, ndim;
                        
    /*------------------------------------------------------
-    * Copy stencil elements into `symm_stencil_shape'
+    * Copy stencil entrys into 'symm_stencil_shape'
     *------------------------------------------------------*/
 
    ndim = hypre_StructStencilNDim(stencil);
@@ -138,20 +139,20 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
    }
 
    /*------------------------------------------------------
-    * Create symmetric stencil elements and `symm_elements'
+    * Create symmetric stencil entries and 'symm_entries'
     *------------------------------------------------------*/
 
-   symm_elements = hypre_CTAlloc(HYPRE_Int, 2*stencil_size);
+   symm_entries = hypre_CTAlloc(HYPRE_Int, 2*stencil_size);
    for (i = 0; i < 2*stencil_size; i++)
-      symm_elements[i] = -1;
+      symm_entries[i] = -1;
 
    symm_stencil_size = stencil_size;
    for (i = 0; i < stencil_size; i++)
    {
-      if (symm_elements[i] < 0)
+      if (symm_entries[i] < 0)
       {
-         /* note: start at i to handle "center" element correctly */
-         no_symmetric_stencil_element = 1;
+         /* note: start at i to handle "center" entry correctly */
+         no_symmetric_stencil_entry = 1;
          for (j = i; j < stencil_size; j++)
          {
             symmetric = 1;
@@ -166,25 +167,25 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
             }
             if (symmetric)
             {
-               /* only "off-center" elements have symmetric entries */
+               /* only "off-center" entries have symmetric entries */
                if (i != j)
                {
-                  symm_elements[j] = i;
+                  symm_entries[j] = i;
                }
-               no_symmetric_stencil_element = 0;
+               no_symmetric_stencil_entry = 0;
             }
          }
 
-         if (no_symmetric_stencil_element)
+         if (no_symmetric_stencil_entry)
          {
-            /* add symmetric stencil element to `symm_stencil' */
+            /* add symmetric stencil entry to 'symm_stencil' */
             for (d = 0; d < ndim; d++)
             {
                hypre_IndexD(symm_stencil_shape[symm_stencil_size], d) =
                   -hypre_IndexD(symm_stencil_shape[i], d);
             }
                
-            symm_elements[symm_stencil_size] = i;
+            symm_entries[symm_stencil_size] = i;
             symm_stencil_size++;
          }
       }
@@ -194,8 +195,8 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
                                             symm_stencil_size,
                                             symm_stencil_shape);
 
-   *symm_stencil_ptr  = symm_stencil;
-   *symm_elements_ptr = symm_elements;
+   *symm_stencil_ptr = symm_stencil;
+   *symm_entries_ptr = symm_entries;
 
    return hypre_error_flag;
 }

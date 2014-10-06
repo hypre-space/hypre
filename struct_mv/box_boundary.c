@@ -144,7 +144,7 @@ hypre_BoxBoundaryDG( hypre_Box *box,
 
 
 /*--------------------------------------------------------------------------
- * Intersect a surface of 'box' with the physical boundary.  A stencil element
+ * Intersect a surface of 'box' with the physical boundary.  A stencil offset
  * indicates in which direction the surface should be determined. 
  *
  * The result will be returned in the box array 'boundary'.  Any boxes already
@@ -154,7 +154,7 @@ hypre_BoxBoundaryDG( hypre_Box *box,
 HYPRE_Int
 hypre_GeneralBoxBoundaryIntersect( hypre_Box *box,
                             hypre_StructGrid *grid,
-                            hypre_Index stencil_element,
+                            hypre_Index stencil_offset,
                             hypre_BoxArray *boundary )
 {
    hypre_BoxManager   *boxman;
@@ -169,7 +169,7 @@ hypre_GeneralBoxBoundaryIntersect( hypre_Box *box,
    dd = hypre_CTAlloc(HYPRE_Int, ndim);
 
    for (i=0; i < ndim; i++)
-     dd[i] = hypre_IndexD(stencil_element, i);
+     dd[i] = hypre_IndexD(stencil_offset, i);
 
    /* set bbox to the box surface of interest */
    hypre_BoxArraySetSize(boundary, 1);

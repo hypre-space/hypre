@@ -70,7 +70,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
 
    HYPRE_Int              j, i;
    HYPRE_Int              d;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
 
    HYPRE_Int             *RAP_marker;
    HYPRE_Int              RAP_marker_size;
@@ -101,7 +101,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    hypre_SetIndex(indexRA, 0);
    hypre_SetIndex(indexRAP, 0);
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * Calculate RAP stencil by symbolic computation of triple matrix
@@ -242,13 +242,13 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
 
    RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
 
-   stencil_rank= 0;
+   stencil_entry= 0;
    for (i = 0; i < RAP_marker_size; i++)
    {
       if ( RAP_marker[i] != 0 )
       {
-         hypre_InverseMapRAPMarker(i,RAP_stencil_shape[stencil_rank]);
-         stencil_rank++;
+         hypre_InverseMapRAPMarker(i,RAP_stencil_shape[stencil_entry]);
+         stencil_entry++;
       }
    }
 
@@ -293,7 +293,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    hypre_StructStencil  *coarse_stencil;
    HYPRE_Int             coarse_stencil_size;
    hypre_Index          *coarse_stencil_shape;
-   HYPRE_Int            *coarse_symm_elements;
+   HYPRE_Int            *coarse_symm_entries;
 
    hypre_StructGrid     *fgrid;
    HYPRE_Int            *fgrid_ids;
@@ -341,7 +341,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
    coarse_stencil = hypre_StructMatrixStencil(RAP);
    coarse_stencil_size = hypre_StructStencilSize(coarse_stencil);
-   coarse_symm_elements = hypre_StructMatrixSymmElements(RAP);
+   coarse_symm_entries = hypre_StructMatrixSymmEntries(RAP);
    coarse_stencil_shape = hypre_StructStencilShape(coarse_stencil);
    dim = hypre_StructStencilNDim(coarse_stencil);
 
@@ -479,7 +479,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
       for (RAPloop = 0; RAPloop < coarse_stencil_size; RAPloop++)
       {
-         if (coarse_symm_elements[RAPloop] == -1)
+         if (coarse_symm_entries[RAPloop] == -1)
          {
             rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -503,7 +503,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
        *-----------------------------------------------------------------*/
       for (RAPloop = 0; RAPloop < coarse_stencil_size; RAPloop++)
       {
-         if (coarse_symm_elements[RAPloop] == -1)
+         if (coarse_symm_entries[RAPloop] == -1)
          {
             /*-------------------------------------------------------------
              * Get pointer for A that corresponds to the current RAP index.
@@ -768,7 +768,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
             } /* end of if a_ptr != NULL */
 
-         } /* end if coarse_symm_element == -1 */
+         } /* end if coarse_symm_entry == -1 */
 
       } /* end of RAPloop */
 
@@ -795,7 +795,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
           *-------------------------------------------------------------*/
          for (RAPloop = 0; RAPloop < coarse_stencil_size; RAPloop++)
          {
-            if (coarse_symm_elements[RAPloop] == -1)
+            if (coarse_symm_entries[RAPloop] == -1)
             {
                hypre_CopyIndex(coarse_stencil_shape[RAPloop], index);
                switch (hypre_IndexD(index, cdir))
@@ -862,7 +862,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                } /* end of switch */
 
-            } /* end if coarse_symm_element == -1 */
+            } /* end if coarse_symm_entry == -1 */
 
          } /* end of RAPloop */
 

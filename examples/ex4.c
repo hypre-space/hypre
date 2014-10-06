@@ -407,7 +407,7 @@ int main (int argc, char *argv[])
 
       /* Assign stencil entries */
       for (i = 0; i < 5; i++)
-         HYPRE_StructStencilSetElement(stencil, i, offsets[i]);
+         HYPRE_StructStencilSetEntry(stencil, i, offsets[i]);
    }
    else /* Symmetric storage */
    {
@@ -419,7 +419,7 @@ int main (int argc, char *argv[])
 
       /* Assign stencil entries */
       for (i = 0; i < 3; i++)
-         HYPRE_StructStencilSetElement(stencil, i, offsets[i]);
+         HYPRE_StructStencilSetEntry(stencil, i, offsets[i]);
    }
 
    /* 3. Set up Struct Vectors for b and x */

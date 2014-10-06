@@ -92,9 +92,9 @@ hypre_StIndexPrint( hypre_Index index,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StCoeffTermCopy( hypre_StCoeffTerm *term1,
-                       hypre_StCoeffTerm *term2,
-                       HYPRE_Int          ndim )
+hypre_StTermCopy( hypre_StTerm *term1,
+                  hypre_StTerm *term2,
+                  HYPRE_Int     ndim )
 {
    HYPRE_Int  d;
 
@@ -102,7 +102,7 @@ hypre_StCoeffTermCopy( hypre_StCoeffTerm *term1,
    (term2->entry) = (term1->entry);
    for (d = 0; d < ndim; d++)
    {
-      (term2->offset[d]) = (term1->offset[d]);
+      (term2->shift[d]) = (term1->shift[d]);
    }
 
    return hypre_error_flag;
@@ -112,12 +112,12 @@ hypre_StCoeffTermCopy( hypre_StCoeffTerm *term1,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StCoeffTermPrint( hypre_StCoeffTerm *term,
-                        char              *matnames,
-                        HYPRE_Int          ndim )
+hypre_StTermPrint( hypre_StTerm *term,
+                   char         *matnames,
+                   HYPRE_Int     ndim )
 {
    hypre_printf("%c%d", matnames[(term->id)], (term->entry));
-   hypre_StIndexPrint((term->offset), '(', ')', ndim);
+   hypre_StIndexPrint((term->shift), '(', ')', ndim);
 
    return hypre_error_flag;
 }
@@ -133,7 +133,7 @@ hypre_StCoeffCreate( HYPRE_Int       nterms,
 
    coeff = hypre_CTAlloc(hypre_StCoeff, 1);
    (coeff->nterms) = nterms;
-   (coeff->terms) = hypre_CTAlloc(hypre_StCoeffTerm, nterms);
+   (coeff->terms) = hypre_CTAlloc(hypre_StTerm, nterms);
    (coeff->prev) = NULL;
    (coeff->next) = NULL;
 
@@ -161,7 +161,7 @@ hypre_StCoeffClone( hypre_StCoeff  *coeff,
       hypre_StCoeffCreate(nterms, &clone);
       for (t = 0; t < nterms; t++)
       {
-         hypre_StCoeffTermCopy(&(coeff->terms[t]), &(clone->terms[t]), ndim);
+         hypre_StTermCopy(&(coeff->terms[t]), &(clone->terms[t]), ndim);
       }
       if (lastclone == NULL)
       {
@@ -207,8 +207,8 @@ hypre_StCoeffShift( hypre_StCoeff *coeff,
                     hypre_Index    shift,
                     HYPRE_Int      ndim )
 {
-   hypre_StCoeffTerm *terms;
-   HYPRE_Int          nterms, t;
+   hypre_StTerm *terms;
+   HYPRE_Int     nterms, t;
 
    while (coeff != NULL)
    {
@@ -216,7 +216,7 @@ hypre_StCoeffShift( hypre_StCoeff *coeff,
       terms  = (coeff->terms);
       for (t = 0; t < nterms; t++)
       {
-         hypre_StIndexShift((terms[t].offset), shift, ndim);
+         hypre_StIndexShift((terms[t].shift), shift, ndim);
       }
       
       coeff = (coeff->next);
@@ -278,11 +278,11 @@ hypre_StCoeffMult( hypre_StCoeff  *Acoeff,
          Ci = 0;
          for (i = 0; i < (Acoeff->nterms); i++)
          {
-            hypre_StCoeffTermCopy(&(Acoeff->terms[i]), &(coeff->terms[Ci++]), ndim);
+            hypre_StTermCopy(&(Acoeff->terms[i]), &(coeff->terms[Ci++]), ndim);
          }
          for (i = 0; i < (Bcoeff->nterms); i++)
          {
-            hypre_StCoeffTermCopy(&(Bcoeff->terms[i]), &(coeff->terms[Ci++]), ndim);
+            hypre_StTermCopy(&(Bcoeff->terms[i]), &(coeff->terms[Ci++]), ndim);
          }
          hypre_StCoeffPush(&Ccoeff, coeff);
 
@@ -309,11 +309,11 @@ hypre_StCoeffPrint( hypre_StCoeff *coeff,
 
    while (coeff != NULL)
    {
-      hypre_StCoeffTermPrint(&(coeff->terms[0]), matnames, ndim);
+      hypre_StTermPrint(&(coeff->terms[0]), matnames, ndim);
       for (i = 1; i < (coeff->nterms); i++)
       {
          hypre_printf("*");
-         hypre_StCoeffTermPrint(&(coeff->terms[i]), matnames, ndim);
+         hypre_StTermPrint(&(coeff->terms[i]), matnames, ndim);
       }
       coeff = (coeff->next);
       if (coeff != NULL)
@@ -346,8 +346,9 @@ hypre_StMatrixCreate( HYPRE_Int        id,
       (matrix->rmap[d]) = 1;
       (matrix->dmap[d]) = 1;
    }
-   (matrix->shapes) = hypre_CTAlloc(hypre_Index, size);
-   (matrix->coeffs) = hypre_CTAlloc(hypre_StCoeff *, size);
+   (matrix->shapes)  = hypre_CTAlloc(hypre_Index, size);
+   (matrix->ncoeffs) = hypre_CTAlloc(HYPRE_Int, size);
+   (matrix->coeffs)  = hypre_CTAlloc(hypre_StCoeff *, size);
 
    *matrix_ptr = matrix;
 
@@ -373,6 +374,7 @@ hypre_StMatrixClone( hypre_StMatrix  *matrix,
    for (entry = 0; entry < (matrix->size); entry++)
    {
       hypre_StIndexCopy((matrix->shapes[entry]), (mclone->shapes[entry]), ndim);
+      (mclone->ncoeffs[entry]) = (matrix->ncoeffs[entry]);
       hypre_StCoeffClone((matrix->coeffs[entry]), ndim, &(mclone->coeffs[entry]));
    }
 
@@ -394,6 +396,7 @@ hypre_StMatrixDestroy( hypre_StMatrix *matrix )
       hypre_StCoeffDestroy(matrix->coeffs[entry]);
    }
    hypre_TFree(matrix->shapes);
+   hypre_TFree(matrix->ncoeffs);
    hypre_TFree(matrix->coeffs);
    hypre_TFree(matrix);
 
@@ -481,8 +484,8 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
 
       if (m2 != (B->rmap[d]))
       {
-         hypre_printf("Error: domain(A) and range(B) must match\n");
-         exit(0);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Domain and range mismatch");
+         return hypre_error_flag;
       }
 
       if ((m1 >= m2) && (m1%m2 == 0) && (m1 >= m3) && (m1%m3 == 0))
@@ -525,8 +528,9 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
    }
    if (isrowstencil == -2)
    {
-      hypre_printf("Error: Invalid or incompatible matrices in product\n\n");
-      exit(0);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,
+                        "Invalid or incompatible matrices in product");
+      return hypre_error_flag;
    }
    /* If either stencil type is okay, choose row type */
    if (isrowstencil == -1)
@@ -637,13 +641,15 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
                ABbox[ABii] = Centry;
                hypre_StIndexCopy(ABoff, (C->shapes[Centry]), ndim);
             }
+            (C->ncoeffs[Centry]) += 1;
             hypre_StCoeffPush(&(C->coeffs[Centry]), Ccoeff);
          }
       }
    }
-   (C->size)   = Csize;
-   (C->shapes) = hypre_TReAlloc((C->shapes), hypre_Index, Csize);
-   (C->coeffs) = hypre_TReAlloc((C->coeffs), hypre_StCoeff *, Csize);
+   (C->size)    = Csize;
+   (C->shapes)  = hypre_TReAlloc((C->shapes), hypre_Index, Csize);
+   (C->ncoeffs) = hypre_TReAlloc((C->ncoeffs), HYPRE_Int, Csize);
+   (C->coeffs)  = hypre_TReAlloc((C->coeffs), hypre_StCoeff *, Csize);
    if (!isrowstencil)
    {
       /* An StMatrix always has a row stencil */

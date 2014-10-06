@@ -84,12 +84,12 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
 {
    hypre_RedBlackGSData  *relax_data = relax_vdata;
 
-   HYPRE_Int              diag_rank;
+   HYPRE_Int              diag_entry;
    hypre_ComputePkg      *compute_pkg;
 
    hypre_StructGrid      *grid;
    hypre_StructStencil   *stencil;
-   hypre_Index            diag_index;
+   hypre_Index            diag_offset;
    hypre_ComputeInfo     *compute_info;
                        
    /*----------------------------------------------------------
@@ -99,8 +99,8 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex3(diag_index, 0, 0, 0);
-   diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+   hypre_SetIndex3(diag_offset, 0, 0, 0);
+   diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
 
    /*----------------------------------------------------------
     * Set up the compute packages
@@ -117,7 +117,7 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    (relax_data -> A) = hypre_StructMatrixRef(A);
    (relax_data -> x) = hypre_StructVectorRef(x);
    (relax_data -> b) = hypre_StructVectorRef(b);
-   (relax_data -> diag_rank) = diag_rank;
+   (relax_data -> diag_entry) = diag_entry;
    (relax_data -> compute_pkg) = compute_pkg;
 
    return hypre_error_flag;
@@ -137,7 +137,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              max_iter    = (relax_data -> max_iter);
    HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
-   HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
+   HYPRE_Int              diag_entry  = (relax_data -> diag_entry);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
@@ -210,7 +210,7 @@ hypre_RedBlackGS( void               *relax_vdata,
       i = 0;
       for (j = 0; j < stencil_size; j++)
       {
-         if (j != diag_rank)
+         if (j != diag_entry)
          {
             offd[i] = j;
             i++;
@@ -252,7 +252,7 @@ hypre_RedBlackGS( void               *relax_vdata,
             b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 
@@ -348,7 +348,7 @@ hypre_RedBlackGS( void               *relax_vdata,
             b_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
             x_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 

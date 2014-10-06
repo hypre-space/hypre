@@ -203,7 +203,7 @@ on all processes.
       /* Set stencil entries */
       for (entry = 0; entry < size; entry++)
       {
-2-6:     HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+2-6:     HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
       }
       
       /* Thats it!  There is no assemble routine */
@@ -215,7 +215,7 @@ Code for setting up the stencil in Figure~\ref{fig-struct-stencil-a}.}
 \label{fig-struct-stencil-b}
 \end{figure}
 The \code{Create()} routine creates an empty 2D, 5-pt stencil object.  The
-\code{SetElement()} routine defines the geometry of the stencil and assigns the
+\code{SetEntry()} routine defines the geometry of the stencil and assigns the
 stencil numbers for each of the stencil entries.  None of the calls are
 collective calls.
 

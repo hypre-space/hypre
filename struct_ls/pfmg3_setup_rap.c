@@ -51,7 +51,7 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
 
    hypre_Index            index_temp;
    HYPRE_Int              k, j, i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
 
    RAP_stencil_dim = 3;
  
@@ -62,7 +62,7 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * non-symmetric case
@@ -71,7 +71,7 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
    /*-----------------------------------------------------------------------
     * 7-point fine grid stencil produces 19 point RAP
     *
-    * Store all 27 elements except for the corners.
+    * Store all 27 entries except for the corners.
     *
     * For symmetric A, only store the lower triangular part, where
     * lower triangular means the lower triangular part on the matrix
@@ -91,12 +91,12 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
          {
             for (i = -1; i < 2; i++)
             {
-               if ((i*j*k == 0) && (stencil_rank < RAP_stencil_size))
+               if ((i*j*k == 0) && (stencil_entry < RAP_stencil_size))
                {
                   hypre_SetIndex3(index_temp,i,j,k);
                   MapIndex(index_temp, cdir,
-                           RAP_stencil_shape[stencil_rank]);
-                  stencil_rank++;
+                           RAP_stencil_shape[stencil_entry]);
+                  stencil_entry++;
                }
             }
          }
@@ -106,7 +106,7 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
    /*-----------------------------------------------------------------------
     * 19 or 27 point fine grid stencil produces 27 point RAP
     *
-    * Store all 27 elements
+    * Store all 27 entries
     *
     * For symmetric A, only store the lower triangular part, where
     * lower triangular means the lower triangular part on the matrix
@@ -126,12 +126,12 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
          {
             for (i = -1; i < 2; i++)
             {
-               if (stencil_rank < RAP_stencil_size)
+               if (stencil_entry < RAP_stencil_size)
                {
                   hypre_SetIndex3(index_temp,i,j,k);
                   MapIndex(index_temp, cdir,
-                           RAP_stencil_shape[stencil_rank]);
-                  stencil_rank++;
+                           RAP_stencil_shape[stencil_entry]);
+                  stencil_entry++;
                }
             }
          }

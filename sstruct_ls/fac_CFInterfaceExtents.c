@@ -62,7 +62,7 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
 
    for (i= 0; i< stencil_size; i++)
    {
-       hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape);
+       hypre_CopyIndex(hypre_StructStencilOffset(stencils, i), stencil_shape);
        AbsStencilShape(stencil_shape, abs_stencil);
 
        if (abs_stencil)  /* only do if not the centre stencil */
@@ -161,7 +161,7 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
 
    for (i= 0; i< stencil_size; i++)
    {
-       hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape);
+       hypre_CopyIndex(hypre_StructStencilOffset(stencils, i), stencil_shape);
        AbsStencilShape(stencil_shape, abs_stencil);
 
        if (abs_stencil)  /* only do if not the centre stencil */

@@ -572,7 +572,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 
          /* to compute 'orders', remember that we are doing reverse communication */
          num_values = hypre_StructMatrixNumValues(recv_matrix);
-         symm = hypre_StructMatrixSymmElements(recv_matrix);
+         symm = hypre_StructMatrixSymmEntries(recv_matrix);
          stencil_size = hypre_StructStencilSize(recv_stencil);
          v_to_s = hypre_TAlloc(HYPRE_Int, num_values);
          s_to_v = hypre_TAlloc(HYPRE_Int, stencil_size);
@@ -594,13 +594,13 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
             for (i = 0; i < num_values; i++)
             {
                si = v_to_s[i];
-               sentry0 = hypre_StructStencilElement(recv_stencil, si);
+               sentry0 = hypre_StructStencilOffset(recv_stencil, si);
                for (j = 0; j < ndim; j++)
                {
                   hypre_IndexD(sentry1, hypre_IndexD(coords[ti], j)) = 
                      hypre_IndexD(sentry0, j) * hypre_IndexD(dirs[ti], j);
                }
-               order[i] = hypre_StructStencilElementRank(send_stencil, sentry1);
+               order[i] = hypre_StructStencilOffsetEntry(send_stencil, sentry1);
                /* currently, both send and recv transforms are parsed */
                if (order[i] > -1)
                {

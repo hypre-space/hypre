@@ -373,10 +373,18 @@ HYPRE_StructMatrixMatmat( HYPRE_StructMatrix  A,
                           HYPRE_Int           Btranspose,
                           HYPRE_StructMatrix *C )
 {
+   HYPRE_Int           nmatrices     = 2;
    hypre_StructMatrix *matrices[2]   = {A, B};
+   HYPRE_Int           nterms        = 2;
+   HYPRE_Int           terms[2]      = {0, 1};
    HYPRE_Int           transposes[2] = {Atranspose, Btranspose};
 
-   hypre_StructMatmult(2, matrices, transposes, C);
+   if (A == B)
+   {
+      nmatrices = 1;
+      terms[1] = 0;
+   }
+   hypre_StructMatmult(nmatrices, matrices, nterms, terms, transposes, C);
 
    return hypre_error_flag;
 }

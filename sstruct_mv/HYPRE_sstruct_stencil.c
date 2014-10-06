@@ -75,7 +75,7 @@ HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil  stencil,
 {
    hypre_StructStencil  *sstencil = hypre_SStructStencilSStencil(stencil);
 
-   HYPRE_StructStencilSetElement(sstencil, entry, offset);
+   HYPRE_StructStencilSetEntry(sstencil, entry, offset);
    hypre_SStructStencilVar(stencil, entry) = var;
 
    return hypre_error_flag;

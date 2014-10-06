@@ -99,7 +99,7 @@ HYPRE_StructGridSetExtents(grid, ilower, iupper);
 HYPRE_StructGridAssemble(grid);
 	
 HYPRE_StructStencilCreate(dim, stencil_size, &stencil);
-HYPRE_StructStencilSetElement(stencil, 0, offset0);
+HYPRE_StructStencilSetEntry(stencil, 0, offset0);
 ...
 
 /*-----------------------------------------------------------

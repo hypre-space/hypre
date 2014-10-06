@@ -105,7 +105,7 @@ int main (int argc, char *argv[])
 
          /* Assign each of the 5 stencil entries */
          for (entry = 0; entry < 5; entry++)
-            HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
       }
    }
 

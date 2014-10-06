@@ -877,7 +877,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 
    HYPRE_Int              i, si;
 
-   hypre_Index            diag_index;
+   hypre_Index            diag_offset;
    HYPRE_Real             diag_product = 1.0;
    HYPRE_Int              zero_diag = 0;
 
@@ -888,7 +888,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
     *----------------------------------------------------------*/
 
    hypre_SetIndex3(stride, 1, 1, 1);
-   hypre_SetIndex3(diag_index, 0, 0, 0);
+   hypre_SetIndex3(diag_offset, 0, 0, 0);
 
    /* Need to modify here */
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
@@ -901,7 +901,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-      si = hypre_StructStencilElementRank(stencil, diag_index);
+      si = hypre_StructStencilOffsetEntry(stencil, diag_offset);
       Ap = hypre_StructMatrixBoxData(A, i, si);
       if (hypre_StructMatrixConstEntry(A, si))
       {

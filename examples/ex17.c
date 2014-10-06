@@ -152,13 +152,13 @@ int main (int argc, char *argv[])
          {
             offset[d] = 0;
          }
-         HYPRE_StructStencilSetElement(stencil, entry++, offset);
+         HYPRE_StructStencilSetEntry(stencil, entry++, offset);
          for (d = 0; d < NDIM; d++)
          {
             offset[d] = -1;
-            HYPRE_StructStencilSetElement(stencil, entry++, offset);
+            HYPRE_StructStencilSetEntry(stencil, entry++, offset);
             offset[d] =  1;
-            HYPRE_StructStencilSetElement(stencil, entry++, offset);
+            HYPRE_StructStencilSetEntry(stencil, entry++, offset);
             offset[d] =  0;
          }
       }

@@ -38,7 +38,7 @@ typedef struct
 
    hypre_SStructPVector   *t;
 
-   HYPRE_Int             **diag_rank;
+   HYPRE_Int             **diag_entry;
 
    /* defines sends and recieves for each struct_vector */
    hypre_ComputePkg     ***svec_compute_pkgs;
@@ -92,7 +92,7 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
    (relax_data -> nodeset_ranks)    = NULL;
    (relax_data -> nodeset_strides)  = NULL;
    (relax_data -> nodeset_indices)  = NULL;
-   (relax_data -> diag_rank)        = NULL;
+   (relax_data -> diag_entry)       = NULL;
    (relax_data -> t)                = NULL;
    (relax_data -> A_loc)            = NULL;
    (relax_data -> x_loc)            = NULL;
@@ -156,10 +156,10 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       for (vi = 0; vi < nvars; vi++)
       {
          hypre_TFree((relax_data -> Ap)[vi]);
-         hypre_TFree((relax_data -> diag_rank)[vi]);
+         hypre_TFree((relax_data -> diag_entry)[vi]);
       }
       hypre_TFree(relax_data -> Ap);
-      hypre_TFree(relax_data -> diag_rank);
+      hypre_TFree(relax_data -> diag_entry);
 
       hypre_FinalizeTiming(relax_data -> time_index);
       hypre_TFree(relax_data);
@@ -186,7 +186,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    HYPRE_Int              ndim = hypre_SStructPMatrixNDim(A);
 
    hypre_SStructPVector  *t;
-   HYPRE_Int            **diag_rank;
+   HYPRE_Int            **diag_entry;
    HYPRE_Real           **A_loc;
    HYPRE_Real            *x_loc;
    HYPRE_Real          ***Ap;
@@ -199,7 +199,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_ComputePkg    ***svec_compute_pkgs;
    hypre_CommHandle     **comm_handle;
 
-   hypre_Index            diag_index;
+   hypre_Index            diag_offset;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
                        
@@ -247,28 +247,28 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    }
 
    /*----------------------------------------------------------
-    * Find the matrix diagonals, use diag_rank[vi][vj] = -1 to
+    * Find the matrix diagonals, use diag_entry[vi][vj] = -1 to
     * mark that the coresponding StructMatrix is NULL.
     *----------------------------------------------------------*/
 
    nvars = hypre_SStructPMatrixNVars(A);
 
-   diag_rank = hypre_CTAlloc(HYPRE_Int *, nvars);
+   diag_entry = hypre_CTAlloc(HYPRE_Int *, nvars);
    for (vi = 0; vi < nvars; vi++)
    {
-      diag_rank[vi] = hypre_CTAlloc(HYPRE_Int, nvars);
+      diag_entry[vi] = hypre_CTAlloc(HYPRE_Int, nvars);
       for (vj = 0; vj < nvars; vj++)
       {
          if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
          {
             sstencil = hypre_SStructPMatrixSStencil(A, vi, vj);
-            hypre_SetIndex3(diag_index, 0, 0, 0);
-            diag_rank[vi][vj] = 
-               hypre_StructStencilElementRank(sstencil, diag_index);
+            hypre_SetIndex3(diag_offset, 0, 0, 0);
+            diag_entry[vi][vj] = 
+               hypre_StructStencilOffsetEntry(sstencil, diag_offset);
          }
          else
          {
-            diag_rank[vi][vj] = -1; 
+            diag_entry[vi][vj] = -1; 
          }
       }
    }
@@ -496,9 +496,9 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_SStructPVectorRef(x, &(relax_data -> x));
    hypre_SStructPVectorRef(b, &(relax_data -> b));
 
-   (relax_data -> diag_rank)    = diag_rank;
-   (relax_data -> A_loc)    = A_loc;
-   (relax_data -> x_loc)    = x_loc;
+   (relax_data -> diag_entry) = diag_entry;
+   (relax_data -> A_loc) = A_loc;
+   (relax_data -> x_loc) = x_loc;
    (relax_data -> Ap)    = Ap;
    (relax_data -> bp)    = bp;
    (relax_data -> tp)    = tp;
@@ -546,7 +546,7 @@ hypre_NodeRelax(  void               *relax_vdata,
    HYPRE_Int             *nodeset_ranks    = (relax_data -> nodeset_ranks);
    hypre_Index           *nodeset_strides  = (relax_data -> nodeset_strides);
    hypre_SStructPVector  *t                = (relax_data -> t);
-   HYPRE_Int            **diag_rank        = (relax_data -> diag_rank);
+   HYPRE_Int            **diag_entry       = (relax_data -> diag_entry);
    hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
    hypre_ComputePkg    ***svec_compute_pkgs= (relax_data ->
                                               svec_compute_pkgs);
@@ -683,7 +683,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                   {
                      Ap[vi][vj] = hypre_StructMatrixBoxData(
                         hypre_SStructPMatrixSMatrix(A,vi,vj),
-                        i, diag_rank[vi][vj]);
+                        i, diag_entry[vi][vj]);
                   }
                }
                bp[vi] = hypre_StructVectorBoxData(
@@ -861,7 +861,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                         stencil_size  = hypre_StructStencilSize(stencil);
                         for (si = 0; si < stencil_size; si++)
                         {
-                           if (si != diag_rank[vi][vj])
+                           if (si != diag_entry[vi][vj])
                            {
                               Ap[vi][vj] = hypre_StructMatrixBoxData(
                                  A_block,i,si);
@@ -895,7 +895,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                      {
                         Ap[vi][vj] = hypre_StructMatrixBoxData(
                            hypre_SStructPMatrixSMatrix(A,vi,vj),
-                           i, diag_rank[vi][vj]);
+                           i, diag_entry[vi][vj]);
                      }
                   }
                }

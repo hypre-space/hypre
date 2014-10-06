@@ -31,7 +31,7 @@ typedef struct
    hypre_StructVector     *b;
    hypre_StructVector     *x;
 
-   HYPRE_Int               diag_rank;
+   HYPRE_Int               diag_entry;
 
    hypre_ComputePkg       *compute_pkg;
 

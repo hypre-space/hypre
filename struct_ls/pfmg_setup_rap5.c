@@ -49,7 +49,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
 
    hypre_Index            index_temp;
    HYPRE_Int              j, i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
  
    RAP_stencil_dim = 2;
 
@@ -57,7 +57,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------------------------------
     * non-symmetric case
@@ -77,13 +77,13 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
          {
 
             /*--------------------------------------------------------------
-             * Storage for 5 elements (c,w,e,n,s)
+             * Storage for 5 entries (c,w,e,n,s)
              *--------------------------------------------------------------*/
             if (i*j == 0)
             {
                hypre_SetIndex3(index_temp,i,j,0);
-               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
-               stencil_rank++;
+               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
+               stencil_entry++;
             }
          }
       }
@@ -110,13 +110,13 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
          {
 
             /*--------------------------------------------------------------
-             * Store 3 elements in (c,w,s)
+             * Store 3 entries in (c,w,s)
              *--------------------------------------------------------------*/
             if( i*j == 0 )
             {
                hypre_SetIndex3(index_temp,i,j,0);
-               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
-               stencil_rank++;
+               MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_entry]);
+               stencil_entry++;
             }
          }
       }

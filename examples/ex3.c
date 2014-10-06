@@ -181,7 +181,7 @@ int main (int argc, char *argv[])
          int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          for (entry = 0; entry < 5; entry++)
-            HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
+            HYPRE_StructStencilSetEntry(stencil, entry, offsets[entry]);
       }
    }
 

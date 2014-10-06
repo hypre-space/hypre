@@ -43,7 +43,7 @@ typedef struct
    hypre_StructVector     *x;
    hypre_StructVector     *t;
 
-   HYPRE_Int               diag_rank;
+   HYPRE_Int               diag_entry;
 
    hypre_ComputePkg      **compute_pkgs;
 
@@ -152,11 +152,11 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    hypre_Index          **pointset_indices = (relax_data -> pointset_indices);
    HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
    hypre_StructVector    *t;
-   HYPRE_Int              diag_rank;
+   HYPRE_Int              diag_entry;
    hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
 
-   hypre_Index            diag_index;
+   hypre_Index            diag_offset;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
                        
@@ -200,8 +200,8 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex3(diag_index, 0, 0, 0);
-   diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
+   hypre_SetIndex3(diag_offset, 0, 0, 0);
+   diag_entry = hypre_StructStencilOffsetEntry(stencil, diag_offset);
 
    /*----------------------------------------------------------
     * Set up the compute packages
@@ -285,7 +285,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    (relax_data -> A) = hypre_StructMatrixRef(A);
    (relax_data -> x) = hypre_StructVectorRef(x);
    (relax_data -> b) = hypre_StructVectorRef(b);
-   (relax_data -> diag_rank)    = diag_rank;
+   (relax_data -> diag_entry)   = diag_entry;
    (relax_data -> compute_pkgs) = compute_pkgs;
 
    /*-----------------------------------------------------
@@ -325,7 +325,7 @@ hypre_PointRelax( void               *relax_vdata,
    HYPRE_Int             *pointset_ranks   = (relax_data -> pointset_ranks);
    hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
    hypre_StructVector    *t                = (relax_data -> t);
-   HYPRE_Int              diag_rank        = (relax_data -> diag_rank);
+   HYPRE_Int              diag_entry       = (relax_data -> diag_entry);
    hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
    HYPRE_Real             tol              = (relax_data -> tol);
    HYPRE_Real             tol2             = tol*tol;
@@ -451,7 +451,7 @@ hypre_PointRelax( void               *relax_vdata,
             x_data_box =
                hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
-            Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+            Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);
 
@@ -597,7 +597,7 @@ hypre_PointRelax( void               *relax_vdata,
                      );
                }
 
-               Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
+               Ap = hypre_StructMatrixBoxData(A, i, diag_entry);
 
                if ( constant_coefficient==0 || constant_coefficient==2 )
                   /* divide by the variable diagonal */
@@ -707,7 +707,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
                         
-   HYPRE_Int              diag_rank        = (relax_data -> diag_rank);
+   HYPRE_Int              diag_entry        = (relax_data -> diag_entry);
    hypre_IndexRef         start;
    hypre_Index            loop_size;
    HYPRE_Int              si, sk, ssi[MAX_DEPTH], depth, k;
@@ -741,7 +741,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
 
       for (k = 0, sk = si; k < depth; sk++)
       {
-         if (sk == diag_rank)
+         if (sk == diag_entry)
          {
             depth--;
          }
@@ -986,7 +986,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
                         
-   HYPRE_Int              diag_rank        = (relax_data -> diag_rank);
+   HYPRE_Int              diag_entry        = (relax_data -> diag_entry);
    hypre_IndexRef         start;
    hypre_Index            loop_size;
    HYPRE_Int              si, sk, ssi[MAX_DEPTH], depth, k;
@@ -1011,7 +1011,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
    Ai = hypre_CCBoxIndexRank( A_data_box, start );
    if ( constant_coefficient==1 ) /* constant diagonal */
    {
-      Apd = hypre_StructMatrixBoxData(A, boxarray_id, diag_rank);
+      Apd = hypre_StructMatrixBoxData(A, boxarray_id, diag_entry);
       AApd = 1/Apd[Ai];
 
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1050,7 +1050,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
 
       for (k = 0, sk = si; k < depth; sk++)
       {
-         if (sk == diag_rank)
+         if (sk == diag_entry)
          {
             depth--;
          }

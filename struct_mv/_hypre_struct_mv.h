@@ -510,7 +510,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 #ifndef hypre_ZBOX_HEADER
 #define hypre_ZBOX_HEADER
 
-#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
+#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i,hypre__k
 
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
@@ -798,6 +798,70 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
          i2 += hypre__ikinc2[hypre__d];\
          i3 += hypre__ikinc3[hypre__d];\
          i4 += hypre__ikinc4[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+/*-----------------------------------*/
+/* currently hardcoded for m <= 4 */
+
+#define hypre_BoxLoopMBegin(m, ndim, loop_size,    \
+                            dbox, start, stride, i)\
+{\
+   zypre_BoxLoopDeclare();\
+   HYPRE_Int  hypre__ikstart[4], hypre__i0inc[4];\
+   HYPRE_Int  hypre__sk[4][HYPRE_MAXDIM], hypre__ikinc[4][HYPRE_MAXDIM+1];\
+   HYPRE_Int  hypre__k = 0;\
+   HYPRE_Int  hypre__m = m;\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+   {\
+      hypre__sk[hypre__k][0] = stride[hypre__k][0];\
+      hypre__ikinc[hypre__k][0] = 0;\
+      i[hypre__k] = hypre_BoxSizeD(dbox[hypre__k], 0); /* temporarily use i */\
+      for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+      {\
+         hypre__sk[hypre__k][hypre__d] = i[hypre__k]*stride[hypre__k][hypre__d];\
+         hypre__ikinc[hypre__k][hypre__d] =\
+            hypre__ikinc[hypre__k][hypre__d-1] + hypre__sk[hypre__k][hypre__d] -\
+            hypre__n[hypre__d-1]*hypre__sk[hypre__k][hypre__d-1];\
+         i[hypre__k] *= hypre_BoxSizeD(dbox[hypre__k], hypre__d);\
+      }\
+      hypre__i0inc[hypre__k] = hypre__sk[hypre__k][0];\
+      hypre__ikinc[hypre__k][hypre__ndim] = 0;\
+      hypre__ikstart[hypre__k] =\
+         hypre_BoxIndexRank(dbox[hypre__k], start[hypre__k]);\
+   }
+
+#define hypre_BoxLoopMFor(i)\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+      zypre_BoxLoopSet();\
+      for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+      {\
+         i[hypre__k] = hypre__ikstart[hypre__k];\
+         for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+         {\
+            i[hypre__k] += hypre__i[hypre__d]*hypre__sk[hypre__k][hypre__d];\
+         }\
+      }\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define hypre_BoxLoopMEnd(i)\
+            for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+            {\
+               i[hypre__k] += hypre__i0inc[hypre__k];\
+            }\
+         }\
+         zypre_BoxLoopInc1();\
+         for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+         {\
+            i[hypre__k] += hypre__ikinc[hypre__k][hypre__d];\
+         }\
          zypre_BoxLoopInc2();\
       }\
    }\
@@ -1284,8 +1348,6 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  * Header info for hypre_StructStencil data structures
@@ -1319,7 +1381,7 @@ typedef struct hypre_StructStencil_struct
 #define hypre_StructStencilNDim(stencil)       ((stencil) -> ndim)
 #define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
 
-#define hypre_StructStencilElement(stencil, i) \
+#define hypre_StructStencilOffset(stencil, i) \
 hypre_StructStencilShape(stencil)[i]
 
 #endif
@@ -1680,14 +1742,14 @@ typedef struct
 {
    HYPRE_Int     id;      /* Stencil matrix id for this term */
    HYPRE_Int     entry;   /* Stencil entry number */
-   hypre_Index   offset;  /* Offset from center index */
+   hypre_Index   shift;   /* Stencil shift from center */
 
-} hypre_StCoeffTerm;
+} hypre_StTerm;
 
 typedef struct coeff_link
 {
    HYPRE_Int          nterms;  /* Number of terms */
-   hypre_StCoeffTerm *terms;   /* Array of terms */
+   hypre_StTerm      *terms;   /* Array of terms */
 
    struct coeff_link *prev;
    struct coeff_link *next;
@@ -1703,6 +1765,7 @@ typedef struct
    hypre_Index     dmap;       /* Domain map */
 
    hypre_Index    *shapes;     /* Offsets describing the stencil's shape */
+   HYPRE_Int      *ncoeffs;    /* Number of coeffs for each stencil entry */
    hypre_StCoeff **coeffs;     /* Description of coefficients */
 
 } hypre_StMatrix;
@@ -1711,10 +1774,26 @@ typedef struct
  * Accessor macros:
  *--------------------------------------------------------------------------*/
 
-/* TODO: Use accessor macros */
-#define hypre_StCoeffTermElt(struct, elt) ((struct) -> elt)
-#define hypre_StCoeffElt(struct, elt)     ((struct) -> elt)
-#define hypre_StMatrixElt(struct, elt)    ((struct) -> elt)
+#define hypre_StTermID(term)           ((term) -> id)
+#define hypre_StTermEntry(term)        ((term) -> entry)
+#define hypre_StTermShift(term)        ((term) -> shift)
+                                      
+#define hypre_StCoeffNTerms(coeff)     ((coeff) -> nterms)
+#define hypre_StCoeffTerms(coeff)      ((coeff) -> terms)
+#define hypre_StCoeffTerm(coeff, t)   &((coeff) -> terms[t])
+#define hypre_StCoeffPrev(coeff)       ((coeff) -> prev)
+#define hypre_StCoeffNext(coeff)       ((coeff) -> next)
+                                      
+#define hypre_StMatrixID(stmat)        ((stmat) -> id)
+#define hypre_StMatrixSize(stmat)      ((stmat) -> size)
+#define hypre_StMatrixRMap(stmat)      ((stmat) -> rmap)
+#define hypre_StMatrixDMap(stmat)      ((stmat) -> dmap)
+#define hypre_StMatrixShapes(stmat)    ((stmat) -> shapes)
+#define hypre_StMatrixOffset(stmat, e) ((stmat) -> shapes[e])
+#define hypre_StMatrixNCoeffs(stmat)   ((stmat) -> ncoeffs)
+#define hypre_StMatrixNCoeff(stmat, e) ((stmat) -> ncoeffs[e])
+#define hypre_StMatrixCoeffs(stmat)    ((stmat) -> coeffs)
+#define hypre_StMatrixCoeff(stmat, e)  ((stmat) -> coeffs[e])
 
 /*--------------------------------------------------------------------------
  * Prototypes:
@@ -1737,13 +1816,13 @@ hypre_StIndexPrint( hypre_Index index,
                     char        rchar,
                     HYPRE_Int   ndim );
 HYPRE_Int
-hypre_StCoeffTermCopy( hypre_StCoeffTerm *term1,
-                       hypre_StCoeffTerm *term2,
-                       HYPRE_Int          ndim );
+hypre_StTermCopy( hypre_StTerm *term1,
+                  hypre_StTerm *term2,
+                  HYPRE_Int     ndim );
 HYPRE_Int
-hypre_StCoeffTermPrint( hypre_StCoeffTerm *term,
-                        char              *matnames,
-                        HYPRE_Int          ndim );
+hypre_StTermPrint( hypre_StTerm *term,
+                   char         *matnames,
+                   HYPRE_Int     ndim );
 HYPRE_Int
 hypre_StCoeffCreate( HYPRE_Int       nterms,
                      hypre_StCoeff **coeff_ptr );
@@ -1880,7 +1959,7 @@ typedef struct hypre_StructMatrix_struct
                                                    {variable, constant, constant
                                                    with variable diagonal} */
    HYPRE_Int             symmetric;      /* Is the matrix symmetric */
-   HYPRE_Int            *symm_elements;  /* Which elements are "symmetric" */
+   HYPRE_Int            *symm_entries;   /* Which entries are "symmetric" */
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Num ghost layers in each
                                                       * direction */
                       
@@ -1918,7 +1997,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDomainIsCoarse(matrix)((matrix) -> domain_is_coarse)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
-#define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
+#define hypre_StructMatrixSymmEntries(matrix)   ((matrix) -> symm_entries)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
@@ -2051,7 +2130,7 @@ HYPRE_Int hypre_MinUnionBoxes ( hypre_BoxArray *boxes );
 HYPRE_Int hypre_BoxBoundaryIntersect ( hypre_Box *box , hypre_StructGrid *grid , HYPRE_Int d , HYPRE_Int dir , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
 HYPRE_Int hypre_BoxBoundaryDG ( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , HYPRE_Int d );
-HYPRE_Int hypre_GeneralBoxBoundaryIntersect( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_element, hypre_BoxArray *boundary );
+HYPRE_Int hypre_GeneralBoxBoundaryIntersect( hypre_Box *box, hypre_StructGrid *grid, hypre_Index stencil_offset, hypre_BoxArray *boundary );
 
 /* box.c */
 HYPRE_Int hypre_SetIndex ( hypre_Index index , HYPRE_Int val );
@@ -2206,17 +2285,18 @@ HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y
 
 /* struct_io.c */
 HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int *value_ids , HYPRE_Int dim , HYPRE_Complex *data );
-HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_elements , HYPRE_Int dim , HYPRE_Complex *data );
+HYPRE_Int hypre_PrintCCVDBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int center_rank , HYPRE_Int stencil_size , HYPRE_Int *symm_offsets , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_PrintCCBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
 HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int stencil_size , HYPRE_Int real_stencil_size , HYPRE_Int constant_coefficient , HYPRE_Int dim , HYPRE_Complex *data );
 
 /* struct_matmult.c */
-HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int *transposes , hypre_StructMatrix **C_ptr );
+HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_StructMatrix **C_ptr );
 
 /* struct_matrix.c */
-HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index index );
-HYPRE_Int hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix , hypre_Box *box );
+HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index dindex );
+HYPRE_Int hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix , hypre_Box *dbox );
+HYPRE_Int  hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix , hypre_Index dstride );
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );
 hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
@@ -2258,8 +2338,8 @@ HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha , hypre_StructVector *y );
 hypre_StructStencil *hypre_StructStencilCreate ( HYPRE_Int dim , HYPRE_Int size , hypre_Index *shape );
 hypre_StructStencil *hypre_StructStencilRef ( hypre_StructStencil *stencil );
 HYPRE_Int hypre_StructStencilDestroy ( hypre_StructStencil *stencil );
-HYPRE_Int hypre_StructStencilElementRank ( hypre_StructStencil *stencil , hypre_Index stencil_element );
-HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil , hypre_StructStencil **symm_stencil_ptr , HYPRE_Int **symm_elements_ptr );
+HYPRE_Int hypre_StructStencilOffsetEntry ( hypre_StructStencil *stencil , hypre_Index stencil_offset );
+HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil , hypre_StructStencil **symm_stencil_ptr , HYPRE_Int **symm_offsets_ptr );
 
 /* struct_vector.c */
 hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm , hypre_StructGrid *grid );

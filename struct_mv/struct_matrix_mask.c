@@ -103,11 +103,11 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixSymmetric(mask) = hypre_StructMatrixSymmetric(matrix);
 
-   hypre_StructMatrixSymmElements(mask) = hypre_TAlloc(HYPRE_Int, stencil_size);
+   hypre_StructMatrixSymmEntries(mask) = hypre_TAlloc(HYPRE_Int, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      hypre_StructMatrixSymmElements(mask)[i] =
-         hypre_StructMatrixSymmElements(matrix)[i];
+      hypre_StructMatrixSymmEntries(mask)[i] =
+         hypre_StructMatrixSymmEntries(matrix)[i];
    }
 
    for (i = 0; i < 2*ndim; i++)

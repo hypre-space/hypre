@@ -373,8 +373,8 @@ hypre_StructStencilShape( hypre_SStructStencilSStencil(stencil) )
 hypre_StructStencilSize( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilNDim(stencil) \
 hypre_StructStencilNDim( hypre_SStructStencilSStencil(stencil) )
-#define hypre_SStructStencilEntry(stencil, i) \
-hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
+#define hypre_SStructStencilOffset(stencil, i) \
+hypre_StructStencilOffset( hypre_SStructStencilSStencil(stencil), i )
 
 #endif
 /*BHEADER**********************************************************************

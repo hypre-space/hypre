@@ -484,7 +484,7 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 #ifndef hypre_ZBOX_HEADER
 #define hypre_ZBOX_HEADER
 
-#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
+#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i,hypre__k
 
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
@@ -772,6 +772,70 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
          i2 += hypre__ikinc2[hypre__d];\
          i3 += hypre__ikinc3[hypre__d];\
          i4 += hypre__ikinc4[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+/*-----------------------------------*/
+/* currently hardcoded for m <= 4 */
+
+#define hypre_BoxLoopMBegin(m, ndim, loop_size,    \
+                            dbox, start, stride, i)\
+{\
+   zypre_BoxLoopDeclare();\
+   HYPRE_Int  hypre__ikstart[4], hypre__i0inc[4];\
+   HYPRE_Int  hypre__sk[4][HYPRE_MAXDIM], hypre__ikinc[4][HYPRE_MAXDIM+1];\
+   HYPRE_Int  hypre__k = 0;\
+   HYPRE_Int  hypre__m = m;\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+   {\
+      hypre__sk[hypre__k][0] = stride[hypre__k][0];\
+      hypre__ikinc[hypre__k][0] = 0;\
+      i[hypre__k] = hypre_BoxSizeD(dbox[hypre__k], 0); /* temporarily use i */\
+      for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+      {\
+         hypre__sk[hypre__k][hypre__d] = i[hypre__k]*stride[hypre__k][hypre__d];\
+         hypre__ikinc[hypre__k][hypre__d] =\
+            hypre__ikinc[hypre__k][hypre__d-1] + hypre__sk[hypre__k][hypre__d] -\
+            hypre__n[hypre__d-1]*hypre__sk[hypre__k][hypre__d-1];\
+         i[hypre__k] *= hypre_BoxSizeD(dbox[hypre__k], hypre__d);\
+      }\
+      hypre__i0inc[hypre__k] = hypre__sk[hypre__k][0];\
+      hypre__ikinc[hypre__k][hypre__ndim] = 0;\
+      hypre__ikstart[hypre__k] =\
+         hypre_BoxIndexRank(dbox[hypre__k], start[hypre__k]);\
+   }
+
+#define hypre_BoxLoopMFor(i)\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+      zypre_BoxLoopSet();\
+      for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+      {\
+         i[hypre__k] = hypre__ikstart[hypre__k];\
+         for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+         {\
+            i[hypre__k] += hypre__i[hypre__d]*hypre__sk[hypre__k][hypre__d];\
+         }\
+      }\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define hypre_BoxLoopMEnd(i)\
+            for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+            {\
+               i[hypre__k] += hypre__i0inc[hypre__k];\
+            }\
+         }\
+         zypre_BoxLoopInc1();\
+         for (hypre__k = 0; hypre__k < hypre__m; hypre__k++)\
+         {\
+            i[hypre__k] += hypre__ikinc[hypre__k][hypre__d];\
+         }\
          zypre_BoxLoopInc2();\
       }\
    }\

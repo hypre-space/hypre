@@ -156,9 +156,13 @@ HYPRE_Int HYPRE_StructStencilDestroy(HYPRE_StructStencil stencil);
 
 /**
  * Set a stencil entry.
- *
- * NOTE: The name of this routine will eventually be changed to {\tt
- * HYPRE\_StructStencilSetEntry}.
+ **/
+HYPRE_Int HYPRE_StructStencilSetEntry(HYPRE_StructStencil  stencil,
+                                      HYPRE_Int            entry,
+                                      HYPRE_Int           *offset);
+
+/*
+ * OBSOLETE.  Use SetEntry instead.
  **/
 HYPRE_Int HYPRE_StructStencilSetElement(HYPRE_StructStencil  stencil,
                                         HYPRE_Int            entry,

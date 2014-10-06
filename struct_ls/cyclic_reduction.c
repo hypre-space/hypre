@@ -124,7 +124,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    HYPRE_Int              Ac_num_ghost[] = {0, 0, 0, 0, 0, 0};
                        
    HYPRE_Int              i;
-   HYPRE_Int              stencil_rank;
+   HYPRE_Int              stencil_entry;
  
    Ac_stencil_dim = 1;
 
@@ -132,7 +132,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
     * Define Ac_stencil
     *-----------------------------------------------*/
 
-   stencil_rank = 0;
+   stencil_entry = 0;
 
    /*-----------------------------------------------
     * non-symmetric case:
@@ -146,9 +146,9 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
       Ac_stencil_shape = hypre_CTAlloc(hypre_Index, Ac_stencil_size);
       for (i = -1; i < 2; i++)
       {
-         /* Storage for 3 elements (c,w,e) */
-         hypre_SetIndex3(Ac_stencil_shape[stencil_rank],i,0,0);
-         stencil_rank++;
+         /* Storage for 3 entries (c,w,e) */
+         hypre_SetIndex3(Ac_stencil_shape[stencil_entry],i,0,0);
+         stencil_entry++;
       }
    }
 
@@ -169,9 +169,9 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
       for (i = -1; i < 1; i++)
       {
 
-         /* Storage for 2 elements in (c,w) */
-         hypre_SetIndex3(Ac_stencil_shape[stencil_rank],i,0,0);
-         stencil_rank++;
+         /* Storage for 2 entries in (c,w) */
+         hypre_SetIndex3(Ac_stencil_shape[stencil_entry],i,0,0);
+         stencil_entry++;
       }
    }
 

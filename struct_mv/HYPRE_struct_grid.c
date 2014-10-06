@@ -137,6 +137,7 @@ HYPRE_StructGridProjectBox(HYPRE_StructGrid  grid,
    hypre_ProjectBox(box, origin, stride);
    hypre_CopyIndex(hypre_BoxIMin(box), ilower);
    hypre_CopyIndex(hypre_BoxIMax(box), iupper);
+   hypre_BoxDestroy(box);
    
    return hypre_error_flag;
 }

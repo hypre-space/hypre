@@ -207,7 +207,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
       hypre_BoxGetSize(box, loop_size);
 
       /* First entries will be the constant part of the matrix.
-         There is one entry for each constant stencil element,
+         There is one value for each constant stencil entry,
          excluding ones which are redundant due to symmetry.*/
       for (j=0; j <constant_stencil_size; j++)
       {

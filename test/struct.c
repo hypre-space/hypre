@@ -120,8 +120,8 @@ main( hypre_int argc,
    HYPRE_Int           constant_coefficient = 0;
    HYPRE_Int          *stencil_entries;
    HYPRE_Int           stencil_size;
-   HYPRE_Int           diag_rank;
-   hypre_Index         diag_index;
+   HYPRE_Int           diag_entry;
+   hypre_Index         diag_offset;
 
    HYPRE_StructGrid    grid;
    HYPRE_StructGrid    readgrid;
@@ -838,7 +838,7 @@ main( hypre_int argc,
       HYPRE_StructStencilCreate(dim, (2-sym)*dim + 1, &stencil);
       for (s = 0; s < (2-sym)*dim + 1; s++)
       {
-         HYPRE_StructStencilSetElement(stencil, s, offsets[s]);
+         HYPRE_StructStencilSetEntry(stencil, s, offsets[s]);
       }
 
       /*-----------------------------------------------------------
@@ -993,14 +993,14 @@ main( hypre_int argc,
             }
             if ( solver_id == 4 || solver_id == 14)
             {
-               hypre_SetIndex3(diag_index, 0, 0, 0);
-               diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
+               hypre_SetIndex3(diag_offset, 0, 0, 0);
+               diag_entry = hypre_StructStencilOffsetEntry( stencil, diag_offset );
                hypre_assert( stencil_size>=1 );
-               if ( diag_rank==0 ) stencil_entries[diag_rank]=1;
-               else stencil_entries[diag_rank]=0;
+               if ( diag_entry==0 ) stencil_entries[diag_entry]=1;
+               else stencil_entries[diag_entry]=0;
                for ( i=0; i<stencil_size; ++i )
                {
-                  if ( i!= diag_rank ) stencil_entries[i]=i;
+                  if ( i!= diag_entry ) stencil_entries[i]=i;
                }
                hypre_StructMatrixSetConstantEntries(
                   A, stencil_size, stencil_entries );

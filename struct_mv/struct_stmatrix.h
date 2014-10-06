@@ -22,14 +22,14 @@ typedef struct
 {
    HYPRE_Int     id;      /* Stencil matrix id for this term */
    HYPRE_Int     entry;   /* Stencil entry number */
-   hypre_Index   offset;  /* Offset from center index */
+   hypre_Index   shift;   /* Stencil shift from center */
 
-} hypre_StCoeffTerm;
+} hypre_StTerm;
 
 typedef struct coeff_link
 {
    HYPRE_Int          nterms;  /* Number of terms */
-   hypre_StCoeffTerm *terms;   /* Array of terms */
+   hypre_StTerm      *terms;   /* Array of terms */
 
    struct coeff_link *prev;
    struct coeff_link *next;
@@ -45,6 +45,7 @@ typedef struct
    hypre_Index     dmap;       /* Domain map */
 
    hypre_Index    *shapes;     /* Offsets describing the stencil's shape */
+   HYPRE_Int      *ncoeffs;    /* Number of coeffs for each stencil entry */
    hypre_StCoeff **coeffs;     /* Description of coefficients */
 
 } hypre_StMatrix;
@@ -53,10 +54,26 @@ typedef struct
  * Accessor macros:
  *--------------------------------------------------------------------------*/
 
-/* TODO: Use accessor macros */
-#define hypre_StCoeffTermElt(struct, elt) ((struct) -> elt)
-#define hypre_StCoeffElt(struct, elt)     ((struct) -> elt)
-#define hypre_StMatrixElt(struct, elt)    ((struct) -> elt)
+#define hypre_StTermID(term)           ((term) -> id)
+#define hypre_StTermEntry(term)        ((term) -> entry)
+#define hypre_StTermShift(term)        ((term) -> shift)
+                                      
+#define hypre_StCoeffNTerms(coeff)     ((coeff) -> nterms)
+#define hypre_StCoeffTerms(coeff)      ((coeff) -> terms)
+#define hypre_StCoeffTerm(coeff, t)   &((coeff) -> terms[t])
+#define hypre_StCoeffPrev(coeff)       ((coeff) -> prev)
+#define hypre_StCoeffNext(coeff)       ((coeff) -> next)
+                                      
+#define hypre_StMatrixID(stmat)        ((stmat) -> id)
+#define hypre_StMatrixSize(stmat)      ((stmat) -> size)
+#define hypre_StMatrixRMap(stmat)      ((stmat) -> rmap)
+#define hypre_StMatrixDMap(stmat)      ((stmat) -> dmap)
+#define hypre_StMatrixShapes(stmat)    ((stmat) -> shapes)
+#define hypre_StMatrixOffset(stmat, e) ((stmat) -> shapes[e])
+#define hypre_StMatrixNCoeffs(stmat)   ((stmat) -> ncoeffs)
+#define hypre_StMatrixNCoeff(stmat, e) ((stmat) -> ncoeffs[e])
+#define hypre_StMatrixCoeffs(stmat)    ((stmat) -> coeffs)
+#define hypre_StMatrixCoeff(stmat, e)  ((stmat) -> coeffs[e])
 
 /*--------------------------------------------------------------------------
  * Prototypes:
@@ -79,13 +96,13 @@ hypre_StIndexPrint( hypre_Index index,
                     char        rchar,
                     HYPRE_Int   ndim );
 HYPRE_Int
-hypre_StCoeffTermCopy( hypre_StCoeffTerm *term1,
-                       hypre_StCoeffTerm *term2,
-                       HYPRE_Int          ndim );
+hypre_StTermCopy( hypre_StTerm *term1,
+                  hypre_StTerm *term2,
+                  HYPRE_Int     ndim );
 HYPRE_Int
-hypre_StCoeffTermPrint( hypre_StCoeffTerm *term,
-                        char              *matnames,
-                        HYPRE_Int          ndim );
+hypre_StTermPrint( hypre_StTerm *term,
+                   char         *matnames,
+                   HYPRE_Int     ndim );
 HYPRE_Int
 hypre_StCoeffCreate( HYPRE_Int       nterms,
                      hypre_StCoeff **coeff_ptr );

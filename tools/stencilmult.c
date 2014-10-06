@@ -38,6 +38,7 @@ hypre_StMatrixRead( FILE            *file,
       hypre_StCoeffCreate(1, &coeff);
       (coeff->terms[0].id) = id;
       (coeff->terms[0].entry) = entry;
+      (matrix->ncoeffs[entry]) = 1;
       (matrix->coeffs[entry]) = coeff;
    }
 
@@ -55,7 +56,7 @@ main( int argc,
    char             infile_default[] = "stencilmult.in";
    char            *infile;
    FILE            *file;
-   hypre_StMatrix **matrices, *A, *B, *C;
+   hypre_StMatrix **matrices, *C;
    char            *matnames, transposechar;
    hypre_StMatrix **terms;
    int             *termtrs;
@@ -107,8 +108,6 @@ main( int argc,
          termnms[j] = matnames[id];
       }
 
-      hypre_StMatrixMatmult(nterms, terms, termtrs, nmatrices, ndim, &C);
-
       printf("\nMatrix product %d:", i);
       for (j = 0; j < nterms; j++)
       {
@@ -119,12 +118,24 @@ main( int argc,
          }
       }
       printf("\n\n");
-      hypre_StMatrixPrint(C, matnames, ndim);
+
+      HYPRE_ClearAllErrors();
+
+      hypre_StMatrixMatmult(nterms, terms, termtrs, nmatrices, ndim, &C);
+
+      if (HYPRE_GetError())
+      {
+         hypre_printf("Error: Invalid stencil matrix product!\n\n");
+      }
+      else
+      {
+         hypre_StMatrixPrint(C, matnames, ndim);
+         hypre_StMatrixDestroy(C);
+      }
 
       hypre_TFree(terms);
       hypre_TFree(termtrs);
       hypre_TFree(termnms);
-      hypre_StMatrixDestroy(C);
    }
 
    /* Clean up*/

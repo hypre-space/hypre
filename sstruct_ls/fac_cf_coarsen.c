@@ -298,7 +298,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
          for (i= 0; i< stencil_size; i++)
          {
-            hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape_i);
+            hypre_CopyIndex(hypre_StructStencilOffset(stencils, i), stencil_shape_i);
             MapStencilRank(stencil_shape_i, j);
             stencil_ranks[i]= j;
             rank_stencils[stencil_ranks[i]] = i;            
@@ -320,7 +320,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
              *-----------------------------------------------------------------*/
             for (i= 0; i< stencil_size; i++)
             {
-               hypre_CopyIndex(hypre_StructStencilElement(stencils, i), stencil_shape_i);
+               hypre_CopyIndex(hypre_StructStencilOffset(stencils, i), stencil_shape_i);
                a_ptrs[i]= hypre_StructMatrixExtractPointerByIndex(smatrix_var,
                                                                   ci,
                                                                   stencil_shape_i);
