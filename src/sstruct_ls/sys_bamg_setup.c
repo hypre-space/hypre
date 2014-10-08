@@ -95,7 +95,6 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
   hypre_SStructPGrid     *grid;
   hypre_StructGrid       *sgrid;
   HYPRE_Int               dim;
-  HYPRE_Int               full_periodic;
 
   hypre_Box              *cbox;
 
@@ -211,11 +210,11 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     alpha = 0.0;
     for (d = 0; d < dim; d++)
     {
-      if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d) + 3) && (dxyz[d] < min_dxyz))
+      if ( (hypre_BoxIMaxD(cbox, d) - hypre_BoxIMinD(cbox, d) > 3) && (dxyz[d] < min_dxyz) )
       {
         min_dxyz = dxyz[d];
         cdir = d;
-        sysbamg_dbgmsg( "cdir <- %d  Min = %d Max = %d\n", d, hypre_BoxIMinD(cbox,d), hypre_BoxIMaxD(cbox,d) );
+        sysbamg_dbgmsg( "l %d  cdir %d  Min %d Max %d\n", l, d, hypre_BoxIMinD(cbox,d), hypre_BoxIMaxD(cbox,d) );
       }
       alpha += 1.0/(dxyz[d]*dxyz[d]);
     }
@@ -312,10 +311,12 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     /* update dxyz and coarsen cbox*/
     dxyz[cdir] *= 2;
     hypre_ProjectBox(cbox, cindex, stride);
-    hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride,
-        hypre_BoxIMin(cbox));
-    hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride,
-        hypre_BoxIMax(cbox));
+    hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride, hypre_BoxIMin(cbox));
+    hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
+
+    sysbamg_dbgmsg( "cbox Min and Max:\n" );
+    printIndex( hypre_BoxIMin(cbox), dim );
+    printIndex( hypre_BoxIMax(cbox), dim );
 
     /* build the interpolation grid */
     hypre_SysBAMGCoarsen(grid_l[l], findex, stride, 0, &P_grid_l[l+1]);
@@ -324,26 +325,6 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     hypre_SysBAMGCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
   }
   num_levels = l + 1;
-
-  /*-----------------------------------------------------
-   * For fully periodic problems, the coarsest grid
-   * problem (a single node) can have zero diagonal
-   * blocks. This causes problems with the gselim
-   * routine (which doesn't do pivoting). We avoid
-   * this by skipping relaxation.
-   *-----------------------------------------------------*/
-
-  full_periodic = 1;
-  for (d = 0; d < dim; d++)
-  {
-    full_periodic *= hypre_IndexD(hypre_SStructPGridPeriodic(grid),d);
-  }
-  if( full_periodic != 0)
-  {
-    hypre_SStructPGridDestroy(grid_l[num_levels-1]);
-    hypre_SStructPGridDestroy(P_grid_l[num_levels-1]);
-    num_levels -= 1;
-  }
 
   /* free up some things */
   hypre_BoxDestroy(cbox);
@@ -508,6 +489,8 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
     hypre_SysBAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
         cdir, cindex, stride, A_l[l+1]);
 
+    hypre_printf( "constructed A_l[%d of %d]\n", l+1, num_levels-1 );
+
     /* set up the interpolation routine */
     hypre_SysSemiInterpCreate(&interp_data_l[l]);
     hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l],
@@ -527,7 +510,7 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
   }
 
   // now have operator on the coarsest grid; compute ev's/sv's
-  hypre_SysBAMGComputeSVecs( A_l[l+1], num_stv, &(tv[l+1][num_rtv]) );
+  hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[l+1][num_rtv]) );
 
   /* set up fine grid relaxation */
   relax_data_l[0] = hypre_SysBAMGRelaxCreate(comm);

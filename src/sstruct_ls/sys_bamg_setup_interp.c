@@ -170,7 +170,7 @@ void hypre_CheckReturnValue( const char* func, HYPRE_Int rv )
 #define hypre_xtrtrs hypre_ztrtrs
 #endif
 
-HYPRE_Int hypre_LeastSquares(
+HYPRE_Int hypre_LS(
     HYPRE_Complex* M,
     HYPRE_Int      Mrows,
     HYPRE_Int      Mcols,
@@ -178,14 +178,12 @@ HYPRE_Int hypre_LeastSquares(
     HYPRE_Int      Crows,
     HYPRE_Int      Ccols )
 {
-
 #if DEBUG_SYSBAMG > 1
   // print M and b to check
-  hypre_printf("M | b for I=%d, iv=%d, k=%d\n", I, iv, k);
-  for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) {
-      hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
-    }
+  hypre_printf("hypre_LS: M | C = \n");
+  for ( Mi = 0; Mi < Mrows; Mi++ )
+  {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
     hypre_printf("  | %16.6e\n", C[Mi]);
   }
   hypre_printf("\n");
@@ -202,11 +200,10 @@ HYPRE_Int hypre_LeastSquares(
 
 #if DEBUG_SYSBAMG > 1
   // print Q\R to check
-  hypre_printf("Q\\R for I=%d, iv=%d, k=%d\n", I, iv, k);
-  for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) {
-      hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
-    }
+  hypre_printf("hypre_LS: Q\\R = \n");
+  for ( Mi = 0; Mi < Mrows; Mi++ )
+  {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
     hypre_printf("\n");
   }
   hypre_printf("\n");
@@ -219,9 +216,7 @@ HYPRE_Int hypre_LeastSquares(
 #if DEBUG_SYSBAMG > 1
   // print c to check
   hypre_printf("c for I=%d, iv=%d, k=%d\n", I, iv, k);
-  for ( Mj = 0; Mj < Mcols; Mj++ ) {
-    hypre_printf("  %16.6e\n", C[Mj]);
-  }
+  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e\n", C[Mj]);
   hypre_printf("\n");
 #endif
 
@@ -234,11 +229,12 @@ HYPRE_Int hypre_LeastSquares(
 #if DEBUG_SYSBAMG > 1
   // print x to check
   hypre_printf("x for I=%d, iv=%d, k=%d\n", I, iv, k);
-  for ( Mj = 0; Mj < Mcols; Mj++ ) {
-    hypre_printf("  %16.6e\n", C[Mj]);
-  }
+  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e\n", C[Mj]);
   hypre_printf("\n");
 #endif
+
+  hypre_TFree( tau );
+  hypre_TFree( work );
 
   return hypre_error_flag;
 }
@@ -272,9 +268,9 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 
   HYPRE_Int            *v_offsets;
 
-  HYPRE_Complex        *M, *C, *work, *tau;
+  HYPRE_Complex        *M, *C;
 
-  HYPRE_Int             ndims, Mrows, Mcols, Mi, Mj, Crows, Ccols, lwork, info;
+  HYPRE_Int             ndims, Mrows, Mcols, Mi, Mj, Crows, Ccols;
 
   HYPRE_Int             b, I, J, i, j, k, sj, iP, iv;
 
@@ -288,8 +284,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
   // P_Stencil dictates which P[i][j] != 0
 
   P_Stencil       = hypre_StructMatrixStencil(sP[0][0]);
-  P_StencilShape = hypre_StructStencilShape(P_Stencil);
-  P_StencilSize  = hypre_StructStencilSize(P_Stencil);
+  P_StencilShape  = hypre_StructStencilShape(P_Stencil);
+  P_StencilSize   = hypre_StructStencilSize(P_Stencil);
 
   ndims = hypre_StructStencilNDim(P_Stencil);
 
@@ -299,11 +295,11 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 
   Mrows = nvecs;
   Mcols = nvars * P_StencilSize;
-  M     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows*Mcols);
+  M     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
 
   Crows = Mrows;
   Ccols = 1;
-  C     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Crows*Ccols);
+  C     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Crows*Ccols);
 
   GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
@@ -330,8 +326,10 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iv,J) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop2For(iP, iv) {
-        for ( k = 0; k < nvecs; k++ ) {
+      hypre_BoxLoop2For(iP, iv)
+      {
+        for ( k = 0; k < nvecs; k++ )
+        {
           Mi = k;
 
           C[Mi] = hypre_StructVectorData( sv[k][I] )[iv];
@@ -344,7 +342,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
           }
         }
 
-        hypre_LeastSquares( M, Mrows, Mcols, C, Crows, Ccols );
+        hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
 
         for ( J = 0; J < nvars; J++ ) {
           for ( sj = 0; sj < P_StencilSize; sj++ ) {
@@ -354,7 +352,6 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
         }
       }
       hypre_BoxLoop2End(iP, iv);
-
     }
   }
 
@@ -364,8 +361,6 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
     }
   }
 
-  hypre_TFree( tau );
-  hypre_TFree( work );
   hypre_TFree( v_offsets );
   hypre_TFree( C );
   hypre_TFree( M );
@@ -443,6 +438,233 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp(
 
 
 
+/*------------------------------------------------------------------------------
+ * Compute the singular value decomposition of the coarse operator (single
+ * process only at present) ala http://www.netlib.org/lapack/lug/node53.html.
+ *
+ * A is reduced to bidiagonal form: A = U_1 B V_1^T w/ U_1 and V_1 unitary 
+ * and B real and upper-bidiagonal for m >=n (lower bidiagonal for m < n).
+ * NB: U_1 B V_1^T == Q B P^T.
+ *
+ * B is SV-decomposed: B = U_2 S V_2^T w/ U_2 and V_2 unitary and S diagonal.
+ *
+ * The L and R singular vectors of A are then the first min(Mrows,Mcols) 
+ * columns of U = U_1 U_2 and V = V_1 V_2.
+ *
+ * NB: xGBBRD (for banded matrices) may outperform xGEBRD for bidiagonalization.
+ * NB: xBDSDC (for larger matrices) may outperform xBDSQR for the SVD.
+ *
+ * NB: given optimal blocksize, NB (8?), lwork >= { (M+N)*NB for xgebrd,
+ *     4*N for xbdsqr, and max(M,N)*NB for xxxmbr }.
+ *----------------------------------------------------------------------------*/
+
+#if HYPRE_Complex == HYPRE_Real
+#define hypre_xgebrd hypre_dgebrd
+#define hypre_xbdsqr hypre_dbdsqr
+#define hypre_xxxmbr hypre_dormbr
+#else
+#define hypre_xgebrd hypre_zgebrd
+#define hypre_xbdsqr hypre_zbdsqr
+#define hypre_xxxmbr hypre_zunmbr
+#endif
+
+HYPRE_Int hypre_SVD(
+    HYPRE_Complex* M,
+    HYPRE_Int      Mrows,
+    HYPRE_Int      Mcols )
+{
+  HYPRE_Int Mi, Mj;
+
+#if DEBUG_SYSBAMG > 0
+  // print M to check
+  hypre_printf("hypre_SVD: M =\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) {
+      hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
+    }
+    hypre_printf("\n");
+  }
+#endif
+
+  HYPRE_Complex*  d     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
+  HYPRE_Complex*  e     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
+  HYPRE_Complex*  tauq  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
+  HYPRE_Complex*  taup  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
+  HYPRE_Int       lwork = (Mrows + Mcols) * 8;  // optimal blocksize = 8?
+  HYPRE_Complex*  work  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, lwork);
+  HYPRE_Int       info;
+
+  // NB: R and Q (via reflectors) are written to M
+  hypre_xgebrd( &Mrows, &Mcols, M, &Mrows, d, e, tauq, taup, work, &lwork, &info );
+  hypre_CheckReturnValue( "hypre_xgebrd", info );
+
+#if DEBUG_SYSBAMG > 1
+  // print Q\R to check
+  hypre_printf("hypre_SVD: d, e =\n");
+  hypre_printf("  %16s","");
+  for ( Mi = 0; Mi < Mrows-1; Mi++ ) hypre_printf("  %16.6e", e[Mi]);
+  hypre_printf("\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ )   hypre_printf("  %16.6e", d[Mi]);
+  hypre_printf("\n");
+#endif
+
+  char            uplo = 'U';
+  HYPRE_Int       zero = 0;
+  HYPRE_Int       one  = 1;
+  HYPRE_Complex*  U    = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
+  HYPRE_Complex*  VT   = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
+
+  // NB: xbdsqr : U -> U * Q and VT -> P^T V^T
+  for ( Mi = 0; Mi < Mrows; Mi++ ) U[Mi + Mi*Mcols]  = 1.0;
+  for ( Mi = 0; Mi < Mrows; Mi++ ) VT[Mi + Mi*Mcols] = 1.0;
+
+  hypre_xbdsqr( &uplo, &Mrows, &Mrows, &Mrows, &zero, d, e, VT, &Mrows, U, &Mrows, NULL, &one, work, &info );
+  hypre_CheckReturnValue( "hypre_xbdsqr", info );
+
+#if DEBUG_SYSBAMG > 1
+  hypre_printf("hypre_SVD Q\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
+    hypre_printf("\n");
+  }
+  
+  hypre_printf("hypre_SVD S\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    hypre_printf("  %16.6e", d[Mi]);
+  }
+  hypre_printf("\n");
+
+  hypre_printf("hypre_SVD P^T\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
+    hypre_printf("\n");
+  }
+
+  hypre_printf("hypre_SVD [Q S P^T]\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) {
+      HYPRE_Int     k;
+      HYPRE_Complex x = 0.0;
+      for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * d[k] * VT[k+Mj*Mrows];
+      hypre_printf("  %16.6e", ( fabs(x) < 1e-12 ? 0.0 : x ));
+    }
+    hypre_printf("\n");
+  }
+#endif
+
+  // compute the singular vector matrices U = U_1 U_2 == Q U and V^T = V_2^T V_1^T == VT P^T
+
+  char vect   = 'Q';
+  char side   = 'L';
+  char trans  = 'N';
+
+  hypre_xxxmbr(&vect, &side, &trans, &Mrows, &Mcols, &Mcols, M, &Mcols, tauq, U, &Mcols, work, &lwork, &info);
+  hypre_CheckReturnValue( "hypre_xxxmbr", info );
+  
+  vect   = 'P';
+  side   = 'R';
+  trans  = 'T';
+
+  hypre_xxxmbr(&vect, &side, &trans, &Mcols, &Mrows, &Mcols, M, &Mcols, taup, VT, &Mrows, work, &lwork, &info);
+  hypre_CheckReturnValue( "hypre_xxxmbr", info );
+
+#if DEBUG_SYSBAMG > 1
+  hypre_printf("hypre_SVD [U S V^T]\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) {
+      HYPRE_Int     k;
+      HYPRE_Complex x = 0.0;
+      for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * d[k] * VT[k+Mj*Mrows];
+      hypre_printf("  %16.6e", ( fabs(x) < 1e-12 ? 0.0 : x ));
+    }
+    hypre_printf("\n");
+  }
+#endif
+
+  // write lowest Mrows/2 L and R singular vectors into M, M := [ l_1, r_1, l_2, r_2, ... ]
+  //    values/vectors are returned in *descending* order, so 
+  //        M[i,j] := { U[i,Mcols-1-j/2], V[i,Mcols-1-j/2] == VT[Mcols-1-j/2,i] } for j {even, odd}
+
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) {
+      if ( Mj % 2 == 0 )
+        M[Mi+Mj*Mrows] = U[Mi+(Mcols-1-Mj/2)*Mrows];
+      else
+        M[Mi+Mj*Mrows] = VT[(Mcols-1-Mj/2)+Mi*Mcols];
+    }
+  }
+
+  return hypre_error_flag;
+}
+
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int IndexToInt( const hypre_Index Index, /*const*/ hypre_Box* Box )   // non const? XXX
+{
+  HYPRE_Int       Int, NDim, dim, stride;
+  hypre_IndexRef  BoxMin, BoxMax;
+
+  NDim    = hypre_BoxNDim( Box );
+  BoxMin  = hypre_BoxIMin( Box );
+  BoxMax  = hypre_BoxIMax( Box );
+
+  Int = 0;
+  stride = 1;
+
+  for ( dim = 0; dim < NDim; dim++ ) {
+    Int    += ( hypre_IndexD(Index,dim)  - hypre_IndexD(BoxMin,dim) ) * stride;
+    stride *=   hypre_IndexD(BoxMax,dim) - hypre_IndexD(BoxMin,dim) + 1;
+  }
+
+  return Int;
+}
+
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int printIndex( const hypre_Index Index, const HYPRE_Int NDim )
+{
+  HYPRE_Int       dim;
+
+  hypre_printf( "Index:" );
+
+  for ( dim = 0; dim < NDim; dim++ ) {
+    hypre_printf( "  %d", hypre_IndexD(Index,dim) );
+  }
+
+  hypre_printf( "\n" );
+
+  return hypre_error_flag;
+}
+
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int AddIndex( hypre_Index Sum, const hypre_Index A, const hypre_Index B, /*const*/ hypre_Box* Box )
+{
+  HYPRE_Int       NDim, dim;
+  hypre_Index     Size;
+
+  NDim    = hypre_BoxNDim( Box );
+  hypre_BoxGetSize( Box, Size );
+
+  for ( dim = 0; dim < NDim; dim++ ) {
+    hypre_IndexD(Sum,dim) = hypre_IndexD(A,dim) + hypre_IndexD(B,dim);
+    hypre_IndexD(Sum,dim) = (hypre_IndexD(Sum,dim) + hypre_IndexD(Size,dim)) % hypre_IndexD(Size,dim);
+  }
+
+  return hypre_error_flag;
+}
+
+
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -451,6 +673,116 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
     HYPRE_Int               nsvecs,
     hypre_SStructPVector**  svecs )
 {
+  HYPRE_Int             NDim;
+  HYPRE_Int             NVars;
+  hypre_StructMatrix*   StructMatrix;
+  hypre_StructGrid*     Grid;
+  hypre_BoxArray*       BoxArray;
+  hypre_Box*            GridBox;
+  hypre_Index           GridBoxSize;
+  HYPRE_Int             GridBoxVolume;
+  hypre_Box*            DataBox;
+  hypre_Index           DataBoxSize;
+
+  HYPRE_Int             BoxIdx = 0;   // XXX hard-wired XXX
+  HYPRE_Int             I, J, i, j, k, si, dim;
+  hypre_IndexRef        start;
+  hypre_Index           stride;
+  hypre_Index           iIndex, jIndex;
+
+  HYPRE_Complex*        M;
+  HYPRE_Int             Mrows, Mcols, Mi, Mj;
+
+  hypre_StructStencil*  Stencil;
+  hypre_Index*          StencilShape;
+  HYPRE_Int             StencilSize;
+
+  // get sizes and allocate M
+
+  StructMatrix  = hypre_SStructPMatrixSMatrix( A, 0, 0 );  // XXX hard-wired XXX
+  Grid          = hypre_StructMatrixGrid( StructMatrix );
+  BoxArray      = hypre_StructGridBoxes( Grid );
+  GridBox       = hypre_BoxArrayBox( BoxArray, BoxIdx );
+  GridBoxVolume = hypre_BoxVolume( GridBox );
+
+  hypre_BoxGetSize( GridBox, GridBoxSize );
+
+  //sysbamg_dbgmsg( "GridBoxVolume = %d\n", GridBoxVolume );
+
+  NVars = hypre_SStructPMatrixNVars( A );
+
+  Mrows         = GridBoxVolume * NVars;
+  Mcols         = Mrows;
+  M             = (HYPRE_Complex*) hypre_CTAlloc( HYPRE_Complex, Mrows*Mcols );
+
+  // copy A into M
+
+  NDim          = hypre_SStructPMatrixNDim( A );
+
+  sysbamg_dbgmsg( "Coarse Grid Min and Max:\n" )
+  printIndex( hypre_BoxIMin( GridBox ), NDim ); // dbg
+  printIndex( hypre_BoxIMax( GridBox ), NDim ); // dbg
+
+  start         = hypre_BoxIMin( GridBox );
+  hypre_SetIndex( stride, 1 );
+
+  for ( I = 0; I < NVars; I++ )
+  {
+    for ( J = 0; J < NVars; J++ )
+    {
+      StructMatrix  = hypre_SStructPMatrixSMatrix( A, I, J );
+      BoxArray      = hypre_StructMatrixDataSpace( StructMatrix );
+      DataBox       = hypre_BoxArrayBox( BoxArray, BoxIdx );
+
+      hypre_BoxGetSize( DataBox, DataBoxSize );
+
+      Stencil       = hypre_StructMatrixStencil( StructMatrix );
+      StencilSize   = hypre_StructStencilSize( Stencil );
+      StencilShape  = hypre_StructStencilShape( Stencil );
+
+      hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,j,Mi,Mj) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop1For( i )
+      {
+        hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
+
+        //sysbamg_dbgmsg( "iIndex:\n" );
+        //printIndex( iIndex, NDim ); // dbg
+
+        Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
+
+        for ( si = 0; si < StencilSize; si++ )
+        {
+          AddIndex( jIndex, iIndex, StencilShape[si], GridBox );
+
+          //sysbamg_dbgmsg( "StencilShape[%d] and jIndex:\n", si )
+          //printIndex( StencilShape[si], NDim ); // dbg
+          //printIndex( jIndex, NDim ); // dbg
+
+          Mj = J * GridBoxVolume + IndexToInt( jIndex, GridBox );
+
+          M[ Mi + Mj * Mrows ] = hypre_StructMatrixBoxData( StructMatrix, BoxIdx, si )[ i ];  // NB: column-major
+          //sysbamg_dbgmsg( "Mi %3d Mj %3d M %12.3e I %d  J %d  i %d  si %d\n", Mi, Mj, M[Mi+Mj*Mrows], I, J, i, si );
+        }
+      }
+      hypre_BoxLoop1End( i );
+    }
+  }
+
+  // compute singular vectors
+
+  hypre_SVD( M, Mrows, Mcols );
+
+  // copy lowest singular vectors into svecs
+  //    M := [ l_1, r_1, l_2, r_2, ... ]
+
+  // clean up
+
+  hypre_TFree( M );
+
   return hypre_error_flag;
 }
 
