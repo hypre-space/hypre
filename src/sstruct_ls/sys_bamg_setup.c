@@ -394,11 +394,11 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
   }
 
   hypre_SStructPVectorAssemble(tx_l[0]);
-  for (l = 0; l < (num_levels - 1); l++)
+  for (l = 1; l < num_levels; l++)
   {
-    hypre_SStructPVectorAssemble(b_l[l+1]);
-    hypre_SStructPVectorAssemble(x_l[l+1]);
-    hypre_SStructPVectorAssemble(tx_l[l+1]);
+    hypre_SStructPVectorAssemble(b_l[l]);
+    hypre_SStructPVectorAssemble(x_l[l]);
+    hypre_SStructPVectorAssemble(tx_l[l]);
   }
 
   (sys_bamg_data -> A_l)  = A_l;
@@ -510,7 +510,7 @@ hypre_SysBAMGSetup( void                 *sys_bamg_vdata,
   }
 
   // now have operator on the coarsest grid; compute ev's/sv's
-  hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[l+1][num_rtv]) );
+  hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv]) );
 
   /* set up fine grid relaxation */
   relax_data_l[0] = hypre_SysBAMGRelaxCreate(comm);

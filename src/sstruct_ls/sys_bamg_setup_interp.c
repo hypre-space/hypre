@@ -332,12 +332,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
         {
           Mi = k;
 
-          C[Mi] = hypre_StructVectorData( sv[k][I] )[iv];
+          C[Mi] = hypre_StructVectorBoxData( sv[k][I], b )[iv];
 
           for ( J = 0; J < nvars; J++ ) {
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
               Mj = J*P_StencilSize + sj;
-              M[Mi + Mj*Mrows] = hypre_StructVectorData( sv[k][J] )[iv + v_offsets[sj]];
+              M[Mi + Mj*Mrows] = hypre_StructVectorBoxData( sv[k][J], b )[iv + v_offsets[sj]];
             }
           }
         }
@@ -469,15 +469,16 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp(
 #endif
 
 HYPRE_Int hypre_SVD(
+    HYPRE_Complex* S,
     HYPRE_Complex* M,
     HYPRE_Int      Mrows,
     HYPRE_Int      Mcols )
 {
   HYPRE_Int Mi, Mj;
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
   // print M to check
-  hypre_printf("hypre_SVD: M =\n");
+  hypre_printf("hypre_SVD M:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
@@ -486,7 +487,6 @@ HYPRE_Int hypre_SVD(
   }
 #endif
 
-  HYPRE_Complex*  d     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
   HYPRE_Complex*  e     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
   HYPRE_Complex*  tauq  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
   HYPRE_Complex*  taup  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
@@ -495,16 +495,17 @@ HYPRE_Int hypre_SVD(
   HYPRE_Int       info;
 
   // NB: R and Q (via reflectors) are written to M
-  hypre_xgebrd( &Mrows, &Mcols, M, &Mrows, d, e, tauq, taup, work, &lwork, &info );
+  hypre_xgebrd( &Mrows, &Mcols, M, &Mrows, S, e, tauq, taup, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xgebrd", info );
 
 #if DEBUG_SYSBAMG > 1
   // print Q\R to check
-  hypre_printf("hypre_SVD: d, e =\n");
+  hypre_printf("hypre_SVD BD e:\n");
   hypre_printf("  %16s","");
   for ( Mi = 0; Mi < Mrows-1; Mi++ ) hypre_printf("  %16.6e", e[Mi]);
   hypre_printf("\n");
-  for ( Mi = 0; Mi < Mrows; Mi++ )   hypre_printf("  %16.6e", d[Mi]);
+  hypre_printf("hypre_SVD BD d:\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ )   hypre_printf("  %16.6e", S[Mi]);
   hypre_printf("\n");
 #endif
 
@@ -518,34 +519,36 @@ HYPRE_Int hypre_SVD(
   for ( Mi = 0; Mi < Mrows; Mi++ ) U[Mi + Mi*Mcols]  = 1.0;
   for ( Mi = 0; Mi < Mrows; Mi++ ) VT[Mi + Mi*Mcols] = 1.0;
 
-  hypre_xbdsqr( &uplo, &Mrows, &Mrows, &Mrows, &zero, d, e, VT, &Mrows, U, &Mrows, NULL, &one, work, &info );
+  hypre_xbdsqr( &uplo, &Mrows, &Mrows, &Mrows, &zero, S, e, VT, &Mrows, U, &Mrows, NULL, &one, work, &info );
   hypre_CheckReturnValue( "hypre_xbdsqr", info );
 
+#if DEBUG_SYSBAMG > 0
+  hypre_printf("hypre_SVD S:\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) {
+    hypre_printf("  %16.6e", S[Mi]);
+  }
+  hypre_printf("\n");
+#endif
+
 #if DEBUG_SYSBAMG > 1
-  hypre_printf("hypre_SVD Q\n");
+  hypre_printf("hypre_SVD Q:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
     hypre_printf("\n");
   }
   
-  hypre_printf("hypre_SVD S\n");
-  for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    hypre_printf("  %16.6e", d[Mi]);
-  }
-  hypre_printf("\n");
-
-  hypre_printf("hypre_SVD P^T\n");
+  hypre_printf("hypre_SVD P^T:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
     hypre_printf("\n");
   }
 
-  hypre_printf("hypre_SVD [Q S P^T]\n");
+  hypre_printf("hypre_SVD [Q S P^T]:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       HYPRE_Int     k;
       HYPRE_Complex x = 0.0;
-      for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * d[k] * VT[k+Mj*Mrows];
+      for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * S[k] * VT[k+Mj*Mrows];
       hypre_printf("  %16.6e", ( fabs(x) < 1e-12 ? 0.0 : x ));
     }
     hypre_printf("\n");
@@ -569,12 +572,12 @@ HYPRE_Int hypre_SVD(
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
 
 #if DEBUG_SYSBAMG > 1
-  hypre_printf("hypre_SVD [U S V^T]\n");
+  hypre_printf("hypre_SVD [U S V^T]:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       HYPRE_Int     k;
       HYPRE_Complex x = 0.0;
-      for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * d[k] * VT[k+Mj*Mrows];
+      for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * S[k] * VT[k+Mj*Mrows];
       hypre_printf("  %16.6e", ( fabs(x) < 1e-12 ? 0.0 : x ));
     }
     hypre_printf("\n");
@@ -584,6 +587,7 @@ HYPRE_Int hypre_SVD(
   // write lowest Mrows/2 L and R singular vectors into M, M := [ l_1, r_1, l_2, r_2, ... ]
   //    values/vectors are returned in *descending* order, so 
   //        M[i,j] := { U[i,Mcols-1-j/2], V[i,Mcols-1-j/2] == VT[Mcols-1-j/2,i] } for j {even, odd}
+  // also reverse S to correspond to vector ordering
 
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
@@ -591,6 +595,11 @@ HYPRE_Int hypre_SVD(
         M[Mi+Mj*Mrows] = U[Mi+(Mcols-1-Mj/2)*Mrows];
       else
         M[Mi+Mj*Mrows] = VT[(Mcols-1-Mj/2)+Mi*Mcols];
+    }
+    if ( Mi < Mrows/2 ) {
+      HYPRE_Complex tmp = S[Mi];
+      S[Mi] = S[Mrows-1-Mi];
+      S[Mrows-1-Mi] = tmp;
     }
   }
 
@@ -676,6 +685,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
   HYPRE_Int             NDim;
   HYPRE_Int             NVars;
   hypre_StructMatrix*   StructMatrix;
+  hypre_StructVector*   StructVector;
   hypre_StructGrid*     Grid;
   hypre_BoxArray*       BoxArray;
   hypre_Box*            GridBox;
@@ -684,13 +694,14 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
   hypre_Box*            DataBox;
   hypre_Index           DataBoxSize;
 
-  HYPRE_Int             BoxIdx = 0;   // XXX hard-wired XXX
+  HYPRE_Int             BoxIdx = 0;   // XXX hard-wired *should loop over boxes* XXX
   HYPRE_Int             I, J, i, j, k, si, dim;
   hypre_IndexRef        start;
   hypre_Index           stride;
   hypre_Index           iIndex, jIndex;
 
   HYPRE_Complex*        M;
+  HYPRE_Complex*        S;
   HYPRE_Int             Mrows, Mcols, Mi, Mj;
 
   hypre_StructStencil*  Stencil;
@@ -714,6 +725,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
   Mrows         = GridBoxVolume * NVars;
   Mcols         = Mrows;
   M             = (HYPRE_Complex*) hypre_CTAlloc( HYPRE_Complex, Mrows*Mcols );
+  S             = (HYPRE_Complex*) hypre_CTAlloc( HYPRE_Complex, Mrows );
 
   // copy A into M
 
@@ -774,10 +786,62 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
 
   // compute singular vectors
 
-  hypre_SVD( M, Mrows, Mcols );
+  hypre_SVD( S, M, Mrows, Mcols );
 
   // copy lowest singular vectors into svecs
-  //    M := [ l_1, r_1, l_2, r_2, ... ]
+  //    M := [ v_l,1, v_r,1, v_l,2, v_r,2, ... ]
+
+  for ( k = 0; k < nsvecs; k++ )
+  {
+    for ( I = 0; I < NVars; I++ )
+    {
+      StructVector  = hypre_SStructPVectorSVector( svecs[k], I );
+      BoxArray      = hypre_StructVectorDataSpace( StructVector );
+      DataBox       = hypre_BoxArrayBox( BoxArray, BoxIdx );
+
+      hypre_BoxGetSize( DataBox, DataBoxSize );
+
+      hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop1For( i )
+      {
+        hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
+
+        //sysbamg_dbgmsg( "iIndex:\n" );
+        //printIndex( iIndex, NDim ); // dbg
+
+        Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
+
+        hypre_StructVectorBoxData( StructVector, BoxIdx )[ i ] = M[ Mi + k * Mrows ]; // NB: column-major
+      }
+      hypre_BoxLoop1End( i );
+    }
+  }
+
+#if DEBUG_SYSBAMG > 0
+  // check that U^T[i,j] A[j,k] V[k,l] == U_i[j] A[j,k] V_l[k] = delta[i,l] S[i]
+  HYPRE_Complex         x;
+  hypre_SStructPVector* AV;
+  hypre_SStructPGrid*   PGrid = hypre_SStructPVectorPGrid( svecs[0] );
+  MPI_Comm              Comm  = hypre_SStructPGridComm( PGrid );
+
+  hypre_SStructPVectorCreate( Comm, PGrid, &AV );
+  hypre_SStructPVectorInitialize( AV );
+  hypre_SStructPVectorAssemble( AV );
+
+  for ( I = 0; I < 3; I++ ) {
+    for ( J = 0; J < 3; J++ ) {
+      hypre_SStructPMatvec( 1.0, A, svecs[2*J+1], 0.0, AV );
+      hypre_SStructPComplexInnerProd( svecs[2*I+0], AV, &x );
+      printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", I, J, I, x / S[I]);
+    }
+  }
+
+  hypre_SStructPVectorDestroy( AV );
+#endif
 
   // clean up
 

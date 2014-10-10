@@ -119,8 +119,8 @@ hypre_SStructPComplexInnerProd( hypre_SStructPVector *px,
                                              hypre_SStructPVectorSVector(py, var));
       presult += sresult;
 
-      printf("DEBUG - %s: sresult: %g + i %g\n", __func__, creal(sresult), cimag(sresult)); // XXX
-      printf("DEBUG - %s: presult: %g + i %g\n", __func__, creal(presult), cimag(presult)); // XXX
+      //printf("DEBUG - %s: sresult: %g + i %g\n", __func__, creal(sresult), cimag(sresult)); // XXX
+      //printf("DEBUG - %s: presult: %g + i %g\n", __func__, creal(presult), cimag(presult)); // XXX
    }
 
    *presult_ptr = presult;
@@ -162,7 +162,7 @@ hypre_SStructComplexInnerProd( hypre_SStructVector *x,
                                         hypre_SStructVectorPVector(y, part), &presult);
          result += presult;
 
-         printf("DEBUG - %s: result: %g + i %g\n", __func__, creal(result), cimag(result)); // XXX
+         //printf("DEBUG - %s: result: %g + i %g\n", __func__, creal(result), cimag(result)); // XXX
       }
    }
 
@@ -176,7 +176,7 @@ hypre_SStructComplexInnerProd( hypre_SStructVector *x,
 
       result= hypre_ParVectorComplexInnerProd(x_par, y_par);
       
-      printf("DEBUG - %s: result: %g + i %g\n", __func__, creal(result), cimag(result)); // XXX
+      //printf("DEBUG - %s: result: %g + i %g\n", __func__, creal(result), cimag(result)); // XXX
    }
                                                                                                                 
    *result_ptr = result;
