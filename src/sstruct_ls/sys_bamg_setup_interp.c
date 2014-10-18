@@ -19,7 +19,7 @@
 
 hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp(
     hypre_SStructPMatrix *A,
-    hypre_SStructPGrid   *cgrid,
+    hypre_SStructPGrid   *coarsePGrid,
     HYPRE_Int             cdir  )
 {
   hypre_SStructPMatrix  *P;
@@ -60,7 +60,7 @@ hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp(
   }
 
   /* create interpolation matrix */
-  hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid, P_Stencils, &P);
+  hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), coarsePGrid, P_Stencils, &P);
 
   //hypre_TFree( //P_Stencils ); // Cannot free this here!
   hypre_TFree(stencil_shape);
@@ -118,12 +118,12 @@ HYPRE_Int hypre_StructVectorUpdateGhostCells(
     hypre_StructVector  *sV,
     hypre_StructStencil *stencil )
 {
-  hypre_StructGrid    *grid = hypre_StructVectorGrid( sV );
+  hypre_StructGrid    *SGrid = hypre_StructVectorGrid( sV );
   hypre_BoxArray      *dataspace = hypre_StructVectorDataSpace( sV );
   hypre_CommInfo      *info;
-  hypre_CreateCommInfoFromStencil( grid, stencil, &info );
+  hypre_CreateCommInfoFromStencil( SGrid, stencil, &info );
   hypre_CommPkg       *pkg;
-  hypre_CommPkgCreate( info, dataspace, dataspace, 1, NULL, 0, hypre_StructGridComm(grid), &pkg );
+  hypre_CommPkgCreate( info, dataspace, dataspace, 1, NULL, 0, hypre_StructGridComm(SGrid), &pkg );
   hypre_CommHandle    *handle;
 
   HYPRE_Complex *data = hypre_StructVectorData( sV );
@@ -347,7 +347,11 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
         for ( J = 0; J < nvars; J++ ) {
           for ( sj = 0; sj < P_StencilSize; sj++ ) {
             Mj = J*P_StencilSize + sj;
-            hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];   // 0.5 for sanity check
+#if DEBUG_SYSBAMG_PFMG            
+            hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
+#else
+            hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];
+#endif
           }
         }
       }
@@ -789,7 +793,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
   hypre_SVD( S, M, Mrows, Mcols );
 
   // copy lowest singular vectors into svecs
-  //    M := [ v_l,1, v_r,1, v_l,2, v_r,2, ... ]
+  //    M := [ v_l,1, v_r,1, v_l,2, v_r,2, ... ] -> svecs[...]
 
   for ( k = 0; k < nsvecs; k++ )
   {

@@ -19,7 +19,7 @@ hypre_SStructPMatrix *
 hypre_SysBAMGCreateRAPOp( hypre_SStructPMatrix *R,
                           hypre_SStructPMatrix *A,
                           hypre_SStructPMatrix *P,
-                          hypre_SStructPGrid   *coarse_grid,
+                          hypre_SStructPGrid   *coarsePGrid,
                           HYPRE_Int             cdir        )
 {
    hypre_SStructPMatrix    *RAP;
@@ -43,7 +43,7 @@ hypre_SysBAMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    HYPRE_Int              stencil_size;
 
-   hypre_StructGrid      *cgrid;
+   hypre_StructGrid      *coarseSGrid;
 
    HYPRE_Int              vi,vj;
 
@@ -54,8 +54,8 @@ hypre_SysBAMGCreateRAPOp( hypre_SStructPMatrix *R,
    ndim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
    nvars = hypre_SStructPMatrixNVars(A);
 
-   vartype = hypre_SStructPGridVarType(coarse_grid, 0);
-   cgrid = hypre_SStructPGridVTSGrid(coarse_grid, vartype);
+   vartype = hypre_SStructPGridVarType(coarsePGrid, 0);
+   coarseSGrid = hypre_SStructPGridVTSGrid(coarsePGrid, vartype);
 
    RAP_stencils = hypre_CTAlloc(hypre_SStructStencil *, nvars);
 
@@ -79,7 +79,7 @@ hypre_SysBAMGCreateRAPOp( hypre_SStructPMatrix *R,
          if (A_s != NULL)
          {         
             RAP_s = hypre_SemiCreateRAPOp(R_s, A_s, P_s,
-                                          cgrid, cdir,
+                                          coarseSGrid, cdir,
                                           P_stored_as_transpose);
             /* Just want stencil for RAP */
             hypre_StructMatrixInitializeShell(RAP_s);
@@ -116,7 +116,7 @@ hypre_SysBAMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    /* create RAP Pmatrix */
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
-                              coarse_grid, RAP_stencils, &RAP);
+                              coarsePGrid, RAP_stencils, &RAP);
 
    //hypre_TFree( //RAP_stencils ); // Cannot free this here!
    hypre_TFree(RAP_shapes);

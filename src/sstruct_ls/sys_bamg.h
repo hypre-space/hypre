@@ -25,6 +25,8 @@
 
 #define DEBUG_SYSBAMG 1
 
+#define DEBUG_SYSBAMG_PFMG 1
+
 #define sysbamg_dbgmsg( format, args... ) \
 { \
   if ( DEBUG_SYSBAMG ) hypre_printf( "DEBUG_SYSBAMG: " format, ## args ); fflush(stdout); \
@@ -56,31 +58,31 @@ typedef struct
 
    HYPRE_Int             num_levels;
 
-   HYPRE_Int            *cdir_l;  /* coarsening directions */
-   HYPRE_Int            *active_l;  /* flags to relax on level l*/
+   HYPRE_Int*            cdir_l;  /* coarsening directions */
+   HYPRE_Int*            active_l;  /* flags to relax on level l*/
 
-   hypre_SStructPGrid    **grid_l;
-   hypre_SStructPGrid    **P_grid_l;
+   hypre_SStructPGrid**    PGrid_l;
+   hypre_SStructPGrid**    P_PGrid_l;
 
-   HYPRE_Real             *data;
-   hypre_SStructPMatrix  **A_l;
-   hypre_SStructPMatrix  **P_l;
-   hypre_SStructPMatrix  **RT_l;
-   hypre_SStructPVector  **b_l;
-   hypre_SStructPVector  **x_l;
+   HYPRE_Real*             data;
+   hypre_SStructPMatrix**  A_l;
+   hypre_SStructPMatrix**  P_l;
+   hypre_SStructPMatrix**  RT_l;
+   hypre_SStructPVector**  b_l;
+   hypre_SStructPVector**  x_l;
 
    // "test vectors" -- random (initial) and singular
    HYPRE_Int             num_rtv, num_stv, num_tv_relax;
 
    /* temp vectors */
-   hypre_SStructPVector  **tx_l;
-   hypre_SStructPVector  **r_l;
-   hypre_SStructPVector  **e_l;
+   hypre_SStructPVector**  tx_l;
+   hypre_SStructPVector**  r_l;
+   hypre_SStructPVector**  e_l;
 
-   void                **relax_data_l;
-   void                **matvec_data_l;
-   void                **restrict_data_l;
-   void                **interp_data_l;
+   void**                relax_data_l;
+   void**                matvec_data_l;
+   void**                restrict_data_l;
+   void**                interp_data_l;
 
    /* log info (always logged) */
    HYPRE_Int             num_iterations;
@@ -89,8 +91,8 @@ typedef struct
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
-   HYPRE_Real           *norms;
-   HYPRE_Real           *rel_norms;
+   HYPRE_Real*           norms;
+   HYPRE_Real*           rel_norms;
 
 } hypre_SysBAMGData;
 

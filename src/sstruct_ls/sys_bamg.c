@@ -90,14 +90,13 @@ HYPRE_Int hypre_SysBAMGDestroy( void *sys_bamg_vdata )
       hypre_TFree(sys_bamg_data -> interp_data_l);
 
       hypre_SStructPVectorDestroy(sys_bamg_data -> tx_l[0]);
-      /*hypre_SStructPGridDestroy(sys_bamg_data -> grid_l[0]);*/
       hypre_SStructPMatrixDestroy(sys_bamg_data -> A_l[0]);
       hypre_SStructPVectorDestroy(sys_bamg_data -> b_l[0]);
       hypre_SStructPVectorDestroy(sys_bamg_data -> x_l[0]);
       for (l = 0; l < ((sys_bamg_data -> num_levels) - 1); l++)
       {
-        hypre_SStructPGridDestroy(sys_bamg_data -> grid_l[l+1]);
-        hypre_SStructPGridDestroy(sys_bamg_data -> P_grid_l[l+1]);
+        hypre_SStructPGridDestroy(sys_bamg_data -> PGrid_l[l+1]);
+        hypre_SStructPGridDestroy(sys_bamg_data -> P_PGrid_l[l+1]);
         hypre_SStructPMatrixDestroy(sys_bamg_data -> A_l[l+1]);
         hypre_SStructPMatrixDestroy(sys_bamg_data -> P_l[l]);
         hypre_SStructPVectorDestroy(sys_bamg_data -> b_l[l+1]);
@@ -107,8 +106,8 @@ HYPRE_Int hypre_SysBAMGDestroy( void *sys_bamg_vdata )
       hypre_SharedTFree(sys_bamg_data -> data);
       hypre_TFree(sys_bamg_data -> cdir_l);
       hypre_TFree(sys_bamg_data -> active_l);
-      hypre_TFree(sys_bamg_data -> grid_l);
-      hypre_TFree(sys_bamg_data -> P_grid_l);
+      hypre_TFree(sys_bamg_data -> PGrid_l);
+      hypre_TFree(sys_bamg_data -> P_PGrid_l);
       hypre_TFree(sys_bamg_data -> A_l);
       hypre_TFree(sys_bamg_data -> P_l);
       hypre_TFree(sys_bamg_data -> RT_l);

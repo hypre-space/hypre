@@ -258,6 +258,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          /* don't coarsen if a periodic direction and not divisible by 2 */
          periodic = hypre_IndexD(hypre_StructGridPeriodic(grid_l[l]), cdir);
+         hypre_printf("level %d  periodic[%d] = %d\n", l, cdir, periodic);
          if ((periodic) && (periodic % 2))
          {
             cdir = -1;
@@ -280,8 +281,11 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
             cmaxsize = hypre_max(cmaxsize, hypre_BoxSizeD(cbox, d));
          }
 
+         hypre_printf("stop coarsening: l = %d\n", l);
          break;
       }
+
+      hypre_printf( "l %d  cdir %d  Min %d Max %d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir) );
 
       cdir_l[l] = cdir;
 
@@ -319,6 +323,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    }
    num_levels = l + 1;
   
+   hypre_printf("num_levels = %d\n", num_levels);
+
    /*-----------------------------------------------------
     * For fully periodic problems, the coarsest grid
     * problem (a single node) can have zero diagonal
