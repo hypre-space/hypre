@@ -25,7 +25,7 @@
 
 #define DEBUG_SYSBAMG 1
 
-#define DEBUG_SYSBAMG_PFMG 1
+#define DEBUG_SYSBAMG_PFMG 0
 
 #define sysbamg_dbgmsg( format, args... ) \
 { \
