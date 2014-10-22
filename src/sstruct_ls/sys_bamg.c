@@ -43,7 +43,7 @@ hypre_SysBAMGCreate( MPI_Comm  comm )
 
   (sys_bamg_data -> num_rtv)           = 10;
   (sys_bamg_data -> num_stv)           = 10;
-  (sys_bamg_data -> num_tv_relax)      = 20;
+  (sys_bamg_data -> num_relax_tv)      = 20;
 
   (sys_bamg_data -> skip_relax)       = 1;
   (sys_bamg_data -> logging)          = 0;

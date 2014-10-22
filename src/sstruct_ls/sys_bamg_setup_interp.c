@@ -17,22 +17,24 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp(
-    hypre_SStructPMatrix *A,
-    hypre_SStructPGrid   *coarsePGrid,
-    HYPRE_Int             cdir  )
+hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp
+(
+  hypre_SStructPMatrix*   A,
+  hypre_SStructPGrid*     coarsePGrid,
+  HYPRE_Int               cdir
+)
 {
-  hypre_SStructPMatrix  *P;
+  hypre_SStructPMatrix*   P;
 
-  hypre_Index           *stencil_shape;
-  HYPRE_Int              stencil_size;
+  hypre_Index*            stencil_shape;
+  HYPRE_Int               stencil_size;
 
-  HYPRE_Int              ndims;
+  HYPRE_Int               ndims;
 
-  HYPRE_Int              nvars;
-  hypre_SStructStencil **P_Stencils;
+  HYPRE_Int               nvars;
+  hypre_SStructStencil**  P_Stencils;
 
-  HYPRE_Int              I,si;
+  HYPRE_Int               I,si;
 
   /* set up stencil_shape */
   stencil_size = 2;
@@ -73,13 +75,14 @@ hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructPMatrixUnpack(
-    const hypre_SStructPMatrix *M,
-    const int                   nvars,
-    hypre_StructMatrix       ***sM )
+HYPRE_Int hypre_SStructPMatrixUnpack
+(
+  const hypre_SStructPMatrix* M,
+  const int                   nvars,
+  hypre_StructMatrix***       sM
+)
 {
   int I, J;
-
 
   for ( I = 0; I < nvars; I++ ) {
     for ( J = 0; J < nvars; J++ ) {
@@ -95,10 +98,12 @@ HYPRE_Int hypre_SStructPMatrixUnpack(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SStructPVectorUnpack(
-    const hypre_SStructPVector *V,
+HYPRE_Int hypre_SStructPVectorUnpack
+(
+    const hypre_SStructPVector* V,
     const int                   nvars,
-    hypre_StructVector        **sV )
+    hypre_StructVector**        sV
+)
 {
   int I;
 
@@ -114,19 +119,26 @@ HYPRE_Int hypre_SStructPVectorUnpack(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_StructVectorUpdateGhostCells(
-    hypre_StructVector  *sV,
-    hypre_StructStencil *stencil )
+HYPRE_Int hypre_StructVectorUpdateGhostCells
+(
+  hypre_StructVector*     sV,
+  hypre_StructStencil*    stencil
+)
 {
-  hypre_StructGrid    *SGrid = hypre_StructVectorGrid( sV );
-  hypre_BoxArray      *dataspace = hypre_StructVectorDataSpace( sV );
-  hypre_CommInfo      *info;
-  hypre_CreateCommInfoFromStencil( SGrid, stencil, &info );
-  hypre_CommPkg       *pkg;
-  hypre_CommPkgCreate( info, dataspace, dataspace, 1, NULL, 0, hypre_StructGridComm(SGrid), &pkg );
-  hypre_CommHandle    *handle;
+  hypre_StructGrid*       SGrid             = hypre_StructVectorGrid( sV );
+  hypre_BoxArray*         dataspace         = hypre_StructVectorDataSpace( sV );
+  hypre_CommInfo*         info;
 
-  HYPRE_Complex *data = hypre_StructVectorData( sV );
+  hypre_CreateCommInfoFromStencil( SGrid, stencil, &info );
+
+  hypre_CommPkg*          pkg;
+
+  hypre_CommPkgCreate( info, dataspace, dataspace, 1, NULL, 0, hypre_StructGridComm(SGrid), &pkg );
+
+  hypre_CommHandle*       handle;
+
+  HYPRE_Complex*          data              = hypre_StructVectorData( sV );
+
   hypre_InitializeCommunication( pkg, data, data, 0, 0, &handle );
   hypre_FinalizeCommunication( handle );
 
@@ -140,7 +152,11 @@ HYPRE_Int hypre_StructVectorUpdateGhostCells(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void hypre_CheckReturnValue( const char* func, HYPRE_Int rv )
+void hypre_CheckReturnValue
+(
+  const char*             func,
+  HYPRE_Int               rv
+)
 {
   if ( rv != 0 ) {
     hypre_printf( "\nexit: error: %s returned %d\n", func, rv );
@@ -170,13 +186,15 @@ void hypre_CheckReturnValue( const char* func, HYPRE_Int rv )
 #define hypre_xtrtrs hypre_ztrtrs
 #endif
 
-HYPRE_Int hypre_LS(
-    HYPRE_Complex* M,
-    HYPRE_Int      Mrows,
-    HYPRE_Int      Mcols,
-    HYPRE_Complex* C,
-    HYPRE_Int      Crows,
-    HYPRE_Int      Ccols )
+HYPRE_Int hypre_LS
+(
+  HYPRE_Complex*          M,
+  HYPRE_Int               Mrows,
+  HYPRE_Int               Mcols,
+  HYPRE_Complex*          C,
+  HYPRE_Int               Crows,
+  HYPRE_Int               Ccols
+)
 {
 #if DEBUG_SYSBAMG > 1
   // print M and b to check
@@ -244,35 +262,37 @@ HYPRE_Int hypre_LS(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
-    hypre_StructMatrix ***sA,
-    hypre_StructMatrix ***sP,
-    HYPRE_Int             nvars,
-    HYPRE_Int             cdir,
-    hypre_Index           findex,
-    hypre_Index           stride,
-    HYPRE_Int             nvecs,
-    hypre_StructVector ***sv )
+HYPRE_Int hypre_SysBAMGSetupInterpOpLS
+(
+  hypre_StructMatrix***   sA,
+  hypre_StructMatrix***   sP,
+  HYPRE_Int               nvars,
+  HYPRE_Int               cdir,
+  hypre_Index             findex,
+  hypre_Index             stride,
+  HYPRE_Int               nvecs,
+  hypre_StructVector***   sv
+)
 {
-  hypre_BoxArray       *GridBoxes;
-  hypre_Box            *GridBox;
+  hypre_BoxArray*         GridBoxes;
+  hypre_Box*              GridBox;
 
-  hypre_StructStencil  *P_Stencil;
-  hypre_Index          *P_StencilShape;
-  HYPRE_Int             P_StencilSize;
+  hypre_StructStencil*    P_Stencil;
+  hypre_Index*            P_StencilShape;
+  HYPRE_Int               P_StencilSize;
 
-  hypre_IndexRef        startc;
-  hypre_Index           BoxSize, start, stridec;
+  hypre_IndexRef          startc;
+  hypre_Index             BoxSize, start, stridec;
 
-  hypre_Box            *PDataBox, *vDataBox;
+  hypre_Box*              PDataBox, *vDataBox;
 
-  HYPRE_Int            *v_offsets;
+  HYPRE_Int*              v_offsets;
 
-  HYPRE_Complex        *M, *C;
+  HYPRE_Complex*          M, *C;
 
-  HYPRE_Int             ndims, Mrows, Mcols, Mi, Mj, Crows, Ccols;
+  HYPRE_Int               ndims, Mrows, Mcols, Mi, Mj, Crows, Ccols;
 
-  HYPRE_Int             b, I, J, i, j, k, sj, iP, iv;
+  HYPRE_Int               b, I, J, i, j, k, sj, iP, iv;
 
   // XXX: NB: Assume same structure for all I,J; i.e., use [0][0] as representative.
 
@@ -347,7 +367,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
         for ( J = 0; J < nvars; J++ ) {
           for ( sj = 0; sj < P_StencilSize; sj++ ) {
             Mj = J*P_StencilSize + sj;
-#if DEBUG_SYSBAMG_PFMG            
+#if DEBUG_SYSBAMG_PFMG
             hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
 #else
             hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];
@@ -377,22 +397,24 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SysBAMGSetupInterpOp(
-    hypre_SStructPMatrix *A,
-    HYPRE_Int             cdir,
-    hypre_Index           findex,
-    hypre_Index           stride,
-    hypre_SStructPMatrix *P,
-    HYPRE_Int             nvecs,
-    hypre_SStructPVector **vecs )
+HYPRE_Int hypre_SysBAMGSetupInterpOp
+(
+  hypre_SStructPMatrix*   A,
+  HYPRE_Int               cdir,
+  hypre_Index             findex,
+  hypre_Index             stride,
+  hypre_SStructPMatrix*   P,
+  HYPRE_Int               nvecs,
+  hypre_SStructPVector**  vecs
+)
 {
-  HYPRE_Int              nvars;
-  HYPRE_Int              I,J,k;   // vars
+  HYPRE_Int               nvars;
+  HYPRE_Int               I,J,k;   // vars
 
-  hypre_StructMatrix  ***sA;
-  hypre_StructMatrix  ***sP;
+  hypre_StructMatrix***   sA;
+  hypre_StructMatrix***   sP;
 
-  hypre_StructVector  ***sv;
+  hypre_StructVector***   sv;
 
   nvars = hypre_SStructPMatrixNVars(A);
 
@@ -446,13 +468,13 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp(
  * Compute the singular value decomposition of the coarse operator (single
  * process only at present) ala http://www.netlib.org/lapack/lug/node53.html.
  *
- * A is reduced to bidiagonal form: A = U_1 B V_1^T w/ U_1 and V_1 unitary 
+ * A is reduced to bidiagonal form: A = U_1 B V_1^T w/ U_1 and V_1 unitary
  * and B real and upper-bidiagonal for m >=n (lower bidiagonal for m < n).
  * NB: U_1 B V_1^T == Q B P^T.
  *
  * B is SV-decomposed: B = U_2 S V_2^T w/ U_2 and V_2 unitary and S diagonal.
  *
- * The L and R singular vectors of A are then the first min(Mrows,Mcols) 
+ * The L and R singular vectors of A are then the first min(Mrows,Mcols)
  * columns of U = U_1 U_2 and V = V_1 V_2.
  *
  * NB: xGBBRD (for banded matrices) may outperform xGEBRD for bidiagonalization.
@@ -460,6 +482,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp(
  *
  * NB: given optimal blocksize, NB (8?), lwork >= { (M+N)*NB for xgebrd,
  *     4*N for xbdsqr, and max(M,N)*NB for xxxmbr }.
+ *
+ * NB: nsvecs must be no more than Mcols/2.
  *----------------------------------------------------------------------------*/
 
 #if HYPRE_Complex == HYPRE_Real
@@ -472,13 +496,17 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp(
 #define hypre_xxxmbr hypre_zunmbr
 #endif
 
-HYPRE_Int hypre_SVD(
-    HYPRE_Complex* S,
-    HYPRE_Complex* M,
-    HYPRE_Int      Mrows,
-    HYPRE_Int      Mcols )
+HYPRE_Int hypre_SVD
+(
+  HYPRE_Complex*          S,
+  HYPRE_Complex*          M,
+  HYPRE_Int               Mrows,
+  HYPRE_Int               Mcols,
+  HYPRE_Int               nsvecs,
+  HYPRE_Int               symmetric
+)
 {
-  HYPRE_Int Mi, Mj;
+  HYPRE_Int               Mi, Mj;
 
 #if DEBUG_SYSBAMG > 1
   // print M to check
@@ -540,7 +568,7 @@ HYPRE_Int hypre_SVD(
     for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
     hypre_printf("\n");
   }
-  
+
   hypre_printf("hypre_SVD P^T:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
@@ -567,7 +595,7 @@ HYPRE_Int hypre_SVD(
 
   hypre_xxxmbr(&vect, &side, &trans, &Mrows, &Mcols, &Mcols, M, &Mcols, tauq, U, &Mcols, work, &lwork, &info);
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
-  
+
   vect   = 'P';
   side   = 'R';
   trans  = 'T';
@@ -588,24 +616,27 @@ HYPRE_Int hypre_SVD(
   }
 #endif
 
-  // write lowest Mrows/2 L and R singular vectors into M, M := [ l_1, r_1, l_2, r_2, ... ]
-  //    values/vectors are returned in *descending* order, so 
-  //        M[i,j] := { U[i,Mcols-1-j/2], V[i,Mcols-1-j/2] == VT[Mcols-1-j/2,i] } for j {even, odd}
-  // also reverse S to correspond to vector ordering
+  // write lowest Mrows/2 L and R singular vectors into M := [v_l,1, v_l,2, ..., v_r,1, v_r,2, ...]
+  //    nb: values/vectors are returned in* descending* order
+  //    also reverse S to correspond to vector ordering
 
-  for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) {
-      if ( Mj % 2 == 0 )
-        M[Mi+Mj*Mrows] = U[Mi+(Mcols-1-Mj/2)*Mrows];
-      else
-        M[Mi+Mj*Mrows] = VT[(Mcols-1-Mj/2)+Mi*Mcols];
-    }
+  for ( Mi = 0; Mi < Mrows; Mi++ )
+  {
     if ( Mi < Mrows/2 ) {
       HYPRE_Complex tmp = S[Mi];
       S[Mi] = S[Mrows-1-Mi];
       S[Mrows-1-Mi] = tmp;
     }
+
+    for ( Mj = 0; Mj < nsvecs; Mj++ )
+      M[Mi+Mj*Mrows] = U[Mi+(Mcols-1-Mj)*Mrows];
+
+    if ( ! symmetric )
+      for ( Mj = 0; Mj < nsvecs; Mj++ )
+        M[Mi+(nsvecs+Mj)*Mrows] = VT[(Mcols-1-Mj)+Mi*Mcols];
   }
+
+  sysbamg_dbgmsg("%s finished\n", __func__);
 
   return hypre_error_flag;
 }
@@ -615,10 +646,14 @@ HYPRE_Int hypre_SVD(
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int IndexToInt( const hypre_Index Index, /*const*/ hypre_Box* Box )   // non const? XXX
+HYPRE_Int IndexToInt
+(
+  const hypre_Index       Index,
+  /*const*/ hypre_Box*    Box
+)   // non const? XXX
 {
-  HYPRE_Int       Int, NDim, dim, stride;
-  hypre_IndexRef  BoxMin, BoxMax;
+  HYPRE_Int               Int, NDim, dim, stride;
+  hypre_IndexRef          BoxMin, BoxMax;
 
   NDim    = hypre_BoxNDim( Box );
   BoxMin  = hypre_BoxIMin( Box );
@@ -640,9 +675,13 @@ HYPRE_Int IndexToInt( const hypre_Index Index, /*const*/ hypre_Box* Box )   // n
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int printIndex( const hypre_Index Index, const HYPRE_Int NDim )
+HYPRE_Int printIndex
+(
+  const hypre_Index       Index,
+  const HYPRE_Int         NDim
+)
 {
-  HYPRE_Int       dim;
+  HYPRE_Int               dim;
 
   hypre_printf( "Index:" );
 
@@ -660,10 +699,15 @@ HYPRE_Int printIndex( const hypre_Index Index, const HYPRE_Int NDim )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int AddIndex( hypre_Index Sum, const hypre_Index A, const hypre_Index B, /*const*/ hypre_Box* Box )
+HYPRE_Int AddIndex(
+  hypre_Index             Sum,
+  const hypre_Index       A,
+  const hypre_Index       B,
+  /*const*/ hypre_Box*    Box
+)
 {
-  HYPRE_Int       NDim, dim;
-  hypre_Index     Size;
+  HYPRE_Int               NDim, dim;
+  hypre_Index             Size;
 
   NDim    = hypre_BoxNDim( Box );
   hypre_BoxGetSize( Box, Size );
@@ -679,38 +723,47 @@ HYPRE_Int AddIndex( hypre_Index Sum, const hypre_Index A, const hypre_Index B, /
 
 
 /*--------------------------------------------------------------------------
+ * Compute singular vectors
+ *  -- currently not at all parallel
+ *
+ *  NB: svecs must have space for 2*nsvecs and nsvecs must be no more than
+ *      Mcols (see below)
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SysBAMGComputeSVecs(
-    hypre_SStructPMatrix*   A,
-    HYPRE_Int               nsvecs,
-    hypre_SStructPVector**  svecs )
+HYPRE_Int hypre_SysBAMGComputeSVecs
+(
+  hypre_SStructPMatrix*   A,
+  HYPRE_Int               nsvecs,
+  hypre_SStructPVector**  svecs
+)
 {
-  HYPRE_Int             NDim;
-  HYPRE_Int             NVars;
-  hypre_StructMatrix*   StructMatrix;
-  hypre_StructVector*   StructVector;
-  hypre_StructGrid*     Grid;
-  hypre_BoxArray*       BoxArray;
-  hypre_Box*            GridBox;
-  hypre_Index           GridBoxSize;
-  HYPRE_Int             GridBoxVolume;
-  hypre_Box*            DataBox;
-  hypre_Index           DataBoxSize;
+  HYPRE_Int               NDim;
+  HYPRE_Int               NVars;
+  hypre_StructMatrix*     StructMatrix;
+  hypre_StructVector*     StructVector;
+  hypre_StructGrid*       Grid;
+  hypre_BoxArray*         BoxArray;
+  hypre_Box*              GridBox;
+  hypre_Index             GridBoxSize;
+  HYPRE_Int               GridBoxVolume;
+  hypre_Box*              DataBox;
+  hypre_Index             DataBoxSize;
 
-  HYPRE_Int             BoxIdx = 0;   // XXX hard-wired *should loop over boxes* XXX
-  HYPRE_Int             I, J, i, j, k, si, dim;
-  hypre_IndexRef        start;
-  hypre_Index           stride;
-  hypre_Index           iIndex, jIndex;
+  HYPRE_Int               BoxIdx = 0;   // XXX hard-wired* should loop over boxes* XXX
+  HYPRE_Int               I, J, i, j, k, si, dim;
+  hypre_IndexRef          start;
+  hypre_Index             stride;
+  hypre_Index             iIndex, jIndex;
 
-  HYPRE_Complex*        M;
-  HYPRE_Complex*        S;
-  HYPRE_Int             Mrows, Mcols, Mi, Mj;
+  HYPRE_Complex*          M;
+  HYPRE_Complex*          S;
+  HYPRE_Int               Mrows, Mcols, Mi, Mj;
 
-  hypre_StructStencil*  Stencil;
-  hypre_Index*          StencilShape;
-  HYPRE_Int             StencilSize;
+  hypre_StructStencil*    Stencil;
+  hypre_Index*            StencilShape;
+  HYPRE_Int               StencilSize;
+
+  HYPRE_Int               symmetric;
 
   // get sizes and allocate M
 
@@ -788,14 +841,16 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
     }
   }
 
+  symmetric     = hypre_SStructPMatrixSymmetric(A)[0][0];     // XXX assume var-indep symmetry
+
   // compute singular vectors
 
-  hypre_SVD( S, M, Mrows, Mcols );
+  hypre_SVD( S, M, Mrows, Mcols, nsvecs, symmetric );
 
   // copy lowest singular vectors into svecs
-  //    M := [ v_l,1, v_r,1, v_l,2, v_r,2, ... ] -> svecs[...]
+  //    M := [ v_l,1, v_l,2, ..., v_r,1, v_r,2, ... ] -> svecs[...]
 
-  for ( k = 0; k < nsvecs; k++ )
+  for ( k = 0; k < nsvecs * ( symmetric ? 1 : 2 ); k++ )
   {
     for ( I = 0; I < NVars; I++ )
     {
@@ -836,11 +891,11 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
   hypre_SStructPVectorInitialize( AV );
   hypre_SStructPVectorAssemble( AV );
 
-  for ( I = 0; I < 3; I++ ) {
-    for ( J = 0; J < 3; J++ ) {
-      hypre_SStructPMatvec( 1.0, A, svecs[2*J+1], 0.0, AV );
-      hypre_SStructPComplexInnerProd( svecs[2*I+0], AV, &x );
-      printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", I, J, I, x / S[I]);
+  for ( i = 0; i < 3; i++ ) {
+    for ( j = 0; j < 3; j++ ) {
+      hypre_SStructPMatvec( 1.0, A, svecs[j + (symmetric ? 0 : nsvecs)], 0.0, AV );
+      hypre_SStructPComplexInnerProd( svecs[i], AV, &x );
+      printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", i, j, i, x / S[i]);
     }
   }
 

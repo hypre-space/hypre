@@ -72,7 +72,7 @@ typedef struct
    hypre_SStructPVector**  x_l;
 
    // "test vectors" -- random (initial) and singular
-   HYPRE_Int             num_rtv, num_stv, num_tv_relax;
+   HYPRE_Int             num_rtv, num_stv, num_relax_tv, symmetric;
 
    /* temp vectors */
    hypre_SStructPVector**  tx_l;
