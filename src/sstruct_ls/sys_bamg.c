@@ -27,30 +27,32 @@ hypre_SysBAMGCreate( MPI_Comm  comm )
   (sys_bamg_data -> time_index) = hypre_InitializeTiming("SYS_BAMG");
 
   /* set defaults */
-  (sys_bamg_data -> tol)              = 1.0e-06;
-  (sys_bamg_data -> max_iter  )       = 200;
-  (sys_bamg_data -> rel_change)       = 0;
-  (sys_bamg_data -> zero_guess)       = 0;
-  (sys_bamg_data -> max_levels)       = 0;
-  (sys_bamg_data -> dxyz)[0]          = 0.0;
-  (sys_bamg_data -> dxyz)[1]          = 0.0;
-  (sys_bamg_data -> dxyz)[2]          = 0.0;
-  (sys_bamg_data -> relax_type)       = 1;       /* weighted Jacobi */
-  (sys_bamg_data -> jacobi_weight)    = 0.0;
-  (sys_bamg_data -> usr_jacobi_weight)= 0;
-  (sys_bamg_data -> num_pre_relax)     = 1;
-  (sys_bamg_data -> num_post_relax)    = 1;
+  (sys_bamg_data -> tol)                 = 1.0e-06;
+  (sys_bamg_data -> max_iter  )          = 200;
+  (sys_bamg_data -> rel_change)          = 0;
+  (sys_bamg_data -> zero_guess)          = 0;
+  (sys_bamg_data -> max_levels)          = 0;
+  (sys_bamg_data -> dxyz)[0]             = 0.0;
+  (sys_bamg_data -> dxyz)[1]             = 0.0;
+  (sys_bamg_data -> dxyz)[2]             = 0.0;
+  (sys_bamg_data -> relax_type)          = 1;       /* weighted Jacobi */
+  (sys_bamg_data -> jacobi_weight)       = 0.0;
+  (sys_bamg_data -> usr_jacobi_weight)   = 0;
+  (sys_bamg_data -> num_pre_relax)       = 1;
+  (sys_bamg_data -> num_post_relax)      = 1;
 
-  (sys_bamg_data -> num_rtv)           = 10;
-  (sys_bamg_data -> num_stv)           = 10;
-  (sys_bamg_data -> num_relax_tv)      = 20;
+  (sys_bamg_data -> num_rtv)             = 10;
+  (sys_bamg_data -> num_stv)             = 10;
+  (sys_bamg_data -> num_pre_relax_tv)    = 20;
+  (sys_bamg_data -> num_post_relax_tv)   = 20;
+  (sys_bamg_data -> num_refine)          = 2;
 
-  (sys_bamg_data -> skip_relax)       = 1;
-  (sys_bamg_data -> logging)          = 0;
-  (sys_bamg_data -> print_level)      = 0;
+  (sys_bamg_data -> skip_relax)          = 1;
+  (sys_bamg_data -> logging)             = 0;
+  (sys_bamg_data -> print_level)         = 0;
 
   /* initialize */
-  (sys_bamg_data -> num_levels) = -1;
+  (sys_bamg_data -> num_levels)          = -1;
 
   return (void *) sys_bamg_data;
 }
@@ -238,7 +240,7 @@ hypre_SysBAMGSetNumPostRelax( void *sys_bamg_vdata,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_SysBAMGSetNumTv1( void *bamg_vdata, HYPRE_Int num_rtv )
+HYPRE_Int hypre_SysBAMGSetNumRTV( void *bamg_vdata, HYPRE_Int num_rtv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
@@ -247,7 +249,7 @@ HYPRE_Int hypre_SysBAMGSetNumTv1( void *bamg_vdata, HYPRE_Int num_rtv )
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SysBAMGGetNumTv1( void *bamg_vdata, HYPRE_Int *num_rtv )
+HYPRE_Int hypre_SysBAMGGetNumRTV( void *bamg_vdata, HYPRE_Int *num_rtv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
@@ -256,7 +258,7 @@ HYPRE_Int hypre_SysBAMGGetNumTv1( void *bamg_vdata, HYPRE_Int *num_rtv )
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SysBAMGSetNumStv( void *bamg_vdata, HYPRE_Int num_stv )
+HYPRE_Int hypre_SysBAMGSetNumSTV( void *bamg_vdata, HYPRE_Int num_stv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
@@ -265,11 +267,71 @@ HYPRE_Int hypre_SysBAMGSetNumStv( void *bamg_vdata, HYPRE_Int num_stv )
   return hypre_error_flag;
 }
 
-HYPRE_Int hypre_SysBAMGGetNumStv( void *bamg_vdata, HYPRE_Int *num_stv )
+HYPRE_Int hypre_SysBAMGGetNumSTV( void *bamg_vdata, HYPRE_Int *num_stv )
 {
   hypre_SysBAMGData *bamg_data = bamg_vdata;
 
   *num_stv = (bamg_data -> num_stv);
+
+  return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SysBAMGSetNumPreRelaxTV( void *bamg_vdata, HYPRE_Int num_pre_relax_tv )
+{
+  hypre_SysBAMGData *bamg_data = bamg_vdata;
+
+  (bamg_data -> num_pre_relax_tv) = num_pre_relax_tv;
+
+  return hypre_error_flag;
+}
+
+HYPRE_Int hypre_SysBAMGGetNumPreRelaxTV( void *bamg_vdata, HYPRE_Int *num_pre_relax_tv )
+{
+  hypre_SysBAMGData *bamg_data = bamg_vdata;
+
+  *num_pre_relax_tv = (bamg_data -> num_pre_relax_tv);
+
+  return hypre_error_flag;
+}
+
+HYPRE_Int hypre_SysBAMGSetNumPostRelaxTV( void *bamg_vdata, HYPRE_Int num_post_relax_tv )
+{
+  hypre_SysBAMGData *bamg_data = bamg_vdata;
+
+  (bamg_data -> num_post_relax_tv) = num_post_relax_tv;
+
+  return hypre_error_flag;
+}
+
+HYPRE_Int hypre_SysBAMGGetNumPostRelaxTV( void *bamg_vdata, HYPRE_Int *num_post_relax_tv )
+{
+  hypre_SysBAMGData *bamg_data = bamg_vdata;
+
+  *num_post_relax_tv = (bamg_data -> num_post_relax_tv);
+
+  return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SysBAMGSetNumRefine( void *bamg_vdata, HYPRE_Int num_refine )
+{
+  hypre_SysBAMGData *bamg_data = bamg_vdata;
+
+  (bamg_data -> num_refine) = num_refine;
+
+  return hypre_error_flag;
+}
+
+HYPRE_Int hypre_SysBAMGGetNumRefine( void *bamg_vdata, HYPRE_Int *num_refine )
+{
+  hypre_SysBAMGData *bamg_data = bamg_vdata;
+
+  *num_refine = (bamg_data -> num_refine);
 
   return hypre_error_flag;
 }

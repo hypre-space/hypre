@@ -39,60 +39,64 @@
 
 typedef struct
 {
-   MPI_Comm              comm;
+   MPI_Comm               comm;
 
-   HYPRE_Real            tol;
-   HYPRE_Int             max_iter;
-   HYPRE_Int             rel_change;
-   HYPRE_Int             zero_guess;
-   HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
+   HYPRE_Real             tol;
+   HYPRE_Int              max_iter;
+   HYPRE_Int              rel_change;
+   HYPRE_Int              zero_guess;
+   HYPRE_Int              max_levels;  /* max_level <= 0 means no limit */
 
-   HYPRE_Int             relax_type;     /* type of relaxation to use */
-   HYPRE_Real            jacobi_weight;  /* weighted jacobi weight */
-   HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
+   HYPRE_Int              relax_type;     /* type of relaxation to use */
+   HYPRE_Real             jacobi_weight;  /* weighted jacobi weight */
+   HYPRE_Int              usr_jacobi_weight; /* indicator flag for user weight */
 
-   HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
-   HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
-   HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */
-   HYPRE_Real            dxyz[3];     /* parameters used to determine cdir */
+   HYPRE_Int              num_pre_relax;  /* number of pre relaxation sweeps */
+   HYPRE_Int              num_post_relax; /* number of post relaxation sweeps */
+   HYPRE_Int              skip_relax;     /* flag to allow skipping relaxation */
+   HYPRE_Real             dxyz[3];     /* parameters used to determine cdir */
 
-   HYPRE_Int             num_levels;
+   HYPRE_Int              num_levels;
 
-   HYPRE_Int*            cdir_l;  /* coarsening directions */
-   HYPRE_Int*            active_l;  /* flags to relax on level l*/
+   HYPRE_Int*             cdir_l;  /* coarsening directions */
+   HYPRE_Int*             active_l;  /* flags to relax on level l*/
 
-   hypre_SStructPGrid**    PGrid_l;
-   hypre_SStructPGrid**    P_PGrid_l;
+   hypre_SStructPGrid**   PGrid_l;
+   hypre_SStructPGrid**   P_PGrid_l;
 
-   HYPRE_Real*             data;
-   hypre_SStructPMatrix**  A_l;
-   hypre_SStructPMatrix**  P_l;
-   hypre_SStructPMatrix**  RT_l;
-   hypre_SStructPVector**  b_l;
-   hypre_SStructPVector**  x_l;
+   HYPRE_Real*            data;
+   hypre_SStructPMatrix** A_l;
+   hypre_SStructPMatrix** P_l;
+   hypre_SStructPMatrix** RT_l;
+   hypre_SStructPVector** b_l;
+   hypre_SStructPVector** x_l;
 
-   // "test vectors" -- random (initial) and singular
-   HYPRE_Int             num_rtv, num_stv, num_relax_tv, symmetric;
+   HYPRE_Int              num_refine;         // number of SVD/Re-setup cycles to perform
+   HYPRE_Int              num_rtv;            // num random test vectors
+   HYPRE_Int              num_stv;            // num singular test vectors (or eigenvectors)
+   HYPRE_Int              num_pre_relax_tv;   // num relaxation iterations before coarsening tv's
+   HYPRE_Int              num_post_relax_tv;  // num relaxation iterations after prolongating tv's
+   HYPRE_Int              symmetric;          // true iff matrix is symmetric
 
    /* temp vectors */
-   hypre_SStructPVector**  tx_l;
-   hypre_SStructPVector**  r_l;
-   hypre_SStructPVector**  e_l;
+   hypre_SStructPVector** tx_l;
+   hypre_SStructPVector** r_l;
+   hypre_SStructPVector** e_l;
 
-   void**                relax_data_l;
-   void**                matvec_data_l;
-   void**                restrict_data_l;
-   void**                interp_data_l;
+   void**                 relax_data_l;
+   void**                 matvec_data_l;
+   void**                 restrict_data_l;
+   void**                 interp_data_l;
 
    /* log info (always logged) */
-   HYPRE_Int             num_iterations;
-   HYPRE_Int             time_index;
-   HYPRE_Int             print_level;
+   HYPRE_Int              num_iterations;
+   HYPRE_Int              time_index;
+   HYPRE_Int              print_level;
 
    /* additional log info (logged when `logging' > 0) */
-   HYPRE_Int             logging;
-   HYPRE_Real*           norms;
-   HYPRE_Real*           rel_norms;
+   HYPRE_Int              logging;
+   HYPRE_Real*            norms;
+   HYPRE_Real*            rel_norms;
 
 } hypre_SysBAMGData;
 

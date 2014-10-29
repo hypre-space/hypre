@@ -50,15 +50,17 @@ HYPRE_Int hypre_SysBAMGSetup
   HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
   HYPRE_Real              jacobi_weight     = (bamg->jacobi_weight);
 
-  HYPRE_Int               num_relax_tv      = (bamg->num_relax_tv);
+  HYPRE_Int               num_refine        = (bamg->num_refine);
   HYPRE_Int               num_rtv           = (bamg->num_rtv);
   HYPRE_Int               num_stv           = (bamg->num_stv);
 
   HYPRE_Int               num_tv            = num_rtv + num_stv;
 
-  HYPRE_Int               symmetric;
   HYPRE_Int               num_tv_total;
   HYPRE_Int               num_rtv_total;
+  HYPRE_Int               num_stv_total;
+
+  HYPRE_Int               symmetric;
 
   hypre_SStructPMatrix*   A;
   hypre_SStructPVector*   b;
@@ -196,6 +198,7 @@ HYPRE_Int hypre_SysBAMGSetup
   symmetric     = (bamg->symmetric)               = hypre_SStructPMatrixSymmetric(A)[0][0];
   num_tv_total  = num_tv  * (symmetric ? 1 : 2);
   num_rtv_total = num_rtv * (symmetric ? 1 : 2);
+  num_stv_total = num_stv * (symmetric ? 1 : 2);
 
   sysbamg_dbgmsg("num_tv = %d = %d + %d\n", num_tv, num_rtv, num_stv);
 
@@ -212,21 +215,33 @@ HYPRE_Int hypre_SysBAMGSetup
   hypre_SysBAMGSetupOperators( bamg, tv, num_rtv_total, relax_weights, cmaxsize );
 
   /*----------------------------------------------------------------------------------------------
-   * Compute the coarse-grid singular vectors and interpolate them up
+   * Refinement loop
    *----------------------------------------------------------------------------------------------*/
 
-  hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv_total]) );
+  for ( i = 0; i < num_refine; i++ )
+  {
+    /*--------------------------------------------------------------------------------------------
+     * Compute the coarse-grid singular vectors and then prolongate them to the fine grid
+     *--------------------------------------------------------------------------------------------*/
+    
+    sysbamg_dbgmsg("Compute singular vectors num_stv=%d ...\n", num_stv);
 
-  // XXX Need to interpolate up
+    hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv_total]) );
 
-  /*----------------------------------------------------------------------------------------------
-   * Refine operators using coarse-grid singular vectors (P_l, RT_l, A_l)
-   *----------------------------------------------------------------------------------------------*/
+    for ( k = num_rtv_total; k < num_rtv_total+num_stv_total; k++ ) {
+      for ( l = num_levels - 2; l >= 0; l-- ) {
+        hypre_SysSemiInterp( interp_data_l[l], P_l[l], tv[l+1][k], tv[l][k] );
+      }
+    }
 
-  sysbamg_dbgmsg("Refine multigrid operators (num_levels=%d) ...\n", num_levels);
+    /*--------------------------------------------------------------------------------------------
+     * Refine operators using coarse-grid singular vectors (P_l, RT_l, A_l)
+     *--------------------------------------------------------------------------------------------*/
 
-  // XXX Need to interpolate up first
-  //hypre_SysBAMGSetupOperators( bamg, tv, num_tv_total, relax_weights, cmaxsize );
+    sysbamg_dbgmsg("Refine multigrid operators (num_levels=%d) ...\n", num_levels);
+
+    hypre_SysBAMGSetupOperators( bamg, tv, num_tv_total, relax_weights, cmaxsize );
+  }
 
   /*----------------------------------------------------------------------------------------------
    * Allocate space for log info
@@ -616,7 +631,7 @@ hypre_SysBAMGSetupTV
   MPI_Comm                comm              = (bamg->comm);
   HYPRE_Int               num_rtv           = (bamg->num_rtv);
   HYPRE_Int               num_stv           = (bamg->num_stv);
-  HYPRE_Int               num_relax_tv      = (bamg->num_relax_tv);
+  HYPRE_Int               num_pre_relax_tv  = (bamg->num_pre_relax_tv);
   HYPRE_Int               relax_type        = (bamg->relax_type);
   HYPRE_Int               num_levels        = (bamg->num_levels);
   HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
@@ -680,7 +695,7 @@ hypre_SysBAMGSetupTV
     hypre_SysBAMGRelaxSetType(tv_relax, relax_type);
     hypre_SysBAMGRelaxSetTempVec(tv_relax, tx_l[l]);
     hypre_SysBAMGRelaxSetPreRelax(tv_relax);
-    hypre_SysBAMGRelaxSetMaxIter(tv_relax, num_relax_tv);
+    hypre_SysBAMGRelaxSetMaxIter(tv_relax, num_pre_relax_tv);
     hypre_SysBAMGRelaxSetZeroGuess(tv_relax, 0);
     hypre_SysBAMGRelaxSetup(tv_relax, A_l[l], rhs, x_l[l]);
 
