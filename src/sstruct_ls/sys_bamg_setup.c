@@ -56,11 +56,8 @@ HYPRE_Int hypre_SysBAMGSetup
 
   HYPRE_Int               num_tv            = num_rtv + num_stv;
 
-  HYPRE_Int               num_tv_total;
-  HYPRE_Int               num_rtv_total;
-  HYPRE_Int               num_stv_total;
-
   HYPRE_Int               symmetric;
+  HYPRE_Int               nsym;
 
   hypre_SStructPMatrix*   A;
   hypre_SStructPVector*   b;
@@ -195,12 +192,10 @@ HYPRE_Int hypre_SysBAMGSetup
    *----------------------------------------------------------------------------------------------*/
 
   // XXX assume 'symmetric' same for all vars
-  symmetric     = (bamg->symmetric)               = hypre_SStructPMatrixSymmetric(A)[0][0];
-  num_tv_total  = num_tv  * (symmetric ? 1 : 2);
-  num_rtv_total = num_rtv * (symmetric ? 1 : 2);
-  num_stv_total = num_stv * (symmetric ? 1 : 2);
+  symmetric = (bamg->symmetric) = hypre_SStructPMatrixSymmetric(A)[0][0];
+  nsym      = ( symmetric ? 1 : 2 );
 
-  sysbamg_dbgmsg("num_tv = %d = %d + %d\n", num_tv, num_rtv, num_stv);
+  sysbamg_dbgmsg("num_tv = %d = %d + %d; nsym = %d\n", num_tv, num_rtv, num_stv, nsym);
 
   tv = hypre_TAlloc(hypre_SStructPVector**, num_levels);
 
@@ -212,7 +207,7 @@ HYPRE_Int hypre_SysBAMGSetup
 
   sysbamg_dbgmsg("Set up multigrid operators (num_levels=%d) ...\n", num_levels);
 
-  hypre_SysBAMGSetupOperators( bamg, tv, num_rtv_total, relax_weights, cmaxsize );
+  hypre_SysBAMGSetupOperators( bamg, tv, num_rtv*nsym, relax_weights, cmaxsize );
 
   /*----------------------------------------------------------------------------------------------
    * Refinement loop
@@ -226,9 +221,9 @@ HYPRE_Int hypre_SysBAMGSetup
     
     sysbamg_dbgmsg("Compute singular vectors num_stv=%d ...\n", num_stv);
 
-    hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv_total]) );
+    hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv*nsym]) );
 
-    for ( k = num_rtv_total; k < num_rtv_total+num_stv_total; k++ ) {
+    for ( k = num_rtv*nsym; k < num_tv*nsym; k++ ) {
       for ( l = num_levels - 2; l >= 0; l-- ) {
         hypre_SysSemiInterp( interp_data_l[l], P_l[l], tv[l+1][k], tv[l][k] );
       }
@@ -240,7 +235,7 @@ HYPRE_Int hypre_SysBAMGSetup
 
     sysbamg_dbgmsg("Refine multigrid operators (num_levels=%d) ...\n", num_levels);
 
-    hypre_SysBAMGSetupOperators( bamg, tv, num_tv_total, relax_weights, cmaxsize );
+    hypre_SysBAMGSetupOperators( bamg, tv, num_tv*nsym, relax_weights, cmaxsize );
   }
 
   /*----------------------------------------------------------------------------------------------
@@ -274,7 +269,7 @@ HYPRE_Int hypre_SysBAMGSetup
   hypre_SStructPVectorDestroy(b);
 
   for ( l = 0; l < num_levels; l++ ) {
-    for ( k = 0; k < num_tv_total; k++ ) {
+    for ( k = 0; k < num_tv*nsym; k++ ) {
       hypre_SStructPVectorDestroy(tv[l][k]);
     }
     hypre_TFree(tv[l]);
@@ -646,8 +641,7 @@ hypre_SysBAMGSetupTV
   HYPRE_Int               num_tv            = num_rtv + num_stv;
 
   // these are = num_tv et al if A is symmetric and 2*num_tv et al if not
-  HYPRE_Int               num_tv_total;
-  HYPRE_Int               num_rtv_total;
+  HYPRE_Int               nsym              = ( bamg->symmetric ? 1 : 2 );
 
   HYPRE_Int               l, k;
 
@@ -655,21 +649,18 @@ hypre_SysBAMGSetupTV
   char                    filename[255];
 #endif
 
-  num_tv_total  = num_tv  * (symmetric ? 1 : 2);
-  num_rtv_total = num_rtv * (symmetric ? 1 : 2);
-
-  sysbamg_dbgmsg("%s:%d symmetric=%d num_tv_total=%d\n", __FILE__, __LINE__, symmetric, num_tv_total);
+  sysbamg_dbgmsg("%s:%d symmetric=%d num_tv*nsym=%d\n", __FILE__, __LINE__, symmetric, num_tv*nsym);
 
   for ( l=0; l<num_levels; l++ )
   {
-    tv[l] = hypre_TAlloc(hypre_SStructPVector*, num_tv_total);
+    tv[l] = hypre_TAlloc(hypre_SStructPVector*, num_tv*nsym);
 
-    for ( k = 0; k < num_tv_total; k++ ) {
+    for ( k = 0; k < num_tv*nsym; k++ ) {
       hypre_SStructPVectorCreate(comm, PGrid_l[l], &tv[l][k]);
       hypre_SStructPVectorInitialize(tv[l][k]);
       hypre_SStructPVectorAssemble(tv[l][k]);
 
-      if ( l == 0 && k < num_rtv_total )
+      if ( l == 0 && k < num_rtv*nsym )
         hypre_SStructPVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0)+k);
     }
   }
@@ -700,7 +691,7 @@ hypre_SysBAMGSetupTV
     hypre_SysBAMGRelaxSetup(tv_relax, A_l[l], rhs, x_l[l]);
 
     // 3) smooth
-    for ( k = 0; k < num_rtv_total; k++ ) {
+    for ( k = 0; k < num_rtv*nsym; k++ ) {
       hypre_SysBAMGRelax( tv_relax, A_l[l], rhs, tv[l][k] );
     }
 
@@ -712,7 +703,7 @@ hypre_SysBAMGSetupTV
 
 #if DEBUG_SYSBAMG
     hypre_printf("printing sysbamg_tv level-%d test vectors\n", l);
-    for ( k = 0; k < num_rtv_total; k++ ) {
+    for ( k = 0; k < num_rtv*nsym; k++ ) {
       hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);
       hypre_SStructPVectorPrint(filename, tv[l][k], 0);
     }
@@ -756,8 +747,6 @@ hypre_SysBAMGSetupOperators
   HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
   HYPRE_Real              jacobi_weight     = (bamg->jacobi_weight);
 
-  HYPRE_Int               symmetric         = (bamg->symmetric);
-
   hypre_Index             cindex;
   hypre_Index             findex;
   hypre_Index             stride;
@@ -793,7 +782,8 @@ hypre_SysBAMGSetupOperators
     }
   }
 
-  // need 'symmetric' for test-vector computations XXX nb: hard-wiring
+  // need to set A_l.'symmetric' for test-vector computations.
+  // XXX hard-wiring
   for (l = 1; l < num_levels; l++)
     hypre_SStructPMatrixSetSymmetric( A_l[l], 0, 0, hypre_SStructPMatrixSymmetric(A_l[0])[0][0] );
 
