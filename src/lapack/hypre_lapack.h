@@ -106,10 +106,23 @@
 #define dlasq5_  hypre_dlasq5
 #define dlasq6_  hypre_dlasq6
 
+#define zbdsqr_  hypre_zbdsqr
+#define zgebrd_  hypre_zgebrd
 #define zgeqrf_  hypre_zgeqrf
 #define ztrtrs_  hypre_ztrtrs
 #define zungqr_  hypre_zungqr
+#define zunmbr_  hypre_zunmbr
 #define zunmqr_  hypre_zunmqr
+#define zunmlq_  hypre_zunmlq
+#define zunm2r_  hypre_zun2mr
+#define zlasr_   hypre_zlasr
+#define zlarft_  hypre_zlarft
+#define zlarfb_  hypre_zlarfb
+#define zlabrd_  hypre_zlabrd
+#define zgeqrf_  hypre_zgeqrf
+#define zgeqr2_  hypre_zgerq2
+#define zgebd2_  hypre_zgebd2
+#define zdrot_   hypre_zdrot
 
 #define s_cmp    hypre_F90_NAME_BLAS(s_cmp,S_CMP)
 #define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)

@@ -1,4 +1,3 @@
-//#include "blaswrap.h"
 #include "hypre_lapack.h"
 #include "f2c.h"
 

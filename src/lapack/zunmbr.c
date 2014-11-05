@@ -1,10 +1,10 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dormbr_(char *vect, char *side, char *trans, integer *m, 
-	integer *n, integer *k, doublereal *a, integer *lda, doublereal *tau, 
-	doublereal *c__, integer *ldc, doublereal *work, integer *lwork, 
-	integer *info)
+/* Subroutine */ HYPRE_Int zunmbr_(char *vect, char *side, char *trans, integer *m, 
+	integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex 
+	*tau, doublecomplex *c__, integer *ldc, doublecomplex *work, integer *
+	lwork, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -15,25 +15,25 @@
     Purpose   
     =======   
 
-    If VECT = 'Q', DORMBR overwrites the general real M-by-N matrix C   
+    If VECT = 'Q', ZUNMBR overwrites the general complex M-by-N matrix C   
     with   
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
-    TRANS = 'T':      Q**T * C       C * Q**T   
+    TRANS = 'C':      Q**H * C       C * Q**H   
 
-    If VECT = 'P', DORMBR overwrites the general real M-by-N matrix C   
+    If VECT = 'P', ZUNMBR overwrites the general complex M-by-N matrix C   
     with   
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      P * C          C * P   
-    TRANS = 'T':      P**T * C       C * P**T   
+    TRANS = 'C':      P**H * C       C * P**H   
 
-    Here Q and P**T are the orthogonal matrices determined by DGEBRD when   
-    reducing a real matrix A to bidiagonal form: A = Q * B * P**T. Q and   
-    P**T are defined as products of elementary reflectors H(i) and G(i)   
-    respectively.   
+    Here Q and P**H are the unitary matrices determined by ZGEBRD when   
+    reducing a complex matrix A to bidiagonal form: A = Q * B * P**H. Q   
+    and P**H are defined as products of elementary reflectors H(i) and   
+    G(i) respectively.   
 
     Let nq = m if SIDE = 'L' and nq = n if SIDE = 'R'. Thus nq is the   
-    order of the orthogonal matrix Q or P**T that is applied.   
+    order of the unitary matrix Q or P**H that is applied.   
 
     If VECT = 'Q', A is assumed to have been an NQ-by-K matrix:   
     if nq >= k, Q = H(1) H(2) . . . H(k);   
@@ -47,16 +47,16 @@
     =========   
 
     VECT    (input) CHARACTER*1   
-            = 'Q': apply Q or Q**T;   
-            = 'P': apply P or P**T.   
+            = 'Q': apply Q or Q**H;   
+            = 'P': apply P or P**H.   
 
     SIDE    (input) CHARACTER*1   
-            = 'L': apply Q, Q**T, P or P**T from the Left;   
-            = 'R': apply Q, Q**T, P or P**T from the Right.   
+            = 'L': apply Q, Q**H, P or P**H from the Left;   
+            = 'R': apply Q, Q**H, P or P**H from the Right.   
 
     TRANS   (input) CHARACTER*1   
-            = 'N':  No transpose, apply Q  or P;   
-            = 'T':  Transpose, apply Q**T or P**T.   
+            = 'N':  No transpose, apply Q or P;   
+            = 'C':  Conjugate transpose, apply Q**H or P**H.   
 
     M       (input) INTEGER   
             The number of rows of the matrix C. M >= 0.   
@@ -66,37 +66,37 @@
 
     K       (input) INTEGER   
             If VECT = 'Q', the number of columns in the original   
-            matrix reduced by DGEBRD.   
+            matrix reduced by ZGEBRD.   
             If VECT = 'P', the number of rows in the original   
-            matrix reduced by DGEBRD.   
+            matrix reduced by ZGEBRD.   
             K >= 0.   
 
-    A       (input) DOUBLE PRECISION array, dimension   
+    A       (input) COMPLEX*16 array, dimension   
                                   (LDA,min(nq,K)) if VECT = 'Q'   
                                   (LDA,nq)        if VECT = 'P'   
             The vectors which define the elementary reflectors H(i) and   
             G(i), whose products determine the matrices Q and P, as   
-            returned by DGEBRD.   
+            returned by ZGEBRD.   
 
     LDA     (input) INTEGER   
             The leading dimension of the array A.   
             If VECT = 'Q', LDA >= max(1,nq);   
             if VECT = 'P', LDA >= max(1,min(nq,K)).   
 
-    TAU     (input) DOUBLE PRECISION array, dimension (min(nq,K))   
+    TAU     (input) COMPLEX*16 array, dimension (min(nq,K))   
             TAU(i) must contain the scalar factor of the elementary   
             reflector H(i) or G(i) which determines Q or P, as returned   
-            by DGEBRD in the array argument TAUQ or TAUP.   
+            by ZGEBRD in the array argument TAUQ or TAUP.   
 
-    C       (input/output) DOUBLE PRECISION array, dimension (LDC,N)   
+    C       (input/output) COMPLEX*16 array, dimension (LDC,N)   
             On entry, the M-by-N matrix C.   
-            On exit, C is overwritten by Q*C or Q**T*C or C*Q**T or C*Q   
-            or P*C or P**T*C or C*P or C*P**T.   
+            On exit, C is overwritten by Q*C or Q**H*C or C*Q**H or C*Q   
+            or P*C or P**H*C or C*P or C*P**H.   
 
     LDC     (input) INTEGER   
             The leading dimension of the array C. LDC >= max(1,M).   
 
-    WORK    (workspace/output) DOUBLE PRECISION array, dimension (LWORK)   
+    WORK    (workspace/output) COMPLEX*16 array, dimension (LWORK)   
             On exit, if INFO = 0, WORK(1) returns the optimal LWORK.   
 
     LWORK   (input) INTEGER   
@@ -140,19 +140,19 @@
     extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dormlq_(char *, char *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, integer *, integer *);
-    static logical notran;
-    extern /* Subroutine */ HYPRE_Int dormqr_(char *, char *, integer *, integer *, 
-	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
-	    integer *, doublereal *, integer *, integer *);
-    static logical applyq;
+    static logical notran, applyq;
     static char transt[1];
     static integer lwkopt;
     static logical lquery;
-#define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
-#define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
+    extern /* Subroutine */ HYPRE_Int zunmlq_(char *, char *, integer *, integer *, 
+	    integer *, doublecomplex *, integer *, doublecomplex *, 
+	    doublecomplex *, integer *, doublecomplex *, integer *, integer *), zunmqr_(char *, char *, integer *, integer *, 
+	    integer *, doublecomplex *, integer *, doublecomplex *, 
+	    doublecomplex *, integer *, doublecomplex *, integer *, integer *);
+#define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
+#define a_ref(a_1,a_2) a[a_subscr(a_1,a_2)]
+#define c___subscr(a_1,a_2) (a_2)*c_dim1 + a_1
+#define c___ref(a_1,a_2) c__[c___subscr(a_1,a_2)]
 
 
     a_dim1 = *lda;
@@ -184,7 +184,7 @@
 	*info = -1;
     } else if (! left && ! lsame_(side, "R")) {
 	*info = -2;
-    } else if (! notran && ! lsame_(trans, "T")) {
+    } else if (! notran && ! lsame_(trans, "C")) {
 	*info = -3;
     } else if (*m < 0) {
 	*info = -4;
@@ -195,8 +195,7 @@
     } else /* if(complicated condition) */ {
 /* Computing MAX */
 	i__1 = 1, i__2 = min(nq,*k);
-	if (((applyq) && (*lda < max(1,nq))) || 
-            ((! applyq) && (*lda < max(i__1,i__2)))) {
+	if (applyq && *lda < max(1,nq) || ! applyq && *lda < max(i__1,i__2)) {
 	    *info = -8;
 	} else if (*ldc < max(1,*m)) {
 	    *info = -11;
@@ -214,7 +213,7 @@
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *m - 1;
 		i__2 = *m - 1;
-		nb = ilaenv_(&c__1, "DORMQR", ch__1, &i__1, n, &i__2, &c_n1, (
+		nb = ilaenv_(&c__1, "ZUNMQR", ch__1, &i__1, n, &i__2, &c_n1, (
 			ftnlen)6, (ftnlen)2);
 	    } else {
 /* Writing concatenation */
@@ -223,7 +222,7 @@
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *n - 1;
 		i__2 = *n - 1;
-		nb = ilaenv_(&c__1, "DORMQR", ch__1, m, &i__1, &i__2, &c_n1, (
+		nb = ilaenv_(&c__1, "ZUNMQR", ch__1, m, &i__1, &i__2, &c_n1, (
 			ftnlen)6, (ftnlen)2);
 	    }
 	} else {
@@ -234,7 +233,7 @@
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *m - 1;
 		i__2 = *m - 1;
-		nb = ilaenv_(&c__1, "DORMLQ", ch__1, &i__1, n, &i__2, &c_n1, (
+		nb = ilaenv_(&c__1, "ZUNMLQ", ch__1, &i__1, n, &i__2, &c_n1, (
 			ftnlen)6, (ftnlen)2);
 	    } else {
 /* Writing concatenation */
@@ -243,25 +242,24 @@
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *n - 1;
 		i__2 = *n - 1;
-		nb = ilaenv_(&c__1, "DORMLQ", ch__1, m, &i__1, &i__2, &c_n1, (
+		nb = ilaenv_(&c__1, "ZUNMLQ", ch__1, m, &i__1, &i__2, &c_n1, (
 			ftnlen)6, (ftnlen)2);
 	    }
 	}
 	lwkopt = max(1,nw) * nb;
-	work[1] = (doublereal) lwkopt;
+	work[1].r = (doublereal) lwkopt, work[1].i = 0.;
     }
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("DORMBR", &i__1);
+	xerbla_("ZUNMBR", &i__1);
 	return 0;
     } else if (lquery) {
-	return 0;
     }
 
 /*     Quick return if possible */
 
-    work[1] = 1.;
+    work[1].r = 1., work[1].i = 0.;
     if (*m == 0 || *n == 0) {
 	return 0;
     }
@@ -272,13 +270,13 @@
 
 	if (nq >= *k) {
 
-/*           Q was determined by a call to DGEBRD with nq >= k */
+/*           Q was determined by a call to ZGEBRD with nq >= k */
 
-	    dormqr_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], &c__[
+	    zunmqr_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], &c__[
 		    c_offset], ldc, &work[1], lwork, &iinfo);
 	} else if (nq > 1) {
 
-/*           Q was determined by a call to DGEBRD with nq < k */
+/*           Q was determined by a call to ZGEBRD with nq < k */
 
 	    if (left) {
 		mi = *m - 1;
@@ -292,7 +290,7 @@
 		i2 = 2;
 	    }
 	    i__1 = nq - 1;
-	    dormqr_(side, trans, &mi, &ni, &i__1, &a_ref(2, 1), lda, &tau[1], 
+	    zunmqr_(side, trans, &mi, &ni, &i__1, &a_ref(2, 1), lda, &tau[1], 
 		    &c___ref(i1, i2), ldc, &work[1], lwork, &iinfo);
 	}
     } else {
@@ -300,19 +298,19 @@
 /*        Apply P */
 
 	if (notran) {
-	    *(unsigned char *)transt = 'T';
+	    *(unsigned char *)transt = 'C';
 	} else {
 	    *(unsigned char *)transt = 'N';
 	}
 	if (nq > *k) {
 
-/*           P was determined by a call to DGEBRD with nq > k */
+/*           P was determined by a call to ZGEBRD with nq > k */
 
-	    dormlq_(side, transt, m, n, k, &a[a_offset], lda, &tau[1], &c__[
+	    zunmlq_(side, transt, m, n, k, &a[a_offset], lda, &tau[1], &c__[
 		    c_offset], ldc, &work[1], lwork, &iinfo);
 	} else if (nq > 1) {
 
-/*           P was determined by a call to DGEBRD with nq <= k */
+/*           P was determined by a call to ZGEBRD with nq <= k */
 
 	    if (left) {
 		mi = *m - 1;
@@ -326,18 +324,20 @@
 		i2 = 2;
 	    }
 	    i__1 = nq - 1;
-	    dormlq_(side, transt, &mi, &ni, &i__1, &a_ref(1, 2), lda, &tau[1],
+	    zunmlq_(side, transt, &mi, &ni, &i__1, &a_ref(1, 2), lda, &tau[1],
 		     &c___ref(i1, i2), ldc, &work[1], lwork, &iinfo);
 	}
     }
-    work[1] = (doublereal) lwkopt;
+    work[1].r = (doublereal) lwkopt, work[1].i = 0.;
     return 0;
 
-/*     End of DORMBR */
+/*     End of ZUNMBR */
 
-} /* dormbr_ */
+} /* zunmbr_ */
 
 #undef c___ref
+#undef c___subscr
 #undef a_ref
+#undef a_subscr
 
 

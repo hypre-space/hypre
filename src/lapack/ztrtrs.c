@@ -1,5 +1,5 @@
+#include "../blas/hypre_blas.h"
 #include "hypre_lapack.h"
-//#include "blaswrap.h"
 #include "f2c.h"
 
 /* Subroutine */ HYPRE_Int ztrtrs_(char *uplo, char *trans, char *diag, integer *n, 

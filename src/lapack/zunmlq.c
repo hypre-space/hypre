@@ -1,7 +1,8 @@
+#include "../blas/hypre_blas.h"
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int zunmqr_(char *side, char *trans, integer *m, integer *n, 
+/* Subroutine */ HYPRE_Int zunmlq_(char *side, char *trans, integer *m, integer *n, 
 	integer *k, doublecomplex *a, integer *lda, doublecomplex *tau, 
 	doublecomplex *c__, integer *ldc, doublecomplex *work, integer *lwork,
 	 integer *info)
@@ -15,7 +16,7 @@
     Purpose   
     =======   
 
-    ZUNMQR overwrites the general complex M-by-N matrix C with   
+    ZUNMLQ overwrites the general complex M-by-N matrix C with   
 
                     SIDE = 'L'     SIDE = 'R'   
     TRANS = 'N':      Q * C          C * Q   
@@ -24,9 +25,9 @@
     where Q is a complex unitary matrix defined as the product of k   
     elementary reflectors   
 
-          Q = H(1) H(2) . . . H(k)   
+          Q = H(k)' . . . H(2)' H(1)'   
 
-    as returned by ZGEQRF. Q is of order M if SIDE = 'L' and of order N   
+    as returned by ZGELQF. Q is of order M if SIDE = 'L' and of order N   
     if SIDE = 'R'.   
 
     Arguments   
@@ -52,20 +53,20 @@
             If SIDE = 'L', M >= K >= 0;   
             if SIDE = 'R', N >= K >= 0.   
 
-    A       (input) COMPLEX*16 array, dimension (LDA,K)   
-            The i-th column must contain the vector which defines the   
+    A       (input) COMPLEX*16 array, dimension   
+                                 (LDA,M) if SIDE = 'L',   
+                                 (LDA,N) if SIDE = 'R'   
+            The i-th row must contain the vector which defines the   
             elementary reflector H(i), for i = 1,2,...,k, as returned by   
-            ZGEQRF in the first k columns of its array argument A.   
+            ZGELQF in the first k rows of its array argument A.   
             A is modified by the routine but restored on exit.   
 
     LDA     (input) INTEGER   
-            The leading dimension of the array A.   
-            If SIDE = 'L', LDA >= max(1,M);   
-            if SIDE = 'R', LDA >= max(1,N).   
+            The leading dimension of the array A. LDA >= max(1,K).   
 
     TAU     (input) COMPLEX*16 array, dimension (K)   
             TAU(i) must contain the scalar factor of the elementary   
-            reflector H(i), as returned by ZGEQRF.   
+            reflector H(i), as returned by ZGELQF.   
 
     C       (input/output) COMPLEX*16 array, dimension (LDC,N)   
             On entry, the M-by-N matrix C.   
@@ -81,7 +82,7 @@
             The dimension of the array WORK.   
             If SIDE = 'L', LWORK >= max(1,N);   
             if SIDE = 'R', LWORK >= max(1,M).   
-            For optimum performance LWORK >= N*NB if SIDE = 'L', and   
+            For optimum performance LWORK >= N*NB if SIDE 'L', and   
             LWORK >= M*NB if SIDE = 'R', where NB is the optimal   
             blocksize.   
 
@@ -119,7 +120,7 @@
     static doublecomplex t[4160]	/* was [65][64] */;
     extern logical lsame_(char *, char *);
     static integer nbmin, iinfo, i1, i2, i3, ib, ic, jc, nb, mi, ni;
-    extern /* Subroutine */ HYPRE_Int zunm2r_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zunml2_(char *, char *, integer *, integer *, 
 	    integer *, doublecomplex *, integer *, doublecomplex *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
     static integer nq, nw;
@@ -135,6 +136,7 @@
     extern /* Subroutine */ HYPRE_Int zlarft_(char *, char *, integer *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
 	    integer *);
+    static char transt[1];
     static integer lwkopt;
     static logical lquery;
     static integer iws;
@@ -178,7 +180,7 @@
 	*info = -4;
     } else if (*k < 0 || *k > nq) {
 	*info = -5;
-    } else if (*lda < max(1,nq)) {
+    } else if (*lda < max(1,*k)) {
 	*info = -7;
     } else if (*ldc < max(1,*m)) {
 	*info = -10;
@@ -196,7 +198,7 @@
 	i__3[0] = 1, a__1[0] = side;
 	i__3[1] = 1, a__1[1] = trans;
 	s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
-	i__1 = 64, i__2 = ilaenv_(&c__1, "ZUNMQR", ch__1, m, n, k, &c_n1, (
+	i__1 = 64, i__2 = ilaenv_(&c__1, "ZUNMLQ", ch__1, m, n, k, &c_n1, (
 		ftnlen)6, (ftnlen)2);
 	nb = min(i__1,i__2);
 	lwkopt = max(1,nw) * nb;
@@ -205,7 +207,7 @@
 
     if (*info != 0) {
 	i__1 = -(*info);
-	xerbla_("ZUNMQR", &i__1);
+	xerbla_("ZUNMLQ", &i__1);
 	return 0;
     } else if (lquery) {
 	return 0;
@@ -229,7 +231,7 @@
 	    i__3[0] = 1, a__1[0] = side;
 	    i__3[1] = 1, a__1[1] = trans;
 	    s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
-	    i__1 = 2, i__2 = ilaenv_(&c__2, "ZUNMQR", ch__1, m, n, k, &c_n1, (
+	    i__1 = 2, i__2 = ilaenv_(&c__2, "ZUNMLQ", ch__1, m, n, k, &c_n1, (
 		    ftnlen)6, (ftnlen)2);
 	    nbmin = max(i__1,i__2);
 	}
@@ -241,13 +243,13 @@
 
 /*        Use unblocked code */
 
-	zunm2r_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], &c__[
+	zunml2_(side, trans, m, n, k, &a[a_offset], lda, &tau[1], &c__[
 		c_offset], ldc, &work[1], &iinfo);
     } else {
 
 /*        Use blocked code */
 
-	if (left && ! notran || ! left && notran) {
+	if (left && notran || ! left && ! notran) {
 	    i1 = 1;
 	    i2 = *k;
 	    i3 = nb;
@@ -265,6 +267,12 @@
 	    ic = 1;
 	}
 
+	if (notran) {
+	    *(unsigned char *)transt = 'C';
+	} else {
+	    *(unsigned char *)transt = 'N';
+	}
+
 	i__1 = i2;
 	i__2 = i3;
 	for (i__ = i1; i__2 < 0 ? i__ >= i__1 : i__ <= i__1; i__ += i__2) {
@@ -276,8 +284,8 @@
              H = H(i) H(i+1) . . . H(i+ib-1) */
 
 	    i__4 = nq - i__ + 1;
-	    zlarft_("Forward", "Columnwise", &i__4, &ib, &a_ref(i__, i__), 
-		    lda, &tau[i__], t, &c__65);
+	    zlarft_("Forward", "Rowwise", &i__4, &ib, &a_ref(i__, i__), lda, &
+		    tau[i__], t, &c__65);
 	    if (left) {
 
 /*              H or H' is applied to C(i:m,1:n) */
@@ -294,18 +302,18 @@
 
 /*           Apply H or H' */
 
-	    zlarfb_(side, trans, "Forward", "Columnwise", &mi, &ni, &ib, &
-		    a_ref(i__, i__), lda, t, &c__65, &c___ref(ic, jc), ldc, &
-		    work[1], &ldwork);
+	    zlarfb_(side, transt, "Forward", "Rowwise", &mi, &ni, &ib, &a_ref(
+		    i__, i__), lda, t, &c__65, &c___ref(ic, jc), ldc, &work[1]
+		    , &ldwork);
 /* L10: */
 	}
     }
     work[1].r = (doublereal) lwkopt, work[1].i = 0.;
     return 0;
 
-/*     End of ZUNMQR */
+/*     End of ZUNMLQ */
 
-} /* zunmqr_ */
+} /* zunmlq_ */
 
 #undef c___ref
 #undef c___subscr

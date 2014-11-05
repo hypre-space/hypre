@@ -1,4 +1,3 @@
-
 #include "hypre_blas.h"
 #include "f2c.h"
 
