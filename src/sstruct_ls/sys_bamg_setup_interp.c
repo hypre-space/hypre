@@ -14,6 +14,8 @@
 #include "sys_bamg.h"
 #include "hypre_lapack.h"
 
+#include <HYPRE_config.h>   // for HYPRE_COMPLEX
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -176,14 +178,14 @@ void hypre_CheckReturnValue
  * Q is Mrows by Mrows.
  *--------------------------------------------------------------------------*/
 
-#if HYPRE_Complex == HYPRE_Real
-#define hypre_xgeqrf hypre_dgeqrf
-#define hypre_xxxmqr hypre_dormqr
-#define hypre_xtrtrs hypre_dtrtrs
-#else
+#ifdef HYPRE_COMPLEX
 #define hypre_xgeqrf hypre_zgeqrf
 #define hypre_xxxmqr hypre_zunmqr
 #define hypre_xtrtrs hypre_ztrtrs
+#else
+#define hypre_xgeqrf hypre_dgeqrf
+#define hypre_xxxmqr hypre_dormqr
+#define hypre_xtrtrs hypre_dtrtrs
 #endif
 
 HYPRE_Int hypre_LS
@@ -196,6 +198,10 @@ HYPRE_Int hypre_LS
   HYPRE_Int               Ccols
 )
 {
+#if DEBUG_SYSBAMG > 0
+  hypre_printf("hypre_LS: M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
+#endif
+
 #if DEBUG_SYSBAMG > 1
   // print M and b to check
   hypre_printf("hypre_LS: M | C = \n");
@@ -486,14 +492,14 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp
  * NB: nsvecs must be no more than Mcols/2.
  *----------------------------------------------------------------------------*/
 
-#if HYPRE_Complex == HYPRE_Real
-#define hypre_xgebrd hypre_dgebrd
-#define hypre_xbdsqr hypre_dbdsqr
-#define hypre_xxxmbr hypre_dormbr
-#else
+#ifdef HYPRE_COMPLEX
 #define hypre_xgebrd hypre_zgebrd
 #define hypre_xbdsqr hypre_zbdsqr
 #define hypre_xxxmbr hypre_zunmbr
+#else
+#define hypre_xgebrd hypre_dgebrd
+#define hypre_xbdsqr hypre_dbdsqr
+#define hypre_xxxmbr hypre_dormbr
 #endif
 
 HYPRE_Int hypre_SVD
