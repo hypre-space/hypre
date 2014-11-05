@@ -29,7 +29,7 @@
 
 #define sysbamg_dbgmsg( format, args... ) \
 { \
-  if ( DEBUG_SYSBAMG ) hypre_printf( "DEBUG_SYSBAMG: " format, ## args ); fflush(stdout); \
+  if ( DEBUG_SYSBAMG ) hypre_printf( "DEBUG_SYSBAMG (%s:%d): " format, __FILE__, __LINE__, ## args ); fflush(stdout); \
 }
 
 

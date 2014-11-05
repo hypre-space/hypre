@@ -182,10 +182,12 @@ void hypre_CheckReturnValue
 #define hypre_xgeqrf hypre_zgeqrf
 #define hypre_xxxmqr hypre_zunmqr
 #define hypre_xtrtrs hypre_ztrtrs
+#define TRANS "C"
 #else
 #define hypre_xgeqrf hypre_dgeqrf
 #define hypre_xxxmqr hypre_dormqr
 #define hypre_xtrtrs hypre_dtrtrs
+#define TRANS "T"
 #endif
 
 HYPRE_Int hypre_LS
@@ -234,7 +236,7 @@ HYPRE_Int hypre_LS
 #endif
 
   // Q is Mrows x Mrows, 'M' = Mrows, 'N' = 1, 'K' = Mrows, 'A' = elementary reflector array = M
-  hypre_xxxmqr( "Left", "Transpose", &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
+  hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xxxmqr", info );
 
 #if DEBUG_SYSBAMG > 1
@@ -246,9 +248,10 @@ HYPRE_Int hypre_LS
 
   // Here, the matrix is R, which is Mcols by Mcols, upper triangular, and stored in M.
   hypre_xtrtrs( "Upper", "No transpose", "Non-unit", &Mcols, &Ccols, M, &Mrows, C, &Crows, &info );
-  if ( info > 0 ) hypre_printf( "\nhypre_xtrtrs error: M is singular!" );
+  if ( info  >  0 ) hypre_printf( "\nhypre_xtrtrs error: M is singular!" );
+  if ( info == -7 ) hypre_printf( "\nhypre_xtrtrs error: the number of test vectors must be greater"
+                                  " than the stencil size. ( %d < %d )", Mrows, Mcols );
   hypre_CheckReturnValue( "hypre_xtrtrs", info );
-
 
 #if DEBUG_SYSBAMG > 1
   // print x to check
@@ -259,6 +262,8 @@ HYPRE_Int hypre_LS
 
   hypre_TFree( tau );
   hypre_TFree( work );
+
+  printf("%s:%d %s finished.\n", __FILE__, __LINE__, __func__);
 
   return hypre_error_flag;
 }
@@ -370,6 +375,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
         hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
 
+        sysbamg_dbgmsg("nvars %d  P_StencilSize %d  sP %p  iP %d\n", nvars, P_StencilSize, sP, iP);
+
         for ( J = 0; J < nvars; J++ ) {
           for ( sj = 0; sj < P_StencilSize; sj++ ) {
             Mj = J*P_StencilSize + sj;
@@ -380,10 +387,15 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 #endif
           }
         }
+
+        printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
       }
+
       hypre_BoxLoop2End(iP, iv);
     }
   }
+
+  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
 
   for ( I = 0; I < nvars; I++ ) {
     for ( J = 0; J < nvars; J++ ) {
@@ -394,6 +406,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   hypre_TFree( v_offsets );
   hypre_TFree( C );
   hypre_TFree( M );
+
+  printf("%s:%d %s finished.\n", __FILE__, __LINE__, __func__);
 
   return hypre_error_flag;
 }
