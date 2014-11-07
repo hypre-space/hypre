@@ -201,9 +201,9 @@ HYPRE_Int hypre_LS
   HYPRE_Int               Ccols
 )
 {
-#if DEBUG_SYSBAMG > 0
-  hypre_printf("hypre_LS: M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
-#endif
+  //sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
+
+  HYPRE_Int Mi, Mj;
 
 #if DEBUG_SYSBAMG > 1
   // print M and b to check
@@ -242,17 +242,25 @@ HYPRE_Int hypre_LS
 
 #if DEBUG_SYSBAMG > 1
   // print c to check
-  hypre_printf("c for I=%d, iv=%d, k=%d\n", I, iv, k);
+  hypre_printf("c");
   for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e\n", C[Mj]);
   hypre_printf("\n");
 #endif
 
   // Here, the matrix is R, which is Mcols by Mcols, upper triangular, and stored in M.
   hypre_xtrtrs( "Upper", "No transpose", "Non-unit", &Mcols, &Ccols, M, &Mrows, C, &Crows, &info );
-  if ( info  >  0 ) hypre_printf( "\nhypre_xtrtrs error: M is singular!" );
-  if ( info == -7 ) hypre_printf( "\nhypre_xtrtrs error: the number of test vectors must be greater"
-                                  " than the stencil size. ( %d < %d )", Mrows, Mcols );
-  hypre_CheckReturnValue( "hypre_xtrtrs", info );
+  if ( info  >  0 ) {
+    hypre_printf( "XXX hypre_xtrtrs error: M is singular! Using C[*] = %g.\n", 1.0/Mcols);
+    for ( Mj = 0; Mj < Mcols; Mj++ ) C[Mj] = 1.0/Mcols;     // XXX set to naive avg if trtrs fails
+  }
+  else if ( info == -7 ) {
+    hypre_printf( "\nhypre_xtrtrs error: the number of test vectors must be greater"
+                  " than the stencil size. ( %d < %d )", Mrows, Mcols );
+    exit(9);
+  }
+  else {
+    hypre_CheckReturnValue( "hypre_xtrtrs", info );
+  }
 
 #if DEBUG_SYSBAMG > 1
   // print x to check
@@ -264,7 +272,7 @@ HYPRE_Int hypre_LS
   hypre_TFree( tau );
   hypre_TFree( work );
 
-  printf("%s:%d %s finished.\n", __FILE__, __LINE__, __func__);
+  //printf("%s %d %s finished.\n", __FILE__, __LINE__, __func__);
 
   return hypre_error_flag;
 }
@@ -333,6 +341,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   Ccols = 1;
   C     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Crows*Ccols);
 
+  sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
+
   GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
   hypre_ForBoxI(b, GridBoxes)
@@ -376,8 +386,8 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
         hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
 
-        sysbamg_dbgmsg("NVars %d  P_StencilSize %d  sP %p  iP %d  C %p  b %d\n",
-                       NVars, P_StencilSize, sP, iP, C, b);
+        //sysbamg_dbgmsg("NVars %d  P_StencilSize %d  sP %p  iP %d  C %p  b %d\n",
+        //               NVars, P_StencilSize, sP, iP, C, b);
 
         for ( J = 0; J < NVars; J++ )
         {
@@ -393,26 +403,29 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
           }
         }
 
-        printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+        //printf("%s %d %s\n", __FILE__, __LINE__, __func__);
       }
 
       hypre_BoxLoop2End(iP, iv);
     }
   }
 
-  printf("%s:%d %s\n", __FILE__, __LINE__, __func__);
+  printf("%s %d %s\n", __FILE__, __LINE__, __func__);
 
   for ( I = 0; I < NVars; I++ ) {
     for ( J = 0; J < NVars; J++ ) {
+      if ( sP[I][J] == NULL ) continue;
       hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
     }
   }
+
+  printf("%s %d %s\n", __FILE__, __LINE__, __func__);
 
   hypre_TFree( v_offsets );
   hypre_TFree( C );
   hypre_TFree( M );
 
-  printf("%s:%d %s finished.\n", __FILE__, __LINE__, __func__);
+  printf("%s %d %s finished.\n", __FILE__, __LINE__, __func__);
 
   return hypre_error_flag;
 }

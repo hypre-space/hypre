@@ -1,8 +1,6 @@
 #include "hypre_blas.h"
 #include "f2c.h"
 
-#include "fio.h"
-
 #ifdef KR_headers
 VOID d_cnjg(r, z) doublecomplex *r, *z;
 #else
