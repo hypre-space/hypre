@@ -13,6 +13,7 @@
 /******************************************************************************
  *
  * Structured matrix-transpose-vector multiply routine
+ *  NB: Hermitian conjugate if HYPRE_COMPLEX !
  *
  *****************************************************************************/
 
@@ -25,10 +26,6 @@
 #define MAX_DEPTH 1
 
 #define LINE printf("%s %d\n", __FILE__, __LINE__);
-
-#include <complex.h>
-#define print_i(x,y) if ( rank >= 0 ) printf(" " #x " %6d", y);
-#define print_c(x,y) if ( rank >= 0 ) printf(" " #x " %12.4f %12.4f", creal(y), cimag(y));
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatvecData data structure
@@ -379,7 +376,7 @@ HYPRE_Int hypre_StructMatvecTCC0(
               // transpose here by swapping x and y
               HYPRE_Int y_index = xi + xoff0;
               HYPRE_Int x_index = yi;
-              yp[y_index] += Ap0[Ai] * xp[x_index];
+              yp[y_index] += hypre_conj( Ap0[Ai] ) * xp[x_index];
             }
             hypre_BoxLoop3End(Ai, xi, yi);
 

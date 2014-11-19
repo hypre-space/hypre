@@ -663,10 +663,16 @@ hypre_SysBAMGSetupTV
       hypre_SStructPVectorCreate(comm, PGrid_l[l], &tv[l][k]);
       hypre_SStructPVectorInitialize(tv[l][k]);
       hypre_SStructPVectorAssemble(tv[l][k]);
-
-      if ( l == 0 && k < num_rtv*nsym )
-        hypre_SStructPVectorSetRandomValues(tv[l][k], (HYPRE_Int)time(0)+k);
     }
+  }
+
+  for ( k = 0; k < num_rtv*nsym; k++ ) {
+    hypre_SStructPVectorSetRandomValues(tv[0][k], (HYPRE_Int)time(0)+k);
+
+#if DEBUG_SYSBAMG > 0
+    hypre_sprintf(filename, "sysbamg_tv_init,k=%d.dat", k);
+    hypre_SStructPVectorPrint(filename, tv[0][k], 0);
+#endif
   }
 
   for (l = 0; l < (num_levels - 1); l++)
@@ -707,7 +713,7 @@ hypre_SysBAMGSetupTV
     // 5) destroy the rhs
     hypre_SStructPVectorDestroy( rhs );
 
-#if DEBUG_SYSBAMG
+#if DEBUG_SYSBAMG > 0
     hypre_printf("printing sysbamg_tv level-%d test vectors\n", l);
     for ( k = 0; k < num_rtv*nsym; k++ ) {
       hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);

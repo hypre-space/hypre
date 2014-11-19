@@ -13,6 +13,10 @@
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
 
+#ifdef HYPRE_COMPLEX
+#include <complex.h>
+#endif
+
 HYPRE_Int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
                                    HYPRE_Int seed )
@@ -20,7 +24,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Box          *v_data_box;
                     
    HYPRE_Int           vi;
-   HYPRE_Real         *vp;
+   HYPRE_Complex      *vp;
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -57,7 +61,12 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 #endif
       hypre_BoxLoop1For(vi)
       {
+#ifdef HYPRE_COMPLEX
+         vp[vi] = (rand()-RAND_MAX/2) + (rand()-RAND_MAX/2)*I;
+         vp[vi] /= hypre_cabs(vp[vi]);
+#else
          vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
+#endif
       }
       hypre_BoxLoop1End(vi);
    }

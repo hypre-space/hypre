@@ -118,9 +118,6 @@ hypre_SStructPComplexInnerProd( hypre_SStructPVector *px,
       sresult = hypre_StructComplexInnerProd(hypre_SStructPVectorSVector(px, var),
                                              hypre_SStructPVectorSVector(py, var));
       presult += sresult;
-
-      //printf("DEBUG - %s: sresult: %g + i %g\n", __func__, creal(sresult), cimag(sresult)); // XXX
-      //printf("DEBUG - %s: presult: %g + i %g\n", __func__, creal(presult), cimag(presult)); // XXX
    }
 
    *presult_ptr = presult;
@@ -161,8 +158,6 @@ hypre_SStructComplexInnerProd( hypre_SStructVector *x,
          hypre_SStructPComplexInnerProd(hypre_SStructVectorPVector(x, part),
                                         hypre_SStructVectorPVector(y, part), &presult);
          result += presult;
-
-         //printf("DEBUG - %s: result: %g + i %g\n", __func__, creal(result), cimag(result)); // XXX
       }
    }
 
@@ -175,8 +170,6 @@ hypre_SStructComplexInnerProd( hypre_SStructVector *x,
       hypre_SStructVectorConvert(y, &y_par);
 
       result= hypre_ParVectorComplexInnerProd(x_par, y_par);
-      
-      //printf("DEBUG - %s: result: %g + i %g\n", __func__, creal(result), cimag(result)); // XXX
    }
                                                                                                                 
    *result_ptr = result;

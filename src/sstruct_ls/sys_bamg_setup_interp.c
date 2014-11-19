@@ -16,6 +16,8 @@
 
 #include <HYPRE_config.h>   // for HYPRE_COMPLEX
 
+#define hypre_re_im( x ) hypre_creal(x), hypre_cimag(x)
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -201,17 +203,18 @@ HYPRE_Int hypre_LS
   HYPRE_Int               Ccols
 )
 {
-  //sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
+  sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
 
   HYPRE_Int Mi, Mj;
 
-#if DEBUG_SYSBAMG > 1
+#if DEBUG_SYSBAMG > 0
   // print M and b to check
   hypre_printf("hypre_LS: M | C = \n");
   for ( Mi = 0; Mi < Mrows; Mi++ )
   {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
-    hypre_printf("  | %16.6e\n", C[Mi]);
+    for ( Mj = 0; Mj < Mcols; Mj++ )
+      hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(M[Mi+Mj*Mrows]));
+    hypre_printf("  | ( %16.6e %16.6e )\n", hypre_re_im(C[Mi]));
   }
   hypre_printf("\n");
 #endif
@@ -225,12 +228,12 @@ HYPRE_Int hypre_LS
   hypre_xgeqrf( &Mrows, &Mcols, M, &Mrows, tau, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xgeqrf", info );
 
-#if DEBUG_SYSBAMG > 1
+#if DEBUG_SYSBAMG > 0
   // print Q\R to check
   hypre_printf("hypre_LS: Q\\R = \n");
   for ( Mi = 0; Mi < Mrows; Mi++ )
   {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
+    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(M[Mi+Mj*Mrows]));
     hypre_printf("\n");
   }
   hypre_printf("\n");
@@ -240,10 +243,10 @@ HYPRE_Int hypre_LS
   hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xxxmqr", info );
 
-#if DEBUG_SYSBAMG > 1
+#if DEBUG_SYSBAMG > 0
   // print c to check
-  hypre_printf("c");
-  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e\n", C[Mj]);
+  hypre_printf("c\n");
+  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(C[Mj]));
   hypre_printf("\n");
 #endif
 
@@ -252,6 +255,7 @@ HYPRE_Int hypre_LS
   if ( info  >  0 ) {
     hypre_printf( "XXX hypre_xtrtrs error: M is singular! Using C[*] = %g.\n", 1.0/Mcols);
     for ( Mj = 0; Mj < Mcols; Mj++ ) C[Mj] = 1.0/Mcols;     // XXX set to naive avg if trtrs fails
+    exit(9);
   }
   else if ( info == -7 ) {
     hypre_printf( "\nhypre_xtrtrs error: the number of test vectors must be greater"
@@ -262,10 +266,10 @@ HYPRE_Int hypre_LS
     hypre_CheckReturnValue( "hypre_xtrtrs", info );
   }
 
-#if DEBUG_SYSBAMG > 1
+#if DEBUG_SYSBAMG > 0
   // print x to check
-  hypre_printf("x for I=%d, iv=%d, k=%d\n", I, iv, k);
-  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e\n", C[Mj]);
+  hypre_printf("x\n");
+  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(C[Mj]));
   hypre_printf("\n");
 #endif
 
@@ -281,6 +285,9 @@ HYPRE_Int hypre_LS
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
+// INTERVARIABLE: 0 iff all inter-variable components of P and R = 0
+#define INTERVARIABLE 0
 
 HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 (
@@ -334,14 +341,19 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   v_offsets = (HYPRE_Int*) hypre_TAlloc(HYPRE_Int, P_StencilSize);
 
   Mrows = nvecs;
+#if INTERVARIABLE
   Mcols = NVars * P_StencilSize;
+#else
+  Mcols = P_StencilSize;
+#endif
+
   M     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
 
   Crows = Mrows;
   Ccols = 1;
   C     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Crows*Ccols);
 
-  sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
+  //sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
 
   GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
@@ -376,18 +388,27 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
           C[Mi] = hypre_StructVectorBoxData( sv[k][I], b )[iv];
 
-          for ( J = 0; J < NVars; J++ ) {
+#if INTERVARIABLE
+          for ( J = 0; J < NVars; J++ )
+#else
+          for ( J = I; J < I+1; J++ )
+#endif
+          {
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
+#if INTERVARIABLE
               Mj = J*P_StencilSize + sj;
+#else
+              Mj = sj;
+#endif
               M[Mi + Mj*Mrows] = hypre_StructVectorBoxData( sv[k][J], b )[iv + v_offsets[sj]];
+              sysbamg_dbgmsg("I %d k %d J %d sj %d Mi %d Mj %d M ( %16.6e %16.6e )\n", I, k, J, sj, Mi, Mj, M[Mi+Mj*Mrows]);
             }
           }
         }
 
-        hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
+        sysbamg_dbgmsg("iP %d iv %d\n", iP, iv)
 
-        //sysbamg_dbgmsg("NVars %d  P_StencilSize %d  sP %p  iP %d  C %p  b %d\n",
-        //               NVars, P_StencilSize, sP, iP, C, b);
+        hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
 
         for ( J = 0; J < NVars; J++ )
         {
