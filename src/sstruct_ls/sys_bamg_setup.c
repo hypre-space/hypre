@@ -675,6 +675,9 @@ hypre_SysBAMGSetupTV
 #endif
   }
 
+
+  // XXX Need to coarsen the vectors!
+
   for (l = 0; l < (num_levels - 1); l++)
   {
     sysbamg_dbgmsg("%s:%d smooth test vectors l=%d\n", __FILE__, __LINE__, l);
