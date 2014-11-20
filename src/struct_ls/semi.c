@@ -57,7 +57,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
 
-   HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             num_ghost[] = {0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0};
    HYPRE_Int             i, j, s, dim;
 
    if (hypre_StructMatrixConstantCoefficient(P) != 0)
@@ -93,11 +93,11 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
       {
          case 0:
             box_aa = hypre_CommInfoSendBoxes(comm_info);
-            hypre_SetIndex3(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
+            hypre_SetIndex(hypre_CommInfoSendStride(comm_info), 1);
             break;
          case 1:
             box_aa = hypre_CommInfoRecvBoxes(comm_info);
-            hypre_SetIndex3(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
+            hypre_SetIndex(hypre_CommInfoRecvStride(comm_info), 1);
             break;
          case 2:
             box_aa = hypre_CommInfoSendRBoxes(comm_info);
@@ -119,10 +119,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    }
 
    comm_pkg = hypre_StructMatrixCommPkg(P);
-   if (comm_pkg)
-   {
-      hypre_CommPkgDestroy(comm_pkg);
-   }
+
+   if (comm_pkg) { hypre_CommPkgDestroy(comm_pkg); }
    
    hypre_CommPkgCreate(comm_info,
                        hypre_StructMatrixDataSpace(P),
@@ -130,13 +128,16 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
                        hypre_StructMatrixNumValues(P), NULL, 0,
                        hypre_StructMatrixComm(P),
                        &comm_pkg);
+   
    hypre_CommInfoDestroy(comm_info);
+   
    hypre_StructMatrixCommPkg(P) = comm_pkg;
 
    hypre_InitializeCommunication(comm_pkg,
                                  hypre_StructMatrixData(P),
                                  hypre_StructMatrixData(P), 0, 0,
                                  &comm_handle);
+   
    hypre_FinalizeCommunication(comm_handle);
 
    return hypre_error_flag;

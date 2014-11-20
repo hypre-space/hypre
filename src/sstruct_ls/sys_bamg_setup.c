@@ -630,7 +630,6 @@ hypre_SysBAMGSetupTV
   MPI_Comm                comm              = (bamg->comm);
   HYPRE_Int               num_rtv           = (bamg->num_rtv);
   HYPRE_Int               num_stv           = (bamg->num_stv);
-  HYPRE_Int               num_pre_relax_tv  = (bamg->num_pre_relax_tv);
   HYPRE_Int               relax_type        = (bamg->relax_type);
   HYPRE_Int               num_levels        = (bamg->num_levels);
   HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
@@ -649,10 +648,6 @@ hypre_SysBAMGSetupTV
 
   HYPRE_Int               l, k;
 
-#if DEBUG_SYSBAMG
-  char                    filename[255];
-#endif
-
   sysbamg_dbgmsg("%s:%d symmetric=%d num_tv*nsym=%d\n", __FILE__, __LINE__, symmetric, num_tv*nsym);
 
   for ( l = 0; l < num_levels; l++ )
@@ -670,58 +665,9 @@ hypre_SysBAMGSetupTV
     hypre_SStructPVectorSetRandomValues(tv[0][k], (HYPRE_Int)time(0)+k);
 
 #if DEBUG_SYSBAMG > 0
+    char filename[255];
     hypre_sprintf(filename, "sysbamg_tv_init,k=%d.dat", k);
     hypre_SStructPVectorPrint(filename, tv[0][k], 0);
-#endif
-  }
-
-
-  // XXX Need to coarsen the vectors!
-
-  for (l = 0; l < (num_levels - 1); l++)
-  {
-    sysbamg_dbgmsg("%s:%d smooth test vectors l=%d\n", __FILE__, __LINE__, l);
-
-    // 1) set up the rhs for smoothing, zero for now
-    hypre_SStructPVector* rhs;
-    hypre_SStructPVectorCreate(comm, PGrid_l[l], &rhs);
-    hypre_SStructPVectorInitialize(rhs);
-    hypre_SStructPVectorAssemble(rhs);
-    hypre_SStructPVectorSetConstantValues(rhs, 0.0);
-
-    // 2) set up the relax struct
-    void* tv_relax = hypre_SysBAMGRelaxCreate(comm);
-    hypre_SysBAMGRelaxSetTol(tv_relax, 0.0);
-    if (usr_jacobi_weight) {
-      hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, jacobi_weight);
-    }
-    else {
-      hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, relax_weights[l]);
-    }
-    hypre_SysBAMGRelaxSetType(tv_relax, relax_type);
-    hypre_SysBAMGRelaxSetTempVec(tv_relax, tx_l[l]);
-    hypre_SysBAMGRelaxSetPreRelax(tv_relax);
-    hypre_SysBAMGRelaxSetMaxIter(tv_relax, num_pre_relax_tv);
-    hypre_SysBAMGRelaxSetZeroGuess(tv_relax, 0);
-    hypre_SysBAMGRelaxSetup(tv_relax, A_l[l], rhs, x_l[l]);
-
-    // 3) smooth
-    for ( k = 0; k < num_rtv*nsym; k++ ) {
-      hypre_SysBAMGRelax( tv_relax, A_l[l], rhs, tv[l][k] );
-    }
-
-    // 4) destroy the relax struct
-    hypre_SysBAMGRelaxDestroy( tv_relax );
-
-    // 5) destroy the rhs
-    hypre_SStructPVectorDestroy( rhs );
-
-#if DEBUG_SYSBAMG > 0
-    hypre_printf("printing sysbamg_tv level-%d test vectors\n", l);
-    for ( k = 0; k < num_rtv*nsym; k++ ) {
-      hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);
-      hypre_SStructPVectorPrint(filename, tv[l][k], 0);
-    }
 #endif
   }
 
@@ -751,6 +697,7 @@ hypre_SysBAMGSetupOperators
   hypre_SStructPVector**  e_l               = (bamg->e_l);
   hypre_SStructPVector**  r_l               = (bamg->r_l);
   hypre_SStructPVector**  tx_l              = (bamg->tx_l);
+  hypre_SStructPGrid**    PGrid_l           = (bamg->PGrid_l);
 
   void**                  relax_data_l      = (bamg->relax_data_l);
   void**                  matvec_data_l     = (bamg->matvec_data_l);
@@ -761,6 +708,8 @@ hypre_SysBAMGSetupOperators
   HYPRE_Int               relax_type        = (bamg->relax_type);
   HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
   HYPRE_Real              jacobi_weight     = (bamg->jacobi_weight);
+  HYPRE_Int               num_pre_relax_tv  = (bamg->num_pre_relax_tv);
+  MPI_Comm                comm              = (bamg->comm);
 
   hypre_Index             cindex;
   hypre_Index             findex;
@@ -774,6 +723,54 @@ hypre_SysBAMGSetupOperators
     hypre_BAMGSetFIndex(cdir_l[l], findex);
     hypre_BAMGSetStride(cdir_l[l], stride);
 
+    // smooth the test vectors at *this* level
+    {
+      sysbamg_dbgmsg("%s:%d smooth test vectors l=%d\n", __FILE__, __LINE__, l);
+
+      // 1) set up the rhs for smoothing, zero for now
+      hypre_SStructPVector* rhs;
+      hypre_SStructPVectorCreate(comm, PGrid_l[l], &rhs);
+      hypre_SStructPVectorInitialize(rhs);
+      hypre_SStructPVectorAssemble(rhs);
+      hypre_SStructPVectorSetConstantValues(rhs, 0.0);
+
+      // 2) set up the relax struct
+      void* tv_relax = hypre_SysBAMGRelaxCreate(comm);
+      hypre_SysBAMGRelaxSetTol(tv_relax, 0.0);
+      if (usr_jacobi_weight) {
+        hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, jacobi_weight);
+      }
+      else {
+        hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, relax_weights[l]);
+      }
+      hypre_SysBAMGRelaxSetType(tv_relax, relax_type);
+      hypre_SysBAMGRelaxSetTempVec(tv_relax, tx_l[l]);
+      hypre_SysBAMGRelaxSetPreRelax(tv_relax);
+      hypre_SysBAMGRelaxSetMaxIter(tv_relax, num_pre_relax_tv);
+      hypre_SysBAMGRelaxSetZeroGuess(tv_relax, 0);
+      hypre_SysBAMGRelaxSetup(tv_relax, A_l[l], rhs, x_l[l]);
+
+      // 3) smooth
+      for ( k = 0; k < num_tv_; k++ ) {
+        hypre_SysBAMGRelax( tv_relax, A_l[l], rhs, tv[l][k] );
+      }
+
+      // 4) destroy the relax struct
+      hypre_SysBAMGRelaxDestroy( tv_relax );
+
+      // 5) destroy the rhs
+      hypre_SStructPVectorDestroy( rhs );
+
+#if DEBUG_SYSBAMG > 0
+      char filename[255];
+      hypre_printf("printing sysbamg_tv level-%d test vectors\n", l);
+      for ( k = 0; k < num_tv_; k++ ) {
+        hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);
+        hypre_SStructPVectorPrint(filename, tv[l][k], 0);
+      }
+#endif
+    }
+
     /* set up the interpolation operator */
     hypre_SysBAMGSetupInterpOp(A_l[l], cdir_l[l], findex, stride, P_l[l], num_tv_, tv[l]);
 
@@ -786,8 +783,7 @@ hypre_SysBAMGSetupOperators
     hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l], cindex, findex, stride);
 
     /* set up the restriction routine */
-    hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1],
-        cindex, findex, stride);
+    hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1], cindex, findex, stride);
 
     // restrict the tv[l] to tv[l+1] (NB: don't need tv's on the coarsest grid)
     if ( l < num_levels-2 ) {

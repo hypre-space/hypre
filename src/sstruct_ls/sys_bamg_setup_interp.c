@@ -203,11 +203,11 @@ HYPRE_Int hypre_LS
   HYPRE_Int               Ccols
 )
 {
-  sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
+  //sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
 
   HYPRE_Int Mi, Mj;
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
   // print M and b to check
   hypre_printf("hypre_LS: M | C = \n");
   for ( Mi = 0; Mi < Mrows; Mi++ )
@@ -228,7 +228,7 @@ HYPRE_Int hypre_LS
   hypre_xgeqrf( &Mrows, &Mcols, M, &Mrows, tau, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xgeqrf", info );
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
   // print Q\R to check
   hypre_printf("hypre_LS: Q\\R = \n");
   for ( Mi = 0; Mi < Mrows; Mi++ )
@@ -243,7 +243,7 @@ HYPRE_Int hypre_LS
   hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xxxmqr", info );
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
   // print c to check
   hypre_printf("c\n");
   for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(C[Mj]));
@@ -266,7 +266,7 @@ HYPRE_Int hypre_LS
     hypre_CheckReturnValue( "hypre_xtrtrs", info );
   }
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
   // print x to check
   hypre_printf("x\n");
   for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(C[Mj]));
@@ -276,7 +276,7 @@ HYPRE_Int hypre_LS
   hypre_TFree( tau );
   hypre_TFree( work );
 
-  //printf("%s %d %s finished.\n", __FILE__, __LINE__, __func__);
+  //printf("%s %3d %s finished.\n", __FILE__, __LINE__, __func__);
 
   return hypre_error_flag;
 }
@@ -285,9 +285,6 @@ HYPRE_Int hypre_LS
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
-// INTERVARIABLE: 0 iff all inter-variable components of P and R = 0
-#define INTERVARIABLE 0
 
 HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 (
@@ -317,7 +314,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   HYPRE_Complex*          M, *C;
 
-  HYPRE_Int               NDim, Mrows, Mcols, Mi, Mj, Crows, Ccols;
+  HYPRE_Int               NDim, numIJ, Mrows, Mcols, Mi, Mj, Crows, Ccols;
 
   HYPRE_Int               b, I, J, i, j, k, sj, iP, iv;
 
@@ -340,12 +337,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   v_offsets = (HYPRE_Int*) hypre_TAlloc(HYPRE_Int, P_StencilSize);
 
+  for ( J = 0; J < NVars; J++ ) {
+    if ( sP[0][J] != NULL ) numIJ++;    // XXX assume numIJ same for all I
+  }
+
   Mrows = nvecs;
-#if INTERVARIABLE
-  Mcols = NVars * P_StencilSize;
-#else
-  Mcols = P_StencilSize;
-#endif
+  Mcols = numIJ * P_StencilSize;
 
   M     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
 
@@ -382,31 +379,32 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 #endif
       hypre_BoxLoop2For(iP, iv)
       {
+#if DEBUG_SYSBAMG > 1
+        hypre_Index iIndex;
+        hypre_BoxLoopGetIndex( iIndex );
+        sysbamg_dbgmsg("Set up LS - iP %d iv %d\n", iP, iv);
+        printIndex( iIndex, NDim ); // dbgmsg
+#endif
+
         for ( k = 0; k < nvecs; k++ )
         {
           Mi = k;
 
           C[Mi] = hypre_StructVectorBoxData( sv[k][I], b )[iv];
 
-#if INTERVARIABLE
-          for ( J = 0; J < NVars; J++ )
-#else
-          for ( J = I; J < I+1; J++ )
-#endif
+          for ( J = 0, numIJ = 0; J < NVars; J++ )
           {
+            if ( sP[I][J] == NULL ) continue;
+
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
-#if INTERVARIABLE
-              Mj = J*P_StencilSize + sj;
-#else
-              Mj = sj;
-#endif
+              Mj = numIJ*P_StencilSize + sj;
               M[Mi + Mj*Mrows] = hypre_StructVectorBoxData( sv[k][J], b )[iv + v_offsets[sj]];
-              sysbamg_dbgmsg("I %d k %d J %d sj %d Mi %d Mj %d M ( %16.6e %16.6e )\n", I, k, J, sj, Mi, Mj, M[Mi+Mj*Mrows]);
+              //sysbamg_dbgmsg("I %d k %d J %d sj %d Mi %d Mj %d M ( %16.6e %16.6e )\n", I, k, J, sj, Mi, Mj, M[Mi+Mj*Mrows]);
             }
+
+            numIJ++;
           }
         }
-
-        sysbamg_dbgmsg("iP %d iv %d\n", iP, iv)
 
         hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
 
@@ -423,30 +421,32 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 #endif
           }
         }
-
-        //printf("%s %d %s\n", __FILE__, __LINE__, __func__);
       }
-
       hypre_BoxLoop2End(iP, iv);
     }
   }
 
-  printf("%s %d %s\n", __FILE__, __LINE__, __func__);
+  printf("%s %3d %s\n", __FILE__, __LINE__, __func__);
+
+  printf("findex\n"); printIndex(findex,NDim);
+  printf("stride\n"); printIndex(stride,NDim);
+  printf("cdir %d\n", cdir);
 
   for ( I = 0; I < NVars; I++ ) {
     for ( J = 0; J < NVars; J++ ) {
       if ( sP[I][J] == NULL ) continue;
+      printf("I %d J %d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
       hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
     }
   }
 
-  printf("%s %d %s\n", __FILE__, __LINE__, __func__);
+  printf("%s %3d %s\n", __FILE__, __LINE__, __func__);
 
   hypre_TFree( v_offsets );
   hypre_TFree( C );
   hypre_TFree( M );
 
-  printf("%s %d %s finished.\n", __FILE__, __LINE__, __func__);
+  printf("%s %3d %s finished.\n", __FILE__, __LINE__, __func__);
 
   return hypre_error_flag;
 }

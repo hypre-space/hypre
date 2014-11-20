@@ -40,7 +40,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
    srand( seed );
 
-   hypre_SetIndex3(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
  
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    hypre_ForBoxI(i, boxes)
