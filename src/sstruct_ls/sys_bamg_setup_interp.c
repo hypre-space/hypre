@@ -854,6 +854,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   start         = hypre_BoxIMin( GridBox );
   hypre_SetIndex( stride, 1 );
 
+#if 0
   for ( I = 0; I < NVars; I++ )
   {
     for ( J = 0; J < NVars; J++ )
@@ -899,6 +900,58 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       hypre_BoxLoop1End( i );
     }
   }
+#else
+  for ( I = 0; I < NVars; I++ )
+  {
+    for ( J = 0; J < NVars; J++ )
+    {
+      StructMatrix  = hypre_SStructPMatrixSMatrix( A, I, J );
+      BoxArray      = hypre_StructMatrixDataSpace( StructMatrix );
+      DataBox       = hypre_BoxArrayBox( BoxArray, BoxIdx );
+
+      hypre_BoxGetSize( DataBox, DataBoxSize );
+
+      Stencil       = hypre_StructMatrixStencil( StructMatrix );
+      StencilSize   = hypre_StructStencilSize( Stencil );
+      StencilShape  = hypre_StructStencilShape( Stencil );
+
+      hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
+
+// Beginning of non-parallelized section (PDP)
+#ifdef HYPRE_USING_OPENMP
+      int num_threads = omp_get_num_threads();
+
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,j,Mi,Mj) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop1For( i )
+      {
+        int th_id = omp_get_thread_num();
+
+        hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
+
+        //sysbamg_dbgmsg( "iIndex:\n" );
+        //printIndex( iIndex, NDim ); // dbg
+
+        Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
+
+        for ( si = 0; si < StencilSize; si++ )
+        {
+          AddIndex( jIndex, iIndex, StencilShape[si], GridBox );
+
+          //sysbamg_dbgmsg( "StencilShape[%d] and jIndex:\n", si )
+          //printIndex( StencilShape[si], NDim ); // dbg
+          //printIndex( jIndex, NDim ); // dbg
+
+          Mj = J * GridBoxVolume + IndexToInt( jIndex, GridBox );
+
+          M[ Mi + Mj * Mrows ] = hypre_StructMatrixBoxData( StructMatrix, BoxIdx, si )[ i ];  // NB: column-major
+          //sysbamg_dbgmsg( "Mi %3d Mj %3d M %12.3e I %d  J %d  i %d  si %d\n", Mi, Mj, M[Mi+Mj*Mrows], I, J, i, si );
+        }
+      }
+      hypre_BoxLoop1End( i );
+    }
+  }
+#endif
 
   symmetric     = hypre_SStructPMatrixSymmetric(A)[0][0];     // XXX assume var-indep symmetry
 
