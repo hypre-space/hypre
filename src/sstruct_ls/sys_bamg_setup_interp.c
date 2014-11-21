@@ -409,7 +409,11 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 #endif
       hypre_BoxLoop2For(iP, iv)
       {
+#ifdef HYPRE_USING_OPENMP
         thread_num = omp_get_thread_num();
+#else
+        thread_num = 0;
+#endif
 
 #if DEBUG_SYSBAMG > 1
 #ifdef HYPRE_USING_OPENMP
