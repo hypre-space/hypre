@@ -854,7 +854,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   start         = hypre_BoxIMin( GridBox );
   hypre_SetIndex( stride, 1 );
 
-#if 0
+#if 1
   for ( I = 0; I < NVars; I++ )
   {
     for ( J = 0; J < NVars; J++ )
