@@ -375,7 +375,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
       hypre_BoxLoop2Begin( NDim, BoxSize, PDataBox, startc, stridec, iP, vDataBox, start, stride, iv );
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iv,J) HYPRE_SMP_SCHEDULE
+//#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iv,J,Mi,Mj,sj,k) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(iP, iv)
       {
@@ -872,7 +872,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,j,Mi,Mj) HYPRE_SMP_SCHEDULE
+//#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,j,Mi,Mj) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For( i )
       {
@@ -975,7 +975,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi) HYPRE_SMP_SCHEDULE
+//#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For( i )
       {
