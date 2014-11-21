@@ -337,7 +337,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   v_offsets = (HYPRE_Int*) hypre_TAlloc(HYPRE_Int, P_StencilSize);
 
-  for ( J = 0; J < NVars; J++ ) {
+  for ( J = 0, numIJ = 0; J < NVars; J++ ) {
     if ( sP[0][J] != NULL ) numIJ++;    // XXX assume numIJ same for all I
   }
 
@@ -435,18 +435,18 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   for ( I = 0; I < NVars; I++ ) {
     for ( J = 0; J < NVars; J++ ) {
       if ( sP[I][J] == NULL ) continue;
-      printf("I %d J %d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
+      //sysbamg_dbgmsg("I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
       hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
     }
   }
 
-  printf("%s %3d %s\n", __FILE__, __LINE__, __func__);
+  sysbamg_dbgmsg("TFree\n");
 
   hypre_TFree( v_offsets );
   hypre_TFree( C );
   hypre_TFree( M );
 
-  printf("%s %3d %s finished.\n", __FILE__, __LINE__, __func__);
+  sysbamg_dbgmsg("return\n");
 
   return hypre_error_flag;
 }
