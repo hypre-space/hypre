@@ -312,20 +312,30 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   HYPRE_Int*              v_offsets;
 
-  HYPRE_Complex*          M, *C;
+  HYPRE_Int               NDim, Mrows, Mcols, Mi, Mj, Crows, Ccols;
 
-  HYPRE_Int               NDim, numIJ, Mrows, Mcols, Mi, Mj, Crows, Ccols;
+  HYPRE_Int               max_threads, thread_num;
+
+  HYPRE_Complex**         M;
+  HYPRE_Complex**         C;
+
+  HYPRE_Int*              numIJ;
+  HYPRE_Int**             idxIJ;
 
   HYPRE_Int               b, I, J, i, j, k, sj, iP, iv;
-
-  // XXX: NB: Assume same structure for all I,J; i.e., use [0][0] as representative.
 
   //  for each row, i = (I = i_vars, iP = i_grid),
   //    for each vector, k, and col, j = (J = j_vars, sj = j_grid), s.t. P[i][j] != 0,
   //      compute P[_i_][j] by minimizing l2norm( weight[k] * (v_c[k][j] P[_i_][j] - v_f[k][_i_]) )
   //                      by QR factorizing M[j][k] = v_c[k][j], etc.
+  //
+  // use sP[I][J] == NULL to determin non-zero I,J blocks
+  // P_Stencil dictates which P[i][j] are non-zero
+  //
+  // XXX: Assume Stencil, GridBoxes, ... same for all I,J
+  //
+  // XXX: Does hypre_LS() have to be in an omp critical region? Why?
 
-  // P_Stencil dictates which P[i][j] != 0
 
   P_Stencil       = hypre_StructMatrixStencil(sP[0][0]);
   P_StencilShape  = hypre_StructStencilShape(P_Stencil);
@@ -337,18 +347,38 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   v_offsets = (HYPRE_Int*) hypre_TAlloc(HYPRE_Int, P_StencilSize);
 
-  for ( J = 0, numIJ = 0; J < NVars; J++ ) {
-    if ( sP[0][J] != NULL ) numIJ++;    // XXX assume numIJ same for all I
+  numIJ = hypre_TAlloc(HYPRE_Int, NVars);
+  idxIJ = hypre_TAlloc(HYPRE_Int*, NVars);
+
+  for ( I = 0; I < NVars; I++ ) {
+    numIJ[I] = 0;
+    idxIJ[I] = hypre_TAlloc(HYPRE_Int, NVars);
+    for ( J = 0; J < NVars; J++ ) {
+      if ( sP[0][J] != NULL ) idxIJ[I][J] = numIJ[I]++;
+    }
   }
 
-  Mrows = nvecs;
-  Mcols = numIJ * P_StencilSize;
+#ifdef HYPRE_USING_OPENMP
+  max_threads = omp_get_max_threads();
+#else
+  max_threads = 1;
+#endif
 
-  M     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
+  Mrows = nvecs;
+  Mcols = numIJ[0] * P_StencilSize;
 
   Crows = Mrows;
   Ccols = 1;
-  C     = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Crows*Ccols);
+
+  sysbamg_dbgmsg("max_threads %d\n", max_threads);
+
+  M = (HYPRE_Complex**) hypre_CTAlloc(HYPRE_Complex*, max_threads);
+  C = (HYPRE_Complex**) hypre_CTAlloc(HYPRE_Complex*, max_threads);
+
+  for ( thread_num = 0; thread_num < max_threads; thread_num++ ) {
+    M[thread_num] = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
+    C[thread_num] = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Crows*Ccols);
+  }
 
   //sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
 
@@ -375,38 +405,45 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
       hypre_BoxLoop2Begin( NDim, BoxSize, PDataBox, startc, stridec, iP, vDataBox, start, stride, iv );
 
 #ifdef HYPRE_USING_OPENMP
-//#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iv,J,Mi,Mj,sj,k) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(thread_num,HYPRE_BOX_PRIVATE,iP,iv,Mi,Mj,k,J,sj) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(iP, iv)
       {
+        thread_num = omp_get_thread_num();
+
 #if DEBUG_SYSBAMG > 1
-        hypre_Index iIndex;
-        hypre_BoxLoopGetIndex( iIndex );
-        sysbamg_dbgmsg("Set up LS - iP %d iv %d\n", iP, iv);
-        printIndex( iIndex, NDim ); // dbgmsg
+#ifdef HYPRE_USING_OPENMP
+#pragma omp critical
+#endif
+        {
+          sysbamg_dbgmsg("Set up LS - thread_num %d iP %d iv %d\n", thread_num, iP, iv);
+          //hypre_Index iIndex;
+          //hypre_BoxLoopGetIndex( iIndex );
+          // printIndex( iIndex, NDim ); // dbgmsg
+        }
 #endif
 
         for ( k = 0; k < nvecs; k++ )
         {
           Mi = k;
 
-          C[Mi] = hypre_StructVectorBoxData( sv[k][I], b )[iv];
+          C[thread_num][Mi] = hypre_StructVectorBoxData( sv[k][I], b )[iv];
 
-          for ( J = 0, numIJ = 0; J < NVars; J++ )
+          for ( J = 0; J < NVars; J++ )
           {
             if ( sP[I][J] == NULL ) continue;
 
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
-              Mj = numIJ*P_StencilSize + sj;
-              M[Mi + Mj*Mrows] = hypre_StructVectorBoxData( sv[k][J], b )[iv + v_offsets[sj]];
-              //sysbamg_dbgmsg("I %d k %d J %d sj %d Mi %d Mj %d M ( %16.6e %16.6e )\n", I, k, J, sj, Mi, Mj, M[Mi+Mj*Mrows]);
+              Mj = idxIJ[I][J]*P_StencilSize + sj;
+              M[thread_num][Mi + Mj*Mrows] = hypre_StructVectorBoxData( sv[k][J], b )[iv + v_offsets[sj]];
             }
-
-            numIJ++;
           }
         }
 
-        hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
+#ifdef HYPRE_USING_OPENMP
+#pragma omp critical
+#endif
+        hypre_LS( M[thread_num], Mrows, Mcols, C[thread_num], Crows, Ccols );
 
         for ( J = 0; J < NVars; J++ )
         {
@@ -417,7 +454,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 #if DEBUG_SYSBAMG_PFMG
             hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
 #else
-            hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];
+            hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[thread_num][Mj];
 #endif
           }
         }
@@ -425,6 +462,14 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
       hypre_BoxLoop2End(iP, iv);
     }
   }
+
+  for ( thread_num = 0; thread_num < max_threads; thread_num++ ) {
+    hypre_TFree( C[thread_num] );
+    hypre_TFree( M[thread_num] );
+  }
+
+  hypre_TFree( C );
+  hypre_TFree( M );
 
   printf("%s %3d %s\n", __FILE__, __LINE__, __func__);
 
@@ -443,8 +488,6 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   sysbamg_dbgmsg("TFree\n");
 
   hypre_TFree( v_offsets );
-  hypre_TFree( C );
-  hypre_TFree( M );
 
   sysbamg_dbgmsg("return\n");
 
@@ -872,7 +915,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
 
 #ifdef HYPRE_USING_OPENMP
-//#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,j,Mi,Mj) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi,si,Mj) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For( i )
       {
@@ -975,7 +1018,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
 
 #ifdef HYPRE_USING_OPENMP
-//#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For( i )
       {
