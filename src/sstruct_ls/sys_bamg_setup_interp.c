@@ -239,9 +239,13 @@ HYPRE_Int hypre_LS
   hypre_printf("\n");
 #endif
 
+#if 1   // CRS omp bug
+
   // Q is Mrows x Mrows, 'M' = Mrows, 'N' = 1, 'K' = Mrows, 'A' = elementary reflector array = M
   hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xxxmqr", info );
+
+#endif  // CRS omp bug
 
 #if DEBUG_SYSBAMG > 1
   // print c to check
@@ -440,10 +444,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
           }
         }
 
+        sysbamg_dbgmsg("hypre_LS() thread_num %d iP %d iv %d\n", thread_num, iP, iv);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp critical
+//#pragma omp critical
 #endif
         hypre_LS( M[thread_num], Mrows, Mcols, C[thread_num], Crows, Ccols );
+        sysbamg_dbgmsg("hypre_LS() finished thread_num %d iP %d iv %d\n", thread_num, iP, iv);
 
         for ( J = 0; J < NVars; J++ )
         {
@@ -451,7 +457,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
           for ( sj = 0; sj < P_StencilSize; sj++ ) {
             Mj = J*P_StencilSize + sj;
-#if DEBUG_SYSBAMG_PFMG
+#if 1 // DEBUG_SYSBAMG_PFMG
             hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
 #else
             hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[thread_num][Mj];
@@ -463,15 +469,20 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
     }
   }
 
+  sysbamg_dbgmsg("BoxLoop finished\n");
+
   for ( thread_num = 0; thread_num < max_threads; thread_num++ ) {
+    sysbamg_dbgmsg("TFree C[%d]\n", thread_num);
     hypre_TFree( C[thread_num] );
+    sysbamg_dbgmsg("TFree M[%d]\n", thread_num);
     hypre_TFree( M[thread_num] );
   }
 
+  sysbamg_dbgmsg("TFree C\n");
   hypre_TFree( C );
-  hypre_TFree( M );
 
-  printf("%s %3d %s\n", __FILE__, __LINE__, __func__);
+  sysbamg_dbgmsg("TFree M\n");
+  hypre_TFree( M );
 
   printf("findex\n"); printIndex(findex,NDim);
   printf("stride\n"); printIndex(stride,NDim);
@@ -480,17 +491,15 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   for ( I = 0; I < NVars; I++ ) {
     for ( J = 0; J < NVars; J++ ) {
       if ( sP[I][J] == NULL ) continue;
-      //sysbamg_dbgmsg("I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
+      sysbamg_dbgmsg("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
       hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
     }
   }
 
-  sysbamg_dbgmsg("TFree\n");
-
+  sysbamg_dbgmsg("TFree v_offsets\n");
   hypre_TFree( v_offsets );
 
   sysbamg_dbgmsg("return\n");
-
   return hypre_error_flag;
 }
 

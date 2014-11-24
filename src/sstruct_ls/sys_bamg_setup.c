@@ -772,24 +772,24 @@ hypre_SysBAMGSetupOperators
     }
 
     /* set up the interpolation operator */
-    hypre_printf( "SysBAMGSetupInterpOp %d of %d\n", l, num_levels-1 );
+    sysbamg_dbgmsg( "SysBAMGSetupInterpOp %d of %d\n", l, num_levels-2 );
     hypre_SysBAMGSetupInterpOp(A_l[l], cdir_l[l], findex, stride, P_l[l], num_tv_, tv[l]);
 
     /* set up the coarse grid operator */
-    hypre_printf( "SysBAMGSetupRAPOp    %d of %d\n", l, num_levels-1 );
+    sysbamg_dbgmsg( "SysBAMGSetupRAPOp    %d of %d\n", l, num_levels-2 );
     hypre_SysBAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir_l[l], cindex, stride, A_l[l+1]);
 
     /* set up the interpolation routine */
-    hypre_printf( "SysSemiInterpSetup   %d of %d\n", l, num_levels-1 );
+    sysbamg_dbgmsg( "SysSemiInterpSetup   %d of %d\n", l, num_levels-2 );
     hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l], cindex, findex, stride);
 
     /* set up the restriction routine */
-    hypre_printf( "SysSemiRestrictSetup %d of %d\n", l, num_levels-1 );
+    sysbamg_dbgmsg( "SysSemiRestrictSetup %d of %d\n", l, num_levels-2 );
     hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1], cindex, findex, stride);
 
     // restrict the tv[l] to tv[l+1] (NB: don't need tv's on the coarsest grid)
     if ( l < num_levels-2 ) {
-      hypre_printf( "SysSemiRestrict      %d of %d\n", l, num_levels-1 );
+      sysbamg_dbgmsg( "SysSemiRestrict      %d of %d\n", l, num_levels-2 );
       for ( k = 0; k < num_tv_; k++ ) {
         hypre_SysSemiRestrict(restrict_data_l[l], RT_l[l], tv[l][k], tv[l+1][k]);
       }
