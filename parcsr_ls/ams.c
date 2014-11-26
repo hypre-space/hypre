@@ -2373,6 +2373,8 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          notify BoomerAMG that this is a dim x dim block system. */
       if (!ams_data -> A_Pi)
       {
+         int P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Pi);
+
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pi))
             hypre_MatvecCommPkgCreate(ams_data -> Pi);
 
@@ -2502,6 +2504,12 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                                                ams_data -> A,
                                                ams_data -> Pi,
                                                &ams_data -> A_Pi);
+         }
+
+         if (!P_owned_col_starts)
+         {
+            hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Pi) = 0;
+            hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Pi) = 0;
          }
 
          ams_data -> owns_A_Pi = 1;
