@@ -5420,6 +5420,9 @@ fi
           # Ignore these flags.
         -lang* | -lcrt*.o | -lc | -lgcc* | -lSystem | -libmil | -LANG:=* | -LIST:* | -LNO:*)
           ;;
+        -lxlomp_ser)
+          ac_cv_f77_libs="$ac_cv_f77_libs -lxlsmp"
+          ;;
         -lkernel32)
           test x"$CYGWIN" != xyes && ac_cv_f77_libs="$ac_cv_f77_libs $ac_arg"
           ;;
