@@ -16,11 +16,6 @@
 
 #include <HYPRE_config.h>   // for HYPRE_COMPLEX
 
-#ifdef HYPRE_USING_OPENMP
-#define USING_OPENMP_LS
-#define USING_OPENMP_SVD
-#endif
-
 #define hypre_re_im( x ) hypre_creal(x), hypre_cimag(x)
 
 /*--------------------------------------------------------------------------
@@ -110,9 +105,9 @@ HYPRE_Int hypre_SStructPMatrixUnpack
 
 HYPRE_Int hypre_SStructPVectorUnpack
 (
-    const hypre_SStructPVector* V,
-    const int                   NVars,
-    hypre_StructVector**        sV
+  const hypre_SStructPVector* V,
+  const int                   NVars,
+  hypre_StructVector**        sV
 )
 {
   int I;
@@ -229,36 +224,24 @@ HYPRE_Int hypre_LS
   HYPRE_Complex*  tau   = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows*Mcols);;
   HYPRE_Int       info;
 
-#ifdef USING_OPENMP_LS
-#pragma omp critical   // XXX Need thread-safe dgeqrf, zgeqrf!
-#endif
-  {
-    // NB: R and Q (via reflectors) are written to M
-    hypre_xgeqrf( &Mrows, &Mcols, M, &Mrows, tau, work, &lwork, &info );
-    hypre_CheckReturnValue( "hypre_xgeqrf", info );
-  }
-  // omp critical
+  // NB: R and Q (via reflectors) are written to M
+  hypre_xgeqrf( &Mrows, &Mcols, M, &Mrows, tau, work, &lwork, &info );
+  hypre_CheckReturnValue( "hypre_xgeqrf", info );
 
 #if DEBUG_SYSBAMG > 1
-    // print Q\R to check
-    hypre_printf("hypre_LS: Q\\R = \n");
-    for ( Mi = 0; Mi < Mrows; Mi++ )
-    {
-      for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(M[Mi+Mj*Mrows]));
-      hypre_printf("\n");
-    }
+  // print Q\R to check
+  hypre_printf("hypre_LS: Q\\R = \n");
+  for ( Mi = 0; Mi < Mrows; Mi++ )
+  {
+    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(M[Mi+Mj*Mrows]));
     hypre_printf("\n");
+  }
+  hypre_printf("\n");
 #endif
 
-#ifdef USING_OPENMP_LS
-#pragma omp critical   // XXX Need thread-safe dormqr (n.b. failure rate ~ 1 in 20), zunmqr!
-#endif
-  {
-    // Q is Mrows x Mrows, 'M' = Mrows, 'N' = 1, 'K' = Mrows, 'A' = elementary reflector array = M
-    hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
-    hypre_CheckReturnValue( "hypre_xxxmqr", info );
-  }
-  // omp critical
+  // Q is Mrows x Mrows, 'M' = Mrows, 'N' = 1, 'K' = Mrows, 'A' = elementary reflector array = M
+  hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
+  hypre_CheckReturnValue( "hypre_xxxmqr", info );
 
 #if DEBUG_SYSBAMG > 1
   // print c to check
@@ -276,7 +259,7 @@ HYPRE_Int hypre_LS
   }
   else if ( info == -7 ) {
     hypre_printf( "\nhypre_xtrtrs error: the number of test vectors must be greater"
-                  " than the stencil size. ( %d < %d )", Mrows, Mcols );
+        " than the stencil size. ( %d < %d )", Mrows, Mcols );
     exit(9);
   }
   else {
@@ -333,19 +316,21 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   HYPRE_Int NDim = hypre_StructStencilNDim(P_Stencil);
 
-  hypre_Index stridec;
-  hypre_SetIndex(stridec, 1);
+  hypre_Index cStride;
+  hypre_SetIndex(cStride, 1);
 
   HYPRE_Int*  v_offsets = (HYPRE_Int*) hypre_TAlloc(HYPRE_Int, P_StencilSize);
   HYPRE_Int*  numIJ     = hypre_TAlloc(HYPRE_Int,  NVars);
   HYPRE_Int** idxIJ     = hypre_TAlloc(HYPRE_Int*, NVars);
 
-  HYPRE_Int I, J;
-  for ( I = 0; I < NVars; I++ ) {
-    numIJ[I] = 0;
-    idxIJ[I] = hypre_TAlloc(HYPRE_Int, NVars);
-    for ( J = 0; J < NVars; J++ ) {
-      if ( sP[0][J] != NULL ) idxIJ[I][J] = numIJ[I]++;
+  {
+    HYPRE_Int I, J;
+    for ( I = 0; I < NVars; I++ ) {
+      numIJ[I] = 0;
+      idxIJ[I] = hypre_TAlloc(HYPRE_Int, NVars);
+      for ( J = 0; J < NVars; J++ ) {
+        if ( sP[0][J] != NULL ) idxIJ[I][J] = numIJ[I]++;
+      }
     }
   }
 
@@ -359,9 +344,10 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
   hypre_BoxArray* GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
-#ifdef USING_OPENMP_LS
-#pragma omp parallel
-#endif
+// XXX Cannot thread-parallelize this until underlying LAPACK functions are thread-safe!
+//#ifdef HYPRE_USING_OPENMP
+//#pragma omp parallel
+//#endif
   {
     HYPRE_Complex* M = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Mrows*Mcols);
     HYPRE_Complex* C = (HYPRE_Complex*) hypre_CTAlloc(HYPRE_Complex, Crows*Ccols);
@@ -372,16 +358,13 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
     {
       hypre_Box* GridBox = hypre_BoxArrayBox(GridBoxes, b);  // NB: GridBox is from P and corresponds to coarse grid
 
-      hypre_Index BoxSize;
-      hypre_BoxGetSize( GridBox, BoxSize );
+      hypre_IndexRef cStart = hypre_BoxIMin(GridBox);
 
-      hypre_IndexRef startc = hypre_BoxIMin(GridBox);
-
-      hypre_Index stridec;
-      hypre_BoxGetStrideSize(GridBox, stridec, BoxSize);
+      hypre_Index cBoxSize;
+      hypre_BoxGetStrideSize(GridBox, cStride, cBoxSize);
 
       hypre_Index start;
-      hypre_StructMapCoarseToFine(startc, findex, stride, start);
+      hypre_StructMapCoarseToFine(cStart, findex, stride, start);
 
       for ( I = 0; I < NVars; I++ )
       {
@@ -389,25 +372,25 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
         hypre_Box* vDataBox = hypre_BoxArrayBox( hypre_StructVectorDataSpace(sv[0][I]), b );
 
         for ( sj = 0; sj < P_StencilSize; sj++ )
-          v_offsets[sj] = hypre_BoxOffsetDistance( vDataBox, P_StencilShape[sj] );
+          v_offsets[sj] = hypre_BoxOffsetDistance(vDataBox, P_StencilShape[sj]);
 
-        hypre_BoxLoop2Begin( NDim, BoxSize, PDataBox, startc, stridec, iP, vDataBox, start, stride, iv );
+        hypre_BoxLoop2Begin(NDim, cBoxSize, PDataBox, cStart, cStride, iP, vDataBox, start, stride, iv);
 
-#ifdef USING_OPENMP_LS
-#pragma omp for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
+//#ifdef HYPRE_USING_OPENMP
+//#pragma omp for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
+//#endif
         hypre_BoxLoop2For(iP, iv)
         {
 #if DEBUG_SYSBAMG > 1
           sysbamg_dbgmsg("Set up LS - iP %d iv %d\n", iP, iv);
-          hypre_Index iIndex; hypre_BoxLoopGetIndex( iIndex ); printIndex( iIndex, NDim ); // dbgmsg
+          hypre_Index iIndex; hypre_BoxLoopGetIndex(iIndex); printIndex(iIndex, NDim); // dbgmsg
 #endif
 
           for ( k = 0; k < nvecs; k++ )
           {
             Mi = k;
 
-            C[Mi] = hypre_StructVectorBoxData( sv[k][I], b )[iv];
+            C[Mi] = hypre_StructVectorBoxData(sv[k][I], b)[iv];
 
             for ( J = 0; J < NVars; J++ )
             {
@@ -415,13 +398,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
               for ( sj = 0; sj < P_StencilSize; sj++ ) {
                 Mj = idxIJ[I][J]*P_StencilSize + sj;
-                M[Mi + Mj*Mrows] = hypre_StructVectorBoxData( sv[k][J], b )[iv + v_offsets[sj]];
+                M[Mi + Mj*Mrows] = hypre_StructVectorBoxData(sv[k][J], b)[iv + v_offsets[sj]];
               }
             }
           }
 
-          // XXX Need omp critical here?
-          hypre_LS( M, Mrows, Mcols, C, Crows, Ccols );
+          hypre_LS(M, Mrows, Mcols, C, Crows, Ccols);
 
           for ( J = 0; J < NVars; J++ )
           {
@@ -440,21 +422,23 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
         hypre_BoxLoop2End(iP, iv);
       }
     }
-    
+
     hypre_TFree( C );
     hypre_TFree( M );
   }
-  // end omp parallel
 
   printf("findex\n"); printIndex(findex,NDim);
   printf("stride\n"); printIndex(stride,NDim);
   printf("cdir %d\n", cdir);
 
-  for ( I = 0; I < NVars; I++ ) {
-    for ( J = 0; J < NVars; J++ ) {
-      if ( sP[I][J] == NULL ) continue;
-      sysbamg_dbgmsg("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
-      hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
+  {
+    HYPRE_Int I, J;
+    for ( I = 0; I < NVars; I++ ) {
+      for ( J = 0; J < NVars; J++ ) {
+        if ( sP[I][J] == NULL ) continue;
+        sysbamg_dbgmsg("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
+        hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
+      }
     }
   }
 
@@ -723,7 +707,7 @@ HYPRE_Int IndexToInt
 (
   const hypre_Index       Index,
   /*const*/ hypre_Box*    Box
-)   // non const? XXX
+)
 {
   HYPRE_Int               Int, NDim, dim, stride;
   hypre_IndexRef          BoxMin, BoxMax;
@@ -772,7 +756,8 @@ HYPRE_Int printIndex
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int AddIndex(
+HYPRE_Int AddIndex
+(
   hypre_Index             Sum,
   const hypre_Index       A,
   const hypre_Index       B,
@@ -861,14 +846,13 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
 
   NDim = hypre_SStructPMatrixNDim( A );
 
-  sysbamg_dbgmsg( "Coarse Grid Min and Max:\n" )
+  sysbamg_dbgmsg( "Coarse Grid Min and Max:\n" );
   printIndex( hypre_BoxIMin( GridBox ), NDim ); // dbg
   printIndex( hypre_BoxIMax( GridBox ), NDim ); // dbg
 
-  start         = hypre_BoxIMin( GridBox );
+  start = hypre_BoxIMin( GridBox );
   hypre_SetIndex( stride, 1 );
 
-#if 1
   for ( I = 0; I < NVars; I++ )
   {
     for ( J = 0; J < NVars; J++ )
@@ -885,7 +869,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
 
       hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
 
-#ifdef USING_OPENMP_SVD
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,si,Mi,Mj,iIndex,jIndex) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For( i )
@@ -914,60 +898,6 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       hypre_BoxLoop1End( i );
     }
   }
-#else
-#if 0
-  for ( I = 0; I < NVars; I++ )
-  {
-    for ( J = 0; J < NVars; J++ )
-    {
-      StructMatrix  = hypre_SStructPMatrixSMatrix( A, I, J );
-      BoxArray      = hypre_StructMatrixDataSpace( StructMatrix );
-      DataBox       = hypre_BoxArrayBox( BoxArray, BoxIdx );
-
-      hypre_BoxGetSize( DataBox, DataBoxSize );
-
-      Stencil       = hypre_StructMatrixStencil( StructMatrix );
-      StencilSize   = hypre_StructStencilSize( Stencil );
-      StencilShape  = hypre_StructStencilShape( Stencil );
-
-      hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
-
-// Beginning of non-parallelized section (PDP)
-#ifdef USING_OPENMP_SVD
-      int num_threads = omp_get_num_threads();
-
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,j,Mi,Mj) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For( i )
-      {
-        int th_id = omp_get_thread_num();
-
-        hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
-
-        //sysbamg_dbgmsg( "iIndex:\n" );
-        //printIndex( iIndex, NDim ); // dbg
-
-        Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
-
-        for ( si = 0; si < StencilSize; si++ )
-        {
-          AddIndex( jIndex, iIndex, StencilShape[si], GridBox );
-
-          //sysbamg_dbgmsg( "StencilShape[%d] and jIndex:\n", si )
-          //printIndex( StencilShape[si], NDim ); // dbg
-          //printIndex( jIndex, NDim ); // dbg
-
-          Mj = J * GridBoxVolume + IndexToInt( jIndex, GridBox );
-
-          M[ Mi + Mj * Mrows ] = hypre_StructMatrixBoxData( StructMatrix, BoxIdx, si )[ i ];  // NB: column-major
-          //sysbamg_dbgmsg( "Mi %3d Mj %3d M %12.3e I %d  J %d  i %d  si %d\n", Mi, Mj, M[Mi+Mj*Mrows], I, J, i, si );
-        }
-      }
-      hypre_BoxLoop1End( i );
-    }
-  }
-#endif
-#endif
 
   symmetric     = hypre_SStructPMatrixSymmetric(A)[0][0];     // XXX assume var-indep symmetry
 
@@ -990,15 +920,12 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
 
       hypre_BoxLoop1Begin( NDim, GridBoxSize, DataBox, start, stride, i );
 
-#ifdef USING_OPENMP_SVD
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,i,Mi) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For( i )
       {
         hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
-
-        //sysbamg_dbgmsg( "iIndex:\n" );
-        //printIndex( iIndex, NDim ); // dbg
 
         Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
 
