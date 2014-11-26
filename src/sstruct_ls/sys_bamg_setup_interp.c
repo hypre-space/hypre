@@ -329,7 +329,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
       numIJ[I] = 0;
       idxIJ[I] = hypre_TAlloc(HYPRE_Int, NVars);
       for ( J = 0; J < NVars; J++ ) {
-        if ( sP[0][J] != NULL ) idxIJ[I][J] = numIJ[I]++;
+        if ( sP[I][J] != NULL ) idxIJ[I][J] = numIJ[I]++;
       }
     }
   }
@@ -340,7 +340,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   HYPRE_Int Crows = Mrows;
   HYPRE_Int Ccols = 1;
 
-  //sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
+  sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
 
   hypre_BoxArray* GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
@@ -382,7 +382,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
         hypre_BoxLoop2For(iP, iv)
         {
 #if DEBUG_SYSBAMG > 1
-          sysbamg_dbgmsg("Set up LS - iP %d iv %d\n", iP, iv);
+          sysbamg_dbgmsg("Set up LS - I %d iP %d iv %d\n", I, iP, iv);
           hypre_Index iIndex; hypre_BoxLoopGetIndex(iIndex); printIndex(iIndex, NDim); // dbgmsg
 #endif
 

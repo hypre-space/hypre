@@ -725,7 +725,7 @@ hypre_SysBAMGSetupOperators
 
     // smooth the test vectors at *this* level
     {
-      sysbamg_dbgmsg("%s:%d smooth test vectors l=%d\n", __FILE__, __LINE__, l);
+      sysbamg_dbgmsg("smooth test vectors l=%d\n", l);
 
       // 1) set up the rhs for smoothing, zero for now
       hypre_SStructPVector* rhs;
