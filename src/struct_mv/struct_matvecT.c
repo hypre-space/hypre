@@ -103,7 +103,6 @@ HYPRE_Int hypre_StructMatvecTCompute(
 
   HYPRE_Int                yi;
 
-  HYPRE_Complex           *xp;
   HYPRE_Complex           *yp;
 
   hypre_BoxArray          *boxes;
@@ -293,19 +292,7 @@ HYPRE_Int hypre_StructMatvecTCC0(
 {
   HYPRE_Int i, j, si;
   HYPRE_Complex           *Ap0;
-  HYPRE_Complex           *Ap1;
-  HYPRE_Complex           *Ap2;
-  HYPRE_Complex           *Ap3;
-  HYPRE_Complex           *Ap4;
-  HYPRE_Complex           *Ap5;
-  HYPRE_Complex           *Ap6;
   HYPRE_Int                xoff0;
-  HYPRE_Int                xoff1;
-  HYPRE_Int                xoff2;
-  HYPRE_Int                xoff3;
-  HYPRE_Int                xoff4;
-  HYPRE_Int                xoff5;
-  HYPRE_Int                xoff6;
   HYPRE_Int                Ai;
   HYPRE_Int                xi;
   hypre_BoxArray          *compute_box_a;

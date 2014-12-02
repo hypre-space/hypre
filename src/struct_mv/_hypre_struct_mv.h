@@ -1974,6 +1974,8 @@ HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info , hypre_BoxAr
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg , HYPRE_Complex *data , hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeIndtComputations ( hypre_CommHandle *comm_handle );
+HYPRE_Int hypre_ComputePkgCreate2 ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int reverse, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+HYPRE_Int hypre_InitializeIndtComputations2 ( hypre_ComputePkg *compute_pkg, HYPRE_Complex *data, hypre_CommHandle **comm_handle_ptr, HYPRE_Int action );
 
 /* HYPRE_struct_grid.c */
 HYPRE_Int HYPRE_StructGridCreate ( MPI_Comm comm , HYPRE_Int dim , HYPRE_StructGrid *grid );
