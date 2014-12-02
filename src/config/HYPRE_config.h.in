@@ -108,3 +108,8 @@
 
 /* As F77_FUNC, but for C identifiers containing underscores. */
 #undef F77_FUNC_
+
+
+// for debugging (CRS)
+#define LINE hypre_printf("%s %d\n", __FILE__, __LINE__);
+
