@@ -104,8 +104,8 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
    (relax_data -> svec_compute_pkgs)= NULL;
    (relax_data -> compute_pkgs)     = NULL;
 
-   hypre_SetIndex3(stride, 1, 1, 1);
-   hypre_SetIndex3(indices[0], 0, 0, 0);
+   hypre_SetIndex(stride, 1);
+   hypre_SetIndex(indices[0], 0);
    hypre_NodeRelaxSetNumNodesets((void *) relax_data, 1);
    hypre_NodeRelaxSetNodeset((void *) relax_data, 0, 1, stride, indices);
 
@@ -262,7 +262,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
          {
             sstencil = hypre_SStructPMatrixSStencil(A, vi, vj);
-            hypre_SetIndex3(diag_index, 0, 0, 0);
+            hypre_SetIndex(diag_index, 0);
             diag_rank[vi][vj] = 
                hypre_StructStencilElementRank(sstencil, diag_index);
          }
@@ -358,8 +358,10 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                }
             }
          }
+
          sstencil_union_shape = hypre_CTAlloc(hypre_Index,
                                               sstencil_union_count);
+
          sstencil_union_count = 0;
          if (vi == -1)
          {
@@ -403,7 +405,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
          sstencil_union = hypre_StructStencilCreate(dim, 
                                                     sstencil_union_count, sstencil_union_shape);
-
 
          hypre_CreateComputeInfo(sgrid, sstencil_union, &compute_info);
          orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
@@ -487,7 +488,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          hypre_StructStencilDestroy(sstencil_union);
       }
    }
-   
+
    /*----------------------------------------------------------
     * Set up the relax data structure
     *----------------------------------------------------------*/

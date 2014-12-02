@@ -30,7 +30,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
                        
-   HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM] = {1};
                        
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
@@ -41,7 +41,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
+      hypre_SetIndex(stencil_shape[i], 0);
    }
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
@@ -161,7 +161,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
       }
    }
             
-   hypre_SetIndex3(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1);
 
    /*----------------------------------------------------------
     * Compute P
@@ -466,7 +466,7 @@ hypre_PFMGSetupInterpOp_CC2
    HYPRE_Int              diag_rank;
    HYPRE_Int              warning_cnt= 0;
 
-   hypre_SetIndex3(diag_index, 0, 0, 0);
+   hypre_SetIndex(diag_index, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
    if ( rap_type!=0 )

@@ -174,8 +174,10 @@ void hypre_CheckReturnValue
  * Use QR to determine P[i][j] - see http://www.netlib.org/lapack/lug/node40.html and
  * http://people.sc.fsu.edu/~jburkardt/f_src/qr_solve/qr_solve.html
  *
- * compute c_1 = Q^T b    (dim: (Mrows * Mrows) * (Mrows * 1) -> (Mrows * 1)),
- * compute x | R x = c_1  (dim: (Mcols*Mcols) (Mcols * 1) -> (Mcols * 1))
+ * Compute x that minimizes || C - M x ||_2 and return in C.
+ *
+ * compute c_1 = Q^T b       (dim: (Mrows x Mrows) * (Mrows x 1) -> (Mrows x 1)),
+ * compute x s.t. R x = c_1  (dim: (Mcols x Mcols) * (Mcols x 1) -> (Mcols x 1))
  *
  * M is Mrows by Mcols with Mrows > Mcols. Must be column-major order (Fortran style).
  * Q is Mrows by Mrows.
@@ -298,17 +300,19 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   hypre_StructVector***   sv
 )
 {
-  //  for each row, i = (I = i_vars, iP = i_grid),
-  //    for each vector, k, and col, j = (J = j_vars, sj = j_grid), s.t. P[i][j] != 0,
+  //  for each row, _i_ = (I = i_vars, iP = i_grid),
+  //    for each vector, k, and col, j = (J = j_vars, sj = j_grid), s.t. P[_i_][j] != 0,
   //      compute P[_i_][j] by minimizing l2norm( weight[k] * (v_c[k][j] P[_i_][j] - v_f[k][_i_]) )
   //                      by QR factorizing M[j][k] = v_c[k][j], etc.
   //
-  // use sP[I][J] == NULL to determin non-zero I,J blocks
+  // use sP[I][J] == NULL to determine non-zero I,J blocks
   // P_Stencil dictates which P[i][j] are non-zero
   //
   // XXX: Assume Stencil, GridBoxes, ... same for all I,J
   //
   // XXX: Does hypre_LS() have to be in an omp critical region? Why?
+
+  sysbamg_dbgmsg("\n");
 
   hypre_StructStencil* P_Stencil      = hypre_StructMatrixStencil(sP[0][0]);
   hypre_Index*         P_StencilShape = hypre_StructStencilShape(P_Stencil);
@@ -327,9 +331,19 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
     HYPRE_Int I, J;
     for ( I = 0; I < NVars; I++ ) {
       numIJ[I] = 0;
-      idxIJ[I] = hypre_TAlloc(HYPRE_Int, NVars);
+      idxIJ[I] = hypre_CTAlloc(HYPRE_Int, NVars);
       for ( J = 0; J < NVars; J++ ) {
-        if ( sP[I][J] != NULL ) idxIJ[I][J] = numIJ[I]++;
+        if ( sP[I][J] == NULL ) continue;
+        idxIJ[I][J] = numIJ[I]++;
+      }
+    }
+    for ( I = 0; I < NVars; I++ ) {
+      sysbamg_dbgmsg("numIJ[ %2d ] = %2d\n", I, numIJ[I]);
+    }
+    for ( I = 0; I < NVars; I++ ) {
+      for ( J = 0; J < NVars; J++ ) {
+        if ( sP[I][J] == NULL ) continue;
+        sysbamg_dbgmsg("idxIJ[ %2d ][ %2d ] = %2d\n", I, J, idxIJ[I][J]);
       }
     }
   }
@@ -390,6 +404,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
           {
             Mi = k;
 
+#if 0
             C[Mi] = hypre_StructVectorBoxData(sv[k][I], b)[iv];
 
             for ( J = 0; J < NVars; J++ )
@@ -401,17 +416,21 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
                 M[Mi + Mj*Mrows] = hypre_StructVectorBoxData(sv[k][J], b)[iv + v_offsets[sj]];
               }
             }
+#endif
           }
 
+          // compute C_out[Mcols] that minimizes || M[Mrows][Mcols] C_out[Mcols] - C_in[Mrows] ||_2
+#if 1
           hypre_LS(M, Mrows, Mcols, C, Crows, Ccols);
+#endif
 
           for ( J = 0; J < NVars; J++ )
           {
             if ( sP[I][J] == NULL ) continue;
 
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
-              Mj = J*P_StencilSize + sj;
-#if 0 // DEBUG_SYSBAMG_PFMG
+              Mj = idxIJ[I][J]*P_StencilSize + sj;
+#if 1 // DEBUG_SYSBAMG_PFMG
               hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
 #else
               hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];

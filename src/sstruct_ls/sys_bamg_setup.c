@@ -222,7 +222,7 @@ HYPRE_Int hypre_SysBAMGSetup
     /*--------------------------------------------------------------------------------------------
      * Compute the coarse-grid singular vectors and then prolongate them to the fine grid
      *--------------------------------------------------------------------------------------------*/
-    
+
     sysbamg_dbgmsg("Compute singular vectors num_stv=%d ...\n", num_stv);
 
     hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv*nsym]) );
@@ -725,13 +725,14 @@ hypre_SysBAMGSetupOperators
 
     // smooth the test vectors at *this* level
     {
-      sysbamg_dbgmsg("smooth test vectors l=%d\n", l);
+      sysbamg_dbgmsg("smooth the test vectors at level %d\n", l);
 
       // 1) set up the rhs for smoothing, zero for now
       hypre_SStructPVector* rhs;
       hypre_SStructPVectorCreate(comm, PGrid_l[l], &rhs);
       hypre_SStructPVectorInitialize(rhs);
       hypre_SStructPVectorAssemble(rhs);
+
       hypre_SStructPVectorSetConstantValues(rhs, 0.0);
 
       // 2) set up the relax struct
@@ -762,13 +763,14 @@ hypre_SysBAMGSetupOperators
       hypre_SStructPVectorDestroy( rhs );
 
 #if DEBUG_SYSBAMG > 0
+      sysbamg_dbgmsg("printing sysbamg test vectors; level %d; num_tv_ %d\n", l, num_tv_);
       char filename[255];
-      hypre_printf("printing sysbamg test vectors; level %d; num_tv_ %d\n", l, num_tv_);
       for ( k = 0; k < num_tv_; k++ ) {
         hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);
         hypre_SStructPVectorPrint(filename, tv[l][k], 0);
       }
 #endif
+      fflush(stdout);
     }
 
     /* set up the interpolation operator */

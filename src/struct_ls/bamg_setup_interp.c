@@ -30,8 +30,6 @@ hypre_StructMatrix* hypre_BAMGCreateInterpOp(
 
   HYPRE_Int            *num_ghost;
 
-  HYPRE_Int             i;
-
   /* set up stencil */
   stencil_size = 2;
   stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
@@ -75,14 +73,11 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
   hypre_BoxArray        *compute_boxes;
   hypre_Box             *compute_box;
 
-  hypre_Box             *A_dbox;
   hypre_Box             *P_dbox;
   hypre_Box             *tv_dbox;
 
   HYPRE_Real            **Pp, **vp;
   HYPRE_Int              *v_offsets;
-
-  HYPRE_Int              constant_coefficient;
 
   hypre_StructStencil   *P_stencil;
   hypre_Index           *P_stencil_shape;
@@ -93,7 +88,7 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
   hypre_IndexRef         startc;
   hypre_Index            stridec;
 
-  HYPRE_Int              i, j, k, Pi, vi, d;
+  HYPRE_Int              i, j, k, Pi, vi;
 
   HYPRE_Real             smm, smp, smz, spp, spz, vkm, vkp, vkz;
 

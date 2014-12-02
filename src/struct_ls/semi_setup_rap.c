@@ -13,29 +13,27 @@
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
-#define hypre_MapRAPMarker(indexRAP, rank)      \
-   {                                            \
-      HYPRE_Int imacro,jmacro,kmacro;           \
-      imacro = hypre_IndexX(indexRAP);          \
-      jmacro = hypre_IndexY(indexRAP);          \
-      kmacro = hypre_IndexZ(indexRAP);          \
-      if (imacro==-1) imacro=2;                 \
-      if (jmacro==-1) jmacro=2;                 \
-      if (kmacro==-1) kmacro=2;                 \
-      rank = imacro + 3*jmacro + 9*kmacro;      \
+// RAP marker size per dimension, temporary (better than a bunch of hard-wired 3's)
+#define RMSIZE 3
+
+#define hypre_MapRAPMarker(indexRAP, rank) \
+   { \
+      HYPRE_Int macro, mu, stride; \
+      for ( rank = 0, mu = 0, stride = 1; mu < HYPRE_MAXDIM; mu++, stride *= RMSIZE ) { \
+        macro = hypre_IndexD(indexRAP,mu); \
+        if ( macro == -1 ) macro = 2; \
+        rank += macro*stride; \
+      } \
    }
 
-#define hypre_InverseMapRAPMarker(rank, indexRAP)       \
-   {                                                    \
-      HYPRE_Int imacro,ijmacro,jmacro,kmacro;           \
-      ijmacro = (rank%9);                               \
-      imacro  = (ijmacro%3);                            \
-      jmacro  = (ijmacro-imacro)/3;                     \
-      kmacro  = (rank-3*jmacro-imacro)/9;               \
-      if (imacro==2) imacro=-1;                         \
-      if (jmacro==2) jmacro=-1;                         \
-      if (kmacro==2) kmacro=-1;                         \
-      hypre_SetIndex3(indexRAP,imacro,jmacro,kmacro);    \
+#define hypre_InverseMapRAPMarker(rank, indexRAP) \
+   { \
+      HYPRE_Int macro, mu, stride; \
+      for ( mu = 0, stride = 1; mu < HYPRE_MAXDIM; mu++, stride *= RMSIZE ) { \
+        macro = (rank/stride) % RMSIZE; \
+        if ( macro == 2 ) macro = -1; \
+        hypre_IndexD( indexRAP, mu ) = macro; \
+      } \
    }
 
 /*--------------------------------------------------------------------------
@@ -56,7 +54,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructStencil   *RAP_stencil;
    HYPRE_Int              RAP_stencil_size;
    HYPRE_Int              dim;
-   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
    HYPRE_Int             *not_cdirs;
    hypre_StructStencil   *A_stencil;
@@ -82,14 +80,14 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    A_stencil_shape = hypre_StructStencilShape(A_stencil);
  
    /*-----------------------------------------------------------------------
-    * Allocate RAP_marker array used to deternine which offsets are
+    * Allocate RAP_marker array used to determine which offsets are
     * present in RAP. Initialized to zero indicating no offsets present.
     *-----------------------------------------------------------------------*/
 
    RAP_marker_size = 1;
    for (i = 0; i < dim; i++)
    {
-      RAP_marker_size *= 3;
+      RAP_marker_size *= RMSIZE;
    }
    RAP_marker = hypre_CTAlloc(HYPRE_Int, RAP_marker_size);
    
@@ -346,7 +344,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    dim = hypre_StructStencilNDim(coarse_stencil);
 
    stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -872,3 +870,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
    return hypre_error_flag;
 }
+
+#undef RMSIZE
+

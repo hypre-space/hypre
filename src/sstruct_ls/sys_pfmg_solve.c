@@ -178,6 +178,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       {
          /* restrict fine grid residual */
          hypre_SysSemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
+
 #if DEBUG
          hypre_sprintf(filename, "zout_xdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);

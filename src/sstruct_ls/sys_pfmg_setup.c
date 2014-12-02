@@ -17,19 +17,19 @@
 
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \
-      hypre_SetIndex3(cindex, 0, 0, 0);          \
+      hypre_SetIndex(cindex, 0);          \
       hypre_IndexD(cindex, cdir) = 0;           \
    }
 
 #define hypre_PFMGSetFIndex(cdir, findex)       \
    {                                            \
-      hypre_SetIndex3(findex, 0, 0, 0);          \
+      hypre_SetIndex(findex, 0);          \
       hypre_IndexD(findex, cdir) = 1;           \
    }
 
 #define hypre_PFMGSetStride(cdir, stride)       \
    {                                            \
-      hypre_SetIndex3(stride, 1, 1, 1);          \
+      hypre_SetIndex(stride, 1);          \
       hypre_IndexD(stride, cdir) = 2;           \
    }
 
@@ -90,7 +90,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    hypre_SStructPGrid     *grid;
    hypre_StructGrid       *sgrid;
-   HYPRE_Int               dim;
+   HYPRE_Int               NDim;
    HYPRE_Int               full_periodic;
 
    hypre_Box            *cbox;
@@ -128,7 +128,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    sys_dxyz = hypre_TAlloc(HYPRE_Real *, nvars);
    for ( i = 0; i < nvars; i++)
    {
-      sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, 3);
+      sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, HYPRE_MAXDIM);
    }
    
    /*-----------------------------------------------------
@@ -137,14 +137,13 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    grid  = hypre_SStructPMatrixPGrid(A);
    sgrid = hypre_SStructPGridSGrid(grid, 0);
-   dim   = hypre_StructGridNDim(sgrid);
+   NDim  = hypre_StructGridNDim(sgrid);
 
    /* Compute a new max_levels value based on the grid */
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(sgrid));
-   max_levels =
-      hypre_Log2(hypre_BoxSizeD(cbox, 0)) + 2 +
-      hypre_Log2(hypre_BoxSizeD(cbox, 1)) + 2 +
-      hypre_Log2(hypre_BoxSizeD(cbox, 2)) + 2;
+
+   max_levels = 0;
+   for ( d = 0; d < NDim; d++ ) max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
    if ((sys_pfmg_data -> max_levels) > 0)
    {
       max_levels = hypre_min(max_levels, (sys_pfmg_data -> max_levels));
@@ -153,10 +152,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
    /* compute dxyz */
    dxyz_flag= 0;
-   if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
+   HYPRE_Int dxyz_zeroes = 0;
+   for ( d = 0; d < NDim; d++ ) dxyz_zeroes += ( dxyz[d] == 0 );
+   if (dxyz_zeroes != 0)
    {
-      mean = hypre_CTAlloc(HYPRE_Real, 3);
-      deviation = hypre_CTAlloc(HYPRE_Real, 3);
+      mean = hypre_CTAlloc(HYPRE_Real, NDim);
+      deviation = hypre_CTAlloc(HYPRE_Real, NDim);
 
       dxyz_flag = 0;
       for (i = 0; i < nvars; i++)
@@ -168,7 +169,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
           * variation */
          if (!dxyz_flag)
          {
-            for (d = 0; d < dim; d++)
+            for (d = 0; d < NDim; d++)
             {
                deviation[d] -= mean[d]*mean[d];
                /* square of coeff. of variation */
@@ -180,7 +181,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
             }
          }
 
-         for (d = 0; d < 3; d++)
+         for (d = 0; d < HYPRE_MAXDIM; d++)
          {
             dxyz[d] += sys_dxyz[i][d];
          } 
@@ -196,14 +197,15 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
    active_l = hypre_TAlloc(HYPRE_Int, max_levels);
    relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
-   hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
+   hypre_SetIndex(coarsen, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
       /* determine cdir */
-      min_dxyz = dxyz[0] + dxyz[1] + dxyz[2] + 1;
+      min_dxyz = 1;
+      for ( d = 0; d < NDim; d++ ) min_dxyz += dxyz[d];
       cdir = -1;
       alpha = 0.0;
-      for (d = 0; d < dim; d++)
+      for (d = 0; d < NDim; d++)
       {
          if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d)) &&
              (dxyz[d] < min_dxyz))
@@ -226,7 +228,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
          else
          {
-            for (d = 0; d < dim; d++)
+            for (d = 0; d < NDim; d++)
             {
                if (d != cdir)
                {
@@ -243,7 +245,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
             }
 
             /* determine level Jacobi weights */
-            if (dim > 1)
+            if (NDim > 1)
             {
                relax_weights[l] = 2.0/(3.0 - alpha);
             }
@@ -258,7 +260,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          /* don't coarsen if a periodic direction and not divisible by 2 */
          periodic = hypre_IndexD(hypre_StructGridPeriodic(grid_l[l]), cdir);
-         hypre_printf("level %d  periodic[%d] = %d\n", l, cdir, periodic);
          if ((periodic) && (periodic % 2))
          {
             cdir = -1;
@@ -276,7 +277,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          active_l[l] = 1; /* forces relaxation on coarsest grid */
          cmaxsize = 0;
-         for (d = 0; d < dim; d++)
+         for (d = 0; d < NDim; d++)
          {
             cmaxsize = hypre_max(cmaxsize, hypre_BoxSizeD(cbox, d));
          }
@@ -285,7 +286,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          break;
       }
 
-      hypre_printf( "l %d  cdir %d  Min %d Max %d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir) );
+      hypre_printf( "l %2d cdir %d Min %3d Max %3d periodic %3d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir), periodic );
 
       cdir_l[l] = cdir;
 
@@ -293,7 +294,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       {
          /* coarsened previously in this direction, relax level l */
          active_l[l] = 1;
-         hypre_SetIndex3(coarsen, 0, 0, 0);
+         hypre_SetIndex(coarsen, 0);
          hypre_IndexD(coarsen, cdir) = 1;
       }
       else
@@ -334,7 +335,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     *-----------------------------------------------------*/
 
    full_periodic = 1;
-   for (d = 0; d < dim; d++)
+   for (d = 0; d < NDim; d++)
    {
       full_periodic *= hypre_IndexD(hypre_SStructPGridPeriodic(grid),d);
    }
@@ -584,7 +585,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
    hypre_StructGrid     *scgrid;
 
    MPI_Comm               comm;
-   HYPRE_Int              ndim;
+   HYPRE_Int              NDim;
    HYPRE_Int              nvars;
    hypre_SStructVariable *vartypes;
    hypre_SStructVariable *new_vartypes;
@@ -596,14 +597,14 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
     *-----------------------------------------*/
 
    comm      = hypre_SStructPGridComm(fgrid);
-   ndim      = hypre_SStructPGridNDim(fgrid);
+   NDim      = hypre_SStructPGridNDim(fgrid);
    nvars     = hypre_SStructPGridNVars(fgrid);
    vartypes  = hypre_SStructPGridVarTypes(fgrid);
 
    cgrid = hypre_TAlloc(hypre_SStructPGrid, 1);
 
    hypre_SStructPGridComm(cgrid)     = comm;
-   hypre_SStructPGridNDim(cgrid)     = ndim;
+   hypre_SStructPGridNDim(cgrid)     = NDim;
    hypre_SStructPGridNVars(cgrid)    = nvars;
    new_vartypes = hypre_TAlloc(hypre_SStructVariable, nvars);
    for (i = 0; i < nvars; i++)
@@ -630,7 +631,7 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
 
    hypre_SStructPGridSetCellSGrid(cgrid, scgrid);
 
-   hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0, ndim);
+   hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0, NDim);
    hypre_SStructPGridPNborOffsets(cgrid) = NULL;
 
    hypre_SStructPGridLocalSize(cgrid)  = 0;

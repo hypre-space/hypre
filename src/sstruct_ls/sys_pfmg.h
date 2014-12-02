@@ -43,7 +43,7 @@ typedef struct
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */
-   HYPRE_Real            dxyz[3];     /* parameters used to determine cdir */
+   HYPRE_Real            dxyz[HYPRE_MAXDIM];     /* parameters used to determine cdir */
 
    HYPRE_Int             num_levels;
                       
