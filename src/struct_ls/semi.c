@@ -57,7 +57,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
 
-   HYPRE_Int             num_ghost[] = {0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0};
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM] = {0};
    HYPRE_Int             i, j, s, dim;
 
    if (hypre_StructMatrixConstantCoefficient(P) != 0)

@@ -37,7 +37,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
    for (i = 0; i < stencil_size; i++)
    {
-      hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
+      hypre_SetIndex(stencil_shape[i], 0);
    }
    hypre_IndexD(stencil_shape[0], cdir) = -1;
    hypre_IndexD(stencil_shape[1], cdir) =  1;
