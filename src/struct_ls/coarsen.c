@@ -61,12 +61,10 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
                              hypre_Index stride,
                              hypre_Index findex ) 
 {
-   hypre_IndexX(findex) =
-      hypre_IndexX(cindex) * hypre_IndexX(stride) + hypre_IndexX(index);
-   hypre_IndexY(findex) =
-      hypre_IndexY(cindex) * hypre_IndexY(stride) + hypre_IndexY(index);
-   hypre_IndexZ(findex) =
-      hypre_IndexZ(cindex) * hypre_IndexZ(stride) + hypre_IndexZ(index);
+  HYPRE_Int d;
+
+  for ( d = 0; d < HYPRE_MAXDIM; d++ )
+    hypre_IndexD(findex,d) = hypre_IndexD(cindex,d) * hypre_IndexD(stride,d) + hypre_IndexD(index,d);
 
    return hypre_error_flag;
 }

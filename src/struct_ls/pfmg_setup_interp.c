@@ -12,7 +12,7 @@
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
-//#include "bamg.h"
+#include "bamg.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -29,9 +29,9 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM] = {1};
-                       
+
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
 
@@ -72,7 +72,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    }
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return P;
 }
 
@@ -87,28 +87,30 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
                          hypre_StructMatrix *P,
                          HYPRE_Int           rap_type )
 {
+   HYPRE_Int              NDim = hypre_StructMatrixNDim(A);
+
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Pp0, *Pp1;
    HYPRE_Int              constant_coefficient;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
-                        
+
    HYPRE_Int              Pstenc0, Pstenc1;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
-                        
+
    HYPRE_Int              i, si;
 
    HYPRE_Int              si0, si1;
@@ -138,7 +140,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    {
       mrk0 = 0;
       mrk1 = 0;
-      for (d = 0; d < hypre_StructStencilNDim(stencil); d++)
+      for (d = 0; d < NDim; d++)
       {
          if (hypre_IndexD(stencil_shape[si], d) ==
              hypre_IndexD(P_stencil_shape[0], d))
@@ -151,16 +153,16 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
             mrk1++;
          }
       }
-      if (mrk0 == hypre_StructStencilNDim(stencil))
+      if (mrk0 == NDim)
       {
          si0 = si;
       }
-      if (mrk1 == hypre_StructStencilNDim(stencil))
+      if (mrk1 == NDim)
       {
          si1 = si;
       }
    }
-            
+
    hypre_SetIndex(stridec, 1);
 
    /*----------------------------------------------------------
@@ -180,15 +182,15 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
       Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
       Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
- 
+
       startc  = hypre_BoxIMin(compute_box);
       hypre_StructMapCoarseToFine(startc, findex, stride, start);
-    
-//  bamg_dbgmsg("findex:  %d %d %d\n", hypre_IndexD(findex, 0), hypre_IndexD(findex, 1), hypre_IndexD(findex, 2));
-//  bamg_dbgmsg("stride:  %d %d %d\n", hypre_IndexD(stride, 0), hypre_IndexD(stride, 1), hypre_IndexD(stride, 2));
-//  bamg_dbgmsg("stridec: %d %d %d\n", hypre_IndexD(stridec,0), hypre_IndexD(stridec,1), hypre_IndexD(stridec,2));
-//  bamg_dbgmsg("startc:  %d %d %d\n", hypre_IndexD(startc, 0), hypre_IndexD(startc, 1), hypre_IndexD(startc, 2));
-//  bamg_dbgmsg("start:   %d %d %d\n", hypre_IndexD(start,  0), hypre_IndexD(start,  1), hypre_IndexD(start,  2));
+
+      bamg_dbgmsg("d, findex, start, stride, startc, stridec\n");
+      for ( d = 0; d < NDim; d++ ) {
+        bamg_dbgmsg("%d %d %d %d %d %d\n", d, hypre_IndexD(findex,d), hypre_IndexD(start,d),
+                    hypre_IndexD(stride,d), hypre_IndexD(startc,d), hypre_IndexD(stridec,d));
+      }
 
       hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
@@ -299,12 +301,12 @@ hypre_PFMGSetupInterpOp_CC0
       {
          warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
          Pp0[Pi] /= center;
-         Pp1[Pi] /= center;  
+         Pp1[Pi] /= center;
       }
 
       /*----------------------------------------------
@@ -397,12 +399,12 @@ hypre_PFMGSetupInterpOp_CC1
    {
       warning_cnt++;
       Pp0[Pi] = 0.0;
-      Pp1[Pi] = 0.0;  
+      Pp1[Pi] = 0.0;
    }
    else
    {
       Pp0[Pi] /= center;
-      Pp1[Pi] /= center;  
+      Pp1[Pi] /= center;
    }
 
    /*----------------------------------------------
@@ -547,12 +549,12 @@ hypre_PFMGSetupInterpOp_CC2
          {
             warning_cnt++;
             Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            Pp1[Pi] = 0.0;
          }
          else
          {
             Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
+            Pp1[Pi] /= center;
          }
 
          /*----------------------------------------------

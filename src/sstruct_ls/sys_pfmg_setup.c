@@ -12,6 +12,7 @@
 
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
+#include "sys_bamg.h"
 
 #define DEBUG 1
 
@@ -324,8 +325,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    }
    num_levels = l + 1;
   
-   hypre_printf("num_levels = %d\n", num_levels);
-
    /*-----------------------------------------------------
     * For fully periodic problems, the coarsest grid
     * problem (a single node) can have zero diagonal
@@ -345,6 +344,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_SStructPGridDestroy(P_grid_l[num_levels-1]);
       num_levels -= 1;
    }
+
+   hypre_printf("num_levels = %d (full_periodic = %d)\n", num_levels, full_periodic);
 
    /* free up some things */
    hypre_BoxDestroy(cbox);
@@ -448,6 +449,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation operator */
+      sysbamg_dbgmsg("SysPFMGSetupInterpOp() l=%d\n", l);
       hypre_SysPFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l]);
 
       /* set up the coarse grid operator */

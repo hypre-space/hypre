@@ -430,11 +430,23 @@ hypre_PCGSolve( void *pcg_vdata,
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
       if (print_level > 0 || logging > 0)
       {
-        hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-        hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
-        hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-        hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-        hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+         hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
+         hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
+
+         if ( print_level > 1 )
+         {
+            bi_prod = (*(pcg_functions->InnerProd))(x, x);
+            if (my_id == 0) hypre_printf("<x,x>: %e\n",bi_prod);
+
+            (*(pcg_functions->ClearVector))(p);
+            precond(precond_data, A, b, p);
+            bi_prod = (*(pcg_functions->InnerProd))(p, b);
+            if (my_id == 0) hypre_printf("<A*b,b>: %e\n",bi_prod);
+         }
+
+         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+         hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       return hypre_error_flag;
