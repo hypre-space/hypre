@@ -164,7 +164,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
    if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
 
-   hypre_SetIndex3(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1);
 
    /*-----------------------------------------------------------------------
     * Compute e at coarse points (injection)
