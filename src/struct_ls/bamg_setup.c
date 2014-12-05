@@ -82,8 +82,8 @@ HYPRE_Int hypre_BAMGSetup(
   HYPRE_Int             cdir, periodic, cmaxsize;
   HYPRE_Int             d, l, k;
 
-  HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM]  = {0};
+  HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM]  = {1};
 
 #if DEBUG_BAMG
   char                  filename[255];

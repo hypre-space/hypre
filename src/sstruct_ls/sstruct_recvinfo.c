@@ -49,7 +49,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    hypre_BoxInit(&boxman_entry_box, ndim);
 
    hypre_ClearIndex(index1); 
-   hypre_SetIndex3(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);
+   for ( i = 0; i < HYPRE_MAXDIM; i++ ) hypre_IndexD(index2,i) = rfactor[i]-1;
 
    hypre_MPI_Comm_rank(comm, &myproc);
 

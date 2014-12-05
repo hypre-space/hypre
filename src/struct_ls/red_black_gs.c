@@ -99,7 +99,7 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex3(diag_index, 0, 0, 0);
+   hypre_SetIndex(diag_index, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
    /*----------------------------------------------------------

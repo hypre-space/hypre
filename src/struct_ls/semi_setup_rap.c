@@ -54,7 +54,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructStencil   *RAP_stencil;
    HYPRE_Int              RAP_stencil_size;
    HYPRE_Int              dim;
-   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+   HYPRE_Int              RAP_num_ghost[2*HYPRE_MAXDIM] = {1};
 
    HYPRE_Int             *not_cdirs;
    hypre_StructStencil   *A_stencil;
