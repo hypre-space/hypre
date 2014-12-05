@@ -573,6 +573,8 @@ HYPRE_Int HYPRE_SStructSysPFMGSetZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSysPFMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
 HYPRE_Int HYPRE_SStructSysPFMGSetRelaxType ( HYPRE_SStructSolver solver , HYPRE_Int relax_type );
 HYPRE_Int HYPRE_SStructSysPFMGSetJacobiWeight ( HYPRE_SStructSolver solver , HYPRE_Real weight );
+HYPRE_Int HYPRE_SStructSysPFMGSetRAPType(HYPRE_SStructSolver solver, HYPRE_Int rap_type);
+HYPRE_Int HYPRE_SStructSysPFMGSetRAPType(HYPRE_SStructSolver solver, HYPRE_Int rap_type);
 HYPRE_Int HYPRE_SStructSysPFMGSetNumPreRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_pre_relax );
 HYPRE_Int HYPRE_SStructSysPFMGSetNumPostRelax ( HYPRE_SStructSolver solver , HYPRE_Int num_post_relax );
 HYPRE_Int HYPRE_SStructSysPFMGSetSkipRelax ( HYPRE_SStructSolver solver , HYPRE_Int skip_relax );
@@ -697,6 +699,8 @@ HYPRE_Int hypre_SysPFMGSetRelChange ( void *sys_pfmg_vdata , HYPRE_Int rel_chang
 HYPRE_Int hypre_SysPFMGSetZeroGuess ( void *sys_pfmg_vdata , HYPRE_Int zero_guess );
 HYPRE_Int hypre_SysPFMGSetRelaxType ( void *sys_pfmg_vdata , HYPRE_Int relax_type );
 HYPRE_Int hypre_SysPFMGSetJacobiWeight ( void *sys_pfmg_vdata , HYPRE_Real weight );
+HYPRE_Int hypre_SysPFMGSetRAPType( void *sys_pfmg_vdata, HYPRE_Int   rap_type );
+HYPRE_Int hypre_SysPFMGGetRAPType( void *sys_pfmg_vdata, HYPRE_Int * rap_type );
 HYPRE_Int hypre_SysPFMGSetNumPreRelax ( void *sys_pfmg_vdata , HYPRE_Int num_pre_relax );
 HYPRE_Int hypre_SysPFMGSetNumPostRelax ( void *sys_pfmg_vdata , HYPRE_Int num_post_relax );
 HYPRE_Int hypre_SysPFMGSetSkipRelax ( void *sys_pfmg_vdata , HYPRE_Int skip_relax );
@@ -727,7 +731,7 @@ HYPRE_Int hypre_SysStructCoarsen ( hypre_SStructPGrid *fgrid , hypre_Index index
 
 /* sys_pfmg_setup_interp.c */
 hypre_SStructPMatrix *hypre_SysPFMGCreateInterpOp ( hypre_SStructPMatrix *A , hypre_SStructPGrid *cgrid , HYPRE_Int cdir );
-HYPRE_Int hypre_SysPFMGSetupInterpOp ( hypre_SStructPMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_SStructPMatrix *P );
+HYPRE_Int hypre_SysPFMGSetupInterpOp ( hypre_SStructPMatrix *A , HYPRE_Int cdir , hypre_Index findex , hypre_Index stride , hypre_SStructPMatrix *P, HYPRE_Int rap_type );
 
 /* sys_pfmg_setup_rap.c */
 hypre_SStructPMatrix *hypre_SysPFMGCreateRAPOp ( hypre_SStructPMatrix *R , hypre_SStructPMatrix *A , hypre_SStructPMatrix *P , hypre_SStructPGrid *coarse_grid , HYPRE_Int cdir );

@@ -73,7 +73,8 @@ hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
                             HYPRE_Int             cdir,
                             hypre_Index           findex,
                             hypre_Index           stride,
-                            hypre_SStructPMatrix *P      )
+                            hypre_SStructPMatrix *P,
+                            HYPRE_Int             rap_type )
 {
    HYPRE_Int              nvars;
    hypre_StructMatrix    *A_s;
@@ -86,7 +87,7 @@ hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
    {
       A_s = hypre_SStructPMatrixSMatrix(A, vi, vi);
       P_s = hypre_SStructPMatrixSMatrix(P, vi, vi);
-      hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s, 0);
+      hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s, rap_type);
    }
 
    return hypre_error_flag;

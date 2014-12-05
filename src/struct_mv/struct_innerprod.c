@@ -22,13 +22,13 @@
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
 
-HYPRE_Real
+HYPRE_Complex
 hypre_StructInnerProd( hypre_StructVector *x,
                        hypre_StructVector *y )
 {
-   HYPRE_Real       final_innerprod_result;
-   HYPRE_Real       local_result;
-   HYPRE_Real       process_result;
+   HYPRE_Complex    final_innerprod_result;
+   HYPRE_Complex    local_result;
+   HYPRE_Complex    process_result;
                    
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
@@ -80,8 +80,10 @@ hypre_StructInnerProd( hypre_StructVector *x,
    }
    process_result = local_result;
 
+   // XXX HYPRE_MPI_COMPLEX = MPI_C_DOUBLE_COMPLEX doesn't work here, so changed
+   // HYPRE_MPI_COMPLEX to MPI_LONG_DOUBLE
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                       HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
+                       HYPRE_MPI_COMPLEX, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
@@ -150,9 +152,10 @@ hypre_StructComplexInnerProd( hypre_StructVector *x,
    }
    process_result = local_result;
 
-   // note: this doesn't work on (my) Mac OS X unless I replace HYPRE_MPI_COMPLEX with MPI_LONG_DOUBLE
+   // XXX HYPRE_MPI_COMPLEX = MPI_C_DOUBLE_COMPLEX doesn't work here, so changed
+   // HYPRE_MPI_COMPLEX to MPI_LONG_DOUBLE
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                       MPI_LONG_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
+                       HYPRE_MPI_COMPLEX, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(7*hypre_StructVectorGlobalSize(x));   // XXX r*r+r*i+i*r+i*i = 7 flops?
 

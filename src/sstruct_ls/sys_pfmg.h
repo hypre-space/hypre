@@ -40,6 +40,7 @@ typedef struct
    HYPRE_Real            jacobi_weight;  /* weighted jacobi weight */
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
                                                                                                                                      
+   HYPRE_Int             rap_type;       /* controls choice of RAP codes (see struct_ls/pfmg* */
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */

@@ -69,7 +69,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
   hypre_StructGrid    **grid_l;
   hypre_StructGrid    **P_grid_l;
 
-  HYPRE_Real           *data;
+  HYPRE_Complex        *data;
   HYPRE_Int             data_size = 0;
   HYPRE_Real           *relax_weights;
   HYPRE_Real           *mean, *deviation;
@@ -101,8 +101,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
   HYPRE_Int             d, l;
   HYPRE_Int             dxyz_flag;
 
-  HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM] = {0}; // XXX does this work?
-  HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM] = {1}; // XXX does this work?
+  HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM] = {0};
+  HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM] = {1};
 
 #if DEBUG
   char                  filename[255];
@@ -378,7 +378,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     hypre_StructVectorInitializeShell(tx_l[l+1]);
   }
 
-  data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
+  data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
   (pfmg_data -> data) = data;
 
   hypre_StructVectorInitializeData(tx_l[0], data);
@@ -604,7 +604,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
   HYPRE_Int              Ai;
 
-  HYPRE_Real            *Ap;
+  HYPRE_Complex         *Ap;
   HYPRE_Real             cxyz[HYPRE_MAXDIM], sqcxyz[HYPRE_MAXDIM], tcxyz[HYPRE_MAXDIM];
   HYPRE_Real             cxyz_max;
 
@@ -684,7 +684,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* get sign of diagonal */
       Ap = hypre_StructMatrixBoxData(A, i, sdiag);
       diag = 1.0;
-      if (Ap[Ai] < 0)
+      if (hypre_creal(Ap[Ai]) < 0)
       {
         diag = -1.0;
       }
@@ -731,7 +731,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
           /* get sign of diagonal */
           Ap = hypre_StructMatrixBoxData(A, i, sdiag);
           diag = 1.0;
-          if (Ap[Ai] < 0)
+          if (hypre_creal(Ap[Ai]) < 0)
           {
             diag = -1.0;
           }
@@ -848,7 +848,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
   hypre_IndexRef         start;
   hypre_Index            stride;
 
-  HYPRE_Real            *Ap;
+  HYPRE_Complex         *Ap;
   hypre_Box             *A_dbox;
   HYPRE_Int              Ai;
 

@@ -56,6 +56,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    HYPRE_Real            jacobi_weight    = (sys_pfmg_data -> jacobi_weight);
    HYPRE_Int             skip_relax = (sys_pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz       = (sys_pfmg_data -> dxyz);
+   HYPRE_Int             rap_type;
                      
    HYPRE_Int             max_iter;
    HYPRE_Int             max_levels;
@@ -371,6 +372,17 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    (sys_pfmg_data -> grid_l)     = grid_l;
    (sys_pfmg_data -> P_grid_l)   = P_grid_l;
 
+  /*-----------------------------------------------------
+   * Modify the rap_type if red-black Gauss-Seidel is 
+   * used. Red-black gs is used only in the non-Galerkin
+   * case.
+   *-----------------------------------------------------*/
+   if (relax_type == 2 || relax_type == 3)   /* red-black gs */
+   {
+     (sys_pfmg_data -> rap_type)= 1;
+   }
+   rap_type = (sys_pfmg_data -> rap_type);
+
    /*-----------------------------------------------------
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
@@ -401,7 +413,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       RT_l[l] = P_l[l];
 
       A_l[l+1] = hypre_SysPFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l],
-                                          grid_l[l+1], cdir);
+                                          grid_l[l+1], cdir/*, rap_type*/);
       hypre_SStructPMatrixInitialize(A_l[l+1]);
 
       hypre_SStructPVectorCreate(comm, grid_l[l+1], &b_l[l+1]);
@@ -450,7 +462,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
 
       /* set up interpolation operator */
       sysbamg_dbgmsg("SysPFMGSetupInterpOp() l=%d\n", l);
-      hypre_SysPFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l]);
+      hypre_SysPFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], rap_type);
 
       /* set up the coarse grid operator */
       hypre_SysPFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],

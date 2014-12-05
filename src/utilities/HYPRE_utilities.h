@@ -60,7 +60,9 @@ typedef double HYPRE_Real;
 
 #ifdef HYPRE_COMPLEX
 typedef double _Complex HYPRE_Complex;
-#define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
+// XXX some MPI implementations apparently don't like MPI_C_DOUBLE_COMPLEX
+//#define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX
+#define HYPRE_MPI_COMPLEX MPI_LONG_DOUBLE
 #else 
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL

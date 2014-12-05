@@ -29,7 +29,7 @@
 
 #define bamg_dbgmsg( format, args... ) \
 { \
-  if ( DEBUG_BAMG ) hypre_printf( "DEBUG_BAMG: " format, ## args ); fflush(stdout); \
+  if ( DEBUG_BAMG ) hypre_printf( "DEBUG_BAMG (%s:%d): " format, __FILE__, __LINE__, ## args ); fflush(stdout); \
 }
 
 

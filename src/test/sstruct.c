@@ -3604,6 +3604,7 @@ main( hypre_int argc,
     HYPRE_SStructSysPFMGSetTol(solver, tol);
     HYPRE_SStructSysPFMGSetRelChange(solver, 0);
     /* weighted Jacobi = 1; red-black GS = 2 */
+    // HYPRE_SStructSysPFMGSetRAPType(solver,2);    Set RAPType = 2 for general RAP
     HYPRE_SStructSysPFMGSetRelaxType(solver, relax);
     if (usr_jacobi_weight)
     {
@@ -5641,7 +5642,11 @@ main( hypre_int argc,
           }
           for (j = 0; j < size; j++)
           {
+#ifdef HYPRE_COMPLEX
+            hypre_fprintf(file, "%.14e %.14e\n", hypre_creal(values[j]), hypre_cimag(values[j]));
+#else
             hypre_fprintf(file, "%.14e\n", values[j]);
+#endif
           }
         }
         fflush(file);

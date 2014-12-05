@@ -119,16 +119,33 @@ HYPRE_SStructSysPFMGSetRelaxType( HYPRE_SStructSolver solver,
 {
    return( hypre_SysPFMGSetRelaxType( (void *) solver, relax_type) );
 }
-
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-                                                                                                                                                               
+
 HYPRE_Int
 HYPRE_SStructSysPFMGSetJacobiWeight(HYPRE_SStructSolver solver,
                                     HYPRE_Real          weight)
 {
    return( hypre_SysPFMGSetJacobiWeight( (void *) solver, weight) );
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+                                                                                                                                                               
+HYPRE_Int
+HYPRE_SStructSysPFMGSetRAPType(HYPRE_SStructSolver solver,
+                               HYPRE_Int           rap_type)
+{
+   return( hypre_SysPFMGSetRAPType( (void *) solver, rap_type) );
+}
+
+HYPRE_Int
+HYPRE_SStructSysPFMGGetRAPType(HYPRE_SStructSolver solver,
+                               HYPRE_Int           rap_type)
+{
+   return( hypre_SysPFMGSetRAPType( (void *) solver, rap_type) );
+}
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

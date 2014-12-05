@@ -57,7 +57,6 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
             break;
       } 
    }
-
    else if (rap_type == 1)
    {
       switch (hypre_StructStencilNDim(stencil)) 
