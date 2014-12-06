@@ -461,22 +461,20 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation operator */
-      sysbamg_dbgmsg("SysPFMGSetupInterpOp() l=%d\n", l);
+      sysbamg_dbgmsg("SysPFMGSetupInterpOp() P_l[l] l=%d cdir=%d\n", l, cdir);
       hypre_SysPFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], rap_type);
 
       /* set up the coarse grid operator */
-      hypre_SysPFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
-                              cdir, cindex, stride, A_l[l+1]);
+      sysbamg_dbgmsg("SysPFMGSetupRAPOp() A_l[l+1] l=%d cdir=%d\n", l, cdir);
+      hypre_SysPFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, A_l[l+1]);
 
       /* set up the interpolation routine */
       hypre_SysSemiInterpCreate(&interp_data_l[l]);
-      hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l],
-                               cindex, findex, stride);
+      hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l], cindex, findex, stride);
 
       /* set up the restriction routine */
       hypre_SysSemiRestrictCreate(&restrict_data_l[l]);
-      hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1],
-                                 cindex, findex, stride);
+      hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1], cindex, findex, stride);
    }
 
    /* set up fine grid relaxation */

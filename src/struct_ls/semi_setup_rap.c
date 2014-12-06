@@ -37,7 +37,7 @@
       } \
    }
 
-#define print_complex(x) if ( iAc == 403 ) { bamg_dbgmsg( "  %30s %16.6e %16.6e\n", #x, hypre_creal(x), hypre_cimag(x) ); }
+#define print_complex(x) if ( iAc < 0 ) { bamg_dbgmsg( "  %30s %16.6e %16.6e\n", #x, hypre_creal(x), hypre_cimag(x) ); }
 
 /*--------------------------------------------------------------------------
  * Sets up new coarse grid operator stucture.
@@ -610,7 +610,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
-                           if ( iAc == 403 ) bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
+                           if ( iAc < 0 )
+                             bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
 
                            print_complex( rap_ptrS[iAc] );
                            print_complex( rap_ptrU[iAc] );
@@ -703,7 +704,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
-                        if ( iAc == 403 ) bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
+                        if ( iAc < 0 )
+                           bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
                         
                         print_complex( rap_ptrS[iAc] );
                         print_complex( rap_ptrD[iAc] );
@@ -790,7 +792,8 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
-                        if ( iAc == 403 ) bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
+                        if ( iAc < 0 )
+                           bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
                         
                         print_complex( rap_ptrS[iAc] );
                         print_complex( rap_ptrU[iAc] );

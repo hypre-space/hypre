@@ -711,6 +711,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
     /* constant_coefficient==0, all coefficients vary with space */
     else
     {
+// XXX *arrays* can be private, but not reduced, so do need t_c, t_tc, t_sqc.
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,d)
 #endif

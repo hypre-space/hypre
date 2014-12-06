@@ -312,6 +312,7 @@ hypre_PFMGSetupInterpOp_CC0
          bamg_dbgmsg("Ai %d Pi %d center %g %g Pp0 %g %g Pp1 %g %g mrk0 %d mrk1 %d\n", Ai, Pi, hypre_creal(center), hypre_cimag(center), hypre_creal(Pp0[Pi]), hypre_cimag(Pp0[Pi]), hypre_creal(Pp1[Pi]), hypre_cimag(Pp1[Pi]), mrk0, mrk1);
       }
 
+#if 0  // XXX only useful when avoiding out-of-boundary indexing
       /*----------------------------------------------
        * Set interpolation weight to zero, if stencil
        * entry in same direction is zero. Prevents
@@ -322,6 +323,7 @@ hypre_PFMGSetupInterpOp_CC0
          Pp0[Pi] = 0.0;
       if (mrk1 != 0)
          Pp1[Pi] = 0.0;
+#endif
    }
    hypre_BoxLoop2End(Ai, Pi);
 
