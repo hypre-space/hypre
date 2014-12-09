@@ -940,8 +940,8 @@ HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part 
 
 /* sstruct_innerprod.c */
 HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
-HYPRE_Int hypre_SStructPComplexInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Complex *presult_ptr );
 HYPRE_Int hypre_SStructInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Real *result_ptr );
+HYPRE_Int hypre_SStructPComplexInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Complex *presult_ptr );
 HYPRE_Int hypre_SStructComplexInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Complex *result_ptr );
 
 /* sstruct_matrix.c */

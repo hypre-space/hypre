@@ -12,6 +12,7 @@
 
 #include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
+#include "sys_bamg.h"
 
 #define DEBUG 0
 
@@ -55,9 +56,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
 
    HYPRE_Real            b_dot_b, r_dot_r, eps = 0;
    HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
-                    
+
    HYPRE_Int             i, l;
-                    
+
 #if DEBUG
    char                  filename[255];
 #endif
@@ -133,6 +134,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
        * Down cycle
        *--------------------------------------------------*/
 
+      if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
+      sysbamg_dbgmsg("i %d l %d  b_dot_b %12.3e\n", i, 0, b_dot_b);
+
       /* fine grid pre-relaxation */
       hypre_SysPFMGRelaxSetPreRelax(relax_data_l[0]);
       hypre_SysPFMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
@@ -140,10 +144,15 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SysPFMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
 
+      if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
+      sysbamg_dbgmsg("i %d l %d  b_dot_b after PreRelax %12.3e\n", i, 0, b_dot_b);
+
       /* compute fine grid residual (b - Ax) */
       hypre_SStructPCopy(b_l[0], r_l[0]);
-      hypre_SStructPMatvecCompute(matvec_data_l[0],
-                                  -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+      hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
+
+      if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
+      sysbamg_dbgmsg("i %d l %d  r_dot_r %12.3e\n", i, 0, r_dot_r);
 
       /* convergence check */
       if (tol > 0.0)
@@ -180,15 +189,18 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SysSemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
 
 #if DEBUG
-         hypre_sprintf(filename, "zout_xdown.%02d", 0);
+         hypre_sprintf(filename, "zout_xdown.%02d.%02d", i, 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
-         hypre_sprintf(filename, "zout_rdown.%02d", 0);
+         hypre_sprintf(filename, "zout_rdown.%02d.%02d", i, 0);
          hypre_SStructPVectorPrint(filename, r_l[0], 0);
-         hypre_sprintf(filename, "zout_b.%02d", 1);
+         hypre_sprintf(filename, "zout_b.%02d.%02d", i, 1);
          hypre_SStructPVectorPrint(filename, b_l[1], 0);
 #endif
          for (l = 1; l <= (num_levels - 2); l++)
          {
+            if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[l], b_l[l], &b_dot_b);
+            sysbamg_dbgmsg("i %d l %d  b_dot_b %12.3e\n", i, l, b_dot_b);
+
             if (active_l[l])
             {
                /* pre-relaxation */
@@ -201,6 +213,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                hypre_SStructPCopy(b_l[l], r_l[l]);
                hypre_SStructPMatvecCompute(matvec_data_l[l],
                                            -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+
+               if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[l], b_l[l], &b_dot_b);
+               sysbamg_dbgmsg("i %d l %d  b_dot_b after PreRelax %12.3e\n", i, l, b_dot_b);
             }
             else
             {
@@ -213,11 +228,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SysSemiRestrict(restrict_data_l[l],
                                   RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-            hypre_sprintf(filename, "zout_xdown.%02d", l);
+            hypre_sprintf(filename, "zout_xdown.%02d.%02d", i, l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
-            hypre_sprintf(filename, "zout_rdown.%02d", l);
+            hypre_sprintf(filename, "zout_rdown.%02d.%02d", i, l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
-            hypre_sprintf(filename, "zout_b.%02d", l+1);
+            hypre_sprintf(filename, "zout_b.%02d.%02d", i, l+1);
             hypre_SStructPVectorPrint(filename, b_l[l+1], 0);
 #endif
          }
@@ -229,7 +244,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
-         hypre_sprintf(filename, "zout_xbottom.%02d", l);
+         hypre_sprintf(filename, "zout_xbottom.%02d.%02d", i, l);
          hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
 
@@ -243,9 +258,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SysSemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_SStructPAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            hypre_sprintf(filename, "zout_eup.%02d", l);
+            hypre_sprintf(filename, "zout_eup.%02d.%02d", i, l);
             hypre_SStructPVectorPrint(filename, e_l[l], 0);
-            hypre_sprintf(filename, "zout_xup.%02d", l);
+            hypre_sprintf(filename, "zout_xup.%02d.%02d", i, l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
             if (active_l[l])
@@ -262,9 +277,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SysSemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_SStructPAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG
-         hypre_sprintf(filename, "zout_eup.%02d", 0);
+         hypre_sprintf(filename, "zout_eup.%02d.%02d", i, 0);
          hypre_SStructPVectorPrint(filename, e_l[0], 0);
-         hypre_sprintf(filename, "zout_xup.%02d", 0);
+         hypre_sprintf(filename, "zout_xup.%02d.%02d", i, 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
 #endif
       }

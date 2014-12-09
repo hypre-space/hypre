@@ -503,7 +503,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
        * If it exists, we then calculate all RAP paths involving this
        * entry of A.
        *-----------------------------------------------------------------*/
-      bamg_dbgmsg("Begin RAPloop cdir=%d\n", cdir);
+      //bamg_dbgmsg("Begin RAPloop cdir=%d\n", cdir);
 
       for (RAPloop = 0; RAPloop < coarse_stencil_size; RAPloop++)
       {
@@ -517,7 +517,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
             hypre_CopyIndex(coarse_stencil_shape[RAPloop], index);
             a_ptr = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-            bamg_dbgmsg("RAPloop %d a_ptr %p\n", RAPloop, a_ptr); printIndex(index,NDim);
+            //bamg_dbgmsg("RAPloop %d a_ptr %p\n", RAPloop, a_ptr); printIndex(index,NDim);
 
             if (a_ptr != NULL)
             {
@@ -552,7 +552,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
                      }
 
-                     bamg_dbgmsg("diag %d Symmetric %d\n", diag, hypre_StructMatrixSymmetric(RAP));
+                     //bamg_dbgmsg("diag %d Symmetric %d\n", diag, hypre_StructMatrixSymmetric(RAP));
 
                      if (diag == 0 && hypre_StructMatrixSymmetric(RAP))
                      {
@@ -611,7 +611,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
                            if ( iAc < 0 )
-                             bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
+                             //bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
 
                            print_complex( rap_ptrS[iAc] );
                            print_complex( rap_ptrU[iAc] );
@@ -705,7 +705,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
                         if ( iAc < 0 )
-                           bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
+                           //bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
                         
                         print_complex( rap_ptrS[iAc] );
                         print_complex( rap_ptrD[iAc] );
@@ -793,7 +793,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
                         if ( iAc < 0 )
-                           bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
+                           //bamg_dbgmsg("iA %d iAc %d iR %d iP %d\n", iA, iAc, iR, iP);
                         
                         print_complex( rap_ptrS[iAc] );
                         print_complex( rap_ptrU[iAc] );
@@ -847,7 +847,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
    if (hypre_IndexD(hypre_StructGridPeriodic(cgrid),cdir) == 1)
    {
-      bamg_dbgmsg("Periodic == 1 -> collapsing RAP entries.\n");
+      //bamg_dbgmsg("Periodic == 1 -> collapsing RAP entries.\n");
 
       hypre_ForBoxI(ci, cgrid_boxes)
       {

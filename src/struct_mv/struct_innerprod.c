@@ -20,15 +20,16 @@
 
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProd
+ * *compute only the real part*; for full complex, use ComplexInnerProd
  *--------------------------------------------------------------------------*/
 
-HYPRE_Complex
+HYPRE_Real
 hypre_StructInnerProd( hypre_StructVector *x,
                        hypre_StructVector *y )
 {
-   HYPRE_Complex    final_innerprod_result;
-   HYPRE_Complex    local_result;
-   HYPRE_Complex    process_result;
+   HYPRE_Real       final_innerprod_result;
+   HYPRE_Real       local_result;
+   HYPRE_Real       process_result;
                    
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
@@ -74,7 +75,12 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #endif
       hypre_BoxLoop2For(xi, yi)
       {
-         local_result += xp[xi] * hypre_conj(yp[yi]);
+#ifdef HYPRE_COMPLEX      
+         local_result += hypre_creal(xp[xi]) * hypre_creal(yp[yi])
+                       - hypre_cimag(xp[xi]) * hypre_cimag(yp[yi]);
+#else
+         local_result += xp[xi] * yp[yi];
+#endif
       }
       hypre_BoxLoop2End(xi, yi);
    }
@@ -85,7 +91,11 @@ hypre_StructInnerProd( hypre_StructVector *x,
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_COMPLEX, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
+#ifdef HYPRE_COMPLEX
+   hypre_IncFLOPCount(4*hypre_StructVectorGlobalSize(x));
+#else
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
+#endif
 
    return final_innerprod_result;
 }
@@ -157,7 +167,7 @@ hypre_StructComplexInnerProd( hypre_StructVector *x,
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_COMPLEX, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
-   hypre_IncFLOPCount(7*hypre_StructVectorGlobalSize(x));   // XXX r*r+r*i+i*r+i*i = 7 flops?
+   hypre_IncFLOPCount(8*hypre_StructVectorGlobalSize(x));
 
    return final_innerprod_result;
 }

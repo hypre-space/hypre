@@ -284,11 +284,11 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
             cmaxsize = hypre_max(cmaxsize, hypre_BoxSizeD(cbox, d));
          }
 
-         hypre_printf("stop coarsening: l = %d\n", l);
+         sysbamg_dbgmsg("stop coarsening: l = %d\n", l);
          break;
       }
 
-      hypre_printf( "l %2d cdir %d Min %3d Max %3d periodic %3d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir), periodic );
+      sysbamg_dbgmsg("l %2d cdir %d Min %3d Max %3d periodic %3d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir), periodic);
 
       cdir_l[l] = cdir;
 
@@ -346,7 +346,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       num_levels -= 1;
    }
 
-   hypre_printf("num_levels = %d (full_periodic = %d)\n", num_levels, full_periodic);
+   sysbamg_dbgmsg("num_levels = %d (full_periodic = %d)\n", num_levels, full_periodic);
 
    /* free up some things */
    hypre_BoxDestroy(cbox);

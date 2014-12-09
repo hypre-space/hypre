@@ -2071,7 +2071,7 @@ HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid *
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
 
 /* struct_innerprod.c */
-HYPRE_Complex hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
+HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Complex hypre_StructComplexInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */

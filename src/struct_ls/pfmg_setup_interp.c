@@ -188,12 +188,12 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
       hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
-      bamg_dbgmsg("d, findex, start, stride, startc, stridec, loop_size (rap_type=%d, cc=%d)\n",rap_type,constant_coefficient);
-      for ( d = 0; d < NDim; d++ ) {
-        bamg_dbgmsg("%d %d %d %d %d %d %d\n", d, hypre_IndexD(findex,d), hypre_IndexD(start,d),
-                    hypre_IndexD(stride,d), hypre_IndexD(startc,d), hypre_IndexD(stridec,d),
-                    hypre_IndexD(loop_size,d));
-      }
+//    bamg_dbgmsg("d, findex, start, stride, startc, stridec, loop_size (rap_type=%d, cc=%d)\n",rap_type,constant_coefficient);
+//    for ( d = 0; d < NDim; d++ ) {
+//      bamg_dbgmsg("%d %d %d %d %d %d %d\n", d, hypre_IndexD(findex,d),  hypre_IndexD(start,d),
+//                                               hypre_IndexD(stride,d),  hypre_IndexD(startc,d),
+//                                               hypre_IndexD(stridec,d), hypre_IndexD(loop_size,d));
+//    }
 
       if ( constant_coefficient==1 )
          /* all coefficients are constant */
@@ -309,7 +309,11 @@ hypre_PFMGSetupInterpOp_CC0
          Pp0[Pi] /= center;
          Pp1[Pi] /= center;
 
-         bamg_dbgmsg("Ai %d Pi %d center %g %g Pp0 %g %g Pp1 %g %g mrk0 %d mrk1 %d\n", Ai, Pi, hypre_creal(center), hypre_cimag(center), hypre_creal(Pp0[Pi]), hypre_cimag(Pp0[Pi]), hypre_creal(Pp1[Pi]), hypre_cimag(Pp1[Pi]), mrk0, mrk1);
+//       bamg_dbgmsg("Ai %d Pi %d center %g %g Pp0 %g %g Pp1 %g %g mrk0 %d mrk1 %d\n", Ai, Pi,
+//                    hypre_creal(center),    hypre_cimag(center),
+//                    hypre_creal(Pp0[Pi]),   hypre_cimag(Pp0[Pi]),
+//                    hypre_creal(Pp1[Pi]),   hypre_cimag(Pp1[Pi]),
+//                    mrk0, mrk1);
       }
 
 #if 0  // XXX only useful when avoiding out-of-boundary indexing

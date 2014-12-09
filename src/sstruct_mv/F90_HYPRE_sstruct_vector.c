@@ -337,14 +337,14 @@ void
 hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
    (hypre_F90_Obj *x,
     hypre_F90_Obj *y,
-    hypre_F90_Complex *result,
+    hypre_F90_Real *result,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructInnerProd(
           hypre_F90_PassObj (HYPRE_SStructVector, x),
           hypre_F90_PassObj (HYPRE_SStructVector, y),
-          hypre_F90_PassComplexRef (result) ) );
+          hypre_F90_PassRealRef (result) ) );
 }
 
 /*--------------------------------------------------------------------------
