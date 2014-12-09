@@ -404,7 +404,6 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
           {
             Mi = k;
 
-#if 0
             C[Mi] = hypre_StructVectorBoxData(sv[k][I], b)[iv];
 
             for ( J = 0; J < NVars; J++ )
@@ -416,13 +415,10 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
                 M[Mi + Mj*Mrows] = hypre_StructVectorBoxData(sv[k][J], b)[iv + v_offsets[sj]];
               }
             }
-#endif
           }
 
           // compute C_out[Mcols] that minimizes || M[Mrows][Mcols] C_out[Mcols] - C_in[Mrows] ||_2
-#if 1
           hypre_LS(M, Mrows, Mcols, C, Crows, Ccols);
-#endif
 
           for ( J = 0; J < NVars; J++ )
           {
@@ -430,7 +426,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
               Mj = idxIJ[I][J]*P_StencilSize + sj;
-#if 1 // DEBUG_SYSBAMG_PFMG
+#if DEBUG_SYSBAMG_PFMG
               hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
 #else
               hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];
@@ -920,9 +916,12 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
 
   symmetric     = hypre_SStructPMatrixSymmetric(A)[0][0];     // XXX assume var-indep symmetry
 
-  // compute singular vectors
+  symmetric = 1;  // XXX hack to get test working
 
+  // compute singular vectors
   hypre_SVD( S, M, Mrows, Mcols, nsvecs, symmetric );
+
+  sysbamg_dbgmsg("copy vectors; symmetric %d; nsvecs %d\n", symmetric, nsvecs);
 
   // copy lowest singular vectors into svecs
   //    M := [ v_l,1, v_l,2, ..., v_r,1, v_r,2, ... ] -> svecs[...]

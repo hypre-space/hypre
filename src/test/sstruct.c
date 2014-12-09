@@ -2129,9 +2129,10 @@ SetCosineVector(   HYPRE_Real  scale,
   HYPRE_Int    i, j, k, l;
   HYPRE_Int    count = 0;
 
-  // XXX hard-wired for MAXDIM=4
-
+  // XXX hard-wired for MAXDIM < 5
+#if HYPRE_MAXDIM > 3
   for (l = ilower[3]; l <= iupper[3]; l++)
+#endif
   {
     for (k = ilower[2]; k <= iupper[2]; k++)
     {
