@@ -1891,6 +1891,7 @@ HYPRE_Int hypre_IndexMax( hypre_Index index , HYPRE_Int ndim );
 HYPRE_Int hypre_AddIndexes ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim , hypre_Index result );
 HYPRE_Int hypre_SubtractIndexes ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim , hypre_Index result );
 HYPRE_Int hypre_IndexesEqual ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim );
+HYPRE_Int hypre_PrintIndex( const hypre_Index Index, const HYPRE_Int NDim );
 hypre_Box *hypre_BoxCreate ( HYPRE_Int ndim );
 HYPRE_Int hypre_BoxDestroy ( hypre_Box *box );
 HYPRE_Int hypre_BoxInit( hypre_Box *box , HYPRE_Int  ndim );

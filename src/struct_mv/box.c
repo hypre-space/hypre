@@ -204,6 +204,23 @@ hypre_IndexesEqual( hypre_Index  index1,
    return equal;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_PrintIndex( const hypre_Index       Index,
+                  const HYPRE_Int         NDim )
+{
+  HYPRE_Int d;
+
+  for ( d = 0; d < NDim; d++ ) {
+    hypre_printf( "  %d", hypre_IndexD(Index,d) );
+  }
+  hypre_printf( "\n" );
+
+  return hypre_error_flag;
+}
+
 /*==========================================================================
  * Member functions: hypre_Box
  *==========================================================================*/

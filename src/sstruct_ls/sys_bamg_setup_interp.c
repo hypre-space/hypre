@@ -16,7 +16,13 @@
 
 #include <HYPRE_config.h>   // for HYPRE_COMPLEX
 
-#define hypre_re_im( x ) hypre_creal(x), hypre_cimag(x)
+#ifdef HYPRE_COMPLEX
+#define PrintComplex( s, x, t ) hypre_printf("%s(%12.3e, %12.3e)%s", s, hypre_creal(x), hypre_cimag(x), t);
+#else
+#define PrintComplex( s, x, t ) hypre_printf("%s%12.3e%s", s, x, t);
+#endif
+
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -184,6 +190,7 @@ void hypre_CheckReturnValue
  *--------------------------------------------------------------------------*/
 
 #ifdef HYPRE_COMPLEX
+// note: HYPRE_Complex is equivalent to doublecomplex but compiler will throw warnings
 #define hypre_xgeqrf hypre_zgeqrf
 #define hypre_xxxmqr hypre_zunmqr
 #define hypre_xtrtrs hypre_ztrtrs
@@ -207,7 +214,9 @@ HYPRE_Int hypre_LS
 {
   //sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
 
+#if DEBUG_SYSBAMG > 1
   HYPRE_Int Mi, Mj;
+#endif
 
 #if DEBUG_SYSBAMG > 1
   // print M and b to check
@@ -215,8 +224,8 @@ HYPRE_Int hypre_LS
   for ( Mi = 0; Mi < Mrows; Mi++ )
   {
     for ( Mj = 0; Mj < Mcols; Mj++ )
-      hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(M[Mi+Mj*Mrows]));
-    hypre_printf("  | ( %16.6e %16.6e )\n", hypre_re_im(C[Mi]));
+      PrintComplex("  ", M[Mi+Mj*Mrows], "");
+    PrintComplex("  |  ", C[Mi], "\n");
   }
   hypre_printf("\n");
 #endif
@@ -235,7 +244,7 @@ HYPRE_Int hypre_LS
   hypre_printf("hypre_LS: Q\\R = \n");
   for ( Mi = 0; Mi < Mrows; Mi++ )
   {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(M[Mi+Mj*Mrows]));
+    for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", M[Mi+Mj*Mrows], "");
     hypre_printf("\n");
   }
   hypre_printf("\n");
@@ -248,7 +257,7 @@ HYPRE_Int hypre_LS
 #if DEBUG_SYSBAMG > 1
   // print c to check
   hypre_printf("c\n");
-  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(C[Mj]));
+  for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", C[Mj], "");
   hypre_printf("\n");
 #endif
 
@@ -256,8 +265,11 @@ HYPRE_Int hypre_LS
   hypre_xtrtrs( "Upper", "No transpose", "Non-unit", &Mcols, &Ccols, M, &Mrows, C, &Crows, &info );
   if ( info  >  0 ) {
     hypre_printf( "XXX hypre_xtrtrs error: M is singular! Using C[*] = %g.\n", 1.0/Mcols);
-    for ( Mj = 0; Mj < Mcols; Mj++ ) C[Mj] = 1.0/Mcols;     // XXX set to naive avg if trtrs fails
+#if 1
     exit(9);
+#else
+    for ( Mj = 0; Mj < Mcols; Mj++ ) C[Mj] = 1.0/Mcols;     // XXX set to naive avg if trtrs fails
+#endif
   }
   else if ( info == -7 ) {
     hypre_printf( "\nhypre_xtrtrs error: the number of test vectors must be greater"
@@ -271,7 +283,7 @@ HYPRE_Int hypre_LS
 #if DEBUG_SYSBAMG > 1
   // print x to check
   hypre_printf("x\n");
-  for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  ( %16.6e %16.6e )", hypre_re_im(C[Mj]));
+  for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", C[Mj], "");
   hypre_printf("\n");
 #endif
 
@@ -283,6 +295,10 @@ HYPRE_Int hypre_LS
   return hypre_error_flag;
 }
 
+#undef hypre_xgeqrf
+#undef hypre_xxxmqr
+#undef hypre_xtrtrs
+#undef TRANS
 
 
 /*--------------------------------------------------------------------------
@@ -397,7 +413,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
         {
 #if DEBUG_SYSBAMG > 1
           sysbamg_dbgmsg("Set up LS - I %d iP %d iv %d\n", I, iP, iv);
-          hypre_Index iIndex; hypre_BoxLoopGetIndex(iIndex); printIndex(iIndex, NDim); // dbgmsg
+          hypre_Index iIndex; hypre_BoxLoopGetIndex(iIndex); hypre_PrintIndex(iIndex, NDim); // dbgmsg
 #endif
 
           for ( k = 0; k < nvecs; k++ )
@@ -442,9 +458,9 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
     hypre_TFree( M );
   }
 
-  printf("findex\n"); printIndex(findex,NDim);
-  printf("stride\n"); printIndex(stride,NDim);
-  printf("cdir %d\n", cdir);
+  sysbamg_dbgmsg("findex  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(findex,NDim);
+  sysbamg_dbgmsg("stride  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(stride,NDim);
+  sysbamg_dbgmsg("cdir %d\n", cdir);
 
   {
     HYPRE_Int I, J;
@@ -481,7 +497,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp
 )
 {
   HYPRE_Int               NVars;
-  HYPRE_Int               I,J,k;   // vars
+  HYPRE_Int               I,k;   // vars
 
   hypre_StructMatrix***   sA;
   hypre_StructMatrix***   sP;
@@ -559,18 +575,21 @@ HYPRE_Int hypre_SysBAMGSetupInterpOp
  *----------------------------------------------------------------------------*/
 
 #ifdef HYPRE_COMPLEX
+// note: HYPRE_Complex is equivalent to doublecomplex but compiler will throw warnings
 #define hypre_xgebrd hypre_zgebrd
 #define hypre_xbdsqr hypre_zbdsqr
 #define hypre_xxxmbr hypre_zunmbr
+#define TRANS        "C"
 #else
 #define hypre_xgebrd hypre_dgebrd
 #define hypre_xbdsqr hypre_dbdsqr
 #define hypre_xxxmbr hypre_dormbr
+#define TRANS        "T"
 #endif
 
 HYPRE_Int hypre_SVD
 (
-  HYPRE_Complex*          S,
+  HYPRE_Real*             S,
   HYPRE_Complex*          M,
   HYPRE_Int               Mrows,
   HYPRE_Int               Mcols,
@@ -582,16 +601,17 @@ HYPRE_Int hypre_SVD
 
 #if DEBUG_SYSBAMG > 1
   // print M to check
-  hypre_printf("hypre_SVD M:\n");
+  sysbamg_dbgmsg("hypre_SVD M:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
-      hypre_printf("  %16.6e", M[Mi + Mj*Mrows]);
+      PrintComplex("  ", M[Mi + Mj*Mrows], "");
     }
     hypre_printf("\n");
   }
+  sysbamg_dbgmsg("symmetric = %d\n", symmetric);
 #endif
 
-  HYPRE_Complex*  e     = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
+  HYPRE_Real*     e     = (HYPRE_Real*) hypre_TAlloc(HYPRE_Real, Mrows);
   HYPRE_Complex*  tauq  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
   HYPRE_Complex*  taup  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, Mrows);
   HYPRE_Int       lwork = (Mrows + Mcols) * 8;  // optimal blocksize = 8?
@@ -604,12 +624,11 @@ HYPRE_Int hypre_SVD
 
 #if DEBUG_SYSBAMG > 1
   // print Q\R to check
-  hypre_printf("hypre_SVD BD e:\n");
-  hypre_printf("  %16s","");
-  for ( Mi = 0; Mi < Mrows-1; Mi++ ) hypre_printf("  %16.6e", e[Mi]);
+  sysbamg_dbgmsg("hypre_SVD BD d:\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ )   PrintComplex("  ", S[Mi], "");
   hypre_printf("\n");
-  hypre_printf("hypre_SVD BD d:\n");
-  for ( Mi = 0; Mi < Mrows; Mi++ )   hypre_printf("  %16.6e", S[Mi]);
+  sysbamg_dbgmsg("hypre_SVD BD e:\n");
+  for ( Mi = 0; Mi < Mrows-1; Mi++ ) PrintComplex("  ", e[Mi], "");
   hypre_printf("\n");
 #endif
 
@@ -627,62 +646,61 @@ HYPRE_Int hypre_SVD
   hypre_CheckReturnValue( "hypre_xbdsqr", info );
 
 #if DEBUG_SYSBAMG > 0
-  hypre_printf("hypre_SVD S:\n");
-  for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    hypre_printf("  %16.6e", S[Mi]);
-  }
+  sysbamg_dbgmsg("hypre_SVD S:\n");
+  for ( Mi = 0; Mi < Mrows; Mi++ ) PrintComplex("  ", S[Mi], "");
   hypre_printf("\n");
 #endif
 
 #if DEBUG_SYSBAMG > 1
-  hypre_printf("hypre_SVD Q:\n");
+  sysbamg_dbgmsg("hypre_SVD Q:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
+    for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", U[Mi+Mj*Mrows], "");
     hypre_printf("\n");
   }
 
-  hypre_printf("hypre_SVD P^T:\n");
+  sysbamg_dbgmsg("hypre_SVD P^T:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
-    for ( Mj = 0; Mj < Mcols; Mj++ ) hypre_printf("  %16.6e", U[Mi+Mj*Mrows]);
+    for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", VT[Mi+Mj*Mrows], "");
     hypre_printf("\n");
   }
 
-  hypre_printf("hypre_SVD [Q S P^T]:\n");
+  sysbamg_dbgmsg("hypre_SVD [Q S P^T]:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       HYPRE_Int     k;
       HYPRE_Complex x = 0.0;
       for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * S[k] * VT[k+Mj*Mrows];
-      hypre_printf("  %16.6e", ( fabs(x) < 1e-12 ? 0.0 : x ));
+      if ( hypre_cabs(x) < 1e-12 ) x = 0.0;
+      PrintComplex("  ", x, "");
     }
     hypre_printf("\n");
   }
 #endif
 
   // compute the singular vector matrices U = U_1 U_2 == Q U and V^T = V_2^T V_1^T == VT P^T
+  // ( "N" : no transpose )
 
   char vect   = 'Q';
   char side   = 'L';
-  char trans  = 'N';
 
-  hypre_xxxmbr(&vect, &side, &trans, &Mrows, &Mcols, &Mcols, M, &Mcols, tauq, U, &Mcols, work, &lwork, &info);
+  hypre_xxxmbr(&vect, &side, "N", &Mrows, &Mcols, &Mcols, M, &Mcols, tauq, U, &Mcols, work, &lwork, &info);
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
 
   vect   = 'P';
   side   = 'R';
-  trans  = 'T';
 
-  hypre_xxxmbr(&vect, &side, &trans, &Mcols, &Mrows, &Mcols, M, &Mcols, taup, VT, &Mrows, work, &lwork, &info);
+  hypre_xxxmbr(&vect, &side, TRANS, &Mcols, &Mrows, &Mcols, M, &Mcols, taup, VT, &Mrows, work, &lwork, &info);
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
 
 #if DEBUG_SYSBAMG > 1
-  hypre_printf("hypre_SVD [U S V^T]:\n");
+  sysbamg_dbgmsg("hypre_SVD [U S V^T]:\n");
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       HYPRE_Int     k;
       HYPRE_Complex x = 0.0;
       for ( k = 0; k < Mrows; k++ ) x += U[Mi+k*Mrows] * S[k] * VT[k+Mj*Mrows];
-      hypre_printf("  %16.6e", ( fabs(x) < 1e-12 ? 0.0 : x ));
+      if ( hypre_cabs(x) < 1e-12 ) x = 0.0;
+      PrintComplex("  ", x, "");
     }
     hypre_printf("\n");
   }
@@ -713,6 +731,11 @@ HYPRE_Int hypre_SVD
   return hypre_error_flag;
 }
 
+#undef hypre_xgebrd
+#undef hypre_xbdsqr
+#undef hypre_xxxmbr
+#undef TRANS
+
 
 
 /*--------------------------------------------------------------------------
@@ -740,30 +763,6 @@ HYPRE_Int IndexToInt
   }
 
   return Int;
-}
-
-
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int printIndex
-(
-  const hypre_Index       Index,
-  const HYPRE_Int         NDim
-)
-{
-  HYPRE_Int               dim;
-
-  hypre_printf( "Index:" );
-
-  for ( dim = 0; dim < NDim; dim++ ) {
-    hypre_printf( "  %d", hypre_IndexD(Index,dim) );
-  }
-
-  hypre_printf( "\n" );
-
-  return hypre_error_flag;
 }
 
 
@@ -823,13 +822,13 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   hypre_Index             DataBoxSize;
 
   HYPRE_Int               BoxIdx = 0;   // XXX hard-wired* should loop over boxes* XXX
-  HYPRE_Int               I, J, i, j, k, si, dim;
+  HYPRE_Int               I, J, i, j, k, si;
   hypre_IndexRef          start;
   hypre_Index             stride;
   hypre_Index             iIndex, jIndex;
 
   HYPRE_Complex*          M;
-  HYPRE_Complex*          S;
+  HYPRE_Real*             S;
   HYPRE_Int               Mrows, Mcols, Mi, Mj;
 
   hypre_StructStencil*    Stencil;
@@ -855,15 +854,15 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   Mrows         = GridBoxVolume * NVars;
   Mcols         = Mrows;
   M             = (HYPRE_Complex*) hypre_CTAlloc( HYPRE_Complex, Mrows*Mcols );
-  S             = (HYPRE_Complex*) hypre_CTAlloc( HYPRE_Complex, Mrows );
+  S             = (HYPRE_Real*) hypre_CTAlloc( HYPRE_Real, Mrows );
 
   // copy A into M
 
   NDim = hypre_SStructPMatrixNDim( A );
 
   sysbamg_dbgmsg( "Coarse Grid Min and Max:\n" );
-  printIndex( hypre_BoxIMin( GridBox ), NDim ); // dbg
-  printIndex( hypre_BoxIMax( GridBox ), NDim ); // dbg
+  hypre_PrintIndex( hypre_BoxIMin( GridBox ), NDim ); // dbg
+  hypre_PrintIndex( hypre_BoxIMax( GridBox ), NDim ); // dbg
 
   start = hypre_BoxIMin( GridBox );
   hypre_SetIndex( stride, 1 );
@@ -892,7 +891,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
         hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
 
         //sysbamg_dbgmsg( "iIndex:\n" );
-        //printIndex( iIndex, NDim ); // dbg
+        //hypre_PrintIndex( iIndex, NDim ); // dbg
 
         Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
 
@@ -901,8 +900,8 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
           AddIndex( jIndex, iIndex, StencilShape[si], GridBox );
 
           //sysbamg_dbgmsg( "StencilShape[%d] and jIndex:\n", si )
-          //printIndex( StencilShape[si], NDim ); // dbg
-          //printIndex( jIndex, NDim ); // dbg
+          //hypre_PrintIndex( StencilShape[si], NDim ); // dbg
+          //hypre_PrintIndex( jIndex, NDim ); // dbg
 
           Mj = J * GridBoxVolume + IndexToInt( jIndex, GridBox );
 
@@ -968,7 +967,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
     for ( j = 0; j < 3; j++ ) {
       hypre_SStructPMatvec( 1.0, A, svecs[j + (symmetric ? 0 : nsvecs)], 0.0, AV );
       hypre_SStructPComplexInnerProd( svecs[i], AV, &x );
-      printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", i, j, i, x / S[i]);
+      sysbamg_dbgmsg("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", i, j, i, hypre_cabs(x / S[i]));
     }
   }
 

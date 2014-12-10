@@ -32,7 +32,7 @@ hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, HYPRE_Int se
    for (var = 0; var < nvars; var++)
    {
       svector = hypre_SStructPVectorSVector(pvector, var);
-	  seed = rand();
+      seed = rand();
       hypre_StructVectorSetRandomValues(svector, seed);
    }
 

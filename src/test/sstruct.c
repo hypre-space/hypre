@@ -10,6 +10,18 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+/*  Usage ex.:
+    ./sstruct -in TEST_sstruct/sstruct.in.periodic.crs -solver 13 -print -verb 3
+
+    NB: To run with np > 1, must specify process geometry with -P. E.g. to split
+        x dimension into two parts, in 3 dimensions, add -P 2 1 1 to the command line.
+    Usage ex.:
+    mpirun -np 2 ./sstruct -in TEST_sstruct/sstruct.in.periodic.crs -solver 13 -P 2 1 1
+
+    XXX Several parts of this file must be extended to 4 dimensions in order to
+        run with np > 1 in 4D.
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -1209,7 +1221,6 @@ DistributeData( ProblemData   global_data,
     pool = data.pools[part] + 1;
     np = distribute[part][0] * distribute[part][1] * distribute[part][2];
     pool_procs[pool] = hypre_max(pool_procs[pool], np);
-
   }
   pool_procs[0] = 0;
   for (pool = 1; pool < (data.npools + 1); pool++)
@@ -2126,11 +2137,12 @@ SetCosineVector(   HYPRE_Real  scale,
     Index   iupper,
     HYPRE_Complex *values)
 {
-  HYPRE_Int    i, j, k, l;
+  HYPRE_Int    i, j, k;
   HYPRE_Int    count = 0;
 
   // XXX hard-wired for MAXDIM < 5
 #if HYPRE_MAXDIM > 3
+  HYPRE_Int l;
   for (l = ilower[3]; l <= iupper[3]; l++)
 #endif
   {

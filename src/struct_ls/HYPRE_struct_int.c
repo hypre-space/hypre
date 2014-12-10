@@ -45,11 +45,10 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    hypre_ForBoxI(i, boxes)
    {
-      box      = hypre_BoxArrayBox(boxes, i);
+      box   = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
 
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
       vp = hypre_StructVectorBoxData(vector, i);
  
       hypre_BoxGetSize(box, loop_size);

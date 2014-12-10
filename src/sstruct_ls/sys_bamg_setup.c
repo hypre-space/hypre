@@ -31,6 +31,12 @@
   hypre_IndexD(stride, cdir) = 2;           \
 }
 
+HYPRE_Int hypre_SysBAMGSetupGrids ( hypre_SysBAMGData* bamg, hypre_SStructPMatrix* A, HYPRE_Real* relax_weights, HYPRE_Int* cmaxsize);
+HYPRE_Int hypre_SysBAMGSetupMV ( hypre_SysBAMGData* bamg, hypre_SStructPMatrix* A, hypre_SStructPVector* b, hypre_SStructPVector* x);
+HYPRE_Int hypre_SysBAMGSetupTV ( hypre_SysBAMGData* bamg, hypre_SStructPVector*** tv, HYPRE_Real* relax_weights);
+HYPRE_Int hypre_SysBAMGSetupOperators ( hypre_SysBAMGData* bamg, hypre_SStructPVector*** tv, HYPRE_Int num_tv_, HYPRE_Real* relax_weights, HYPRE_Int cmaxsize);
+HYPRE_Int hypre_SysBAMGCoarsen ( hypre_SStructPGrid* finePGrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_SStructPGrid** coarsePGrid_ptr);
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -45,10 +51,6 @@ HYPRE_Int hypre_SysBAMGSetup
   hypre_SysBAMGData*      bamg              = sys_bamg_vdata;
 
   MPI_Comm                comm              = (bamg->comm);
-
-  HYPRE_Int               relax_type        = (bamg->relax_type);
-  HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
-  HYPRE_Real              jacobi_weight     = (bamg->jacobi_weight);
 
   HYPRE_Int               num_refine        = (bamg->num_refine);
   HYPRE_Int               num_rtv           = (bamg->num_rtv);
@@ -93,8 +95,7 @@ HYPRE_Int hypre_SysBAMGSetup
   HYPRE_Int               NDimCoarsen;
 
   HYPRE_Int               cmaxsize;
-  HYPRE_Int               d, l;
-  HYPRE_Int               i, j, k;
+  HYPRE_Int               i, k, l;
 
   hypre_SStructPVector*** tv;     // tv[l][k] == k'th test vector on level l
 
@@ -171,7 +172,7 @@ HYPRE_Int hypre_SysBAMGSetup
   r_l  = (bamg->r_l)  = tx_l;
   e_l  = (bamg->e_l)  = tx_l;
 
-  hypre_SysBAMGSetupMV( bamg, A, b, x, PGrid_l, P_PGrid_l, cdir_l );
+  hypre_SysBAMGSetupMV( bamg, A, b, x );
 
   /*----------------------------------------------------------------------------------------------
    * Allocate/Create auxiliary data structures
@@ -503,8 +504,8 @@ HYPRE_Int hypre_SysBAMGSetupGrids
     hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
 
     sysbamg_dbgmsg( "cbox Min and Max:\n" );
-    printIndex( hypre_BoxIMin(cbox), NDim );
-    printIndex( hypre_BoxIMax(cbox), NDim );
+    hypre_PrintIndex( hypre_BoxIMin(cbox), NDim );
+    hypre_PrintIndex( hypre_BoxIMax(cbox), NDim );
 
 #if DEBUG_SYSBAMG_PFMG
     dxyz[cdir] *= 2;
@@ -549,7 +550,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-hypre_SysBAMGSetupMV
+HYPRE_Int hypre_SysBAMGSetupMV
 (
   hypre_SysBAMGData*      bamg,
   hypre_SStructPMatrix*   A,
@@ -620,7 +621,7 @@ hypre_SysBAMGSetupMV
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-hypre_SysBAMGSetupTV
+HYPRE_Int hypre_SysBAMGSetupTV
 (
   hypre_SysBAMGData*      bamg,
   hypre_SStructPVector*** tv,
@@ -630,15 +631,9 @@ hypre_SysBAMGSetupTV
   MPI_Comm                comm              = (bamg->comm);
   HYPRE_Int               num_rtv           = (bamg->num_rtv);
   HYPRE_Int               num_stv           = (bamg->num_stv);
-  HYPRE_Int               relax_type        = (bamg->relax_type);
   HYPRE_Int               num_levels        = (bamg->num_levels);
-  HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
-  HYPRE_Real              jacobi_weight     = (bamg->jacobi_weight);
   HYPRE_Int               symmetric         = (bamg->symmetric);
 
-  hypre_SStructPMatrix**  A_l               = (bamg->A_l);
-  hypre_SStructPVector**  x_l               = (bamg->x_l);
-  hypre_SStructPVector**  tx_l              = (bamg->tx_l);
   hypre_SStructPGrid**    PGrid_l           = (bamg->PGrid_l);
 
   HYPRE_Int               num_tv            = num_rtv + num_stv;
@@ -662,7 +657,8 @@ hypre_SysBAMGSetupTV
   }
 
   for ( k = 0; k < num_rtv*nsym; k++ ) {
-    hypre_SStructPVectorSetRandomValues(tv[0][k], (HYPRE_Int)time(0)+k);
+    // note: need offset (5173, arbitrary) so that tv[0][0] != tv[0][1] (on oslic at least)
+    hypre_SStructPVectorSetRandomValues(tv[0][k], k + 5173 /*+ (HYPRE_Int)time(0)*/);
 
 #if DEBUG_SYSBAMG > 0
     char filename[255];
@@ -679,7 +675,7 @@ hypre_SysBAMGSetupTV
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-hypre_SysBAMGSetupOperators
+HYPRE_Int hypre_SysBAMGSetupOperators
 (
   hypre_SysBAMGData*      bamg,
   hypre_SStructPVector*** tv,

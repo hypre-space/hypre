@@ -296,6 +296,10 @@ HYPRE_Int dsytd2_ ( char *uplo , integer *n , doublereal *a , integer *lda , dou
 /* dsytrd.c */
 HYPRE_Int dsytrd_ ( char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
+/* dtrtrs.c */
+HYPRE_Int dtrtrs_(char *uplo, char *trans, char *diag, integer *n, integer *nrhs, doublereal *a, integer *lda, doublereal *b, integer * ldb, integer *info );
+
+
 /* ieeeck.c */
 integer ieeeck_ ( integer *ispec , real *zero , real *one );
 
@@ -359,5 +363,23 @@ HYPRE_Int dlasq5_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , 
 
 /* dlasq6.c */
 HYPRE_Int dlasq6_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , doublereal *dmin__ , doublereal *dmin1 , doublereal *dmin2 , doublereal *dn , doublereal *dnm1 , doublereal *dnm2 );
+
+/* zbdsqr.c */
+HYPRE_Int zbdsqr_(char *uplo, integer *n, integer *ncvt, integer * nru, integer *ncc, doublereal *d__, doublereal *e, doublecomplex *vt, integer *ldvt, doublecomplex *u, integer *ldu, doublecomplex *c__, integer *ldc, doublereal *rwork, integer *info);
+
+/* zgebrd.c */
+HYPRE_Int zgebrd_(integer *m, integer *n, doublecomplex *a, integer *lda, doublereal *d__, doublereal *e, doublecomplex *tauq, doublecomplex *taup, doublecomplex *work, integer *lwork, integer * info);
+
+/* zgeqrf.c */
+HYPRE_Int zgeqrf_(integer *m, integer *n, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *work, integer *lwork, integer *info);
+
+/* ztrtrs.c */
+HYPRE_Int ztrtrs_(char *uplo, char *trans, char *diag, integer *n, integer *nrhs, doublecomplex *a, integer *lda, doublecomplex *b, integer *ldb, integer *info);
+
+/* zunmbr.c */
+HYPRE_Int zunmbr_(char *vect, char *side, char *trans, integer *m, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *c__, integer *ldc, doublecomplex *work, integer * lwork, integer *info);
+
+/* zunmqr.c */
+HYPRE_Int zunmqr_(char *side, char *trans, integer *m, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *c__, integer *ldc, doublecomplex *work, integer *lwork, integer *info);
 
 #endif
