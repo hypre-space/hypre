@@ -77,7 +77,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
       {
 #ifdef HYPRE_COMPLEX      
          local_result += hypre_creal(xp[xi]) * hypre_creal(yp[yi])
-                       - hypre_cimag(xp[xi]) * hypre_cimag(yp[yi]);
+                       + hypre_cimag(xp[xi]) * hypre_cimag(yp[yi]);
 #else
          local_result += xp[xi] * yp[yi];
 #endif
