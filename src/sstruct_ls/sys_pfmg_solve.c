@@ -135,7 +135,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
        *--------------------------------------------------*/
 
       if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
-      sysbamg_dbgmsg("i %d l %d  b_dot_b %12.3e\n", i, 0, b_dot_b);
+      sysbamg_dbgmsg("i %d l %d  b_dot_b                %12.3e\n", i, 0, b_dot_b);
 
       /* fine grid pre-relaxation */
       hypre_SysPFMGRelaxSetPreRelax(relax_data_l[0]);
@@ -152,7 +152,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       hypre_SStructPMatvecCompute(matvec_data_l[0], -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
 
       if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(r_l[0], r_l[0], &r_dot_r);
-      sysbamg_dbgmsg("i %d l %d  r_dot_r %12.3e\n", i, 0, r_dot_r);
+      sysbamg_dbgmsg("i %d l %d  r_dot_r                %12.3e\n", i, 0, r_dot_r);
 
       /* convergence check */
       if (tol > 0.0)
@@ -199,7 +199,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          for (l = 1; l <= (num_levels - 2); l++)
          {
             if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[l], b_l[l], &b_dot_b);
-            sysbamg_dbgmsg("i %d l %d  b_dot_b %12.3e\n", i, l, b_dot_b);
+            sysbamg_dbgmsg("i %d l %d  b_dot_b                %12.3e\n", i, l, b_dot_b);
 
             if (active_l[l])
             {
@@ -209,13 +209,15 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
                hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
-               /* compute residual (b - Ax) */
-               hypre_SStructPCopy(b_l[l], r_l[l]);
-               hypre_SStructPMatvecCompute(matvec_data_l[l],
-                                           -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
-
                if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(b_l[l], b_l[l], &b_dot_b);
                sysbamg_dbgmsg("i %d l %d  b_dot_b after PreRelax %12.3e\n", i, l, b_dot_b);
+
+               /* compute residual (b - Ax) */
+               hypre_SStructPCopy(b_l[l], r_l[l]);
+               hypre_SStructPMatvecCompute(matvec_data_l[l], -1.0, A_l[l], x_l[l], 1.0, r_l[l]);
+
+               if ( DEBUG_SYSBAMG > 0 ) hypre_SStructPInnerProd(r_l[l], r_l[l], &r_dot_r);
+               sysbamg_dbgmsg("i %d l %d  r_dot_r                %12.3e\n", i, l, r_dot_r);
             }
             else
             {

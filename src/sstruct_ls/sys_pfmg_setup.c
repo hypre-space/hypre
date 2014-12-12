@@ -14,7 +14,7 @@
 #include "sys_pfmg.h"
 #include "sys_bamg.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define hypre_PFMGSetCIndex(cdir, cindex)       \
    {                                            \

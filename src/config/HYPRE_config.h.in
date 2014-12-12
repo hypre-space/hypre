@@ -111,5 +111,5 @@
 
 
 // for debugging (CRS)
-#define LINE hypre_printf("%s %d\n", __FILE__, __LINE__);
+#define LINE hypre_printf("%s %d\n", __FILE__, __LINE__); fflush(stdout);
 

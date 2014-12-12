@@ -597,6 +597,8 @@ HYPRE_Int hypre_SVD
   HYPRE_Int               symmetric
 )
 {
+  sysbamg_dbgmsg("%s starting\n", __func__);
+
   HYPRE_Int               Mi, Mj;
 
 #if DEBUG_SYSBAMG > 1
@@ -618,6 +620,8 @@ HYPRE_Int hypre_SVD
   HYPRE_Complex*  work  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, lwork);
   HYPRE_Int       info;
 
+LINE
+
   // NB: R and Q (via reflectors) are written to M
   hypre_xgebrd( &Mrows, &Mcols, M, &Mrows, S, e, tauq, taup, work, &lwork, &info );
   hypre_CheckReturnValue( "hypre_xgebrd", info );
@@ -631,6 +635,8 @@ HYPRE_Int hypre_SVD
   for ( Mi = 0; Mi < Mrows-1; Mi++ ) PrintComplex("  ", e[Mi], "");
   hypre_printf("\n");
 #endif
+
+LINE
 
   char            uplo = 'U';
   HYPRE_Int       zero = 0;
@@ -677,6 +683,8 @@ HYPRE_Int hypre_SVD
   }
 #endif
 
+LINE
+
   // compute the singular vector matrices U = U_1 U_2 == Q U and V^T = V_2^T V_1^T == VT P^T
   // ( "N" : no transpose )
 
@@ -685,6 +693,8 @@ HYPRE_Int hypre_SVD
 
   hypre_xxxmbr(&vect, &side, "N", &Mrows, &Mcols, &Mcols, M, &Mcols, tauq, U, &Mcols, work, &lwork, &info);
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
+
+LINE
 
   vect   = 'P';
   side   = 'R';
@@ -705,6 +715,8 @@ HYPRE_Int hypre_SVD
     hypre_printf("\n");
   }
 #endif
+
+LINE
 
   // write lowest Mrows/2 L and R singular vectors into M := [v_l,1, v_l,2, ..., v_r,1, v_r,2, ...]
   //    nb: values/vectors are returned in* descending* order
@@ -860,9 +872,12 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
 
   NDim = hypre_SStructPMatrixNDim( A );
 
-  sysbamg_dbgmsg( "Coarse Grid Min and Max:\n" );
-  hypre_PrintIndex( hypre_BoxIMin( GridBox ), NDim ); // dbg
-  hypre_PrintIndex( hypre_BoxIMax( GridBox ), NDim ); // dbg
+#if DEBUG_SYSBAMG > 0
+  sysbamg_dbgmsg("Coarse Grid Min and Max:\n");
+  hypre_PrintIndex( hypre_BoxIMin( GridBox ), NDim );
+  hypre_PrintIndex( hypre_BoxIMax( GridBox ), NDim );
+  sysbamg_dbgmsg("Mrows=%d Mcols=%d\n", Mrows, Mcols);
+#endif
 
   start = hypre_BoxIMin( GridBox );
   hypre_SetIndex( stride, 1 );
@@ -872,6 +887,9 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
     for ( J = 0; J < NVars; J++ )
     {
       StructMatrix  = hypre_SStructPMatrixSMatrix( A, I, J );
+
+      if ( StructMatrix == NULL ) continue;
+
       BoxArray      = hypre_StructMatrixDataSpace( StructMatrix );
       DataBox       = hypre_BoxArrayBox( BoxArray, BoxIdx );
 
