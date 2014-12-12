@@ -61,7 +61,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1For(vi)
       {
          vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
-#ifdef HYPRE_COMPLEX
+#ifdef HYPRE_COMPLEXX
          vp[vi] *= cexp(rand()*I);
 #endif
       }
