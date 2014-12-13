@@ -520,6 +520,12 @@ ReadData( char         *filename,
       if ( strcmp(key, "GridCreate:") == 0 )
       {
         data.ndim = strtol(sdata_ptr, &sdata_ptr, 10);
+
+        if (data.ndim > HYPRE_MAXDIM) {
+          hypre_printf("Error: Invalid ndim = %d. HYPRE_MAXDIM = %d.\n",data.ndim,HYPRE_MAXDIM);
+          exit(1);
+        }
+
         data.nparts = strtol(sdata_ptr, &sdata_ptr, 10);
         data.pdata = hypre_CTAlloc(ProblemPartData, data.nparts);
       }
