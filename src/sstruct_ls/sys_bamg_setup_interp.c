@@ -290,8 +290,6 @@ HYPRE_Int hypre_LS
   hypre_TFree( tau );
   hypre_TFree( work );
 
-  //printf("%s %3d %s finished.\n", __FILE__, __LINE__, __func__);
-
   return hypre_error_flag;
 }
 
@@ -354,12 +352,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
       }
     }
     for ( I = 0; I < NVars; I++ ) {
-      sysbamg_dbgmsg("numIJ[ %2d ] = %2d\n", I, numIJ[I]);
+      //sysbamg_dbgmsg("numIJ[ %2d ] = %2d\n", I, numIJ[I]);
     }
     for ( I = 0; I < NVars; I++ ) {
       for ( J = 0; J < NVars; J++ ) {
         if ( sP[I][J] == NULL ) continue;
-        sysbamg_dbgmsg("idxIJ[ %2d ][ %2d ] = %2d\n", I, J, idxIJ[I][J]);
+        //sysbamg_dbgmsg("idxIJ[ %2d ][ %2d ] = %2d\n", I, J, idxIJ[I][J]);
       }
     }
   }
@@ -442,9 +440,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
 
             for ( sj = 0; sj < P_StencilSize; sj++ ) {
               Mj = idxIJ[I][J]*P_StencilSize + sj;
-#if DEBUG_SYSBAMG_PFMG
+#if 1 // DEBUG_SYSBAMG_PFMG > 0  - XXX LS results are currently awful, probably because Jacobi relaxation stinks
               hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
 #else
+              // restrict P values to [-1,1]
+              if ( hypre_cabs(C[Mj]) > 1.0 ) C[Mj] = C[Mj] / hypre_cabs(C[Mj]);
+
               hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = C[Mj];
 #endif
             }
@@ -458,16 +459,16 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
     hypre_TFree( M );
   }
 
-  sysbamg_dbgmsg("findex  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(findex,NDim);
-  sysbamg_dbgmsg("stride  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(stride,NDim);
-  sysbamg_dbgmsg("cdir %d\n", cdir);
+  //sysbamg_dbgmsg("findex  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(findex,NDim);
+  //sysbamg_dbgmsg("stride  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(stride,NDim);
+  //sysbamg_dbgmsg("cdir %d\n", cdir);
 
   {
     HYPRE_Int I, J;
     for ( I = 0; I < NVars; I++ ) {
       for ( J = 0; J < NVars; J++ ) {
         if ( sP[I][J] == NULL ) continue;
-        sysbamg_dbgmsg("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
+        //sysbamg_dbgmsg("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
         hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
       }
     }
@@ -620,7 +621,10 @@ HYPRE_Int hypre_SVD
   HYPRE_Complex*  work  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, lwork);
   HYPRE_Int       info;
 
-LINE
+#if DEBUG_SYSBAMG > 0
+  time_t t_init = time(NULL);
+#endif
+  sysbamg_dbgmsg("hypre_xgebrd starting ...\n");
 
   // NB: R and Q (via reflectors) are written to M
   hypre_xgebrd( &Mrows, &Mcols, M, &Mrows, S, e, tauq, taup, work, &lwork, &info );
@@ -636,7 +640,8 @@ LINE
   hypre_printf("\n");
 #endif
 
-LINE
+  sysbamg_dbgmsg("hypre_xgebrd finished at %d s\n", difftime(time(NULL),t_init));
+  sysbamg_dbgmsg("hypre_xbdsqr starting ...\n");
 
   char            uplo = 'U';
   HYPRE_Int       zero = 0;
@@ -683,7 +688,8 @@ LINE
   }
 #endif
 
-LINE
+  sysbamg_dbgmsg("hypre_xbdsqr finished at %d s\n", difftime(time(NULL),t_init));
+  sysbamg_dbgmsg("hypre_xxxmbr starting ...\n");
 
   // compute the singular vector matrices U = U_1 U_2 == Q U and V^T = V_2^T V_1^T == VT P^T
   // ( "N" : no transpose )
@@ -693,8 +699,6 @@ LINE
 
   hypre_xxxmbr(&vect, &side, "N", &Mrows, &Mcols, &Mcols, M, &Mcols, tauq, U, &Mcols, work, &lwork, &info);
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
-
-LINE
 
   vect   = 'P';
   side   = 'R';
@@ -716,7 +720,7 @@ LINE
   }
 #endif
 
-LINE
+  sysbamg_dbgmsg("hypre_xxxmbr finished at %d s\n", difftime(time(NULL),t_init));
 
   // write lowest Mrows/2 L and R singular vectors into M := [v_l,1, v_l,2, ..., v_r,1, v_r,2, ...]
   //    nb: values/vectors are returned in* descending* order

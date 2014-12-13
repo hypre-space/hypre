@@ -31,11 +31,42 @@
   hypre_IndexD(stride, cdir) = 2;           \
 }
 
-HYPRE_Int hypre_SysBAMGSetupGrids ( hypre_SysBAMGData* bamg, hypre_SStructPMatrix* A, HYPRE_Real* relax_weights, HYPRE_Int* cmaxsize);
-HYPRE_Int hypre_SysBAMGSetupMV ( hypre_SysBAMGData* bamg, hypre_SStructPMatrix* A, hypre_SStructPVector* b, hypre_SStructPVector* x);
-HYPRE_Int hypre_SysBAMGSetupTV ( hypre_SysBAMGData* bamg, hypre_SStructPVector*** tv, HYPRE_Real* relax_weights);
-HYPRE_Int hypre_SysBAMGSetupOperators ( hypre_SysBAMGData* bamg, hypre_SStructPVector*** tv, HYPRE_Int num_tv_, HYPRE_Real* relax_weights, HYPRE_Int cmaxsize);
-HYPRE_Int hypre_SysBAMGCoarsen ( hypre_SStructPGrid* finePGrid, hypre_Index index, hypre_Index stride, HYPRE_Int prune, hypre_SStructPGrid** coarsePGrid_ptr);
+HYPRE_Int hypre_SysBAMGSetupGrids(
+  hypre_SysBAMGData* data,
+  hypre_SStructPMatrix* A,
+  HYPRE_Real* relax_weights,
+  HYPRE_Int* cmaxsize
+);
+
+HYPRE_Int hypre_SysBAMGSetupMV(
+  hypre_SysBAMGData* data,
+  hypre_SStructPMatrix* A,
+  hypre_SStructPVector* b,
+  hypre_SStructPVector* x
+);
+
+HYPRE_Int hypre_SysBAMGSetupTV(
+  hypre_SysBAMGData* data,
+  hypre_SStructPVector*** tv,
+  HYPRE_Real* relax_weights
+);
+
+HYPRE_Int hypre_SysBAMGSetupOperators(
+  hypre_SysBAMGData* data,
+  hypre_SStructPVector*** tv,
+  HYPRE_Int num_tv_,
+  HYPRE_Real* relax_weights,
+  HYPRE_Int cmaxsize
+);
+
+HYPRE_Int hypre_SysBAMGCoarsen(
+  hypre_SStructPGrid* finePGrid,
+  hypre_Index index,
+  hypre_Index stride,
+  HYPRE_Int prune,
+  hypre_SStructPGrid** coarsePGrid_ptr
+);
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -48,13 +79,13 @@ HYPRE_Int hypre_SysBAMGSetup
   hypre_SStructVector*    x_in
 )
 {
-  hypre_SysBAMGData*      bamg              = sys_bamg_vdata;
+  hypre_SysBAMGData*      data              = sys_bamg_vdata;
 
-  MPI_Comm                comm              = (bamg->comm);
+  MPI_Comm                comm              = (data->comm);
 
-  HYPRE_Int               num_refine        = (bamg->num_refine);
-  HYPRE_Int               num_rtv           = (bamg->num_rtv);
-  HYPRE_Int               num_stv           = (bamg->num_stv);
+  HYPRE_Int               num_refine        = (data->num_refine);
+  HYPRE_Int               num_rtv           = (data->num_rtv);
+  HYPRE_Int               num_stv           = (data->num_stv);
 
   HYPRE_Int               num_tv            = num_rtv + num_stv;
 
@@ -95,7 +126,7 @@ HYPRE_Int hypre_SysBAMGSetup
   HYPRE_Int               NDimCoarsen;
 
   HYPRE_Int               cmaxsize;
-  HYPRE_Int               i, k, l;
+  HYPRE_Int               i, k, l, d;
 
   hypre_SStructPVector*** tv;     // tv[l][k] == k'th test vector on level l
 
@@ -124,26 +155,20 @@ HYPRE_Int hypre_SysBAMGSetup
 
     hypre_Box* cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(SGrid));
 
-    max_levels =
-      hypre_Log2(hypre_BoxSizeD(cbox, 0)) + 2 +
-      hypre_Log2(hypre_BoxSizeD(cbox, 1)) + 2 +
-      hypre_Log2(hypre_BoxSizeD(cbox, 2)) + 2;
-
-    hypre_BoxDestroy(cbox);
-
-    if ((bamg->max_levels) > 0)
-      max_levels = hypre_min(max_levels, (bamg->max_levels));
-
-    (bamg->max_levels) = max_levels;
+   max_levels = 0;
+   for ( d = 0; d < NDim; d++ ) max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
+   if ((data->max_levels) > 0)
+      max_levels = hypre_min(max_levels, (data->max_levels));
+   (data->max_levels) = max_levels;
 
   /*----------------------------------------------------------------------------------------------
    * Allocate arrays
    *----------------------------------------------------------------------------------------------*/
 
-    PGrid_l   = (bamg->PGrid_l)   = hypre_TAlloc(hypre_SStructPGrid*, max_levels);
-    P_PGrid_l = (bamg->P_PGrid_l) = hypre_TAlloc(hypre_SStructPGrid*, max_levels);
-    cdir_l    = (bamg->cdir_l)    = hypre_TAlloc(HYPRE_Int, max_levels);
-    active_l  = (bamg->active_l)  = hypre_TAlloc(HYPRE_Int, max_levels);
+    PGrid_l   = (data->PGrid_l)   = hypre_TAlloc(hypre_SStructPGrid*, max_levels);
+    P_PGrid_l = (data->P_PGrid_l) = hypre_TAlloc(hypre_SStructPGrid*, max_levels);
+    cdir_l    = (data->cdir_l)    = hypre_TAlloc(HYPRE_Int, max_levels);
+    active_l  = (data->active_l)  = hypre_TAlloc(HYPRE_Int, max_levels);
 
     PGrid_l[0]     = PGrid;
     P_PGrid_l[0]   = NULL;
@@ -155,33 +180,33 @@ HYPRE_Int hypre_SysBAMGSetup
    * Set up coarse grids
    *----------------------------------------------------------------------------------------------*/
 
-  hypre_SysBAMGSetupGrids( bamg, A, relax_weights, &cmaxsize );
+  hypre_SysBAMGSetupGrids( data, A, relax_weights, &cmaxsize );
 
-  num_levels = (bamg->num_levels);
+  num_levels = (data->num_levels);
 
   /*----------------------------------------------------------------------------------------------
    * Allocate/Create/Assemble matrix and vector structures
    *----------------------------------------------------------------------------------------------*/
 
-  A_l  = (bamg->A_l)  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels);
-  P_l  = (bamg->P_l)  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
-  RT_l = (bamg->RT_l) = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
-  b_l  = (bamg->b_l)  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
-  x_l  = (bamg->x_l)  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
-  tx_l = (bamg->tx_l) = hypre_TAlloc(hypre_SStructPVector*, num_levels);
-  r_l  = (bamg->r_l)  = tx_l;
-  e_l  = (bamg->e_l)  = tx_l;
+  A_l  = (data->A_l)  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels);
+  P_l  = (data->P_l)  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
+  RT_l = (data->RT_l) = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
+  b_l  = (data->b_l)  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
+  x_l  = (data->x_l)  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
+  tx_l = (data->tx_l) = hypre_TAlloc(hypre_SStructPVector*, num_levels);
+  r_l  = (data->r_l)  = tx_l;
+  e_l  = (data->e_l)  = tx_l;
 
-  hypre_SysBAMGSetupMV( bamg, A, b, x );
+  hypre_SysBAMGSetupMV( data, A, b, x );
 
   /*----------------------------------------------------------------------------------------------
    * Allocate/Create auxiliary data structures
    *----------------------------------------------------------------------------------------------*/
 
-  relax_data_l    = (bamg->relax_data_l)    = hypre_TAlloc(void *, num_levels);
-  matvec_data_l   = (bamg->matvec_data_l)   = hypre_TAlloc(void *, num_levels);
-  restrict_data_l = (bamg->restrict_data_l) = hypre_TAlloc(void *, num_levels);
-  interp_data_l   = (bamg->interp_data_l)   = hypre_TAlloc(void *, num_levels);
+  relax_data_l    = (data->relax_data_l)    = hypre_TAlloc(void *, num_levels);
+  matvec_data_l   = (data->matvec_data_l)   = hypre_TAlloc(void *, num_levels);
+  restrict_data_l = (data->restrict_data_l) = hypre_TAlloc(void *, num_levels);
+  interp_data_l   = (data->interp_data_l)   = hypre_TAlloc(void *, num_levels);
 
   for (l = 0; l < num_levels; l++)          relax_data_l[l] = hypre_SysBAMGRelaxCreate(comm);
   for (l = 0; l < num_levels; l++)          hypre_SStructPMatvecCreate(&matvec_data_l[l]);
@@ -193,10 +218,10 @@ HYPRE_Int hypre_SysBAMGSetup
    *----------------------------------------------------------------------------------------------*/
 
   // XXX assume 'symmetric' same for all vars
-  symmetric = (bamg->symmetric) = hypre_SStructPMatrixSymmetric(A)[0][0];
+  symmetric = (data->symmetric) = hypre_SStructPMatrixSymmetric(A)[0][0];
 
   // XXX terrible hack to get test working
-  symmetric = (bamg->symmetric) = 1;
+  symmetric = (data->symmetric) = 1;
 
   nsym      = ( symmetric ? 1 : 2 );
 
@@ -204,7 +229,7 @@ HYPRE_Int hypre_SysBAMGSetup
 
   tv = hypre_TAlloc(hypre_SStructPVector**, num_levels);
 
-  hypre_SysBAMGSetupTV( bamg, tv, relax_weights );
+  hypre_SysBAMGSetupTV( data, tv, relax_weights );
 
   /*----------------------------------------------------------------------------------------------
    * Set up operators (P_l, RT_l, A_l)
@@ -212,8 +237,9 @@ HYPRE_Int hypre_SysBAMGSetup
 
   sysbamg_dbgmsg("Set up multigrid operators (num_levels=%d) ...\n", num_levels);
 
-  hypre_SysBAMGSetupOperators( bamg, tv, num_rtv*nsym, relax_weights, cmaxsize );
+  hypre_SysBAMGSetupOperators( data, tv, num_rtv*nsym, relax_weights, cmaxsize );
 
+#if DEBUG_SYSBAMG_PFMG == 0
   /*----------------------------------------------------------------------------------------------
    * Refinement loop
    *----------------------------------------------------------------------------------------------*/
@@ -240,17 +266,18 @@ HYPRE_Int hypre_SysBAMGSetup
 
     sysbamg_dbgmsg("Refine multigrid operators (num_levels=%d) ...\n", num_levels);
 
-    hypre_SysBAMGSetupOperators( bamg, tv, num_tv*nsym, relax_weights, cmaxsize );
+    hypre_SysBAMGSetupOperators( data, tv, num_tv*nsym, relax_weights, cmaxsize );
   }
+#endif
 
   /*----------------------------------------------------------------------------------------------
    * Allocate space for log info
    *----------------------------------------------------------------------------------------------*/
 
-  if ((bamg->logging) > 0) {
-    max_iter = (bamg->max_iter);
-    (bamg->norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
-    (bamg->rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
+  if ((data->logging) > 0) {
+    max_iter = (data->max_iter);
+    (data->norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
+    (data->rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
   }
 
 #if DEBUG_SYSBAMG
@@ -291,18 +318,18 @@ HYPRE_Int hypre_SysBAMGSetup
 
 HYPRE_Int hypre_SysBAMGSetupGrids
 (
-  hypre_SysBAMGData*      bamg,
+  hypre_SysBAMGData*      data,
   hypre_SStructPMatrix*   A,
   HYPRE_Real*             relax_weights,
   HYPRE_Int*              cmaxsize
 )
 {
-  hypre_SStructPGrid**    PGrid_l           = (bamg->PGrid_l);
-  hypre_SStructPGrid**    P_PGrid_l         = (bamg->P_PGrid_l);
-  HYPRE_Int*              cdir_l            = (bamg->cdir_l);
-  HYPRE_Int*              active_l          = (bamg->active_l);
-  HYPRE_Int               max_levels        = (bamg->max_levels);
-  HYPRE_Int               skip_relax        = (bamg->skip_relax);
+  hypre_SStructPGrid**    PGrid_l           = (data->PGrid_l);
+  hypre_SStructPGrid**    P_PGrid_l         = (data->P_PGrid_l);
+  HYPRE_Int*              cdir_l            = (data->cdir_l);
+  HYPRE_Int*              active_l          = (data->active_l);
+  HYPRE_Int               max_levels        = (data->max_levels);
+  HYPRE_Int               skip_relax        = (data->skip_relax);
 
   HYPRE_Int               NDim;
   HYPRE_Int               NDimCoarsen;
@@ -335,7 +362,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 
   /* compute PFMG dxyz */
 
-  HYPRE_Real*             dxyz      = (bamg->dxyz);
+  HYPRE_Real*             dxyz      = (data->dxyz);
   HYPRE_Int               dxyz_flag = 0;
   HYPRE_Real              min_dxyz;
   HYPRE_Real**            sys_dxyz;
@@ -352,7 +379,9 @@ HYPRE_Int hypre_SysBAMGSetupGrids
   for ( i = 0; i < nvars; i++)
     sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, NDim);
 
-  if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
+  HYPRE_Int dxyz_zeroes = 0;
+  for ( d = 0; d < NDim; d++ ) dxyz_zeroes += ( dxyz[d] == 0 );
+  if (dxyz_zeroes != 0)
   {
     mean = hypre_CTAlloc(HYPRE_Real, NDim);
     deviation = hypre_CTAlloc(HYPRE_Real, NDim);
@@ -394,7 +423,8 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 
 #if DEBUG_SYSBAMG_PFMG
     /* determine cdir */
-    min_dxyz = dxyz[0] + dxyz[1] + dxyz[2] + 1;
+    min_dxyz = 1;
+    for ( d = 0; d < NDim; d++ ) min_dxyz += dxyz[d];
     cdir = -1;
     alpha = 0.0;
     for (d = 0; d < NDim; d++)
@@ -439,11 +469,12 @@ HYPRE_Int hypre_SysBAMGSetupGrids
     cdir = l % NDimCoarsen;
     relax_weights[l] = 2.0/3.0;
 
-    // stop coarsening if lengths of dims to coarsen are not *all* multiples of 8
+    // stop coarsening if lengths of dims to coarsen are not *all* multiples of 2
+    // XXX should the min size be 2, 4, 8, ...?
     if ( cdir == 0 ) {
       for ( d = 0; d < NDimCoarsen; d++ ) {
         dimSize = hypre_BoxIMaxD(cbox,d) - hypre_BoxIMinD(cbox,d) + 1;
-        if ( dimSize <= 4 || dimSize % 2 != 0 ) {
+        if ( dimSize <= 2 || dimSize % 2 != 0 ) {
           cdir = -1;
         }
       }
@@ -451,7 +482,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 #endif
 
     if (cdir != -1) {
-      /* don't coarsen if a periodic direction and not divisible by 2 */
+      /* don't coarsen if the cdir is periodic and not divisible by 2 */
       periodic = hypre_IndexD(hypre_StructGridPeriodic(PGrid_l[l]), cdir);
       hypre_printf("level %d  periodic[%d] = %d\n", l, cdir, periodic);
       if ((periodic) && (periodic % 2)) {
@@ -529,7 +560,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
     }
   }
 
-  (bamg->num_levels) = num_levels;
+  (data->num_levels) = num_levels;
 
   sysbamg_dbgmsg("%s freeing\n", __func__);
 
@@ -552,24 +583,24 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 
 HYPRE_Int hypre_SysBAMGSetupMV
 (
-  hypre_SysBAMGData*      bamg,
+  hypre_SysBAMGData*      data,
   hypre_SStructPMatrix*   A,
   hypre_SStructPVector*   b,
   hypre_SStructPVector*   x
 )
 {
-  MPI_Comm                comm              = (bamg->comm);
-  HYPRE_Int               num_levels        = (bamg->num_levels);
-  hypre_SStructPGrid**    PGrid_l           = (bamg->PGrid_l);
-  hypre_SStructPGrid**    P_PGrid_l         = (bamg->P_PGrid_l);
-  HYPRE_Int*              cdir_l            = (bamg->cdir_l);
+  MPI_Comm                comm              = (data->comm);
+  HYPRE_Int               num_levels        = (data->num_levels);
+  hypre_SStructPGrid**    PGrid_l           = (data->PGrid_l);
+  hypre_SStructPGrid**    P_PGrid_l         = (data->P_PGrid_l);
+  HYPRE_Int*              cdir_l            = (data->cdir_l);
 
-  hypre_SStructPMatrix**  A_l               = (bamg->A_l);
-  hypre_SStructPMatrix**  P_l               = (bamg->P_l);
-  hypre_SStructPMatrix**  RT_l              = (bamg->RT_l);
-  hypre_SStructPVector**  b_l               = (bamg->b_l);
-  hypre_SStructPVector**  x_l               = (bamg->x_l);
-  hypre_SStructPVector**  tx_l              = (bamg->tx_l);
+  hypre_SStructPMatrix**  A_l               = (data->A_l);
+  hypre_SStructPMatrix**  P_l               = (data->P_l);
+  hypre_SStructPMatrix**  RT_l              = (data->RT_l);
+  hypre_SStructPVector**  b_l               = (data->b_l);
+  hypre_SStructPVector**  x_l               = (data->x_l);
+  hypre_SStructPVector**  tx_l              = (data->tx_l);
 
   HYPRE_Int               l;
 
@@ -623,23 +654,23 @@ HYPRE_Int hypre_SysBAMGSetupMV
 
 HYPRE_Int hypre_SysBAMGSetupTV
 (
-  hypre_SysBAMGData*      bamg,
+  hypre_SysBAMGData*      data,
   hypre_SStructPVector*** tv,
   HYPRE_Real*             relax_weights
 )
 {
-  MPI_Comm                comm              = (bamg->comm);
-  HYPRE_Int               num_rtv           = (bamg->num_rtv);
-  HYPRE_Int               num_stv           = (bamg->num_stv);
-  HYPRE_Int               num_levels        = (bamg->num_levels);
-  HYPRE_Int               symmetric         = (bamg->symmetric);
+  MPI_Comm                comm              = (data->comm);
+  HYPRE_Int               num_rtv           = (data->num_rtv);
+  HYPRE_Int               num_stv           = (data->num_stv);
+  HYPRE_Int               num_levels        = (data->num_levels);
+  HYPRE_Int               symmetric         = (data->symmetric);
 
-  hypre_SStructPGrid**    PGrid_l           = (bamg->PGrid_l);
+  hypre_SStructPGrid**    PGrid_l           = (data->PGrid_l);
 
   HYPRE_Int               num_tv            = num_rtv + num_stv;
 
   // these are = num_tv et al if A is symmetric and 2*num_tv et al if not
-  HYPRE_Int               nsym              = ( bamg->symmetric ? 1 : 2 );
+  HYPRE_Int               nsym              = ( data->symmetric ? 1 : 2 );
 
   HYPRE_Int               l, k;
 
@@ -677,35 +708,35 @@ HYPRE_Int hypre_SysBAMGSetupTV
 
 HYPRE_Int hypre_SysBAMGSetupOperators
 (
-  hypre_SysBAMGData*      bamg,
+  hypre_SysBAMGData*      data,
   hypre_SStructPVector*** tv,
   HYPRE_Int               num_tv_,
   HYPRE_Real*             relax_weights,
   HYPRE_Int               cmaxsize
 )
 {
-  HYPRE_Int*              cdir_l            = (bamg->cdir_l);
-  hypre_SStructPMatrix**  A_l               = (bamg->A_l);
-  hypre_SStructPMatrix**  P_l               = (bamg->P_l);
-  hypre_SStructPMatrix**  RT_l              = (bamg->RT_l);
-  hypre_SStructPVector**  b_l               = (bamg->b_l);
-  hypre_SStructPVector**  x_l               = (bamg->x_l);
-  hypre_SStructPVector**  e_l               = (bamg->e_l);
-  hypre_SStructPVector**  r_l               = (bamg->r_l);
-  hypre_SStructPVector**  tx_l              = (bamg->tx_l);
-  hypre_SStructPGrid**    PGrid_l           = (bamg->PGrid_l);
+  HYPRE_Int*              cdir_l            = (data->cdir_l);
+  hypre_SStructPMatrix**  A_l               = (data->A_l);
+  hypre_SStructPMatrix**  P_l               = (data->P_l);
+  hypre_SStructPMatrix**  RT_l              = (data->RT_l);
+  hypre_SStructPVector**  b_l               = (data->b_l);
+  hypre_SStructPVector**  x_l               = (data->x_l);
+  hypre_SStructPVector**  e_l               = (data->e_l);
+  hypre_SStructPVector**  r_l               = (data->r_l);
+  hypre_SStructPVector**  tx_l              = (data->tx_l);
+  hypre_SStructPGrid**    PGrid_l           = (data->PGrid_l);
 
-  void**                  relax_data_l      = (bamg->relax_data_l);
-  void**                  matvec_data_l     = (bamg->matvec_data_l);
-  void**                  restrict_data_l   = (bamg->restrict_data_l);
-  void**                  interp_data_l     = (bamg->interp_data_l);
+  void**                  relax_data_l      = (data->relax_data_l);
+  void**                  matvec_data_l     = (data->matvec_data_l);
+  void**                  restrict_data_l   = (data->restrict_data_l);
+  void**                  interp_data_l     = (data->interp_data_l);
 
-  HYPRE_Int               num_levels        = (bamg->num_levels);
-  HYPRE_Int               relax_type        = (bamg->relax_type);
-  HYPRE_Int               usr_jacobi_weight = (bamg->usr_jacobi_weight);
-  HYPRE_Real              jacobi_weight     = (bamg->jacobi_weight);
-  HYPRE_Int               num_pre_relax_tv  = (bamg->num_pre_relax_tv);
-  MPI_Comm                comm              = (bamg->comm);
+  HYPRE_Int               num_levels        = (data->num_levels);
+  HYPRE_Int               relax_type        = (data->relax_type);
+  HYPRE_Int               usr_jacobi_weight = (data->usr_jacobi_weight);
+  HYPRE_Real              jacobi_weight     = (data->jacobi_weight);
+  HYPRE_Int               num_pre_relax_tv  = (data->num_pre_relax_tv);
+  MPI_Comm                comm              = (data->comm);
 
   hypre_Index             cindex;
   hypre_Index             findex;
@@ -769,25 +800,27 @@ HYPRE_Int hypre_SysBAMGSetupOperators
       fflush(stdout);
     }
 
+    HYPRE_Int num_interps = num_levels-2;
+
     /* set up the interpolation operator */
-    sysbamg_dbgmsg( "SysBAMGSetupInterpOp %d of %d\n", l, num_levels-2 );
+    sysbamg_dbgmsg( "SysBAMGSetupInterpOp %d of %d\n", l, num_interps );
     hypre_SysBAMGSetupInterpOp(A_l[l], cdir_l[l], findex, stride, P_l[l], num_tv_, tv[l]);
 
     /* set up the coarse grid operator */
-    sysbamg_dbgmsg( "SysBAMGSetupRAPOp    %d of %d\n", l, num_levels-2 );
+    sysbamg_dbgmsg( "SysBAMGSetupRAPOp    %d of %d\n", l, num_interps );
     hypre_SysBAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir_l[l], cindex, stride, A_l[l+1]);
 
     /* set up the interpolation routine */
-    sysbamg_dbgmsg( "SysSemiInterpSetup   %d of %d\n", l, num_levels-2 );
+    sysbamg_dbgmsg( "SysSemiInterpSetup   %d of %d\n", l, num_interps );
     hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l], cindex, findex, stride);
 
     /* set up the restriction routine */
-    sysbamg_dbgmsg( "SysSemiRestrictSetup %d of %d\n", l, num_levels-2 );
+    sysbamg_dbgmsg( "SysSemiRestrictSetup %d of %d\n", l, num_interps );
     hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1], cindex, findex, stride);
 
     // restrict the tv[l] to tv[l+1] (NB: don't need tv's on the coarsest grid)
-    if ( l < num_levels-2 ) {
-      sysbamg_dbgmsg( "SysSemiRestrict      %d of %d\n", l, num_levels-2 );
+    if ( l < num_interps ) {
+      sysbamg_dbgmsg( "SysSemiRestrict      %d of %d\n", l, num_interps );
       for ( k = 0; k < num_tv_; k++ ) {
         hypre_SysSemiRestrict(restrict_data_l[l], RT_l[l], tv[l][k], tv[l+1][k]);
       }

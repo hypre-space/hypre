@@ -147,9 +147,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    max_levels = 0;
    for ( d = 0; d < NDim; d++ ) max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
    if ((sys_pfmg_data -> max_levels) > 0)
-   {
       max_levels = hypre_min(max_levels, (sys_pfmg_data -> max_levels));
-   }
    (sys_pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
