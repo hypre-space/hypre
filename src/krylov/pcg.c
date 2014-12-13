@@ -121,8 +121,8 @@ hypre_PCGFunctionsCreateComplex(
    pcg_functions->Matvec = Matvec;
    pcg_functions->MatvecDestroy = MatvecDestroy;
    pcg_functions->InnerProd = InnerProd;
-   //pcg_functions->ComplexInnerProd = ComplexInnerProd;
-   pcg_functions->ComplexInnerProd = InnerProd;
+   pcg_functions->ComplexInnerProd = ComplexInnerProd;
+   //pcg_functions->ComplexInnerProd = InnerProd;
    pcg_functions->CopyVector = CopyVector;
    pcg_functions->ClearVector = ClearVector;
    pcg_functions->ScaleVector = ScaleVector;
@@ -403,7 +403,7 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->ClearVector))(p);
       precond(precond_data, A, b, p);
       pdotb = (*(pcg_functions->ComplexInnerProd))(p, b);
-      if (print_level > 1 && my_id == 0)
+      if (print_level>1 && my_id==0)
          hypre_printf("<C*b,b>: %e + I %e\n",hypre_creal(pdotb),hypre_cimag(pdotb));
    };
 
@@ -417,7 +417,7 @@ hypre_PCGSolve( void *pcg_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (print_level > 0 || logging > 0)
+      if (print_level>0 || logging>0)
       {
         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
