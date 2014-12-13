@@ -280,7 +280,7 @@ HYPRE_Int hypre_SysBAMGSetup
     (data->rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
   }
 
-#if DEBUG_SYSBAMG
+#if DEBUG_SYSBAMG > 1
   for (l = 0; l < (num_levels - 1); l++) {
     hypre_sprintf(filename, "sysbamg_A.%02d", l);
     hypre_SStructPMatrixPrint(filename, A_l[l], 0);
@@ -691,7 +691,7 @@ HYPRE_Int hypre_SysBAMGSetupTV
     // note: need offset (5173, arbitrary) so that tv[0][0] != tv[0][1] (on oslic at least)
     hypre_SStructPVectorSetRandomValues(tv[0][k], k + 5173 /*+ (HYPRE_Int)time(0)*/);
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
     char filename[255];
     hypre_sprintf(filename, "sysbamg_tv_init,k=%d.dat", k);
     hypre_SStructPVectorPrint(filename, tv[0][k], 0);
@@ -789,7 +789,7 @@ HYPRE_Int hypre_SysBAMGSetupOperators
       // 5) destroy the rhs
       hypre_SStructPVectorDestroy( rhs );
 
-#if DEBUG_SYSBAMG > 0
+#if DEBUG_SYSBAMG > 1
       sysbamg_dbgmsg("printing sysbamg test vectors; level %d; num_tv_ %d\n", l, num_tv_);
       char filename[255];
       for ( k = 0; k < num_tv_; k++ ) {

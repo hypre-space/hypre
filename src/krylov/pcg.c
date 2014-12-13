@@ -476,7 +476,7 @@ hypre_PCGSolve( void *pcg_vdata,
    /* gamma = <r,p> */
    gamma = (*(pcg_functions->ComplexInnerProd))(r,p);
 
-   hypre_printf("gamma %e + I %e\n",hypre_creal(gamma),hypre_cimag(gamma));
+   hypre_printf("%s:%d:%s gamma %e + I %e\n", __FILE__, __LINE__, __func__, hypre_creal(gamma), hypre_cimag(gamma));
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -513,7 +513,7 @@ hypre_PCGSolve( void *pcg_vdata,
    }
 
    /* Set initial residual norm */
-   if ( logging>0 || print_level > 0 || cf_tol > 0.0 )
+   if ( logging > 0 || print_level > 0 || cf_tol > 0.0 )
    {
       if (two_norm)
          i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
