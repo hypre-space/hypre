@@ -438,7 +438,7 @@ HYPRE_Int hypre_BoomerAMGBlockSolve(void *B,
                                     hypre_ParVector *b,
                                     hypre_ParVector *x)
 {
-   HYPRE_Int d, dim;
+   HYPRE_Int d, dim = 1;
 
    hypre_ParVector *b_[3];
    hypre_ParVector *x_[3];
@@ -2283,7 +2283,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       /* Construct the coarse space matrices by RAP */
       if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pix))
          hypre_MatvecCommPkgCreate(ams_data -> Pix);
-      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Pix);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ams_data -> Pix);
       hypre_BoomerAMGBuildCoarseOperator(ams_data -> Pix,
                                          ams_data -> A,
                                          ams_data -> Pix,
@@ -2304,7 +2304,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
 
       if (!hypre_ParCSRMatrixCommPkg(ams_data -> Piy))
          hypre_MatvecCommPkgCreate(ams_data -> Piy);
-      P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Piy);
+      P_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ams_data -> Piy);
       hypre_BoomerAMGBuildCoarseOperator(ams_data -> Piy,
                                          ams_data -> A,
                                          ams_data -> Piy,
@@ -2327,7 +2327,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       {
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> Piz))
             hypre_MatvecCommPkgCreate(ams_data -> Piz);
-         P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Piz);
+         P_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ams_data -> Piz);
          hypre_BoomerAMGBuildCoarseOperator(ams_data -> Piz,
                                             ams_data -> A,
                                             ams_data -> Piz,
@@ -2373,7 +2373,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
          notify BoomerAMG that this is a dim x dim block system. */
       if (!ams_data -> A_Pi)
       {
-         HYPRE_Int P_owned_col_starts = hypre_ParCSRMatrixOwnsRowStarts(ams_data -> Pi);
+         HYPRE_Int P_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ams_data -> Pi);
 
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pi))
             hypre_MatvecCommPkgCreate(ams_data -> Pi);
