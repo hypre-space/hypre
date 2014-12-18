@@ -1334,7 +1334,8 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
     {
         /* The diag matrices store the diagonal as first element in each row.
          * We maintain that for the case of Pattern and RAP, because the 
-         * strength of connection routine relies on it.  
+         * strength of connection routine relies on it and we need to ignore
+         * diagonal entries in Pattern later during set intersections.
          * */
         
         /* Sort diag portion of RAP */
@@ -1668,9 +1669,18 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                Pattern_offd_i[i], Pattern_offd_i[i+1]-1,
                                col_map_offd_Pattern, Pattern_offd_indices);
             /* No need to grab info out of Pattern_diag_j[...], here we just start from
-             * Pattern_diag_i[i] and end at index Pattern_diag_i[i+1] - 1 */
-            Pattern_indices_ptr = &( Pattern_diag_j[Pattern_diag_i[i]]);
-            Pattern_diag_indices_len = Pattern_diag_i[i+1] - Pattern_diag_i[i];
+             * Pattern_diag_i[i] and end at index Pattern_diag_i[i+1] - 1.  We do need to 
+             * ignore the diagonal entry in Pattern, because we don't lump entries there */
+            if( Pattern_diag_j[Pattern_diag_i[i]] == i )
+            {   
+                Pattern_indices_ptr = &( Pattern_diag_j[Pattern_diag_i[i]+1]);
+                Pattern_diag_indices_len = Pattern_diag_i[i+1] - Pattern_diag_i[i] - 1;
+            }
+            else
+            {   
+                Pattern_indices_ptr = &( Pattern_diag_j[Pattern_diag_i[i]]);
+                Pattern_diag_indices_len = Pattern_diag_i[i+1] - Pattern_diag_i[i];
+            }
         }
         
         for(j = row_start; j < row_end; j++)
@@ -1954,9 +1964,19 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
                                    Pattern_offd_i[i], Pattern_offd_i[i+1]-1,
                                    col_map_offd_Pattern, Pattern_offd_indices);
                 /* No need to grab info out of Pattern_diag_j[...], here we just start from
-                 * Pattern_diag_i[i] and end at index Pattern_diag_i[i+1] - 1 */
-                Pattern_indices_ptr = &( Pattern_diag_j[Pattern_diag_i[i]]);
-                Pattern_diag_indices_len = Pattern_diag_i[i+1] - Pattern_diag_i[i];
+                 * Pattern_diag_i[i] and end at index Pattern_diag_i[i+1] - 1.  We do need to 
+                 * ignore the diagonal entry in Pattern, because we don't lump entries there */
+                if( Pattern_diag_j[Pattern_diag_i[i]] == i )
+                {   
+                    Pattern_indices_ptr = &( Pattern_diag_j[Pattern_diag_i[i]+1]);
+                    Pattern_diag_indices_len = Pattern_diag_i[i+1] - Pattern_diag_i[i] - 1;
+                }
+                else
+                {   
+                    Pattern_indices_ptr = &( Pattern_diag_j[Pattern_diag_i[i]]);
+                    Pattern_diag_indices_len = Pattern_diag_i[i+1] - Pattern_diag_i[i];
+                }
+
             }
             
             for(j = row_start; j < row_end; j++)
