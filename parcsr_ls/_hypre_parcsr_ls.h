@@ -1377,6 +1377,9 @@ void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_In
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
+hypre_ParCSRMatrix * hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP, hypre_ParCSRMatrix *RAP, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Int collapse_beta );
+HYPRE_Int hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr, hypre_ParCSRMatrix *AP, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int * dof_func_value, HYPRE_Real S_commpkg_switch, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Real lump_percent, HYPRE_Int collapse_beta );
+
 
 /* par_rap.c */
 hypre_CSRMatrix *hypre_ExchangeRAPData ( hypre_CSRMatrix *RAP_int , hypre_ParCSRCommPkg *comm_pkg_RT );
