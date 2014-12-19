@@ -224,11 +224,12 @@ hypre_BoomerAMGCreate()
 
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1);
 
+   hypre_ParAMGDataMaxLevels(amg_data) =  max_levels;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
    hypre_ParAMGDataUserRelaxType(amg_data) = -1;
    hypre_ParAMGDataUserNumSweeps(amg_data) = -1;
-   hypre_ParAMGDataUserRelaxWeight(amg_data) = 1.0;
-   hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
+   hypre_ParAMGDataUserRelaxWeight(amg_data) = relax_wt;
+   hypre_ParAMGDataOuterWt(amg_data) = outer_wt;
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
@@ -649,7 +650,7 @@ hypre_BoomerAMGSetMaxLevels( void *data,
                           HYPRE_Int   max_levels )
 {
    hypre_ParAMGData  *amg_data = data;
- 
+   HYPRE_Int old_max_levels;
    if (!amg_data)
    {
       hypre_printf("Warning! BoomerAMG object empty!\n");
@@ -663,6 +664,31 @@ hypre_BoomerAMGSetMaxLevels( void *data,
       return hypre_error_flag;
    }
 
+   old_max_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (old_max_levels < max_levels)
+   {
+      HYPRE_Real *relax_weight, *omega; 
+      HYPRE_Real relax_wt, outer_wt;
+      HYPRE_Int i;
+      relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
+      if (relax_weight)
+      {
+         relax_wt = hypre_ParAMGDataUserRelaxWeight(amg_data);
+         relax_weight = hypre_TReAlloc(relax_weight, HYPRE_Real, max_levels);
+         for (i=old_max_levels; i < max_levels; i++)
+            relax_weight[i] = relax_wt;
+         hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
+      }
+      omega = hypre_ParAMGDataOmega(amg_data);
+      if (omega)
+      {
+         outer_wt = hypre_ParAMGDataOuterWt(amg_data);
+         omega = hypre_TReAlloc(omega, HYPRE_Real, max_levels);
+         for(i=old_max_levels; i < max_levels; i++)
+            omega[i] = outer_wt;
+         hypre_ParAMGDataOmega(amg_data) = omega;
+      }
+   }
    hypre_ParAMGDataMaxLevels(amg_data) = max_levels;
 
    return hypre_error_flag;
@@ -2051,7 +2077,8 @@ hypre_BoomerAMGSetOuterWt( void     *data,
    omega_array = hypre_ParAMGDataOmega(amg_data);
    for (i=0; i < num_levels; i++)
       omega_array[i] = omega;
-   
+   hypre_ParAMGDataOuterWt(amg_data) = omega;
+ 
    return hypre_error_flag;
 }
 

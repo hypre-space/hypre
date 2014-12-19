@@ -2213,6 +2213,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
       HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
       HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
+      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       if (level_w > -1)
          HYPRE_BoomerAMGSetLevelRelaxWt(amg_solver, relax_wt_level, level_w);
       if (level_ow > -1)
@@ -2220,7 +2221,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
       HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
       HYPRE_BoomerAMGSetSmoothNumLevels(amg_solver, smooth_num_levels);
-      HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_BoomerAMGSetDebugFlag(amg_solver, debug_flag);
       HYPRE_BoomerAMGSetVariant(amg_solver, variant);
