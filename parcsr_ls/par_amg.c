@@ -537,8 +537,6 @@ hypre_BoomerAMGDestroy( void *data )
    }
    if (smooth_num_levels)
    {
-      if (smooth_num_levels > num_levels-1)
-	smooth_num_levels = num_levels -1;
       if (hypre_ParAMGDataSmoothType(amg_data) == 7)
       {
          for (i=0; i < smooth_num_levels; i++)

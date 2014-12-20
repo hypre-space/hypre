@@ -185,6 +185,11 @@ HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    out_vec = hypre_CTAlloc(HYPRE_Real, block_size);
    tmp_vec = hypre_CTAlloc(HYPRE_Real, block_size);
 
+   if (!comm_pkg)
+   {
+      hypre_BlockMatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
+   }
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
     *     relax_type = 20 -> Jacobi or CF-Jacobi

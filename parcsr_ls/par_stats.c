@@ -1083,6 +1083,15 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          for (j=0; j < smooth_num_levels; j++)
             hypre_printf( " Schwarz Relaxation Weight %f level %d\n",
 			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
+      if (smooth_type == 7)
+         for (j=0; j < smooth_num_levels; j++)
+            hypre_printf( " Pilut smoother level %d\n", j);
+      if (smooth_type == 8)
+         for (j=0; j < smooth_num_levels; j++)
+            hypre_printf( " ParaSails smoother level %d\n", j);
+      if (smooth_type == 9)
+         for (j=0; j < smooth_num_levels; j++)
+            hypre_printf( " Euclid smoother level %d\n", j);
       for (j=0; j < num_levels; j++)
          if (relax_weight[j] != 1)
 	       hypre_printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
