@@ -816,6 +816,52 @@ HYPRE_AMSSetInterpolations(solver, Pi, Pix, Piy, Piz);
 which will duplicate some memory, but allows for experimentation with all
 available AMS cycle types.
 
+\subsection{Non-conforming AMR Grids}
+
+AMS could also be applied to problems with adaptive mesh refinement (AMR) posed
+on non-conforming quadrilateral/hexahedral meshes, see \cite{ams_hpamr} for
+more details.
+
+On non-conforming grids (assuming also arbitrarily high-order elements), each
+finite element space has two versions: a conforming one,
+e.g. $\mathrm{Q}_k^{c}$/$\mathrm{ND}_k^c$, where the {\em hanging} degrees of
+freedom are constrained by the conforming ({\em real}) degrees of freedom, and
+a non-conforming one, e.g. $\mathrm{Q}_k^{nc}$/$\mathrm{ND}_k^{nc}$ where the
+non-conforming degrees of freedom (hanging and real) are unconstrained.
+These spaces are related with the conforming prolongation and the pure
+restriction operators $P$ and $R$, as well as the conforming and non-conforming
+version of the discrete gradient operator as follows:
+$$
+\xymatrix{
+\mathrm{Q}_k^{c} \ar[r]^{G_{c}} \ar@<-2pt>[d]_{P_{\mathrm{Q}}} & \mathrm{ND}_k^c \ar@<-2pt>[d]_{P_{\mathrm{ND}}} \\
+\mathrm{Q}_k^{nc} \ar[r]^{G_{nc}} \ar@<-2pt>[u]_{R_{\mathrm{Q}}} & \mathrm{ND}_k^{nc} \ar@<-2pt>[u]_{R_{\mathrm{ND}}}
+}
+$$
+Since the linear system is posed on $\mathrm{ND}_k^c$, the user needs to provide
+the conforming discrete gradient matrix $G_c$ to AMS, using 
+\code{HYPRE_AMSSetDiscreteGradient}.
+This matrix is defined by the requirement that the above diagram commutes from
+$\mathrm{Q}_k^{c}$ to $\mathrm{ND}_k^{nc}$, corresponding to the definition
+$$
+G_{c} = R_{\mathrm{ND}}\, G_{nc}\, P_{\mathrm{Q}} \,,
+$$
+i.e. the conforming gradient is computed by starting with a conforming nodal
+$\mathrm{Q}_k$ function, interpolating it in the hanging nodes, computing the
+gradient locally and representing it in the Nedelec space on each element (the
+non-conforming discrete gradient $G_{nc}$ in the above formula), and
+disregarding the values in the hanging $\mathrm{ND}_k$ degrees of freedom.
+
+Similar considerations imply that the conforming Nedelec interpolation matrix
+${\mathbf \Pi}_{c}$ should be defined as
+$$
+{\mathbf \Pi}_{c} = R_{\mathrm{ND}}\, {\mathbf \Pi}_{nc}\, P_{\mathrm{Q}^3} \,,
+$$
+with ${\mathbf \Pi}_{nc}$ computed element-wise as in the previous subsection. Note that
+in the low-order case, ${\mathbf \Pi}_{c}$ can be computed internally in AMS based only
+$G_c$ and the conforming coordinates of the vertices $x_c$/$y_c$/$z_c$, see
+\cite{ams_hpamr}.
+
+
 %-----------------------------------------------------------------------------
 
 \section{ADS}
