@@ -808,7 +808,20 @@ then
    AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes.])
 else
    AC_HYPRE_CHECK_MPI([LIBS="$LIBS $MPILIBS"])
-   AC_CHECK_FUNCS([MPI_Comm_f2c],[AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C)])
+   AC_CHECK_FUNCS([MPI_Comm_f2c])
+   AC_CACHE_CHECK([whether MPI_Comm_f2c is a macro],
+     hypre_cv_func_MPI_Comm_f2c_macro,
+     [AC_EGREP_CPP([mpi_header_defines_MPI_Comm_f2c], [
+#include <mpi.h>
+#ifdef MPI_Comm_f2c
+  mpi_header_defines_MPI_Comm_f2c
+#endif],
+       hypre_cv_func_MPI_Comm_f2c_macro=yes,
+       hypre_cv_func_MPI_Comm_f2c_macro=no)])
+   if test $ac_cv_func_MPI_Comm_f2c = yes \
+      || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
+     AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C)
+   fi
 fi
 
 dnl *********************************************************************
