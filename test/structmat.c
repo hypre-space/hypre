@@ -828,11 +828,12 @@ main( hypre_int  argc,
       {
          values[i] = data.vector_values[vi];
       }
-      for (box = 0; box < data.nboxes; box++)
+      HYPRE_StructVectorSetConstantValues(vectors[vi], values[0]);
+      /*for (box = 0; box < data.nboxes; box++)
       {
          HYPRE_StructVectorSetBoxValues(
             vectors[vi], data.ilowers[box], data.iuppers[box], values);
-      }
+      }*/
       HYPRE_StructVectorAssemble(vectors[vi]);
    }
 
