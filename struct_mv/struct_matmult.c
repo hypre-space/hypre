@@ -25,11 +25,24 @@
 
 /*--------------------------------------------------------------------------
  * Multiply matrices.  The matrix product has 'nterms' terms constructed from
- * the matrices in the 'matrices' array.  Each term i is given by the matrix
- * matrices[terms[i]] transposed according to the boolean transposes[i].
+ * the matrices in the 'matrices' array.  Each term t is given by the matrix
+ * matrices[terms[t]] transposed according to the boolean transposes[t].
  *
  * This routine uses the StMatrix routines to determine if the operation is
  * allowable and to compute the stencil and stencil formulas for C.
+ *
+ * All of the matrices must be defined on a common fine index space, and each
+ * matrix must have a unitary stride for either its domain or range (or both).
+ * RDF: Need to remove the latter requirement.  Think of P*C for example, where
+ * P is interpolation and C is a square matrix on the coarse grid.  Another
+ * approach (maybe the most flexible) is to temporarily modify the matrices in
+ * this routine so that they have a common fine index space.  This will require
+ * mapping the matrix strides, the grid extents, and the stencil offsets.
+ *
+ * RDF TODO: Rewrite communication_info to use CommStencil idea (write routine
+ * FromCommStencil and have FromStencil call it).
+ *
+ * RDF TODO: Compute symmetric matrix
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -40,7 +53,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
                      HYPRE_Int           *transposes,
                      hypre_StructMatrix **C_ptr )
 {
-#if 0
    hypre_StructMatrix  *C;
 
    hypre_StMatrix     **st_matrices, *st_C;
@@ -155,6 +167,14 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    }
 
    /* Use st_C to compute information needed to build the matrix */
+   /* This splits the computation into constant and variable coefficient
+    * computations as indicated by num_coeffs and num_const_entries.  Variable
+    * computations are further split into constant and variable components, with
+    * constant contributions stored in the aconst array.  Communication stencils
+    * are also computed for each matrix (not each term, so matrices that appear
+    * in more than one term in the product are dealt with only once).
+    * Communication stencils are then used to determine ghost sizes for a single
+    * fine and coarse data space to simplify the boxloop below. */
 
    const_entries = hypre_TAlloc(HYPRE_Int, size);
    aconst = hypre_TAlloc(HYPRE_Complex, num_coeffs);
@@ -166,11 +186,12 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
       comm_stencils = hypre_TAlloc(hypre_CommStencil *, nmatrices);
       for (m = 0; m < nmatrices; m++)
       {
-         comm_stencils[m] = hypre_CommStencilCreate();
+         comm_stencils[m] = hypre_CommStencilCreate(ndim);
       }
 
       i = 0;
       ai = 0;
+      /* Loop over each stencil coefficient in st_C */
       for (e = 0; e < size; e++)
       {
          const_entry = 1;
@@ -179,6 +200,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
          while (coeff != NULL)
          {
             aconst[i] = 1.0;
+            /* Each coefficient in the sum is a product of nterms terms */
             for (t = 0; t < nterms; t++)
             {
                term = hypre_StCoeffTerm(coeff, t);
@@ -192,20 +214,21 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
                hypre_CopyToIndex(shift, ndim, csoffset);
                if (hypre_StructMatrixConstEntry(matrix, entry))
                {
+                  /* Accumulate the constant contribution to the product */
                   constp = hypre_StructMatrixBoxData(matrix, 0, entry);
                   aconst[i] *= constp[0];
                   if (!transposes[t])
                   {
                      stencil = hypre_StructMatrixStencil(matrix);
                      offsetref = hypre_StructStencilOffset(stencil, entry);
-                     hypre_AddIndexes(csshift, offsetref, ndim, csshift);
+                     hypre_AddIndexes(csoffset, offsetref, ndim, csoffset);
                   }
                }
                else
                {
                   const_entry = 0;
                }
-               hypre_CommStencilSetEntry(comm_stencils[m], csshift);
+               hypre_CommStencilSetEntry(comm_stencils[m], csoffset);
                ai++;
             }
             term = &aterms[ai];
@@ -264,26 +287,14 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    grid = hypre_StructMatrixGrid(C);
    domain_grid = hypre_StructMatrixDomainGrid(C);
 
-   /* Copy A and B into AA and BB (matrices with additional ghost layers) and
-    * update their ghost values */
-
-   for (m = 0; m < nmatrices; m++)
-   {
-      matrix = matrices[m];
-      hypre_StructMatrixGrowByStencil(matrix, grow_stencils[m]);
-      /* RDF: GrowByGhost?  Get num_ghost from comm_stencils */
-   }
-
-   /* Loop through AA and BB to compute C */
-
-   /* Set constant values */
+   /* Set constant values in C */
    for (i = 0; i < num_const_entries; i++)
    {
       constp = hypre_StructMatrixBoxData(C, 0, const_entries[i]);
       constp[0] = const_values[i];
    }
 
-   /* Set variable values */
+   /* Set variable values in C */
 
    /* RDF START - Fix the start, stride, and base_stride stuff.  The grid_start
     * should be the imin of a projection of the grid_box onto an index space
@@ -292,6 +303,11 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
 
    if (num_coeffs > 0)
    { 
+      /* RDF: Agglomerate comm pkgs and do only one communication.  Test the
+       * separate case first to make debugging easier.  Note that comm_info is
+       * the same for matrices and masks.  Still need to project/coarsen/map. */
+
+      /* Add ghost layers to the matrices and update them */
       /* Create masks for matrices with constant coefficients to prevent
        * incorrect contributions in the matrix product.  Each mask is a vector
        * of all ones with updated ghost layers (this accounts for parallelism
@@ -299,14 +315,58 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
       masks = hypre_CTAlloc(hypre_StructVector, nmatrices);
       for (m = 0; m < nmatrices; m++)
       {
+         HYPRE_Int              num_ghost[2*HYPRE_MAXDIM];
+         hypre_CommInfo        *comm_info;
+         hypre_CommPkg         *comm_pkg;
+         hypre_CommHandle      *comm_handle;
+         HYPRE_Complex         *vdata, *data;
+
          matrix = matrices[m];
+
+         if (hypre_StructMatrixNumValues(matrix) > 0)
+         {
+            /* Add ghost layers to the matrices (this requires a data copy) */
+            hypre_CommStencilGetNumGhost(comm_stencils[m], num_ghost);
+            hypre_StructMatrixGrowByNumGhost(matrix, num_ghost);
+
+            /* Update the ghost layers of the matrices */
+            hypre_CreateCommInfoFromCStencil(hypre_StructMatrixGrid(matrix),
+                                             comm_stencils[m], &comm_info);
+            hypre_CommPkgCreate(comm_info,
+                                hypre_StructMatrixDataSpace(matrix),
+                                hypre_StructMatrixDataSpace(matrix),
+                                hypre_StructMatrixNumValues(matrix), NULL, 0,
+                                hypre_StructMatrixComm(matrix), &comm_pkg);
+            hypre_CommInfoDestroy(comm_info);
+
+            vdata = hypre_StructMatrixVData(matrix);
+            hypre_InitializeCommunication(comm_pkg, &vdata, &vdata, 0, 0,
+                                          &comm_handle);
+            hypre_FinalizeCommunication(comm_handle);
+         }
+
          if (hypre_StructMatrixNumCValues(matrix) > 0)
          {
             HYPRE_StructVectorCreate(comm, hypre_StructMatrixGrid(matrix), &mask);
-            /* hypre_StructVectorSetNumGhost(mask, num_ghost) */
+            /* It's important to use num_ghost from the matrix and not the one
+             * created above from comm_stencils, because they may not match. */
+            hypre_StructVectorSetNumGhost(mask, hypre_StructMatrixNumGhost(matrix));
             HYPRE_StructVectorInitialize(mask);
-            hypre_StructVectorSetConstantValues(mask);
-            /* Update ghosts here */
+            hypre_StructVectorSetConstantValues(mask, 1.0);
+
+            /* Update ghosts */
+            hypre_CreateCommInfoFromCStencil(hypre_StructVectorGrid(mask),
+                                             comm_stencils[m], &comm_info);
+            hypre_CommPkgCreate(comm_info,
+                                hypre_StructVectorDataSpace(mask),
+                                hypre_StructVectorDataSpace(mask), 1, NULL, 0,
+                                hypre_StructVectorComm(mask), &comm_pkg);
+            hypre_CommInfoDestroy(comm_info);
+
+            data = hypre_StructVectorData(mask);
+            hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0,
+                                          &comm_handle);
+            hypre_FinalizeCommunication(comm_handle);
 
             masks[m] = mask;
          }
@@ -410,7 +470,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    /* hypre_StructMatrixShrink(matrix); */
 
    *C_ptr = C;
-#endif
 
    return hypre_error_flag;
 }

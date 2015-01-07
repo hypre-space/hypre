@@ -114,6 +114,8 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    {
       hypre_StructMatrixNumGhost(mask)[i] =
          hypre_StructMatrixNumGhost(matrix)[i];
+      hypre_StructMatrixAddGhost(mask)[i] =
+         hypre_StructMatrixAddGhost(matrix)[i];
    }
 
    hypre_StructMatrixGlobalSize(mask) =

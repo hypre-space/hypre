@@ -77,8 +77,8 @@ typedef struct hypre_StructMatrix_struct
                                                    with variable diagonal} */
    HYPRE_Int             symmetric;      /* Is the matrix symmetric */
    HYPRE_Int            *symm_entries;   /* Which entries are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Num ghost layers in each
-                                                      * direction */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Min num ghost layers */
+   HYPRE_Int             add_ghost[2*HYPRE_MAXDIM];  /* Additional ghost layers */
                       
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
@@ -116,6 +116,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmEntries(matrix)   ((matrix) -> symm_entries)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
+#define hypre_StructMatrixAddGhost(matrix)      ((matrix) -> add_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)

@@ -83,7 +83,7 @@ main( int argc,
       fscanf(file, "%d%s\n", &id, &matnames[i]);
       if (id != i)
       {
-         printf("Matrix ID has incorrect value");
+         printf("Matrix ID has incorrect value\n");
          exit(0);
       }
       hypre_StMatrixRead(file, i, ndim, &matrices[i]);

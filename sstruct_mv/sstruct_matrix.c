@@ -233,6 +233,8 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
    HYPRE_Int             vi, vj, d, ndim;
 
    ndim = hypre_SStructPMatrixNDim(pmatrix);
+   /* RDF: Why are the ghosts being reset to one? Maybe it needs to be at least
+    * one to set shared coefficients correctly, but not exactly one? */
    for (d = 0; d < ndim; d++)
    {
       num_ghost[2*d] = num_ghost[2*d+1] = 1;
