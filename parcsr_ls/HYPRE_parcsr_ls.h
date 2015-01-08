@@ -139,6 +139,39 @@ HYPRE_Int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
                           HYPRE_ParVector    x);
 
 /**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetResidual(HYPRE_Solver     solver,
+                               HYPRE_ParVector *residual);
+
+/**
+ * Returns the number of iterations taken.
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
+                                    HYPRE_Int          *num_iterations);
+
+/**
+ * Returns the norm of the final relative residual.
+ **/
+HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                HYPRE_Real   *rel_resid_norm);
+
+/**
+ * (Optional) Sets the size of the system of PDEs, if using the systems version.
+ * The default is 1, i.e. a scalar system.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
+                                   HYPRE_Int          num_functions);
+
+/**
+ * (Optional) Sets the mapping that assigns the function to each variable, 
+ * if using the systems version. If no assignment is made and the number of
+ * functions is k > 1, the mapping generated is (0,1,...,k-1,0,1,...,k-1,...).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver  solver,
+                              HYPRE_Int          *dof_func);
+
+/**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
  * as a solver. If it is used as a preconditioner, it should be set to 0.
  * The default is 1.e-7.
@@ -155,11 +188,10 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxIter(HYPRE_Solver solver,
                               HYPRE_Int          max_iter);
 
 /**
- * (Optional) Sets maximum number of multigrid levels.
- * The default is 25.
+ * (Optional)
  **/
-HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
-                                HYPRE_Int          max_levels);
+HYPRE_Int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
+                              HYPRE_Int          min_iter);
 
 /**
  * (Optional) Sets maximum size of coarsest grid.
@@ -176,18 +208,11 @@ HYPRE_Int HYPRE_BoomerAMGSetMinCoarseSize(HYPRE_Solver solver,
                                     HYPRE_Int          min_coarse_size);
 
 /**
- * (Optional) Sets maximal size for agglomeration or redundant coarse grid solve. 
- * When the system is smaller than this threshold, sequential AMG is used 
- * on process 0 or on all remaining active processes (if redundant = 1 ).
+ * (Optional) Sets maximum number of multigrid levels.
+ * The default is 25.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
-                                    HYPRE_Int          seq_threshold);
-/**
- * (Optional) operates switch for redundancy. Needs to be used with
- * HYPRE_BoomerAMGSetSeqThreshold. Default is 0, i.e. no redundancy.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
-                                    HYPRE_Int          redundant);
+HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
+                                HYPRE_Int          max_levels);
 
 /**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
@@ -197,6 +222,18 @@ HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
                                       HYPRE_Real   strong_threshold);
+
+/**
+ * (Optional) Defines the largest strength threshold for which 
+ * the strength matrix S uses the communication package of the operator A.
+ * If the strength threshold is larger than this values,
+ * a communication package is generated for S. This can save
+ * memory and decrease the amount of data that needs to be communicated,
+ * if S is substantially sparser than A.
+ * The default is 1.0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
+                                     HYPRE_Real   S_commpkg_switch);
 
 /**
  * (Optional) Sets a parameter to modify the definition of strength for
@@ -242,12 +279,278 @@ HYPRE_Int HYPRE_BoomerAMGSetMeasureType(HYPRE_Solver solver,
                                   HYPRE_Int          measure_type);
 
 /**
+ * (Optional) Defines the number of levels of aggressive coarsening.
+ * The default is 0, i.e. no aggressive coarsening.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAggNumLevels(HYPRE_Solver solver,
+                                   HYPRE_Int          agg_num_levels);
+
+/**
+ * (Optional) Defines the degree of aggressive coarsening.
+ * The default is 1. Larger numbers lead to less aggressive 
+ * coarsening.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNumPaths(HYPRE_Solver solver,
+                               HYPRE_Int          num_paths);
+
+/**
+ * (optional) Defines the number of pathes for CGC-coarsening.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCGCIts (HYPRE_Solver solver,
+                              HYPRE_Int          its);
+
+/**
+ * (Optional) Sets whether to use the nodal systems coarsening.
+ * Should be used for linear systems generated from systems of PDEs.
+ * The default is 0 (unknown-based coarsening, 
+ *                   only coarsens within same function).
+ * For the remaining options a nodal matrix is generated by
+ * applying a norm to the nodal blocks and applying the coarsening
+ * algorithm to this matrix.
+ * \begin{tabular}{|c|l|} \hline
+ * 1  & Frobenius norm \\
+ * 2  & sum of absolute values of elements in each block \\
+ * 3  & largest element in each block (not absolute value)\\
+ * 4  & row-sum norm \\
+ * 6  & sum of all values in each block \\
+ * \hline
+ * \end{tabular}
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
+                            HYPRE_Int          nodal);
+/**
+ * (Optional) Sets whether to give special treatment to diagonal elements in 
+ * the nodal systems version.
+ * The default is 0.
+ * If set to 1, the diagonal entry is set to the negative sum of all off
+ * diagonal entries.
+ * If set to 2, the signs of all diagonal entries are inverted.
+ */
+HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
+                                HYPRE_Int          nodal_diag);
+
+
+/**
+ * (Optional) Defines which parallel interpolation operator is used.
+ * There are the following options for interp\_type: 
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ * 0  & classical modified interpolation \\
+ * 1  & LS interpolation (for use with GSMG) \\
+ * 2  & classical modified interpolation for hyperbolic PDEs \\
+ * 3  & direct interpolation (with separation of weights) \\
+ * 4  & multipass interpolation \\
+ * 5  & multipass interpolation (with separation of weights) \\
+ * 6  & extended+i interpolation \\
+ * 7  & extended+i (if no common C neighbor) interpolation \\
+ * 8  & standard interpolation \\
+ * 9  & standard interpolation (with separation of weights) \\
+ * 10 & classical block interpolation (for use with nodal systems version only) \\
+ * 11 & classical block interpolation (for use with nodal systems version only) \\
+ *    & with diagonalized diagonal blocks \\
+ * 12 & FF interpolation \\
+ * 13 & FF1 interpolation \\
+ * 14 & extended interpolation \\
+ * \hline
+ * \end{tabular}
+ * 
+ * The default is 0. 
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
+                                 HYPRE_Int          interp_type);
+
+/**
+ * (Optional) Defines a truncation factor for the interpolation.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
+                                  HYPRE_Real   trunc_factor);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the interpolation.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
+                                HYPRE_Int          P_max_elmts);
+
+/**
+ * (Optional) Defines whether separation of weights is used
+ * when defining strength for standard interpolation or
+ * multipass interpolation.
+ * Default: 0, i.e. no separation of weights used.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
+                                HYPRE_Int          sep_weight);
+
+/**
+ * (Optional) Defines the interpolation used on levels of aggressive coarsening
+ * The default is 4, i.e. multipass interpolation.
+ * The following options exist:
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ * 1 & 2-stage extended+i interpolation \\
+ * 2 & 2-stage standard interpolation \\
+ * 3 & 2-stage extended interpolation \\
+ * 4 & multipass interpolation \\
+ * \hline
+ * \end{tabular}
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
+                                    HYPRE_Int          agg_interp_type);
+
+/**
+ * (Optional) Defines the truncation factor for the 
+ * interpolation used for aggressive coarsening.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor(HYPRE_Solver solver,
+                                     HYPRE_Real   agg_trunc_factor);
+
+/**
+ * (Optional) Defines the truncation factor for the 
+ * matrices P1 and P2 which are used to build 2-stage interpolation.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor(HYPRE_Solver solver,
+                                        HYPRE_Real   agg_P12_trunc_factor);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the 
+ * interpolation used for aggressive coarsening.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAggPMaxElmts(HYPRE_Solver solver,
+                                   HYPRE_Int          agg_P_max_elmts);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the 
+ * matrices P1 and P2 which are used to build 2-stage interpolation.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts(HYPRE_Solver solver,
+                                     HYPRE_Int          agg_P12_max_elmts);
+
+/**
+ * (Optional) Allows the user to incorporate additional vectors 
+ * into the interpolation for systems AMG, e.g. rigid body modes for 
+ * linear elasticity problems.
+ * This can only be used in context with nodal coarsening and still
+ * requires the user to choose an interpolation. 
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetInterpVectors (HYPRE_Solver solver , 
+	HYPRE_Int num_vectors , HYPRE_ParVector *interp_vectors );
+
+/**
+ * (Optional) Defines the interpolation variant used for 
+ * HYPRE_BoomerAMGSetInterpVectors:
+ * \begin{tabular}{|c|l|} \hline
+ * 1 & GM approach 1 \\
+ * 2 & GM approach 2  (to be preferred over 1) \\
+ * 3 & LN approach \\
+ * \hline
+ * \end{tabular}
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetInterpVecVariant (HYPRE_Solver solver, 
+				HYPRE_Int var );
+
+/**
+ * (Optional) Defines the maximal elements per row for Q, the additional
+ * columns added to the original interpolation matrix P, to reduce complexity.
+ * The default is no truncation.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetInterpVecQMax (HYPRE_Solver solver, 
+				HYPRE_Int q_max );
+
+/**
+ * (Optional) Defines a truncation factor for Q, the additional
+ * columns added to the original interpolation matrix P, to reduce complexity.
+ * The default is no truncation.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetInterpVecAbsQTrunc (HYPRE_Solver solver, 
+			HYPRE_Real q_trunc );
+
+/**
+ * (Optional) Specifies the use of GSMG - geometrically smooth 
+ * coarsening and interpolation. Currently any nonzero value for
+ * gsmg will lead to the use of GSMG.
+ * The default is 0, i.e. (GSMG is not used)
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
+                           HYPRE_Int          gsmg);
+
+/**
+ * (Optional) Defines the number of sample vectors used in GSMG
+ * or LS interpolation.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
+                                 HYPRE_Int          num_samples);
+/**
  * (Optional) Defines the type of cycle.
  * For a V-cycle, set cycle\_type to 1, for a W-cycle
  *  set cycle\_type to 2. The default is 1.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
                                 HYPRE_Int          cycle_type);
+
+/**
+ * (Optional) Defines use of an additive V(1,1)-cycle using the
+ * classical additive method starting at level 'addlvl'.
+ * The multiplicative approach is used on levels 0, ...'addlvl+1'.
+ * 'addlvl' needs to be > -1 for this to have an effect.
+ * Can only be used with weighted Jacobi and l1-Jacobi(default).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAdditive(HYPRE_Solver solver,
+                                     HYPRE_Int addlvl);
+
+/**
+ * (Optional) Defines use of an additive V(1,1)-cycle using the
+ * mult-additive method starting at level 'addlvl'.
+ * The multiplicative approach is used on levels 0, ...'addlvl+1'.
+ * 'addlvl' needs to be > -1 for this to have an effect.
+ * Can only be used with weighted Jacobi and l1-Jacobi(default).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetMultAdditive(HYPRE_Solver solver,
+                                     HYPRE_Int addlvl);
+
+/**
+ * (Optional) Defines use of an additive V(1,1)-cycle using the
+ * simplified mult-additive method starting at level 'addlvl'.
+ * The multiplicative approach is used on levels 0, ...'addlvl+1'.
+ * 'addlvl' needs to be > -1 for this to have an effect.
+ * Can only be used with weighted Jacobi and l1-Jacobi(default).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
+                                     HYPRE_Int addlvl);
+
+/**
+ * (Optional) Defines the truncation factor for the 
+ * smoothed interpolation used for mult-additive or simple method.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor(HYPRE_Solver solver,
+                                     HYPRE_Real       add_trunc_factor);
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the 
+ * smoothed interpolation used for mult-additive or simple method.
+ * The default is 0.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts(HYPRE_Solver solver,
+                                   HYPRE_Int          add_P_max_elmts);
+
+/**
+ * (Optional) Sets maximal size for agglomeration or redundant coarse grid solve. 
+ * When the system is smaller than this threshold, sequential AMG is used 
+ * on process 0 or on all remaining active processes (if redundant = 1 ).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
+                                    HYPRE_Int          seq_threshold);
+/**
+ * (Optional) operates switch for redundancy. Needs to be used with
+ * HYPRE_BoomerAMGSetSeqThreshold. Default is 0, i.e. no redundancy.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
+                                    HYPRE_Int          redundant);
 
 /**
  * (Optional) Defines the number of sweeps for the fine and coarse grid, 
@@ -459,116 +762,6 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
                                      HYPRE_Real     ratio);
 
 /**
- * (Optional)
- **/
-HYPRE_Int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
-                                HYPRE_Int          debug_flag);
-
-/**
- * Returns the residual.
- **/
-HYPRE_Int HYPRE_BoomerAMGGetResidual(HYPRE_Solver     solver,
-                               HYPRE_ParVector *residual);
-
-/**
- * Returns the number of iterations taken.
- **/
-HYPRE_Int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
-                                    HYPRE_Int          *num_iterations);
-
-/**
- * Returns the norm of the final relative residual.
- **/
-HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                HYPRE_Real   *rel_resid_norm);
-
-/*
- * (Optional)
- **/
-HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
-                                  HYPRE_Int          restr_par);
-
-/**
- * (Optional) Defines a truncation factor for the interpolation.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
-                                  HYPRE_Real   trunc_factor);
-
-/**
- * (Optional) Defines the maximal number of elements per row for the interpolation.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
-                                HYPRE_Int          P_max_elmts);
-
-/**
- * (Optional) Defines the largest strength threshold for which 
- * the strength matrix S uses the communication package of the operator A.
- * If the strength threshold is larger than this values,
- * a communication package is generated for S. This can save
- * memory and decrease the amount of data that needs to be communicated,
- * if S is substantially sparser than A.
- * The default is 1.0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
-                                     HYPRE_Real   S_commpkg_switch);
-
-/**
- * (Optional) Defines which parallel interpolation operator is used.
- * There are the following options for interp\_type: 
- * 
- * \begin{tabular}{|c|l|} \hline
- * 0  & classical modified interpolation \\
- * 1  & LS interpolation (for use with GSMG) \\
- * 2  & classical modified interpolation for hyperbolic PDEs \\
- * 3  & direct interpolation (with separation of weights) \\
- * 4  & multipass interpolation \\
- * 5  & multipass interpolation (with separation of weights) \\
- * 6  & extended+i interpolation \\
- * 7  & extended+i (if no common C neighbor) interpolation \\
- * 8  & standard interpolation \\
- * 9  & standard interpolation (with separation of weights) \\
- * 10 & classical block interpolation (for use with nodal systems version only) \\
- * 11 & classical block interpolation (for use with nodal systems version only) \\
- *    & with diagonalized diagonal blocks \\
- * 12 & FF interpolation \\
- * 13 & FF1 interpolation \\
- * 14 & extended interpolation \\
- * \hline
- * \end{tabular}
- * 
- * The default is 0. 
- **/
-HYPRE_Int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
-                                 HYPRE_Int          interp_type);
-
-/**
- * (Optional) Defines whether separation of weights is used
- * when defining strength for standard interpolation or
- * multipass interpolation.
- * Default: 0, i.e. no separation of weights used.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetSepWeight(HYPRE_Solver solver,
-                                HYPRE_Int          sep_weight);
-
-/**
- * (Optional)
- **/
-HYPRE_Int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
-                              HYPRE_Int          min_iter);
-
-/**
- * (Optional) This routine will be eliminated in the future.
- **/
-HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
-                                      HYPRE_Int    **grid_relax_type_ptr,
-                                      HYPRE_Int   ***grid_relax_points_ptr,
-                                      HYPRE_Int      coarsen_type,
-                                      HYPRE_Real **relax_weights_ptr,
-                                      HYPRE_Int      max_levels);
-
-/**
  * (Optional) Enables the use of more complex smoothers.
  * The following options exist for smooth\_type:
  *
@@ -605,169 +798,6 @@ HYPRE_Int HYPRE_BoomerAMGSetSmoothNumLevels(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSmoothNumSweeps(HYPRE_Solver solver,
                                       HYPRE_Int          smooth_num_sweeps);
-
-/*
- * (Optional) Name of file to which BoomerAMG will print;
- * cf HYPRE\_BoomerAMGSetPrintLevel.  (Presently this is ignored).
- **/
-HYPRE_Int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
-                                    const char   *print_file_name);
-
-/**
- * (Optional) Requests automatic printing of setup and solve information.
- *
- * \begin{tabular}{|c|l|} \hline
- * 0 & no printout (default) \\
- * 1 & print setup information \\
- * 2 & print solve information \\
- * 3 & print both setup and solve information \\
- * \hline
- * \end{tabular}
- *
- * Note, that if one desires to print information and uses BoomerAMG as a 
- * preconditioner, suggested print$\_$level is 1 to avoid excessive output,
- * and use print$\_$level of solver for solve phase information.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver solver,
-                                 HYPRE_Int          print_level);
-
-/**
- * (Optional) Requests additional computations for diagnostic and similar
- * data to be logged by the user. Default to 0 for do nothing.  The latest
- * residual will be available if logging > 1.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetLogging(HYPRE_Solver solver,
-                              HYPRE_Int          logging);
-
-/**
- * (Optional) Sets the size of the system of PDEs, if using the systems version.
- * The default is 1.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
-                                   HYPRE_Int          num_functions);
-
-/**
- * (Optional) Sets whether to use the nodal systems coarsening.
- * The default is 0 (unknown-based coarsening).
- **/
-HYPRE_Int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
-                            HYPRE_Int          nodal);
-/*  Don't want this in manual...
- * (Optional) Sets whether to give spoecial treatment to diagonal elements in 
- * the nodal systems version.
- * The default is 0.
- */
-HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
-                                HYPRE_Int          nodal_diag);
-/**
- * (Optional) Sets the mapping that assigns the function to each variable, 
- * if using the systems version. If no assignment is made and the number of
- * functions is k > 1, the mapping generated is (0,1,...,k-1,0,1,...,k-1,...).
- **/
-HYPRE_Int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver  solver,
-                              HYPRE_Int          *dof_func);
-
-/**
- * (Optional) Defines the number of levels of aggressive coarsening.
- * The default is 0, i.e. no aggressive coarsening.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAggNumLevels(HYPRE_Solver solver,
-                                   HYPRE_Int          agg_num_levels);
-
-/**
- * (Optional) Defines the interpolation used on levels of aggressive coarsening
- * The default is 4, i.e. multipass interpolation.
- * The following options exist:
- * 
- * \begin{tabular}{|c|l|} \hline
- * 1 & 2-stage extended+i interpolation \\
- * 2 & 2-stage standard interpolation \\
- * 3 & 2-stage extended interpolation \\
- * 4 & multipass interpolation \\
- * \hline
- * \end{tabular}
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAggInterpType(HYPRE_Solver solver,
-                                    HYPRE_Int          agg_interp_type);
-
-/**
- * (Optional) Defines the truncation factor for the 
- * interpolation used for aggressive coarsening.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor(HYPRE_Solver solver,
-                                     HYPRE_Real   agg_trunc_factor);
-
-/**
- * (Optional) Defines the truncation factor for the 
- * matrices P1 and P2 which are used to build 2-stage interpolation.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor(HYPRE_Solver solver,
-                                        HYPRE_Real   agg_P12_trunc_factor);
-
-/**
- * (Optional) Defines the maximal number of elements per row for the 
- * interpolation used for aggressive coarsening.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAggPMaxElmts(HYPRE_Solver solver,
-                                   HYPRE_Int          agg_P_max_elmts);
-
-/**
- * (Optional) Defines the maximal number of elements per row for the 
- * matrices P1 and P2 which are used to build 2-stage interpolation.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts(HYPRE_Solver solver,
-                                     HYPRE_Int          agg_P12_max_elmts);
-
-/**
- * (Optional) Defines the degree of aggressive coarsening.
- * The default is 1.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetNumPaths(HYPRE_Solver solver,
-                               HYPRE_Int          num_paths);
-
-/*
- * (Optional) Defines use of an additive V-cycle using the
- * classical additive method starting at level 'addlvl'
- * 'addlvl' needs to be > -1 for this to have an effect
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAdditive(HYPRE_Solver solver,
-                                     HYPRE_Int addlvl);
-
-/*
- * (Optional) Defines use of an additive V-cycle using the
- * mult-additive method starting at level 'addlvl'
- * 'addlvl' needs to be > -1 for this to have an effect
- **/
-HYPRE_Int HYPRE_BoomerAMGSetMultAdditive(HYPRE_Solver solver,
-                                     HYPRE_Int addlvl);
-
-/*
- * (Optional) Defines use of an additive V-cycle using the
- * simplified mult-additive method starting at level 'addlvl'
- * 'addlvl' needs to be > -1 for this to have an effect
- **/
-HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
-                                     HYPRE_Int addlvl);
-
-/*
- * (Optional) Defines the truncation factor for the 
- * smoothed interpolation used for mult-additive or simple method.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor(HYPRE_Solver solver,
-                                     HYPRE_Real       add_trunc_factor);
-
-/*
- * (Optional) Defines the maximal number of elements per row for the 
- * smoothed interpolation used for mult-additive or simple method.
- * The default is 0.
- **/
-HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts(HYPRE_Solver solver,
-                                   HYPRE_Int          add_P_max_elmts);
 
 /**
  * (Optional) Defines which variant of the Schwarz method is used.
@@ -906,26 +936,61 @@ HYPRE_Int HYPRE_BoomerAMGSetEuSparseA(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
                            HYPRE_Int          eu_bj);
 
-/**
- * (Optional) Specifies the use of GSMG - geometrically smooth 
- * coarsening and interpolation. Currently any nonzero value for
- * gsmg will lead to the use of GSMG.
- * The default is 0, i.e. (GSMG is not used)
+/*
+ * (Optional)
  **/
-HYPRE_Int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
-                           HYPRE_Int          gsmg);
+HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
+                                  HYPRE_Int          restr_par);
+
+/*
+ * (Optional) Name of file to which BoomerAMG will print;
+ * cf HYPRE\_BoomerAMGSetPrintLevel.  (Presently this is ignored).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
+                                    const char   *print_file_name);
 
 /**
- * (Optional) Defines the number of sample vectors used in GSMG
- * or LS interpolation.
+ * (Optional) Requests automatic printing of setup and solve information.
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 0 & no printout (default) \\
+ * 1 & print setup information \\
+ * 2 & print solve information \\
+ * 3 & print both setup and solve information \\
+ * \hline
+ * \end{tabular}
+ *
+ * Note, that if one desires to print information and uses BoomerAMG as a 
+ * preconditioner, suggested print$\_$level is 1 to avoid excessive output,
+ * and use print$\_$level of solver for solve phase information.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
-                                 HYPRE_Int          num_samples);
+HYPRE_Int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver solver,
+                                 HYPRE_Int          print_level);
+
 /**
- * (optional) Defines the number of pathes for CGC-coarsening.
+ * (Optional) Requests additional computations for diagnostic and similar
+ * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * residual will be available if logging > 1.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetCGCIts (HYPRE_Solver solver,
-                              HYPRE_Int          its);
+HYPRE_Int HYPRE_BoomerAMGSetLogging(HYPRE_Solver solver,
+                              HYPRE_Int          logging);
+
+
+/**
+ * (Optional)
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
+                                HYPRE_Int          debug_flag);
+
+/**
+ * (Optional) This routine will be eliminated in the future.
+ **/
+HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
+                                      HYPRE_Int    **grid_relax_type_ptr,
+                                      HYPRE_Int   ***grid_relax_points_ptr,
+                                      HYPRE_Int      coarsen_type,
+                                      HYPRE_Real **relax_weights_ptr,
+                                      HYPRE_Int      max_levels);
 
 /*
  * HYPRE_BoomerAMGSetPlotGrids
