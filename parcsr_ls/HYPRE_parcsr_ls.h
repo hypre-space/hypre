@@ -273,6 +273,29 @@ HYPRE_Int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
                                   HYPRE_Int          coarsen_type);
 
 /**
+ * (Optional) Defines the level specific non-Galerkin drop-tolerances
+ * for sparsifying coarse grid operators and thus reducing communication. 
+ * A drop-tolerance of 0.0 means to skip doing non-Galerkin on that 
+ * level.  The maximum drop tolerance for a level is 1.0, although 
+ * much smaller values such as 0.03 or 0.01 are recommended.
+ *
+ * In general, it is safer to drop more aggressively on coarser levels.  
+ * For instance, using \\
+ *   nongalerk_num_tol = 3\\
+ *   nongalerk_tol = [0.0, 0.01, 0.05]\\
+ * would skip the non-Galerkin process on level 0, use a drop-tolerance of
+ * 0.01 on level 1 and then use 0.05 on level 2 and all subsequent levels.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param nongalerk_num_tol [IN] number of level specific drop tolerances
+ * @param nongalerk_tol [IN] array of the level specific drop tolerances, 
+ *    of length nongalerk_num_tol
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol (HYPRE_Solver solver,
+                                          HYPRE_Int    nongalerk_num_tol,
+                                          HYPRE_Real  *nongalerk_tol);
+
+/**
  * (Optional) Defines whether local or global measures are used.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMeasureType(HYPRE_Solver solver,
@@ -3064,17 +3087,6 @@ HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
                              HYPRE_Int          IS_type);
-/*
- * HYPRE_BoomerAMGSetNonGalerkNumTol
- **/
-HYPRE_Int HYPRE_BoomerAMGSetNonGalerkNumTol (HYPRE_Solver solver,
-                             HYPRE_Int          nongalerk_num_tol);
-
-/*
- * HYPRE_BoomerAMGSetNonGalerkTol 
- **/
-HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol (HYPRE_Solver  solver,
-                                   HYPRE_Real        *nongalerk_tol);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

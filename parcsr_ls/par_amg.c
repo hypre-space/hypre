@@ -3760,23 +3760,14 @@ hypre_BoomerAMGGetSimple( void *data,
 }
 
 HYPRE_Int
-hypre_BoomerAMGSetNonGalerkNumTol( void *data,
-                          HYPRE_Int nongalerk_num_tol)
+hypre_BoomerAMGSetNonGalerkTol( void   *data,
+                            HYPRE_Int   nongalerk_num_tol,
+                            HYPRE_Real *nongalerk_tol)
 {
   HYPRE_Int ierr = 0;
   hypre_ParAMGData *amg_data = data;
 
   hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
-  return (ierr);
-}
-
-HYPRE_Int
-hypre_BoomerAMGSetNonGalerkTol ( void *data,
-                             HYPRE_Real *nongalerk_tol)
-{
-  HYPRE_Int ierr = 0;
-  hypre_ParAMGData *amg_data = data;
-
   hypre_ParAMGDataNonGalerkTol(amg_data) = nongalerk_tol;
   return (ierr);
 }

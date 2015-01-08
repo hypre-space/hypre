@@ -829,8 +829,7 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAdditive ( HYPRE_Solver solver , HYPRE_Int mult_
 HYPRE_Int HYPRE_BoomerAMGGetMultAdditive ( HYPRE_Solver solver , HYPRE_Int *mult_additive );
 HYPRE_Int HYPRE_BoomerAMGSetSimple ( HYPRE_Solver solver , HYPRE_Int simple );
 HYPRE_Int HYPRE_BoomerAMGGetSimple ( HYPRE_Solver solver , HYPRE_Int *simple );
-HYPRE_Int HYPRE_BoomerAMGSetNonGalerkNumTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol );
-HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Real *nongalerk_tol );
+HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1246,8 +1245,7 @@ HYPRE_Int hypre_BoomerAMGSetMultAdditive ( void *data , HYPRE_Int mult_additive 
 HYPRE_Int hypre_BoomerAMGGetMultAdditive ( void *data , HYPRE_Int *mult_additive );
 HYPRE_Int hypre_BoomerAMGSetSimple ( void *data , HYPRE_Int simple );
 HYPRE_Int hypre_BoomerAMGGetSimple ( void *data , HYPRE_Int *simple );
-HYPRE_Int hypre_BoomerAMGSetNonGalerkNumTol ( void *data , HYPRE_Int nongalerk_num_tol );
-HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Real *nongalerk_tol );
+HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 
 /* par_amg_setup.c */
 HYPRE_Int hypre_BoomerAMGSetup ( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );

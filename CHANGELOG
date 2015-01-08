@@ -25,6 +25,9 @@ Version 2.10.0b released 2015/01/xx
   V-cycle
 - fixed several bugs in BoomerAMG and removed some inefficiencies
 - Added threading to the IJ interface and some AMG setup routines.
+- Added new non-Galerkin coarse grid construction scheme to reduce 
+  communication and complexity.
+
 #====================================
 
 Version 2.9.4a released 2013/11/21
