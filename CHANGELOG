@@ -19,7 +19,12 @@
 Version 2.10.0b released 2015/01/xx
 
 - Fixed potential bug and memory leaks in the AMS and ADS solvers.
-
+- Added new interpolation which allows to incorporate near null-space vector
+  for systems problems
+- Added additive V-cycle and new mult-additive and simplified mult-additive 
+  V-cycle
+- fixed several bugs in BoomerAMG and removed some inefficiencies
+- Added threading to the IJ interface and some AMG setup routines.
 #====================================
 
 Version 2.9.4a released 2013/11/21
