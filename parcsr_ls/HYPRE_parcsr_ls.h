@@ -283,8 +283,14 @@ HYPRE_Int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
  * For instance, using \\
  *   nongalerk_num_tol = 3\\
  *   nongalerk_tol = [0.0, 0.01, 0.05]\\
- * would skip the non-Galerkin process on level 0, use a drop-tolerance of
- * 0.01 on level 1 and then use 0.05 on level 2 and all subsequent levels.
+ * would skip the non-Galerkin process on the first coarse level (level 1), 
+ * use a drop-tolerance of 0.01 on the second coarse level (level 2) and
+ * then use 0.05 on all subsequent coarse levels.  Like many AMG parameters,
+ * these drop tolerances can be tuned.  It is also common to delay the start
+ * of the non-Galerkin process further, for example, try\\
+ *   nongalerk_tol = [0.0, 0.0, 0.01, 0.05]\\
+ *   or 
+ *   nongalerk_tol = [0.0, 0.0, 0.0, 0.01, 0.05]\\
  *
  * @param solver [IN] solver or preconditioner object to be applied.
  * @param nongalerk_num_tol [IN] number of level specific drop tolerances
