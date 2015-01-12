@@ -446,12 +446,6 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            hypre_printf("% 5d    %e    %f\n", iter, norms[iter],
 		                             norms[iter]/norms[iter-1]);
 	}
-    /* Is this extra check for r_norm exactly 0.0 necessary ?*/
-    if (r_norm == 0.0)
-    {
-	   ierr = 0;
-	   return hypre_error_flag;
-	}
     /* check for convergence, evaluate actual residual */
 	if (r_norm <= epsilon && iter >= min_iter) 
     {

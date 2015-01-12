@@ -439,6 +439,22 @@ and recommended to control complexity and truncate the interpolation operators
 using \code{HYPRE_BoomerAMGSetTruncFactor} and/or \code{HYPRE_BoomerAMGSetPMaxElmts},
 or \code{HYPRE_BoomerAMGSetJacobiTruncTheshold} (for Jacobi interpolation only).
 
+\subsection{Non-Galerkin Options}
+In order to reduce communication, there is a non-Galerkin coarse grid
+sparsification option available \cite{FaSc2014}.  This option can be used by
+itself or with existing strategies to reduce communication such as aggressive
+coarsening and HMIS coarsening.  To use, call
+\code{HYPRE_BoomerAMGSetNonGalerkTol}, which gives BoomerAMG a list of level
+specific non-Galerkin drop tolerances.  It is common to drop more aggressively
+on coarser levels.  A common choice of drop-tolerances is $[0.0,
+0.01, 0.05]$ where the value of 0.0 will skip the non-Galerkin process on the
+first coarse level (level 1), use a drop-tolerance of 0.01 on the second coarse
+level (level 2) and then use 0.05 on all subsequent coarse levels.  While still
+experimental, this capability has significantly improved performance on a
+variety of problems.  See the \code{new_ij} driver for an example usage and the
+reference manual for more details.
+
+
 \subsection{Smoother Options}
 A good overview of parallel smoothers and their properties can be found in \cite{Baker_Falgout_Kolev_UMYang_2011}. Various of the described relaxation techniques are available:
 \begin{itemize}
