@@ -11,11 +11,33 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+TNAME=`basename $0 .sh`
+
 #=============================================================================
-# EXAMPLES: Compare ex*.base files with bigint.out.* files from current runs
-#           differences (except for timings) indicate errors
+# compare with baseline case
 #=============================================================================
 
-diff -U3 -bI"time" ex5big.base bigint.out.1 >&2
+FILES="\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
 
-diff -U3 -bI"time" ex15big.base bigint.out.2 >&2
+# Need to avoid output lines about "no global partition"
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -93 $i
+done > ${TNAME}.out
+
+# Make sure that the output files are reasonable
+CHECK_LINE="Iterations"
+OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
+SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
+if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
+   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
+fi
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+

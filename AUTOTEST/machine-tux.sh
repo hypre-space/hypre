@@ -22,8 +22,9 @@ case $1 in
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
+          
 
    This script runs a number of tests suitable for the tux machines.
 
@@ -42,63 +43,56 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Test runtest tests with debugging and insure turned on
-./test.sh debug.sh $src_dir --with-insure
-mv -f debug.??? $output_dir
+# Basic build and run tests
+mo="-j test"
+ro="-ij -sstruct -struct"
+eo=""
 
-# Test examples
-./test.sh examples.sh $src_dir/examples
-mv -f examples.??? $output_dir
+co=""
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/basictest-default basictest.???
 
-# Test babel build (only if 'babel-runtime' directory is present)
+co="--with-insure --enable-debug --with-print-errors"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+rename basictest $output_dir/basictest--with-insure basictest.???
+
+co="--enable-global-partition --with-insure"
+RO="-ij -sstruct -struct -ams -fac"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
+rename basictest $output_dir/basictest--enable-global-partition basictest.???
+
+co="--without-MPI"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/basictest--without-MPI basictest.???
+
+co="--with-strict-checking"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/basictest--with-strict-checking basictest.???
+
+co="--enable-shared"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/basictest--enable-shared basictest.???
+
+co="--enable-bigint --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
+rename basictest $output_dir/basictest--enable-bigint basictest.???
+
+co="--enable-maxdim=4 --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
+rename basictest $output_dir/basictest--enable-maxdim=4 basictest.???
+
+co="--enable-complex --enable-maxdim=4 --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
+# ignore complex compiler output for now
+rm -fr basictest.dir/make.???
+rename basictest $output_dir/basictest--enable-complex basictest.???
+
+# Test babel build only if 'babel-runtime' directory is present
 if [ -d $src_dir/babel-runtime ]; then
-   opt="--with-babel"
-   output_subdir="$output_dir/build--with-babel"
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
+   co="--with-babel"
+   test.sh basictest.sh $src_dir -co: $co -mo: $mo
+   rename basictest $output_dir/basictest--with-babel basictest.???
 fi
-
-# Test other builds (last one is the default build)
-configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition --with-insure:--enable-bigint --enable-debug:--enable-maxdim=4 --enable-debug:--enable-complex --enable-maxdim=4 --enable-debug: "
-# temporarily change word delimeter to allow spaces in options
-tmpIFS=$IFS; IFS=:
-for opt in $configure_opts
-do
-   # only use first part of $opt for subdir name
-   optpre=`echo $opt | awk '{print $1}'`
-   output_subdir=$output_dir/build$optpre
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir -j test
-   mv -f make.??? $output_subdir
-   case $optpre in
-      --with-no-global-partition)
-         ./test.sh run.sh -ij -sstruct -struct $src_dir
-         mv -f run.??? $output_subdir
-      ;;
-      --enable-bigint)
-         ./test.sh run.sh $src_dir
-         mv -f run.??? $output_subdir
-         ./test.sh examples.sh -bigint $src_dir/examples
-         mv -f examples.??? $output_subdir
-      ;;
-      --enable-maxdim*)
-         ./test.sh examples.sh -maxdim $src_dir/examples
-         mv -f examples.??? $output_subdir
-      ;;
-      --enable-complex)
-         # ignore complex compiler output for now
-         rm -fr $output_subdir/make.???
-         ./test.sh examples.sh -complex $src_dir/examples
-         mv -f examples.??? $output_subdir
-      ;;
-   esac
-done
-IFS=$tmpIFS
 
 # Test linking for different languages
 link_opts="all++ all77"

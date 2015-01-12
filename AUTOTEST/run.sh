@@ -15,40 +15,44 @@ testname=`basename $0 .sh`
 tests=""
 
 # Echo usage information
-while [ "$*" ]
-do
-   case $1 in
-      -h|-help)
-         cat <<EOF
+case $1 in
+   -h|-help)
+      cat <<EOF
 
-   $0 [options] {src_dir} [options for 'runtest.sh']
+   $0 [-h] {src_dir} [options] [-rt <options for runtest.sh script>]
 
-   where: {src_dir}  is the hypre source directory
-
-   with options (more than one set of tests can be specified):
-
-      -all       run ams, fac, ij, sstruct, struct (default behavior)
-      -<test>    run <test>
-      -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
+          -<test>    run <test>  (test = ams, fac, ij, sstruct, struct)
+          -all       run all tests (default behavior)
 
    This script runs runtest.sh in {src_dir}/test with optional parameters.
 
-   Example usage: $0 .. -D HYPRE_NO_SAVED
+   Example usage: $0 .. -rt -D HYPRE_NO_SAVED
 
 EOF
-         exit
-         ;;
+      exit
+      ;;
+esac
 
+# Set src_dir
+src_dir=$1; shift
+
+# Parse the rest of the command line
+while [ "$*" ]
+do
+   case $1 in
       -all)
          shift
+         ;;
+      -rt)
+         shift
+         break
          ;;
       -*)
          tname=`echo $1 | sed 's/-//'`
          tests="$tests $tname"
          shift
-         ;;
-      *)
-         break
          ;;
    esac
 done
@@ -62,8 +66,6 @@ fi
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
-shift
 
 # Run the test drivers
 cd $src_dir/test

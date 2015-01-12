@@ -22,8 +22,8 @@ case $1 in
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
 
       This script mainly runs the klocwork static analysis tool.
 

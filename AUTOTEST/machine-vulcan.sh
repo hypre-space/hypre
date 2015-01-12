@@ -22,8 +22,8 @@ case $1 in
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
 
       This script runs a number of tests suitable for the vulcan cluster.
 
@@ -42,9 +42,21 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Test runtest tests
-./test.sh default.sh $src_dir
-mv -f default.??? $output_dir
+# Basic build and run tests
+mo="test"
+ro="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+
+co=""
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+rename basictest $output_dir/test-default basictest.???
+
+co="--enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/test--enable-debug basictest.???
+
+co="--enable-bigint"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/test--enable-bigint basictest.???
 
 # Test linking for different languages
 link_opts="all++ all77"
@@ -55,22 +67,6 @@ do
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
-
-# Test other builds
-configure_opts="--enable-debug:--enable-bigint"
-# temporarily change word delimeter to allow spaces in options
-tmpIFS=$IFS; IFS=:
-for opt in $configure_opts
-do
-   # only use first part of $opt for subdir name
-   output_subdir=$output_dir/build`echo $opt | awk '{print $1}'`
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt 
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
-done
-IFS=$tmpIFS
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

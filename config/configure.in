@@ -137,6 +137,8 @@ hypre_user_chose_fei=no
 hypre_using_c=yes
 hypre_using_cxx=yes
 
+hypre_using_mpi=yes
+
 hypre_using_fei=yes
 hypre_using_superlu=yes
 
@@ -230,6 +232,29 @@ AS_HELP_STRING([--enable-maxdim=MAXDIM],
 [hypre_maxdim=3]
 )
 AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Max dimension])
+
+dnl * The --with-no-global-partition option is retained here for
+dnl * backward compatibility (no help string is printed).
+dnl * The new --enable-global-partition option takes precedence.
+hypre_using_global_partition=no
+AC_ARG_WITH(no-global-partition,,
+[case "${withval}" in
+    yes) hypre_using_global_partition=no ;;
+    no)  hypre_using_global_partition=yes ;;
+    *)   hypre_using_global_partition=no ;;
+ esac]
+)
+AC_ARG_ENABLE(global-partition,
+AS_HELP_STRING([--enable-global-partition],
+               [Use global partitioning (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_global_partition=yes ;;
+    no)  hypre_using_global_partition=no ;;
+    *)   hypre_using_global_partition=yes ;;
+ esac]
+)
+dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
+dnl * Need to change to a new approach that always defines variable to some value
 
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
@@ -596,15 +621,6 @@ AS_HELP_STRING([--with-fei-inc-dir=DIR],
  hypre_user_chose_fei=yes]
 )
 
-AC_ARG_WITH(no-global-partition,
-AS_HELP_STRING([--with-no-global-partition],
-               [Do not use global partitioning.]),
-[if test "$withval" = "yes"
- then
-    AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION,1,[No global partitioning being used])
- fi]
-)
-
 AC_ARG_WITH(print-errors,
 AS_HELP_STRING([--with-print-errors],
                [Print HYPRE errors.]),
@@ -690,8 +706,8 @@ AS_HELP_STRING([--with-MPI],
 [case "$withval" in 
     no) hypre_using_mpi=no ;;
     *)  hypre_using_mpi=yes ;;
- esac],
-[hypre_using_mpi=yes])
+ esac]
+)
 
 dnl *********************************************************************
 dnl * Select compilers if not already defined by command line options 
@@ -821,6 +837,16 @@ else
    if test $ac_cv_func_MPI_Comm_f2c = yes \
       || test $hypre_cv_func_MPI_Comm_f2c_macro = yes; then
      AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C)
+   fi
+fi
+
+dnl * It would be better if this could be defined above, but much work is needed
+dnl * to make that happen.
+if test "$hypre_using_global_partition" = "no"
+then
+   if test "$hypre_using_mpi" != "no"
+   then
+      AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
    fi
 fi
 

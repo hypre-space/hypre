@@ -22,8 +22,8 @@ case $1 in
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
 
       This script runs a number of tests suitable for the zeus cluster.
 
@@ -42,9 +42,24 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Test runtest tests
-./test.sh default.sh $src_dir
-mv -f default.??? $output_dir
+# Default test (and default options used below)
+tdir="$output_dir/test"
+co=""
+mo="test"
+ro="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo -ro: $ro
+
+tdir="$output_dir/test--enable-debug"
+co="--enable-debug"
+test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo
+
+tdir="$output_dir/test--enable-bigint"
+co="--enable-bigint"
+test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo
+
+tdir="$output_dir/test--with-blas"
+co="--with-blas --with-lapack --with-blas-lib-dirs=/usr/lib64 --with-lapack-lib-dirs=/usr/lib64 --with-blas-libs=blas --with-lapack-libs=lapack"
+test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo
 
 # Test linking for different languages
 link_opts="all++ all77"
@@ -55,23 +70,6 @@ do
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
-
-# Test other builds
-configure_opts="--enable-debug:--enable-bigint:--with-blas --with-lapack --with-blas-lib-dirs=/usr/lib64 --with-lapack-lib-dirs=/usr/lib64 --with-blas-libs=blas --with-lapack-libs=lapack"
-# temporarily change word delimeter in order to have spaces in options
-tmpIFS=$IFS
-IFS=:
-for opt in $configure_opts
-do
-   # only use first part of $opt for subdir name
-   output_subdir=$output_dir/build`echo $opt | awk '{print $1}'`
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt 
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
-done
-IFS=$tmpIFS
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

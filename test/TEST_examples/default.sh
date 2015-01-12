@@ -11,46 +11,47 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-# EXAMPLES: Compare ex*.base files with default.out.* files from current runs
-#           differences (except for timings) indicate errors
+# compare with baseline case
 #=============================================================================
 
-diff -U3 -bI"time" ex1.base default.out.1 >&2
+FILES="\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.5f\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+ ${TNAME}.out.8\
+ ${TNAME}.out.9\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+ ${TNAME}.out.12\
+ ${TNAME}.out.12f\
+ ${TNAME}.out.13\
+ ${TNAME}.out.14\
+ ${TNAME}.out.15\
+"
 
-diff -U3 -bI"time" ex2.base default.out.2 >&2
+# Need to avoid output lines about "no global partition"
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -93 $i
+done > ${TNAME}.out
 
-diff -U3 -bI"time" ex3.base default.out.3 >&2
+# Make sure that the output files are reasonable
+CHECK_LINE="Iterations"
+OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`
+SAVED_COUNT=`grep "$CHECK_LINE" ${TNAME}.saved | wc -l`
+if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
+   echo "Incorrect number of \"$CHECK_LINE\" lines in ${TNAME}.out" >&2
+fi
 
-diff -U3 -bI"time" ex4.base default.out.4 >&2
-
-diff -U3 -bI"time" ex5.base default.out.5 >&2
-
-diff -U3 -bI"time" ex5f.base default.out.5f >&2
-
-diff -U3 -bI"time" ex6.base default.out.6 >&2
-
-diff -U3 -bI"time" ex7.base default.out.7 >&2
-
-diff -U3 -bI"time" ex8.base default.out.8 >&2
-
-diff -U3 -bI"time" ex9.base default.out.9 >&2
-
-diff -U3 -bI"time" ex10.base default.out.10 >&2
-
-diff -U3 -bI"time" ex11.base default.out.11 >&2
-
-diff -U3 -bI"time" ex12.base default.out.12 >&2
-
-diff -U3 -bI"time" ex12f.base default.out.12f >&2
-
-diff -U3 -bI"time" ex13.base default.out.13 >&2
-
-diff -U3 -bI"time" ex14.base default.out.14 >&2
-
-diff -U3 -bI"time" ex15.base default.out.15 >&2
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
