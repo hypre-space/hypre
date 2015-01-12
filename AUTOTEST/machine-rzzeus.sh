@@ -42,24 +42,25 @@ mkdir -p $output_dir
 src_dir=$1
 shift
 
-# Default test (and default options used below)
-tdir="$output_dir/test"
-co=""
+# Basic build and run tests
 mo="test"
-ro="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
-test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo -ro: $ro
+ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
-tdir="$output_dir/test--enable-debug"
+co=""
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+rename basictest $output_dir/test-default basictest.???
+
 co="--enable-debug"
-test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/test--enable-debug basictest.???
 
-tdir="$output_dir/test--enable-bigint"
 co="--enable-bigint"
-test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/test--enable-bigint basictest.???
 
-tdir="$output_dir/test--with-blas"
 co="--with-blas --with-lapack --with-blas-lib-dirs=/usr/lib64 --with-lapack-lib-dirs=/usr/lib64 --with-blas-libs=blas --with-lapack-libs=lapack"
-test.sh basictest.sh $src_dir $tdir -co: $co -mo: $mo
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+rename basictest $output_dir/test--with-blas basictest.???
 
 # Test linking for different languages
 link_opts="all++ all77"

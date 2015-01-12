@@ -44,14 +44,14 @@ shift
 
 # Basic build and run tests
 mo="test"
-ro="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co=""
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
 rename basictest $output_dir/test-default basictest.???
 
 co="--with-openmp"
-RO="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
+RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO
 rename basictest $output_dir/test--with-openmp basictest.???
 

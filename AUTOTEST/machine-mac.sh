@@ -48,7 +48,7 @@ export CXX="mpicxx"
 # Basic build and run tests
 # Make sure that we don't check for a working Fortran compiler
 mo="test"
-ro="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co="--disable-fortran"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro

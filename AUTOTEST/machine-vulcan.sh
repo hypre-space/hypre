@@ -44,7 +44,7 @@ shift
 
 # Basic build and run tests
 mo="test"
-ro="-ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co=""
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro

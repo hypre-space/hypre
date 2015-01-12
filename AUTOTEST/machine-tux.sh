@@ -45,7 +45,7 @@ shift
 
 # Basic build and run tests
 mo="-j test"
-ro="-ij -sstruct -struct"
+ro="-ams -ij -sstruct -struct"
 eo=""
 
 co=""
@@ -57,7 +57,7 @@ test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 rename basictest $output_dir/basictest--with-insure basictest.???
 
 co="--enable-global-partition --with-insure"
-RO="-ij -sstruct -struct -ams -fac"
+RO="-ams -ij -sstruct -struct -fac"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
 rename basictest $output_dir/basictest--enable-global-partition basictest.???
 
@@ -85,6 +85,7 @@ co="--enable-complex --enable-maxdim=4 --enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basictest.dir/make.???
+grep -v make.err basictest.err > basictest.err
 rename basictest $output_dir/basictest--enable-complex basictest.???
 
 # Test babel build only if 'babel-runtime' directory is present

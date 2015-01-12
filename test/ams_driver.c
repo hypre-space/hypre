@@ -53,7 +53,7 @@ void AMSDriverMatrixRead(char *file, HYPRE_ParCSRMatrix *A)
       {
          HYPRE_IJMatrix ij_A;
          void *object;
-         HYPRE_IJMatrixRead(file, MPI_COMM_WORLD, HYPRE_PARCSR, &ij_A);
+         HYPRE_IJMatrixRead(file, hypre_MPI_COMM_WORLD, HYPRE_PARCSR, &ij_A);
          HYPRE_IJMatrixGetObject(ij_A, &object);
          *A = (HYPRE_ParCSRMatrix) object;
       }
@@ -83,7 +83,7 @@ void AMSDriverVectorRead(char *file, HYPRE_ParVector *x)
       {
          HYPRE_IJVector ij_x;
          void *object;
-         HYPRE_IJVectorRead(file, MPI_COMM_WORLD, HYPRE_PARCSR, &ij_x);
+         HYPRE_IJVectorRead(file, hypre_MPI_COMM_WORLD, HYPRE_PARCSR, &ij_x);
          HYPRE_IJVectorGetObject(ij_x, &object);
          *x = (HYPRE_ParVector) object;
       }
