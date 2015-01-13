@@ -80,7 +80,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Real   grid_cmplxty;
    HYPRE_Real   conv_factor = 0.0;
    HYPRE_Real   resid_nrm;
-   HYPRE_Real   resid_nrm_init;
+   HYPRE_Real   resid_nrm_init = 0.0;
    HYPRE_Real   relative_resid;
    HYPRE_Real   rhs_norm = 0.0;
    HYPRE_Real   old_resid;
