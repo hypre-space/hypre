@@ -116,6 +116,7 @@ hypre_F90_IFACE(hypre_euclidsetparamsfromfile, HYPRE_EUCLIDSETPARAMSFROMFILE)
       hypre_F90_PassObj (HYPRE_Solver, solver), 
       (char *)        filename );
 }
+
 /*--------------------------------------------------------------------------
  * HYPRE_EuclidSetLevel
  *--------------------------------------------------------------------------*/
@@ -130,7 +131,6 @@ hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)
       hypre_F90_PassObj (HYPRE_Solver, solver),
       hypre_F90_PassInt (eu_level) );
 }
-
 
 /*--------------------------------------------------------------------------
  * HYPRE_EuclidSetBJ
@@ -148,6 +148,36 @@ hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetStats
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetstats, HYPRE_EUCLIDSETSTATS)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *eu_stats,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetStats(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (eu_stats) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetMem
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetmem, HYPRE_EUCLIDSETMEM)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *eu_mem,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetMem(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (eu_mem) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_EuclidSetSparseA
  *--------------------------------------------------------------------------*/
 
@@ -161,3 +191,34 @@ hypre_F90_IFACE(hypre_euclidsetsparsea, HYPRE_EUCLIDSETSPARSEA)
       hypre_F90_PassObj (HYPRE_Solver, solver),
       hypre_F90_PassReal (spa) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetRowScale
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetrowscale, HYPRE_EUCLIDSETROWSCALE)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *row_scale,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetRowScale(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (row_scale) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_EuclidSetILUT *
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_euclidsetilut, HYPRE_EUCLIDSETILUT)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Real *drop_tol,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetILUT(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassReal (drop_tol) );
+}
+
