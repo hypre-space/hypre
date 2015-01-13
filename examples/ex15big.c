@@ -1025,14 +1025,7 @@ int main (int argc, char *argv[])
                                    pi*h*n, pj*h*n, pk*h*n, myid);
 
          /* Additional visualization data */
-         if (myid == 0)
-         {
-            sprintf(filename, "%s", "vis/ex15.data");
-            file = fopen(filename, "w");
-            fprintf(file, "np %d\n", num_procs);
-            fflush(file);
-            fclose(file);
-         }
+         GLVis_PrintData("vis/ex15.data", myid, num_procs);
       }
 
       if (myid == 0)

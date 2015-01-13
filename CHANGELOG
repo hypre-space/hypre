@@ -18,15 +18,22 @@
 
 Version 2.10.0b released 2015/01/xx
 
-- Fixed potential bug and memory leaks in the AMS and ADS solvers.
-- Added new interpolation which allows to incorporate near null-space vector
-  for systems problems
-- Added additive V-cycle and new mult-additive and simplified mult-additive 
+- Added new interpolation which allows to incorporate near null-space vector for
+  systems problems
+
+- Added additive V-cycle and new mult-additive and simplified mult-additive
   V-cycle
-- fixed several bugs in BoomerAMG and removed some inefficiencies
+
+- Fixed several bugs in BoomerAMG and removed some inefficiencies.
+
+- Fixed potential bug and memory leaks in the AMS and ADS solvers.
+
 - Added threading to the IJ interface and some AMG setup routines.
-- Added new non-Galerkin coarse grid construction scheme to reduce 
-  communication and complexity.
+
+- Added new non-Galerkin coarse grid construction scheme to reduce communication
+  and complexity.
+
+- Extended GLVis visualization to all 2D and 3D example codes.
 
 #====================================
 

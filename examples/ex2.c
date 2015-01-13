@@ -23,11 +23,15 @@
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
 
+#include "vis.c"
+
 int main (int argc, char *argv[])
 {
    int i, j;
 
    int myid, num_procs;
+
+   int vis = 0;
 
    HYPRE_StructGrid     grid;
    HYPRE_StructStencil  stencil;
@@ -44,10 +48,49 @@ int main (int argc, char *argv[])
 
    if (num_procs != 2)
    {
-      if (myid ==0) printf("Must run with 2 processors!\n");
+      if (myid == 0) printf("Must run with 2 processors!\n");
       MPI_Finalize();
 
       return(0);
+   }
+
+   /* Parse command line */
+   {
+      int arg_index = 0;
+      int print_usage = 0;
+
+      while (arg_index < argc)
+      {
+         if ( strcmp(argv[arg_index], "-vis") == 0 )
+         {
+            arg_index++;
+            vis = 1;
+         }
+         else if ( strcmp(argv[arg_index], "-help") == 0 )
+         {
+            print_usage = 1;
+            break;
+         }
+         else
+         {
+            arg_index++;
+         }
+      }
+
+      if ((print_usage) && (myid == 0))
+      {
+         printf("\n");
+         printf("Usage: %s [<options>]\n", argv[0]);
+         printf("\n");
+         printf("  -vis : save the solution for GLVis visualization\n");
+         printf("\n");
+      }
+
+      if (print_usage)
+      {
+         MPI_Finalize();
+         return (0);
+      }
    }
 
    /* 1. Set up a grid */
@@ -409,6 +452,14 @@ int main (int argc, char *argv[])
                                 HYPRE_StructSMGSetup, precond);
       HYPRE_StructPCGSetup(solver, A, b, x);
       HYPRE_StructPCGSolve(solver, A, b, x);
+   }
+
+   /* Save the solution for GLVis visualization, see vis/glvis-ex2.sh */
+   if (vis)
+   {
+      GLVis_PrintStructGrid(grid, "vis/ex2.mesh", myid, NULL, NULL);
+      GLVis_PrintStructVector(x, "vis/ex2.sol", myid);
+      GLVis_PrintData("vis/ex2.data", myid, num_procs);
    }
 
    /* Free memory */

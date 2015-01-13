@@ -28,9 +28,13 @@
 #include "HYPRE_parcsr_ls.h"
 #include "HYPRE_krylov.h"
 
+#include "vis.c"
+
 int main (int argc, char *argv[])
 {
    int i, j, myid, num_procs;
+
+   int vis = 0;
 
    HYPRE_SStructGrid     grid;
    HYPRE_SStructGraph    graph;
@@ -45,7 +49,8 @@ int main (int argc, char *argv[])
    int part   = 0;
    int var    = 0;
 
-   int precond_id, object_type;
+   int precond_id  = 1;
+   int object_type = HYPRE_STRUCT;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -58,26 +63,57 @@ int main (int argc, char *argv[])
       exit(1);
    }
 
-   /* Parse the command line to determine the solver */
-   if (argc != 2)
+   /* Parse command line */
    {
-      if (myid == 0) printf("Must specify a solver!\n");
-      exit(1);
-   }
-   if ( strcmp(argv[1], "-pfmg") == 0 )
-   {
-      precond_id = 1;
-      object_type = HYPRE_STRUCT;
-   }
-   else if ( strcmp(argv[1], "-boomeramg") == 0 )
-   {
-      precond_id = 2;
-      object_type = HYPRE_PARCSR;
-   }
-   else
-   {
-      if (myid == 0) printf("Invalid solver!\n");
-      exit(1);
+      int arg_index = 0;
+      int print_usage = 0;
+
+      while (arg_index < argc)
+      {
+         if ( strcmp(argv[arg_index], "-pfmg") == 0 )
+         {
+            arg_index++;
+            precond_id = 1;
+            object_type = HYPRE_STRUCT;
+         }
+         else if ( strcmp(argv[arg_index], "-boomeramg") == 0 )
+         {
+            arg_index++;
+            precond_id = 2;
+            object_type = HYPRE_PARCSR;
+         }
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
+         {
+            arg_index++;
+            vis = 1;
+         }
+         else if ( strcmp(argv[arg_index], "-help") == 0 )
+         {
+            print_usage = 1;
+            break;
+         }
+         else
+         {
+            arg_index++;
+         }
+      }
+
+      if ((print_usage) && (myid == 0))
+      {
+         printf("\n");
+         printf("Usage: %s [<options>]\n", argv[0]);
+         printf("\n");
+         printf("  -pfmg        : use the structured PFMG solver (default)\n");
+         printf("  -boomeramg   : use the unstructured BoomerAMG solver\n");
+         printf("  -vis         : save the solution for GLVis visualization\n");
+         printf("\n");
+      }
+
+      if (print_usage)
+      {
+         MPI_Finalize();
+         return (0);
+      }
    }
 
    /* 1. Set up the grid.  Here we use only one part.  Each processor describes
@@ -426,6 +462,17 @@ int main (int argc, char *argv[])
       /* Free memory */
       HYPRE_ParCSRPCGDestroy(solver);
       HYPRE_BoomerAMGDestroy(precond);
+   }
+
+   /* Save the solution for GLVis visualization, see vis/glvis-ex12.sh */
+   if (vis)
+   {
+      /* Gather the solution vector */
+      HYPRE_SStructVectorGather(x);
+
+      GLVis_PrintSStructGrid(grid, "vis/ex12.mesh", myid, NULL, NULL);
+      GLVis_PrintSStructVector(x, 0, "vis/ex12.sol", myid);
+      GLVis_PrintData("vis/ex12.data", myid, num_procs);
    }
 
    /* Free memory */
