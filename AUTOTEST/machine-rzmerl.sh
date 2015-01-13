@@ -48,20 +48,20 @@ ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co=""
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-rename basictest $output_dir/test-default basictest.???
+renametest.sh basictest $output_dir/basictest-default
 
 co="--with-openmp"
 RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO
-rename basictest $output_dir/test--with-openmp basictest.???
+renametest.sh basictest $output_dir/basictest--with-openmp
 
 co="--enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/test--enable-debug basictest.???
+renametest.sh basictest $output_dir/basictest--enable-debug
 
 co="--enable-bigint"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/test--enable-bigint basictest.???
+renametest.sh basictest $output_dir/basictest--enable-bigint
 
 # Test linking for different languages
 link_opts="all++ all77"

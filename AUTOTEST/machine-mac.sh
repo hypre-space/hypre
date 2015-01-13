@@ -30,8 +30,8 @@ case $1 in
    Example usage: $0 ..
 
 EOF
-   exit
-   ;;
+      exit
+      ;;
 esac
 
 # Setup
@@ -52,15 +52,15 @@ ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co="--disable-fortran"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-rename basictest $output_dir/test-default basictest.???
+renametest.sh basictest $output_dir/basictest-default
 
 co="--enable-debug --disable-fortran"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/test--enable-debug basictest.???
+renametest.sh basictest $output_dir/basictest--enable-debug
 
 co="--enable-bigint --disable-fortran"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/test--enable-bigint basictest.???
+renametest.sh basictest $output_dir/basictest--enable-bigint
 
 # Test linking for different languages
 link_opts="all++"

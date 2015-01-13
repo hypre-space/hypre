@@ -25,9 +25,9 @@ case $1 in
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
 
-      This script mainly runs the klocwork static analysis tool.
+   This script mainly runs the klocwork static analysis tool.
 
-      Example usage: $0 ..
+   Example usage: $0 ..
 
 EOF
       exit

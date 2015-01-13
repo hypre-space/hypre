@@ -50,49 +50,49 @@ eo=""
 
 co=""
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/basictest-default basictest.???
+renametest.sh basictest $output_dir/basictest-default
 
 co="--with-insure --enable-debug --with-print-errors"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
-rename basictest $output_dir/basictest--with-insure basictest.???
+renametest.sh basictest $output_dir/basictest--with-insure
 
 co="--enable-global-partition --with-insure"
 RO="-ams -ij -sstruct -struct -fac"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
-rename basictest $output_dir/basictest--enable-global-partition basictest.???
+renametest.sh basictest $output_dir/basictest--enable-global-partition
 
 co="--without-MPI"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/basictest--without-MPI basictest.???
+renametest.sh basictest $output_dir/basictest--without-MPI
 
 co="--with-strict-checking"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/basictest--with-strict-checking basictest.???
+renametest.sh basictest $output_dir/basictest--with-strict-checking
 
 co="--enable-shared"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
-rename basictest $output_dir/basictest--enable-shared basictest.???
+renametest.sh basictest $output_dir/basictest--enable-shared
 
 co="--enable-bigint --enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
-rename basictest $output_dir/basictest--enable-bigint basictest.???
+renametest.sh basictest $output_dir/basictest--enable-bigint
 
 co="--enable-maxdim=4 --enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
-rename basictest $output_dir/basictest--enable-maxdim=4 basictest.???
+renametest.sh basictest $output_dir/basictest--enable-maxdim=4
 
 co="--enable-complex --enable-maxdim=4 --enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basictest.dir/make.???
 grep -v make.err basictest.err > basictest.err
-rename basictest $output_dir/basictest--enable-complex basictest.???
+renametest.sh basictest $output_dir/basictest--enable-complex
 
 # Test babel build only if 'babel-runtime' directory is present
 if [ -d $src_dir/babel-runtime ]; then
    co="--with-babel"
    test.sh basictest.sh $src_dir -co: $co -mo: $mo
-   rename basictest $output_dir/basictest--with-babel basictest.???
+   renametest.sh basictest $output_dir/basictest--with-babel
 fi
 
 # Test linking for different languages
