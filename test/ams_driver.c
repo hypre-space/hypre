@@ -21,6 +21,7 @@
 
 /* hypre/AMS prototypes */
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
 
 void CheckIfFileExists(char *file)
@@ -56,6 +57,8 @@ void AMSDriverMatrixRead(char *file, HYPRE_ParCSRMatrix *A)
          HYPRE_IJMatrixRead(file, hypre_MPI_COMM_WORLD, HYPRE_PARCSR, &ij_A);
          HYPRE_IJMatrixGetObject(ij_A, &object);
          *A = (HYPRE_ParCSRMatrix) object;
+         hypre_IJMatrixObject((hypre_IJMatrix *)ij_A) = NULL;
+         HYPRE_IJMatrixDestroy(ij_A);
       }
    }
    else /* Read in ParCSR format*/
@@ -86,6 +89,8 @@ void AMSDriverVectorRead(char *file, HYPRE_ParVector *x)
          HYPRE_IJVectorRead(file, hypre_MPI_COMM_WORLD, HYPRE_PARCSR, &ij_x);
          HYPRE_IJVectorGetObject(ij_x, &object);
          *x = (HYPRE_ParVector) object;
+         hypre_IJVectorObject((hypre_IJVector *)ij_x) = NULL;
+         HYPRE_IJVectorDestroy(ij_x);
       }
    }
    else /* Read in ParCSR format*/
