@@ -91,7 +91,8 @@ renametest.sh basictest $output_dir/basictest--enable-complex
 # Test babel build only if 'babel-runtime' directory is present
 if [ -d $src_dir/babel-runtime ]; then
    co="--with-babel"
-   test.sh basictest.sh $src_dir -co: $co -mo: $mo
+   MO="test"  # the -j option doesn't always work with the babel code
+   test.sh basictest.sh $src_dir -co: $co -mo: $MO
    renametest.sh basictest $output_dir/basictest--with-babel
 fi
 
