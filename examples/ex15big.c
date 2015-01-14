@@ -34,8 +34,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "HYPRE.h"
 
-#include "vis.c"
-
 int optionAlpha, optionBeta;
 
 /* Curl-curl coefficient alpha = mu^{-1} */
@@ -180,7 +178,6 @@ int main (int argc, char *argv[])
    int myid, num_procs;
    int n, N, pi, pj, pk;
    double h;
-   int vis;
 
    double tol, theta;
    int maxit, cycle_type;
@@ -211,7 +208,6 @@ int main (int argc, char *argv[])
 
    /* Set default parameters */
    n                = 10;
-   vis              = 0;
    optionAlpha      = 0;
    optionBeta       = 0;
    maxit            = 100;
@@ -250,11 +246,6 @@ int main (int argc, char *argv[])
          {
             arg_index++;
             optionBeta = atoi(argv[arg_index++]);
-         }
-         else if ( strcmp(argv[arg_index], "-vis") == 0 )
-         {
-            arg_index++;
-            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-maxit") == 0 )
          {
@@ -346,7 +337,6 @@ int main (int argc, char *argv[])
          printf("  -n <n>              : problem size per processor (default: 10)\n");
          printf("  -a <alpha_opt>      : choice for the curl-curl coefficient (default: 1)\n");
          printf("  -b <beta_opt>       : choice for the mass coefficient (default: 1)\n");
-         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
          printf("PCG-AMS solver options:                                     \n");
          printf("  -maxit <num>        : maximum number of iterations (100)  \n");
@@ -928,105 +918,6 @@ int main (int argc, char *argv[])
 
       /* Gather the solution vector */
       HYPRE_SStructVectorGather(x);
-
-      /* Save the solution for GLVis visualization, see vis/glvis-ex15.sh */
-      if (vis)
-      {
-         FILE *file;
-         char  filename[255];
-
-         HYPRE_Int part = 0;
-         int nvalues = n*(n+1)*(n+1);
-         double *xvalues, *yvalues, *zvalues;
-
-         xvalues = calloc(nvalues, sizeof(double));
-         yvalues = calloc(nvalues, sizeof(double));
-         zvalues = calloc(nvalues, sizeof(double));
-
-         /* Get local solution in the x-edges */
-         {
-            HYPRE_Int var = 0;
-            HYPRE_Int ilower[3] = {1 + pi*n, 0 + pj*n, 0 + pk*n};
-            HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
-            HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                            var, xvalues);
-         }
-         /* Get local solution in the y-edges */
-         {
-            HYPRE_Int var = 1;
-            HYPRE_Int ilower[3] = {0 + pi*n, 1 + pj*n, 0 + pk*n};
-            HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
-            HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                            var, yvalues);
-         }
-         /* Get local solution in the z-edges */
-         {
-            HYPRE_Int var = 2;
-            HYPRE_Int ilower[3] = {0 + pi*n, 0 + pj*n, 1 + pk*n};
-            HYPRE_Int iupper[3] = {n + pi*n, n + pj*n, n + pk*n};
-            HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                            var, zvalues);
-         }
-
-         sprintf(filename, "%s.%06d", "vis/ex15.sol", myid);
-         if ((file = fopen(filename, "w")) == NULL)
-         {
-            printf("Error: can't open output file %s\n", filename);
-            MPI_Finalize();
-            exit(1);
-         }
-
-         /* Finite element space header */
-         fprintf(file, "FiniteElementSpace\n");
-         fprintf(file, "FiniteElementCollection: Local_Hex_ND1\n");
-         fprintf(file, "VDim: 1\n");
-         fprintf(file, "Ordering: 0\n\n");
-
-         /* Save solution with replicated shared data, i.e., element by element,
-            using the same numbering as the local finite element unknowns. */
-         {
-            int i, j, k, s;
-
-            /* Initial x-, y- and z-edge indices in the values arrays */
-            int oi[4] = { 0, n, n*(n+1), n*(n+1)+n }; /* e_0, e_2,  e_4,  e_6 */
-            int oj[4] = { 0, 1, n*(n+1), n*(n+1)+1 }; /* e_3, e_1,  e_7,  e_5 */
-            int ok[4] = { 0, 1,     n+1,       n+2 }; /* e_8, e_9, e_11, e_10 */
-            /* Loop over the cells while updating the above offsets */
-            for (k = 0; k < n; k++)
-            {
-               for (j = 0; j < n; j++)
-               {
-                  for (i = 0; i < n; i++)
-                  {
-                     fprintf(file,
-                             "%.14e\n%.14e\n%.14e\n%.14e\n"
-                             "%.14e\n%.14e\n%.14e\n%.14e\n"
-                             "%.14e\n%.14e\n%.14e\n%.14e\n",
-                             xvalues[oi[0]], yvalues[oj[1]], xvalues[oi[1]], yvalues[oj[0]],
-                             xvalues[oi[2]], yvalues[oj[3]], xvalues[oi[3]], yvalues[oj[2]],
-                             zvalues[ok[0]], zvalues[ok[1]], zvalues[ok[3]], zvalues[ok[2]]);
-
-                     for (s=0; s<4; s++) oi[s]++, oj[s]++, ok[s]++;
-                  }
-                  for (s=0; s<4; s++) oj[s]++, ok[s]++;
-               }
-               for (s=0; s<4; s++) oi[s]+=n, ok[s]+=n+1;
-            }
-         }
-
-         fflush(file);
-         fclose(file);
-         free(xvalues);
-         free(yvalues);
-         free(zvalues);
-
-         /* Save local finite element mesh */
-         GLVis_PrintLocalCubicMesh("vis/ex15.mesh", n, n, n, h,
-                                   pi*h*n, pj*h*n, pk*h*n, myid);
-
-         /* Additional visualization data */
-         GLVis_PrintData("vis/ex15.data", myid, num_procs);
-      }
 
       if (myid == 0)
       {
