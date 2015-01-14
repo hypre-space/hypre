@@ -16,8 +16,6 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
 
-#include "vis.c"
-
 #define NDIM 4
 #define NSTENC (2*NDIM+1)
 

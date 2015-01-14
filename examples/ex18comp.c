@@ -17,8 +17,6 @@
 #include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
 
-#include "vis.c"
-
 #define NDIM   4
 #define NPARTS 1
 #define NVARS  2
