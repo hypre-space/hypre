@@ -34,13 +34,17 @@
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
+/* RDF: What is MPIAPI? */
+#ifndef MPIAPI
+#define MPIAPI
+#endif
 
 int  HYPRE_DummySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                       HYPRE_ParVector x_csr, HYPRE_ParVector y_csr ){return 0;}
 
 void HYPRE_LSI_Get_IJAMatrixFromFile(double**,int**,int**,int*,double**,
                                      char*,char*);
-extern int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
+extern int MPIAPI MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
 
 /***************************************************************************/
 /***************************************************************************/

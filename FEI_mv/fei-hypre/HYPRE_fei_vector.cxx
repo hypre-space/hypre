@@ -26,7 +26,8 @@
 #endif
 #include "LLNL_FEI_Impl.h"
 #include "fei_mv.h"
-#include "Data.h"
+//New FEI 2.23.02
+#include "fei_Data.hpp"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 
