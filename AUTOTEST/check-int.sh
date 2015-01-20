@@ -41,6 +41,7 @@ cd $src_dir
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
   egrep -v '/AUTOTEST' |
   egrep -v '/babel' |
+  egrep -v '/cmbuild' |
   egrep -v '/docs' |
   egrep -v '/docs_misc' |
   egrep -v '/examples' |

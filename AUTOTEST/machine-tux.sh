@@ -96,6 +96,38 @@ if [ -d $src_dir/babel-runtime ]; then
    renametest.sh basictest $output_dir/basictest--with-babel
 fi
 
+# CMake build and run tests
+mo="-j"
+ro="-ams -ij -sstruct -struct"
+eo=""
+
+co=""
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-default
+
+co="-DCMAKE_BUILD_TYPE=Debug"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+renametest.sh cmaketest $output_dir/cmaketest-debug
+
+co="-DHYPRE_NO_GLOBAL_PARTITION=OFF"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-global-partition
+
+co="-DHYPRE_SEQUENTIAL=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-sequential
+
+co="-DHYPRE_SHARED=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-shared
+
+co="-DHYPRE_BIGINT=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+renametest.sh cmaketest $output_dir/cmaketest-bigint
+
+# cmake build doesn't currently support maxdim
+# cmake build doesn't currently support complex
+
 # Test linking for different languages
 link_opts="all++ all77"
 for opt in $link_opts

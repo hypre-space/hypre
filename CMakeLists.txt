@@ -34,13 +34,18 @@ option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
 
-if (HYPRE_SEQUENTIAL)
-  set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
+if (HYPRE_SHARED)
+  # FEI doesn't currently compile with shared
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 
 if (HYPRE_BIGINT)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
   # In the future, also turn off babel
+endif ()
+
+if (HYPRE_SEQUENTIAL)
+  set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
 #   --with-examples         Build example codes.
@@ -464,6 +469,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_coordinates.c
   parcsr_ls/par_cr.c
   parcsr_ls/par_cycle.c
+  parcsr_ls/par_add_cycle.c
   parcsr_ls/par_difconv.c
   parcsr_ls/par_gsmg.c
   parcsr_ls/par_indepset.c
@@ -474,6 +480,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_laplace_9pt.c
   parcsr_ls/par_laplace.c
   parcsr_ls/par_lr_interp.c
+  parcsr_ls/par_nongalerkin.c
   parcsr_ls/par_nodal_systems.c
   parcsr_ls/par_rap.c
   parcsr_ls/par_rap_communication.c
@@ -709,8 +716,9 @@ configure_file (
   "${PROJECT_BINARY_DIR}/HYPRE_config.h"
   )
 
-include_directories(${hypre_SOURCE_DIR})
+# BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
+include_directories(${hypre_SOURCE_DIR})
 include_directories(utilities)
 include_directories(multivector)
 include_directories(krylov)

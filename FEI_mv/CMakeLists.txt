@@ -3,7 +3,6 @@ project(HYPRE_FEI C CXX)
 
 include_directories(fei-base)
 include_directories(fei-hypre)
-include_directories(fei-base/base)
 include_directories(ml/src/include)
 
 option(HYPRE_USING_SUPERLU "Use internal SuperLU routines" ON)

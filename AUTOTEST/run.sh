@@ -76,7 +76,7 @@ do
 done
 
 # Collect all error files from the tests
-for errfile in $( find . -name "*.err" -o -name "*.fil" -o -name "*.out*" )
+for errfile in $( find TEST* -name "*.err" -o -name "*.fil" -o -name "*.out*" )
 do
    mkdir -p $output_dir/`dirname $errfile`
    mv -f $errfile $output_dir/$errfile
