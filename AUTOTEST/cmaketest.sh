@@ -72,16 +72,25 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
+cd $src_dir
+src_dir=`pwd`
+
+# Clean up the cmbuild directories (do it from src_dir as a precaution)
+cd $src_dir
+rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr `echo test/cmbuild/* | sed 's/[^ ]*README.txt//g'`
+
+# Clean up the previous install
+cd $src_dir
+rm -fr hypre
 
 # Configure
 cd $src_dir/cmbuild
-rm -fr `echo * | sed s/README.txt//g`
 cmake $copts ..
 make $mopts install
 
 # Make
 cd $src_dir/test/cmbuild
-rm -fr `echo * | sed s/README.txt//g`
 cmake ..
 make $mopts
 mv -f ams_driver ij ij_mv new_ij sstruct struct ..
