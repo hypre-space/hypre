@@ -53,8 +53,6 @@
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
-//#define HAVE_SYSPDE
-//#define HAVE_DSUPERLU
 #include "dsuperlu_include.h"
 
 //***************************************************************************
@@ -341,6 +339,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsX_ = NULL;
    amsY_ = NULL;
    amsZ_ = NULL;
+   amsG_ = NULL;
+   amsD0_ = NULL;
+   amsD1_ = NULL;
    amsNumPDEs_ = 3;
    amsMaxIter_ = 1;
    amsTol_     = 0.0;
@@ -558,7 +559,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       else if ( HYPreconID_ == HYAMS )
       {
  	 // Destroy G and coordinate vectors
-         HYPRE_AMSFEIDestroy( HYPrecon_ );
+         // OLD WAY
+         if( amsG_ == NULL ) { 
+           HYPRE_AMSFEIDestroy( HYPrecon_ );
+         }
          HYPRE_AMSDestroy( HYPrecon_ );
       }
 #ifdef HAVE_SYSPDE
@@ -622,6 +626,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if (amsX_ != NULL) HYPRE_IJVectorDestroy(amsX_);
    if (amsY_ != NULL) HYPRE_IJVectorDestroy(amsY_);
    if (amsZ_ != NULL) HYPRE_IJVectorDestroy(amsZ_);
+   if (amsG_ != NULL) HYPRE_IJMatrixDestroy(amsG_);
+   if (amsD0_ != NULL) HYPRE_IJMatrixDestroy(amsD0_);
+   if (amsD1_ != NULL) HYPRE_IJMatrixDestroy(amsD1_);
    // Users who copy this matrix in should be responsible for
    // destroying this
    //if (maxwellGEN_ != NULL)
@@ -1037,12 +1044,13 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
-      printf("%4d : HYPRE_LSC::entering allocateMatrix.\n", mypid_);
-   if ( localEndRow_ < localStartRow_ ) 
    {
-      printf("allocateMatrix ERROR : createMatrixAndVectors should be\n");
-      printf("                       called before allocateMatrix.\n");
-      exit(1);
+      printf("%4d : HYPRE_LSC::entering allocateMatrix.\n", mypid_);
+      if ( localEndRow_ < localStartRow_ ) 
+      {
+         printf("allocateMatrix WARNING : createMatrixAndVectors should be\n");
+         printf("                         called before allocateMatrix.\n");
+      }
    }
 
    //-------------------------------------------------------------------
@@ -2512,7 +2520,269 @@ This should ultimately be taken out even for newer ale3d implementation
          delete [] eqnNumbers;
          delete [] aleNodeNumbers;
       } 
-   } 
+   }
+
+   //-------------------------------------------------------------------
+   // This part is for initializing the nodal coordinates vectors
+   // for AMS in the New Fashion which allows multiply-connected edges
+   //-------------------------------------------------------------------
+
+   if (fieldID == -100) {
+
+        errCnt = 0;
+        //USAGE:
+        //FieldID=-100: Initialize space for vectors X,Y,Z for AMS
+        //double *data_dummy;
+        //memAllocDoubles( 1, &data_dummy, NULL);
+        //lsc->putNodalFieldData(-100,1,globalOffsets,numProcs+1,data_dummy);
+        //MPI_Comm_rank(comm, &mypid_);
+        //MPI_Comm_size(comm, &numProcs_);
+        //localStartRowAMSV_ = nodeNumbers[mypid_] + 1;
+        //localEndRowAMSV_   = nodeNumbers[mypid_+1];
+        localStartRowAMSV_ = fieldSize;
+        localEndRowAMSV_   = numNodes;
+
+        MPI_Comm_rank(comm_, &mypid_);
+        MPI_Comm_size(comm_, &numProcs_);
+
+        errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsX_);
+        errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsY_);
+        errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsZ_);
+        errCnt += HYPRE_IJVectorSetObjectType(amsX_, HYPRE_PARCSR);
+        errCnt += HYPRE_IJVectorSetObjectType(amsY_, HYPRE_PARCSR);
+        errCnt += HYPRE_IJVectorSetObjectType(amsZ_, HYPRE_PARCSR);
+        errCnt += HYPRE_IJVectorInitialize(amsX_);
+        errCnt += HYPRE_IJVectorInitialize(amsY_);
+        errCnt += HYPRE_IJVectorInitialize(amsZ_);
+   }
+   if (fieldID == -101 || fieldID == -102 || fieldID == -103) {
+
+      errCnt = 0;
+      //-------------------------------------------------------------------
+      // This part is for loading the nodal coordinates vectors
+      // for AMS in the New Fashion which allows multiply-connected edges
+      //-------------------------------------------------------------------
+
+      //Usage
+      //FieldID=-101,2,3 Put values for vectors X,Y,Z for AMS
+      //lsc->putNodalFieldData(-101,1,nodeNumbers_dummy,numNodes,datax_dummy);
+      //lsc->putNodalFieldData(-102,1,nodeNumbers_dummy,numNodes,datay_dummy);
+      //lsc->putNodalFieldData(-103,1,nodeNumbers_dummy,numNodes,dataz_dummy);
+
+      switch( fieldID ) {
+        case( -101 ) :
+          //errCnt += HYPRE_IJVectorSetValues(amsX_, numNodes, localInds, data);
+          errCnt += HYPRE_IJVectorSetValues(amsX_, numNodes, nodeNumbers, data);
+          break;
+        case( -102 ) :
+          errCnt += HYPRE_IJVectorSetValues(amsY_, numNodes, nodeNumbers, data);
+          break;
+        case( -103 ) :
+          errCnt += HYPRE_IJVectorSetValues(amsZ_, numNodes, nodeNumbers, data);
+          break;
+        default :
+          printf("%d : PutNodalFieldData, FieldID=-101,-102,-103, ERROR - FieldID %d out of range.\n",
+                    mypid_,fieldID);
+          exit(1);
+          break;
+      }
+   }
+   if (fieldID == -200) {
+
+      errCnt = 0;
+      //USAGE
+      //FieldID=-200: Initialize the Matrix G for AMS;
+      //double *globalColOffsetsd;
+      //memAllocDoubles( numProcs+1, &globalColOffsetsd, NULL);
+      //for (int iproc=0;iproc<numProcs+1;iproc++){
+      //  globalColOffsetsd[iproc] = double( globalColOffsets[iproc] );
+      //}
+      //lsc->putNodalFieldData(-200,numProcs+1,globalRowOffsets,numProcs+1,globalColOffsetsd);
+      //memFree(&globalRowOffsets,&globalColOffsets,&globalColOffsetsd,NULL);
+
+      if( amsG_ != NULL) errCnt += HYPRE_IJMatrixDestroy(amsG_);
+      localStartRowAMSG_ = nodeNumbers[0];
+      localEndRowAMSG_   = nodeNumbers[1];
+      localStartColAMSG_ = int( data[0] );
+      localEndColAMSG_   = int( data[1] );
+
+
+      errCnt += HYPRE_IJMatrixCreate(comm_, localStartRowAMSG_, localEndRowAMSG_,
+                                  localStartColAMSG_, localEndColAMSG_, &amsG_);
+
+
+      errCnt += HYPRE_IJMatrixSetObjectType(amsG_, HYPRE_PARCSR);
+
+   }
+
+   if (fieldID == -201) {
+      //USAGE
+      //FieldID=-201: Set Row Sizes
+      errCnt = 0;
+      errCnt += HYPRE_IJMatrixSetRowSizes(amsG_, nodeNumbers);
+      errCnt += HYPRE_IJMatrixInitialize(amsG_);
+   }
+
+   if (fieldID == -202) {
+      //USAGE
+      //FieldID=-202: Put Values into the GMatrix
+      //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
+
+      errCnt += HYPRE_IJMatrixSetValues(amsG_, 1, &numNodes, &fieldSize, nodeNumbers, data);
+
+   }
+
+   if (fieldID == -203) {
+     //USAGE
+     //FieldID=-203: Final Assembly of G Matrix
+     //int *nodenumbers_dummy2;
+     //double *data_dummy2;
+     //memAllocInts( 1, &nodenumbers_dummy2, NULL);
+     //memAllocDoubles( 1, &data_dummy2, NULL);
+     //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
+     //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
+     errCnt = HYPRE_IJMatrixAssemble(amsG_);
+     //this is also a good time to do this:
+     errCnt += HYPRE_IJVectorAssemble(amsX_);
+     errCnt += HYPRE_IJVectorAssemble(amsY_);
+     errCnt += HYPRE_IJVectorAssemble(amsZ_);
+
+   }
+
+   // fieldID's -300, -301, -302, -303 are for calculating the D0 Matrix
+   // This is purely for debugging.
+   // The D0 Matrix maps nodes to edges
+   if (fieldID == -300) {
+
+      errCnt = 0;
+      //USAGE
+      //FieldID=-300: Initialize the Matrix D0 for AMS;
+      //double *globalColOffsetsd;
+      //memAllocDoubles( numProcs+1, &globalColOffsetsd, NULL);
+      //for (int iproc=0;iproc<numProcs+1;iproc++){
+      //  globalColOffsetsd[iproc] = double( globalColOffsets[iproc] );
+      //}
+      //lsc->putNodalFieldData(-200,numProcs+1,globalRowOffsets,numProcs+1,globalColOffsetsd);
+      //memFree(&globalRowOffsets,&globalColOffsets,&globalColOffsetsd,NULL);
+
+      if( amsD0_ != NULL) errCnt += HYPRE_IJMatrixDestroy(amsD0_);
+      int localStartRowAMSD_ = nodeNumbers[0];
+      int localEndRowAMSD_   = nodeNumbers[1];
+      int localStartColAMSD_ = int( data[0] );
+      int localEndColAMSD_   = int( data[1] );
+
+
+      errCnt += HYPRE_IJMatrixCreate(comm_, localStartRowAMSD_, localEndRowAMSD_,
+                                  localStartColAMSD_, localEndColAMSD_, &amsD0_);
+
+
+      errCnt += HYPRE_IJMatrixSetObjectType(amsD0_, HYPRE_PARCSR);
+
+   }
+
+   if (fieldID == -301) {
+     //USAGE
+     //FieldID=-301: Set Row Sizes for the D0 Matrix
+      errCnt = 0;
+      errCnt += HYPRE_IJMatrixSetRowSizes(amsD0_, nodeNumbers);
+      errCnt += HYPRE_IJMatrixInitialize(amsD0_);
+   }
+
+   if (fieldID == -302) {
+     //USAGE
+     //FieldID=-302: Put Values into the D0 Matrix
+     //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
+
+     errCnt += HYPRE_IJMatrixSetValues(amsD0_, 1, &numNodes, &fieldSize, nodeNumbers, data);
+
+   }
+
+   if (fieldID == -303) {
+     //USAGE
+     //FieldID=-303: Final Assembly of D0 Matrix
+     //int *nodenumbers_dummy2;
+     //double *data_dummy2;
+     //memAllocInts( 1, &nodenumbers_dummy2, NULL);
+     //memAllocDoubles( 1, &data_dummy2, NULL);
+     //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
+     //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
+     errCnt = HYPRE_IJMatrixAssemble(amsD0_);
+
+     bool printD0matrix = true;
+     if(printD0matrix) {
+       HYPRE_ParCSRMatrix D0_csr;
+       HYPRE_IJMatrixGetObject(amsD0_, (void **) &D0_csr);
+       HYPRE_ParCSRMatrixPrint(D0_csr, "D0.parmatrix");
+     }
+   }
+
+   // fieldID's -400, -401, -402, -403 are for calculating the D1 Matrix
+   // This is purely for debugging.
+   // The D1 Matrix maps edges to nodes
+   if (fieldID == -400) {
+
+      errCnt = 0;
+      //USAGE
+      //FieldID=-400: Initialize the Matrix D1 for AMS;
+      //double *globalColOffsetsd;
+      //memAllocDoubles( numProcs+1, &globalColOffsetsd, NULL);
+      //for (int iproc=0;iproc<numProcs+1;iproc++){
+      //  globalColOffsetsd[iproc] = double( globalColOffsets[iproc] );
+      //}
+      //lsc->putNodalFieldData(-200,numProcs+1,globalRowOffsets,numProcs+1,globalColOffsetsd);
+      //memFree(&globalRowOffsets,&globalColOffsets,&globalColOffsetsd,NULL);
+
+      if( amsD1_ != NULL) errCnt += HYPRE_IJMatrixDestroy(amsD1_);
+      int localStartRowAMSD_ = nodeNumbers[0];
+      int localEndRowAMSD_   = nodeNumbers[1];
+      int localStartColAMSD_ = int( data[0] );
+      int localEndColAMSD_   = int( data[1] );
+
+
+      errCnt += HYPRE_IJMatrixCreate(comm_, localStartRowAMSD_, localEndRowAMSD_,
+                                  localStartColAMSD_, localEndColAMSD_, &amsD1_);
+
+
+      errCnt += HYPRE_IJMatrixSetObjectType(amsD1_, HYPRE_PARCSR);
+
+   }
+
+   if (fieldID == -401) {
+     //USAGE
+     //FieldID=-401: Set Row Sizes for the D1 Matrix
+      errCnt = 0;
+      errCnt += HYPRE_IJMatrixSetRowSizes(amsD1_, nodeNumbers);
+      errCnt += HYPRE_IJMatrixInitialize(amsD1_);
+   }
+
+   if (fieldID == -402) {
+     //USAGE
+     //FieldID=-402: Put Values into the D1 Matrix
+     //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
+
+     errCnt += HYPRE_IJMatrixSetValues(amsD1_, 1, &numNodes, &fieldSize, nodeNumbers, data);
+
+   }
+
+   if (fieldID == -403) {
+     //USAGE
+     //FieldID=-403: Final Assembly of D1 Matrix
+     //int *nodenumbers_dummy2;
+     //double *data_dummy2;
+     //memAllocInts( 1, &nodenumbers_dummy2, NULL);
+     //memAllocDoubles( 1, &data_dummy2, NULL);
+     //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
+     //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
+     errCnt = HYPRE_IJMatrixAssemble(amsD1_);
+
+     bool printD1matrix = true;
+     if(printD1matrix) {
+       HYPRE_ParCSRMatrix D1_csr;
+       HYPRE_IJMatrixGetObject(amsD1_, (void **) &D1_csr);
+       HYPRE_ParCSRMatrixPrint(D1_csr, "D1.parmatrix");
+     }
+   }
+ 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  putNodalFieldData.\n",mypid_);
    return (0);
@@ -4790,8 +5060,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            }
            else
            {
-              HYPRE_PCGSetAbsoluteTol(HYSolver_, tolerance_);
               HYPRE_PCGSetTol(HYSolver_, 0.0);
+              HYPRE_PCGSetAbsoluteTol(HYSolver_, tolerance_);
            }
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
@@ -5032,8 +5302,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            }
            else
            {
-              HYPRE_GMRESSetAbsoluteTol(HYSolver_, tolerance_);
               HYPRE_GMRESSetTol(HYSolver_, 0.0);
+              HYPRE_GMRESSetAbsoluteTol(HYSolver_, tolerance_);
            }
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {

@@ -67,10 +67,14 @@ HEADERS =\
  hypre_cfei.h\
  HYPRE_LinSysCore.h\
  HYPRE_FEI_includes.h \
- $(BASE_DIR)/base/Data.h  \
- $(BASE_DIR)/base/Lookup.h  \
- $(BASE_DIR)/base/LinearSystemCore.h \
+ $(BASE_DIR)/fei_Data.hpp  \
+ $(BASE_DIR)/fei_Lookup.hpp  \
+ $(BASE_DIR)/fei_LinearSystemCore.hpp \
+ $(BASE_DIR)/cfei.h\
+ $(BASE_DIR)/fei_bool.h\
  $(BASE_DIR)/fei_defs.h\
+ $(BASE_DIR)/fei_mpi.h\
+ $(BASE_DIR)/fei_version.h\
  LLNL_FEI_Impl.h\
  LLNL_FEI_Fei.h\
  LLNL_FEI_LSCore.h\
@@ -165,11 +169,13 @@ all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
-	cp -fR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_Data.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_Lookup.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_LinearSystemCore.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/cfei.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_bool.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
-#	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fR $(BASE_DIR)/fei_mpi.h $(HYPRE_BUILD_DIR)/include
 
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
@@ -178,11 +184,13 @@ install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
-	cp -fR $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
-	cp -fR $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
-	cp -fR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
-	cp -fR $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
-#	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fR $(BASE_DIR)/fei_Data.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_Lookup.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_LinearSystemCore.hpp $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/cfei.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_bool.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(BASE_DIR)/fei_mpi.h $(HYPRE_BUILD_DIR)/include
 	@echo  ""
 
 clean:

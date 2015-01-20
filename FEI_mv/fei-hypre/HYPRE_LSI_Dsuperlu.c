@@ -178,8 +178,11 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       options->PrintStat         = YES;
    */
    sluPtr->options_.Fact = DOFACT;
-   sluPtr->options_.Equil = NO;
-   sluPtr->options_.IterRefine = DOUBLE;
+   sluPtr->options_.Equil = YES;
+   sluPtr->options_.IterRefine = SLU_DOUBLE;
+   sluPtr->options_.ColPerm = MMD_AT_PLUS_A;
+   sluPtr->options_.DiagPivotThresh = 1.0;
+   sluPtr->options_.ReplaceTinyPivot = NO;
    if (sluPtr->outputLevel_ < 2) sluPtr->options_.PrintStat = NO;
    ScalePermstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_,
                        &(sluPtr->ScalePermstruct_));

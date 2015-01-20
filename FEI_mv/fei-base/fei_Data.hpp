@@ -1,6 +1,5 @@
-
-#ifndef _Data_h_
-#define _Data_h_
+#ifndef _fei_Data_hpp_
+#define _fei_Data_hpp_
 
 #include <string.h>
 #include <stdlib.h>
@@ -28,7 +27,7 @@ class Data {
    /** Set a string representing the type of the object stored in
        'getDataPtr()'. */
    void setTypeName(const char* name) {if (typeName_) delete [] typeName_;
-                                 int len = strlen(name);
+                                 size_t len = strlen(name);
                                  typeName_ = new char[len+1];
                                  strcpy(typeName_, name);
                                  typeName_[len] = '\0';};

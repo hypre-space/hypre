@@ -694,6 +694,15 @@ class HYPRE_LinSysCore
    HYPRE_IJVector  amsX_;
    HYPRE_IJVector  amsY_;
    HYPRE_IJVector  amsZ_;
+   int             localStartRowAMSV_;
+   int             localEndRowAMSV_;
+   HYPRE_IJMatrix  amsG_;
+   HYPRE_IJMatrix  amsD0_;
+   HYPRE_IJMatrix  amsD1_;
+   int             localStartRowAMSG_;
+   int             localEndRowAMSG_;
+   int             localStartColAMSG_;
+   int             localEndColAMSG_;
    HYPRE_ParCSRMatrix  amsBetaPoisson_;
    int             amsNumPDEs_;
    int             amsMaxIter_;

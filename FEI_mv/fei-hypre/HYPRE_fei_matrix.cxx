@@ -24,7 +24,8 @@
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "fei_mv.h"
-#include "Data.h"
+//NEW FEI 2.23.02
+#include "fei_Data.hpp"
 
 /*****************************************************************************/
 /* HYPRE_FEMatrixCreate function                                             */

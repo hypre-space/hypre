@@ -1,11 +1,7 @@
+#ifndef _fei_Lookup_hpp_
+#define _fei_Lookup_hpp_
 
-
-#ifndef _Lookup_h_
-#define _Lookup_h_
-
-#ifndef _fei_defs_h_
 #include <fei_defs.h>
-#endif
 
 /**  
   This interface is intended to be used by a LinearSystemCore implementation

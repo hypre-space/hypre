@@ -13,7 +13,8 @@
 
 #include "_hypre_utilities.h"
 
-#include "LinearSystemCore.h"
+// NEW FEI (2.23.02)
+#include "fei_LinearSystemCore.hpp"
 #include "LLNL_FEI_Impl.h"
 
 #ifndef hypre_FE_MV_HEADER
