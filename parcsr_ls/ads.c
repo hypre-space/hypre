@@ -973,11 +973,15 @@ HYPRE_Int hypre_ADSSetup(void *solver,
       /* Construct the coarse space matrix by RAP */
       if (!ads_data -> A_C)
       {
+         HYPRE_Int C_owned_col_starts;
+
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> C))
             hypre_MatvecCommPkgCreate(ads_data -> C);
 
          if (!hypre_ParCSRMatrixCommPkg(ads_data -> A))
             hypre_MatvecCommPkgCreate(ads_data -> A);
+
+         C_owned_col_starts = hypre_ParCSRMatrixOwnsColStarts(ads_data -> C);
 
          hypre_BoomerAMGBuildCoarseOperator(ads_data -> C,
                                             ads_data -> A,
@@ -988,7 +992,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
             in part of the domain). */
          hypre_ParCSRMatrixFixZeroRows(ads_data -> A_C);
 
-         hypre_ParCSRMatrixOwnsColStarts(ads_data -> C) = 1;
+         hypre_ParCSRMatrixOwnsColStarts(ads_data -> C) = C_owned_col_starts;
          hypre_ParCSRMatrixOwnsRowStarts(ads_data -> A_C) = 0;
       }
 
