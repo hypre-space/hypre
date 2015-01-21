@@ -18,11 +18,11 @@
 
 Version 2.10.0b released 2015/01/xx
 
-- Added new interpolation which allows to incorporate near null-space vector for
-  systems problems
+- Added new interpolation that allows the incorporation of near null-space
+  vectors for systems problems.
 
 - Added additive V-cycle and new mult-additive and simplified mult-additive
-  V-cycle
+  V-cycle.
 
 - Fixed several bugs in BoomerAMG and removed some inefficiencies.
 
@@ -34,6 +34,10 @@ Version 2.10.0b released 2015/01/xx
   and complexity.
 
 - Extended GLVis visualization to all 2D and 3D example codes.
+
+- Changed the configure settings to use --disable-global-partition by default.
+  The equivalent old option --with-no-global-partition is still available, but
+  users should migrate to the new one.
 
 #====================================
 
