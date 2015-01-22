@@ -93,7 +93,7 @@ make $mopts install
 cd $src_dir/test/cmbuild
 cmake ..
 make $mopts
-mv -f ams_driver ij ij_mv new_ij sstruct struct ..
+mv -f ij new_ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv ..
 
 cd $test_dir
 
