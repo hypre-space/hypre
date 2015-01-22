@@ -35,11 +35,11 @@ the responsible project member before the release is made available to users.
 
 - Verify that all agreed-upon changes have been committed.
 
-  []
+  [rdf 01/22/2015]
 
 - Project Lead review and/or concurrence to release.
 
-  []
+  [rdf 01/22/2015]
 
 - Update 'config/configure.in' and 'CMakeLists.txt' with release number and
   date, then run 'config/bootstrap' and commit changes to the repository.
@@ -47,7 +47,7 @@ the responsible project member before the release is made available to users.
   []
 
 - Tag repository with release number: git tag -a V2-8-0b -m "Release 2.8.0b".
-  Push the tags to the central repositoryL: git push --tags
+  Push the tags to the central repository: git push --tags
 
   []
 
