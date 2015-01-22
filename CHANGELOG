@@ -16,7 +16,7 @@
 #=============================================================================
 
 
-Version 2.10.0b released 2015/01/xx
+Version 2.10.0b released 2015/01/22
 
 - Added new interpolation that allows the incorporation of near null-space
   vectors for systems problems.
