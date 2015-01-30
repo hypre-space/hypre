@@ -2760,7 +2760,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
             max_coef *= trunc_factor;
 
             start_j = P_diag_i[i];
-            P_diag_i[i] -= num_lost;  
+            if (num_lost) P_diag_i[i] -= num_lost;  
             row_sum = 0;
             scale = 0;
             for (j = start_j; j < P_diag_i[i+1]; j++)
@@ -2782,7 +2782,7 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
             }
 
             start_j = P_offd_i[i];
-            P_offd_i[i] -= num_lost_offd;
+            if (num_lost_offd) P_offd_i[i] -= num_lost_offd;
             for (j = start_j; j < P_offd_i[i+1]; j++)
             {
                row_sum += P_offd_data[now_checking_offd];
@@ -2902,8 +2902,11 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                   /* sort data */
                   hypre_qsort2abs(P_aux_j,P_aux_data,0,cnt-1);
                   scale = 0;
-                  P_diag_i[i] = cnt_diag;
-                  P_offd_i[i] = cnt_offd;
+                  if (i > start)
+                  {
+                     P_diag_i[i] = cnt_diag;
+                     P_offd_i[i] = cnt_offd;
+                  }
                   for (j = 0; j < max_elmts; j++)
                   {
                      scale += P_aux_data[j];
