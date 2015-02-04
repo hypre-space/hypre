@@ -2025,7 +2025,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
       tmp_id = response_buf[i*2];
 
       /* loop through row_list entries - counting how many are in the range */
-      while (row_list[j] <= upper_bound && j < num_rows)     
+      while (j < num_rows && row_list[j] <= upper_bound)    
       {
          real_proc_id[j] = tmp_id;
          j++;
