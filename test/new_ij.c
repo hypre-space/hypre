@@ -2042,9 +2042,6 @@ main( hypre_int argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
    
-   /* HYPRE_IJMatrixPrint(ij_A, "driver.out.A");
-      HYPRE_IJVectorPrint(ij_x, "driver.out.x0"); */
-
    if (num_functions > 1)
    {
       dof_func = NULL;
@@ -2063,8 +2060,6 @@ main( hypre_int argc,
       }
    }
  
-
- 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
@@ -2072,12 +2067,10 @@ main( hypre_int argc,
    if (print_system)
    {
       HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
-      if (!(build_rhs_type ==1 || build_rhs_type ==7)) HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
+      HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
 
-      /* HYPRE_ParCSRMatrixPrint( parcsr_A,
-         "new_mat.A" );*/
-      
+      /* HYPRE_ParCSRMatrixPrint( parcsr_A, "new_mat.A" );*/
    }
 
    /*-----------------------------------------------------------
@@ -3836,10 +3829,15 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
+
+   /* RDF: Why is this here? */
    if (!(build_rhs_type ==1 || build_rhs_type ==7))
       HYPRE_IJVectorGetObjectType(ij_b, &j);
-   /* HYPRE_IJVectorPrint(ij_b, "driver.out.b"); */
-   /* HYPRE_IJVectorPrint(ij_x, "driver.out.x");  */
+
+   if (print_system)
+   {
+      HYPRE_IJVectorPrint(ij_x, "IJ.out.x");
+   }
 
    /*-----------------------------------------------------------
     * Finalize things
