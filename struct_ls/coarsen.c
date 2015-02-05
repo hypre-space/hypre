@@ -152,6 +152,9 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_BeginTiming(tindex);
 #endif
 
+   hypre_SetIndex(ilower, 0);
+   hypre_SetIndex(iupper, 0);
+
    /* get relevant information from the fine grid */
    fids = hypre_StructGridIDs(fgrid);
    fboxman = hypre_StructGridBoxMan(fgrid);
