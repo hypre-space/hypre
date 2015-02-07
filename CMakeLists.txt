@@ -331,6 +331,7 @@ list (APPEND HYPRE_SOURCES
   IJ_mv/F90_IJMatrix.c
   IJ_mv/HYPRE_IJMatrix.c
   IJ_mv/HYPRE_IJVector.c
+  IJ_mv/IJ_assumed_part.c
   IJ_mv/IJMatrix.c
   IJ_mv/IJMatrix_parcsr.c
   IJ_mv/IJVector.c
