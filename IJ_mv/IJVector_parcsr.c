@@ -1078,6 +1078,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    			     	      HYPRE_Complex  *off_proc_data)
 {
    HYPRE_Int myid, global_num_rows;
+   HYPRE_Int global_first_row;
    HYPRE_Int i, j, in, k;
    HYPRE_Int proc_id, last_proc, prev_id, tmp_id;
    HYPRE_Int max_response_size;
@@ -1089,7 +1090,6 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    HYPRE_Int num_recvs;
    HYPRE_Int counter, upper_bound;
    HYPRE_Int num_real_procs;
-   HYPRE_Int first_index;
    
    HYPRE_Int *row_list=NULL;
    HYPRE_Int *a_proc_id=NULL, *orig_order=NULL;
@@ -1100,6 +1100,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    HYPRE_Int *num_rows_per_proc = NULL;
    HYPRE_Int  tmp_int;
    HYPRE_Int  obj_size_bytes, int_size, complex_size;
+   HYPRE_Int  first_index;
 
    void *void_contact_buf = NULL;
    void *index_ptr;
@@ -1120,15 +1121,16 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
 
    hypre_MPI_Comm_rank(comm, &myid);
    
-   global_num_rows = hypre_ParVectorGlobalSize(par_vector);
+   global_num_rows = hypre_IJVectorGlobalNumRows(vector);
+   global_first_row = hypre_IJVectorGlobalFirstRow(vector);
  
    /* verify that we have created the assumed partition */
 
-   if  (hypre_ParVectorAssumedPartition(par_vector) == NULL)
+   if  (hypre_IJVectorAssumedPart(vector) == NULL)
    {
-      hypre_ParVectorCreateAssumedPartition(par_vector);
+      hypre_IJVectorCreateAssumedPartition(vector);
    }
-   apart = hypre_ParVectorAssumedPartition(par_vector);
+   apart = hypre_IJVectorAssumedPart(vector);
 
    /* get the assumed processor id for each row */
    a_proc_id = hypre_CTAlloc(HYPRE_Int, current_num_elmts);
@@ -1142,7 +1144,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       {
          row = off_proc_i[i]; 
          row_list[i] = row;
-         hypre_GetAssumedPartitionProcFromRow(comm, row, global_num_rows, &proc_id);
+         hypre_GetAssumedPartitionProcFromRow(comm, row, global_first_row,
+		global_num_rows, &proc_id);
          a_proc_id[i] = proc_id;
          orig_order[i] = i;
       }
@@ -1192,8 +1195,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          ex_contact_buf[counter*2] =  row_list[i];
          counter++;
          
-         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_num_rows, 
-                                           &range_start, &range_end);
+         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_first_row,
+					global_num_rows, &range_start, &range_end);
       }
    }
 
@@ -1243,7 +1246,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       tmp_id = response_buf[i*2];
       
       /* loop through row_list entries - counting how many are in the range */
-      while (row_list[j] <= upper_bound && j < current_num_elmts)     
+      while (j < current_num_elmts && row_list[j] <= upper_bound)     
       {
          real_proc_id[j] = tmp_id;
          j++;
@@ -1434,7 +1437,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    recv_starts = send_proc_obj.vec_starts;
    
    vector_data = hypre_VectorData(hypre_ParVectorLocalVector(par_vector));
-   first_index = hypre_ParVectorFirstIndex(par_vector);
+   first_index =  hypre_ParVectorFirstIndex(par_vector);
 
    for (i=0; i < num_recvs; i++)
    {
@@ -1457,7 +1460,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
-         k = row - first_index;
+         k = row - first_index - global_first_row;
          vector_data[k] += value;
       }
    }

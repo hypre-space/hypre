@@ -37,6 +37,7 @@ typedef struct hypre_IJMatrix_struct
    void       *object;              /* Structure for storing local portion */
    void       *translator;          /* optional storage_type specfic structure
                                        for holding additional local info */
+   void       *assumed_part;	   /* IJMatrix assumed partition */
    HYPRE_Int         assemble_flag;       /* indicates whether matrix has been 
 				       assembled */
 
@@ -46,8 +47,6 @@ typedef struct hypre_IJMatrix_struct
    HYPRE_Int         global_num_cols;
    HYPRE_Int         omp_flag;
    HYPRE_Int         print_level;
-   
-
 
 } hypre_IJMatrix;
 
@@ -63,6 +62,7 @@ typedef struct hypre_IJMatrix_struct
 #define hypre_IJMatrixObjectType(matrix)        ((matrix) -> object_type)
 #define hypre_IJMatrixObject(matrix)            ((matrix) -> object)
 #define hypre_IJMatrixTranslator(matrix)        ((matrix) -> translator)
+#define hypre_IJMatrixAssumedPart(matrix)       ((matrix) -> assumed_part)
 
 #define hypre_IJMatrixAssembleFlag(matrix)      ((matrix) -> assemble_flag)
 

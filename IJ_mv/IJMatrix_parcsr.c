@@ -17,6 +17,7 @@
  *****************************************************************************/
  
 #include "_hypre_IJ_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 #include "../HYPRE.h"
 
@@ -45,7 +46,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
    if (hypre_IJMatrixGlobalFirstRow(matrix))
       for (i=0; i < 2; i++)
 	 row_starts[i] = row_partitioning[i]- hypre_IJMatrixGlobalFirstRow(matrix);
-   else
+   else 
       for (i=0; i < 2; i++)
 	 row_starts[i] = row_partitioning[i];
    if (row_partitioning != col_partitioning)
@@ -54,7 +55,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
       if (hypre_IJMatrixGlobalFirstCol(matrix))
 	 for (i=0; i < 2; i++)
 	    col_starts[i] = col_partitioning[i]-hypre_IJMatrixGlobalFirstCol(matrix);
-      else
+      else 
 	 for (i=0; i < 2; i++)
 	    col_starts[i] = col_partitioning[i];
    }
@@ -70,7 +71,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
    if (row_partitioning[0])
       for (i=0; i < num_procs+1; i++)
 	 row_starts[i] = row_partitioning[i]-row_partitioning[0];
-   else
+   else 
       for (i=0; i < num_procs+1; i++)
 	 row_starts[i] = row_partitioning[i];
    if (row_partitioning != col_partitioning)
@@ -79,7 +80,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
       if (col_partitioning[0])
 	 for (i=0; i < num_procs+1; i++)
 	    col_starts[i] = col_partitioning[i]-col_partitioning[0];
-      else
+      else 
 	 for (i=0; i < num_procs+1; i++)
 	    col_starts[i] = col_partitioning[i];
    }
@@ -1856,6 +1857,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int proc_id, last_proc, prev_id, tmp_id;
    HYPRE_Int max_response_size;
    HYPRE_Int global_num_cols;
+   HYPRE_Int global_first_col;
+   HYPRE_Int global_first_row;
    HYPRE_Int ex_num_contacts = 0, num_rows = 0;
    HYPRE_Int range_start, range_end;
    HYPRE_Int num_elements;
@@ -1893,21 +1896,28 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 
    hypre_IJAssumedPart   *apart;
 
-   hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixObject(matrix);
-
    hypre_MPI_Comm_rank(comm, &myid);
    global_num_cols = hypre_IJMatrixGlobalNumCols(matrix);
+   global_first_col = hypre_IJMatrixGlobalFirstCol(matrix);
+   global_first_row = hypre_IJMatrixGlobalFirstRow(matrix);
+
+   num_rows = off_proc_i_indx/2;
    
    /* verify that we have created the assumed partition */
-   if  (hypre_ParCSRMatrixAssumedPartition(par_matrix) == NULL)
+   if  (hypre_IJMatrixAssumedPart(matrix) == NULL)
+   {
+      hypre_IJMatrixCreateAssumedPartition(matrix);
+   }
+
+   apart = hypre_IJMatrixAssumedPart(matrix);
+
+   /*if  (hypre_ParCSRMatrixAssumedPartition(par_matrix) == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(par_matrix);
    }
 
-   apart = hypre_ParCSRMatrixAssumedPartition(par_matrix);
+   apart = hypre_ParCSRMatrixAssumedPartition(par_matrix);*/
 
-   num_rows = off_proc_i_indx/2;
-   
    row_list = hypre_CTAlloc(HYPRE_Int, num_rows);
    row_list_num_elements = hypre_CTAlloc(HYPRE_Int, num_rows);
    a_proc_id = hypre_CTAlloc(HYPRE_Int, num_rows);
@@ -1924,7 +1934,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          row_list[i] = row;
          row_list_num_elements[i] = off_proc_i[i*2+1];
          
-         hypre_GetAssumedPartitionProcFromRow(comm, row, global_num_cols, &proc_id);
+         hypre_GetAssumedPartitionProcFromRow(comm, row, global_first_row, 
+				global_num_cols, &proc_id);
          a_proc_id[i] = proc_id;
          orig_order[i] = i;
       }
@@ -1975,7 +1986,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          ex_contact_buf[counter*2] =  row_list[i];
          counter++;
          
-         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_num_cols, 
+         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_first_col, global_num_cols, 
                                            &range_start, &range_end); 
       }
    }

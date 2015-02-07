@@ -188,9 +188,9 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
   
          if (redundant || my_id == 0)
          {
-            A_seq_i = hypre_CTAlloc(HYPRE_Int, size+1);
-            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int, size+1);
-            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int, size);
+            A_seq_i = hypre_CTAlloc(HYPRE_Int, size+2);
+            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int, size+2);
+            if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int, size+1);
          }
 
          if (redundant)

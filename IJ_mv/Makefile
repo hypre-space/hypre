@@ -45,6 +45,7 @@ FILES =\
  F90_IJMatrix.c\
  HYPRE_IJMatrix.c\
  HYPRE_IJVector.c\
+ IJ_assumed_part.c\
  IJMatrix.c\
  IJMatrix_parcsr.c\
  IJVector.c\

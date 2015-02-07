@@ -178,7 +178,7 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
 
    /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   hypre_GetAssumedPartitionRowRange(comm, myid, global_num_cols,
+   hypre_GetAssumedPartitionRowRange(comm, myid, 0, global_num_cols,
                                      &(apart->row_start), &(apart->row_end));
 
    /*allocate some space for the partition of the assumed partition */
@@ -191,7 +191,7 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
 
    /* now we want to reconcile our actual partition with the assumed partition */
    hypre_LocateAssummedPartition(comm, col_start, col_end,
-                                 global_num_cols, apart, myid);
+                                 0, global_num_cols, apart, myid);
 
    /* this partition will be saved in the matrix data structure until the matrix
     * is destroyed */
