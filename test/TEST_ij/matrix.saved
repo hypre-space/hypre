@@ -75,3 +75,10 @@
     3    2.206259e+01    0.793755    6.976803e-01
     4    1.558512e+01    0.706405    4.928447e-01
     5    1.111687e+01    0.713300    3.515462e-01
+# Output file: matrix.out.11
+ Average Convergence Factor = 0.028399
+
+     Complexity:    grid = 1.260870
+                operator = 1.325581
+                   cycle = 2.325581
+
