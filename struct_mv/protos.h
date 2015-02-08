@@ -166,6 +166,10 @@ HYPRE_Int hypre_CommPkgDestroy ( hypre_CommPkg *comm_pkg );
 HYPRE_Int hypre_StructCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructPartialCopy ( hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *array_boxes );
 
+/* struct_data.c */
+HYPRE_Int hypre_StructDataCopy ( HYPRE_Complex *fr_data , hypre_BoxArray *fr_data_space , HYPRE_Int *fr_ids , HYPRE_Complex *to_data , hypre_BoxArray *to_data_space , HYPRE_Int *to_ids , HYPRE_Int move , HYPRE_Int ndim , HYPRE_Int nval );
+HYPRE_Int hypre_StructNumGhostFromStencil ( hypre_StructStencil *stencil , HYPRE_Int **num_ghost_ptr );
+
 /* struct_grid.c */
 HYPRE_Int hypre_StructGridCreate ( MPI_Comm comm , HYPRE_Int dim , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridRef ( hypre_StructGrid *grid , hypre_StructGrid **grid_ref );
@@ -198,16 +202,24 @@ HYPRE_Int hypre_ReadBoxArrayData_CC ( FILE *file , hypre_BoxArray *box_array , h
 HYPRE_Int hypre_StructMatmult ( HYPRE_Int nmatrices , hypre_StructMatrix **matrices , HYPRE_Int nterms , HYPRE_Int *terms , HYPRE_Int *transposes , hypre_StructMatrix **C_ptr );
 
 /* struct_matrix.c */
-HYPRE_Int  hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix , hypre_Index dindex );
-HYPRE_Int hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix , hypre_Box *dbox );
-HYPRE_Int  hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix , hypre_Index dstride );
+HYPRE_Int  hypre_StructMatrixMapDataIndex ( hypre_StructMatrix *matrix , hypre_Index dindex );
+HYPRE_Int hypre_StructMatrixMapDataBox ( hypre_StructMatrix *matrix , hypre_Box *dbox );
+HYPRE_Int  hypre_StructMatrixMapDataStride ( hypre_StructMatrix *matrix , hypre_Index dstride );
+HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix , hypre_Index dindex );
+HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix , hypre_Box *dbox );
+HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix , hypre_Index dstride );
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );
 hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixDestroy ( hypre_StructMatrix *matrix );
-HYPRE_Int hypre_StructMatrixSetDomainGrid( hypre_StructMatrix *matrix , hypre_StructGrid *domain_grid );
-HYPRE_Int hypre_StructMatrixSetRStride( hypre_StructMatrix *matrix , HYPRE_Int *rstride );
-HYPRE_Int hypre_StructMatrixSetDStride( hypre_StructMatrix *matrix , HYPRE_Int *dstride );
+HYPRE_Int hypre_StructMatrixSetRangeBoxnums ( hypre_StructMatrix *matrix , HYPRE_Int range_nboxes , HYPRE_Int *range_boxnums );
+HYPRE_Int hypre_StructMatrixSetRangeStride ( hypre_StructMatrix *matrix , HYPRE_Int *range_stride );
+HYPRE_Int hypre_StructMatrixSetDomainBoxnums ( hypre_StructMatrix *matrix , HYPRE_Int domain_nboxes , HYPRE_Int *domain_boxnums );
+HYPRE_Int hypre_StructMatrixSetDomainStride ( hypre_StructMatrix *matrix , HYPRE_Int *domain_stride );
+HYPRE_Int hypre_StructMatrixComputeDataSpace ( hypre_StructMatrix *matrix , HYPRE_Int *num_ghost , hypre_BoxArray **data_space_ptr );
+HYPRE_Int hypre_StructMatrixResize ( hypre_StructMatrix *matrix , hypre_BoxArray *data_space );
+HYPRE_Int hypre_StructMatrixRestore ( hypre_StructMatrix *matrix );
+HYPRE_Int hypre_StructMatrixForget ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data );
 HYPRE_Int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
@@ -246,9 +258,21 @@ HYPRE_Int hypre_StructStencilOffsetEntry ( hypre_StructStencil *stencil , hypre_
 HYPRE_Int hypre_StructStencilSymmetrize ( hypre_StructStencil *stencil , hypre_StructStencil **symm_stencil_ptr , HYPRE_Int **symm_offsets_ptr );
 
 /* struct_vector.c */
+HYPRE_Int hypre_StructVectorMapDataIndex ( hypre_StructVector *vector , hypre_Index dindex );
+HYPRE_Int hypre_StructVectorMapDataBox ( hypre_StructVector *vector , hypre_Box *dbox );
+HYPRE_Int hypre_StructVectorMapDataStride ( hypre_StructVector *vector , hypre_Index dstride );
+HYPRE_Int hypre_StructVectorUnMapDataIndex ( hypre_StructVector *vector , hypre_Index dindex );
+HYPRE_Int hypre_StructVectorUnMapDataBox ( hypre_StructVector *vector , hypre_Box *dbox );
+HYPRE_Int hypre_StructVectorUnMapDataStride ( hypre_StructVector *vector , hypre_Index dstride );
 hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm , hypre_StructGrid *grid );
 hypre_StructVector *hypre_StructVectorRef ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorDestroy ( hypre_StructVector *vector );
+HYPRE_Int hypre_StructVectorSetBoxnums ( hypre_StructVector *vector , HYPRE_Int nboxes , HYPRE_Int *boxnums );
+HYPRE_Int hypre_StructVectorReindex ( hypre_StructVector *vector , hypre_StructGrid *grid , hypre_Index stride );
+HYPRE_Int hypre_StructVectorComputeDataSpace ( hypre_StructVector *vector , HYPRE_Int *num_ghost , hypre_BoxArray **data_space_ptr );
+HYPRE_Int hypre_StructVectorResize ( hypre_StructVector *vector , hypre_BoxArray     *data_space );
+HYPRE_Int hypre_StructVectorRestore ( hypre_StructVector *vector );
+HYPRE_Int hypre_StructVectorForget ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeShell ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeData ( hypre_StructVector *vector , HYPRE_Complex *data );
 HYPRE_Int hypre_StructVectorInitialize ( hypre_StructVector *vector );

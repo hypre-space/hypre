@@ -518,6 +518,7 @@ list (APPEND HYPRE_SOURCES
   struct_mv/struct_axpy.c
   struct_mv/struct_communication.c
   struct_mv/struct_copy.c
+  struct_mv/struct_data.c
   struct_mv/struct_grid.c
   struct_mv/struct_innerprod.c
   struct_mv/struct_io.c

@@ -21,6 +21,84 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int 
+hypre_StructVectorMapDataIndex( hypre_StructVector *vector,
+                                hypre_Index         dindex )
+{
+   hypre_MapToCoarseIndex(dindex, NULL,
+                          hypre_StructVectorStride(vector),
+                          hypre_StructVectorNDim(vector));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructVectorMapDataBox( hypre_StructVector *vector,
+                              hypre_Box          *dbox )
+{
+   hypre_StructVectorMapDataIndex(vector, hypre_BoxIMin(dbox));
+   hypre_StructVectorMapDataIndex(vector, hypre_BoxIMax(dbox));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructVectorMapDataStride( hypre_StructVector *vector,
+                                 hypre_Index         dstride )
+{
+   hypre_StructVectorMapDataIndex(vector, dstride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructVectorUnMapDataIndex( hypre_StructVector *vector,
+                                  hypre_Index         dindex )
+{
+   hypre_MapToFineIndex(dindex, NULL,
+                        hypre_StructVectorStride(vector),
+                        hypre_StructVectorNDim(vector));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructVectorUnMapDataBox( hypre_StructVector *vector,
+                                hypre_Box          *dbox )
+{
+   hypre_StructVectorUnMapDataIndex(vector, hypre_BoxIMin(dbox));
+   hypre_StructVectorUnMapDataIndex(vector, hypre_BoxIMax(dbox));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructVectorUnMapDataStride( hypre_StructVector *vector,
+                                   hypre_Index         dstride )
+{
+   hypre_StructVectorUnMapDataIndex(vector, dstride);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 hypre_StructVector *
 hypre_StructVectorCreate( MPI_Comm          comm,
                           hypre_StructGrid *grid )
@@ -33,6 +111,8 @@ hypre_StructVectorCreate( MPI_Comm          comm,
 
    hypre_StructVectorComm(vector)           = comm;
    hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
+   hypre_StructVectorSetBoxnums(vector, 0, NULL);
+   hypre_SetIndex(hypre_StructVectorStride(vector), 1);
    hypre_StructVectorDataAlloced(vector)    = 1;
    hypre_StructVectorBGhostNotClear(vector) = 0;
    hypre_StructVectorRefCount(vector)       = 1;
@@ -74,9 +154,293 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector));
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
+         hypre_TFree(hypre_StructVectorBoxnums(vector));
          hypre_StructGridDestroy(hypre_StructVectorGrid(vector));
          hypre_TFree(vector);
       }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * If boxnums == NULL, set default values
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorSetBoxnums( hypre_StructVector *vector,
+                              HYPRE_Int           nboxes,
+                              HYPRE_Int          *boxnums )
+{
+   HYPRE_Int  *vec_boxnums;
+   HYPRE_Int   i, vec_nboxes;
+
+   vec_nboxes = hypre_StructGridNumBoxes(hypre_StructVectorGrid(vector));
+   if (boxnums != NULL)
+   {
+      vec_nboxes = nboxes;
+   }
+
+   vec_boxnums = hypre_StructVectorBoxnums(vector);
+   vec_boxnums = hypre_TReAlloc(vec_boxnums, HYPRE_Int, vec_nboxes);
+   for (i = 0; i < vec_nboxes; i++)
+   {
+      vec_boxnums[i] = i;
+      if (boxnums != NULL)
+      {
+         vec_boxnums[i] = boxnums[i];
+      }
+   }
+   hypre_StructVectorNBoxes(vector)  = vec_nboxes;
+   hypre_StructVectorBoxnums(vector) = vec_boxnums;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine changes the grid and index space.  Before the vector can
+ * actually be used, hypre_StructVectorResize() must be called with an
+ * appropriate data space.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorReindex( hypre_StructVector *vector,
+                           hypre_StructGrid   *grid,
+                           hypre_Index         stride )
+{
+   hypre_StructGrid *old_grid   = hypre_StructVectorGrid(vector);
+   hypre_IndexRef    old_stride = hypre_StructVectorStride(vector);
+
+   if (hypre_StructVectorSaveGrid(vector) != NULL)
+   {
+      /* Call Restore or Forget first */
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Reindex has already been called");
+      return hypre_error_flag;
+   }
+
+   hypre_StructVectorSaveGrid(vector) = old_grid;
+   hypre_CopyIndex(old_stride, hypre_StructVectorSaveStride(vector));
+   hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
+   hypre_StructVectorSetBoxnums(vector, 0, NULL);
+   hypre_CopyIndex(stride, hypre_StructVectorStride(vector));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This computes a vector data space from a num_ghost array.  If the num_ghost
+ * argument is NULL, the vector num_ghost is used instead.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
+                                    HYPRE_Int          *num_ghost,
+                                    hypre_BoxArray    **data_space_ptr )
+{
+   HYPRE_Int          ndim      = hypre_StructVectorNDim(vector);
+   hypre_StructGrid  *grid      = hypre_StructVectorGrid(vector);
+   hypre_BoxArray    *data_space;
+   hypre_Box         *data_box;
+   HYPRE_Int          i, d;
+
+   if (num_ghost == NULL)
+   {
+      /* Use the vector num_ghost */
+      num_ghost = hypre_StructVectorNumGhost(vector);
+   }
+
+   /* Add ghost layers and map the data space */
+   data_space = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
+   hypre_ForBoxI(i, data_space)
+   {
+      data_box = hypre_BoxArrayBox(data_space, i);
+      for (d = 0; d < ndim; d++)
+      {
+         hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
+         hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
+      }
+      hypre_StructVectorMapDataBox(vector, data_box);
+   }
+
+   *data_space_ptr = data_space;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine takes new data space information and recomputes entries in the
+ * vector that depend on it (e.g., data_indices and data_size).  The routine
+ * will also re-allocate the vector data if their was data to begin with.
+ *
+ * The boxes in the data_space argument may be larger (but not smaller) than
+ * those computed by the routine VectorComputeDataSpace().
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorResize( hypre_StructVector *vector,
+                          hypre_BoxArray     *data_space )
+{
+   hypre_StructGrid     *old_grid         = hypre_StructVectorGrid(vector);
+   hypre_IndexRef        old_stride       = hypre_StructVectorStride(vector);
+   HYPRE_Complex        *old_data         = hypre_StructVectorData(vector);
+   hypre_BoxArray       *old_data_space   = hypre_StructVectorDataSpace(vector);
+   HYPRE_Int             old_data_size    = hypre_StructVectorDataSize(vector);
+   HYPRE_Int            *old_data_indices = hypre_StructVectorDataIndices(vector);
+
+   HYPRE_Int             ndim             = hypre_StructVectorNDim(vector);
+
+   HYPRE_Complex        *data;
+   HYPRE_Int             data_size;
+   HYPRE_Int            *data_indices;
+
+   hypre_Box            *data_box;
+   HYPRE_Int             i;
+
+   if (hypre_StructVectorSaveDataSpace(vector) != NULL)
+   {
+      /* Call Restore or Forget first */
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Resize has already been called");
+      return hypre_error_flag;
+   }
+
+   /* Set up data_indices and data_size */
+   data_indices = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_space));
+   data_size = 0;
+   hypre_ForBoxI(i, data_space)
+   {
+      data_box = hypre_BoxArrayBox(data_space, i);
+
+      data_indices[i] = data_size;
+      data_size += hypre_BoxVolume(data_box);
+   }
+
+   /* Copy or move old_data to data */
+   data = NULL;
+   if (old_data != NULL)
+   {
+      HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructVectorGrid(vector));
+      HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructVectorGrid(vector));
+
+      /* If Reindex() has been called, use saved grid ids */
+      if (hypre_StructVectorSaveGrid(vector) != NULL)
+      {
+         old_ids = hypre_StructGridIDs(hypre_StructVectorSaveGrid(vector));
+      }
+
+      data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
+
+      if (hypre_StructVectorDataAlloced(vector))
+      {
+         /* copy the data */
+         hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                              data, data_space, ids, 0, ndim, 1);
+      }
+      else
+      {
+         /* move the data */
+         hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                              data, data_space, ids, 1, ndim, 1);
+         old_data = NULL;
+      }
+   }
+
+   hypre_StructVectorData(vector)        = data;
+   hypre_StructVectorDataSpace(vector)   = data_space;
+   hypre_StructVectorDataSize(vector)    = data_size;
+   hypre_StructVectorDataIndices(vector) = data_indices;
+
+   /* Clean up and save data */
+   if (old_data_space != NULL)
+   {
+      hypre_TFree(old_data_indices);
+
+      hypre_StructVectorSaveGrid(vector)      = old_grid;
+      hypre_CopyIndex(old_stride, hypre_StructVectorSaveStride(vector));
+      hypre_StructVectorSaveData(vector)      = old_data;
+      hypre_StructVectorSaveDataSpace(vector) = old_data_space;
+      hypre_StructVectorSaveDataSize(vector)  = old_data_size;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine restores the old data and data space.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorRestore( hypre_StructVector *vector )
+{
+   hypre_StructGrid *old_grid       = hypre_StructVectorGrid(vector);
+   HYPRE_Complex    *old_data       = hypre_StructVectorData(vector);
+   hypre_BoxArray   *old_data_space = hypre_StructVectorDataSpace(vector);
+   hypre_StructGrid *grid           = hypre_StructVectorSaveGrid(vector);
+   HYPRE_Complex    *data           = hypre_StructVectorSaveData(vector);
+   hypre_IndexRef    stride         = hypre_StructVectorSaveStride(vector);
+   hypre_BoxArray   *data_space     = hypre_StructVectorSaveDataSpace(vector);
+   HYPRE_Int         data_size      = hypre_StructVectorSaveDataSize(vector);
+
+   if (data_space != NULL)
+   {
+      HYPRE_Int  *old_ids = hypre_StructGridIDs(old_grid);
+      HYPRE_Int  *ids = hypre_StructGridIDs(grid);
+      HYPRE_Int   ndim = hypre_StructVectorNDim(vector);
+
+      /* Move the data */
+      if (!hypre_StructVectorDataAlloced(vector))
+      {
+         data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
+      }
+      hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                           data, data_space, ids, 1, ndim, 1);
+
+      /* Reset certain fields to enable the Resize call below */
+      hypre_StructVectorSaveGrid(vector)      = NULL;
+      hypre_StructVectorSaveData(vector)      = NULL;
+      hypre_StructVectorSaveDataSpace(vector) = NULL;
+      hypre_StructVectorSaveDataSize(vector)  = 0;
+      hypre_StructVectorData(vector)          = NULL;
+
+      /* Set the grid and boxnums */
+      hypre_StructGridDestroy(old_grid);
+      hypre_StructVectorGrid(vector) = grid;
+      hypre_StructVectorSetBoxnums(vector, 0, NULL);
+      hypre_CopyIndex(stride, hypre_StructVectorStride(vector));
+
+      /* Set the data space and recompute data_indices, etc. */
+      hypre_StructVectorResize(vector, data_space);
+      hypre_StructVectorForget(vector);
+
+      /* Set the data pointer */
+      hypre_StructVectorData(vector) = data;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine will clear data needed to do a Restore
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorForget( hypre_StructVector *vector )
+{
+   hypre_StructGrid *save_grid       = hypre_StructVectorSaveGrid(vector);
+   hypre_BoxArray   *save_data_space = hypre_StructVectorSaveDataSpace(vector);
+
+   if (save_data_space != NULL)
+   {
+      /* Only forget a Reindex if the companion Resize was also called */
+      if (save_grid != NULL)
+      {
+         hypre_StructGridDestroy(save_grid);
+         hypre_StructVectorSaveGrid(vector) = NULL;
+      }
+
+      hypre_BoxArrayDestroy(save_data_space);
+      hypre_StructVectorSaveData(vector)      = NULL;
+      hypre_StructVectorSaveDataSpace(vector) = NULL;
+      hypre_StructVectorSaveDataSize(vector)  = 0;
    }
 
    return hypre_error_flag;
@@ -88,77 +452,29 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
 HYPRE_Int 
 hypre_StructVectorInitializeShell( hypre_StructVector *vector )
 {
-   HYPRE_Int             ndim = hypre_StructVectorNDim(vector);
-   hypre_StructGrid     *grid;
-
-   HYPRE_Int            *num_ghost;
- 
+   hypre_StructGrid     *grid       = hypre_StructVectorGrid(vector);
    hypre_BoxArray       *data_space;
-   hypre_BoxArray       *boxes;
-   hypre_Box            *box;
-   hypre_Box            *data_box;
-
-   HYPRE_Int            *data_indices;
-   HYPRE_Int             data_size;
                      
-   HYPRE_Int             i, d;
- 
-   /*-----------------------------------------------------------------------
-    * Set up data_space
-    *-----------------------------------------------------------------------*/
-
-   grid = hypre_StructVectorGrid(vector);
-
-   if (hypre_StructVectorDataSpace(vector) == NULL)
-   {
-      num_ghost = hypre_StructVectorNumGhost(vector);
-
-      boxes = hypre_StructGridBoxes(grid);
-      data_space = hypre_BoxArrayCreate(hypre_BoxArraySize(boxes), ndim);
-
-      hypre_ForBoxI(i, boxes)
-      {
-         box = hypre_BoxArrayBox(boxes, i);
-         data_box = hypre_BoxArrayBox(data_space, i);
-
-         hypre_CopyBox(box, data_box);
-         for (d = 0; d < ndim; d++)
-         {
-            hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-            hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
-         }
-      }
-
-      hypre_StructVectorDataSpace(vector) = data_space;
-   }
-
-   /*-----------------------------------------------------------------------
-    * Set up data_indices array and data_size
-    *-----------------------------------------------------------------------*/
-
-   if (hypre_StructVectorDataIndices(vector) == NULL)
-   {
-      data_space = hypre_StructVectorDataSpace(vector);
-      data_indices = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_space));
-
-      data_size = 0;
-      hypre_ForBoxI(i, data_space)
-      {
-         data_box = hypre_BoxArrayBox(data_space, i);
-
-         data_indices[i] = data_size;
-         data_size += hypre_BoxVolume(data_box);
-      }
-
-      hypre_StructVectorDataIndices(vector) = data_indices;
-      hypre_StructVectorDataSize(vector)    = data_size;
-   }
-
    /*-----------------------------------------------------------------------
     * Set total number of nonzero coefficients
     *-----------------------------------------------------------------------*/
 
    hypre_StructVectorGlobalSize(vector) = hypre_StructGridGlobalSize(grid);
+
+   /*-----------------------------------------------------------------------
+    * Set up information related to the data space and data storage
+    *-----------------------------------------------------------------------*/
+
+   if (hypre_StructVectorDataSpace(vector) == NULL)
+   {
+      hypre_StructVectorComputeDataSpace(vector, NULL, &data_space);
+      hypre_StructVectorResize(vector, data_space);
+      hypre_StructVectorForget(vector);
+   }
+
+   /*-----------------------------------------------------------------------
+    * Return
+    *-----------------------------------------------------------------------*/
 
    return hypre_error_flag;
 }

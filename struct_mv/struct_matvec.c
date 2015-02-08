@@ -236,8 +236,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       hypre_Index loop_size, f_start;
       HYPRE_Int vc, vf;
 
-      d_stride = hypre_StructMatrixDStride(A);
-      r_stride = hypre_StructMatrixRStride(A);
+      d_stride = hypre_StructMatrixDomStride(A);
+      r_stride = hypre_StructMatrixRanStride(A);
 
       xtmp = hypre_StructVectorCreate(hypre_StructVectorComm(y), fgrid); 
       hypre_StructVectorInitialize(xtmp);
@@ -374,7 +374,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                hypre_Index y_start;
                compute_box = hypre_BoxArrayBox(compute_box_a, j);
 	       start  = hypre_BoxIMin(compute_box);
-               r_stride = hypre_StructMatrixRStride(A);
+               r_stride = hypre_StructMatrixRanStride(A);
 	       tmp_box = hypre_BoxCreate(ndim);
                hypre_CopyBox(compute_box, tmp_box);
                hypre_ProjectBox(tmp_box, origin, r_stride);
@@ -484,8 +484,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                    * range compute box based on the current stencil entry */
                   if (hypre_StructMatrixDomainIsCoarse(A))
                   {
-                     stride = hypre_StructMatrixDStride(A);
-                     r_stride = hypre_StructMatrixRStride(A);
+                     stride = hypre_StructMatrixDomStride(A);
+                     r_stride = hypre_StructMatrixRanStride(A);
                      hypre_CopyBox(compute_box, tmp_box);
                      hypre_BoxShiftPos(tmp_box, stencil_shape[si]);
                      hypre_ProjectBox(tmp_box, origin, stride);

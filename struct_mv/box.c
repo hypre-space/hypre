@@ -233,7 +233,7 @@ hypre_BoxCreate( HYPRE_Int  ndim )
 {
    hypre_Box *box;
 
-   box = hypre_TAlloc(hypre_Box, 1);
+   box = hypre_CTAlloc(hypre_Box, 1);
    hypre_BoxNDim(box) = ndim;
 
    return box;

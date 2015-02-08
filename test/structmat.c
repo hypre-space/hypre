@@ -15,6 +15,7 @@
 #include <math.h>
 
 #include "_hypre_utilities.h"
+#include "_hypre_struct_mv.h"
 #include "HYPRE_struct_mv.h"
 
 #define MAXDIM 3
@@ -772,8 +773,8 @@ main( hypre_int  argc,
 
       HYPRE_StructMatrixCreate(
          hypre_MPI_COMM_WORLD, grid, stencils[mi], &matrices[mi]);
-      HYPRE_StructMatrixSetRStride(matrices[mi], data.matrix_rstrides[mi]);
-      HYPRE_StructMatrixSetDStride(matrices[mi], data.matrix_dstrides[mi]);
+      HYPRE_StructMatrixSetRangeStride(matrices[mi], data.matrix_rstrides[mi]);
+      HYPRE_StructMatrixSetDomainStride(matrices[mi], data.matrix_dstrides[mi]);
       HYPRE_StructMatrixSetSymmetric(matrices[mi], data.matrix_symmetric[mi]);
       HYPRE_StructMatrixSetConstantEntries(
          matrices[mi], data.matrix_ncentries[mi], data.matrix_centries[mi]);
@@ -821,6 +822,16 @@ main( hypre_int  argc,
    for (vi = 0; vi < data.nvectors; vi++)
    {
       HYPRE_StructGridCoarsen(grid, data.vector_strides[vi], &vgrids[vi]);
+#if DEBUG
+      {
+         HYPRE_Int num_ghost[2*MAXDIM];
+         for (i = 0; i < 2*MAXDIM; i++)
+         {
+            num_ghost[i] = 0;
+         }
+         HYPRE_StructGridSetNumGhost(vgrids[vi], num_ghost);
+      }
+#endif
 
       HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, vgrids[vi], &vectors[vi]);
       HYPRE_StructVectorInitialize(vectors[vi]);
@@ -865,6 +876,27 @@ main( hypre_int  argc,
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       time_index = hypre_InitializeTiming("Matrix-vector multiply");
       hypre_BeginTiming(time_index);
+
+#if DEBUG
+      {
+         HYPRE_Int       *num_ghost;
+         hypre_BoxArray  *data_space;
+
+         hypre_StructVectorReindex(vectors[mv_x], grid, data.vector_strides[mv_x]);
+         hypre_StructNumGhostFromStencil(stencils[mv_A], &num_ghost);
+         hypre_StructVectorComputeDataSpace(vectors[mv_x], num_ghost, &data_space);
+         hypre_StructVectorResize(vectors[mv_x], data_space);
+         HYPRE_StructVectorPrint("zvec-resize", vectors[mv_x], 1);
+         hypre_StructVectorRestore(vectors[mv_x]);
+         HYPRE_StructVectorPrint("zvec-restore", vectors[mv_x], 1);
+
+         hypre_StructVectorComputeDataSpace(vectors[mv_x], num_ghost, &data_space);
+         hypre_StructVectorResize(vectors[mv_x], data_space);
+         HYPRE_StructVectorPrint("zzvec-resize", vectors[mv_x], 1);
+
+         hypre_TFree(num_ghost);
+      }
+#endif
 
       HYPRE_StructMatrixMatvec(
          1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);

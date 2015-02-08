@@ -21,17 +21,24 @@
 
 /*--------------------------------------------------------------------------
  * hypre_StructVector:
+ *
+ * Most of the routines currently only work when the base grid and grid are
+ * identically the same (i.e., when nboxes equals the number of boxes in the
+ * grid and stride is the unit stride.  RDF: It's not clear yet if this is the
+ * structure we want to maintain into the future.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructVector_struct
 {
    MPI_Comm              comm;
 
-   hypre_StructGrid     *grid;
-
-   hypre_BoxArray       *data_space;
+   hypre_StructGrid     *grid;         /* Base grid */
+   HYPRE_Int             nboxes;       /* Grid number of boxes */
+   HYPRE_Int            *boxnums;      /* Grid boxnums in base grid */
+   hypre_Index           stride;       /* Grid coarsening stride */
 
    HYPRE_Complex        *data;         /* Pointer to vector data */
+   hypre_BoxArray       *data_space;   /* Layout of vector data */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of vector data */
    HYPRE_Int            *data_indices; /* num-boxes array of indices into
@@ -47,6 +54,13 @@ typedef struct hypre_StructVector_struct
 
    HYPRE_Int             ref_count;
 
+   /* Information needed to Restore() after Reindex() and Resize() */
+   hypre_StructGrid     *save_grid;
+   hypre_Index           save_stride;
+   HYPRE_Complex        *save_data;
+   hypre_BoxArray       *save_data_space;
+   HYPRE_Int             save_data_size;
+
 } hypre_StructVector;
 
 /*--------------------------------------------------------------------------
@@ -55,8 +69,11 @@ typedef struct hypre_StructVector_struct
 
 #define hypre_StructVectorComm(vector)          ((vector) -> comm)
 #define hypre_StructVectorGrid(vector)          ((vector) -> grid)
-#define hypre_StructVectorDataSpace(vector)     ((vector) -> data_space)
+#define hypre_StructVectorNBoxes(matrix)        ((vector) -> nboxes)
+#define hypre_StructVectorBoxnums(matrix)       ((vector) -> boxnums)
+#define hypre_StructVectorStride(matrix)        ((vector) -> stride)
 #define hypre_StructVectorData(vector)          ((vector) -> data)
+#define hypre_StructVectorDataSpace(vector)     ((vector) -> data_space)
 #define hypre_StructVectorDataAlloced(vector)   ((vector) -> data_alloced)
 #define hypre_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
@@ -65,6 +82,12 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
+#define hypre_StructVectorSaveGrid(vector)      ((vector) -> save_grid)
+#define hypre_StructVectorSaveStride(vector)    ((vector) -> save_stride)
+#define hypre_StructVectorSaveData(vector)      ((vector) -> save_data)
+#define hypre_StructVectorSaveDataSpace(vector) ((vector) -> save_data_space)
+#define hypre_StructVectorSaveDataSize(vector)  ((vector) -> save_data_size)
+
 #define hypre_StructVectorNDim(vector) \
 hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 

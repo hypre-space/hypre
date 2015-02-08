@@ -44,31 +44,27 @@ HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/* RDF: Need a good user interface for setting range/domain grids. Maybe a
+ * GridSetExtents approach would be the best approach. */
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
-HYPRE_StructMatrixSetDomainGrid(HYPRE_StructMatrix matrix,
-                                HYPRE_StructGrid   domain_grid)
+HYPRE_StructMatrixSetRangeStride(HYPRE_StructMatrix matrix,
+                                 HYPRE_Int         *range_stride)
 {
-   return ( hypre_StructMatrixSetDomainGrid(matrix, domain_grid) );
+   return ( hypre_StructMatrixSetRangeStride(matrix, range_stride) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_StructMatrixSetRStride(HYPRE_StructMatrix matrix,
-                             HYPRE_Int         *rstride)
+HYPRE_StructMatrixSetDomainStride(HYPRE_StructMatrix matrix,
+                                  HYPRE_Int         *domain_stride)
 {
-   return ( hypre_StructMatrixSetRStride(matrix, rstride) );
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_StructMatrixSetDStride(HYPRE_StructMatrix matrix,
-                             HYPRE_Int         *dstride)
-{
-   return ( hypre_StructMatrixSetDStride(matrix, dstride) );
+   return ( hypre_StructMatrixSetDomainStride(matrix, domain_stride) );
 }
 
 /*--------------------------------------------------------------------------

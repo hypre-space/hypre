@@ -185,7 +185,13 @@ struct hypre_StructMatrix_struct;
 typedef struct hypre_StructMatrix_struct *HYPRE_StructMatrix;
 
 /**
- * Create a matrix object.
+ * Create a matrix object.  Matrices may have different range and domain grids,
+ * that is, they need not be square.  By default, the range and domain grids are
+ * the same as {\tt grid}.  In general, the range is a coarsening of {\tt grid}
+ * as specified in \Ref{HYPRE_StructMatrixSetRangeStride}, and similarly for the
+ * domain.  Note that the range index space must either be a subspace of the
+ * domain index space or vice versa.  Also, (currently) either the range or
+ * domain coarsening factor (or both) must be all ones (i.e., no coarsening).
  **/
 HYPRE_Int HYPRE_StructMatrixCreate(MPI_Comm             comm,
                                    HYPRE_StructGrid     grid,
@@ -197,6 +203,7 @@ HYPRE_Int HYPRE_StructMatrixCreate(MPI_Comm             comm,
  **/
 HYPRE_Int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
 
+#if 0
 /**
  * (Optional) Set the domain grid.  By default, the range and domain grids are
  * the same as the argument {\tt grid} in \Ref{HYPRE_StructMatrixCreate}.  Both
@@ -210,20 +217,23 @@ HYPRE_Int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
  **/
 HYPRE_Int HYPRE_StructMatrixSetDomainGrid(HYPRE_StructMatrix matrix,
                                           HYPRE_StructGrid   domain_grid);
+#endif
+
+/* RDF: Need a good user interface for setting range/domain grids. */
 
 /**
  * (Optional) Set the range coarsening stride.  For more information, see
- * \Ref{HYPRE_StructMatrixSetDomainGrid}.
+ * \Ref{HYPRE_StructMatrixCreate}.
  **/
-HYPRE_Int HYPRE_StructMatrixSetRStride(HYPRE_StructMatrix matrix,
-                                       HYPRE_Int         *rstride);
+HYPRE_Int HYPRE_StructMatrixSetRangeStride(HYPRE_StructMatrix matrix,
+                                           HYPRE_Int         *range_stride);
 
 /**
  * (Optional) Set the domain coarsening stride.  For more information, see
- * \Ref{HYPRE_StructMatrixSetDomainGrid}.
+ * \Ref{HYPRE_StructMatrixCreate}.
  **/
-HYPRE_Int HYPRE_StructMatrixSetDStride(HYPRE_StructMatrix matrix,
-                                       HYPRE_Int         *dstride);
+HYPRE_Int HYPRE_StructMatrixSetDomainStride(HYPRE_StructMatrix matrix,
+                                            HYPRE_Int         *domain_stride);
 
 /**
  * Prepare a matrix object for setting coefficient values.

@@ -42,7 +42,8 @@
  * RDF TODO: Rewrite communication_info to use CommStencil idea (write routine
  * FromCommStencil and have FromStencil call it).
  *
- * RDF TODO: Compute symmetric matrix
+ * RDF TODO: Compute symmetric matrix.  Make sure to compute comm_pkg correctly
+ * using add_ghost or similar idea.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -53,6 +54,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
                      HYPRE_Int           *transposes,
                      hypre_StructMatrix **C_ptr )
 {
+#if 0
    hypre_StructMatrix  *C;
 
    hypre_StMatrix     **st_matrices, *st_C;
@@ -471,5 +473,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
 
    *C_ptr = C;
 
+#endif
    return hypre_error_flag;
 }

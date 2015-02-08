@@ -26,20 +26,16 @@ HYPRE_Int
 hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix,
                                 hypre_Index         dindex )
 {
-   hypre_IndexRef stride;
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
+   hypre_IndexRef stride;
 
+   stride = hypre_StructMatrixRanStride(matrix);
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixDStride(matrix);
+      stride = hypre_StructMatrixDomStride(matrix);
       hypre_SnapIndexNeg(dindex, NULL, stride, ndim);
-      hypre_MapToCoarseIndex(dindex, NULL, stride, ndim);
    }
-   else if (hypre_StructMatrixRangeIsCoarse(matrix))
-   {
-      stride = hypre_StructMatrixRStride(matrix);
-      hypre_MapToCoarseIndex(dindex, NULL, stride, ndim);
-   }
+   hypre_MapToCoarseIndex(dindex, NULL, stride, ndim);
 
    return hypre_error_flag;
 }
@@ -55,7 +51,7 @@ hypre_StructMatrixMapDataBox( hypre_StructMatrix *matrix,
 {
    if (hypre_StructMatrixRangeIsCoarse(matrix))
    {
-      hypre_ProjectBox(dbox, NULL, hypre_StructMatrixRStride(matrix));
+      hypre_ProjectBox(dbox, NULL, hypre_StructMatrixRanStride(matrix));
    }
    hypre_StructMatrixMapDataIndex(matrix, hypre_BoxIMin(dbox));
    hypre_StructMatrixMapDataIndex(matrix, hypre_BoxIMax(dbox));
@@ -70,19 +66,68 @@ HYPRE_Int
 hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix,
                                  hypre_Index         dstride )
 {
-   hypre_IndexRef stride;
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
+   hypre_IndexRef stride;
 
+   stride = hypre_StructMatrixRanStride(matrix);
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixDStride(matrix);
-      hypre_MapToCoarseIndex(dstride, NULL, stride, ndim);
+      stride = hypre_StructMatrixDomStride(matrix);
    }
-   else if (hypre_StructMatrixRangeIsCoarse(matrix))
+   hypre_MapToCoarseIndex(dstride, NULL, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixUnMapDataIndex( hypre_StructMatrix *matrix,
+                                  hypre_Index         dindex )
+{
+   HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
+   hypre_IndexRef stride;
+
+   stride = hypre_StructMatrixRanStride(matrix);
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixRStride(matrix);
-      hypre_MapToCoarseIndex(dstride, NULL, stride, ndim);
+      stride = hypre_StructMatrixDomStride(matrix);
    }
+   hypre_MapToFineIndex(dindex, NULL, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixUnMapDataBox( hypre_StructMatrix *matrix,
+                                hypre_Box          *dbox )
+{
+   hypre_StructMatrixUnMapDataIndex(matrix, hypre_BoxIMin(dbox));
+   hypre_StructMatrixUnMapDataIndex(matrix, hypre_BoxIMax(dbox));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
+                                   hypre_Index         dstride )
+{
+   HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
+   hypre_IndexRef stride;
+
+   stride = hypre_StructMatrixRanStride(matrix);
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
+   {
+      stride = hypre_StructMatrixDomStride(matrix);
+   }
+   hypre_MapToFineIndex(dstride, NULL, stride, ndim);
 
    return hypre_error_flag;
 }
@@ -126,13 +171,14 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
 
    hypre_StructMatrixComm(matrix)        = comm;
    hypre_StructGridRef(grid, &hypre_StructMatrixGrid(matrix));
-   hypre_StructGridRef(grid, &hypre_StructMatrixDomainGrid(matrix));
+   hypre_StructMatrixSetRangeBoxnums(matrix, 0, NULL);
+   hypre_SetIndex(hypre_StructMatrixRanStride(matrix), 1);
+   hypre_StructMatrixSetDomainBoxnums(matrix, 0, NULL);
+   hypre_SetIndex(hypre_StructMatrixDomStride(matrix), 1);
    hypre_StructMatrixUserStencil(matrix) =
       hypre_StructStencilRef(user_stencil);
    hypre_StructMatrixConstant(matrix) =
       hypre_CTAlloc(HYPRE_Int, hypre_StructStencilSize(user_stencil));
-   hypre_SetIndex(hypre_StructMatrixRStride(matrix), 1);
-   hypre_SetIndex(hypre_StructMatrixDStride(matrix), 1);
    hypre_StructMatrixDataAlloced(matrix) = 1;
    hypre_StructMatrixRefCount(matrix)    = 1;
 
@@ -184,15 +230,16 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
             hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
          hypre_TFree(hypre_StructMatrixDataIndices(matrix));
          
-         hypre_BoxArrayDestroy(hypre_StructMatrixDataBoxes(matrix));
          hypre_BoxArrayDestroy(hypre_StructMatrixDataSpace(matrix));
+         hypre_BoxArrayDestroy(hypre_StructMatrixDataBoxes(matrix));
          
          hypre_TFree(hypre_StructMatrixSymmEntries(matrix));
          hypre_TFree(hypre_StructMatrixConstant(matrix));
          hypre_StructStencilDestroy(hypre_StructMatrixUserStencil(matrix));
          hypre_StructStencilDestroy(hypre_StructMatrixStencil(matrix));
+         hypre_TFree(hypre_StructMatrixDomBoxnums(matrix));
+         hypre_TFree(hypre_StructMatrixRanBoxnums(matrix));
          hypre_StructGridDestroy(hypre_StructMatrixGrid(matrix));
-         hypre_StructGridDestroy(hypre_StructMatrixDomainGrid(matrix));
          
          hypre_TFree(matrix);
       }
@@ -202,15 +249,35 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * If range_boxnums == NULL, set default values
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixSetDomainGrid(hypre_StructMatrix *matrix,
-                                hypre_StructGrid   *domain_grid)
+hypre_StructMatrixSetRangeBoxnums( hypre_StructMatrix *matrix,
+                                   HYPRE_Int           range_nboxes,
+                                   HYPRE_Int          *range_boxnums )
 {
-   /* This should only decrement a reference counter */
-   hypre_StructGridDestroy(hypre_StructMatrixDomainGrid(matrix));
-   hypre_StructGridRef(domain_grid, &hypre_StructMatrixDomainGrid(matrix));
+   HYPRE_Int  *ran_boxnums;
+   HYPRE_Int   i, ran_nboxes;
+
+   ran_nboxes = hypre_StructGridNumBoxes(hypre_StructMatrixGrid(matrix));
+   if (range_boxnums != NULL)
+   {
+      ran_nboxes = range_nboxes;
+   }
+
+   ran_boxnums = hypre_StructMatrixRanBoxnums(matrix);
+   ran_boxnums = hypre_TReAlloc(ran_boxnums, HYPRE_Int, ran_nboxes);
+   for (i = 0; i < ran_nboxes; i++)
+   {
+      ran_boxnums[i] = i;
+      if (range_boxnums != NULL)
+      {
+         ran_boxnums[i] = range_boxnums[i];
+      }
+   }
+   hypre_StructMatrixRanNBoxes(matrix)  = ran_nboxes;
+   hypre_StructMatrixRanBoxnums(matrix) = ran_boxnums;
 
    return hypre_error_flag;
 }
@@ -219,11 +286,45 @@ hypre_StructMatrixSetDomainGrid(hypre_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixSetRStride(hypre_StructMatrix *matrix,
-                             HYPRE_Int          *rstride)
+hypre_StructMatrixSetRangeStride( hypre_StructMatrix *matrix,
+                                  HYPRE_Int          *range_stride )
 {
-   hypre_CopyToIndex(rstride, hypre_StructMatrixNDim(matrix),
-                     hypre_StructMatrixRStride(matrix));
+   hypre_CopyToIndex(range_stride, hypre_StructMatrixNDim(matrix),
+                     hypre_StructMatrixRanStride(matrix));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * If domain_boxnums == NULL, set default values
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSetDomainBoxnums( hypre_StructMatrix *matrix,
+                                    HYPRE_Int           domain_nboxes,
+                                    HYPRE_Int          *domain_boxnums )
+{
+   HYPRE_Int  *dom_boxnums;
+   HYPRE_Int   i, dom_nboxes;
+
+   dom_nboxes = hypre_StructGridNumBoxes(hypre_StructMatrixGrid(matrix));
+   if (domain_boxnums != NULL)
+   {
+      dom_nboxes = domain_nboxes;
+   }
+
+   dom_boxnums = hypre_StructMatrixDomBoxnums(matrix);
+   dom_boxnums = hypre_TReAlloc(dom_boxnums, HYPRE_Int, dom_nboxes);
+   for (i = 0; i < dom_nboxes; i++)
+   {
+      dom_boxnums[i] = i;
+      if (domain_boxnums != NULL)
+      {
+         dom_boxnums[i] = domain_boxnums[i];
+      }
+   }
+   hypre_StructMatrixDomNBoxes(matrix)  = dom_nboxes;
+   hypre_StructMatrixDomBoxnums(matrix) = dom_boxnums;
 
    return hypre_error_flag;
 }
@@ -232,72 +333,75 @@ hypre_StructMatrixSetRStride(hypre_StructMatrix *matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixSetDStride(hypre_StructMatrix *matrix,
-                             HYPRE_Int          *dstride)
+hypre_StructMatrixSetDomainStride( hypre_StructMatrix *matrix,
+                                   HYPRE_Int          *domain_stride )
 {
-   hypre_CopyToIndex(dstride, hypre_StructMatrixNDim(matrix),
-                     hypre_StructMatrixDStride(matrix));
+   hypre_CopyToIndex(domain_stride, hypre_StructMatrixNDim(matrix),
+                     hypre_StructMatrixDomStride(matrix));
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * This computes a data space based on num_ghost.  The routine takes into
- * account additional ghost values needed for symmetric matrices.
+ * This computes a matrix data space from a num_ghost array.  If the num_ghost
+ * argument is NULL, the matrix num_ghost is used instead.  The routine takes
+ * into account additional ghost values needed for symmetric matrices.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixDataSpaceFromNumGhost(hypre_StructMatrix *matrix,
-                                        HYPRE_Int          *num_ghost,
-                                        hypre_BoxArray    **data_boxes_ptr,
-                                        hypre_BoxArray    **data_space_ptr )
+hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
+                                    HYPRE_Int          *num_ghost,
+                                    hypre_BoxArray    **data_space_ptr )
 {
    HYPRE_Int          ndim      = hypre_StructMatrixNDim(matrix);
    hypre_StructGrid  *grid      = hypre_StructMatrixGrid(matrix);
    HYPRE_Int         *add_ghost = hypre_StructMatrixAddGhost(matrix);
-   hypre_BoxArray    *data_boxes;
    hypre_BoxArray    *data_space;
    hypre_Box         *data_box;
    HYPRE_Int          i, d;
 
-   /* Add ghost layers */
-   data_boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
-   hypre_ForBoxI(i, data_boxes)
+   if (num_ghost == NULL)
    {
-      data_box = hypre_BoxArrayBox(data_boxes, i);
+      /* Use the matrix num_ghost */
+      num_ghost = hypre_StructMatrixNumGhost(matrix);
+   }
+
+   /* Add ghost layers and map the data space */
+   data_space = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
+   hypre_ForBoxI(i, data_space)
+   {
+      data_box = hypre_BoxArrayBox(data_space, i);
       for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(data_box, d) -= num_ghost[2*d]     + add_ghost[2*d];
          hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1] + add_ghost[2*d + 1];
       }
-   }
-
-   /* If the domain or range is coarse, map the data space */
-   data_space = hypre_BoxArrayDuplicate(data_boxes);
-   hypre_ForBoxI(i, data_space)
-   {
-      data_box = hypre_BoxArrayBox(data_space, i);
       hypre_StructMatrixMapDataBox(matrix, data_box);
    }
 
-   *data_boxes_ptr = data_boxes;
    *data_space_ptr = data_space;
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
+ * This routine takes new data space information and recomputes entries in the
+ * matrix that depend on it (e.g., data_indices and data_size).  The routine
+ * will also re-allocate the matrix data if their was data to begin with.
+ *
+ * The boxes in the data_space argument may be larger (but not smaller) than
+ * those computed by the routine VectorComputeDataSpace().
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatrixResizeData(hypre_StructMatrix *matrix,
-                             hypre_BoxArray     *data_boxes,
-                             hypre_BoxArray     *data_space )
+hypre_StructMatrixResize( hypre_StructMatrix *matrix,
+                          hypre_BoxArray     *data_space )
 {
-   hypre_BoxArray       *old_data_boxes   = hypre_StructMatrixDataBoxes(matrix);
-   hypre_BoxArray       *old_data_space   = hypre_StructMatrixDataSpace(matrix);
-   HYPRE_Int           **old_data_indices = hypre_StructMatrixDataIndices(matrix);
    HYPRE_Complex        *old_data         = hypre_StructMatrixData(matrix);
+   hypre_BoxArray       *old_data_space   = hypre_StructMatrixDataSpace(matrix);
+   hypre_BoxArray       *old_data_boxes   = hypre_StructMatrixDataBoxes(matrix);
+   HYPRE_Int             old_data_size    = hypre_StructMatrixDataSize(matrix);
+   HYPRE_Int           **old_data_indices = hypre_StructMatrixDataIndices(matrix);
 
    HYPRE_Int             ndim          = hypre_StructMatrixNDim(matrix);
    hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(matrix);
@@ -306,22 +410,33 @@ hypre_StructMatrixResizeData(hypre_StructMatrix *matrix,
    HYPRE_Int            *constant      = hypre_StructMatrixConstant(matrix);
    HYPRE_Int            *symm_entries  = hypre_StructMatrixSymmEntries(matrix);
 
-   hypre_Box            *data_box;
-   HYPRE_Int           **data_indices;
    HYPRE_Complex        *data;
-
+   hypre_BoxArray       *data_boxes;
    HYPRE_Int             data_size;
+   HYPRE_Int           **data_indices;
+
+   hypre_Box            *data_box;
    HYPRE_Int             data_box_volume;
    HYPRE_Int             i, j;
 
-   /* Set data_boxes and data_space */
-   hypre_StructMatrixDataBoxes(matrix) = data_boxes;
-   hypre_StructMatrixDataSpace(matrix) = data_space;
+   if (hypre_StructMatrixSaveDataSpace(matrix) != NULL)
+   {
+      /* Call Restore or Forget first */
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Resize has already been called");
+      return hypre_error_flag;
+   }
+
+   /* Set up data_boxes */
+   data_boxes = hypre_BoxArrayDuplicate(data_space);
+   hypre_ForBoxI(i, data_boxes)
+   {
+      data_box = hypre_BoxArrayBox(data_boxes, i);
+      hypre_StructMatrixUnMapDataBox(matrix, data_box);
+   }
 
    /* Set up data_indices and data_size (constant values at the beginning) */
    data_indices = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space));
    data_size = stencil_size;
-   hypre_StructMatrixVDataOffset(matrix) = data_size;
    hypre_ForBoxI(i, data_space)
    {
       data_box = hypre_BoxArrayBox(data_space, i);
@@ -364,103 +479,133 @@ hypre_StructMatrixResizeData(hypre_StructMatrix *matrix,
       }
    }
 
-   /* If data space is of size zero, reset a few things */
-   if (hypre_BoxArraySize(data_space) == 0)
-   {
-      data_size    = 0;
-      data_indices = NULL;
-   }
-
-   hypre_StructMatrixDataSize(matrix)    = data_size;
-   hypre_StructMatrixDataIndices(matrix) = data_indices;
-
-   /* Resize data */
+   /* Copy or move old_data to data */
+   data = NULL;
    if (old_data != NULL)
    {
-      hypre_Box            *old_data_box, *int_box;
-      hypre_IndexRef        start;
-      hypre_Index           unit_stride, loop_size;
-      HYPRE_Complex        *dp, *old_dp;
-      HYPRE_Int             di, old_di;
+      HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
+      HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
+      HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
 
       data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
 
-      /* copy old_data to new data */
-      hypre_SetIndex(unit_stride, 1);
-      int_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
-      hypre_ForBoxI(i, data_space)
-      {
-         data_box = hypre_BoxArrayBox(data_space, i);
-         old_data_box = hypre_BoxArrayBox(old_data_space, i);
-         hypre_IntersectBoxes(data_box, old_data_box, int_box);
-
-         for (j = 0; j < stencil_size; j++)
-         {
-            if (symm_entries[j] < 0)
-            {
-               dp = data + data_indices[i][j];
-               old_dp = old_data + old_data_indices[i][j];
-
-               if (constant[j])
-               {
-                  dp[0] = old_dp[0];
-               }
-               else
-               {
-                  start = hypre_BoxIMin(int_box);
-                  hypre_BoxGetSize(int_box, loop_size);
-                     
-                  hypre_BoxLoop2Begin(ndim, loop_size,
-                                      data_box, start, unit_stride, di,
-                                      old_data_box, start, unit_stride, old_di);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi ) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(di, old_di)
-                  {
-                     dp[di] = old_dp[old_di];
-                  }
-                  hypre_BoxLoop2End(di, old_di);
-               }
-            }
-         }
-      }
-      hypre_BoxDestroy(int_box);
-
-      hypre_StructMatrixData(matrix) = data;
-
-      /* Free up old_data if originally allocated */
       if (hypre_StructMatrixDataAlloced(matrix))
       {
-         hypre_TFree(old_data);
+         /* copy the data */
+         hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                              data, data_space, ids, 0, ndim, nval);
+      }
+      else
+      {
+         /* move the data */
+         hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                              data, data_space, ids, 1, ndim, nval);
+         old_data = NULL;
       }
    }
 
-   /* If data space info already exists, free it up */
+   hypre_StructMatrixData(matrix)        = data;
+   hypre_StructMatrixDataSpace(matrix)   = data_space;
+   hypre_StructMatrixDataBoxes(matrix)   = data_boxes;
+   hypre_StructMatrixDataSize(matrix)    = data_size;
+   hypre_StructMatrixDataIndices(matrix) = data_indices;
+   hypre_StructMatrixVDataOffset(matrix) = stencil_size;
+
+   /* Clean up and save data */
    if (old_data_space != NULL)
    {
-      hypre_ForBoxI(i, old_data_space)
-         hypre_TFree(old_data_indices[i]);
-      hypre_TFree(old_data_indices);
       hypre_BoxArrayDestroy(old_data_boxes);
-      hypre_BoxArrayDestroy(old_data_space);
+      hypre_ForBoxI(i, old_data_space)
+      {
+         hypre_TFree(old_data_indices[i]);
+      }
+      hypre_TFree(old_data_indices);
+
+      hypre_StructMatrixSaveData(matrix)      = old_data;
+      hypre_StructMatrixSaveDataSpace(matrix) = old_data_space;
+      hypre_StructMatrixSaveDataSize(matrix)  = old_data_size;
    }
 
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * NOTE: This currently assumes that either rstride or dstride (or both) is 1.
+ * This routine restores the old data and data space.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
+{
+   HYPRE_Complex   *old_data       = hypre_StructMatrixData(matrix);
+   hypre_BoxArray  *old_data_space = hypre_StructMatrixDataSpace(matrix);
+   HYPRE_Complex   *data           = hypre_StructMatrixSaveData(matrix);
+   hypre_BoxArray  *data_space     = hypre_StructMatrixSaveDataSpace(matrix);
+   HYPRE_Int        data_size      = hypre_StructMatrixSaveDataSize(matrix);
+
+   if (data_space != NULL)
+   {
+      HYPRE_Int  *old_ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
+      HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
+      HYPRE_Int   ndim = hypre_StructMatrixNDim(matrix);
+      HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
+
+      /* Move the data */
+      if (!hypre_StructMatrixDataAlloced(matrix))
+      {
+         data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
+      }
+      hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                           data, data_space, ids, 1, ndim, nval);
+
+      /* Reset certain fields to enable the Resize call below */
+      hypre_StructMatrixSaveData(matrix)      = NULL;
+      hypre_StructMatrixSaveDataSpace(matrix) = NULL;
+      hypre_StructMatrixSaveDataSize(matrix)  = 0;
+      hypre_StructMatrixData(matrix)          = NULL;
+
+      /* Set the data space and recompute data_indices, etc. */
+      hypre_StructMatrixResize(matrix, data_space);
+      hypre_StructMatrixForget(matrix);
+
+      /* Set the data pointer */
+      hypre_StructMatrixData(matrix) = data;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine will clear data needed to do a Restore
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixForget( hypre_StructMatrix *matrix )
+{
+   hypre_BoxArray  *save_data_space = hypre_StructMatrixSaveDataSpace(matrix);
+
+   if (save_data_space != NULL)
+   {
+      hypre_BoxArrayDestroy(save_data_space);
+      hypre_StructMatrixSaveData(matrix)      = NULL;
+      hypre_StructMatrixSaveDataSpace(matrix) = NULL;
+      hypre_StructMatrixSaveDataSize(matrix)  = 0;
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * NOTE: This currently assumes that either ran_stride or dom_stride is 1.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
 hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 {
-   HYPRE_Int             ndim     = hypre_StructMatrixNDim(matrix);
-   hypre_StructGrid     *grid     = hypre_StructMatrixGrid(matrix);
-   HYPRE_Int            *constant = hypre_StructMatrixConstant(matrix);
-   hypre_IndexRef        rstride  = hypre_StructMatrixRStride(matrix);
-   hypre_IndexRef        dstride  = hypre_StructMatrixDStride(matrix);
+   HYPRE_Int             ndim       = hypre_StructMatrixNDim(matrix);
+   hypre_StructGrid     *grid       = hypre_StructMatrixGrid(matrix);
+   HYPRE_Int            *constant   = hypre_StructMatrixConstant(matrix);
+   hypre_IndexRef        ran_stride = hypre_StructMatrixRanStride(matrix);
+   hypre_IndexRef        dom_stride = hypre_StructMatrixDomStride(matrix);
 
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
@@ -469,45 +614,41 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int             num_values, num_cvalues;
    HYPRE_Int            *symm_entries;
    HYPRE_Int             domain_is_coarse;
-                    
-   HYPRE_Int            *num_ghost, *add_ghost;
- 
-   hypre_BoxArray       *data_boxes;
    hypre_BoxArray       *data_space;
-
+   HYPRE_Int            *add_ghost;
    HYPRE_Int             i, j, d;
 
    /*-----------------------------------------------------------------------
-    * First, check consistency of rstride, dstride, and symmetric.
+    * First, check consistency of ran_stride, dom_stride, and symmetric.
     *-----------------------------------------------------------------------*/
 
    /* domain_is_coarse={0,1,-1,-2} -> coarse grid={range,domain,neither,error} */
    domain_is_coarse = -1;
    for (d = 0; d < ndim; d++)
    {
-      if (rstride[d] > dstride[d])
+      if (ran_stride[d] > dom_stride[d])
       {
-         if ((domain_is_coarse == 1) || (rstride[d]%dstride[d] != 0))
+         if ((domain_is_coarse == 1) || (ran_stride[d] % dom_stride[d] != 0))
          {
             domain_is_coarse = -2;
             break;
          }
          else
          {
-            /* Range grid is a subset of domain grid */
+            /* Range index space is coarsest */
             domain_is_coarse = 0;
          }
       }
-      else if (dstride[d] > rstride[d])
+      else if (dom_stride[d] > ran_stride[d])
       {
-         if ((domain_is_coarse == 0) || (dstride[d]%rstride[d] != 0))
+         if ((domain_is_coarse == 0) || (dom_stride[d] % ran_stride[d] != 0))
          {
             domain_is_coarse = -2;
             break;
          }
          else
          {
-            /* Domain grid is a subset of range grid */
+            /* Domain index space is coarsest */
             domain_is_coarse = 1;
          }
       }
@@ -651,11 +792,9 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
 
    if (hypre_StructMatrixDataSpace(matrix) == NULL)
    {
-      num_ghost = hypre_StructMatrixNumGhost(matrix);
-      hypre_StructMatrixDataSpaceFromNumGhost(matrix, num_ghost,
-                                              &data_boxes, &data_space);
-
-      hypre_StructMatrixResizeData(matrix, data_boxes, data_space);
+      hypre_StructMatrixComputeDataSpace(matrix, NULL, &data_space);
+      hypre_StructMatrixResize(matrix, data_space);
+      hypre_StructMatrixForget(matrix);
    }
 
    /*-----------------------------------------------------------------------
@@ -1266,7 +1405,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    comm_pkg = hypre_StructMatrixCommPkg(matrix);
 
-   if (!comm_pkg)
+   if ((!comm_pkg) && (num_values > 0))
    {
       HYPRE_Int  *num_ghost = hypre_StructMatrixNumGhost(matrix);
       HYPRE_Int  *add_ghost = hypre_StructMatrixAddGhost(matrix);
@@ -1497,6 +1636,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * RDF TODO: This currently only works correctly for square matrices
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1513,7 +1653,7 @@ hypre_StructMatrixPrint( const char         *filename,
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
-   hypre_IndexRef        rstride, dstride;
+   hypre_IndexRef        ran_stride, dom_stride;
    hypre_BoxArray       *data_space;
    HYPRE_Int            *symm_entries, *value_ids, *cvalue_ids;
    HYPRE_Int             ndim, num_values, num_cvalues;
@@ -1552,18 +1692,18 @@ hypre_StructMatrixPrint( const char         *filename,
    grid = hypre_StructMatrixGrid(matrix);
    hypre_StructGridPrint(file, grid);
 
-   /* print rstride and dstride info */
+   /* print ran_stride and dom_stride info */
    hypre_fprintf(file, "\nRange Stride: ");
-   rstride = hypre_StructMatrixRStride(matrix);
+   ran_stride = hypre_StructMatrixRanStride(matrix);
    for (d = 0; d < ndim; d++)
    {
-      hypre_fprintf(file, " %d", hypre_IndexD(rstride, d));
+      hypre_fprintf(file, " %d", hypre_IndexD(ran_stride, d));
    }
    hypre_fprintf(file, "\nDomain Stride:");
-   dstride = hypre_StructMatrixDStride(matrix);
+   dom_stride = hypre_StructMatrixDomStride(matrix);
    for (d = 0; d < ndim; d++)
    {
-      hypre_fprintf(file, " %d", hypre_IndexD(dstride, d));
+      hypre_fprintf(file, " %d", hypre_IndexD(dom_stride, d));
    }
    hypre_fprintf(file, "\n");
 
@@ -1659,36 +1799,6 @@ hypre_StructMatrixPrint( const char         *filename,
  
    fflush(file);
    fclose(file);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * Based on the entries in 'stencil', this routine adds an appropriate amount of
- * ghost laters to 'matrix' and fills them with correct values from neighboring
- * processors.  The stencil is relative to the fine index space.  Some ghost
- * data values may not be updated, depending on the stencil.  Constant valued
- * data is not communicated.  A data reallocation and copy is required.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int 
-hypre_StructMatrixGrowByStencil( hypre_StructMatrix  *matrix,
-                                 hypre_StructStencil *stencil )
-{
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * This routine shrinks the ghost layers in a matrix to the value set by either
- * StructMatrixSetNumGhost() or StructMatrixSetOneGhost().  A data reallocation
- * and copy is required.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int 
-hypre_StructMatrixShrink( hypre_StructMatrix  *matrix )
-{
-   /* RDF */
 
    return hypre_error_flag;
 }

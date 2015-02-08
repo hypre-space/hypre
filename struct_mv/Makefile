@@ -56,6 +56,7 @@ FILES =\
  struct_axpy.c\
  struct_communication.c\
  struct_copy.c\
+ struct_data.c\
  struct_grid.c\
  struct_innerprod.c\
  struct_io.c\
