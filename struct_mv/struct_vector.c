@@ -156,6 +156,7 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
          hypre_TFree(hypre_StructVectorBoxnums(vector));
          hypre_StructGridDestroy(hypre_StructVectorGrid(vector));
+         hypre_StructVectorForget(vector);
          hypre_TFree(vector);
       }
    }
@@ -331,16 +332,16 @@ hypre_StructVectorResize( hypre_StructVector *vector,
 
       if (hypre_StructVectorDataAlloced(vector))
       {
-         /* copy the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 0, ndim, 1);
-      }
-      else
-      {
          /* move the data */
          hypre_StructDataCopy(old_data, old_data_space, old_ids,
                               data, data_space, ids, 1, ndim, 1);
          old_data = NULL;
+      }
+      else
+      {
+         /* copy the data */
+         hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                              data, data_space, ids, 0, ndim, 1);
       }
    }
 
@@ -354,8 +355,12 @@ hypre_StructVectorResize( hypre_StructVector *vector,
    {
       hypre_TFree(old_data_indices);
 
-      hypre_StructVectorSaveGrid(vector)      = old_grid;
-      hypre_CopyIndex(old_stride, hypre_StructVectorSaveStride(vector));
+      /* If Reindex() has not been called, save a copy of the grid info */
+      if (hypre_StructVectorSaveGrid(vector) == NULL)
+      {
+         hypre_StructGridRef(old_grid, &hypre_StructVectorSaveGrid(vector));
+         hypre_CopyIndex(old_stride, hypre_StructVectorSaveStride(vector));
+      }
       hypre_StructVectorSaveData(vector)      = old_data;
       hypre_StructVectorSaveDataSpace(vector) = old_data_space;
       hypre_StructVectorSaveDataSize(vector)  = old_data_size;
@@ -387,7 +392,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       HYPRE_Int   ndim = hypre_StructVectorNDim(vector);
 
       /* Move the data */
-      if (!hypre_StructVectorDataAlloced(vector))
+      if (hypre_StructVectorDataAlloced(vector))
       {
          data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
       }

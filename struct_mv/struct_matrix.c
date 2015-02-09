@@ -240,6 +240,7 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          hypre_TFree(hypre_StructMatrixDomBoxnums(matrix));
          hypre_TFree(hypre_StructMatrixRanBoxnums(matrix));
          hypre_StructGridDestroy(hypre_StructMatrixGrid(matrix));
+         hypre_StructMatrixForget(matrix);
          
          hypre_TFree(matrix);
       }
@@ -491,16 +492,16 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
 
       if (hypre_StructMatrixDataAlloced(matrix))
       {
-         /* copy the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 0, ndim, nval);
-      }
-      else
-      {
          /* move the data */
          hypre_StructDataCopy(old_data, old_data_space, old_ids,
                               data, data_space, ids, 1, ndim, nval);
          old_data = NULL;
+      }
+      else
+      {
+         /* copy the data */
+         hypre_StructDataCopy(old_data, old_data_space, old_ids,
+                              data, data_space, ids, 0, ndim, nval);
       }
    }
 
@@ -550,7 +551,7 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
 
       /* Move the data */
-      if (!hypre_StructMatrixDataAlloced(matrix))
+      if (hypre_StructMatrixDataAlloced(matrix))
       {
          data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
       }

@@ -822,16 +822,6 @@ main( hypre_int  argc,
    for (vi = 0; vi < data.nvectors; vi++)
    {
       HYPRE_StructGridCoarsen(grid, data.vector_strides[vi], &vgrids[vi]);
-#if DEBUG
-      {
-         HYPRE_Int num_ghost[2*MAXDIM];
-         for (i = 0; i < 2*MAXDIM; i++)
-         {
-            num_ghost[i] = 0;
-         }
-         HYPRE_StructGridSetNumGhost(vgrids[vi], num_ghost);
-      }
-#endif
 
       HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, vgrids[vi], &vectors[vi]);
       HYPRE_StructVectorInitialize(vectors[vi]);
@@ -878,6 +868,25 @@ main( hypre_int  argc,
       hypre_BeginTiming(time_index);
 
 #if DEBUG
+      /* First, set num_ghost to zero for both x and y */
+      {
+         HYPRE_Int        num_ghost[2*MAXDIM];
+         hypre_BoxArray  *data_space;
+
+         for (i = 0; i < 2*MAXDIM; i++)
+         {
+            num_ghost[i] = 0;
+         }
+         hypre_StructVectorComputeDataSpace(vectors[mv_x], num_ghost, &data_space);
+         hypre_StructVectorResize(vectors[mv_x], data_space);
+         hypre_StructVectorComputeDataSpace(vectors[mv_y], num_ghost, &data_space);
+         hypre_StructVectorResize(vectors[mv_y], data_space);
+         hypre_StructVectorForget(vectors[mv_x]);
+         hypre_StructVectorForget(vectors[mv_y]);
+         HYPRE_StructVectorPrint("zvec-x-resize0", vectors[mv_x], 1);
+         HYPRE_StructVectorPrint("zvec-y-resize0", vectors[mv_y], 1);
+      }
+      /* Now, test reindex, etc. and add appropriate num_ghost */
       {
          HYPRE_Int       *num_ghost;
          hypre_BoxArray  *data_space;
@@ -886,13 +895,19 @@ main( hypre_int  argc,
          hypre_StructNumGhostFromStencil(stencils[mv_A], &num_ghost);
          hypre_StructVectorComputeDataSpace(vectors[mv_x], num_ghost, &data_space);
          hypre_StructVectorResize(vectors[mv_x], data_space);
-         HYPRE_StructVectorPrint("zvec-resize", vectors[mv_x], 1);
+         HYPRE_StructVectorPrint("zvec-x-resize1", vectors[mv_x], 1);
          hypre_StructVectorRestore(vectors[mv_x]);
-         HYPRE_StructVectorPrint("zvec-restore", vectors[mv_x], 1);
+         HYPRE_StructVectorPrint("zvec-x-restore0", vectors[mv_x], 1);
 
          hypre_StructVectorComputeDataSpace(vectors[mv_x], num_ghost, &data_space);
          hypre_StructVectorResize(vectors[mv_x], data_space);
-         HYPRE_StructVectorPrint("zzvec-resize", vectors[mv_x], 1);
+         HYPRE_StructVectorPrint("zvec-x-resize2", vectors[mv_x], 1);
+
+         /* Currently need to add ghost to y (but shouldn't in the future) */
+         hypre_StructVectorComputeDataSpace(vectors[mv_y], num_ghost, &data_space);
+         hypre_StructVectorResize(vectors[mv_y], data_space);
+         hypre_StructVectorForget(vectors[mv_y]);
+         HYPRE_StructVectorPrint("zvec-y-resize1", vectors[mv_y], 1);
 
          hypre_TFree(num_ghost);
       }

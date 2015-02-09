@@ -270,6 +270,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          }
          hypre_BoxLoop2End(vc, vf);
       }
+      hypre_StructVectorAssemble(xtmp);
    }
 
    stencil       = hypre_StructMatrixStencil(A);
