@@ -133,6 +133,43 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixMapCommInfo( hypre_StructMatrix *matrix,
+                               hypre_CommInfo     *comm_info )
+{
+   hypre_BoxArrayArray  *boxaa;
+   hypre_BoxArray       *boxa;
+   hypre_Box            *box;
+   HYPRE_Int             i, j;
+
+   boxaa = hypre_CommInfoSendBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructMatrixMapDataBox(matrix, box);
+      }
+   }
+
+   boxaa = hypre_CommInfoSendRBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructMatrixMapDataBox(matrix, box);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Returns a pointer to data in `matrix' coresponding to the stencil offset
  * specified by `index'. If index does not exist in the matrix stencil, the NULL
  * pointer is returned.
@@ -391,7 +428,7 @@ hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
  * will also re-allocate the matrix data if their was data to begin with.
  *
  * The boxes in the data_space argument may be larger (but not smaller) than
- * those computed by the routine VectorComputeDataSpace().
+ * those computed by the routine MatrixComputeDataSpace().
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

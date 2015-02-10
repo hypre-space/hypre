@@ -2347,6 +2347,7 @@ HYPRE_Int  hypre_StructMatrixMapDataStride ( hypre_StructMatrix *matrix , hypre_
 HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix , hypre_Index dindex );
 HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix , hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix , hypre_Index dstride );
+HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix , hypre_CommInfo *comm_info );
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );
 hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
@@ -2403,6 +2404,7 @@ HYPRE_Int hypre_StructVectorMapDataStride ( hypre_StructVector *vector , hypre_I
 HYPRE_Int hypre_StructVectorUnMapDataIndex ( hypre_StructVector *vector , hypre_Index dindex );
 HYPRE_Int hypre_StructVectorUnMapDataBox ( hypre_StructVector *vector , hypre_Box *dbox );
 HYPRE_Int hypre_StructVectorUnMapDataStride ( hypre_StructVector *vector , hypre_Index dstride );
+HYPRE_Int hypre_StructVectorMapCommInfo ( hypre_StructVector *vector , hypre_CommInfo *comm_info );
 hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm , hypre_StructGrid *grid );
 hypre_StructVector *hypre_StructVectorRef ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorDestroy ( hypre_StructVector *vector );

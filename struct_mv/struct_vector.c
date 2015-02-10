@@ -99,6 +99,43 @@ hypre_StructVectorUnMapDataStride( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+HYPRE_Int 
+hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
+                               hypre_CommInfo     *comm_info )
+{
+   hypre_BoxArrayArray  *boxaa;
+   hypre_BoxArray       *boxa;
+   hypre_Box            *box;
+   HYPRE_Int             i, j;
+
+   boxaa = hypre_CommInfoSendBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructVectorMapDataBox(vector, box);
+      }
+   }
+
+   boxaa = hypre_CommInfoSendRBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructVectorMapDataBox(vector, box);
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 hypre_StructVector *
 hypre_StructVectorCreate( MPI_Comm          comm,
                           hypre_StructGrid *grid )
