@@ -579,7 +579,7 @@ hypre_BoomerAMG_MyCreateS(hypre_ParCSRMatrix  *A,
 /**
  * Initialize the IJBuffer counters
  **/
-static inline HYPRE_Int
+HYPRE_Int
 hypre_NonGalerkinIJBufferInit( HYPRE_Int     *ijbuf_cnt,           /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
                                HYPRE_Int     *ijbuf_rowcounter,
                                HYPRE_Int     *ijbuf_numcols )
@@ -598,7 +598,7 @@ hypre_NonGalerkinIJBufferInit( HYPRE_Int     *ijbuf_cnt,           /* See NonGal
 /**
  * Update the buffer counters 
  **/
-static inline HYPRE_Int
+HYPRE_Int
 hypre_NonGalerkinIJBufferNewRow(HYPRE_Int     *ijbuf_rownums, /* See NonGalerkinIJBufferWrite for parameter descriptions */
                                 HYPRE_Int     *ijbuf_numcols, 
                                 HYPRE_Int     *ijbuf_rowcounter, 
@@ -625,7 +625,7 @@ hypre_NonGalerkinIJBufferNewRow(HYPRE_Int     *ijbuf_rownums, /* See NonGalerkin
 /**
  * Compress the current row in an IJ Buffer by removing duplicate entries 
  **/
-static inline HYPRE_Int
+HYPRE_Int
 hypre_NonGalerkinIJBufferCompressRow( HYPRE_Int      *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
                                       HYPRE_Int      ijbuf_rowcounter, 
                                       HYPRE_Real     *ijbuf_data, 
@@ -667,7 +667,7 @@ hypre_NonGalerkinIJBufferCompressRow( HYPRE_Int      *ijbuf_cnt,      /* See Non
 /**
  * Compress the entire buffer, removing duplicate rows
  **/
-static inline HYPRE_Int
+HYPRE_Int
 hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
                                    HYPRE_Int      *ijbuf_cnt,      /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
                                    HYPRE_Int      *ijbuf_rowcounter, 
@@ -800,7 +800,7 @@ hypre_NonGalerkinIJBufferCompress( HYPRE_Int      ijbuf_size,
  * In effect, this buffers this operation
  *  A[row_to_write, col_to_write] += val_to_write 
  **/
-static inline HYPRE_Int
+HYPRE_Int
 hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled matrix to add an entry to */
                                 HYPRE_Int    *ijbuf_cnt,          /* current buffer size */ 
                                 HYPRE_Int     ijbuf_size,         /* max buffer size */
@@ -865,7 +865,7 @@ hypre_NonGalerkinIJBufferWrite( HYPRE_IJMatrix B,                 /* Unassembled
 /**
  * Empty the IJ Buffer with a final AddToValues.
  **/
-static inline HYPRE_Int
+HYPRE_Int
 hypre_NonGalerkinIJBufferEmpty(HYPRE_IJMatrix B,             /* See NonGalerkinIJBufferWrite for parameter descriptions */ 
                                HYPRE_Int      ijbuf_size,
                                HYPRE_Int      *ijbuf_cnt, 
