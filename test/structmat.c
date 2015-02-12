@@ -892,6 +892,9 @@ main( hypre_int  argc,
          hypre_BoxArray  *data_space;
 
          hypre_StructVectorReindex(vectors[mv_x], grid, data.vector_strides[mv_x]);
+         hypre_StructVectorRestore(vectors[mv_x]);
+
+         hypre_StructVectorReindex(vectors[mv_x], grid, data.vector_strides[mv_x]);
          hypre_StructNumGhostFromStencil(stencils[mv_A], &num_ghost);
          hypre_StructVectorComputeDataSpace(vectors[mv_x], num_ghost, &data_space);
          hypre_StructVectorResize(vectors[mv_x], data_space);

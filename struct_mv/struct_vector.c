@@ -456,6 +456,15 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       /* Set the data pointer */
       hypre_StructVectorData(vector) = data;
    }
+   else if (old_grid != NULL)
+   {
+      /* Only a Reindex was called */
+      hypre_StructVectorSaveGrid(vector) = NULL;
+      hypre_StructGridDestroy(old_grid);
+      hypre_StructVectorGrid(vector) = grid;
+      hypre_StructVectorSetBoxnums(vector, 0, NULL);
+      hypre_CopyIndex(stride, hypre_StructVectorStride(vector));
+   }
 
    return hypre_error_flag;
 }
