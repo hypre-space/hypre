@@ -11,9 +11,6 @@
 #EHEADER**********************************************************************
 
 
-
-
-
 include ../config/Makefile.config
 
 # Python support.
@@ -57,7 +54,7 @@ all:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 	cp -fR ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
@@ -71,7 +68,7 @@ install:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 	cp -fR ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
@@ -84,7 +81,7 @@ clean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 
@@ -94,7 +91,7 @@ distclean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 
