@@ -23,16 +23,6 @@ HYPRE_Int AddValuesVector( hypre_StructGrid   *grid,
                            hypre_StructVector *vector,
                            HYPRE_Real          value );
 
-#if 0
-HYPRE_Int HYPRE_StructVectorGetMigrateCommPkg(HYPRE_StructVector  from_vector,
-                                              HYPRE_StructVector  to_vector,
-                                              HYPRE_CommPkg      *comm_pkg);
-HYPRE_Int HYPRE_StructVectorMigrate(HYPRE_CommPkg      comm_pkg,
-                                    HYPRE_StructVector from_vector,
-                                    HYPRE_StructVector to_vector);
-HYPRE_Int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
-#endif
-
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  *--------------------------------------------------------------------------*/
@@ -53,7 +43,7 @@ main( hypre_int argc,
    HYPRE_Int           bx, by, bz;
 
    HYPRE_StructGrid    from_grid, to_grid;
-   HYPRE_StructVector  from_vector, to_vector;
+   HYPRE_StructVector  from_vector, to_vector, check_vector;
    HYPRE_CommPkg       comm_pkg;
 
    HYPRE_Int           time_index;
@@ -66,6 +56,8 @@ main( hypre_int argc,
    HYPRE_Int           istart[3];
    HYPRE_Int           i, ix, iy, iz, ib;
    HYPRE_Int           print_system = 0;
+
+   HYPRE_Real          check;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -340,6 +332,12 @@ main( hypre_int argc,
    AddValuesVector(to_grid, to_vector, 0.0);
    HYPRE_StructVectorAssemble(to_vector);
 
+   /* Vector used to check the migration */
+   HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, to_grid, &check_vector);
+   HYPRE_StructVectorInitialize(check_vector);
+   AddValuesVector(to_grid, check_vector, 1.0);
+   HYPRE_StructVectorAssemble(check_vector);
+
    /*-----------------------------------------------------------
     * Migrate
     *-----------------------------------------------------------*/
@@ -354,6 +352,18 @@ main( hypre_int argc,
    hypre_EndTiming(time_index);
    hypre_PrintTiming("Struct Migrate", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
+
+   /*-----------------------------------------------------------
+    * Check the migration and print the result
+    *-----------------------------------------------------------*/
+
+   hypre_StructAxpy(-1.0, to_vector, check_vector);
+   check = hypre_StructInnerProd (check_vector, check_vector);
+
+   if (myid == 0)
+   {
+      printf("\nCheck = %1.0f (success = 0)\n\n", check);
+   }
 
    /*-----------------------------------------------------------
     * Print out the vectors
@@ -384,6 +394,7 @@ main( hypre_int argc,
 
    HYPRE_StructVectorDestroy(from_vector);
    HYPRE_StructVectorDestroy(to_vector);
+   HYPRE_StructVectorDestroy(check_vector);
 
    /* Finalize MPI */
    hypre_MPI_Finalize();
