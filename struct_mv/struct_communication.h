@@ -14,6 +14,20 @@
 #define hypre_COMMUNICATION_HEADER
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_CommStencil_struct
+{
+   HYPRE_Int   ndim;
+   hypre_Box  *box;                 /* extents of data array */
+   HYPRE_Int  *data;                /* non-zero values indicate communication */
+   hypre_Index stride;
+   HYPRE_Int   mgrow[HYPRE_MAXDIM]; /* amount to grow in the minus direction */
+   HYPRE_Int   pgrow[HYPRE_MAXDIM]; /* amount to grow in the plus direction */
+
+} hypre_CommStencil;
+
+/*--------------------------------------------------------------------------
  *
  * For "reverse" communication, the following are not needed (may be NULL)
  *    send_rboxnums, send_rboxes, send_transforms
@@ -145,7 +159,18 @@ typedef struct hypre_CommHandle_struct
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_CommInto
+ * Accessor macros: hypre_CommStencil
+ *--------------------------------------------------------------------------*/
+ 
+#define hypre_CommStencilNDim(cstenc)   (cstenc -> ndim)
+#define hypre_CommStencilBox(cstenc)    (cstenc -> box)
+#define hypre_CommStencilData(cstenc)   (cstenc -> data)
+#define hypre_CommStencilStride(cstenc) (cstenc -> stride)
+#define hypre_CommStencilMGrow(cstenc)  (cstenc -> mgrow)
+#define hypre_CommStencilPGrow(cstenc)  (cstenc -> pgrow)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_CommInfo
  *--------------------------------------------------------------------------*/
  
 #define hypre_CommInfoNDim(info)           (info -> ndim)
