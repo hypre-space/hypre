@@ -66,6 +66,9 @@ target_link_libraries (ams_driver ${HYPRE_LIBS})
 add_executable (maxwell_unscaled maxwell_unscaled.c)
 target_link_libraries (maxwell_unscaled ${HYPRE_LIBS})
  
+add_executable (struct_migrate struct_migrate.c)
+target_link_libraries (struct_migrate ${HYPRE_LIBS})
+ 
 add_executable (sstruct_fac sstruct_fac.c)
 target_link_libraries (sstruct_fac ${HYPRE_LIBS})
  
