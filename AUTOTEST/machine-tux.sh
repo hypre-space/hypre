@@ -52,14 +52,24 @@ co=""
 test.sh basictest.sh $src_dir -co: $co -mo: $mo
 renametest.sh basictest $output_dir/basictest-default
 
-co="--with-insure --enable-debug --with-print-errors"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
-renametest.sh basictest $output_dir/basictest--with-insure
+co="--enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: $eo
+renametest.sh basictest $output_dir/basictest-debug1
 
-co="--enable-global-partition --with-insure"
-RO="-ams -ij -sstruct -struct -fac"
+co="--enable-debug --enable-global-partition"
+RO="-fac"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
-renametest.sh basictest $output_dir/basictest--enable-global-partition
+renametest.sh basictest $output_dir/basictest-debug2
+
+co="--with-insure --enable-debug --with-print-errors"
+MO="test"
+test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+renametest.sh basictest $output_dir/basictest--with-insure1
+
+co="--with-insure --enable-debug --enable-global-partition"
+MO="test"
+test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+renametest.sh basictest $output_dir/basictest--with-insure2
 
 co="--without-MPI"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo

@@ -92,7 +92,7 @@ all:
 	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
-	  (cd $$i && $(MAKE) $@); \
+	  (cd $$i && $(MAKE) $@) || exit 1; \
 	  echo ""; \
 	done
 
@@ -187,7 +187,7 @@ clean:
 	  if [ -f $$i/Makefile ]; \
 	  then \
 	    echo "Cleaning $$i ..."; \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 	rm -rf tca.map pchdir *inslog*
@@ -200,7 +200,7 @@ distclean:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Dist-Cleaning $$i ..."; \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 	rm -rf tca.map pchdir *inslog*

@@ -592,6 +592,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    HYPRE_Int         *recvcounts;
    HYPRE_Int         *displs;
    HYPRE_Int          recvbuf_size;
+   HYPRE_Int          item_size;
                      
    HYPRE_Int          i, p, b, d;
 
@@ -603,7 +604,8 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    hypre_MPI_Comm_rank(comm, &my_rank);
 
    /* compute recvcounts and displs */
-   sendcount = 7*hypre_BoxArraySize(boxes);
+   item_size = 2*ndim + 1;
+   sendcount = item_size*hypre_BoxArraySize(boxes);
    recvcounts = hypre_SharedTAlloc(HYPRE_Int, num_all_procs);
    displs = hypre_TAlloc(HYPRE_Int, num_all_procs);
    hypre_MPI_Allgather(&sendcount, 1, HYPRE_MPI_INT,
@@ -645,7 +647,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
     *-----------------------------------------------------*/
 
    /* unpack recvbuf box info */
-   all_boxes_size = recvbuf_size / 7;
+   all_boxes_size = recvbuf_size / item_size;
    all_boxes   = hypre_BoxArrayCreate(all_boxes_size, ndim);
    all_procs   = hypre_TAlloc(HYPRE_Int, all_boxes_size);
    first_local = -1;
