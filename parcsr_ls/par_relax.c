@@ -4322,6 +4322,7 @@ HYPRE_Int n;
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;
    HYPRE_Real factor;
+   HYPRE_Real divA;
    
    if (n==1)                           /* A is 1x1 */  
    {
@@ -4342,11 +4343,12 @@ HYPRE_Int n;
       {
           if (A[k*n+k] != 0.0)
           {          
+             divA = 1.0/A[k*n+k];
              for (j = k+1; j < n; j++)
              {
                  if (A[j*n+k] != 0.0)
                  {
-                    factor = A[j*n+k]/A[k*n+k];
+                    factor = A[j*n+k]*divA;
                     for (m = k+1; m < n; m++)
                     {
                         A[j*n+m]  -= factor * A[k*n+m];
@@ -4360,16 +4362,19 @@ HYPRE_Int n;
                                     /* Back Substitution  */
        for (k = n-1; k > 0; --k)
        {
-           x[k] /= A[k*n+k];
-           for (j = 0; j < k; j++)
-           {
-               if (A[j*n+k] != 0.0)
-               {
-                  x[j] -= x[k] * A[j*n+k];
-               }
+          if (A[k*n+k] != 0.0)
+          {          
+              x[k] /= A[k*n+k];
+              for (j = 0; j < k; j++)
+              {
+                  if (A[j*n+k] != 0.0)
+                  {
+                     x[j] -= x[k] * A[j*n+k];
+                  }
+              }
            }
        }
-       x[0] /= A[0];
+       if (A[0] != 0.0) x[0] /= A[0];
        return(err_flag);
     }
 }
