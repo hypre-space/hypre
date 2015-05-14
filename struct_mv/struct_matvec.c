@@ -446,7 +446,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             }
             /*hypre_ForBoxArrayI(i, compute_box_aa) */
             {
-               hypre_Index A_start;
+               hypre_IndexRef A_start;
                hypre_IndexRef x_start;
 
                compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, ci);
@@ -469,6 +469,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      hypre_BoxGetSize(compute_box, loop_size);
                      x_start  = hypre_BoxIMin(compute_box);
                      start  = hypre_BoxIMin(compute_box);
+                     A_start  = hypre_BoxIMin(compute_box);
                   }
                   dom_stride = hypre_StructMatrixDomStride(A);
                   ran_stride = hypre_StructMatrixRanStride(A);
