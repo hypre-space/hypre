@@ -39,6 +39,7 @@ HYPRE_Int
 hypre_StructVectorMapDataBox( hypre_StructVector *vector,
                               hypre_Box          *dbox )
 {
+   hypre_ProjectBox(dbox, NULL, hypre_StructVectorStride(vector));
    hypre_StructVectorMapDataIndex(vector, hypre_BoxIMin(dbox));
    hypre_StructVectorMapDataIndex(vector, hypre_BoxIMax(dbox));
 
@@ -120,6 +121,28 @@ hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
    }
 
    boxaa = hypre_CommInfoSendRBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructVectorMapDataBox(vector, box);
+      }
+   }
+
+   boxaa = hypre_CommInfoRecvBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructVectorMapDataBox(vector, box);
+      }
+   }
+
+   boxaa = hypre_CommInfoRecvRBoxes(comm_info);
    hypre_ForBoxArrayI(i, boxaa)
    {
       boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
@@ -308,7 +331,7 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  * This routine takes new data space information and recomputes entries in the
  * vector that depend on it (e.g., data_indices and data_size).  The routine
- * will also re-allocate the vector data if their was data to begin with.
+ * will also re-allocate the vector data if there was data to begin with.
  *
  * The boxes in the data_space argument may be larger (but not smaller) than
  * those computed by the routine VectorComputeDataSpace().
