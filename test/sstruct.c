@@ -4919,6 +4919,8 @@ main( hypre_int argc,
 
    else if ( solver_id == 205 )
    {
+      HYPRE_StructVector  sr;
+
       time_index = hypre_InitializeTiming("CycRed Setup");
       hypre_BeginTiming(time_index);
 
@@ -4944,7 +4946,19 @@ main( hypre_int argc,
       hypre_ClearTiming();
 
       num_iterations = 1;
-      final_res_norm = 0.0;
+      HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD,
+                               hypre_StructVectorGrid(sb), &sr);
+      HYPRE_StructVectorInitialize(sr);
+      HYPRE_StructVectorAssemble(sr);
+      HYPRE_StructVectorCopy(sb, sr);
+      hypre_StructMatvec(-1.0, sA, sx, 1.0, sr);
+      /* Using an inner product instead of a norm to help with testing */
+      final_res_norm = hypre_StructInnerProd(sr, sr);
+      if (final_res_norm < 1.0e-20)
+      {
+         final_res_norm = 0.0;
+      }
+      HYPRE_StructVectorDestroy(sr);
 
       HYPRE_StructCycRedDestroy(struct_solver);
    }
