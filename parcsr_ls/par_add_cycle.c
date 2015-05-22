@@ -52,6 +52,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    HYPRE_Int       simple;
    HYPRE_Int       i, num_rows;
    HYPRE_Int       n_global;
+   HYPRE_Int       rlx_order;
 
  /* Local variables  */ 
    HYPRE_Int       Solve_err_flag = 0;
@@ -105,6 +106,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    grid_relax_type   = hypre_ParAMGDataGridRelaxType(amg_data);
    relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
    omega             = hypre_ParAMGDataOmega(amg_data);
+   rlx_order         = hypre_ParAMGDataRelaxOrder(amg_data);
 
    /* Initialize */
 
@@ -151,7 +153,9 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
 
          else if (rlx_down != 18)
          {
-            hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_down,0,
+            /*hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_down,0,*/
+            hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
+	     CF_marker_array[fine_grid], rlx_down,rlx_order,1,
              relax_weight[fine_grid], omega[fine_grid],
              l1_norms_lvl, U_array[fine_grid], Vtemp, Ztemp);
             hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
@@ -234,10 +238,25 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);            
          if (rlx_up != 18)
-            hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_up,0,
+            /*hypre_BoomerAMGRelax(A_array[fine_grid],F_array[fine_grid],NULL,rlx_up,0,*/
+            hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
+		CF_marker_array[fine_grid],
+		rlx_up,rlx_order,2,
                 relax_weight[fine_grid], omega[fine_grid],
                 l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
-         else
+         else if (rlx_order)
+         {
+            HYPRE_Int loc_relax_points[2];
+            loc_relax_points[0] = -1;
+            loc_relax_points[1] = 1;
+            for (i=0; i < 2; i++)
+                hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid],F_array[fine_grid],
+                                            CF_marker_array[fine_grid],
+                                            loc_relax_points[i],
+                                            1.0, l1_norms[fine_grid],
+                                            U_array[fine_grid], Vtemp);
+         }
+         else 
             hypre_ParCSRRelax(A_array[fine_grid], F_array[fine_grid],
                                  1, 1, l1_norms[fine_grid],
                                  1.0, 1.0 ,0,0,0,0,
