@@ -2994,6 +2994,100 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                        HYPRE_Real   *norm);
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*
+ * @name SysTG Solver
+ **/                                                       
+
+
+HYPRE_Int HYPRE_SysTGCreate( HYPRE_Solver *solver );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGDestroy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SysTGDestroy( HYPRE_Solver solver );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SysTGSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SysTGSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetBlockData
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SysTGSetBlockData( HYPRE_Solver solver,
+                         HYPRE_Int  block_size, 
+                         HYPRE_Int num_coarse_points, 
+                         HYPRE_Int  *block_coarse_indexes);
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetMaxCoarseLevels
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetBlockSize
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetRelaxType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetNumRelaxSweeps
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetNumInterpSweeps
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );                         
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetCoarseSolver
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_SysTGSetCoarseSolver(HYPRE_Solver          solver,
+                             HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
+                             HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
+                             HYPRE_Solver          coarse_grid_solver );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetLogging
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetLogging( HYPRE_Solver solver, HYPRE_Int logging );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetMaxIters
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetConvTol
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol );
+/*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/
 
