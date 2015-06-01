@@ -625,3 +625,37 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
 
    return C;
 }
+
+static HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBoundary(hypre_CSRMatrix *A, HYPRE_Int idx)
+{
+   HYPRE_Int num_nonzerosA = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int num_rowsA = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
+
+   HYPRE_Int num_threads = hypre_NumActiveThreads();
+
+   HYPRE_Int nonzeros_per_thread = (num_nonzerosA + num_threads - 1)/num_threads;
+
+   if (idx <= 0)
+   {
+      return 0;
+   }
+   else if (idx >= num_threads)
+   {
+      return num_rowsA;
+   }
+   else
+   {
+      return (HYPRE_Int)(hypre_LowerBound(A_i, A_i + num_rowsA, nonzeros_per_thread*idx) - A_i);
+   }
+}
+
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin(hypre_CSRMatrix *A)
+{
+   return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum());
+}
+
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
+{
+   return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
+}
