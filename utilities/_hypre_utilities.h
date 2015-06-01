@@ -802,6 +802,7 @@ void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_pt
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
+HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 
 /* hypre_complex.c */
 #ifdef HYPRE_COMPLEX
