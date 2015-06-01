@@ -113,6 +113,14 @@ HYPRE_SysTGSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
    return hypre_SysTGSetBlockSize(solver, bsize );
 }
 /*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetNumWells
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetNumWells( HYPRE_Solver solver, HYPRE_Int num_wells )
+{
+   return hypre_SysTGSetNumWells(solver, num_wells );
+}
+/*--------------------------------------------------------------------------
  * HYPRE_SysTGSetRelaxType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
