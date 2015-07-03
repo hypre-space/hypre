@@ -383,15 +383,25 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             Ztemp_data = hypre_VectorData(Ztemp_local);
          }
          
+#ifdef HYPRE_USING_PERSISTENT_COMM
+         // JSP: persistent comm can be similarly used for other smoothers
+         hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
+#endif
          
          if (num_procs > 1)
          {
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
             
+#ifdef HYPRE_USING_PERSISTENT_COMM
+            persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
+            v_buf_data = (HYPRE_Real *)persistent_comm_handle->send_data;
+            Vext_data = (HYPRE_Real *)persistent_comm_handle->recv_data;
+#else
             v_buf_data = hypre_CTAlloc(HYPRE_Real, 
                                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
             
             Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+#endif
             
             if (num_cols_offd)
             {
@@ -408,13 +418,21 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                      = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
             }
             
+#ifdef HYPRE_USING_PERSISTENT_COMM
+            hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
+#else
             comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data, 
                                                         Vext_data);
+#endif
             
             /*-----------------------------------------------------------------
              * Copy current approximation into temporary vector.
              *-----------------------------------------------------------------*/
+#ifdef HYPRE_USING_PERSISTENT_COMM
+            hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+#else
             hypre_ParCSRCommHandleDestroy(comm_handle);
+#endif
             comm_handle = NULL;
          }
 
@@ -822,11 +840,13 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  }
          }
         }
+#ifndef HYPRE_USING_PERSISTENT_COMM
         if (num_procs > 1)
         {
 	   hypre_TFree(Vext_data);
 	   hypre_TFree(v_buf_data);
         }
+#endif
       }
       break;
 

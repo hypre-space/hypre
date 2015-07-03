@@ -36,6 +36,30 @@ extern "C" {
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
+#define HYPRE_USING_PERSISTENT_COMM // JSP: can be defined by configure
+#ifdef HYPRE_USING_PERSISTENT_COMM
+typedef enum CommPkgJobType
+{
+   HYPRE_COMM_PKG_JOB_COMPLEX = 0,
+   HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE,
+   HYPRE_COMM_PKG_JOB_INT,
+   HYPRE_COMM_PKG_JOB_INT_TRANSPOSE,
+   NUM_OF_COMM_PKG_JOB_TYPE,
+} CommPkgJobType;
+
+typedef struct
+{
+   void     *send_data;
+   void     *recv_data;
+
+   HYPRE_Int             num_requests;
+   hypre_MPI_Request    *requests;
+
+   int own_send_data, own_recv_data;
+
+} hypre_ParCSRPersistentCommHandle;
+#endif
+
 typedef struct
 {
    MPI_Comm               comm;
@@ -53,6 +77,9 @@ typedef struct
    hypre_MPI_Datatype          *send_mpi_types;
    hypre_MPI_Datatype          *recv_mpi_types;
 
+#ifdef HYPRE_USING_PERSISTENT_COMM
+   hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
+#endif
 } hypre_ParCSRCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -752,6 +779,21 @@ void hypre_ParCSRMatrixExtractRowSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE
 HYPRE_Complex hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParCSRMatrixAminvDB ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , HYPRE_Complex *d , hypre_ParCSRMatrix **C_ptr );
 hypre_ParCSRMatrix *hypre_ParTMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
+#ifdef HYPRE_USING_PERSISTENT_COMM
+hypre_ParCSRPersistentCommHandle *
+hypre_ParCSRCommPkgGetPersistentCommHandle(HYPRE_Int job,
+             hypre_ParCSRCommPkg *comm_pkg);
+
+hypre_ParCSRPersistentCommHandle *
+hypre_ParCSRPersistentCommHandleCreate(HYPRE_Int job,
+             hypre_ParCSRCommPkg *comm_pkg,
+             void *send_data,
+             void *recv_data);
+void
+hypre_ParCSRPersistentCommHandleDestroy(hypre_ParCSRPersistentCommHandle *comm_handle);
+void hypre_ParCSRPersistentCommHandleStart(hypre_ParCSRPersistentCommHandle *comm_handle);
+void hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRPersistentCommHandle *comm_handle);
+#endif
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );
