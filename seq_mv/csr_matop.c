@@ -468,6 +468,9 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
    HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
+   hypre_assert(iBegin <= iEnd);
+   hypre_assert(iBegin >= 0 && iBegin <= num_rowsA);
+   hypre_assert(iEnd >= 0 && iEnd <= num_rowsA);
 
    HYPRE_Int i, j;
    memset(bucket + my_thread_num*num_colsA, 0, sizeof(HYPRE_Int)*num_colsA);

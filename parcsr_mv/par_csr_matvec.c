@@ -22,25 +22,28 @@
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
-
+// y = alpha*A*x + beta*b
 HYPRE_Int
-hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
-                          hypre_ParCSRMatrix *A,
-                          hypre_ParVector    *x,
-                          HYPRE_Complex       beta,
-                          hypre_ParVector    *y )
+hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
+                                    hypre_ParCSRMatrix *A,
+                                    hypre_ParVector    *x,
+                                    HYPRE_Complex       beta,
+                                    hypre_ParVector    *b,
+                                    hypre_ParVector    *y )
 {
    hypre_ParCSRCommHandle **comm_handle;
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix   *diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix   *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Vector      *x_local  = hypre_ParVectorLocalVector(x);   
+   hypre_Vector      *b_local  = hypre_ParVectorLocalVector(b);   
    hypre_Vector      *y_local  = hypre_ParVectorLocalVector(y);   
    HYPRE_Int          num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int          num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
 
    hypre_Vector      *x_tmp;
    HYPRE_Int          x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int          b_size = hypre_ParVectorGlobalSize(b);
    HYPRE_Int          y_size = hypre_ParVectorGlobalSize(y);
    HYPRE_Int          num_vectors = hypre_VectorNumVectors(x_local);
    HYPRE_Int          num_cols_offd = hypre_CSRMatrixNumCols(offd);
@@ -69,12 +72,13 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
    if (num_cols != x_size)
       ierr = 11;
 
-   if (num_rows != y_size)
+   if (num_rows != y_size || num_rows != b_size)
       ierr = 12;
 
-   if (num_cols != x_size && num_rows != y_size)
+   if (num_cols != x_size && (num_rows != y_size || num_rows != b_size))
       ierr = 13;
 
+   hypre_assert( hypre_VectorNumVectors(b_local)==num_vectors );
    hypre_assert( hypre_VectorNumVectors(y_local)==num_vectors );
 
    if ( num_vectors==1 )
@@ -146,7 +150,7 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
          ( 1, comm_pkg, x_buf_data[jv], &(x_tmp_data[jv*num_cols_offd]) );
    }
 
-   hypre_CSRMatrixMatvec( alpha, diag, x_local, beta, y_local);
+   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
    
    for ( jv=0; jv<num_vectors; ++jv )
    {
@@ -163,6 +167,16 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
    hypre_TFree(x_buf_data);
   
    return ierr;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
+                          hypre_ParCSRMatrix *A,
+                          hypre_ParVector    *x,
+                          HYPRE_Complex       beta,
+                          hypre_ParVector    *y )
+{
+   return hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
 }
 
 /*--------------------------------------------------------------------------

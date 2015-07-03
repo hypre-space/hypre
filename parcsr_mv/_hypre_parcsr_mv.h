@@ -784,6 +784,9 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixCompleteClone ( hypre_ParCSRMatrix *A );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 
 /* par_csr_matvec.c */
+// y = alpha*A*x + beta*b
+HYPRE_Int hypre_ParCSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *b, hypre_ParVector *y );
+// y = alpha*A*x + beta*y
 HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );
 HYPRE_Int hypre_ParCSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y , HYPRE_Int *CF_marker , HYPRE_Int fpt );
