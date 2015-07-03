@@ -138,17 +138,19 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    if ( num_vectors==1 )
    {
-      index = 0;
-      for (i = 0; i < num_sends; i++)
-      {
-         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-#ifdef HYPRE_USING_PERSISTENT_COMM
-            ((HYPRE_Complex *)persistent_comm_handle->send_data)[index++]
-#else
-            x_buf_data[0][index++] 
+      HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+      HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
-               = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+      for (i = begin; i < end; i++)
+      {
+#ifdef HYPRE_USING_PERSISTENT_COMM
+         ((HYPRE_Complex *)persistent_comm_handle->send_data)[i - begin]
+#else
+         x_buf_data[0][i - begin]
+#endif
+            = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
    }
    else

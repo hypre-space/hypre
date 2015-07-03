@@ -408,14 +408,16 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                A_offd_j = hypre_CSRMatrixJ(A_offd);
                A_offd_data = hypre_CSRMatrixData(A_offd);
             }
-            
-            index = 0;
-            for (i = 0; i < num_sends; i++)
+
+            HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+            HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+            for (i = begin; i < end; i++)
             {
-               start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-               for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
-                  v_buf_data[index++] 
-                     = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               v_buf_data[i - begin]
+                  = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
             }
             
 #ifdef HYPRE_USING_PERSISTENT_COMM
