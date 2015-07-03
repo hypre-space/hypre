@@ -271,7 +271,18 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    hypre_assert( idxstride==1 ); /* only 'column' storage of multivectors
                                   * implemented so far */
 
-   if (num_cols_offd) hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
+   if (num_cols_offd)
+   {
+      if (A->offdT)
+      {
+         // offdT is optional. Used only if it's present.
+         hypre_CSRMatrixMatvec(alpha, A->offdT, x_local, 0.0, y_tmp);
+      }
+      else
+      {
+         hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
+      }
+   }
 
    for ( jv=0; jv<num_vectors; ++jv )
    {
@@ -280,7 +291,15 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
          ( 2, comm_pkg, &(y_tmp_data[jv*num_cols_offd]), y_buf_data[jv] );
    }
 
-   hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+   if (A->diagT)
+   {
+      // diagT is optional. Used only if it's present.
+      hypre_CSRMatrixMatvec(alpha, A->diagT, x_local, beta, y_local);
+   }
+   else
+   {
+      hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+   }
 
    for ( jv=0; jv<num_vectors; ++jv )
    {

@@ -1768,12 +1768,29 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
     *  Free R, P_ext and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   hypre_CSRMatrixDestroy(R_diag);
+   HYPRE_Int keepTranspose = 1;
+      // JSP: this may need to be controlled by user provided options
+
+   if (keepTranspose)
+   {
+      hypre_ParCSRMatrixDiagT(RT) = R_diag;
+   }
+   else
+   {
+      hypre_CSRMatrixDestroy(R_diag);
+   }
    R_diag = NULL;
 
    if (num_cols_offd_RT) 
    {
-      hypre_CSRMatrixDestroy(R_offd);
+      if (keepTranspose)
+      {
+         hypre_ParCSRMatrixOffdT(RT) = R_offd;
+      }
+      else
+      {
+         hypre_CSRMatrixDestroy(R_offd);
+      }
       R_offd = NULL;
    }
 

@@ -44,6 +44,8 @@ typedef struct hypre_ParCSRMatrix_struct
 
    hypre_CSRMatrix      *diag;
    hypre_CSRMatrix      *offd;
+   hypre_CSRMatrix      *diagT, *offdT;
+        /* JSP: transposed matrices are created lazily and optional */
    HYPRE_Int            *col_map_offd; 
         /* maps columns of offd to global columns */
    HYPRE_Int            *row_starts; 
@@ -93,6 +95,8 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixLastColDiag(matrix)     ((matrix) -> last_col_diag)
 #define hypre_ParCSRMatrixDiag(matrix)            ((matrix) -> diag)
 #define hypre_ParCSRMatrixOffd(matrix)            ((matrix) -> offd)
+#define hypre_ParCSRMatrixDiagT(matrix)            ((matrix) -> diagT)
+#define hypre_ParCSRMatrixOffdT(matrix)            ((matrix) -> offdT)
 #define hypre_ParCSRMatrixColMapOffd(matrix)      ((matrix) -> col_map_offd)
 #define hypre_ParCSRMatrixRowStarts(matrix)       ((matrix) -> row_starts)
 #define hypre_ParCSRMatrixColStarts(matrix)       ((matrix) -> col_starts)
