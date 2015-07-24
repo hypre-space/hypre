@@ -20,7 +20,7 @@ src_dir="$testing_dir/hypre"
 remote_dir="hypre/testing"
 summary_file="SUMMARY.html"
 summary_subject="Autotest Error Summary `date +%Y-%m-%d`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov, oseikuffuor1@llnl.gov, wang84@llnl.gov"
+email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov, oseikuffuor1@llnl.gov, wang84@llnl.gov, li50@llnl.gov"
 
 # Main loop
 test_opts=""
