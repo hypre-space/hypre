@@ -3056,6 +3056,12 @@ HYPRE_SysTGSetNumWells( HYPRE_Solver solver, HYPRE_Int num_wells );
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetInterpType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType );
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetNumRelaxSweeps
  *--------------------------------------------------------------------------*/
@@ -3093,6 +3099,17 @@ HYPRE_SysTGSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter );
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetMaxGlobalsmoothIters
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetGlobalsmoothType
+ *--------------------------------------------------------------------------*/	
+HYPRE_Int
+HYPRE_SysTGSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type );	
+
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/

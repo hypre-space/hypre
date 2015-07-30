@@ -44,7 +44,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                            HYPRE_Real         *l1_norms,
                            hypre_ParVector    *u,
                            hypre_ParVector    *Vtemp,
-                           hypre_ParVector    *Ztemp )
+                           hypre_ParVector    *Ztemp)
 {
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);

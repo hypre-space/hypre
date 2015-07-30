@@ -1530,6 +1530,7 @@ HYPRE_Int hypre_SysTGSolve( void *systg_vdata, hypre_ParCSRMatrix *A, hypre_ParV
 HYPRE_Int hypre_SysTGSetMaxCoarseLevels( void *systg_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_SysTGSetBlockSize( void *systg_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_SysTGSetRelaxType( void *systg_vdata, HYPRE_Int relax_type );
+HYPRE_Int hypre_SysTGSetInterpType( void *systg_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_SysTGSetNumRelaxSweeps( void *systg_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_SysTGSetNumInterpSweeps( void *systg_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_SysTGSetPrintLevel( void *systg_vdata, HYPRE_Int print_level );

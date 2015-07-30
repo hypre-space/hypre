@@ -137,6 +137,15 @@ HYPRE_SysTGSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
    return hypre_SysTGSetNumRelaxSweeps(solver, nsweeps);
 }
 /*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetInterpType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
+{
+   return hypre_SysTGSetInterpType(solver, interpType);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SysTGSetNumInterpSweeps
  *--------------------------------------------------------------------------*/
 HYPRE_Int
@@ -175,4 +184,21 @@ HYPRE_Int
 HYPRE_SysTGSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol )
 {
    return hypre_SysTGSetConvTol( solver, conv_tol );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetMaxGlobalsmoothIters
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+{
+	return hypre_SysTGSetMaxGlobalsmoothIters(solver, max_iter);
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetGlobalsmoothType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SysTGSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
+{
+	return hypre_SysTGSetGlobalsmoothType(solver, iter_type);
 }
