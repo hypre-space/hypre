@@ -321,7 +321,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* free up storage in case of new setup without prvious destroy */
 
-   if (A_array || A_block_array || P_array || P_block_array || CF_marker_array || dof_func_array)
+   if (A_array || A_block_array || P_array || P_block_array || CF_marker_array || dof_func_array || C_point_marker_array)
    {
       for (j = 1; j < old_num_levels; j++)
       {
@@ -378,6 +378,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             CF_marker_array[j] = NULL;
          }
       }
+	  
+	  if (C_point_marker_array[0])
+      {
+        hypre_TFree(C_point_marker_array[0]);
+        C_point_marker_array[0] = NULL;
+      }
+
+      for (j = 1; j < old_num_levels-1; j++)
+      {
+         if (C_point_marker_array[j])
+         {
+            hypre_TFree(C_point_marker_array[j]);
+            C_point_marker_array[j] = NULL;
+         }
+      }
+	  
    }
 
    {
@@ -533,6 +549,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (CF_marker_array == NULL)
       CF_marker_array = hypre_CTAlloc(HYPRE_Int*, max_levels);
+   
+   if (C_point_marker_array == NULL)
+      C_point_marker_array = hypre_CTAlloc(HYPRE_Int*, max_levels);
+   
    if (dof_func_array == NULL)
       dof_func_array = hypre_CTAlloc(HYPRE_Int*, max_levels);
    if (num_functions > 1 && dof_func == NULL)
@@ -587,6 +607,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    dof_func_array[0] = dof_func;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
+   hypre_ParAMGDataCPointMarkerArray(amg_data) = C_point_marker_array;
    hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
