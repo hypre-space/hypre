@@ -381,6 +381,10 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
    hypre_ParAMGDataNonGalerkTol(amg_data) = NULL;
 
+   /* information for preserving indeces as coarse grid points */
+   hypre_ParAMGDataCPointMarkerArray(amg_data) = NULL;
+   hypre_ParAMGDataCPointCoarseLevel(amg_data) = 0;
+   hypre_ParAMGDataNumCPointCoarse(amg_data)   = 0;
    return (void *) amg_data;
 }
 
@@ -511,108 +515,108 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataDofFuncArray(amg_data))
    {
-      for (i=1; i < num_levels; i++)
-	 hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i]);
-      hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
-      hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
+	   for (i=1; i < num_levels; i++)
+		   hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i]);
+	   hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
+	   hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
    }
    if (hypre_ParAMGDataRestriction(amg_data))
    {
-      hypre_TFree(hypre_ParAMGDataRArray(amg_data));
-      hypre_ParAMGDataRArray(amg_data) = NULL;
+	   hypre_TFree(hypre_ParAMGDataRArray(amg_data));
+	   hypre_ParAMGDataRArray(amg_data) = NULL;
    }
    if (hypre_ParAMGDataDofPointArray(amg_data))
    {
-      for (i=0; i < num_levels; i++)
-	 hypre_TFree(hypre_ParAMGDataDofPointArray(amg_data)[i]);
-      hypre_TFree(hypre_ParAMGDataDofPointArray(amg_data));
-      hypre_ParAMGDataDofPointArray(amg_data) = NULL;
+	   for (i=0; i < num_levels; i++)
+		   hypre_TFree(hypre_ParAMGDataDofPointArray(amg_data)[i]);
+	   hypre_TFree(hypre_ParAMGDataDofPointArray(amg_data));
+	   hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    }
    if (hypre_ParAMGDataPointDofMapArray(amg_data))
    {
-      for (i=0; i < num_levels; i++)
-	 hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data)[i]);
-      hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data));
-      hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
+	   for (i=0; i < num_levels; i++)
+		   hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data)[i]);
+	   hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data));
+	   hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    }
    if (smooth_num_levels)
    {
-      if (hypre_ParAMGDataSmoothType(amg_data) == 7)
-      {
-         for (i=0; i < smooth_num_levels; i++)
-         {
-	    HYPRE_ParCSRPilutDestroy(smoother[i]);
-         }
-      }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 8)
-      {
-         for (i=0; i < smooth_num_levels; i++)
-         {
-	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
-         }
-      }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 9)
-      {
-         for (i=0; i < smooth_num_levels; i++)
-	 {
-	    HYPRE_EuclidDestroy(smoother[i]);
-         }
-      }
-      else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
-      {
-         for (i=0; i < smooth_num_levels; i++)
-	 {
-	    HYPRE_SchwarzDestroy(smoother[i]);
-         } 
-      }
-      hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
+	   if (hypre_ParAMGDataSmoothType(amg_data) == 7)
+	   {
+		   for (i=0; i < smooth_num_levels; i++)
+		   {
+			   HYPRE_ParCSRPilutDestroy(smoother[i]);
+		   }
+	   }
+	   else if (hypre_ParAMGDataSmoothType(amg_data) == 8)
+	   {
+		   for (i=0; i < smooth_num_levels; i++)
+		   {
+			   HYPRE_ParCSRParaSailsDestroy(smoother[i]);
+		   }
+	   }
+	   else if (hypre_ParAMGDataSmoothType(amg_data) == 9)
+	   {
+		   for (i=0; i < smooth_num_levels; i++)
+		   {
+			   HYPRE_EuclidDestroy(smoother[i]);
+		   }
+	   }
+	   else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
+	   {
+		   for (i=0; i < smooth_num_levels; i++)
+		   {
+			   HYPRE_SchwarzDestroy(smoother[i]);
+		   } 
+	   }
+	   hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
    }
    if ( hypre_ParAMGDataResidual(amg_data) ) {
-      /* jfp: was... hypre_TFree( hypre_ParAMGDataResidual(amg_data) );*/
-      hypre_ParVectorDestroy( hypre_ParAMGDataResidual(amg_data) );
-      hypre_ParAMGDataResidual(amg_data) = NULL;
+	   /* jfp: was... hypre_TFree( hypre_ParAMGDataResidual(amg_data) );*/
+	   hypre_ParVectorDestroy( hypre_ParAMGDataResidual(amg_data) );
+	   hypre_ParAMGDataResidual(amg_data) = NULL;
    }
-
+   
    
    if (hypre_ParAMGInterpVecVariant(amg_data) > 0 
-        &&  hypre_ParAMGNumInterpVectors(amg_data) > 0)
+	   &&  hypre_ParAMGNumInterpVectors(amg_data) > 0)
    {
-
-      HYPRE_Int j;
-      HYPRE_Int num_vecs =  hypre_ParAMGNumInterpVectors(amg_data);
-      hypre_ParVector **sm_vecs;
-      HYPRE_Int num_il;
-      num_il = hypre_min(hypre_ParAMGNumLevelsInterpVectors(amg_data),num_levels);
-
-      /* don't destroy lev = 0 - this was user input */
-      for (i = 1; i< num_il; i++)
-      {
-         sm_vecs = hypre_ParAMGInterpVectorsArray(amg_data)[i];
-         for (j = 0; j< num_vecs; j++)
-         {
-            hypre_ParVectorDestroy(sm_vecs[j]);
-         }
-         hypre_TFree(sm_vecs);
-      }
-      hypre_TFree( hypre_ParAMGInterpVectorsArray(amg_data));
-   
+	   
+	   HYPRE_Int j;
+	   HYPRE_Int num_vecs =  hypre_ParAMGNumInterpVectors(amg_data);
+	   hypre_ParVector **sm_vecs;
+	   HYPRE_Int num_il;
+	   num_il = hypre_min(hypre_ParAMGNumLevelsInterpVectors(amg_data),num_levels);
+	   
+	   /* don't destroy lev = 0 - this was user input */
+	   for (i = 1; i< num_il; i++)
+	   {
+		   sm_vecs = hypre_ParAMGInterpVectorsArray(amg_data)[i];
+		   for (j = 0; j< num_vecs; j++)
+		   {
+			   hypre_ParVectorDestroy(sm_vecs[j]);
+		   }
+		   hypre_TFree(sm_vecs);
+	   }
+	   hypre_TFree( hypre_ParAMGInterpVectorsArray(amg_data));
+	   
    }
    
    if (amg) hypre_BoomerAMGDestroy(amg);
-
+   
    if (hypre_ParAMGDataACoarse(amg_data))
-      hypre_ParCSRMatrixDestroy(hypre_ParAMGDataACoarse(amg_data));
-
+	   hypre_ParCSRMatrixDestroy(hypre_ParAMGDataACoarse(amg_data));
+   
    if (hypre_ParAMGDataUCoarse(amg_data))
-      hypre_ParVectorDestroy(hypre_ParAMGDataUCoarse(amg_data));
-
+	   hypre_ParVectorDestroy(hypre_ParAMGDataUCoarse(amg_data));
+   
    if (hypre_ParAMGDataFCoarse(amg_data))
-      hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
-
+	   hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
+   
    if (hypre_ParAMGDataAMat(amg_data)) hypre_TFree(hypre_ParAMGDataAMat(amg_data));
    if (hypre_ParAMGDataBVec(amg_data)) hypre_TFree(hypre_ParAMGDataBVec(amg_data));
    if (hypre_ParAMGDataCommInfo(amg_data)) hypre_TFree(hypre_ParAMGDataCommInfo(amg_data));
-
+   
    if (new_comm != hypre_MPI_COMM_NULL) 
    {
        hypre_MPI_Comm_free (&new_comm);
@@ -3772,3 +3776,33 @@ hypre_BoomerAMGSetNonGalerkTol( void   *data,
   return (ierr);
 }
 
+HYPRE_Int
+hypre_BoomerAMGSetCoarseningCpoint(void      *data,
+								   HYPRE_Int  cpt_coarse_level,
+								   HYPRE_Int  num_cpt_coarse,
+								   HYPRE_Int *cpt_coarse_index)
+{
+	HYPRE_Int ierr = 0;
+	hypre_ParAMGData *amg_data = data;
+
+	HYPRE_Int **C_point_marker_array;
+	HYPRE_Int max_levels = 0;
+	HYPRE_Int cpt_level;
+	
+	if (hypre_ParAMGDataMaxLevels(amg_data) < cpt_coarse_level)
+	{
+		cpt_level = hypre_ParAMGDataNumLevels(amg_data);
+	} else {
+		cpt_level = cpt_coarse_level;
+	}
+
+	hypre_ParAMGDataCPointCoarseLevel(amg_data) = cpt_level;
+
+	C_point_marker_array = hypre_ParAMGDataCPointMarkerArray(amg_data);
+	hypre_ParAMGDataNumCPointCoarse(amg_data) = num_cpt_coarse;
+
+	//if (hypre_ParAMGDataCPointMarkerArray(amg_data) == NULL)
+	C_point_marker_array = hypre_CTAlloc(HYPRE_Int*, cpt_level);
+    C_point_marker_array[0] = cpt_coarse_index;
+	hypre_ParAMGDataCPointMarkerArray(amg_data) = C_point_marker_array;
+}

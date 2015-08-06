@@ -215,6 +215,7 @@ typedef struct
    HYPRE_Real *D_inv;
 
  /* information for preserving indeces as coarse grid points */
+   HYPRE_Int C_point_coarse_level;
    HYPRE_Int   **C_point_marker_array;
 } hypre_ParAMGData;
 

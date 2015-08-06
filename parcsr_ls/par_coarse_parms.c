@@ -116,7 +116,6 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 
 #else
    coarse_pnts_global = hypre_CTAlloc(HYPRE_Int,num_procs+1);
-
    hypre_MPI_Allgather(&local_coarse_size,1,HYPRE_MPI_INT,&coarse_pnts_global[1],
 		1,HYPRE_MPI_INT,comm);
 

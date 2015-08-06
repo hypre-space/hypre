@@ -244,7 +244,10 @@ typedef struct
    hypre_ParVector *Rtilde;
    hypre_ParVector *Xtilde;
    HYPRE_Real *D_inv;
-
+/* information for preserving indeces as coarse grid points */
+   HYPRE_Int C_point_coarse_level;
+   HYPRE_Int num_C_point_marker;
+   HYPRE_Int   **C_point_marker_array;
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -441,10 +444,11 @@ typedef struct
 #define hypre_ParAMGDataNonGalerkNumTol(amg_data) ((amg_data)->nongalerk_num_tol)
 #define hypre_ParAMGDataNonGalerkTol(amg_data) ((amg_data)->nongalerk_tol)
 
+/*indeces for the dof which will keep coarsening to the coarse level */
+#define hypre_ParAMGDataCPointMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
+#define hypre_ParAMGDataCPointCoarseLevel(amg_data) ((amg_data)-> C_point_coarse_level)
+#define hypre_ParAMGDataNumCPointCoarse(amg_data) ((amg_data)-> num_C_point_marker)
 #endif
-
-
-
 
 /* ads.c */
 void *hypre_ADSCreate ( void );
