@@ -196,7 +196,7 @@ int main (int argc, char *argv[])
          cols[nnz] = i;
          values[nnz] = 4.0;
          nnz++;
-
+ 
          /* The right -1: position i+1 */
          if ((i+1)%n)
          {
