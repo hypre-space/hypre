@@ -273,29 +273,45 @@ HYPRE_Int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
                                         HYPRE_Int    coarsen_type);
 
 /**
+ * (Optional) Defines the non-Galerkin drop-tolerance
+ * for sparsifying coarse grid operators and thus reducing communication. 
+ * Value specified here is set on all levels.
+ * This routine should be used before HYPRE_BoomerAMGSetLevelNonGalerkinTol, which 
+ * then can be used to change individual levels if desired
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol (HYPRE_Solver solver,
+                                          HYPRE_Real  nongalerkin_tol);
+
+/**
  * (Optional) Defines the level specific non-Galerkin drop-tolerances
  * for sparsifying coarse grid operators and thus reducing communication. 
  * A drop-tolerance of 0.0 means to skip doing non-Galerkin on that 
  * level.  The maximum drop tolerance for a level is 1.0, although 
  * much smaller values such as 0.03 or 0.01 are recommended.
  *
+ * Note that if the user wants to set a  specific tolerance on all levels,
+ * HYPRE_BooemrAMGSetNonGalerkinTol should be used. Individual levels
+ * can then be changed using this routine.
+ *
  * In general, it is safer to drop more aggressively on coarser levels.  
- * For instance, using \\
- *   nongalerk_num_tol = 3\\
- *   nongalerk_tol = [0.0, 0.01, 0.05]\\
- * would skip the non-Galerkin process on the first coarse level (level 1), 
- * use a drop-tolerance of 0.01 on the second coarse level (level 2) and
- * then use 0.05 on all subsequent coarse levels.  Like many AMG parameters,
- * these drop tolerances can be tuned.  It is also common to delay the start
- * of the non-Galerkin process further, for example, try\\
- *   nongalerk_tol = [0.0, 0.0, 0.01, 0.05]\\
- *   or 
- *   nongalerk_tol = [0.0, 0.0, 0.0, 0.01, 0.05]\\
+ * For instance, one could use 0.0 on the finest level, 0.01 on the second level and
+ * then using 0.05 on all remaining levels. The best way to achieve this is
+ * to set 0.05 on all levels with HYPRE_BoomerAMGSetNonGalerkinTol and then
+ * change the tolerance on level 0 to 0.0 and the tolerance on level 1 to 0.01
+ * with HYPRE_BoomerAMGSetLevelNonGalerkinTol.
+ * Like many AMG parameters, these drop tolerances can be tuned.  It is also common 
+ * to delay the start of the non-Galerkin process further to a later level than
+ * level 1.
  *
  * @param solver [IN] solver or preconditioner object to be applied.
- * @param nongalerk_num_tol [IN] number of level specific drop tolerances
- * @param nongalerk_tol [IN] array of the level specific drop tolerances, 
- *    of length nongalerk_num_tol
+ * @param nongalerkin_tol [IN] level specific drop tolerance
+ * @param level [IN] level on which drop tolerance is used
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol (HYPRE_Solver solver,
+                                          HYPRE_Real   nongalerkin_tol,
+                                          HYPRE_Int  level);
+/*
+ * (Optional) Defines the non-Galerkin drop-tolerance (old version)
  **/
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol (HYPRE_Solver solver,
                                           HYPRE_Int    nongalerk_num_tol,
@@ -528,6 +544,8 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleType(HYPRE_Solver solver,
  * The multiplicative approach is used on levels 0, ...'addlvl+1'.
  * 'addlvl' needs to be > -1 for this to have an effect.
  * Can only be used with weighted Jacobi and l1-Jacobi(default).
+ * 
+ * Can only be used when AMG is used as a preconditioner !!!
  **/
 HYPRE_Int HYPRE_BoomerAMGSetAdditive(HYPRE_Solver solver,
                                      HYPRE_Int    addlvl);
@@ -538,6 +556,8 @@ HYPRE_Int HYPRE_BoomerAMGSetAdditive(HYPRE_Solver solver,
  * The multiplicative approach is used on levels 0, ...'addlvl+1'.
  * 'addlvl' needs to be > -1 for this to have an effect.
  * Can only be used with weighted Jacobi and l1-Jacobi(default).
+ * 
+ * Can only be used when AMG is used as a preconditioner !!!
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMultAdditive(HYPRE_Solver solver,
                                          HYPRE_Int    addlvl);
@@ -548,6 +568,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAdditive(HYPRE_Solver solver,
  * The multiplicative approach is used on levels 0, ...'addlvl+1'.
  * 'addlvl' needs to be > -1 for this to have an effect.
  * Can only be used with weighted Jacobi and l1-Jacobi(default).
+ * 
+ * Can only be used when AMG is used as a preconditioner !!!
  **/
 HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
                                    HYPRE_Int    addlvl);
@@ -557,7 +579,7 @@ HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
  * smoothed interpolation used for mult-additive or simple method.
  * The default is 0.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor(HYPRE_Solver solver,
+HYPRE_Int HYPRE_BoomerAMGSetMultAddTruncFactor(HYPRE_Solver solver,
                                            HYPRE_Real   add_trunc_factor);
 
 /**
@@ -565,7 +587,7 @@ HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor(HYPRE_Solver solver,
  * smoothed interpolation used for mult-additive or simple method.
  * The default is 0.
  **/
-HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts(HYPRE_Solver solver,
+HYPRE_Int HYPRE_BoomerAMGSetMultAddPMaxElmts(HYPRE_Solver solver,
                                          HYPRE_Int    add_P_max_elmts);
 
 /**
