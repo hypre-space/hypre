@@ -1619,8 +1619,8 @@ HYPRE_Int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver       solver,
 /**
  * (Optional) Set the list of nodes which are interior to a zero-conductivity
  * region. This way, a more robust solver is constructed, that can be iterated
- * to lower tolerance levels. This function should be called before
- * HYPRE\_AMSSetup()!
+ * to lower tolerance levels. A node is interior if its entry in the array is
+ * 1.0. This function should be called before HYPRE\_AMSSetup()!
  **/
 HYPRE_Int HYPRE_AMSSetInteriorNodes(HYPRE_Solver    solver,
                                     HYPRE_ParVector interior_nodes);
