@@ -79,8 +79,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int      mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
    HYPRE_Int      additive = hypre_ParAMGDataAdditive(amg_data);
    HYPRE_Int      simple = hypre_ParAMGDataSimple(amg_data);
-   HYPRE_Int      add_P_max_elmts = hypre_ParAMGDataAddPMaxElmts(amg_data);
-   HYPRE_Real     add_trunc_factor = hypre_ParAMGDataAddTruncFactor(amg_data);
+   HYPRE_Int      add_P_max_elmts = hypre_ParAMGDataMultAddPMaxElmts(amg_data);
+   HYPRE_Real     add_trunc_factor = hypre_ParAMGDataMultAddTruncFactor(amg_data);
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
  
@@ -168,9 +168,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real        *expandp_weights =  hypre_ParAMGDataExpandPWeights(amg_data);
 
    /* parameters for non-Galerkin stuff */
-   HYPRE_Int nongalerk_num_tol = hypre_ParAMGDataNonGalerkNumTol (amg_data);
-   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data);
-   HYPRE_Real nongalerk_tol_l = 0.0;
+   /*HYPRE_Int nongalerk_num_tol = hypre_ParAMGDataNonGalerkNumTol (amg_data);
+   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data); */
+   HYPRE_Real nongalerk_tol_l = 0.0; 
+   HYPRE_Real *nongal_tol_array = hypre_ParAMGDataNonGalTolArray (amg_data); 
 
    hypre_ParCSRBlockMatrix *A_H_block;
 
@@ -181,12 +182,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
+   /*hypre_CSRMatrix *A_new;*/
+
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
    num_threads = hypre_NumThreads();
 
-   
+   /*A_new = hypre_CSRMatrixDeleteZeros(hypre_ParCSRMatrixDiag(A), 1.e-16);
+   hypre_CSRMatrixPrint(A_new, "Atestnew"); */
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    amg_logging = hypre_ParAMGDataLogging(amg_data);
@@ -1097,6 +1101,36 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #else
           coarse_size = coarse_pnts_global[num_procs];
 #endif
+          /* if no coarse-grid, stop coarsening, and set the
+           * coarsest solve to be a single sweep of default smoother or smoother set by user */
+          if ((coarse_size == 0) || (coarse_size == fine_size))
+          {
+             HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
+             HYPRE_Int **grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+             if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99
+                 || grid_relax_type[3] == 19 || grid_relax_type[3] == 98)
+	     {
+	        grid_relax_type[3] = grid_relax_type[0];
+	        num_grid_sweeps[3] = 1;
+	        if (grid_relax_points) grid_relax_points[3][0] = 0; 
+	     }
+	     if (S) hypre_ParCSRMatrixDestroy(S);
+	     if (SN) hypre_ParCSRMatrixDestroy(SN);
+	     if (AN) hypre_ParCSRMatrixDestroy(AN);
+             hypre_TFree(CF_marker);
+             hypre_TFree(coarse_pnts_global);
+             if (level > 0)
+             {
+                /* note special case treatment of CF_marker is necessary
+                 * to do CF relaxation correctly when num_levels = 1 */
+                hypre_TFree(CF_marker_array[level]);
+                hypre_ParVectorDestroy(F_array[level]);
+                hypre_ParVectorDestroy(U_array[level]);
+             }
+             coarse_size = fine_size;
+             break; 
+          }
+
           if (coarse_size < min_coarse_size)
           {
 	    if (S) hypre_ParCSRMatrixDestroy(S);
@@ -1864,9 +1898,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(C); */
 
          /* Set NonGalerkin drop tol on each level */
-         if (level < nongalerk_num_tol)
-            nongalerk_tol_l = nongalerk_tol[level];
-
+         if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
          if (nongalerk_tol_l > 0.0)
          {
             /* Build Non-Galerkin Coarse Grid */
@@ -1932,8 +1964,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if (mult_addlvl == -1 || level < mult_addlvl)
       {
          /* Set NonGalerkin drop tol on each level */
-         if (level < nongalerk_num_tol)
-            nongalerk_tol_l = nongalerk_tol[level];
+         /*if (level < nongalerk_num_tol)*/
+         if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
 
          if (nongalerk_tol_l > 0.0)
          {
@@ -2268,7 +2300,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         HYPRE_ParCSRPilutSetDropTolerance(smoother[j],drop_tol);
         HYPRE_ParCSRPilutSetFactorRowSize(smoother[j],max_nz_per_row);
      }
-     else if ((j < num_levels-1) || ((j == num_levels-1) && (grid_relax_type[3]!= 9) && coarse_size > 9))
+     else if ((j < num_levels-1) || ((j == num_levels-1) && (grid_relax_type[3]!= 9 && 
+	grid_relax_type[3] != 99 && grid_relax_type[3] != 19 && grid_relax_type[3] != 98) 
+	&& coarse_size > 9))
      {
         if (relax_weight[j] < 0 )
         {

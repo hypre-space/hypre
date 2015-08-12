@@ -1216,7 +1216,18 @@ HYPRE_Int
 HYPRE_BoomerAMGSetAddTruncFactor( HYPRE_Solver  solver,
                                   HYPRE_Real        add_trunc_factor  )
 {
-   return( hypre_BoomerAMGSetAddTruncFactor( (void *) solver, add_trunc_factor ) );
+   return( hypre_BoomerAMGSetMultAddTruncFactor( (void *) solver, add_trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMultAddTruncFactor
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetMultAddTruncFactor( HYPRE_Solver  solver,
+                                  HYPRE_Real        add_trunc_factor  )
+{
+   return( hypre_BoomerAMGSetMultAddTruncFactor( (void *) solver, add_trunc_factor ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1249,7 +1260,18 @@ HYPRE_Int
 HYPRE_BoomerAMGSetAddPMaxElmts( HYPRE_Solver  solver,
                                 HYPRE_Int          add_P_max_elmts  )
 {
-   return( hypre_BoomerAMGSetAddPMaxElmts( (void *) solver, add_P_max_elmts ) );
+   return( hypre_BoomerAMGSetMultAddPMaxElmts( (void *) solver, add_P_max_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMultAddPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetMultAddPMaxElmts( HYPRE_Solver  solver,
+                                HYPRE_Int          add_P_max_elmts  )
+{
+   return( hypre_BoomerAMGSetMultAddPMaxElmts( (void *) solver, add_P_max_elmts ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1545,6 +1567,29 @@ HYPRE_BoomerAMGGetSimple( HYPRE_Solver solver,
                           HYPRE_Int        * simple  )
 {
    return( hypre_BoomerAMGGetSimple( (void *) solver, simple ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNonGalerkinTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetNonGalerkinTol (HYPRE_Solver solver,
+                                HYPRE_Real  nongalerkin_tol)
+{
+   return (hypre_BoomerAMGSetNonGalerkinTol ( (void *) solver, nongalerkin_tol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetLevelNonGalerkinTol
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetLevelNonGalerkinTol (HYPRE_Solver solver,
+                                HYPRE_Real  nongalerkin_tol,
+                                HYPRE_Int   level)
+{
+   return (hypre_BoomerAMGSetLevelNonGalerkinTol ( (void *) solver, nongalerkin_tol , level ) );
 }
 
 /*--------------------------------------------------------------------------

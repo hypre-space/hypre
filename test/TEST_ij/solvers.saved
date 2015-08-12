@@ -207,3 +207,31 @@ Final Relative Residual Norm = 4.557497e-09
 Iterations = 22
 Final Relative Residual Norm = 4.557497e-09
 
+# Output file: solvers.out.109
+Iterations = 17
+Final Relative Residual Norm = 6.163208e-09
+
+# Output file: solvers.out.110
+Iterations = 17
+Final Relative Residual Norm = 6.163208e-09
+
+# Output file: solvers.out.111
+Iterations = 29
+Final Relative Residual Norm = 8.452076e-09
+
+# Output file: solvers.out.112
+GMRES Iterations = 23
+Final GMRES Relative Residual Norm = 3.943470e-09
+
+# Output file: solvers.out.113
+GMRES Iterations = 25
+Final GMRES Relative Residual Norm = 8.744056e-09
+
+# Output file: solvers.out.114
+BoomerAMG Iterations = 13
+Final Relative Residual Norm = 8.867318e-09
+
+# Output file: solvers.out.115
+BoomerAMG Iterations = 14
+Final Relative Residual Norm = 3.248865e-09
+
