@@ -428,6 +428,11 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree (hypre_ParAMGDataOmega(amg_data));
       hypre_ParAMGDataOmega(amg_data) = NULL; 
    }
+   if (hypre_ParAMGDataNonGalTolArray(amg_data))
+   {
+      hypre_TFree (hypre_ParAMGDataNonGalTolArray(amg_data));
+      hypre_ParAMGDataNonGalTolArray(amg_data) = NULL; 
+   }
    if (hypre_ParAMGDataDofFunc(amg_data))
    {
       hypre_TFree (hypre_ParAMGDataDofFunc(amg_data));
