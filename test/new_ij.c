@@ -2246,6 +2246,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
+      /*HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);*/
       if (nongalerk_tol)
       {
          HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3903,6 +3904,8 @@ main( hypre_int argc,
       HYPRE_IJVectorDestroy(ij_b);
 
    HYPRE_IJVectorDestroy(ij_x);
+
+   if (nongalerk_tol) hypre_TFree (nongalerk_tol);
 
 /*
   hypre_FinalizeMemoryDebug();
