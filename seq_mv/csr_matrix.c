@@ -392,28 +392,29 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
    HYPRE_Int     *B_i = hypre_CSRMatrixI(B);
    HYPRE_Int     *B_j = hypre_CSRMatrixJ(B);
    HYPRE_Complex *B_data;
+   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Int i, j;
 
-   for (i=0; i < num_rows; i++)
+#pragma omp parallel for
+   for (i=0; i <= num_rows; i++)
    {
       B_i[i] = A_i[i];
-      for (j=A_i[i]; j < A_i[i+1]; j++)
-      {
-         B_j[j] = A_j[j];
-      }
    }
-   B_i[num_rows] = A_i[num_rows];
+#pragma omp parallel for
+   for (j = 0; j < num_nonzeros; ++j)
+   {
+      B_j[j] = A_j[j];
+   }
+
    if (copy_data)
    {
       A_data = hypre_CSRMatrixData(A);
       B_data = hypre_CSRMatrixData(B);
-      for (i=0; i < num_rows; i++)
+#pragma omp parallel for
+      for (j=0; j < num_nonzeros; j++)
       {
-         for (j=A_i[i]; j < A_i[i+1]; j++)
-         {
-            B_data[j] = A_data[j];
-         }
+         B_data[j] = A_data[j];
       }
    }
    return ierr;
