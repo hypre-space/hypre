@@ -40,6 +40,7 @@ HEADERS =\
  block_tridiag.h\
  Common.h\
  par_amg.h\
+ par_amgdd_comp_grid.h\
  schwarz.h
 
 FILES =\
@@ -80,6 +81,8 @@ FILES =\
  HYPRE_ads.c\
  HYPRE_ame.c\
  par_amg.c\
+ par_amgdd_comp_grid.c\
+ par_amgdd_res_comm.c\
  par_amg_setup.c\
  par_amg_solve.c\
  par_amg_solveT.c\
