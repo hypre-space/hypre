@@ -88,7 +88,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size);
+      hypre_VectorData(vector) = hypre_TAlloc(HYPRE_Complex, num_vectors*size);
 
    if ( multivec_storage_method == 0 )
    {
