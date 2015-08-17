@@ -867,6 +867,11 @@ HYPRE_Real hypre_Rand ( void );
  * Note that always y_0 = 0
  */
 void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum);
+/**
+ * This version does prefix sum in pair.
+ * Useful when we prefix sum of diag and offd in tandem.
+ */
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *in_out2, HYPRE_Int *sum1, HYPRE_Int *sum2);
 
 /* hypre_map.cc */
 typedef struct HYPRE_IntSet HYPRE_IntSet;
