@@ -592,6 +592,8 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
          }
       } 
    }
+   if (max_sends) hypre_TFree(all_send_procs);
+   if (max_recvs) hypre_TFree(all_recv_procs);
 
    L_diag = hypre_CSRMatrixCreate(num_rows_L, num_rows_L, num_nonzeros_diag);
    L_offd = hypre_CSRMatrixCreate(num_rows_L, num_cols_offd_L, num_nonzeros_offd);
