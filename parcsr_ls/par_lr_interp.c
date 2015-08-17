@@ -1943,7 +1943,10 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
    if (trunc_factor != 0.0 || max_elmts > 0)
    {
+      hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
       hypre_BoomerAMGInterpTruncation(P, trunc_factor, max_elmts);
+      hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] -= hypre_MPI_Wtime();
+
       P_diag_data = hypre_CSRMatrixData(P_diag);
       P_diag_i = hypre_CSRMatrixI(P_diag);
       P_diag_j = hypre_CSRMatrixJ(P_diag);
