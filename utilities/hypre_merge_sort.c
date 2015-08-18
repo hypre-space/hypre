@@ -235,7 +235,9 @@ HYPRE_Int hypre_parallel_merge_unique(
 
    prefix_sum_workspace[my_thread_num] = out_len;
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 
    HYPRE_Int i;
    if (0 == my_thread_num)
@@ -258,7 +260,9 @@ HYPRE_Int hypre_parallel_merge_unique(
       }
    }
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 
    HYPRE_Int out_begin = my_thread_num == 0 ? 0 : prefix_sum_workspace[my_thread_num - 1];
    HYPRE_Int out_end = prefix_sum_workspace[my_thread_num];
@@ -351,7 +355,9 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
       HYPRE_Int *out_buf = temp;
       for (in_group_size = 1; in_group_size < num_threads; in_group_size *= 2)
       {
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 
          // merge 2 in-groups into 1 out-group
          HYPRE_Int out_group_size = in_group_size*2;
@@ -406,7 +412,9 @@ HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len)
    if (out_buf != out)
    {
       HYPRE_Int i;
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for
+#endif
       for (i = 0; i < out_len; i++)
       {
          out[i] = in[i];
