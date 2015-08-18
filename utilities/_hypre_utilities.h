@@ -865,14 +865,23 @@ HYPRE_Real hypre_Rand ( void );
  * The output of ith thread y_i = x_0 + x_1 + ... + x_{i-1}
  * Additionally, sum = x_0 + x_1 + ... + x_{nthreads - 1}
  * Note that always y_0 = 0
+ *
+ * @param workspace at least with length (nthreads+1)
  */
-void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum);
+void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
 /**
  * This version does prefix sum in pair.
  * Useful when we prefix sum of diag and offd in tandem.
+ *
+ * @param worksapce at least with length 2*(nthreads+1)
+ *                  workspace[2*tid] and workspace[2*tid+1] contain result for tid
  */
-void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2);
-void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3);
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace);
+/**
+ * @param workspace at least with length 3*(nthreads+1)
+ *                  workspace[3*tid:3*tid+3) contain result for tid
+ */
+void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
 
 /* hypre_merge_sort.c */
 /**

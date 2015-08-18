@@ -2502,6 +2502,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       * Update subgraph
       *------------------------------------------------*/
 
+    HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ig,i)
 #endif
@@ -2552,7 +2554,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
            }
         }
 
-        hypre_prefix_sum_pair(&private_graph_size_cnt, &graph_size, &private_graph_offd_size_cnt, &graph_offd_size);
+        hypre_prefix_sum_pair(&private_graph_size_cnt, &graph_size, &private_graph_offd_size_cnt, &graph_offd_size, prefix_sum_workspace);
 
         for (ig = ig_begin; ig < ig_end; ig++)
         {
