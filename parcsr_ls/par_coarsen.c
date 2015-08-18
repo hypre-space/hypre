@@ -2552,7 +2552,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
            }
         }
 
-        hypre_prefix_sum_pair(&private_graph_size_cnt, &private_graph_offd_size_cnt, &graph_size, &graph_offd_size);
+        hypre_prefix_sum_pair(&private_graph_size_cnt, &graph_size, &private_graph_offd_size_cnt, &graph_offd_size);
 
         for (ig = ig_begin; ig < ig_end; ig++)
         {
