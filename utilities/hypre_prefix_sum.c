@@ -31,7 +31,7 @@ void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum)
 #endif /* !HYPRE_USING_OPENMP */
 }
 
-void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *in_out2, HYPRE_Int *sum1, HYPRE_Int *sum2)
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2)
 {
 #ifdef HYPRE_USING_OPENMP
    HYPRE_Int my_thread_num = hypre_GetThreadNum();
@@ -65,5 +65,49 @@ void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *in_out2, HYPRE_Int *su
    *sum2 = *in_out2;
    *in_out1 = 0;
    *in_out2 = 0;
+#endif /* !HYPRE_USING_OPENMP */
+}
+
+void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3)
+{
+#ifdef HYPRE_USING_OPENMP
+   HYPRE_Int my_thread_num = hypre_GetThreadNum();
+   HYPRE_Int num_threads = hypre_NumActiveThreads();
+   hypre_assert(1 == num_threads || omp_in_parallel());
+
+   prefix_sum[(my_thread_num + 1)*3] = *in_out1;
+   prefix_sum[(my_thread_num + 1)*3 + 1] = *in_out2;
+   prefix_sum[(my_thread_num + 1)*3 + 2] = *in_out3;
+
+#pragma omp barrier
+#pragma omp master
+   {
+      prefix_sum[0] = 0;
+      prefix_sum[1] = 0;
+      prefix_sum[2] = 0;
+
+      HYPRE_Int i;
+      for (i = 1; i < num_threads; i++)
+      {
+         prefix_sum[(i + 1)*3] += prefix_sum[i*3];
+         prefix_sum[(i + 1)*3 + 1] += prefix_sum[i*3 + 1];
+         prefix_sum[(i + 1)*3 + 2] += prefix_sum[i*3 + 2];
+      }
+      *sum1 = prefix_sum[num_threads*3];
+      *sum2 = prefix_sum[num_threads*3 + 1];
+      *sum3 = prefix_sum[num_threads*3 + 2];
+   }
+#pragma omp barrier
+
+   *in_out1 = prefix_sum[my_thread_num*3];
+   *in_out2 = prefix_sum[my_thread_num*3 + 1];
+   *in_out3 = prefix_sum[my_thread_num*3 + 2];
+#else /* !HYPRE_USING_OPENMP */
+   *sum1 = *in_out1;
+   *sum2 = *in_out2;
+   *sum3 = *in_out3;
+   *in_out1 = 0;
+   *in_out2 = 0;
+   *in_out3 = 0;
 #endif /* !HYPRE_USING_OPENMP */
 }

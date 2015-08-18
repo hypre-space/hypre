@@ -871,16 +871,39 @@ void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum);
  * This version does prefix sum in pair.
  * Useful when we prefix sum of diag and offd in tandem.
  */
-void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *in_out2, HYPRE_Int *sum1, HYPRE_Int *sum2);
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2);
+void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3);
+
+/* hypre_merge_sort.c */
+/**
+ * Why merge sort?
+ * 1) Merge sort can take advantage of eliminating duplicates.
+ * 2) Merge sort is more efficiently parallelizable than qsort
+ */
+
+/**
+ * Out of place merge sort with duplicate elimination
+ * @ret number of unique elements
+ */
+HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len);
+/**
+ * Out of place merge sort with duplicate elimination
+ *
+ * @param out pointer to output can be in or temp
+ * @ret number of unique elements
+ */
+HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out);
 
 /* hypre_map.cc */
 typedef struct HYPRE_IntSet HYPRE_IntSet;
-  // wrapper of std::set<HYPRE_Int>
+  // wrapper of std::unordered_set<HYPRE_Int>
 
 HYPRE_IntSet *hypre_IntSetCreate( void );
 void hypre_IntSetDestroy( HYPRE_IntSet *set );
 
 void hypre_IntSetInsert ( HYPRE_IntSet *set, HYPRE_Int x );
+
+HYPRE_Int hypre_IntSetSize ( HYPRE_IntSet *set );
 
 // Support only iterator for a set at a time
 // A typical loop
@@ -893,6 +916,15 @@ HYPRE_Int hypre_IntSetNext( HYPRE_IntSet *set );
  * @ret 1 if set has more elements to iterate
  */
 HYPRE_Int hypre_IntSetHasNext( HYPRE_IntSet *set );
+
+typedef struct HYPRE_Int2Int HYPRE_Int2Int;
+  // wrapper of std::unordered_map<HYPRE_Int, HYPRE_Int>
+
+HYPRE_Int2Int *hypre_Int2IntCreate();
+void hypre_Int2IntDestroy( HYPRE_Int2Int *map );
+
+void hypre_Int2IntInsert( HYPRE_Int2Int *map, HYPRE_Int key, HYPRE_Int value );
+HYPRE_Int hypre_Int2IntFind( HYPRE_Int2Int *map, HYPRE_Int key );
 
 typedef struct HYPRE_Int2IntSet HYPRE_Int2IntSet;
   // wrapper of std::unordered_map<HYPRE_Int, std::set<HYPRE_Int> >
