@@ -1,6 +1,7 @@
 #include "_hypre_utilities.h"
 
-#include <set>
+#include <cassert>
+#include <unordered_set>
 #include <unordered_map>
 
 using namespace std;
@@ -10,8 +11,8 @@ extern "C"
 
 typedef struct HYPRE_IntSet
 {
-   set<HYPRE_Int> set;
-   std::set<HYPRE_Int>::iterator itr;
+   unordered_set<HYPRE_Int> set;
+   unordered_set<HYPRE_Int>::iterator itr;
 } HYPRE_IntSet;
 
 HYPRE_IntSet *hypre_IntSetCreate()
@@ -22,6 +23,16 @@ HYPRE_IntSet *hypre_IntSetCreate()
 void hypre_IntSetDestroy( HYPRE_IntSet *set )
 {
    delete set;
+}
+
+void hypre_IntSetInsert( HYPRE_IntSet *set, HYPRE_Int x)
+{
+   set->set.insert(x);
+}
+
+HYPRE_Int hypre_IntSetSize( HYPRE_IntSet *set )
+{
+   return set->set.size();
 }
 
 void hypre_IntSetBegin( HYPRE_IntSet *set )
@@ -39,6 +50,26 @@ HYPRE_Int hypre_IntSetNext( HYPRE_IntSet *set )
 HYPRE_Int hypre_IntSetHasNext( HYPRE_IntSet *set )
 {
    return set->itr != set->set.end();
+}
+
+HYPRE_Int2Int *hypre_Int2IntCreate()
+{
+   return (HYPRE_Int2Int *)(new unordered_map<HYPRE_Int, HYPRE_Int>());
+}
+
+void hypre_Int2IntDestroy(HYPRE_Int2Int *map)
+{
+   delete (unordered_map<HYPRE_Int, HYPRE_Int> *)map;
+}
+
+void hypre_Int2IntInsert(HYPRE_Int2Int *map, HYPRE_Int key, HYPRE_Int value)
+{
+   ((unordered_map<HYPRE_Int, HYPRE_Int> *)map)->insert(make_pair(key, value));
+}
+
+HYPRE_Int hypre_Int2IntFind(HYPRE_Int2Int *map, HYPRE_Int key)
+{
+   return ((unordered_map<HYPRE_Int, HYPRE_Int> *)map)->find(key)->second;
 }
 
 HYPRE_Int2IntSet *hypre_Int2IntSetCreate()
