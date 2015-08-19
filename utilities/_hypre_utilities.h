@@ -911,6 +911,10 @@ HYPRE_IntSet *hypre_IntSetCreate( void );
 void hypre_IntSetDestroy( HYPRE_IntSet *set );
 
 void hypre_IntSetInsert ( HYPRE_IntSet *set, HYPRE_Int x );
+/**
+ * @return 1 if set has x
+ */
+HYPRE_Int hypre_IntSetContain ( HYPRE_IntSet *set, HYPRE_Int x );
 
 HYPRE_Int hypre_IntSetSize ( HYPRE_IntSet *set );
 
@@ -933,7 +937,10 @@ HYPRE_Int2Int *hypre_Int2IntCreate();
 void hypre_Int2IntDestroy( HYPRE_Int2Int *map );
 
 void hypre_Int2IntInsert( HYPRE_Int2Int *map, HYPRE_Int key, HYPRE_Int value );
-HYPRE_Int hypre_Int2IntFind( HYPRE_Int2Int *map, HYPRE_Int key );
+/**
+ * @ret NULL if map doesn't have key
+ */
+HYPRE_Int *hypre_Int2IntFind( HYPRE_Int2Int *map, HYPRE_Int key );
 
 typedef struct HYPRE_Int2IntSet HYPRE_Int2IntSet;
   // wrapper of std::unordered_map<HYPRE_Int, std::set<HYPRE_Int> >

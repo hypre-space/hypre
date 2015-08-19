@@ -1525,7 +1525,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
 #pragma omp parallel for
       for (i=0 ; i < S_ext_offd_size; i++)
-         S_ext_offd_j[i] = hypre_Int2IntFind(temp_inverse_map, S_ext_offd_j[i]);
+         S_ext_offd_j[i] = *hypre_Int2IntFind(temp_inverse_map, S_ext_offd_j[i]);
 
       hypre_Int2IntDestroy(temp_inverse_map);
 
