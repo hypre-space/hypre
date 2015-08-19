@@ -368,7 +368,7 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
 #pragma omp parallel private(i,j,i1,ifound)
 #endif
   {
-    HYPRE_IntSet *temp_set = hypre_IntSetCreate();
+    HYPRE_IntSet *tmp_found_set = hypre_IntSetCreate();
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for HYPRE_SMP_SCHEDULE
@@ -382,7 +382,7 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
         i1 = A_ext_j[j];
         if(i1 < col_1 || i1 >= col_n)
         {
-          if (!hypre_IntSetContain(temp_set, i1))
+          if (!hypre_IntSetContain(tmp_found_set, i1))
           {
             HYPRE_Int *itr = hypre_Int2IntFind(col_map_offd_inverse, i1);
             if (itr)
@@ -391,7 +391,7 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
             }
             else
             {
-               hypre_IntSetInsert(temp_set, i1);
+               hypre_IntSetInsert(tmp_found_set, i1);
             }
           }
         }
@@ -401,7 +401,7 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
         i1 = Sop_j[j];
         if(i1 < col_1 || i1 >= col_n)
         {
-          if (!hypre_IntSetContain(temp_set, i1))
+          if (!hypre_IntSetContain(tmp_found_set, i1))
           {
             Sop_j[j] = -*hypre_Int2IntFind(col_map_offd_inverse, i1) - 1;
           }
@@ -410,40 +410,40 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
      } /* CF_marker_offd[i] < 0 */
     } /* for each row */
 
-   HYPRE_Int temp_set_size = hypre_IntSetSize(temp_set);
+   HYPRE_Int tmp_found_set_size = hypre_IntSetSize(tmp_found_set);
 
-   hypre_prefix_sum(&temp_set_size, &newoff, prefix_sum_workspace);
+   hypre_prefix_sum(&tmp_found_set_size, &newoff, prefix_sum_workspace);
 
-   hypre_IntSetBegin(temp_set);
-   while (hypre_IntSetHasNext(temp_set))
+   hypre_IntSetBegin(tmp_found_set);
+   while (hypre_IntSetHasNext(tmp_found_set))
    {
-     tmp_found[temp_set_size++] = hypre_IntSetNext(temp_set);
+     tmp_found[tmp_found_set_size++] = hypre_IntSetNext(tmp_found_set);
    }
-   hypre_IntSetDestroy(temp_set);
+   hypre_IntSetDestroy(tmp_found_set);
   } /* omp parallel */
 
   hypre_Int2IntDestroy(col_map_offd_inverse);
 
   /* Put found in monotone increasing order */
-  HYPRE_Int2Int *temp_inverse_map = hypre_Int2IntCreate();
+  HYPRE_Int2Int *tmp_found_inverse = hypre_Int2IntCreate();
   if (newoff > 0)
   {
-     HYPRE_Int *temp2 = hypre_TAlloc(HYPRE_Int, newoff);
-     HYPRE_Int *temp_duplicate_eliminated;
-     newoff = hypre_merge_sort_unique2(tmp_found, temp2, newoff, &temp_duplicate_eliminated);
+     HYPRE_Int *tmp_found2 = hypre_TAlloc(HYPRE_Int, newoff);
+     HYPRE_Int *tmp_found_duplicate_eliminated;
+     newoff = hypre_merge_sort_unique2(tmp_found, tmp_found2, newoff, &tmp_found_duplicate_eliminated);
      for (i = 0; i < newoff; i++)
      {
-        hypre_Int2IntInsert(temp_inverse_map, temp_duplicate_eliminated[i], i);
+        hypre_Int2IntInsert(tmp_found_inverse, tmp_found_duplicate_eliminated[i], i);
      }
-     if (temp_duplicate_eliminated == tmp_found)
+     if (tmp_found_duplicate_eliminated == tmp_found)
      {
-        hypre_TFree(temp2);
+        hypre_TFree(tmp_found2);
      }
      else
      {
         hypre_TFree(tmp_found);
      }
-     tmp_found = temp_duplicate_eliminated;
+     tmp_found = tmp_found_duplicate_eliminated;
   }
 
   full_off_procNodes = newoff + num_cols_A_offd;
@@ -461,7 +461,7 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
        k1 = Sop_j[kk];
        if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        { 
-	 got_loc = *hypre_Int2IntFind(temp_inverse_map,k1);
+	 got_loc = *hypre_Int2IntFind(tmp_found_inverse,k1);
 	 loc_col = got_loc + num_cols_A_offd;
 	 Sop_j[kk] = -loc_col - 1;
        }
@@ -471,14 +471,14 @@ HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int
        k1 = A_ext_j[kk];
        if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        {
-	 got_loc = *hypre_Int2IntFind(temp_inverse_map,k1);
+	 got_loc = *hypre_Int2IntFind(tmp_found_inverse,k1);
 	 loc_col = got_loc + num_cols_A_offd;
 	 A_ext_j[kk] = -loc_col - 1;
        }
      }
    }
   }
-  hypre_Int2IntDestroy(temp_inverse_map);
+  hypre_Int2IntDestroy(tmp_found_inverse);
 
 
   hypre_TFree(CF_marker_offd);
