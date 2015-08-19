@@ -1102,15 +1102,20 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
 
    comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,B_int_j,B_ext_j);
+   hypre_ParCSRCommHandle *comm_handle_data;
+   if (data)
+   {
+      comm_handle_data = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,B_int_data,
+                                                 B_ext_data);
+   }
+
    hypre_ParCSRCommHandleDestroy(comm_handle);
    comm_handle = NULL;
 
    if (data)
    {
-      comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,B_int_data,
-                                                 B_ext_data);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-      comm_handle = NULL;
+      hypre_ParCSRCommHandleDestroy(comm_handle_data);
+      comm_handle_data = NULL;
    }
 
    hypre_TFree(jdata_send_map_starts);
