@@ -1499,11 +1499,6 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       HYPRE_Int *temp_duplicate_eliminated;
       num_cols_offd_C = hypre_merge_sort_unique2(temp, temp2, temp_size, &temp_duplicate_eliminated);
 
-      HYPRE_Int2Int *temp_inverse_map = hypre_Int2IntCreate();
-      for (i = 0; i < num_cols_offd_C; i++)
-      {
-         hypre_Int2IntInsert(temp_inverse_map, temp_duplicate_eliminated[i], i);
-      }
       if (temp_duplicate_eliminated == temp)
       {
          hypre_TFree(temp2);
@@ -1513,14 +1508,19 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          hypre_TFree(temp);
       }
       col_map_offd_C = temp_duplicate_eliminated;
+      HYPRE_Int2Int *col_map_offd_C_inverse = hypre_Int2IntCreate();
+      for (i = 0; i < num_cols_offd_C; i++)
+      {
+         hypre_Int2IntInsert(col_map_offd_C_inverse, col_map_offd_C[i], i);
+      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
       for (i=0 ; i < S_ext_offd_size; i++)
-         S_ext_offd_j[i] = *hypre_Int2IntFind(temp_inverse_map, S_ext_offd_j[i]);
+         S_ext_offd_j[i] = *hypre_Int2IntFind(col_map_offd_C_inverse, S_ext_offd_j[i]);
 
-      hypre_Int2IntDestroy(temp_inverse_map);
+      hypre_Int2IntDestroy(col_map_offd_C_inverse);
 
       if (num_cols_offd_S)
       {

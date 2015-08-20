@@ -576,4 +576,109 @@ HYPRE_Int exchange_interp_data(
   return hypre_error_flag;
 }
 
+void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd)
+{
+   HYPRE_Int i, index;
 
+   HYPRE_Int n_fine = hypre_CSRMatrixNumRows(P->diag);
+   HYPRE_Int P_offd_size = P->offd->i[n_fine];
+   HYPRE_Int *P_offd_j = P->offd->j;
+
+   HYPRE_Int *P_marker = NULL;
+   if (full_off_procNodes)
+      P_marker = hypre_TAlloc(HYPRE_Int, full_off_procNodes);
+   
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i=0; i < full_off_procNodes; i++)
+     P_marker[i] = 0;
+   
+   /* These two loops set P_marker[i] to 1 if it appears in P_offd_j and if
+    * tmp_CF_marker_offd has i marked. num_cols_P_offd is then set to the
+    * total number of times P_marker is set */
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,index) HYPRE_SMP_SCHEDULE
+#endif
+   for (i=0; i < P_offd_size; i++)
+   {
+     index = P_offd_j[i];
+     if(tmp_CF_marker_offd[index] >= 0)
+     {  P_marker[index] = 1; }
+   }
+
+   HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
+   HYPRE_Int num_cols_P_offd = 0;
+   HYPRE_Int *col_map_offd_P;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(i)
+#endif
+   {
+     HYPRE_Int i_begin, i_end;
+     hypre_GetSimpleThreadPartition(&i_begin, &i_end, full_off_procNodes);
+
+     HYPRE_Int local_num_cols_P_offd = 0;
+     for (i = i_begin; i < i_end; i++)
+     {
+       if (P_marker[i] == 1) local_num_cols_P_offd++;
+     }
+
+     hypre_prefix_sum(&local_num_cols_P_offd, &num_cols_P_offd, prefix_sum_workspace);
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp master
+#endif
+     {
+       if (num_cols_P_offd)
+         col_map_offd_P = hypre_TAlloc(HYPRE_Int, num_cols_P_offd);
+     }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+     for (i = i_begin; i < i_end; i++)
+     {
+       if (P_marker[i] == 1)
+       {
+          col_map_offd_P[local_num_cols_P_offd++] = fine_to_coarse_offd[i];
+       }
+     }
+   }
+
+   /* Check if sort actually changed anything */
+   HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int, num_cols_P_offd);
+   HYPRE_Int *sorted;
+   hypre_merge_sort(col_map_offd_P, temp, num_cols_P_offd, &sorted);
+   if (sorted == col_map_offd_P)
+   {
+      hypre_TFree(temp);
+   }
+   else
+   {
+      hypre_TFree(col_map_offd_P);
+   }
+   col_map_offd_P = sorted;
+
+   // find old idx -> new idx map
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for
+#endif
+   for (i = 0; i < full_off_procNodes; i++)
+     P_marker[i] = hypre_BinarySearch(
+      col_map_offd_P, fine_to_coarse_offd[i], num_cols_P_offd);
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for
+#endif
+   for(i = 0; i < P_offd_size; i++)
+     P_offd_j[i] = P_marker[P_offd_j[i]];
+
+   hypre_TFree(P_marker); 
+
+   if (num_cols_P_offd)
+   {
+      hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+      hypre_CSRMatrixNumCols(P->offd) = num_cols_P_offd;
+   }
+}

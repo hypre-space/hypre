@@ -45,3 +45,5 @@ HYPRE_Int exchange_interp_data(
     HYPRE_Int num_functions,
     HYPRE_Int *dof_func,
     HYPRE_Int skip_fine_or_same_sign);
+
+void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd);
