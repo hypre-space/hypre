@@ -592,29 +592,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
        Bs_ext = NULL;
     }
 
-    if (cnt)
-    {
-       HYPRE_Int *temp2 = hypre_TAlloc(HYPRE_Int, cnt);
-       HYPRE_Int *temp_duplicate_eliminated;
-       num_cols_offd_C = hypre_merge_sort_unique2(temp, temp2, cnt, &temp_duplicate_eliminated);
-
-       col_map_offd_C_inverse = hypre_Int2IntCreate();
-       HYPRE_Int i;
-       for (i = 0; i < num_cols_offd_C; i++)
-       {
-          hypre_Int2IntInsert(col_map_offd_C_inverse, temp_duplicate_eliminated[i], i);
-       }
-       if (temp_duplicate_eliminated == temp)
-       {
-          hypre_TFree(temp2);
-       }
-       else
-       {
-          hypre_TFree(temp);
-       }
-
-       col_map_offd_C = temp_duplicate_eliminated;
-    }
+    num_cols_offd_C = hypre_sort_unique_and_inverse_map(temp, cnt, &col_map_offd_C, &col_map_offd_C_inverse);
 
     HYPRE_Int i, j;
 #ifdef HYPRE_USING_OPENMP

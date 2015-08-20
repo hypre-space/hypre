@@ -969,6 +969,12 @@ void hypre_Int2IntSetInsert( HYPRE_Int2IntSet *map, HYPRE_Int key, HYPRE_Int val
  */
 HYPRE_IntSet *hypre_Int2IntSetFind( HYPRE_Int2IntSet *map, HYPRE_Int key );
 
+/**
+ * @return length of output with duplication eliminated
+ */
+HYPRE_Int hypre_sort_unique_and_inverse_map(
+  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, HYPRE_Int2Int **inverse_map);
+
 #ifdef __cplusplus
 }
 #endif

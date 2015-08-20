@@ -111,4 +111,34 @@ HYPRE_IntSet *hypre_Int2IntSetFind( HYPRE_Int2IntSet *map, HYPRE_Int key )
    return itr == m->end() ? NULL : &itr->second;
 }
 
+HYPRE_Int hypre_sort_unique_and_inverse_map(
+  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, HYPRE_Int2Int **inverse_map)
+{
+   if (len == 0)
+   {
+      *inverse_map = NULL;
+      return 0;
+   }
+
+   HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int, len);
+   HYPRE_Int *duplicate_eliminated;
+   HYPRE_Int new_len = hypre_merge_sort_unique2(in, temp, len, &duplicate_eliminated);
+   *inverse_map = hypre_Int2IntCreate();
+   HYPRE_Int i;
+   for (i = 0; i < new_len; i++)
+   {
+      hypre_Int2IntInsert(*inverse_map, duplicate_eliminated[i], i);
+   }
+   if (duplicate_eliminated == in)
+   {
+      hypre_TFree(temp);
+   }
+   else
+   {
+      hypre_TFree(in);
+   }
+   *out = duplicate_eliminated;
+   return new_len;
+}
+
 } // extern "C"

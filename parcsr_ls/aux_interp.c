@@ -398,26 +398,8 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   hypre_Int2IntDestroy(col_map_offd_inverse);
 
   /* Put found in monotone increasing order */
-  HYPRE_Int2Int *tmp_found_inverse = hypre_Int2IntCreate();
-  if (newoff > 0)
-  {
-     HYPRE_Int *tmp_found2 = hypre_TAlloc(HYPRE_Int, newoff);
-     HYPRE_Int *tmp_found_duplicate_eliminated;
-     newoff = hypre_merge_sort_unique2(tmp_found, tmp_found2, newoff, &tmp_found_duplicate_eliminated);
-     for (i = 0; i < newoff; i++)
-     {
-        hypre_Int2IntInsert(tmp_found_inverse, tmp_found_duplicate_eliminated[i], i);
-     }
-     if (tmp_found_duplicate_eliminated == tmp_found)
-     {
-        hypre_TFree(tmp_found2);
-     }
-     else
-     {
-        hypre_TFree(tmp_found);
-     }
-     tmp_found = tmp_found_duplicate_eliminated;
-  }
+  HYPRE_Int2Int *tmp_found_inverse;
+  newoff = hypre_sort_unique_and_inverse_map(tmp_found, newoff, &tmp_found, &tmp_found_inverse);
 
   full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
