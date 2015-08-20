@@ -754,6 +754,17 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
 HYPRE_Int
 hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
 {
+#ifdef HYPRE_USING_PERSISTENT_COMM
+   HYPRE_Int i;
+   for (i = HYPRE_COMM_PKG_JOB_COMPLEX; i < NUM_OF_COMM_PKG_JOB_TYPE; ++i)
+   {
+      if (comm_pkg->persistent_comm_handles[i])
+      {
+         hypre_ParCSRPersistentCommHandleDestroy(comm_pkg->persistent_comm_handles[i]);
+      }
+   }
+#endif
+
    if (hypre_ParCSRCommPkgNumSends(comm_pkg))
    {
       hypre_TFree(hypre_ParCSRCommPkgSendProcs(comm_pkg));
@@ -770,17 +781,6 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    /* if (hypre_ParCSRCommPkgRecvMPITypes(comm_pkg))
       hypre_TFree(hypre_ParCSRCommPkgRecvMPITypes(comm_pkg)); */
    hypre_TFree(comm_pkg);
-
-#ifdef USE_PERSISTENT_COMM
-   HYPRE_Int i;
-   for (i = HYPRE_COMM_PKG_JOB_COMPLEX; i < NUM_OF_COMM_PKG_JOB_TYPE; ++i)
-   {
-      if (comm_pkg->persistent_comm_handles[i])
-      {
-         hypre_ParCSRPersistentCommHandleDestroy(comm_pkg->persistent_comm_handles[i]);
-      }
-   }
-#endif
 
    return hypre_error_flag;
 }
