@@ -109,3 +109,54 @@ void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_
    *in_out3 = 0;
 #endif /* !HYPRE_USING_OPENMP */
 }
+
+void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace)
+{
+#ifdef HYPRE_USING_OPENMP
+   HYPRE_Int my_thread_num = hypre_GetThreadNum();
+   HYPRE_Int num_threads = hypre_NumActiveThreads();
+   hypre_assert(1 == num_threads || omp_in_parallel());
+
+   HYPRE_Int i;
+   for (i = 0; i < n; i++)
+   {
+     workspace[(my_thread_num + 1)*n + i] = in_out[i];
+   }
+
+#pragma omp barrier
+#pragma omp master
+   {
+      for (i = 0; i < n; i++)
+      {
+         workspace[i] = 0;
+      }
+
+      HYPRE_Int t;
+      // assuming n is not so big, we don't parallelize this loop
+      for (t = 1; t < num_threads; t++)
+      {
+         for (i = 0; i < n; i++)
+         {
+            workspace[(t + 1)*n + i] += workspace[t*n + i];
+         }
+      }
+
+      for (i = 0; i < n; i++)
+      {
+         sum[i] = workspace[num_threads*n + i];
+      }
+   }
+#pragma omp barrier
+
+   for (i = 0; i < n; i++)
+   {
+      in_out[i] = workspace[my_thread_num*n + i];
+   }
+#else /* !HYPRE_USING_OPENMP */
+   for (i = 0; i < n; i++)
+   {
+      sum[i] = in_out[i];
+      in_out[i] = 0;
+   }
+#endif /* !HYPRE_USING_OPENMP */
+}
