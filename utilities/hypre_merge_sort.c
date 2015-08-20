@@ -155,23 +155,22 @@ void kth_element(
       *out1 = k; *out2 = 0;
       return;
    }
-   if (k < n2 && a2[k] <= a1[0])
-   {
-      *out1 = 0; *out2 = k;
-      return;
-   }
-   // now k > 0
-
-   if (k - n2 >= 0 && a1[k - n2] >= a2[n2 - 1])
-   {
-      *out1 = k - n2; *out2 = n2;
-      return;
-   }
    if (k - n1 >= 0 && a2[k - n1] >= a1[n1 - 1])
    {
       *out1 = n1; *out2 = k - n1;
       return;
    }
+   if (k < n2 && a2[k] <= a1[0])
+   {
+      *out1 = 0; *out2 = k;
+      return;
+   }
+   if (k - n2 >= 0 && a1[k - n2] >= a2[n2 - 1])
+   {
+      *out1 = k - n2; *out2 = n2;
+      return;
+   }
+   // now k > 0
 
    // faster to do binary search on the shorter sequence
    if (n1 > n2)
@@ -233,6 +232,26 @@ HYPRE_Int hypre_parallel_merge_unique(
    HYPRE_Int begin1, begin2, end1, end2;
    kth_element(&begin1, &begin2, first1, first2, n1, n2, begin_rank);
    kth_element(&end1, &end2, first1, first2, n1, n2, end_rank);
+
+   while (begin1 > end1 && begin2 < n2 - 1 && first1[begin1] == first2[begin2 + 1])
+   {
+#ifdef DBG_MERGE_SORT
+      printf("%s:%d\n", __FILE__, __LINE__);
+#endif
+      begin1--; begin2++; 
+   }
+   while (begin2 > end2 && end2 < n2 - 1 && first1[end1] == first2[end2 + 1])
+   {
+#ifdef DBG_MERGE_SORT
+      printf("%s:%d\n", __FILE__, __LINE__);
+#endif
+      end1--; end2++;
+   }
+
+#ifdef DBG_MERGE_SORT
+   assert(begin1 <= end1);
+   assert(begin2 <= end2);
+#endif
 
    HYPRE_Int out_len = hypre_merge_unique(
       first1 + begin1, first1 + end1,
@@ -333,6 +352,26 @@ void hypre_parallel_merge(
    HYPRE_Int begin1, begin2, end1, end2;
    kth_element(&begin1, &begin2, first1, first2, n1, n2, begin_rank);
    kth_element(&end1, &end2, first1, first2, n1, n2, end_rank);
+
+   while (begin1 > end1 && begin2 < n2 - 1 && first1[begin1] == first2[begin2 + 1])
+   {
+#ifdef DBG_MERGE_SORT
+      printf("%s:%d\n", __FILE__, __LINE__);
+#endif
+      begin1--; begin2++; 
+   }
+   while (begin2 > end2 && end2 < n2 - 1 && first1[end1] == first2[end2 + 1])
+   {
+#ifdef DBG_MERGE_SORT
+      printf("%s:%d\n", __FILE__, __LINE__);
+#endif
+      end1--; end2++;
+   }
+
+#ifdef DBG_MERGE_SORT
+   assert(begin1 <= end1);
+   assert(begin2 <= end2);
+#endif
 
    hypre_merge(
       first1 + begin1, first1 + end1,
@@ -475,6 +514,79 @@ HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len)
       }
    }
    return out_len;
+}
+
+void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out)
+{
+   if (0 == len) return;
+
+#ifdef DBG_MERGE_SORT
+   int *dbg_buf = new int[len];
+   std::copy(in, in + len, dbg_buf);
+   std::sort(dbg_buf, dbg_buf + len);
+#endif
+
+   HYPRE_Int thread_private_len[hypre_NumThreads()];
+   HYPRE_Int out_len = 0;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel
+#endif
+   {
+      HYPRE_Int num_threads = hypre_NumActiveThreads();
+      HYPRE_Int my_thread_num = hypre_GetThreadNum();
+
+      // thread-private sort
+      HYPRE_Int i_per_thread = (len + num_threads - 1)/num_threads;
+      HYPRE_Int i_begin = hypre_min(i_per_thread*my_thread_num, len);
+      HYPRE_Int i_end = hypre_min(i_begin + i_per_thread, len);
+
+      qsort0(in, i_begin, i_end - 1);
+
+      // merge sorted sequences
+      HYPRE_Int in_group_size;
+      HYPRE_Int *in_buf = in;
+      HYPRE_Int *out_buf = temp;
+      for (in_group_size = 1; in_group_size < num_threads; in_group_size *= 2)
+      {
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+         // merge 2 in-groups into 1 out-group
+         HYPRE_Int out_group_size = in_group_size*2;
+         HYPRE_Int group_leader = my_thread_num/out_group_size*out_group_size;
+         HYPRE_Int group_sub_leader = hypre_min(group_leader + in_group_size, num_threads - 1);
+         HYPRE_Int id_in_group = my_thread_num%out_group_size;
+         HYPRE_Int num_threads_in_group =
+            hypre_min(group_leader + out_group_size, num_threads) - group_leader;
+
+         HYPRE_Int in_group1_begin = hypre_min(i_per_thread*group_leader, len);
+         HYPRE_Int in_group1_end = hypre_min(in_group1_begin + i_per_thread*in_group_size, len);
+
+         HYPRE_Int in_group2_begin = hypre_min(in_group1_begin + i_per_thread*in_group_size, len);
+         HYPRE_Int in_group2_end = hypre_min(in_group2_begin + i_per_thread*in_group_size, len);
+
+         hypre_parallel_merge(
+            in_buf + in_group1_begin, in_buf + in_group1_end,
+            in_buf + in_group2_begin, in_buf + in_group2_end,
+            out_buf + in_group1_begin,
+            num_threads_in_group,
+            id_in_group);
+
+         HYPRE_Int *temp = in_buf;
+         in_buf = out_buf;
+         out_buf = temp;
+      }
+
+      *out = in_buf;
+   } /* omp parallel */
+
+#ifdef DBG_MERGE_SORT
+   assert(std::equal(*out, *out + len, dbg_buf));
+
+   delete[] dbg_buf;
+#endif
 }
 
 /* vim: set tabstop=8 softtabstop=3 sw=3 expandtab: */

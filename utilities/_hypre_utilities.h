@@ -913,6 +913,8 @@ HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len);
  */
 HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out);
 
+void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
+
 /* hypre_map.cc */
 typedef struct HYPRE_IntSet HYPRE_IntSet;
   // wrapper of std::unordered_set<HYPRE_Int>
