@@ -1868,6 +1868,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int num_recvs;
    HYPRE_Int counter, upper_bound;
    HYPRE_Int num_real_procs;
+   HYPRE_Int current_proc, original_proc_indx;
    
    HYPRE_Int *row_list=NULL, *row_list_num_elements=NULL;
    HYPRE_Int *a_proc_id=NULL, *orig_order=NULL;
@@ -1876,6 +1877,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int *recv_starts=NULL;
    HYPRE_Int *response_buf = NULL, *response_buf_starts=NULL;
    HYPRE_Int *num_rows_per_proc = NULL, *num_elements_total = NULL;
+   HYPRE_Int *argsort_contact_procs = NULL;
   
    HYPRE_Int  obj_size_bytes, int_size, complex_size;
    HYPRE_Int  tmp_int;
@@ -2229,7 +2231,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    /*estimate inital storage allocation */
    send_proc_obj.length = 0;
    send_proc_obj.storage_length = num_real_procs + 5;
-   send_proc_obj.id = NULL; /* don't care who send it to us */
+   send_proc_obj.id = 
+      hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length + 1);
    send_proc_obj.vec_starts =
       hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length + 1); 
    send_proc_obj.vec_starts[0] = 0;
@@ -2256,9 +2259,18 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    hypre_TFree(ex_contact_vec_starts);
 
    /* Now we can unpack the send_proc_objects and call set 
-      and add to values functions */
-
+      and add to values functions.  We unpack messages in a 
+      deterministic order, using processor rank */
+   
    num_recvs = send_proc_obj.length; 
+   argsort_contact_procs = hypre_CTAlloc(HYPRE_Int, num_recvs);
+   for(i=0; i < num_recvs; i++)
+   {
+      argsort_contact_procs[i] = i;
+   }
+   /* This sort's the id array, but the original indices are stored in
+    * argsort_contact_procs */
+   hypre_qsort2i( send_proc_obj.id, argsort_contact_procs, 0, num_recvs-1 );
 
    /* alias */
    recv_data_ptr = send_proc_obj.v_elements;
@@ -2266,8 +2278,12 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    
    for (i=0; i < num_recvs; i++)
    {
-
-      indx = recv_starts[i];
+      
+      /* Find the current processor in order, and reset recv_data_ptr to that processor's message */
+      original_proc_indx = argsort_contact_procs[i];
+      current_proc = send_proc_obj.id[i];
+      indx = recv_starts[original_proc_indx];
+      recv_data_ptr = (void *) ((char *) send_proc_obj.v_elements + indx*obj_size_bytes);
 
       /* get the number of rows for this recv */
       memcpy( &num_rows, recv_data_ptr, int_size);
@@ -2339,6 +2355,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    }
    hypre_TFree(send_proc_obj.v_elements);
    hypre_TFree(send_proc_obj.vec_starts);
+   hypre_TFree(send_proc_obj.id);
  
    if (int_data) hypre_TFree(int_data);
    if (complex_data) hypre_TFree(complex_data);
@@ -2380,17 +2397,27 @@ hypre_FillResponseIJOffProcVals(void      *p_recv_contact_buf,
    hypre_MPI_Comm_rank(comm, &myid );
 
 
-   /*check to see if we need to allocate more space in send_proc_obj for vec starts*/
+   /*check to see if we need to allocate more space in send_proc_obj for vec starts
+    * and id */
    if (send_proc_obj->length == send_proc_obj->storage_length)
    {
       send_proc_obj->storage_length +=20; /*add space for 20 more contact*/
       send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts,HYPRE_Int, 
                                                  send_proc_obj->storage_length + 1);
+      if( send_proc_obj->id != NULL)
+      {
+         send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id, HYPRE_Int, 
+                                         send_proc_obj->storage_length + 1);
+      }
    }
   
    /*initialize*/ 
    count = send_proc_obj->length;
    index = send_proc_obj->vec_starts[count]; /* current number of elements */
+   if( send_proc_obj->id != NULL)
+   {
+      send_proc_obj->id[count] = contact_proc;
+   }
 
    /*do we need more storage for the elements?*/
    if (send_proc_obj->element_storage_length < index + contact_size)
