@@ -2356,6 +2356,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    hypre_TFree(send_proc_obj.v_elements);
    hypre_TFree(send_proc_obj.vec_starts);
    hypre_TFree(send_proc_obj.id);
+   hypre_TFree(argsort_contact_procs);
  
    if (int_data) hypre_TFree(int_data);
    if (complex_data) hypre_TFree(complex_data);
