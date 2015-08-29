@@ -55,14 +55,14 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
       to_data_box = hypre_BoxArrayBox(to_data_space, tb);
       to_data_vol = hypre_BoxVolume(to_data_box);
       
-      while ((fb < fr_nboxes) && (fr_ids[fb] != to_ids[tb]))
+      while ((fb < fr_nboxes) && (fr_ids[fb] < to_ids[tb]))
       {
          fr_data_box = hypre_BoxArrayBox(fr_data_space, fb);
          fr_data_vol = hypre_BoxVolume(fr_data_box);
          fr_data_off += nval * fr_data_vol;
          fb++;
       }
-      if (fb < fr_nboxes)
+      if ((fb < fr_nboxes) && (fr_ids[fb] == to_ids[tb]))
       {
          fr_data_box = hypre_BoxArrayBox(fr_data_space, fb);
          fr_data_vol = hypre_BoxVolume(fr_data_box);

@@ -236,6 +236,19 @@ hypre_StructVectorSetBoxnums( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructVectorSetStride( hypre_StructVector *vector,
+                             HYPRE_Int          *stride )
+{
+   hypre_CopyToIndex(stride, hypre_StructVectorNDim(vector),
+                     hypre_StructVectorStride(vector));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This routine changes the grid and index space.  Before the vector can
  * actually be used, hypre_StructVectorResize() must be called with an
  * appropriate data space.

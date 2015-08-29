@@ -19,6 +19,23 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
+ * Matrix data is currently stored relative to the largest matrix stride
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix,
+                                    hypre_IndexRef     *stride )
+{
+   *stride = hypre_StructMatrixRanStride(matrix);
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
+   {
+      *stride = hypre_StructMatrixDomStride(matrix);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This routine assumes that 'dindex' is in the range index space.
  *--------------------------------------------------------------------------*/
 
@@ -29,10 +46,9 @@ hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixDomStride(matrix);
       hypre_SnapIndexNeg(dindex, NULL, stride, ndim);
    }
    hypre_MapToCoarseIndex(dindex, NULL, stride, ndim);
@@ -69,11 +85,7 @@ hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixDomainIsCoarse(matrix))
-   {
-      stride = hypre_StructMatrixDomStride(matrix);
-   }
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    hypre_MapToCoarseIndex(dstride, NULL, stride, ndim);
 
    return hypre_error_flag;
@@ -89,11 +101,7 @@ hypre_StructMatrixUnMapDataIndex( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixDomainIsCoarse(matrix))
-   {
-      stride = hypre_StructMatrixDomStride(matrix);
-   }
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    hypre_MapToFineIndex(dindex, NULL, stride, ndim);
 
    return hypre_error_flag;
@@ -122,12 +130,41 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
+   hypre_MapToFineIndex(dstride, NULL, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Places the center of the stencil correctly on the base index space given a
+ * stencil entry and a data index.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixPlaceStencil( hypre_StructMatrix *matrix,
+                                HYPRE_Int           entry,
+                                hypre_Index         dindex,
+                                hypre_Index         index )
+{
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixDomStride(matrix);
+      HYPRE_Int             ndim    = hypre_StructMatrixNDim(matrix);
+      hypre_IndexRef        stride  = hypre_StructMatrixDomStride(matrix);
+      hypre_StructStencil  *stencil = hypre_StructMatrixStencil(matrix);
+      hypre_IndexRef        offset  = hypre_StructStencilOffset(stencil, entry);
+      hypre_Index           snapoffset;
+
+      /* Map the data index to the base index space */
+      hypre_CopyToIndex(dindex, ndim, index);
+      hypre_StructMatrixUnMapDataIndex(matrix, index);
+
+      /* Shift to the right based on offset: index += (SnapIndexPos(offset) - offset) */
+      hypre_CopyToIndex(offset, ndim, snapoffset);
+      hypre_SnapIndexPos(snapoffset, NULL, stride, ndim);
+      hypre_AddIndexes(index, snapoffset, ndim, index);  /* + SnapIndexPos(offset) */
+      hypre_SubtractIndexes(index, offset, ndim, index); /* - offset */
    }
-   hypre_MapToFineIndex(dstride, NULL, stride, ndim);
 
    return hypre_error_flag;
 }

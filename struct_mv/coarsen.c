@@ -124,6 +124,20 @@ hypre_CoarsenBox( hypre_Box      *box,
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_RefineBox( hypre_Box      *box,
+                 hypre_IndexRef  origin,
+                 hypre_Index     stride )
+{
+   hypre_MapToFineIndex(hypre_BoxIMin(box), origin, stride, hypre_BoxNDim(box));
+   hypre_MapToFineIndex(hypre_BoxIMax(box), origin, stride, hypre_BoxNDim(box));
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * The dimensions of the modified box array are not changed.
  * It is possible to have boxes with volume 0.
  * If 'origin' is NULL, a zero origin is used.

@@ -586,6 +586,27 @@ hypre_BoxGrowByValue( hypre_Box  *box,
 }
 
 /*--------------------------------------------------------------------------
+ * Grow a box outward to encompass a second box
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxGrowByBox( hypre_Box  *box,
+                    hypre_Box  *gbox )
+{ 
+   HYPRE_Int  d, ndim = hypre_BoxNDim(box);
+
+   for (d = 0; d < ndim; d++)
+   {
+      hypre_BoxIMinD(box, d) =
+         hypre_min(hypre_BoxIMinD(box, d), hypre_BoxIMinD(gbox, d));
+      hypre_BoxIMaxD(box, d) =
+         hypre_max(hypre_BoxIMaxD(box, d), hypre_BoxIMaxD(gbox, d));
+   }
+  
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Grow a box as specified by array
  *--------------------------------------------------------------------------*/
 

@@ -111,8 +111,8 @@ hypre_CommStencilDestroy( hypre_CommStencil  *comm_stencil )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructNumGhostFromCommStencil( hypre_CommStencil  *comm_stencil,
-                                     HYPRE_Int         **num_ghost_ptr )
+hypre_CommStencilCreateNumGhost( hypre_CommStencil  *comm_stencil,
+                                 HYPRE_Int         **num_ghost_ptr )
 {
    HYPRE_Int      *num_ghost;
    HYPRE_Int       ndim   = hypre_CommStencilNDim(comm_stencil);
