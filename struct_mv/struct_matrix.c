@@ -147,17 +147,18 @@ hypre_StructMatrixPlaceStencil( hypre_StructMatrix *matrix,
                                 hypre_Index         dindex,
                                 hypre_Index         index )
 {
+   HYPRE_Int  ndim = hypre_StructMatrixNDim(matrix);
+
+   /* Map the data index to the base index space */
+   hypre_CopyToIndex(dindex, ndim, index);
+   hypre_StructMatrixUnMapDataIndex(matrix, index);
+
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      HYPRE_Int             ndim    = hypre_StructMatrixNDim(matrix);
       hypre_IndexRef        stride  = hypre_StructMatrixDomStride(matrix);
       hypre_StructStencil  *stencil = hypre_StructMatrixStencil(matrix);
       hypre_IndexRef        offset  = hypre_StructStencilOffset(stencil, entry);
       hypre_Index           snapoffset;
-
-      /* Map the data index to the base index space */
-      hypre_CopyToIndex(dindex, ndim, index);
-      hypre_StructMatrixUnMapDataIndex(matrix, index);
 
       /* Shift to the right based on offset: index += (SnapIndexPos(offset) - offset) */
       hypre_CopyToIndex(offset, ndim, snapoffset);
@@ -564,18 +565,19 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
 
       data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
 
+      /* Copy constant data values */
+      for (i = 0; i < stencil_size; i++)
+      {
+         data[i] = old_data[i];
+      }
+
+      /* Copy the data */
+      hypre_StructDataCopy(old_data + stencil_size, old_data_space, old_ids,
+                           data + stencil_size, data_space, ids, ndim, nval);
       if (hypre_StructMatrixDataAlloced(matrix))
       {
-         /* move the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 1, ndim, nval);
+         hypre_TFree(old_data);
          old_data = NULL;
-      }
-      else
-      {
-         /* copy the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 0, ndim, nval);
       }
    }
 
@@ -611,11 +613,13 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
 HYPRE_Int
 hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
 {
-   HYPRE_Complex   *old_data       = hypre_StructMatrixData(matrix);
-   hypre_BoxArray  *old_data_space = hypre_StructMatrixDataSpace(matrix);
-   HYPRE_Complex   *data           = hypre_StructMatrixSaveData(matrix);
-   hypre_BoxArray  *data_space     = hypre_StructMatrixSaveDataSpace(matrix);
-   HYPRE_Int        data_size      = hypre_StructMatrixSaveDataSize(matrix);
+   HYPRE_Complex        *old_data       = hypre_StructMatrixData(matrix);
+   hypre_BoxArray       *old_data_space = hypre_StructMatrixDataSpace(matrix);
+   HYPRE_Complex        *data           = hypre_StructMatrixSaveData(matrix);
+   hypre_BoxArray       *data_space     = hypre_StructMatrixSaveDataSpace(matrix);
+   HYPRE_Int             data_size      = hypre_StructMatrixSaveDataSize(matrix);
+   hypre_StructStencil  *stencil        = hypre_StructMatrixStencil(matrix);
+   HYPRE_Int             stencil_size   = hypre_StructStencilSize(stencil);
 
    if (data_space != NULL)
    {
@@ -623,14 +627,21 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
       HYPRE_Int   ndim = hypre_StructMatrixNDim(matrix);
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
+      HYPRE_Int   i;
 
       /* Move the data */
       if (hypre_StructMatrixDataAlloced(matrix))
       {
          data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
       }
-      hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                           data, data_space, ids, 1, ndim, nval);
+      /* Copy constant data values */
+      for (i = 0; i < stencil_size; i++)
+      {
+         data[i] = old_data[i];
+      }
+      hypre_StructDataCopy(old_data + stencil_size, old_data_space, old_ids,
+                           data + stencil_size, data_space, ids, ndim, nval);
+      hypre_TFree(old_data);
 
       /* Reset certain fields to enable the Resize call below */
       hypre_StructMatrixSaveData(matrix)      = NULL;

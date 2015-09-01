@@ -347,7 +347,6 @@ hypre_StMatrixCreate( HYPRE_Int        id,
       (matrix->dmap[d]) = 1;
    }
    (matrix->shapes)  = hypre_CTAlloc(hypre_Index, size);
-   (matrix->ncoeffs) = hypre_CTAlloc(HYPRE_Int, size);
    (matrix->coeffs)  = hypre_CTAlloc(hypre_StCoeff *, size);
 
    *matrix_ptr = matrix;
@@ -374,7 +373,6 @@ hypre_StMatrixClone( hypre_StMatrix  *matrix,
    for (entry = 0; entry < (matrix->size); entry++)
    {
       hypre_StIndexCopy((matrix->shapes[entry]), (mclone->shapes[entry]), ndim);
-      (mclone->ncoeffs[entry]) = (matrix->ncoeffs[entry]);
       hypre_StCoeffClone((matrix->coeffs[entry]), ndim, &(mclone->coeffs[entry]));
    }
 
@@ -396,7 +394,6 @@ hypre_StMatrixDestroy( hypre_StMatrix *matrix )
       hypre_StCoeffDestroy(matrix->coeffs[entry]);
    }
    hypre_TFree(matrix->shapes);
-   hypre_TFree(matrix->ncoeffs);
    hypre_TFree(matrix->coeffs);
    hypre_TFree(matrix);
 
@@ -641,14 +638,12 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
                ABbox[ABii] = Centry;
                hypre_StIndexCopy(ABoff, (C->shapes[Centry]), ndim);
             }
-            (C->ncoeffs[Centry]) += 1;
             hypre_StCoeffPush(&(C->coeffs[Centry]), Ccoeff);
          }
       }
    }
    (C->size)    = Csize;
    (C->shapes)  = hypre_TReAlloc((C->shapes), hypre_Index, Csize);
-   (C->ncoeffs) = hypre_TReAlloc((C->ncoeffs), HYPRE_Int, Csize);
    (C->coeffs)  = hypre_TReAlloc((C->coeffs), hypre_StCoeff *, Csize);
    if (!isrowstencil)
    {
@@ -659,6 +654,8 @@ hypre_StMatrixMatmat( hypre_StMatrix  *A,
    /* Simplify? */
 
    /* Clean up */
+   hypre_StMatrixDestroy(Aclone);
+   hypre_StMatrixDestroy(Bclone);
    hypre_TFree(ABbox);
 
    *C_ptr = C;
@@ -791,4 +788,24 @@ hypre_StMatrixPrint( hypre_StMatrix *matrix,
    }
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
+                            HYPRE_Int       entry )
+{
+   HYPRE_Int      ncoeffs = 0;
+   hypre_StCoeff *coeff;
+
+   coeff = matrix->coeffs[entry];
+   while (coeff != NULL)
+   {
+      ncoeffs++;
+      coeff = (coeff->next);
+   }
+
+   return ncoeffs;
 }

@@ -38,7 +38,6 @@ hypre_StMatrixRead( FILE            *file,
       hypre_StCoeffCreate(1, &coeff);
       (coeff->terms[0].id) = id;
       (coeff->terms[0].entry) = entry;
-      (matrix->ncoeffs[entry]) = 1;
       (matrix->coeffs[entry]) = coeff;
    }
 

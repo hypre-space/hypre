@@ -31,8 +31,6 @@
  * This routine uses the StMatrix routines to determine if the operation is
  * allowable and to compute the stencil and stencil formulas for M.
  *
- * It is assumed that all nmatrices matrices are used in the product.
- *
  * All of the matrices must be defined on a common base grid (fine index space),
  * and each matrix must have a unitary stride for either its domain or range (or
  * both).  RDF: Need to remove the latter requirement.  Think of P*C for
@@ -109,15 +107,17 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructMatmult( HYPRE_Int            nmatrices,
-                     hypre_StructMatrix **matrices,
+hypre_StructMatmult( HYPRE_Int            nmatrices_input,
+                     hypre_StructMatrix **matrices_input,
                      HYPRE_Int            nterms,
-                     HYPRE_Int           *terms,
+                     HYPRE_Int           *terms_input,
                      HYPRE_Int           *transposes,
                      hypre_StructMatrix **M_ptr )
 {
-#if 1
    MPI_Comm             comm;
+
+   hypre_StructMatrix **matrices;     /* matrices we are multiplying */
+   HYPRE_Int            nmatrices, *terms, *matmap;
 
    hypre_StructMatrix  *M;            /* matrix product we are computing */
    hypre_StructStencil *Mstencil;
@@ -176,11 +176,11 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    hypre_IndexRef       loop_start;  /* boxloop start index on the base index space */
    hypre_IndexRef       loop_stride; /* boxloop stride on the base index space */
    hypre_Index          loop_size;   /* boxloop size */
-   hypre_IndexRef       fstride,  cstride,  Mstride;  /* data-map strides */
+   hypre_IndexRef       fstride,  cstride,  Mstride;  /* data-map strides (base index space) */
    hypre_Index          fdstart,  cdstart,  Mdstart;  /* boxloop data starts */
    hypre_Index          fdstride, cdstride, Mdstride; /* boxloop data strides */
    hypre_Box           *fdbox,   *cdbox,   *Mdbox;    /* boxloop data boxes */
-   hypre_Index          tdstart, tdshift;
+   hypre_Index          tdstart;
 
    hypre_BoxArray     **data_spaces;
    hypre_BoxArray      *cdata_space, *fdata_space, *Mdata_space, *data_space;
@@ -188,6 +188,34 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    /* RDF TODO: Maybe write StMatrixCreateFromStructMatrix() and
     * StructMatrixCreateFromStMatrix() routines? */
 
+   /* Create new matrices and terms arrays from the input arguments, because we
+    * only want to consider those matrices actually involved in the multiply */
+   matmap = hypre_CTAlloc(HYPRE_Int, nmatrices_input);
+   for (t = 0; t < nterms; t++)
+   {
+      m = terms_input[t];
+      matmap[m] = 1;
+   }
+   nmatrices = 0;
+   for (m = 0; m < nmatrices_input; m++)
+   {
+      if (matmap[m])
+      {
+         matmap[m] = nmatrices;
+         nmatrices++;
+      }
+   }
+   matrices   = hypre_CTAlloc(hypre_StructMatrix *, nmatrices);
+   terms      = hypre_CTAlloc(HYPRE_Int, nterms);
+   for (t = 0; t < nterms; t++)
+   {
+      m = terms_input[t];
+      matrices[matmap[m]] = matrices_input[m];
+      terms[t] = matmap[m];
+   }
+   hypre_TFree(matmap);
+
+   /* Set comm and ndim */
    matrix = matrices[0];
    comm = hypre_StructMatrixComm(matrix);
    ndim = hypre_StructMatrixNDim(matrix);
@@ -218,7 +246,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
          st_term = hypre_StCoeffTerm(st_coeff, 0);
          hypre_StTermID(st_term) = t;
          hypre_StTermEntry(st_term) = e;
-         hypre_StMatrixNCoeff(st_matrix, e) = 1;
          hypre_StMatrixCoeff(st_matrix, e) = st_coeff;
       }
       st_matrices[t] = st_matrix;
@@ -226,6 +253,13 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
 
    /* Multiply st_matrices */
    hypre_StMatrixMatmult(nterms, st_matrices, transposes, nterms, ndim, &st_M);
+
+   /* Free up st_matrices */
+   for (t = 0; t < nterms; t++)
+   {
+      hypre_StMatrixDestroy(st_matrices[t]);
+   }
+   hypre_TFree(st_matrices);
 
    /* Determine the coarsening factor for M's grid (the stride for either the
     * range or the domain, whichever is smaller) */
@@ -278,7 +312,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
          hypre_MapToCoarseIndex(offset, NULL, coarsen_stride, ndim);
       }
       HYPRE_StructStencilSetEntry(Mstencil, e, offset);
-      na += hypre_StMatrixNCoeff(st_M, e);
+      na += hypre_StMatrixNEntryCoeffs(st_M, e);
    }
 
    /* Use st_M to compute information needed to build the matrix.
@@ -406,7 +440,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    HYPRE_StructMatrixInitialize(M);
    *M_ptr = M;
 
-   /* Destroy the newly created Mgrid (it will still exist in matrix M) */
+   /* Destroy Mstencil and Mgrid (they will still exist in matrix M) */
+   HYPRE_StructStencilDestroy(Mstencil);
    HYPRE_StructGridDestroy(Mgrid);
    Mgrid = hypre_StructMatrixGrid(M);
 
@@ -417,9 +452,24 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
       constp[0] = const_values[i];
    }
 
+   /* Free up some stuff */
+   hypre_TFree(const_entries);
+   hypre_TFree(const_values);
+
    /* If all constant coefficients, return */
    if (na == 0)
    {
+      /* Free up some stuff */
+      hypre_StMatrixDestroy(st_M);
+      hypre_TFree(matrices);
+      hypre_TFree(terms);
+      hypre_TFree(a);
+      for (m = 0; m < nmatrices+1; m++)
+      {
+         hypre_CommStencilDestroy(comm_stencils[m]);
+      }
+      hypre_TFree(comm_stencils);
+
       HYPRE_StructMatrixAssemble(M);
       return hypre_error_flag;
    }
@@ -437,7 +487,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    loop_box = hypre_BoxCreate(ndim);
 
    /* Set Mstride and Mdata_space */
-   hypre_StructMatrixGetDataMapStride(M, &Mstride);
+   hypre_StructMatrixGetDataMapStride(M, &Mstride);            /* M's index space */
+   hypre_MapToFineIndex(Mstride, NULL, coarsen_stride, ndim);   /* base index space */
    Mdata_space = hypre_StructMatrixDataSpace(M);
 
    /* Compute fstride and cstride (assumes only two data-map strides) */
@@ -477,7 +528,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    }
 
    /* Compute initial data spaces for each matrix */
-   data_spaces = hypre_CTAlloc(hypre_BoxArray *, nmatrices);
+   data_spaces = hypre_CTAlloc(hypre_BoxArray *, nmatrices+1);
    for (m = 0; m < nmatrices; m++)
    {
       HYPRE_Int  *num_ghost;
@@ -519,39 +570,42 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
    for (m = 0; m < nmatrices+1; m++)
    {
       data_space = data_spaces[m];
-      switch (mtypes[m])
+      if (data_space != NULL) /* This can be NULL when there is no bit mask */
       {
-         case 0: /* fine data space */
-            if (fdata_space == NULL)
-            {
-               fdata_space = data_space;
-            }
-            else
-            {
-               hypre_ForBoxI(b, fdata_space)
+         switch (mtypes[m])
+         {
+            case 0: /* fine data space */
+               if (fdata_space == NULL)
                {
-                  hypre_BoxGrowByBox(hypre_BoxArrayBox(fdata_space, b),
-                                     hypre_BoxArrayBox(data_space, b));
+                  fdata_space = data_space;
                }
-               hypre_BoxArrayDestroy(data_space);
-            }
-            break;
+               else
+               {
+                  hypre_ForBoxI(b, fdata_space)
+                  {
+                     hypre_BoxGrowByBox(hypre_BoxArrayBox(fdata_space, b),
+                                        hypre_BoxArrayBox(data_space, b));
+                  }
+                  hypre_BoxArrayDestroy(data_space);
+               }
+               break;
 
-         case 1: /* coarse data space */
-            if (cdata_space == NULL)
-            {
-               cdata_space = data_space;
-            }
-            else
-            {
-               hypre_ForBoxI(b, cdata_space)
+            case 1: /* coarse data space */
+               if (cdata_space == NULL)
                {
-                  hypre_BoxGrowByBox(hypre_BoxArrayBox(cdata_space, b),
-                                     hypre_BoxArrayBox(data_space, b));
+                  cdata_space = data_space;
                }
-               hypre_BoxArrayDestroy(data_space);
-            }
-            break;
+               else
+               {
+                  hypre_ForBoxI(b, cdata_space)
+                  {
+                     hypre_BoxGrowByBox(hypre_BoxArrayBox(cdata_space, b),
+                                        hypre_BoxArrayBox(data_space, b));
+                  }
+                  hypre_BoxArrayDestroy(data_space);
+               }
+               break;
+         }
       }
    }
 
@@ -603,6 +657,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
          vdata = hypre_StructMatrixVData(matrix);
          hypre_InitializeCommunication(comm_pkg, &vdata, &vdata, 0, 0, &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
+         hypre_CommPkgDestroy(comm_pkg);
       }
    }
 
@@ -682,6 +737,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
       data = hypre_StructVectorData(mask);
       hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
+      hypre_CommPkgDestroy(comm_pkg);
    }
 
    /* Set a.types[] values */
@@ -755,13 +811,12 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
       fdbox = hypre_BoxArrayBox(fdata_space, b);
       cdbox = hypre_BoxArrayBox(cdata_space, b);
       hypre_CopyToIndex(loop_start, ndim, Mdstart);
-      hypre_MapToCoarseIndex(Mdstart, NULL, Mstride, ndim);
-      hypre_CopyToIndex(loop_start, ndim, fdstart);
-      hypre_MapToCoarseIndex(fdstart, NULL, fstride, ndim);
-      hypre_CopyToIndex(loop_start, ndim, cdstart);
-      hypre_MapToCoarseIndex(cdstart, NULL, cstride, ndim);
+      hypre_MapToCoarseIndex(Mdstart, NULL, Mstride, ndim);   /* at loop_start */
+      hypre_CopyToIndex(hypre_BoxIMin(fdbox), ndim, fdstart); /* at beginning of databox */
+      hypre_CopyToIndex(hypre_BoxIMin(cdbox), ndim, cdstart); /* at beginning of databox */
 
-      /* Set data pointers a.tptrs[] and a.mptr[] */
+      /* Set data pointers a.tptrs[] and a.mptr[].  For a.tptrs[], use Mstart to
+       * compute an offset from the beginning of the databox data. */
       for (i = 0; i < na; i++)
       {
          Mentry = a[i].mentry;
@@ -783,16 +838,14 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
             {
                case 0: /* variable coefficient on fine data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
-                  hypre_SubtractIndexes(tdstart, fdstart, ndim, tdshift);
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
-                     hypre_BoxOffsetDistance(fdbox, tdshift);
+                     hypre_BoxIndexRank(fdbox, tdstart);
                   break;
 
                case 1: /* variable coefficient on coarse data space */
                   hypre_StructMatrixMapDataIndex(matrix, tdstart); /* now on data space */
-                  hypre_SubtractIndexes(tdstart, cdstart, ndim, tdshift);
                   a[i].tptrs[t] = hypre_StructMatrixBoxData(matrix, b, entry) +
-                     hypre_BoxOffsetDistance(cdbox, tdshift);
+                     hypre_BoxIndexRank(cdbox, tdstart);
                   break;
 
                case 2: /* constant coefficient - point to bit mask */
@@ -800,9 +853,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
                   offsetref = hypre_StructStencilOffset(stencil, entry);
                   hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
-                  hypre_SubtractIndexes(tdstart, fdstart, ndim, tdshift);
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
-                     hypre_BoxOffsetDistance(fdbox, tdshift);
+                     hypre_BoxIndexRank(fdbox, tdstart);
                   break;
             }
          }
@@ -850,8 +902,26 @@ hypre_StructMatmult( HYPRE_Int            nmatrices,
       hypre_StructMatrixRestore(matrices[m]);
    }
 
-   HYPRE_StructMatrixAssemble(M);
+   /* Free up some stuff */
+   hypre_StMatrixDestroy(st_M);
+   hypre_TFree(matrices);
+   hypre_TFree(terms);
+   hypre_TFree(a);
+   for (m = 0; m < nmatrices+1; m++)
+   {
+      hypre_CommStencilDestroy(comm_stencils[m]);
+   }
+   hypre_TFree(comm_stencils);
+   if (need_mask)
+   {
+      hypre_StructVectorDestroy(mask);
+   }
+   hypre_BoxDestroy(loop_box);
+   hypre_TFree(mtypes);
+   hypre_BoxArrayDestroy(fdata_space);
+   hypre_BoxArrayDestroy(cdata_space);
+   hypre_TFree(data_spaces);
 
-#endif
+   HYPRE_StructMatrixAssemble(M);
    return hypre_error_flag;
 }

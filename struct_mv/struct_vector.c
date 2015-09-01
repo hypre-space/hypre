@@ -380,18 +380,12 @@ hypre_StructVectorResize( hypre_StructVector *vector,
 
       data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
 
+      /* Copy the data */
+      hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
       if (hypre_StructVectorDataAlloced(vector))
       {
-         /* move the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 1, ndim, 1);
+         hypre_TFree(old_data);
          old_data = NULL;
-      }
-      else
-      {
-         /* copy the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 0, ndim, 1);
       }
    }
 
@@ -446,8 +440,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
       {
          data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
       }
-      hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                           data, data_space, ids, 1, ndim, 1);
+      hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
 
       /* Reset certain fields to enable the Resize call below */
       hypre_StructVectorSaveGrid(vector)      = NULL;

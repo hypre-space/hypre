@@ -251,6 +251,7 @@ ReadData( char  *filename,
    }
 
    hypre_TFree(sdata);
+   fclose(file);
 
    *data_ptr = data; 
    return 0;
@@ -541,10 +542,9 @@ PrintUsage( char      *progname,
       hypre_printf("  -mat-vec <A> <x> <y> : compute A*x + y\n");
       hypre_printf("  -matTvec <A> <x> <y> : compute A^T*x + y\n");
       hypre_printf("\n");
-      hypre_printf("  -mat-mat  <A> <B>    : compute A*B\n");
-      hypre_printf("  -matTmat  <A> <B>    : compute A^T*B\n");
-      hypre_printf("  -mat-matT <A> <B>    : compute A*B^T\n");
-      hypre_printf("  -matTmatT <A> <B>    : compute A^T*B^T\n");
+      hypre_printf("  -mat-mat <n> <A>[T] <B>[T] ... : compute A*B*... or A^T*B*..., etc. \n");
+      hypre_printf("                                 : for n possibly transposed matrices \n");
+      hypre_printf("                                 : example P^T*A*P: -mat-mat 3 1T 0 1 \n");
       hypre_printf("\n");
    }
 
@@ -571,6 +571,7 @@ main( hypre_int  argc,
    HYPRE_StructMatrix   *matrices;
    HYPRE_StructGrid     *vgrids;
    HYPRE_StructVector   *vectors;
+   HYPRE_StructMatrix    M;
 
    HYPRE_Real           *values;
 
@@ -578,7 +579,9 @@ main( hypre_int  argc,
    HYPRE_Int             time_index;
    HYPRE_Int             arg_index, box, mi, vi, ei, d, i, k;
    HYPRE_Int             do_matvec, do_matmat;
-   HYPRE_Int             mv_A, mv_x, mv_y, mm_A, mm_B;
+   HYPRE_Int             mv_A, mv_x, mv_y;
+   HYPRE_Int             nterms, *terms, *trans;
+   char                  transposechar;
                         
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -688,8 +691,18 @@ main( hypre_int  argc,
       {
          arg_index++;
          do_matmat = 1;
-         mm_A = atoi(argv[arg_index++]);
-         mm_B = atoi(argv[arg_index++]);
+         nterms = atoi(argv[arg_index++]);
+         terms = hypre_CTAlloc(HYPRE_Int, nterms);
+         trans = hypre_CTAlloc(HYPRE_Int, nterms);
+         for (i = 0; i < nterms; i++)
+         {
+            transposechar = ' ';
+            sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
+            if (transposechar == 'T')
+            {
+               trans[i] = 1;
+            }
+         }
       }
       else
       {
@@ -936,11 +949,19 @@ main( hypre_int  argc,
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
+
+      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
       
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+
+      HYPRE_StructMatrixPrint("structmat.out.matmat", M, 0);
+
+      HYPRE_StructMatrixDestroy(M);
+      hypre_TFree(terms);
+      hypre_TFree(trans);
    }
 
    /*-----------------------------------------------------------
