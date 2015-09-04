@@ -1481,6 +1481,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int         *length_array;
    HYPRE_Int         *stride_array;
+   HYPRE_Int         *imap;
 
    HYPRE_Complex     *kptr, *lptr;
    HYPRE_Complex     *dptr;
@@ -1557,11 +1558,12 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
             dim = hypre_CommEntryDim(comm_entry);
             length_array = hypre_CommEntryLengthArray(comm_entry);
             stride_array = hypre_CommEntryStrideArray(comm_entry);
+            imap = hypre_CommEntryIMap(comm_entry);
 
             lptr = recv_data[b] + hypre_CommEntryOffset(comm_entry);
             for (ll = 0; ll < length_array[dim]; ll++)
             {
-               kptr = lptr + ll*stride_array[dim];
+               kptr = lptr + imap[ll]*stride_array[dim];
 
                /* This is based on "Idea 2" in box.h */
                {
@@ -1665,13 +1667,14 @@ hypre_ExchangeLocalData( hypre_CommPkg   *comm_pkg,
 
    HYPRE_Complex   *fr_dp;
    HYPRE_Int       *fr_stride_array;
+   HYPRE_Int       *fr_imap;
    HYPRE_Complex   *to_dp;
    HYPRE_Int       *to_stride_array;
+   HYPRE_Int       *to_imap;
                    
    HYPRE_Int       *length_array;
    HYPRE_Int        i, b, d, ll, dim;
 
-   HYPRE_Int       *imap;
 
    /*--------------------------------------------------------------------
     * copy local data
@@ -1701,11 +1704,12 @@ hypre_ExchangeLocalData( hypre_CommPkg   *comm_pkg,
 
             fr_stride_array = hypre_CommEntryStrideArray(copy_fr_entry);
             to_stride_array = hypre_CommEntryStrideArray(copy_to_entry);
-            imap = hypre_CommEntryIMap(copy_fr_entry);
+            fr_imap = hypre_CommEntryIMap(copy_fr_entry);
+            to_imap = hypre_CommEntryIMap(copy_to_entry);
 
             for (ll = 0; ll < length_array[dim]; ll++)
             {
-               if (imap[ll] > -1)
+               if (fr_imap[ll] > -1)
                {
                   /* This is based on "Idea 2" in box.h */
                   {
@@ -1721,8 +1725,8 @@ hypre_ExchangeLocalData( hypre_CommPkg   *comm_pkg,
                      n[dim]  = 2;
                      fs[dim] = 0;
                      ts[dim] = 0;
-                     fp[dim] = fr_dp + (imap[ll])*fr_stride_array[dim];
-                     tp[dim] = to_dp + (     ll )*to_stride_array[dim];
+                     fp[dim] = fr_dp + (fr_imap[ll])*fr_stride_array[dim];
+                     tp[dim] = to_dp + (to_imap[ll])*to_stride_array[dim];
                      for (d = 0; d < dim; d++)
                      {
                         i[d]  = 0;

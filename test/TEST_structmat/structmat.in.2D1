@@ -1,0 +1,128 @@
+##############################################################################
+#
+# This file describes the input file for the 'structmat.c' driver.
+#
+# The input file is line-based.  Any line beginning with a '#' character is
+# considered a comment and ignored by the driver.  For all non-comment lines,
+# the driver checks the first string to see if it matches certain key words of
+# the form 'Keyword:'.  These key words are usually followed by input data as
+# specified below.  If the first string doesn't match any key words, the line is
+# ignored, so blank lines are allowed.
+#
+# The format for each keyword input line is described below.  Each is followed
+# by a simple example
+#
+# More description here at a later date...
+#
+##############################################################################
+
+# For this driver, there is only one grid
+
+# GridCreate: ndim nboxes
+GridCreate: 2 1
+
+# GridSetExtents: boxnum ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (0 0) (4 4)
+
+# GridSetPeriodic: periodic(ndim)
+GridSetPeriodic: (5 0)
+
+###########################################################
+
+# Matrix: nmatrices
+Matrix: 5
+
+##### Matrix A (0)
+
+# MatrixCreate: matnum ncoeffs rmap(ndim) dmap(ndim)
+MatrixCreate: 0 5 (1 1) (1 1)
+
+# MatrixSetCoeff: matnum entry offset(ndim) value
+MatrixSetCoeff: 0  0 ( 0  0)  4.0
+MatrixSetCoeff: 0  1 (-1  0) -1.0
+MatrixSetCoeff: 0  2 ( 1  0) -1.0
+MatrixSetCoeff: 0  3 ( 0 -1) -1.0
+MatrixSetCoeff: 0  4 ( 0  1) -1.0
+
+# MatrixSetConstant: matnum nentries entries(nentries)
+#MatrixSetConstant: 0 5 (0 1 2 3 4)
+
+# MatrixSetSymmetric: matnum symmetric
+MatrixSetSymmetric: 0 0
+
+##### Matrix P (1)
+
+# MatrixCreate: matnum ncoeffs rmap(ndim) dmap(ndim)
+MatrixCreate: 1 3 (1 1) (2 1)
+
+# MatrixSetCoeff: matnum entry offset(ndim) value
+MatrixSetCoeff: 1  0 ( 0  0)  1.0
+MatrixSetCoeff: 1  1 (-1  0)  0.5
+MatrixSetCoeff: 1  2 ( 1  0)  0.5
+
+# MatrixSetConstant: matnum nentries entries(nentries)
+#MatrixSetConstant: 1 3 (0 1 2)
+
+##### Matrix R (2)
+
+# MatrixCreate: matnum ncoeffs rmap(ndim) dmap(ndim)
+MatrixCreate: 2 3 (2 1) (1 1)
+
+# MatrixSetCoeff: matnum entry offset(ndim) value
+MatrixSetCoeff: 2  0 ( 0  0)  1.0
+MatrixSetCoeff: 2  1 (-1  0)  0.5
+MatrixSetCoeff: 2  2 ( 1  0)  0.5
+
+# MatrixSetConstant: matnum nentries entries(nentries)
+#MatrixSetConstant: 2 3 (0 1 2)
+
+##### Matrix P (3)
+
+# MatrixCreate: matnum ncoeffs rmap(ndim) dmap(ndim)
+MatrixCreate: 3 3 (1 1) (1 2)
+
+# MatrixSetCoeff: matnum entry offset(ndim) value
+MatrixSetCoeff: 3  0 ( 0  0)  1.0
+MatrixSetCoeff: 3  1 ( 0 -1)  0.5
+MatrixSetCoeff: 3  2 ( 0  1)  0.5
+
+# MatrixSetConstant: matnum nentries entries(nentries)
+#MatrixSetConstant: 3 3 (0 1 2)
+
+##### Matrix R (4)
+
+# MatrixCreate: matnum ncoeffs rmap(ndim) dmap(ndim)
+MatrixCreate: 4 3 (1 2) (1 1)
+
+# MatrixSetCoeff: matnum entry offset(ndim) value
+MatrixSetCoeff: 4  0 ( 0  0)  1.0
+MatrixSetCoeff: 4  1 ( 0 -1)  0.5
+MatrixSetCoeff: 4  2 ( 0  1)  0.5
+
+# MatrixSetConstant: matnum nentries entries(nentries)
+#MatrixSetConstant: 4 3 (0 1 2)
+
+###########################################################
+
+# Vector: nvectors
+Vector: 4
+
+##### Vector x (0)
+
+# VectorCreate: vecnum map(ndim) value
+VectorCreate: 0 (1 1)  1.0
+
+##### Vector xc (1)
+
+# VectorCreate: vecnum map(ndim) value
+VectorCreate: 1 (2 1)  1.0
+
+##### Vector y (2)
+
+# VectorCreate: vecnum map(ndim) value
+VectorCreate: 2 (1 1)  0.0
+
+##### Vector yc (3)
+
+# VectorCreate: vecnum map(ndim) value
+VectorCreate: 3 (2 1)  0.0

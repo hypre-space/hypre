@@ -176,7 +176,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    hypre_IndexRef       loop_start;  /* boxloop start index on the base index space */
    hypre_IndexRef       loop_stride; /* boxloop stride on the base index space */
    hypre_Index          loop_size;   /* boxloop size */
-   hypre_IndexRef       fstride,  cstride,  Mstride;  /* data-map strides (base index space) */
+   hypre_Index          Mstride;           /* data-map stride  (base index space) */
+   hypre_IndexRef       fstride,  cstride; /* data-map strides (base index space) */
    hypre_Index          fdstart,  cdstart,  Mdstart;  /* boxloop data starts */
    hypre_Index          fdstride, cdstride, Mdstride; /* boxloop data strides */
    hypre_Box           *fdbox,   *cdbox,   *Mdbox;    /* boxloop data boxes */
@@ -487,7 +488,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    loop_box = hypre_BoxCreate(ndim);
 
    /* Set Mstride and Mdata_space */
-   hypre_StructMatrixGetDataMapStride(M, &Mstride);            /* M's index space */
+   hypre_StructMatrixGetDataMapStride(M, &stride);
+   hypre_CopyToIndex(stride, ndim, Mstride);                    /* M's index space */
    hypre_MapToFineIndex(Mstride, NULL, coarsen_stride, ndim);   /* base index space */
    Mdata_space = hypre_StructMatrixDataSpace(M);
 
@@ -639,25 +641,18 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
       hypre_CommInfo        *comm_info;
       hypre_CommPkg         *comm_pkg;
       hypre_CommHandle      *comm_handle;
-      HYPRE_Complex         *vdata;
+      HYPRE_Complex        **comm_data;
 
       matrix = matrices[m];
 
       if (hypre_StructMatrixNumValues(matrix) > 0)
       {
          hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
-         hypre_StructMatrixMapCommInfo(matrix, comm_info);
-         hypre_CommPkgCreate(comm_info,
-                             hypre_StructMatrixDataSpace(matrix),
-                             hypre_StructMatrixDataSpace(matrix),
-                             hypre_StructMatrixNumValues(matrix), NULL, 0,
-                             hypre_StructMatrixComm(matrix), &comm_pkg);
-         hypre_CommInfoDestroy(comm_info);
-
-         vdata = hypre_StructMatrixVData(matrix);
-         hypre_InitializeCommunication(comm_pkg, &vdata, &vdata, 0, 0, &comm_handle);
+         hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
+         hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
          hypre_FinalizeCommunication(comm_handle);
          hypre_CommPkgDestroy(comm_pkg);
+         hypre_TFree(comm_data);
       }
    }
 
@@ -849,9 +844,12 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
                   break;
 
                case 2: /* constant coefficient - point to bit mask */
-                  stencil = hypre_StructMatrixStencil(matrix);
-                  offsetref = hypre_StructStencilOffset(stencil, entry);
-                  hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
+                  if (!transposes[id])
+                  {
+                     stencil = hypre_StructMatrixStencil(matrix);
+                     offsetref = hypre_StructStencilOffset(stencil, entry);
+                     hypre_AddIndexes(tdstart, offsetref, ndim, tdstart);
+                  }
                   hypre_StructVectorMapDataIndex(mask, tdstart); /* now on data space */
                   a[i].tptrs[t] = hypre_StructVectorBoxData(mask, b) +
                      hypre_BoxIndexRank(fdbox, tdstart);
@@ -874,20 +872,22 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
             prod = a[i].cprod;
             for (t = 0; t < nterms; t++)
             {
+               HYPRE_Complex pprod;
                switch (a[i].types[t])
                {
                   case 0: /* variable coefficient on fine data space */
-                     prod *= a[i].tptrs[t][fi];
+                     pprod = a[i].tptrs[t][fi];
                      break;
 
                   case 1: /* variable coefficient on coarse data space */
-                     prod *= a[i].tptrs[t][ci];
+                     pprod = a[i].tptrs[t][ci];
                      break;
 
-                  case 2: /* constant coefficient - multiply by bit t of bit mask */
-                     prod *= ((HYPRE_Int) a[i].tptrs[t][fi]) & (1 << t);
+                  case 2: /* constant coefficient - multiply by bit mask value t */
+                     pprod = (((HYPRE_Int) a[i].tptrs[t][fi]) >> t) & 1;
                      break;
                }
+               prod *= pprod;
             }
             a[i].mptr[Mi] += prod;
          }

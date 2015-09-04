@@ -2298,6 +2298,7 @@ HYPRE_Int hypre_CommInfoGetTransforms ( hypre_CommInfo *comm_info , HYPRE_Int *n
 HYPRE_Int hypre_CommInfoProjectSend ( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
 HYPRE_Int hypre_CommInfoProjectRecv ( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
 HYPRE_Int hypre_CommInfoDestroy ( hypre_CommInfo *comm_info );
+HYPRE_Int hypre_CommInfoClone( hypre_CommInfo *comm_info , hypre_CommInfo **clone_ptr );
 HYPRE_Int hypre_CreateCommInfo ( hypre_StructGrid *grid , hypre_CommStencil *comm_stencil , hypre_CommInfo **comm_info_ptr );
 HYPRE_Int hypre_CreateCommInfoFromStencil ( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_CommInfo **comm_info_ptr );
 HYPRE_Int hypre_CreateCommInfoFromNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost , hypre_CommInfo **comm_info_ptr );
@@ -2318,6 +2319,7 @@ HYPRE_Int hypre_FinalizeIndtComputations ( hypre_CommHandle *comm_handle );
 /* project.c */
 HYPRE_Int hypre_SnapIndexPos( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
 HYPRE_Int hypre_SnapIndexNeg( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
+HYPRE_Int hypre_ConvertToCanonicalIndex( hypre_Index index , hypre_Index stride , HYPRE_Int ndim );
 HYPRE_Int hypre_ProjectBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_ProjectBoxArray ( hypre_BoxArray *box_array , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_ProjectBoxArrayArray ( hypre_BoxArrayArray *box_array_array , hypre_IndexRef origin , hypre_Index stride );
@@ -2384,7 +2386,9 @@ HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix , hypre_
 HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix , hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix , hypre_Index dstride );
 HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix , HYPRE_Int entry , hypre_Index dindex , hypre_Index index );
-HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix , hypre_CommInfo *comm_info );
+HYPRE_Int hypre_StructMatrixGetStencilSpace( hypre_StructMatrix *matrix , HYPRE_Int entry , hypre_Index origin , hypre_Index stride );
+HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix , hypre_IndexRef origin , hypre_Index stride , hypre_CommInfo *comm_info );
+HYPRE_Int hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix , hypre_CommInfo *comm_info , hypre_CommPkg **comm_pkg_ptr , HYPRE_Complex ***comm_data_ptr);
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );
 hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid *grid , hypre_StructStencil *user_stencil );
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );

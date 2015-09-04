@@ -145,73 +145,65 @@ hypre_BoxBoundaryDG( hypre_Box *box,
 
 /*--------------------------------------------------------------------------
  * Intersect a surface of 'box' with the physical boundary.  A stencil offset
- * indicates in which direction the surface should be determined. 
+ * indicates in which direction the surface should be determined.
  *
  * The result will be returned in the box array 'boundary'.  Any boxes already
  * in 'boundary' will be overwritten.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_GeneralBoxBoundaryIntersect( hypre_Box *box,
-                            hypre_StructGrid *grid,
-                            hypre_Index stencil_offset,
-                            hypre_BoxArray *boundary )
+hypre_GeneralBoxBoundaryIntersect( hypre_Box        *box,
+                                   hypre_StructGrid *grid,
+                                   hypre_Index       offset,
+                                   hypre_BoxArray   *boundary )
 {
-   hypre_BoxManager   *boxman;
+   hypre_BoxManager   *boxman = hypre_StructGridBoxMan(grid);
    hypre_BoxManEntry **entries;
    hypre_BoxArray     *int_boxes, *tmp_boxes;
    hypre_Box          *bbox, *ibox;
-   HYPRE_Int           nentries, i, j;
-   HYPRE_Int          *dd;
+   hypre_IndexRef      pshift;
+   HYPRE_Int           nentries, nperiods, i, j, k;
    HYPRE_Int           ndim;
 
    ndim = hypre_StructGridNDim(grid);
-   dd = hypre_CTAlloc(HYPRE_Int, ndim);
 
-   for (i=0; i < ndim; i++)
-     dd[i] = hypre_IndexD(stencil_offset, i);
-
-   /* set bbox to the box surface of interest */
+   /* Initialize the boundary array to contain only the input box (bbox <-- box) */
    hypre_BoxArraySetSize(boundary, 1);
    bbox = hypre_BoxArrayBox(boundary, 0);
    hypre_CopyBox(box, bbox);
 
-   /* temporarily shift bbox in direction dir and intersect with the grid */
-   for (i=0; i < ndim; i++)
-   {
-      hypre_BoxIMinD(bbox, i) += dd[i];
-      hypre_BoxIMaxD(bbox, i) += dd[i];
-   }
+   int_boxes = hypre_BoxArrayCreate(0, ndim);
+   tmp_boxes = hypre_BoxArrayCreate(0, ndim);
 
-   boxman = hypre_StructGridBoxMan(grid);
-   hypre_BoxManIntersect(boxman, hypre_BoxIMin(bbox), hypre_BoxIMax(bbox),
-                         &entries, &nentries);
-   for (i=0; i < ndim; i++)
+   /* Temporarily shift bbox in direction offset and intersect with the grid.
+    * Handle periodicity in a similar way by shifting based on the period. */
+   j = 0;
+   nperiods = hypre_StructGridNumPeriods(grid);
+   hypre_BoxShiftPos(bbox, offset);  /* bbox += offset */
+   for (k = 0; k < nperiods; k++)
    {
-      hypre_BoxIMinD(bbox, i) -= dd[i];
-      hypre_BoxIMaxD(bbox, i) -= dd[i];
-   }
-
-   /* shift intersected boxes in direction -dir and subtract from bbox */
-   int_boxes  = hypre_BoxArrayCreate(nentries, ndim);
-   tmp_boxes  = hypre_BoxArrayCreate(0, ndim);
-   for (i = 0; i < nentries; i++)
-   {
-      ibox = hypre_BoxArrayBox(int_boxes, i);
-      hypre_BoxManEntryGetExtents(
-         entries[i], hypre_BoxIMin(ibox), hypre_BoxIMax(ibox));
-      for (j=0; j < ndim; j++)
+      pshift = hypre_StructGridPShift(grid, k);
+      hypre_BoxShiftPos(bbox, pshift);  /* bbox += pshift */
+      hypre_BoxManIntersect(boxman, hypre_BoxIMin(bbox), hypre_BoxIMax(bbox), &entries, &nentries);
+      hypre_BoxArraySetSize(int_boxes, j + nentries);
+      for (i = 0; i < nentries; i++)
       {
-         hypre_BoxIMinD(ibox, j) -= dd[j];
-         hypre_BoxIMaxD(ibox, j) -= dd[j];
+         ibox = hypre_BoxArrayBox(int_boxes, j);
+         hypre_BoxManEntryGetExtents(entries[i], hypre_BoxIMin(ibox), hypre_BoxIMax(ibox));
+         hypre_BoxShiftNeg(ibox, pshift);  /* bbox -= pshift */
+         hypre_BoxShiftNeg(ibox, offset);  /* bbox -= offset */
+         j++;
       }
+      hypre_TFree(entries);
+      hypre_BoxShiftNeg(bbox, pshift);  /* bbox -= pshift */
    }
+   hypre_BoxShiftNeg(bbox, offset);  /* bbox -= offset */
+
+   /* Subtract intersected boxman boxes from bbox (first entry of boundary array) */
    hypre_SubtractBoxArrays(boundary, int_boxes, tmp_boxes);
 
    hypre_BoxArrayDestroy(int_boxes);
    hypre_BoxArrayDestroy(tmp_boxes);
-   hypre_TFree(entries);
-   hypre_TFree(dd);
 
    return hypre_error_flag;
 }

@@ -89,6 +89,32 @@ hypre_SnapIndexNeg( hypre_Index    index,
 }
 
 /*--------------------------------------------------------------------------
+ * Convert 'index' to a canonical index in the interval [0, 'stride').
+ *
+ * If 'origin' is NULL, a zero origin is used.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ConvertToCanonicalIndex( hypre_Index    index,
+                               hypre_Index    stride,
+                               HYPRE_Int      ndim )
+{
+   HYPRE_Int  d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      index[d] %= stride[d];
+
+      if (index[d] < 0)
+      {
+         index[d] += stride[d];
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Projects a box onto a strided index space that contains the index 'origin'
  * and has stride 'stride'.
  *
