@@ -313,6 +313,8 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
 		   HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
 		   HYPRE_Int *CF_marker_offd)
 {
+  hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+
   HYPRE_Int i, i1, ii, j, ifound, kk, k1;
   HYPRE_Int got_loc, loc_col;
 
@@ -436,6 +438,8 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   hypre_Int2IntDestroy(tmp_found_inverse);
 
   *found = tmp_found;
+
+  hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
  
   return newoff;
 }
@@ -481,6 +485,8 @@ HYPRE_Int exchange_interp_data(
     HYPRE_Int *dof_func,
     HYPRE_Int skip_fine_or_same_sign) // skip_fine_or_same_sign if we want to skip fine points in S and nnz with the same sign as diagonal in A
 {
+  hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] -= hypre_MPI_Wtime();
+
   hypre_ParCSRCommPkg   *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A); 
   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);   
@@ -519,9 +525,11 @@ HYPRE_Int exchange_interp_data(
   hypre_TFree(send_idx);
 
   /* Find nodes that are neighbors of neighbors, not found in offd */
+  hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] += hypre_MPI_Wtime();
   HYPRE_Int newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
       Soprows, col_map_offd, col_1, col_n, 
       Sop_i, Sop_j, *CF_marker_offd);
+  hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] -= hypre_MPI_Wtime();
   if(newoff >= 0)
     *full_off_procNodes = newoff + num_cols_A_offd;
   else
@@ -555,11 +563,15 @@ HYPRE_Int exchange_interp_data(
   hypre_ParCSRCommHandleDestroy(comm_handle_a_data);
   hypre_TFree(send_data);
 
+  hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] += hypre_MPI_Wtime();
+
   return hypre_error_flag;
 }
 
 void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd)
 {
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+
    HYPRE_Int i, index;
 
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(P->diag);
@@ -663,4 +675,6 @@ void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HY
       hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
       hypre_CSRMatrixNumCols(P->offd) = num_cols_P_offd;
    }
+
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
 }

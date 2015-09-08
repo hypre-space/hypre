@@ -411,6 +411,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       }
    }
 
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+
    if (num_procs > 1) 
    {
         Ps_ext = hypre_ParCSRMatrixExtractBExt(P,A,1);
@@ -557,6 +559,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
             if (cnt == num_cols_offd_P) break;
          }
    }
+  hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of RAP_int and set up RAP_int_i if there 
@@ -1044,6 +1047,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    hypre_TFree(jj_count);
   }
 
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+
    RAP_ext_size = 0;
    if (num_sends_RT || num_recvs_RT)
    {
@@ -1157,6 +1162,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    if (col_map_offd_RAP_inverse)
       hypre_Int2IntDestroy(col_map_offd_RAP_inverse);
+
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
 
 /*   need to allocate new P_marker etc. and make further changes */
    /*-----------------------------------------------------------------------

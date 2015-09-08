@@ -1410,6 +1410,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       hypre_TFree(S_int_i);
       hypre_TFree(S_int_j);
 
+      hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+
       S_ext_diag_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_S+1);
       S_ext_diag_i[0] = 0;
       S_ext_offd_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_S+1);
@@ -1529,6 +1531,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
             }
          } /* omp parallel */
       }
+
+      hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
    } /* num_procs > 1 */
 
 #if 1

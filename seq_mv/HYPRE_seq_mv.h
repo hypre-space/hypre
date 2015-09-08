@@ -94,7 +94,7 @@ typedef enum HYPRE_TimerID
    HYPRE_TIMER_ID_RELAX,
    HYPRE_TIMER_ID_GS_ELIM_SOLVE,
 
-   // timers for MPI
+   // timers for solve MPI
    HYPRE_TIMER_ID_PACK_UNPACK, // copying data to/from send/recv buf
    HYPRE_TIMER_ID_HALO_EXCHANGE, // halo exchange in matvec and relax
    HYPRE_TIMER_ID_ALL_REDUCE,
@@ -115,6 +115,10 @@ typedef enum HYPRE_TimerID
 
    // rap
    HYPRE_TIMER_ID_RAP,
+
+   // timers for setup MPI
+   HYPRE_TIMER_ID_RENUMBER_COLIDX,
+   HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA,
 
    // setup etc
    HYPRE_TIMER_ID_GS_ELIM_SETUP,
