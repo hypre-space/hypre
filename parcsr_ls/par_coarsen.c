@@ -2501,7 +2501,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       * Update subgraph
       *------------------------------------------------*/
 
-    HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
+    HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ig,i)
