@@ -389,11 +389,15 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
 
    hypre_prefix_sum(&tmp_found_set_size, &newoff, prefix_sum_workspace);
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp master
+#endif
    {
       tmp_found = hypre_TAlloc(HYPRE_Int, newoff);
    }
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 
    hypre_IntSetBegin(tmp_found_set);
    while (hypre_IntSetHasNext(tmp_found_set))

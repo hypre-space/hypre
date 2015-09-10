@@ -26,6 +26,9 @@ void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace)
 #else /* !HYPRE_USING_OPENMP */
    *sum = *in_out;
    *in_out = 0;
+
+   workspace[0] = 0;
+   workspace[1] = *sum;
 #endif /* !HYPRE_USING_OPENMP */
 }
 
@@ -63,6 +66,11 @@ void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_ou
    *sum2 = *in_out2;
    *in_out1 = 0;
    *in_out2 = 0;
+
+   workspace[0] = 0;
+   workspace[1] = 0;
+   workspace[2] = *sum1;
+   workspace[3] = *sum2;
 #endif /* !HYPRE_USING_OPENMP */
 }
 
@@ -107,17 +115,24 @@ void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_
    *in_out1 = 0;
    *in_out2 = 0;
    *in_out3 = 0;
+
+   workspace[0] = 0;
+   workspace[1] = 0;
+   workspace[2] = 0;
+   workspace[3] = *sum1;
+   workspace[4] = *sum2;
+   workspace[5] = *sum3;
 #endif /* !HYPRE_USING_OPENMP */
 }
 
 void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace)
 {
+   HYPRE_Int i;
 #ifdef HYPRE_USING_OPENMP
    HYPRE_Int my_thread_num = hypre_GetThreadNum();
    HYPRE_Int num_threads = hypre_NumActiveThreads();
    hypre_assert(1 == num_threads || omp_in_parallel());
 
-   HYPRE_Int i;
    for (i = 0; i < n; i++)
    {
      workspace[(my_thread_num + 1)*n + i] = in_out[i];
@@ -157,6 +172,9 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, H
    {
       sum[i] = in_out[i];
       in_out[i] = 0;
+
+      workspace[i] = 0;
+      workspace[n + i] = sum[i];
    }
 #endif /* !HYPRE_USING_OPENMP */
 }

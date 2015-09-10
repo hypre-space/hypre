@@ -225,22 +225,26 @@ HYPRE_Int hypre_parallel_merge_unique(
    HYPRE_Int end_rank = hypre_min(begin_rank + n_per_thread, n);
 
 #ifdef DBG_MERGE_SORT
-   int *dbg_buf = new int[n];
-   std::merge(first1, last1, first2, last2, dbg_buf);
+   int *dbg_buf = NULL;
+   if (my_thread_num == 0)
+   {
+      dbg_buf = new int[n];
+      std::merge(first1, last1, first2, last2, dbg_buf);
+   }
 #endif
 
    HYPRE_Int begin1, begin2, end1, end2;
    kth_element(&begin1, &begin2, first1, first2, n1, n2, begin_rank);
    kth_element(&end1, &end2, first1, first2, n1, n2, end_rank);
 
-   while (begin1 > end1 && begin2 < n2 - 1 && first1[begin1] == first2[begin2 + 1])
+   while (begin1 > end1 && begin1 > 0 && begin2 < n2 && first1[begin1 - 1] == first2[begin2])
    {
 #ifdef DBG_MERGE_SORT
       printf("%s:%d\n", __FILE__, __LINE__);
 #endif
       begin1--; begin2++; 
    }
-   while (begin2 > end2 && end2 < n2 - 1 && first1[end1] == first2[end2 + 1])
+   while (begin2 > end2 && end1 > 0 && end2 < n2 && first1[end1 - 1] == first2[end2])
    {
 #ifdef DBG_MERGE_SORT
       printf("%s:%d\n", __FILE__, __LINE__);
@@ -309,7 +313,9 @@ HYPRE_Int hypre_parallel_merge_unique(
    assert(std::is_sorted(out + out_begin, out + out_end));
    assert(std::adjacent_find(out + out_begin, out + out_end) == out + out_end);
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 
    if (0 == my_thread_num)
    {
@@ -322,7 +328,9 @@ HYPRE_Int hypre_parallel_merge_unique(
       delete[] dbg_buf;
    }
 
+#ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
+#endif
 #endif
 
    return prefix_sum_workspace[num_threads - 1];
@@ -353,14 +361,14 @@ void hypre_parallel_merge(
    kth_element(&begin1, &begin2, first1, first2, n1, n2, begin_rank);
    kth_element(&end1, &end2, first1, first2, n1, n2, end_rank);
 
-   while (begin1 > end1 && begin2 < n2 - 1 && first1[begin1] == first2[begin2 + 1])
+   while (begin1 > end1 && begin1 > 0 && begin2 < n2 && first1[begin1 - 1] == first2[begin2])
    {
 #ifdef DBG_MERGE_SORT
       printf("%s:%d\n", __FILE__, __LINE__);
 #endif
       begin1--; begin2++; 
    }
-   while (begin2 > end2 && end2 < n2 - 1 && first1[end1] == first2[end2 + 1])
+   while (begin2 > end2 && end1 > 0 && end2 < n2 && first1[end1 - 1] == first2[end2])
    {
 #ifdef DBG_MERGE_SORT
       printf("%s:%d\n", __FILE__, __LINE__);

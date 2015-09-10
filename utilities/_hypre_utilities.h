@@ -869,6 +869,8 @@ HYPRE_Real hypre_Rand ( void );
  * Note that always y_0 = 0
  *
  * @param workspace at least with length (nthreads+1)
+ *                  workspace[tid] will contain result for tid
+ *                  workspace[nthreads] will contain sum
  */
 void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
 /**
@@ -876,18 +878,20 @@ void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
  * Useful when we prefix sum of diag and offd in tandem.
  *
  * @param worksapce at least with length 2*(nthreads+1)
- *                  workspace[2*tid] and workspace[2*tid+1] contain result for tid
+ *                  workspace[2*tid] and workspace[2*tid+1] will contain results for tid
+ *                  workspace[3*nthreads] and workspace[3*nthreads + 1] will contain sums
  */
 void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace);
 /**
  * @param workspace at least with length 3*(nthreads+1)
- *                  workspace[3*tid:3*tid+3) contain result for tid
+ *                  workspace[3*tid:3*tid+3) will contain results for tid
  */
 void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
 
 /**
  * n prefix-sums together.
- * workspace[n*tid:n*(tid+1)) contain result for tid
+ * workspace[n*tid:n*(tid+1)) will contain results for tid
+ * workspace[nthreads*tid:nthreads*(tid+1)) will contain sums
  *
  * @param workspace at least with length n*(nthreads+1)
  */

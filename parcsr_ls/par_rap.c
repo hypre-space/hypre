@@ -1809,7 +1809,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       P_marker[i] = -1;
 
    jj_count_offd = 0;
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i3) reduction(+:jj_count_offd) HYPRE_SMP_SCHEDULE
+#endif
    for (i=0; i < RAP_offd_size; i++)
    {
       i3 = RAP_offd_j[i];
