@@ -335,7 +335,7 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   }
 
   size_offP = A_ext_i[num_cols_A_offd]+Sop_i[num_cols_A_offd];
-  tmp_found = hypre_TAlloc(HYPRE_Int, size_offP);
+  tmp_found = NULL;
 
   /* Find nodes that will be added to the off diag list */ 
   HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
@@ -388,6 +388,12 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
    HYPRE_Int tmp_found_set_size = hypre_IntSetSize(tmp_found_set);
 
    hypre_prefix_sum(&tmp_found_set_size, &newoff, prefix_sum_workspace);
+
+#pragma omp master
+   {
+      tmp_found = hypre_TAlloc(HYPRE_Int, newoff);
+   }
+#pragma omp barrier
 
    hypre_IntSetBegin(tmp_found_set);
    while (hypre_IntSetHasNext(tmp_found_set))
