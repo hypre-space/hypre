@@ -14,6 +14,18 @@
 TNAME=`basename $0 .sh`
 
 #=============================================================================
+# IJ: Run multiplicative and mult_additive cycle and compare results 
+#                    should be the same
+#=============================================================================
+
+tail -17 ${TNAME}.out.109 | head -6 > ${TNAME}.testdata
+
+#=============================================================================
+
+tail -17 ${TNAME}.out.110 | head -6 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -86,6 +98,13 @@ FILES="\
  ${TNAME}.out.106\
  ${TNAME}.out.107\
  ${TNAME}.out.108\
+ ${TNAME}.out.109\
+ ${TNAME}.out.110\
+ ${TNAME}.out.111\
+ ${TNAME}.out.112\
+ ${TNAME}.out.113\
+ ${TNAME}.out.114\
+ ${TNAME}.out.115\
 "
 
 for i in $FILES

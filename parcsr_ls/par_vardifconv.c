@@ -355,6 +355,20 @@ GenerateVarDifConv( MPI_Comm comm,
    rhs = hypre_ParVectorLocalVector(par_rhs);
    hypre_VectorData(rhs) = rhs_data;
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+/* ideally we would use less storage earlier in this function, but this is fine
+   for testing */
+   {
+      HYPRE_Int tmp1, tmp2;
+      tmp1 = global_part[my_id];
+      tmp2 = global_part[my_id + 1];
+      hypre_TFree(global_part);
+      global_part = hypre_CTAlloc(HYPRE_Int, 2);
+      global_part[0] = tmp1;
+      global_part[1] = tmp2;
+   }
+#endif
+
    A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
                                 global_part, global_part, num_cols_offd,
                                 diag_i[local_num_rows],

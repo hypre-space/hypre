@@ -1239,3 +1239,41 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_StructVectorClone
+ * Returns a complete copy of x - a deep copy, with its own copy of the data.
+ *--------------------------------------------------------------------------*/
+
+hypre_StructVector *
+hypre_StructVectorClone( hypre_StructVector *x )
+{
+   MPI_Comm		comm = hypre_StructVectorComm(x);
+   hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
+   hypre_BoxArray      *data_space = hypre_StructVectorDataSpace(x);
+   HYPRE_Int           *data_indices = hypre_StructVectorDataIndices(x);
+   HYPRE_Int            data_size = hypre_StructVectorDataSize(x);
+   HYPRE_Int            ndim = hypre_StructGridNDim(grid);
+   HYPRE_Int            data_space_size = hypre_BoxArraySize(data_space);
+   HYPRE_Int            i;
+   hypre_StructVector  *y = hypre_StructVectorCreate(comm, grid);
+
+   hypre_StructVectorDataSize(y) = data_size;
+   hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
+   hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
+   hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
+
+   for (i=0; i < data_space_size; i++)
+       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+
+   hypre_StructVectorCopy( x, y );
+
+   for (i=0; i < 2*ndim; i++)
+      hypre_StructVectorNumGhost(y)[i] = hypre_StructVectorNumGhost(x)[i];
+
+   hypre_StructVectorBGhostNotClear(y) = hypre_StructVectorBGhostNotClear(x);
+   hypre_StructVectorGlobalSize(y) = hypre_StructVectorGlobalSize(x);
+
+   return y;
+}
+
+

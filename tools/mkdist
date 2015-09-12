@@ -32,8 +32,8 @@ help ()
       VersionId    Creates a distribution, where VersionId determines the
                    repository revision to use.  VersionId can either have the
                    form VM-m-r to specify a release tag or Dyyyy-mm-dd to
-                   specify a date.  For example, V2-5-0a checks out source with
-                   tag 'V2-5-0a' and creates the tar file hypre-2.5.0a.tar.gz.
+                   specify a date.  For example, V2-10-1 checks out source with
+                   tag 'V2-10-1' and creates the tar file hypre-2.10.1.tar.gz.
                    The option D2010-01-27 checks out the most recent source not
                    later than the date '2010-01-27' and creates the tar file
                    hypre-2010.01.27.tar.gz.  The V option is used to create
@@ -41,7 +41,7 @@ help ()
                    temporary releases for colleagues.
 
    Example usage: $0 -display
-                  $0 V2-5-0a
+                  $0 V2-10-1
                   $0 D2010-01-27
 
 EOF

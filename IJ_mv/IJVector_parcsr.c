@@ -825,6 +825,11 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
    }
    else
    {
+     if (num_values > (vec_stop-vec_start))
+     {
+        hypre_error_in_arg(2);
+        return hypre_error_flag;
+     }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
 #endif

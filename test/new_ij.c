@@ -2242,11 +2242,17 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
-      HYPRE_BoomerAMGSetAddPMaxElmts(amg_solver, add_P_max_elmts);
-      HYPRE_BoomerAMGSetAddTruncFactor(amg_solver, add_trunc_factor);
+      HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
+      HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
-      HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);
+      /*HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);*/
+      if (nongalerk_tol)
+      {
+         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
+         for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
+      }
 
       /* BM Oct 23, 2006 */
       if (plot_grids) {
@@ -2379,9 +2385,14 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
-      HYPRE_BoomerAMGSetAddPMaxElmts(amg_solver, add_P_max_elmts);
-      HYPRE_BoomerAMGSetAddTruncFactor(amg_solver, add_trunc_factor);
-      HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);
+      HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
+      HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
+      if (nongalerk_tol)
+      {
+         HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
+         for (i=0; i < nongalerk_num_tol-1; i++)
+            HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
+      }
  
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
  
@@ -2532,9 +2543,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2668,9 +2684,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -2876,9 +2897,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3002,9 +3028,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
                                (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3212,9 +3243,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_LGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_LGMRESSetPrecond(pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3375,9 +3411,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_FlexGMRESSetPrecond(pcg_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3544,9 +3585,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_BiCGSTABSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3748,9 +3794,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
-         HYPRE_BoomerAMGSetAddPMaxElmts(pcg_precond, add_P_max_elmts);
-         HYPRE_BoomerAMGSetAddTruncFactor(pcg_precond, add_trunc_factor);
-         HYPRE_BoomerAMGSetNonGalerkTol(pcg_precond, nongalerk_num_tol, nongalerk_tol);
+         HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
+         HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         if (nongalerk_tol)
+         {
+            HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
+            for (i=0; i < nongalerk_num_tol-1; i++)
+               HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
          HYPRE_CGNRSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_CGNRSetPrecond(pcg_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
@@ -3853,6 +3904,8 @@ main( hypre_int argc,
       HYPRE_IJVectorDestroy(ij_b);
 
    HYPRE_IJVectorDestroy(ij_x);
+
+   if (nongalerk_tol) hypre_TFree (nongalerk_tol);
 
 /*
   hypre_FinalizeMemoryDebug();

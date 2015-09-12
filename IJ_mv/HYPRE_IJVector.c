@@ -378,12 +378,6 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector   vector,
       return hypre_error_flag;
    } 
 
-   if (!indices)
-   {
-      hypre_error_in_arg(3);
-      return hypre_error_flag;
-   } 
-
    if (!values)
    {
       hypre_error_in_arg(4);

@@ -95,7 +95,8 @@ co="--enable-complex --enable-maxdim=4 --enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basictest.dir/make.???
-grep -v make.err basictest.err > basictest.err
+grep -v make.err basictest.err > basictest.tmp
+mv basictest.tmp basictest.err
 renametest.sh basictest $output_dir/basictest--enable-complex
 
 # Test babel build only if 'babel-runtime' directory is present

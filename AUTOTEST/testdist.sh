@@ -12,9 +12,9 @@
 #EHEADER**********************************************************************
 
 # Which tests to run?
-TEST_ALPHA="-tux339"
-TEST_BETA="$TEST_ALPHA -rzzeus -rzmerl -vulcan"
-TEST_GENERAL="$TEST_BETA"
+TEST_PATCH="-tux339"
+TEST_MINOR="$TEST_PATCH -rzzeus -rzmerl -vulcan"
+TEST_MAJOR="$TEST_MINOR"
 TERMCMD=""
 
 while [ "$*" ]
@@ -33,13 +33,13 @@ do
       -t|-trace      echo each command
 
    This script unpacks {release} in the parent directory and lists the tests
-   needed to verify it. The list depends on the release type (alpha, beta, or
-   general). If all required tests have passed, the script will generate a
-   verification file containing the logs from the runs. Otherwise, tests that
-   have failed or have not been run yet can be started, and the script will
-   have to be re-run after their completion to generate the verification file.
+   needed to verify it, based on the type of release (MAJOR, MINOR, or PATCH).
+   If all required tests pass, a verification file is generated containing the
+   logs from the runs.  Otherwise, tests that have failed or have not been run
+   yet can be started, and the script will have to be re-run after their
+   completion to generate the verification file.
 
-   Example usage: $0 /usr/casc/hypre/hypre-2.0.0.tar.gz
+   Example usage: $0 /usr/casc/hypre/hypre-2.10.1.tar.gz
 
    NOTE: The absolute path for the release is required.
 
@@ -75,10 +75,10 @@ release_dir=`basename $release_file | awk -F.tar '{print $1}'`
 release=`echo $release_dir | sed 's/hypre-//' | sed 's/.tar.gz//'`
 output_dir="$testing_dir/AUTOTEST-hypre-$release"
 case $release in
-   *[0-9].*[0-9].*[0-9])  NAME="GENERAL"; TESTS=$TEST_GENERAL ;;
-   *[0-9].*[0-9].*[0-9]b) NAME="BETA";    TESTS=$TEST_BETA ;;
-   *[0-9].*[0-9].*[0-9]a) NAME="ALPHA";   TESTS=$TEST_ALPHA ;;
-   *)                     NAME="ALPHA";   TESTS=$TEST_ALPHA ;;
+   [1-9][0-9]*.0.0)                     NAME="MAJOR"; TESTS=$TEST_MAJOR ;;
+   [1-9][0-9]*.[1-9][0-9]*.0)           NAME="MINOR"; TESTS=$TEST_MINOR ;;
+   [1-9][0-9]*.[1-9][0-9]*.[1-9][0-9]*) NAME="PATCH"; TESTS=$TEST_PATCH ;;
+   *)                                   NAME="PATCH"; TESTS=$TEST_PATCH ;;
 esac
 
 # Extract the release

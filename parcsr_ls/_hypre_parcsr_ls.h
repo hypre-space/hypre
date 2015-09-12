@@ -173,6 +173,8 @@ typedef struct
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
    HYPRE_Real         *nongalerk_tol;
+   HYPRE_Real          nongalerkin_tol;
+   HYPRE_Real         *nongal_tol_array;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -430,8 +432,8 @@ typedef struct
 #define hypre_ParAMGDataAdditive(amg_data) ((amg_data)->additive)
 #define hypre_ParAMGDataMultAdditive(amg_data) ((amg_data)->mult_additive)
 #define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
-#define hypre_ParAMGDataAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
-#define hypre_ParAMGDataAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
+#define hypre_ParAMGDataMultAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
+#define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
 #define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
@@ -440,6 +442,8 @@ typedef struct
 /* non-Galerkin parameters */
 #define hypre_ParAMGDataNonGalerkNumTol(amg_data) ((amg_data)->nongalerk_num_tol)
 #define hypre_ParAMGDataNonGalerkTol(amg_data) ((amg_data)->nongalerk_tol)
+#define hypre_ParAMGDataNonGalerkinTol(amg_data) ((amg_data)->nongalerkin_tol)
+#define hypre_ParAMGDataNonGalTolArray(amg_data) ((amg_data)->nongal_tol_array)
 
 #endif
 
@@ -798,9 +802,11 @@ HYPRE_Int HYPRE_BoomerAMGSetAggNumLevels ( HYPRE_Solver solver , HYPRE_Int agg_n
 HYPRE_Int HYPRE_BoomerAMGSetAggInterpType ( HYPRE_Solver solver , HYPRE_Int agg_interp_type );
 HYPRE_Int HYPRE_BoomerAMGSetAggTruncFactor ( HYPRE_Solver solver , HYPRE_Real agg_trunc_factor );
 HYPRE_Int HYPRE_BoomerAMGSetAddTruncFactor ( HYPRE_Solver solver , HYPRE_Real add_trunc_factor );
+HYPRE_Int HYPRE_BoomerAMGSetMultAddTruncFactor ( HYPRE_Solver solver , HYPRE_Real add_trunc_factor );
 HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor ( HYPRE_Solver solver , HYPRE_Real agg_P12_trunc_factor );
 HYPRE_Int HYPRE_BoomerAMGSetAggPMaxElmts ( HYPRE_Solver solver , HYPRE_Int agg_P_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts ( HYPRE_Solver solver , HYPRE_Int add_P_max_elmts );
+HYPRE_Int HYPRE_BoomerAMGSetMultAddPMaxElmts ( HYPRE_Solver solver , HYPRE_Int add_P_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts ( HYPRE_Solver solver , HYPRE_Int agg_P12_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps ( HYPRE_Solver solver , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int HYPRE_BoomerAMGSetCRRate ( HYPRE_Solver solver , HYPRE_Real CR_rate );
@@ -829,6 +835,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAdditive ( HYPRE_Solver solver , HYPRE_Int mult_
 HYPRE_Int HYPRE_BoomerAMGGetMultAdditive ( HYPRE_Solver solver , HYPRE_Int *mult_additive );
 HYPRE_Int HYPRE_BoomerAMGSetSimple ( HYPRE_Solver solver , HYPRE_Int simple );
 HYPRE_Int HYPRE_BoomerAMGGetSimple ( HYPRE_Solver solver , HYPRE_Int *simple );
+HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Real nongalerkin_tol );
+HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Real nongalerkin_tol , HYPRE_Int level );
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 
 /* HYPRE_parcsr_bicgstab.c */
@@ -885,9 +893,9 @@ HYPRE_Int HYPRE_EuclidSetLevel ( HYPRE_Solver solver , HYPRE_Int level );
 HYPRE_Int HYPRE_EuclidSetBJ ( HYPRE_Solver solver , HYPRE_Int bj );
 HYPRE_Int HYPRE_EuclidSetStats ( HYPRE_Solver solver , HYPRE_Int eu_stats );
 HYPRE_Int HYPRE_EuclidSetMem ( HYPRE_Solver solver , HYPRE_Int eu_mem );
-HYPRE_Int HYPRE_EuclidSetILUT ( HYPRE_Solver solver , HYPRE_Real ilut );
 HYPRE_Int HYPRE_EuclidSetSparseA ( HYPRE_Solver solver , HYPRE_Real sparse_A );
 HYPRE_Int HYPRE_EuclidSetRowScale ( HYPRE_Solver solver , HYPRE_Int row_scale );
+HYPRE_Int HYPRE_EuclidSetILUT ( HYPRE_Solver solver , HYPRE_Real ilut );
 
 /* HYPRE_parcsr_flexgmres.c */
 HYPRE_Int HYPRE_ParCSRFlexGMRESCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1193,10 +1201,10 @@ HYPRE_Int hypre_BoomerAMGSetNumPaths ( void *data , HYPRE_Int num_paths );
 HYPRE_Int hypre_BoomerAMGSetAggNumLevels ( void *data , HYPRE_Int agg_num_levels );
 HYPRE_Int hypre_BoomerAMGSetAggInterpType ( void *data , HYPRE_Int agg_interp_type );
 HYPRE_Int hypre_BoomerAMGSetAggPMaxElmts ( void *data , HYPRE_Int agg_P_max_elmts );
-HYPRE_Int hypre_BoomerAMGSetAddPMaxElmts ( void *data , HYPRE_Int add_P_max_elmts );
+HYPRE_Int hypre_BoomerAMGSetMultAddPMaxElmts ( void *data , HYPRE_Int add_P_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetAggP12MaxElmts ( void *data , HYPRE_Int agg_P12_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetAggTruncFactor ( void *data , HYPRE_Real agg_trunc_factor );
-HYPRE_Int hypre_BoomerAMGSetAddTruncFactor ( void *data , HYPRE_Real add_trunc_factor );
+HYPRE_Int hypre_BoomerAMGSetMultAddTruncFactor ( void *data , HYPRE_Real add_trunc_factor );
 HYPRE_Int hypre_BoomerAMGSetAggP12TruncFactor ( void *data , HYPRE_Real agg_P12_trunc_factor );
 HYPRE_Int hypre_BoomerAMGSetNumCRRelaxSteps ( void *data , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int hypre_BoomerAMGSetCRRate ( void *data , HYPRE_Real CR_rate );
@@ -1245,6 +1253,8 @@ HYPRE_Int hypre_BoomerAMGSetMultAdditive ( void *data , HYPRE_Int mult_additive 
 HYPRE_Int hypre_BoomerAMGGetMultAdditive ( void *data , HYPRE_Int *mult_additive );
 HYPRE_Int hypre_BoomerAMGSetSimple ( void *data , HYPRE_Int simple );
 HYPRE_Int hypre_BoomerAMGGetSimple ( void *data , HYPRE_Int *simple );
+HYPRE_Int hypre_BoomerAMGSetNonGalerkinTol ( void *data , HYPRE_Real nongalerkin_tol );
+HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data , HYPRE_Real nongalerkin_tol , HYPRE_Int level );
 HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 
 /* par_amg_setup.c */
@@ -1375,9 +1385,14 @@ void hypre_qsort2_abs ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_In
 HYPRE_Int hypre_IntersectTwoArrays ( HYPRE_Int *x , HYPRE_Real *x_data , HYPRE_Int x_length , HYPRE_Int *y , HYPRE_Int y_length , HYPRE_Int *z , HYPRE_Real *output_x_data , HYPRE_Int *intersect_length );
 HYPRE_Int hypre_SortedCopyParCSRData ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 HYPRE_Int hypre_BoomerAMG_MyCreateS ( hypre_ParCSRMatrix *A , HYPRE_Real strength_threshold , HYPRE_Real max_row_sum , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_ParCSRMatrix **S_ptr );
+HYPRE_Int hypre_NonGalerkinIJBufferInit ( HYPRE_Int *ijbuf_cnt , HYPRE_Int *ijbuf_rowcounter , HYPRE_Int *ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBufferNewRow ( HYPRE_Int *ijbuf_rownums , HYPRE_Int *ijbuf_numcols , HYPRE_Int *ijbuf_rowcounter , HYPRE_Int new_row );
+HYPRE_Int hypre_NonGalerkinIJBufferCompressRow ( HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_rowcounter , HYPRE_Real *ijbuf_data , HYPRE_Int *ijbuf_cols , HYPRE_Int *ijbuf_rownums , HYPRE_Int *ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBufferCompress ( HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_cnt , HYPRE_Int *ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_Int **ijbuf_cols , HYPRE_Int **ijbuf_rownums , HYPRE_Int **ijbuf_numcols );
+HYPRE_Int hypre_NonGalerkinIJBufferWrite ( HYPRE_IJMatrix B , HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_Int **ijbuf_cols , HYPRE_Int **ijbuf_rownums , HYPRE_Int **ijbuf_numcols , HYPRE_Int row_to_write , HYPRE_Int col_to_write , HYPRE_Real val_to_write );
+HYPRE_Int hypre_NonGalerkinIJBufferEmpty ( HYPRE_IJMatrix B , HYPRE_Int ijbuf_size , HYPRE_Int *ijbuf_cnt , HYPRE_Int ijbuf_rowcounter , HYPRE_Real **ijbuf_data , HYPRE_Int **ijbuf_cols , HYPRE_Int **ijbuf_rownums , HYPRE_Int **ijbuf_numcols );
 hypre_ParCSRMatrix * hypre_NonGalerkinSparsityPattern(hypre_ParCSRMatrix *R_IAP, hypre_ParCSRMatrix *RAP, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Int collapse_beta );
 HYPRE_Int hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr, hypre_ParCSRMatrix *AP, HYPRE_Real strong_threshold, HYPRE_Real max_row_sum, HYPRE_Int num_functions, HYPRE_Int * dof_func_value, HYPRE_Real S_commpkg_switch, HYPRE_Int * CF_marker, HYPRE_Real droptol, HYPRE_Int sym_collapse, HYPRE_Real lump_percent, HYPRE_Int collapse_beta );
-
 
 /* par_rap.c */
 hypre_CSRMatrix *hypre_ExchangeRAPData ( hypre_CSRMatrix *RAP_int , hypre_ParCSRCommPkg *comm_pkg_RT );

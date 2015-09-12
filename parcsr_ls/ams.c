@@ -1118,6 +1118,7 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
  * hypre_AMSSetInteriorNodes
  *
  * Set the list of nodes which are interior to the zero-conductivity region.
+ * A node is interior if interior_nodes[i] == 1.0.
  *
  * Should be called before hypre_AMSSetup()!
  *--------------------------------------------------------------------------*/
@@ -1963,7 +1964,9 @@ HYPRE_Int hypre_AMSSetup(void *solver,
       ams_data -> solve_counter = 0;
 
       /* Construct the discrete gradient matrix for the zero-conductivity region
-         by eliminating the zero-conductivity nodes from G^t */
+         by eliminating the zero-conductivity nodes from G^t. The range of G0
+         represents the kernel of A, i.e. the gradients of nodal basis functions
+         supported in zero-conductivity regions. */
       hypre_ParCSRMatrixTranspose(ams_data -> G, &G0t, 1);
       {
          HYPRE_Int i, j;

@@ -15,7 +15,19 @@
 # recent release.
 #=============================================================================
 
+Version 2.10.1 released 2015/09/11
 
+- Fixed various bugs in AMG and the IJ interface.
+
+- Changed function names to set interpolation truncation parameters for 
+  mult-additive versions as follows:
+  HYPRE_BoomerAMGSetAddTruncFactor to HYPRE_BoomerAMGSetMultAddTruncFactor
+  HYPRE_BoomerAMGSetAddPMaxElmts to HYPRE_BoomerAMGSetMultAddPMAxElmts
+
+- Replaced the function HYPRE_BoomerAMGSetNonGalerkTol, which sets parameters 
+  for the nonGalerkin version, with HYPRE_BoomerAMGSetNonGalerkinTol and
+  HYPRE_BommerAMGSetLevelNonGalerkinTol
+  
 Version 2.10.0b released 2015/01/22
 
 - Added new interpolation that allows the incorporation of near null-space
