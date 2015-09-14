@@ -129,4 +129,4 @@ fi
 # remove temporary files
 #=============================================================================
 
-# rm -f ${TNAME}.testdata*
+rm -f ${TNAME}.testdata*

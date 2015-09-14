@@ -550,6 +550,7 @@ list (APPEND HYPRE_SOURCES
   struct_ls/coarsen.c
   struct_ls/cyclic_reduction.c
   struct_ls/F90_HYPRE_struct_bicgstab.c
+  struct_ls/F90_HYPRE_struct_cycred.c
   struct_ls/F90_HYPRE_struct_gmres.c
   struct_ls/F90_HYPRE_struct_hybrid.c
   struct_ls/F90_HYPRE_struct_int.c
@@ -561,6 +562,7 @@ list (APPEND HYPRE_SOURCES
   struct_ls/general.c
   struct_ls/hybrid.c
   struct_ls/HYPRE_struct_bicgstab.c
+  struct_ls/HYPRE_struct_cycred.c
   struct_ls/HYPRE_struct_hybrid.c
   struct_ls/HYPRE_struct_int.c
   struct_ls/HYPRE_struct_jacobi.c

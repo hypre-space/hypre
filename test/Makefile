@@ -153,7 +153,7 @@ distclean: clean
 	rm -f TEST_sstruct/*.err*
 	rm -f TEST_struct/*.out*
 	rm -f TEST_struct/*.err*
-	rm -f ex1 ex2 ex3 ex4 ex5 ex5b ex5b77 ex6 ex7 ex8 ex9
+	rm -f ex1 ex2 ex3 ex4 ex5 ex5big ex5b ex5b77 ex6 ex7 ex8 ex9 ex15big ex18comp
 
 ##################################################################
 # Rules
