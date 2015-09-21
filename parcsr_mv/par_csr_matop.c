@@ -959,9 +959,9 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    HYPRE_Int first_row_index = row_starts[0];
-   HYPRE_Int *send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
 #else
    HYPRE_Int first_row_index = row_starts[my_id];
+   HYPRE_Int *send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
 #endif
 
    num_rows_B_ext = recv_vec_starts[num_recvs];
