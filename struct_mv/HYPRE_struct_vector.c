@@ -43,6 +43,21 @@ HYPRE_StructVectorDestroy( HYPRE_StructVector struct_vector )
 }
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/* RDF: Need a good user interface for setting the grid. */
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorSetStride(HYPRE_StructVector vector,
+                            HYPRE_Int         *stride)
+{
+   return ( hypre_StructVectorSetStride(vector, stride) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorInitialize
  *--------------------------------------------------------------------------*/
 

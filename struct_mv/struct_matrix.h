@@ -67,11 +67,10 @@ typedef struct hypre_StructMatrix_struct
    hypre_BoxArray       *data_boxes;    /* Data extents on fine index space */
    HYPRE_Int             data_alloced;  /* Boolean used for freeing data */
    HYPRE_Int             data_size;     /* Size of matrix data */
-   HYPRE_Int           **data_indices;  /* Num boxes by stencil-size array of
-                                           indices into the data array.
+   HYPRE_Int           **data_indices;  /* Array of indices into the data array.
                                            data_indices[b][s] is the starting
-                                           index of matrix data corresponding to
-                                           box b and stencil coefficient s */
+                                           index of data for boxnum b and
+                                           stencil coefficient s */
    HYPRE_Int             vdata_offset;  /* Offset to variable-coeff matrix data */
    HYPRE_Int             num_values;    /* Number of "stored" variable coeffs */
    HYPRE_Int             num_cvalues;   /* Number of "stored" constant coeffs */
@@ -108,9 +107,11 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixGrid(matrix)          ((matrix) -> grid)
 #define hypre_StructMatrixRanNBoxes(matrix)     ((matrix) -> ran_nboxes)
 #define hypre_StructMatrixRanBoxnums(matrix)    ((matrix) -> ran_boxnums)
+#define hypre_StructMatrixRanBoxnum(matrix, i)  ((matrix) -> ran_boxnums[i])
 #define hypre_StructMatrixRanStride(matrix)     ((matrix) -> ran_stride)
 #define hypre_StructMatrixDomNBoxes(matrix)     ((matrix) -> dom_nboxes)
 #define hypre_StructMatrixDomBoxnums(matrix)    ((matrix) -> dom_boxnums)
+#define hypre_StructMatrixDomBoxnum(matrix, i)  ((matrix) -> dom_boxnums[i])
 #define hypre_StructMatrixDomStride(matrix)     ((matrix) -> dom_stride)
 #define hypre_StructMatrixUserStencil(matrix)   ((matrix) -> user_stencil)
 #define hypre_StructMatrixStencil(matrix)       ((matrix) -> stencil)

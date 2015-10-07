@@ -13,6 +13,127 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
+ * See comments for CreateCommInfo() routine for more info on CommStencil
+ *--------------------------------------------------------------------------*/
+
+hypre_CommStencil *
+hypre_CommStencilCreate( HYPRE_Int  ndim )
+{
+   hypre_CommStencil  *comm_stencil;
+   hypre_Box          *csbox;
+   HYPRE_Int          *csdata;
+
+   comm_stencil = hypre_CTAlloc(hypre_CommStencil, 1);
+
+   csbox = hypre_BoxCreate(ndim);
+   hypre_SetIndex(hypre_BoxIMin(csbox), 0);
+   hypre_SetIndex(hypre_BoxIMax(csbox), 2);
+   csdata = hypre_CTAlloc(HYPRE_Int, hypre_BoxVolume(csbox));
+
+   hypre_CommStencilNDim(comm_stencil) = ndim;
+   hypre_CommStencilBox(comm_stencil)  = csbox;
+   hypre_CommStencilData(comm_stencil) = csdata;
+   hypre_SetIndex(hypre_CommStencilStride(comm_stencil), 1);
+
+   return comm_stencil;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommStencilSetEntry( hypre_CommStencil  *comm_stencil,
+                           hypre_Index         offset )
+{
+   HYPRE_Int              ndim   = hypre_CommStencilNDim(comm_stencil);
+   hypre_Box             *csbox  = hypre_CommStencilBox(comm_stencil);
+   HYPRE_Int             *csdata = hypre_CommStencilData(comm_stencil);
+   hypre_IndexRef         stride = hypre_CommStencilStride(comm_stencil);
+   HYPRE_Int             *mgrow  = hypre_CommStencilMGrow(comm_stencil);
+   HYPRE_Int             *pgrow  = hypre_CommStencilPGrow(comm_stencil);
+
+   hypre_Box              boxmem;
+   hypre_Box             *box = &boxmem;
+   hypre_IndexRef         imin = hypre_BoxIMin(box);
+   hypre_IndexRef         imax = hypre_BoxIMax(box);
+   hypre_Index            loop_size;
+   HYPRE_Int              d, m, ii;
+
+   hypre_BoxInit(box, ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      m = offset[d];
+      
+      imin[d] = 1;
+      imax[d] = 1;
+      
+      if (m < 0)
+      {
+         imin[d] = 0;
+         mgrow[d] = hypre_max(mgrow[d], -m);
+      }
+      else if (m > 0)
+      {
+         imax[d] = 2;
+         pgrow[d] = hypre_max(pgrow[d],  m);
+      }
+   }
+
+   /* update comm-stencil data */
+   hypre_BoxGetSize(box, loop_size);
+   hypre_BoxLoop1Begin(ndim, loop_size,
+                       csbox, imin, stride, ii);
+   hypre_BoxLoopSetOneBlock();
+   hypre_BoxLoop1For(ii)
+   {
+      csdata[ii] = 1;
+   }
+   hypre_BoxLoop1End(ii);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommStencilDestroy( hypre_CommStencil  *comm_stencil )
+{
+   hypre_BoxDestroy(hypre_CommStencilBox(comm_stencil));
+   hypre_TFree(hypre_CommStencilData(comm_stencil));
+   hypre_TFree(comm_stencil);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommStencilCreateNumGhost( hypre_CommStencil  *comm_stencil,
+                                 HYPRE_Int         **num_ghost_ptr )
+{
+   HYPRE_Int      *num_ghost;
+   HYPRE_Int       ndim   = hypre_CommStencilNDim(comm_stencil);
+   HYPRE_Int      *mgrow  = hypre_CommStencilMGrow(comm_stencil);
+   HYPRE_Int      *pgrow  = hypre_CommStencilPGrow(comm_stencil);
+   HYPRE_Int       d;
+
+   num_ghost = hypre_CTAlloc(HYPRE_Int, 2*ndim);
+
+   for (d = 0; d < ndim; d++)
+   {
+      num_ghost[2*d]     = mgrow[d];
+      num_ghost[2*d + 1] = pgrow[d];
+   }
+
+   *num_ghost_ptr = num_ghost;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * Note that send_coords, recv_coords, send_dirs, recv_dirs may be NULL to
  * represent an identity transform.
  *--------------------------------------------------------------------------*/
@@ -202,28 +323,164 @@ hypre_CommInfoDestroy( hypre_CommInfo  *comm_info )
 }
 
 /*--------------------------------------------------------------------------
- * NEW version that uses the box manager to find neighbors boxes. 
- * AHB 9/06
+ * Clone a CommInfo structure.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CommInfoClone( hypre_CommInfo   *comm_info,
+                     hypre_CommInfo  **clone_ptr )
+{
+   hypre_CommInfo       *clone;
+   hypre_BoxArrayArray  *comm_boxes,       *clone_boxes;
+   hypre_IndexRef        comm_stride,       clone_stride;
+   HYPRE_Int           **comm_processes,  **clone_processes;
+   HYPRE_Int           **comm_rboxnums,   **clone_rboxnums;
+   hypre_BoxArrayArray  *comm_rboxes,      *clone_rboxes;
+   HYPRE_Int           **comm_transforms, **clone_transforms;
+   hypre_Index          *comm_coords,      *clone_coords;
+   hypre_Index          *comm_dirs,        *clone_dirs;
+   HYPRE_Int             i, j, k, size_aa, size_a, num_transforms;
+
+   clone = hypre_TAlloc(hypre_CommInfo, 1);
+
+   /* ndim */
+   hypre_CommInfoNDim(clone) = hypre_CommInfoNDim(comm_info);
+
+   for (k = 0; k < 2; k++)
+   {
+      switch (k)
+      {
+        case 0: /* Clone send info */
+           comm_boxes      = hypre_CommInfoSendBoxes(comm_info);
+           comm_stride     = hypre_CommInfoSendStride(comm_info);
+           clone_stride    = hypre_CommInfoSendStride(clone); /* Needs to be here, not below */
+           comm_processes  = hypre_CommInfoSendProcesses(comm_info);
+           comm_rboxnums   = hypre_CommInfoSendRBoxnums(comm_info);
+           comm_rboxes     = hypre_CommInfoSendRBoxes(comm_info);
+           comm_transforms = hypre_CommInfoSendTransforms(comm_info);
+           break;
+
+        case 1: /* Clone recv info */
+           comm_boxes      = hypre_CommInfoRecvBoxes(comm_info);
+           comm_stride     = hypre_CommInfoRecvStride(comm_info);
+           clone_stride    = hypre_CommInfoRecvStride(clone); /* Needs to be here, not below */
+           comm_processes  = hypre_CommInfoRecvProcesses(comm_info);
+           comm_rboxnums   = hypre_CommInfoRecvRBoxnums(comm_info);
+           comm_rboxes     = hypre_CommInfoRecvRBoxes(comm_info);
+           comm_transforms = hypre_CommInfoRecvTransforms(comm_info);
+           break;
+      }
+
+      size_aa = hypre_BoxArrayArraySize(comm_boxes);
+      clone_boxes = hypre_BoxArrayArrayDuplicate(comm_boxes);
+      hypre_CopyIndex(comm_stride, clone_stride);
+      {
+         clone_processes = hypre_CTAlloc(HYPRE_Int *, size_aa);
+         for (i = 0; i < size_aa; i++)
+         {
+            size_a = hypre_BoxArraySize(hypre_BoxArrayArrayBoxArray(comm_boxes, i));
+            clone_processes[i] = hypre_CTAlloc(HYPRE_Int, size_a);
+            for (j = 0; j < size_a; j++)
+            {
+               clone_processes[i][j] = comm_processes[i][j];
+            }
+         }
+      }
+      clone_rboxnums = NULL;
+      if (comm_rboxnums != NULL)
+      {
+         clone_rboxnums = hypre_CTAlloc(HYPRE_Int *, size_aa);
+         for (i = 0; i < size_aa; i++)
+         {
+            size_a = hypre_BoxArraySize(hypre_BoxArrayArrayBoxArray(comm_boxes, i));
+            clone_rboxnums[i] = hypre_CTAlloc(HYPRE_Int, size_a);
+            for (j = 0; j < size_a; j++)
+            {
+               clone_rboxnums[i][j] = comm_rboxnums[i][j];
+            }
+         }
+      }
+      clone_rboxes = hypre_BoxArrayArrayDuplicate(comm_rboxes);
+      clone_transforms = NULL;
+      if (comm_transforms != NULL)
+      {
+         clone_transforms = hypre_CTAlloc(HYPRE_Int *, size_aa);
+         for (i = 0; i < size_aa; i++)
+         {
+            size_a = hypre_BoxArraySize(hypre_BoxArrayArrayBoxArray(comm_boxes, i));
+            clone_transforms[i] = hypre_CTAlloc(HYPRE_Int, size_a);
+            for (j = 0; j < size_a; j++)
+            {
+               clone_transforms[i][j] = comm_transforms[i][j];
+            }
+         }
+      }
+
+      switch (k)
+      {
+        case 0: /* Clone send info */
+           hypre_CommInfoSendBoxes(clone)      = clone_boxes;
+           hypre_CommInfoSendProcesses(clone)  = clone_processes;
+           hypre_CommInfoSendRBoxnums(clone)   = clone_rboxnums;
+           hypre_CommInfoSendRBoxes(clone)     = clone_rboxes;
+           hypre_CommInfoSendTransforms(clone) = clone_transforms;
+           break;
+
+        case 1: /* Clone recv info */
+           hypre_CommInfoRecvBoxes(clone)      = clone_boxes;
+           hypre_CommInfoRecvProcesses(clone)  = clone_processes;
+           hypre_CommInfoRecvRBoxnums(clone)   = clone_rboxnums;
+           hypre_CommInfoRecvRBoxes(clone)     = clone_rboxes;
+           hypre_CommInfoRecvTransforms(clone) = clone_transforms;
+           break;
+      }
+   }
+
+   num_transforms = hypre_CommInfoNumTransforms(comm_info);
+   comm_coords    = hypre_CommInfoCoords(comm_info);
+   comm_dirs      = hypre_CommInfoDirs(comm_info);
+   clone_coords = NULL;
+   clone_dirs   = NULL;
+   if (num_transforms > 0)
+   {
+      clone_coords = hypre_CTAlloc(hypre_Index, num_transforms);
+      clone_dirs   = hypre_CTAlloc(hypre_Index, num_transforms);
+      for (i = 0; i < num_transforms; i++)
+      {
+         hypre_CopyIndex(comm_coords[i], clone_coords[i]);
+         hypre_CopyIndex(comm_dirs[i], clone_dirs[i]);
+      }
+   }
+   hypre_CommInfoNumTransforms(clone) = num_transforms;
+   hypre_CommInfoCoords(clone)        = clone_coords;
+   hypre_CommInfoDirs(clone)          = clone_dirs;
+
+   hypre_CommInfoBoxesMatch(clone) = hypre_CommInfoBoxesMatch(comm_info);
+
+   *clone_ptr = clone;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Return descriptions of communications patterns for a given grid-stencil
+ * computation.  These patterns are defined by intersecting the data
+ * dependencies of each box (including data dependencies within the box) with
+ * its neighbor boxes.
  *
- * Return descriptions of communications patterns for a given
- * grid-stencil computation.  These patterns are defined by
- * intersecting the data dependencies of each box (including data
- * dependencies within the box) with its neighbor boxes.
+ * An inconsistent ordering of the boxes in the send/recv data regions is
+ * returned.  That is, the ordering of the boxes on process p for receives from
+ * process q is not guaranteed to be the same as the ordering of the boxes on
+ * process q for sends to process p.
  *
- * An inconsistent ordering of the boxes in the send/recv data regions
- * is returned.  That is, the ordering of the boxes on process p for
- * receives from process q is not guaranteed to be the same as the
- * ordering of the boxes on process q for sends to process p.
- *
- * The routine uses a grow-the-box-and-intersect-with-neighbors style
- * algorithm.
+ * The routine uses a grow-the-box-and-intersect-with-neighbors style algorithm.
  *
  * 1. The basic algorithm:
  *
- * The basic algorithm is as follows, with one additional optimization
- * discussed below that helps to minimize the number of communications
- * that are done with neighbors (e.g., consider a 7-pt stencil and the
- * difference between doing 26 communications versus 6):
+ * The basic algorithm is as follows, with one additional optimization discussed
+ * below that helps to minimize the number of communications that are done with
+ * neighbors (e.g., consider a 7-pt stencil and the difference between doing 26
+ * communications versus 6):
  *
  * To compute send/recv regions, do
  * 
@@ -252,54 +509,55 @@ hypre_CommInfoDestroy( hypre_CommInfo  *comm_info )
  *
  * 2. Optimization on basic algorithm:
  * 
- * Before looping over the neighbors in the above algorithm, do a
- * preliminary sweep through the neighbors to select a subset of
- * neighbors to do the intersections with.  To select the subset,
- * compute a so-called "distance index" and check the corresponding
- * entry in the so-called "stencil grid" to decide whether or not to
- * use the box.
+ * Before looping over the neighbors in the above algorithm, do a preliminary
+ * sweep through the neighbors to select a subset of neighbors to do the
+ * intersections with.  To select the subset, compute a so-called "distance
+ * index" and check the corresponding entry in the so-called comm-stencil to
+ * decide whether or not to use the box.
  * 
- * The "stencil grid" is a 3x3x3 grid in 3D that is built from the
- * stencil as follows:
+ * The comm-stencil consists of 3x3x3 array in 3D that is built from the stencil
+ * as follows:
  * 
  *   // assume for simplicity that i,j,k are -1, 0, or 1
  *   for each stencil entry (i,j,k)
  *   {
- *      mark all stencil grid entries in (1,1,1) x (1+i,1+j,1+k)
- *      // here (1,1,1) is the "center" entry in the stencil grid
+ *      mark all comm-stencil entries in (1,1,1) x (1+i,1+j,1+k)
+ *      // here (1,1,1) is the "center" entry in the comm-stencil
  *   }
- *
  *
  * 3. Complications with periodicity:
  * 
- * When periodicity is on, it is possible to have a box-pair region
- * (the description of a communication pattern between two boxes) that
- * consists of more than one box.
+ * When periodicity is on, it is possible to have a box-pair region (the
+ * description of a communication pattern between two boxes) that consists of
+ * more than one box.
  * 
- * 4.  Box Manager
+ * 4. Box Manager (added by AHB on 9/2006)
  *
- *   The box manager is used to determine neighbors.  It is assumed 
- *   that the grid's box manager contains sufficient neighbor 
- *   information.
+ * The box manager is used to determine neighbors.  It is assumed that the
+ * grid's box manager contains sufficient neighbor information.
  *
  * NOTES: 
  *
- *    A. No concept of data ownership is assumed.  As a result,
- *       redundant communication patterns can be produced when the grid
- *       boxes overlap.
+ * A. No concept of data ownership is assumed.  As a result, redundant
+ *    communication patterns can be produced when the grid boxes overlap.
  *
- *    B. Boxes in the send and recv regions do not need to be in any
- *       particular order (including those that are periodic).  
- *
+ * B. Boxes in the send and recv regions do not need to be in any particular
+ *    order (including those that are periodic).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
-                                 hypre_StructStencil   *stencil,
-                                 hypre_CommInfo       **comm_info_ptr )
+hypre_CreateCommInfo( hypre_StructGrid   *grid,
+                      hypre_CommStencil  *comm_stencil,
+                      hypre_CommInfo    **comm_info_ptr )
 {
-   HYPRE_Int              ndim = hypre_StructGridNDim(grid);
-   HYPRE_Int              i,j,k, d, m, s, si;
+   HYPRE_Int              ndim   = hypre_StructGridNDim(grid);
+   hypre_Box             *csbox  = hypre_CommStencilBox(comm_stencil);
+   HYPRE_Int             *csdata = hypre_CommStencilData(comm_stencil);
+   HYPRE_Int             *mgrow  = hypre_CommStencilMGrow(comm_stencil);
+   HYPRE_Int             *pgrow  = hypre_CommStencilPGrow(comm_stencil);
+   hypre_Index            csindex;
+
+   HYPRE_Int              i, j, k, d, m, s, si;
 
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
@@ -318,8 +576,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
    hypre_BoxManager      *boxman;
                        
-   hypre_Index           *stencil_shape;
-   hypre_IndexRef         stencil_offset;
    hypre_IndexRef         pshift;
                           
    hypre_Box             *box;
@@ -329,10 +585,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_Box             *int_box;
    hypre_Box             *periodic_box;
    
-   hypre_Box             *stencil_box, *sbox; /* extents of the stencil grid */
-   HYPRE_Int             *stencil_grid;
-   HYPRE_Int              grow[HYPRE_MAXDIM][2];
-                       
    hypre_BoxManEntry    **entries;
    hypre_BoxManEntry     *entry;
    
@@ -356,12 +608,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    HYPRE_Int             *cboxes_neighbor_location;
    HYPRE_Int              num_cboxes, cbox_alloc;
                        
-   hypre_Index            istart, istop, sgindex;
-   hypre_IndexRef         start;
-   hypre_Index            loop_size, stride;
-
-   HYPRE_Int              num_periods, loc, box_id, id, proc_id;
-   HYPRE_Int              myid;
+   HYPRE_Int              num_periods, loc, box_id, id, proc_id, myid;
    
    MPI_Comm               comm;
 
@@ -378,65 +625,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    comm   = hypre_StructGridComm(grid);
    
    hypre_MPI_Comm_rank(comm, &myid);
-
-   stencil_box = hypre_BoxCreate(ndim);
-   hypre_SetIndex(hypre_BoxIMin(stencil_box), 0);
-   hypre_SetIndex(hypre_BoxIMax(stencil_box), 2);
-
-   /* Set initial values to zero */
-   stencil_grid = hypre_CTAlloc(HYPRE_Int, hypre_BoxVolume(stencil_box));
-
-   sbox = hypre_BoxCreate(ndim);
-   hypre_SetIndex(stride, 1);
-   
-   /*------------------------------------------------------
-    * Compute the "grow" information from the stencil
-    *------------------------------------------------------*/
-
-   stencil_shape = hypre_StructStencilShape(stencil);
-
-   for (d = 0; d < ndim; d++)
-   {
-      grow[d][0] = 0;
-      grow[d][1] = 0;
-   }
-
-   for (s = 0; s < hypre_StructStencilSize(stencil); s++)
-   {
-      stencil_offset = stencil_shape[s];
-
-      for (d = 0; d < ndim; d++)
-      {
-         m = stencil_offset[d];
-
-         istart[d] = 1;
-         istop[d]  = 1;
-
-         if (m < 0)
-         {
-            istart[d] = 0;
-            grow[d][0] = hypre_max(grow[d][0], -m);
-         }
-         else if (m > 0)
-         {
-            istop[d] = 2;
-            grow[d][1] = hypre_max(grow[d][1],  m);
-         }
-      }
-
-      /* update stencil grid from the grow_stencil */
-      hypre_BoxSetExtents(sbox, istart, istop);
-      start = hypre_BoxIMin(sbox);
-      hypre_BoxGetSize(sbox, loop_size);
-      hypre_BoxLoop1Begin(ndim, loop_size,
-                          stencil_box, start, stride, si);
-      hypre_BoxLoopSetOneBlock();
-      hypre_BoxLoop1For(si)
-      {
-         stencil_grid[si] = 1;
-      }
-      hypre_BoxLoop1End(si);
-   }
 
    /*------------------------------------------------------
     * Compute send/recv boxes and procs for each local box
@@ -488,12 +676,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
        * and we use this to find out if a box has intersected with itself */
       box_id = i;
       
-      /* grow box local i according to the stencil*/
+      /* grow box local i according to the stencil */
       hypre_CopyBox(box, grow_box);
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(grow_box, d) -= grow[d][0];
-         hypre_BoxIMaxD(grow_box, d) += grow[d][1];
+         hypre_BoxIMinD(grow_box, d) -= mgrow[d];
+         hypre_BoxIMaxD(grow_box, d) += pgrow[d];
       }
 
       /* extend_box - to find the list of potential neighbors, we need to grow
@@ -502,8 +690,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       hypre_CopyBox(box, extend_box);
       for (d = 0; d < ndim; d++)
       { 
-         hypre_BoxIMinD(extend_box, d) -= hypre_max(grow[d][0],grow[d][1]);
-         hypre_BoxIMaxD(extend_box, d) += hypre_max(grow[d][0],grow[d][1]);
+         hypre_BoxIMinD(extend_box, d) -= hypre_max(mgrow[d],pgrow[d]);
+         hypre_BoxIMaxD(extend_box, d) += hypre_max(mgrow[d],pgrow[d]);
       }
 
       /*------------------------------------------------
@@ -612,25 +800,25 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       for (k = 0; k < neighbor_count; k++)
       {
          hood_box = hypre_BoxArrayBox(neighbor_boxes, k);
-         /* check the stencil grid to see if it makes sense to intersect */
+         /* check the comm stencil to see if it makes sense to intersect */
          for (d = 0; d < ndim; d++)
          {
-            sgindex[d] = 1;
+            csindex[d] = 1;
                
             s = hypre_BoxIMinD(hood_box, d) - hypre_BoxIMaxD(box, d);
             if (s > 0)
             {
-               sgindex[d] = 2;
+               csindex[d] = 2;
             }
             s = hypre_BoxIMinD(box, d) - hypre_BoxIMaxD(hood_box, d);
             if (s > 0)
             {
-               sgindex[d] = 0;
+               csindex[d] = 0;
             }
          }
          /* it makes sense only if we have at least one non-zero entry */   
-         si = hypre_BoxIndexRank(stencil_box, sgindex); 
-         if (stencil_grid[si])
+         si = hypre_BoxIndexRank(csbox, csindex); 
+         if (csdata[si])
          {
             /* intersect - result is int_box */
             hypre_IntersectBoxes(grow_box, hood_box, int_box);
@@ -686,32 +874,32 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       for (k = 0; k < neighbor_count; k++)
       {
          hood_box = hypre_BoxArrayBox(neighbor_boxes, k);
-         /* check the stencil grid to see if it makes sense to intersect */
+         /* check the comm stencil to see if it makes sense to intersect */
          for (d = 0; d < ndim; d++)
          {
-            sgindex[d] = 1;
+            csindex[d] = 1;
             
             s = hypre_BoxIMinD(box, d) - hypre_BoxIMaxD(hood_box, d);
             if (s > 0)
             {
-               sgindex[d] = 2;
+               csindex[d] = 2;
             }
             s = hypre_BoxIMinD(hood_box, d) - hypre_BoxIMaxD(box, d);
             if (s > 0)
             {
-               sgindex[d] = 0;
+               csindex[d] = 0;
             }
          }
          /* it makes sense only if we have at least one non-zero entry */   
-         si = hypre_BoxIndexRank(stencil_box, sgindex); 
-         if (stencil_grid[si])
+         si = hypre_BoxIndexRank(csbox, csindex); 
+         if (csdata[si])
          {
             /* grow the neighbor box and intersect */
             hypre_CopyBox(hood_box, grow_box);
             for (d = 0; d < ndim; d++)
             {
-               hypre_BoxIMinD(grow_box, d) -= grow[d][0];
-               hypre_BoxIMaxD(grow_box, d) += grow[d][1];
+               hypre_BoxIMinD(grow_box, d) -= mgrow[d];
+               hypre_BoxIMaxD(grow_box, d) += pgrow[d];
             }
             hypre_IntersectBoxes(box, grow_box, int_box);
             /* if we have a positive volume box, this is a send region */
@@ -769,10 +957,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_BoxDestroy(periodic_box);
    hypre_BoxDestroy(extend_box);
    
-   hypre_BoxDestroy(stencil_box);
-   hypre_BoxDestroy(sbox);
-   hypre_TFree(stencil_grid);
-
    /*------------------------------------------------------
     * Return
     *------------------------------------------------------*/
@@ -785,9 +969,37 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 }
 
 /*--------------------------------------------------------------------------
- * Return descriptions of communications patterns for a given grid
- * based on a specified number of "ghost zones".  These patterns are
- * defined by building a stencil and calling CommInfoFromStencil.
+ * Return communication-pattern descriptions for a grid-stencil computation.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
+                                 hypre_StructStencil   *stencil,
+                                 hypre_CommInfo       **comm_info_ptr )
+{
+   HYPRE_Int           ndim          = hypre_StructGridNDim(grid);
+   hypre_Index        *stencil_shape = hypre_StructStencilShape(stencil);
+   hypre_IndexRef      stencil_offset;
+   hypre_CommStencil  *comm_stencil;
+   HYPRE_Int           s;
+
+   /* Set up the comm-stencil */
+   comm_stencil = hypre_CommStencilCreate(ndim);
+   for (s = 0; s < hypre_StructStencilSize(stencil); s++)
+   {
+      stencil_offset = stencil_shape[s];
+      hypre_CommStencilSetEntry(comm_stencil, stencil_offset);
+   }
+
+   hypre_CreateCommInfo(grid, comm_stencil, comm_info_ptr );
+   hypre_CommStencilDestroy(comm_stencil);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Return communication-pattern descriptions for a given grid based on a
+ * specified number of "ghost zones".
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -795,52 +1007,32 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                   HYPRE_Int             *num_ghost,
                                   hypre_CommInfo       **comm_info_ptr )
 {
-   HYPRE_Int             ndim = hypre_StructGridNDim(grid);
-   hypre_StructStencil  *stencil;
-   hypre_Index          *stencil_shape;
-   hypre_Box            *box;
-   hypre_Index           ii, loop_size;
-   hypre_IndexRef        start;
-   HYPRE_Int             i, d, size;
+   HYPRE_Int           ndim = hypre_StructGridNDim(grid);
+   hypre_CommStencil  *comm_stencil;
+   hypre_Box          *csbox;
+   HYPRE_Int          *csdata;
+   HYPRE_Int          *mgrow;
+   HYPRE_Int          *pgrow;
+   HYPRE_Int           d, ii;
 
-   size = (HYPRE_Int)(pow(3, ndim) + 0.5);
-   stencil_shape = hypre_CTAlloc(hypre_Index, size);
-   box = hypre_BoxCreate(ndim);
+   /* Set up the comm-stencil */
+   comm_stencil = hypre_CommStencilCreate(ndim);
+   csbox  = hypre_CommStencilBox(comm_stencil);
+   csdata = hypre_CommStencilData(comm_stencil);
+   mgrow  = hypre_CommStencilMGrow(comm_stencil);
+   pgrow  = hypre_CommStencilPGrow(comm_stencil);
+   for (ii = 0; ii < hypre_BoxVolume(csbox); ii++)
+   {
+      csdata[ii] = 1;
+   }
    for (d = 0; d < ndim; d++)
    {
-      hypre_BoxIMinD(box, d) = -(num_ghost[2*d]   ? 1 : 0);
-      hypre_BoxIMaxD(box, d) =  (num_ghost[2*d+1] ? 1 : 0);
+      mgrow[d] = num_ghost[2*d];
+      pgrow[d] = num_ghost[2*d + 1];
    }
 
-   size = 0;
-   start = hypre_BoxIMin(box);
-   hypre_BoxGetSize(box, loop_size);
-   hypre_BoxLoop0Begin(ndim, loop_size);
-   hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop0For()
-   {
-      hypre_BoxLoopGetIndex(ii);
-      for (d = 0; d < ndim; d++)
-      {
-         i = ii[d]+start[d];
-         if (i < 0)
-         {
-            stencil_shape[size][d] = -num_ghost[2*d];
-         }
-         else if (i > 0)
-         {
-            stencil_shape[size][d] =  num_ghost[2*d+1];
-         }
-      }
-      size++;
-   }
-   hypre_BoxLoop0End();
-
-   hypre_BoxDestroy(box);
-
-   stencil = hypre_StructStencilCreate(ndim, size, stencil_shape);
-   hypre_CreateCommInfoFromStencil(grid, stencil, comm_info_ptr);
-   hypre_StructStencilDestroy(stencil);
+   hypre_CreateCommInfo(grid, comm_stencil, comm_info_ptr);
+   hypre_CommStencilDestroy(comm_stencil);
 
    return hypre_error_flag;
 }

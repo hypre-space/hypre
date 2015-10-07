@@ -1047,6 +1047,12 @@ then
    LINK_CXX="insure"
    LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
    LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
+   F77="insure"
+   CC="insure"
+   CXX="insure"
+   FFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $FFLAGS"
+   CFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CFLAGS"
+   CXXFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $CXXFLAGS"
 fi
 
 dnl *********************************************************************

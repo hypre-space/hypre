@@ -45,7 +45,6 @@ typedef struct
    hypre_Index     dmap;       /* Domain map */
 
    hypre_Index    *shapes;     /* Offsets describing the stencil's shape */
-   HYPRE_Int      *ncoeffs;    /* Number of coeffs for each stencil entry */
    hypre_StCoeff **coeffs;     /* Description of coefficients */
 
 } hypre_StMatrix;
@@ -70,8 +69,6 @@ typedef struct
 #define hypre_StMatrixDMap(stmat)      ((stmat) -> dmap)
 #define hypre_StMatrixShapes(stmat)    ((stmat) -> shapes)
 #define hypre_StMatrixOffset(stmat, e) ((stmat) -> shapes[e])
-#define hypre_StMatrixNCoeffs(stmat)   ((stmat) -> ncoeffs)
-#define hypre_StMatrixNCoeff(stmat, e) ((stmat) -> ncoeffs[e])
 #define hypre_StMatrixCoeffs(stmat)    ((stmat) -> coeffs)
 #define hypre_StMatrixCoeff(stmat, e)  ((stmat) -> coeffs[e])
 
@@ -159,5 +156,9 @@ HYPRE_Int
 hypre_StMatrixPrint( hypre_StMatrix *matrix,
                      char           *matnames,
                      HYPRE_Int       ndim );
+
+HYPRE_Int
+hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
+                            HYPRE_Int       entry );
 
 #endif

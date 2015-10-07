@@ -19,6 +19,23 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
+ * Matrix data is currently stored relative to the largest matrix stride
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixGetDataMapStride( hypre_StructMatrix *matrix,
+                                    hypre_IndexRef     *stride )
+{
+   *stride = hypre_StructMatrixRanStride(matrix);
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
+   {
+      *stride = hypre_StructMatrixDomStride(matrix);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This routine assumes that 'dindex' is in the range index space.
  *--------------------------------------------------------------------------*/
 
@@ -29,10 +46,9 @@ hypre_StructMatrixMapDataIndex( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixDomStride(matrix);
       hypre_SnapIndexNeg(dindex, NULL, stride, ndim);
    }
    hypre_MapToCoarseIndex(dindex, NULL, stride, ndim);
@@ -69,11 +85,7 @@ hypre_StructMatrixMapDataStride( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixDomainIsCoarse(matrix))
-   {
-      stride = hypre_StructMatrixDomStride(matrix);
-   }
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    hypre_MapToCoarseIndex(dstride, NULL, stride, ndim);
 
    return hypre_error_flag;
@@ -89,11 +101,7 @@ hypre_StructMatrixUnMapDataIndex( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
-   if (hypre_StructMatrixDomainIsCoarse(matrix))
-   {
-      stride = hypre_StructMatrixDomStride(matrix);
-   }
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
    hypre_MapToFineIndex(dindex, NULL, stride, ndim);
 
    return hypre_error_flag;
@@ -122,12 +130,76 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
    HYPRE_Int      ndim = hypre_StructMatrixNDim(matrix);
    hypre_IndexRef stride;
 
-   stride = hypre_StructMatrixRanStride(matrix);
+   hypre_StructMatrixGetDataMapStride(matrix, &stride);
+   hypre_MapToFineIndex(dstride, NULL, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Places the center of the stencil correctly on the base index space given a
+ * stencil entry and a data index.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixPlaceStencil( hypre_StructMatrix *matrix,
+                                HYPRE_Int           entry,
+                                hypre_Index         dindex,
+                                hypre_Index         index )
+{
+   HYPRE_Int  ndim = hypre_StructMatrixNDim(matrix);
+
+   /* Map the data index to the base index space */
+   hypre_CopyToIndex(dindex, ndim, index);
+   hypre_StructMatrixUnMapDataIndex(matrix, index);
+
    if (hypre_StructMatrixDomainIsCoarse(matrix))
    {
-      stride = hypre_StructMatrixDomStride(matrix);
+      hypre_IndexRef        stride  = hypre_StructMatrixDomStride(matrix);
+      hypre_StructStencil  *stencil = hypre_StructMatrixStencil(matrix);
+      hypre_IndexRef        offset  = hypre_StructStencilOffset(stencil, entry);
+      hypre_Index           snapoffset;
+
+      /* Shift to the right based on offset: index += (SnapIndexPos(offset) - offset) */
+      hypre_CopyToIndex(offset, ndim, snapoffset);
+      hypre_SnapIndexPos(snapoffset, NULL, stride, ndim);
+      hypre_AddIndexes(index, snapoffset, ndim, index);  /* + SnapIndexPos(offset) */
+      hypre_SubtractIndexes(index, offset, ndim, index); /* - offset */
    }
-   hypre_MapToFineIndex(dstride, NULL, stride, ndim);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Returns the (origin,stride) index space for a given stencil entry in a
+ * canonical representation with origin in the interval [0, stride).
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixGetStencilSpace( hypre_StructMatrix *matrix,
+                                   HYPRE_Int           entry,
+                                   hypre_Index         origin,
+                                   hypre_Index         stride )
+{
+   HYPRE_Int  ndim = hypre_StructMatrixNDim(matrix);
+
+   /* Initialize origin */
+   hypre_SetIndex(origin, 0);
+
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
+   {
+      hypre_StructStencil  *stencil = hypre_StructMatrixStencil(matrix);
+      hypre_IndexRef        offset  = hypre_StructStencilOffset(stencil, entry);
+
+      hypre_CopyToIndex(hypre_StructMatrixDomStride(matrix), ndim, stride);
+      hypre_SubtractIndexes(origin, offset, ndim, origin); /* origin -= offset */
+      /* Convert origin to a canonical representation in [0, stride) */
+      hypre_ConvertToCanonicalIndex(origin, stride, ndim);
+   }
+   else
+   {
+      hypre_CopyToIndex(hypre_StructMatrixRanStride(matrix), ndim, stride);
+   }
 
    return hypre_error_flag;
 }
@@ -137,6 +209,8 @@ hypre_StructMatrixUnMapDataStride( hypre_StructMatrix *matrix,
 
 HYPRE_Int 
 hypre_StructMatrixMapCommInfo( hypre_StructMatrix *matrix,
+                               hypre_IndexRef      origin,
+                               hypre_Index         stride,
                                hypre_CommInfo     *comm_info )
 {
    hypre_BoxArrayArray  *boxaa;
@@ -151,6 +225,7 @@ hypre_StructMatrixMapCommInfo( hypre_StructMatrix *matrix,
       hypre_ForBoxI(j, boxa)
       {
          box = hypre_BoxArrayBox(boxa, j);
+         hypre_ProjectBox(box, origin, stride);
          hypre_StructMatrixMapDataBox(matrix, box);
       }
    }
@@ -162,9 +237,153 @@ hypre_StructMatrixMapCommInfo( hypre_StructMatrix *matrix,
       hypre_ForBoxI(j, boxa)
       {
          box = hypre_BoxArrayBox(boxa, j);
+         hypre_ProjectBox(box, origin, stride);
          hypre_StructMatrixMapDataBox(matrix, box);
       }
    }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Create a matrix communication package from comm_info and destroy comm_info.
+ *
+ * When the domain is coarse, multiple intermediate communication packages are
+ * first created, then agglomerated into one.  This is because only a subset of
+ * the stencil entries is valid for any given range-space index (for example,
+ * linear interpolation in 1D uses the east and west coefficients at F-points
+ * and the center coefficient at C-points).  Hence, for a given send or receive
+ * box in 'comm_info', the corresponding data box may be different for different
+ * stencil entries.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
+                                 hypre_CommInfo     *comm_info,
+                                 hypre_CommPkg     **comm_pkg_ptr,
+                                 HYPRE_Complex    ***comm_data_ptr )
+{
+   hypre_CommPkg        *comm_pkg;
+   HYPRE_Complex       **comm_data;
+
+   HYPRE_Int             num_values = hypre_StructMatrixNumValues(matrix);
+
+   if (hypre_StructMatrixDomainIsCoarse(matrix))
+   {
+      hypre_CommInfo       *comm_info_clone;
+      hypre_CommPkg       **comm_pkgs;
+      HYPRE_Int             ndim         = hypre_StructMatrixNDim(matrix);
+      hypre_StructStencil  *stencil      = hypre_StructMatrixStencil(matrix);
+      HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+      HYPRE_Int            *symm         = hypre_StructMatrixSymmEntries(matrix);
+      hypre_Index          *origins, origin, stride;
+      HYPRE_Int            *v_to_s, *s_to_v, *order;
+      HYPRE_Int            *stencil_spaces, num_spaces;
+      HYPRE_Int             i, e, s;
+
+      /* Compute mappings between "values" (v) and "stencil entries" (s).
+       * Consider pre-computing this and storing in the matrix itself. */
+      v_to_s = hypre_TAlloc(HYPRE_Int, num_values);
+      s_to_v = hypre_TAlloc(HYPRE_Int, stencil_size);
+      for (e = 0, i = 0; e < stencil_size; e++)
+      {
+         s_to_v[e] = -1;
+         if (symm[e] < 0)  /* this is a stored coefficient */
+         {
+            v_to_s[i] = e;
+            s_to_v[e] = i;
+            i++;
+         }
+      }
+
+      /* Figure out the number of "stencil spaces" and which stencil entries
+       * belong to which space (each space may induce different data boxes for
+       * the communication). */
+      stencil_spaces = hypre_TAlloc(HYPRE_Int, stencil_size);
+      origins = hypre_TAlloc(hypre_Index, stencil_size);
+      num_spaces = 0;
+      for (e = 0; e < stencil_size; e++)
+      {
+         hypre_StructMatrixGetStencilSpace(matrix, e, origin, stride);
+
+         for (s = 0; s < num_spaces; s++)
+         {
+            /* Only check origin (assume that stride is always the same) */
+            if ( hypre_IndexesEqual(origin, origins[s], ndim) )
+            {
+               break;
+            }
+         }
+         stencil_spaces[e] = s;
+
+         if (s == num_spaces)
+         {
+            /* This is a new space */
+            hypre_CopyToIndex(origin, ndim, origins[s]);
+            num_spaces++;
+         }
+      }
+
+      /* Compute communication packages for each stencil space */
+      comm_pkgs = hypre_TAlloc(hypre_CommPkg *, num_spaces);
+      comm_data = hypre_TAlloc(HYPRE_Complex *, num_spaces);
+      order = hypre_TAlloc(HYPRE_Int, num_values);
+      for (s = 0; s < num_spaces; s++)
+      {
+         /* Set order[i] = -1 to skip values not in this stencil space */
+         for (i = 0; i < num_values; i++)
+         {
+            order[i] = i;
+            if (stencil_spaces[v_to_s[i]] != s)
+            {
+               order[i] = -1;
+            }
+         }
+         hypre_CommInfoClone(comm_info, &comm_info_clone);
+         hypre_StructMatrixMapCommInfo(matrix, origins[s], stride, comm_info_clone);
+         hypre_CommPkgCreate(comm_info_clone,
+                             hypre_StructMatrixDataSpace(matrix),
+                             hypre_StructMatrixDataSpace(matrix), num_values, &order, 0,
+                             hypre_StructMatrixComm(matrix), &comm_pkgs[s]);
+         comm_data[s] = hypre_StructMatrixVData(matrix);
+         hypre_CommInfoDestroy(comm_info_clone);
+      }
+      hypre_TFree(order);
+      hypre_TFree(stencil_spaces);
+      hypre_TFree(origins);
+      hypre_TFree(v_to_s);
+      hypre_TFree(s_to_v);
+
+      /* Agglomerate comm_pkgs into one comm_pkg */
+      comm_pkg = comm_pkgs[0];
+      if (num_spaces > 1)
+      {
+         hypre_CommPkgAgglomerate(num_spaces, comm_pkgs, &comm_pkg);
+         for (s = 0; s < num_spaces; s++)
+         {
+            hypre_CommPkgDestroy(comm_pkgs[s]);
+         }
+      }
+      hypre_TFree(comm_pkgs);
+   }
+   else
+   {
+      hypre_IndexRef  stride;
+
+      comm_data = hypre_TAlloc(HYPRE_Complex *, 1);
+      hypre_StructMatrixGetDataMapStride(matrix, &stride);
+      hypre_StructMatrixMapCommInfo(matrix, NULL, stride, comm_info);
+      hypre_CommPkgCreate(comm_info,
+                          hypre_StructMatrixDataSpace(matrix),
+                          hypre_StructMatrixDataSpace(matrix), num_values, NULL, 0,
+                          hypre_StructMatrixComm(matrix), &comm_pkg);
+      comm_data[0] = hypre_StructMatrixVData(matrix);
+   }
+
+   hypre_CommInfoDestroy(comm_info);
+
+   *comm_pkg_ptr  = comm_pkg;
+   *comm_data_ptr = comm_data;
 
    return hypre_error_flag;
 }
@@ -527,18 +746,19 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
 
       data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
 
+      /* Copy constant data values */
+      for (i = 0; i < stencil_size; i++)
+      {
+         data[i] = old_data[i];
+      }
+
+      /* Copy the data */
+      hypre_StructDataCopy(old_data + stencil_size, old_data_space, old_ids,
+                           data + stencil_size, data_space, ids, ndim, nval);
       if (hypre_StructMatrixDataAlloced(matrix))
       {
-         /* move the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 1, ndim, nval);
+         hypre_TFree(old_data);
          old_data = NULL;
-      }
-      else
-      {
-         /* copy the data */
-         hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                              data, data_space, ids, 0, ndim, nval);
       }
    }
 
@@ -574,11 +794,13 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
 HYPRE_Int
 hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
 {
-   HYPRE_Complex   *old_data       = hypre_StructMatrixData(matrix);
-   hypre_BoxArray  *old_data_space = hypre_StructMatrixDataSpace(matrix);
-   HYPRE_Complex   *data           = hypre_StructMatrixSaveData(matrix);
-   hypre_BoxArray  *data_space     = hypre_StructMatrixSaveDataSpace(matrix);
-   HYPRE_Int        data_size      = hypre_StructMatrixSaveDataSize(matrix);
+   HYPRE_Complex        *old_data       = hypre_StructMatrixData(matrix);
+   hypre_BoxArray       *old_data_space = hypre_StructMatrixDataSpace(matrix);
+   HYPRE_Complex        *data           = hypre_StructMatrixSaveData(matrix);
+   hypre_BoxArray       *data_space     = hypre_StructMatrixSaveDataSpace(matrix);
+   HYPRE_Int             data_size      = hypre_StructMatrixSaveDataSize(matrix);
+   hypre_StructStencil  *stencil        = hypre_StructMatrixStencil(matrix);
+   HYPRE_Int             stencil_size   = hypre_StructStencilSize(stencil);
 
    if (data_space != NULL)
    {
@@ -586,14 +808,21 @@ hypre_StructMatrixRestore( hypre_StructMatrix *matrix )
       HYPRE_Int  *ids = hypre_StructGridIDs(hypre_StructMatrixGrid(matrix));
       HYPRE_Int   ndim = hypre_StructMatrixNDim(matrix);
       HYPRE_Int   nval = hypre_StructMatrixNumValues(matrix);
+      HYPRE_Int   i;
 
       /* Move the data */
       if (hypre_StructMatrixDataAlloced(matrix))
       {
          data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
       }
-      hypre_StructDataCopy(old_data, old_data_space, old_ids,
-                           data, data_space, ids, 1, ndim, nval);
+      /* Copy constant data values */
+      for (i = 0; i < stencil_size; i++)
+      {
+         data[i] = old_data[i];
+      }
+      hypre_StructDataCopy(old_data + stencil_size, old_data_space, old_ids,
+                           data + stencil_size, data_space, ids, ndim, nval);
+      hypre_TFree(old_data);
 
       /* Reset certain fields to enable the Resize call below */
       hypre_StructMatrixSaveData(matrix)      = NULL;
@@ -1674,7 +1903,6 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
 }
 
 /*--------------------------------------------------------------------------
- * RDF TODO: This currently only works correctly for square matrices
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -2050,6 +2278,7 @@ hypre_StructMatrixRead( MPI_Comm    comm,
 
    return matrix;
 }
+
 /*--------------------------------------------------------------------------
  * clears matrix stencil coefficients reaching outside of the physical boundaries
  *--------------------------------------------------------------------------*/
@@ -2059,68 +2288,71 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
 {
    HYPRE_Int            ndim = hypre_StructMatrixNDim(matrix);
    HYPRE_Complex       *data;
-   hypre_BoxArray      *grid_boxes;
-   hypre_BoxArray      *data_space;
-   /*hypre_Box           *box;*/
-   hypre_Box           *grid_box;
-   hypre_Box           *data_box;
-   hypre_Box           *tmp_box;
+   hypre_BoxArray      *grid_boxes, *data_space, *boundary;
+   hypre_Box           *box, *dbox, *tbox;
    hypre_Index         *shape;
    hypre_Index          stencil_offset;
    hypre_Index          loop_size;
-   hypre_IndexRef       start;
-   hypre_Index          stride;
+   hypre_IndexRef       dstart;
+   hypre_Index          origin, stride, dstride;
    hypre_StructGrid    *grid;
    hypre_StructStencil *stencil;
-   hypre_BoxArray      *boundary;
 
-   HYPRE_Int           i, i2, ixyz, j;
+   HYPRE_Int           i, j, di, e;
 
    /*-----------------------------------------------------------------------
     * Set the matrix coefficients
     *-----------------------------------------------------------------------*/
+
+   box = hypre_BoxCreate(ndim);
 
    grid = hypre_StructMatrixGrid(matrix);
    stencil = hypre_StructMatrixStencil(matrix);
    grid_boxes = hypre_StructGridBoxes(grid);
    ndim = hypre_StructStencilNDim(stencil);
    data_space = hypre_StructMatrixDataSpace(matrix);
-   hypre_SetIndex(stride, 1);
+   hypre_SetIndex(dstride, 1);
    shape = hypre_StructStencilShape(stencil);
 
-   for (j = 0; j < hypre_StructStencilSize(stencil); j++)
+   for (e = 0; e < hypre_StructStencilSize(stencil); e++)
    {
-      hypre_CopyIndex(shape[j],stencil_offset);
-      if (!hypre_IndexEqual(stencil_offset, 0, ndim))
+      if (!hypre_StructMatrixConstEntry(matrix, e))
       {
-         hypre_ForBoxI(i, grid_boxes)
+         hypre_CopyIndex(shape[e],stencil_offset);
+         if (!hypre_IndexEqual(stencil_offset, 0, ndim))
          {
-            grid_box = hypre_BoxArrayBox(grid_boxes, i);
-            data_box = hypre_BoxArrayBox(data_space, i);
-            boundary = hypre_BoxArrayCreate( 0, ndim );
-            hypre_GeneralBoxBoundaryIntersect(grid_box, grid, stencil_offset,
-                boundary);
-            data = hypre_StructMatrixBoxData(matrix, i, j);
-            hypre_ForBoxI(i2, boundary)
+            hypre_ForBoxI(i, grid_boxes)
             {
-               tmp_box = hypre_BoxArrayBox(boundary, i2);
-               hypre_StructMatrixMapDataBox(matrix, tmp_box);
-               hypre_BoxGetSize(tmp_box, loop_size);
-               start = hypre_BoxIMin(tmp_box);
-               hypre_BoxLoop1Begin(ndim, loop_size, data_box, start, stride, ixyz);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ixyz) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(ixyz)
+               hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), box);
+               hypre_StructMatrixGetStencilSpace(matrix, e, origin, stride);
+               hypre_ProjectBox(box, origin, stride);
+               dbox = hypre_BoxArrayBox(data_space, i);
+               boundary = hypre_BoxArrayCreate(0, ndim);
+               hypre_GeneralBoxBoundaryIntersect(box, grid, stencil_offset, boundary);
+               data = hypre_StructMatrixBoxData(matrix, i, e);
+               hypre_ForBoxI(j, boundary)
                {
-                  data[ixyz] = 0.0;
+                  tbox = hypre_BoxArrayBox(boundary, j);
+                  hypre_StructMatrixMapDataBox(matrix, tbox);
+                  hypre_BoxGetSize(tbox, loop_size);
+                  dstart = hypre_BoxIMin(tbox);
+                  hypre_BoxLoop1Begin(ndim, loop_size, dbox, dstart, dstride, di);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,di) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop1For(di)
+                  {
+                     data[di] = 0.0;
+                  }
+                  hypre_BoxLoop1End(di);
                }
-               hypre_BoxLoop1End(ixyz);
+               hypre_BoxArrayDestroy(boundary);
             }
-            hypre_BoxArrayDestroy(boundary);
          }
       }
    }
+
+   hypre_BoxDestroy(box);
 
    return hypre_error_flag;
 }

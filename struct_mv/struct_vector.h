@@ -24,8 +24,10 @@
  *
  * Most of the routines currently only work when the base grid and grid are
  * identically the same (i.e., when nboxes equals the number of boxes in the
- * grid and stride is the unit stride.  RDF: It's not clear yet if this is the
- * structure we want to maintain into the future.
+ * grid and stride is the unit stride).  The number of boxes in data_space and
+ * data_indices is the same as in the base grid, even though nboxes may be
+ * smaller.  RDF: It's not clear yet if this is the structure we want to
+ * maintain into the future.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructVector_struct
@@ -41,10 +43,9 @@ typedef struct hypre_StructVector_struct
    hypre_BoxArray       *data_space;   /* Layout of vector data */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of vector data */
-   HYPRE_Int            *data_indices; /* num-boxes array of indices into
-                                          the data array.  data_indices[b]
-                                          is the starting index of vector
-                                          data corresponding to box b. */
+   HYPRE_Int            *data_indices; /* Array of indices into the data array.
+                                          data_indices[b] is the starting index
+                                          of data corresponding to boxnum b. */
                       
    HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
                                                      * direction */

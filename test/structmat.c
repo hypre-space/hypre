@@ -26,8 +26,9 @@
  *--------------------------------------------------------------------------*/
 
 /* Globals */
-char      infile_default[50] = "structmat.in";
-HYPRE_Int ndim               = 0;
+char      infile_default[50]  = "structmat.in";
+char      outfile_default[50] = "structmat.out";
+HYPRE_Int ndim                = 0;
 
 typedef HYPRE_Int Index[MAXDIM];
 
@@ -136,6 +137,7 @@ ReadData( char  *filename,
          /* read the next input line */
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
+      fclose(file);
    }
 
    /* broadcast the data size */
@@ -531,8 +533,11 @@ PrintUsage( char      *progname,
       hypre_printf("\n");
       hypre_printf("Usage: %s [-in <filename>] [<options>]\n", progname);
       hypre_printf("\n");
-      hypre_printf("  -in <filename> : input file (default is `%s')\n",
+      hypre_printf("  -in  <filename> : input file  (default is `%s')\n",
                    infile_default);
+      hypre_printf("  -out <filename> : output file (default is `%s')\n",
+                   outfile_default);
+      hypre_printf("  -outlev <level> : level = 0 (none), 1 (default), 2 (all)\n");
       hypre_printf("\n");
       hypre_printf("  -P <Px> <Py> ...     : refine and distribute part(s)\n");
       hypre_printf("  -r <rx> <ry> ...     : refine part(s)\n");
@@ -541,10 +546,9 @@ PrintUsage( char      *progname,
       hypre_printf("  -mat-vec <A> <x> <y> : compute A*x + y\n");
       hypre_printf("  -matTvec <A> <x> <y> : compute A^T*x + y\n");
       hypre_printf("\n");
-      hypre_printf("  -mat-mat  <A> <B>    : compute A*B\n");
-      hypre_printf("  -matTmat  <A> <B>    : compute A^T*B\n");
-      hypre_printf("  -mat-matT <A> <B>    : compute A*B^T\n");
-      hypre_printf("  -matTmatT <A> <B>    : compute A^T*B^T\n");
+      hypre_printf("  -mat-mat <n> <A>[T] <B>[T] ... : compute A*B*... or A^T*B*..., etc. \n");
+      hypre_printf("                                 : for n possibly transposed matrices \n");
+      hypre_printf("                                 : example P^T*A*P: -mat-mat 3 1T 0 1 \n");
       hypre_printf("\n");
    }
 
@@ -559,7 +563,7 @@ hypre_int
 main( hypre_int  argc,
       char      *argv[] )
 {
-   char                 *infile;
+   char                 *infile, *outfile, filename[255];
    Data                  global_data;
    Data                  data;
    Index                 refine;
@@ -571,14 +575,17 @@ main( hypre_int  argc,
    HYPRE_StructMatrix   *matrices;
    HYPRE_StructGrid     *vgrids;
    HYPRE_StructVector   *vectors;
+   HYPRE_StructMatrix    M;
 
    HYPRE_Real           *values;
 
-   HYPRE_Int             num_procs, myid;
+   HYPRE_Int             num_procs, myid, outlev;
    HYPRE_Int             time_index;
    HYPRE_Int             arg_index, box, mi, vi, ei, d, i, k;
    HYPRE_Int             do_matvec, do_matmat;
-   HYPRE_Int             mv_A, mv_x, mv_y, mm_A, mm_B;
+   HYPRE_Int             mv_A, mv_x, mv_y;
+   HYPRE_Int             nterms, *terms, *trans;
+   char                  transposechar;
                         
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -592,6 +599,10 @@ main( hypre_int  argc,
 
    hypre_InitMemoryDebug(myid);
 
+   infile  = infile_default;
+   outfile = outfile_default;
+   outlev  = 1;
+
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
@@ -599,7 +610,6 @@ main( hypre_int  argc,
    arg_index = 1;
 
    /* parse command line for input file name */
-   infile = infile_default;
    if (argc > 1)
    {
       if ( strcmp(argv[arg_index], "-in") == 0 )
@@ -646,7 +656,17 @@ main( hypre_int  argc,
 
    while (arg_index < argc)
    {
-      if ( strcmp(argv[arg_index], "-P") == 0 )
+      if ( strcmp(argv[arg_index], "-out") == 0 )
+      {
+         arg_index++;
+         outfile = argv[arg_index++];
+      }
+      else if ( strcmp(argv[arg_index], "-outlev") == 0 )
+      {
+         arg_index++;
+         outlev = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
       {
          arg_index++;
          k = arg_index;
@@ -688,8 +708,18 @@ main( hypre_int  argc,
       {
          arg_index++;
          do_matmat = 1;
-         mm_A = atoi(argv[arg_index++]);
-         mm_B = atoi(argv[arg_index++]);
+         nterms = atoi(argv[arg_index++]);
+         terms = hypre_CTAlloc(HYPRE_Int, nterms);
+         trans = hypre_CTAlloc(HYPRE_Int, nterms);
+         for (i = 0; i < nterms; i++)
+         {
+            transposechar = ' ';
+            sscanf(argv[arg_index++], "%d%c", &terms[i], &transposechar);
+            if (transposechar == 'T')
+            {
+               trans[i] = 1;
+            }
+         }
       }
       else
       {
@@ -815,6 +845,8 @@ main( hypre_int  argc,
          }
       }
       HYPRE_StructMatrixAssemble(matrices[mi]);
+      /* Zero out coefficients that reach outside of the grid */
+      hypre_StructMatrixClearBoundary(matrices[mi]);
    }
 
    vgrids = hypre_CTAlloc(HYPRE_StructGrid, data.nvectors);
@@ -844,17 +876,18 @@ main( hypre_int  argc,
     * Print matrices and vectors
     *-----------------------------------------------------------*/
 
-   for (mi = 0; mi < data.nmatrices; mi++)
+   if (outlev >= 2)
    {
-      char  filename[255];
-      hypre_sprintf(filename, "structmat.out.matrix%d", mi);
-      HYPRE_StructMatrixPrint(filename,  matrices[mi], 0);
-   }
-   for (vi = 0; vi < data.nvectors; vi++)
-   {
-      char  filename[255];
-      hypre_sprintf(filename, "structmat.out.vector%d", vi);
-      HYPRE_StructVectorPrint(filename,  vectors[vi], 0);
+      for (mi = 0; mi < data.nmatrices; mi++)
+      {
+         hypre_sprintf(filename, "%s.matrix%d", outfile, mi);
+         HYPRE_StructMatrixPrint(filename,  matrices[mi], 0);
+      }
+      for (vi = 0; vi < data.nvectors; vi++)
+      {
+         hypre_sprintf(filename, "%s.vector%d", outfile, vi);
+         HYPRE_StructVectorPrint(filename,  vectors[vi], 0);
+      }
    }
 
    /*-----------------------------------------------------------
@@ -924,7 +957,11 @@ main( hypre_int  argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      HYPRE_StructVectorPrint("structmat.out.matvec", vectors[mv_y], 0);
+      if (outlev >= 1)
+      {
+         hypre_sprintf(filename, "%s.matvec", outfile);
+         HYPRE_StructVectorPrint(filename, vectors[mv_y], 0);
+      }
    }
 
    /*-----------------------------------------------------------
@@ -936,11 +973,23 @@ main( hypre_int  argc,
       hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       time_index = hypre_InitializeTiming("Matrix-matrix multiply");
       hypre_BeginTiming(time_index);
+
+      hypre_StructMatmult(data.nmatrices, matrices, nterms, terms, trans, &M);
       
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-matrix multiply", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+
+      if (outlev >= 1)
+      {
+         hypre_sprintf(filename, "%s.matmat", outfile);
+         HYPRE_StructMatrixPrint(filename, M, 0);
+      }
+
+      HYPRE_StructMatrixDestroy(M);
+      hypre_TFree(terms);
+      hypre_TFree(trans);
    }
 
    /*-----------------------------------------------------------

@@ -19,7 +19,7 @@
 #include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
- * Copy or move struct data with possibly different data spaces.
+ * Copy struct data with possibly different data spaces.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -29,7 +29,6 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
                       HYPRE_Complex   *to_data,        /* to */
                       hypre_BoxArray  *to_data_space,
                       HYPRE_Int       *to_ids,
-                      HYPRE_Int        move,           /* move the data? */
                       HYPRE_Int        ndim,
                       HYPRE_Int        nval )
 {
@@ -62,7 +61,7 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
          fr_data_off += nval * fr_data_vol;
          fb++;
       }
-      if (fb < fr_nboxes && (fr_ids[fb] == to_ids[tb]))
+      if ((fb < fr_nboxes) && (fr_ids[fb] == to_ids[tb]))
       {
          fr_data_box = hypre_BoxArrayBox(fr_data_space, fb);
          fr_data_vol = hypre_BoxVolume(fr_data_box);
@@ -96,11 +95,6 @@ hypre_StructDataCopy( HYPRE_Complex   *fr_data,        /* from */
 
    hypre_BoxDestroy(int_box);
    
-   if (move)
-   {
-      hypre_TFree(fr_data);
-   }
-
    return hypre_error_flag;
 }
 
