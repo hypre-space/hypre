@@ -174,6 +174,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_Index              unit_stride;
    hypre_IndexRef           y_stride;
 
+   hypre_StructVector      *x_tmp = NULL;
+
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
@@ -234,6 +236,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       }
 
       return hypre_error_flag;
+   }
+
+   if (x == y)
+   {
+      x_tmp = hypre_StructVectorClone(y);
+      x = x_tmp;
    }
 
    /*-----------------------------------------------------------------------
@@ -544,6 +552,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             }
          }
       }
+   }
+
+   if (x_tmp)
+   {
+      hypre_StructVectorDestroy(x_tmp);
+      x = y;
    }
 
    /* This restores the original grid and data layout */
