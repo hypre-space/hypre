@@ -523,6 +523,13 @@ HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
                                   HYPRE_StructVector  vector,
                                   HYPRE_Int           all);
 
+/**
+ * Clone a vector x.
+ **/
+HYPRE_Int
+HYPRE_StructVectorClone( HYPRE_StructVector x,
+                         HYPRE_StructVector *y_ptr );
+
 /* Revisit these interface routines */
 HYPRE_Int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector , HYPRE_Complex factor );
 HYPRE_Int HYPRE_StructVectorCopy ( HYPRE_StructVector x , HYPRE_StructVector y );
