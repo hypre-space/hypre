@@ -182,6 +182,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       {
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,jj,tempx) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < num_rows; i++)
          {
             for (j = 0; j < num_vectors; ++j)
@@ -194,7 +195,6 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
                y_data[ j*vecstride_y + i*idxstride_y ] += tempx;
             }
          }
-#endif
       }
 
       /*-----------------------------------------------------------------
@@ -221,18 +221,6 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
       hypre_assert(iBegin <= iEnd);
       hypre_assert(iBegin >= 0 && iBegin <= num_rows);
       hypre_assert(iEnd >= 0 && iEnd <= num_rows);
-
-#ifndef NDEBUG
-      // JSP: a good place to check array bounds
-      for (i = iBegin; i < iEnd; i++)
-      {
-         for (jj = A_i[i]; jj < A_i[i+1]; jj++)
-         {
-            hypre_assert(jj >= A_i[0] && jj < num_nnz);
-            hypre_assert(A_j[jj] >= 0 && A_j[jj] < x_size);
-         }
-      }
-#endif
 
       if (0 == temp)
       {
