@@ -65,22 +65,35 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_StructStencil     *stencil;
    hypre_ComputeInfo       *compute_info;
    hypre_ComputePkg        *compute_pkg;
-   /*hypre_StructGrid        *domain_grid;
-   hypre_ComputeInfo       *compute_domain_info; */
-
+   hypre_IndexRef           dom_stride;
+   hypre_BoxArray          *data_space;
+   HYPRE_Int               *num_ghost;
    /*----------------------------------------------------------
     * Set up the compute package
     *----------------------------------------------------------*/
 
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
+   dom_stride = hypre_StructMatrixDomStride(A);
 
+   /* This computes a data_space with respect to the matrix grid and the
+    * stencil pattern for the matvec */
+   hypre_StructVectorReindex(x, grid, dom_stride);
+   hypre_StructNumGhostFromStencil(stencil, &num_ghost);
+   hypre_StructVectorComputeDataSpace(x, num_ghost, &data_space);
+
+   /* This computes the communication pattern for the new x data_space */
    hypre_CreateComputeInfo(grid, stencil, &compute_info);
-   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
-                          grid, &compute_pkg);
-   /*domain_grid    = hypre_StructMatrixDomainGrid(A);
-   if (grid != domain_grid)
-      hypre_CreateComputeInfo(domain_grid, stencil, &compute_domain_info);*/
+   if (hypre_StructMatrixDomainIsCoarse(A))
+   {
+       hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
+      /* Compute boxes will be appropriately projected in MatvecCompute */
+   }
+   hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
+
+   /* This restores the original grid */
+   hypre_StructVectorRestore(x);
+
    /*----------------------------------------------------------
     * Set up the matvec data structure
     *----------------------------------------------------------*/
@@ -110,6 +123,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                           
    hypre_CommHandle        *comm_handle;
                           
+   hypre_BoxArray          *data_space;
    hypre_BoxArrayArray     *compute_box_aa;
    hypre_Box               *y_data_box;
                           
@@ -143,13 +157,24 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                           
    HYPRE_Int                ndim;
    HYPRE_Int 		    fi, ci;
-   hypre_StructVector      *xtmp;
 
-   hypre_StructGrid        *fgrid;
-   hypre_StructGrid        *cgrid;
-   HYPRE_Int 		   *c_ids;
-   HYPRE_Int 		   *f_ids;
-   hypre_BoxArray *cboxes, *fboxes;
+   hypre_StructGrid        *base_grid;
+   hypre_StructGrid        *ygrid;
+   HYPRE_Int 		   *base_ids;
+   HYPRE_Int 		   *y_ids;
+
+   HYPRE_Int 		    ran_nboxes;
+   HYPRE_Int 		   *ran_boxnums;
+   hypre_IndexRef           ran_stride;
+
+   HYPRE_Int 		    dom_nboxes;
+   HYPRE_Int 		   *dom_boxnums;
+   hypre_IndexRef           dom_stride;
+
+   hypre_Index              unit_stride;
+   hypre_IndexRef           y_stride;
+
+   hypre_StructVector      *x_tmp = NULL;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -162,7 +187,23 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    stride = hypre_ComputePkgStride(compute_pkg);
 
+   dom_stride = hypre_StructMatrixDomStride(A);
+   dom_nboxes = hypre_StructMatrixDomNBoxes(A);
+   dom_boxnums = hypre_StructMatrixDomBoxnums(A);
+
+   ran_stride = hypre_StructMatrixRanStride(A);
+   ran_nboxes = hypre_StructMatrixRanNBoxes(A);
+   ran_boxnums = hypre_StructMatrixRanBoxnums(A);
+
    hypre_SetIndex(origin, 0);
+   hypre_SetIndex(unit_stride, 1);
+
+   y_stride = hypre_StructVectorStride(y);
+   ygrid = hypre_StructVectorGrid(y);
+   y_ids = hypre_StructGridIDs(ygrid);
+
+   base_grid = hypre_StructMatrixGrid(A);
+   base_ids = hypre_StructGridIDs(base_grid);
 
    /*-----------------------------------------------------------------------
     * Do (alpha == 0.0) computation
@@ -170,7 +211,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    if (alpha == 0.0)
    {
-      boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+      boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
+      
       hypre_ForBoxI(i, boxes)
       {
          box   = hypre_BoxArrayBox(boxes, i);
@@ -182,7 +224,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          hypre_BoxGetSize(box, loop_size);
 
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
-                             y_data_box, start, stride, yi);
+                             y_data_box, start, y_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
@@ -196,24 +238,15 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       return hypre_error_flag;
    }
 
+   if (x == y)
+   {
+      x_tmp = hypre_StructVectorClone(y);
+      x = x_tmp;
+   }
+
    /*-----------------------------------------------------------------------
     * Do (alpha != 0.0) computation
     *-----------------------------------------------------------------------*/
-
-   if (hypre_StructMatrixDomainIsCoarse(A))
-   {
-      fgrid = hypre_StructVectorGrid(y);
-      cgrid = hypre_StructVectorGrid(x);
-   }
-   else
-   {
-      fgrid = hypre_StructVectorGrid(x);
-      cgrid = hypre_StructVectorGrid(y);
-   }
-   cboxes = hypre_StructGridBoxes(cgrid);
-   fboxes = hypre_StructGridBoxes(fgrid);
-   c_ids = hypre_StructGridIDs(cgrid);
-   f_ids = hypre_StructGridIDs(fgrid);
 
    /* TODO: Create a vector on the finest grid (range or domain) with additional
     * ghost layers for communication, then copy the original x into that.
@@ -225,54 +258,13 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    /* create new x */
    /* copy xorig into x */
 
+   /* This resizes the data for x using the data_space computed durig setup */
+   data_space = hypre_ComputePkgDataSpace(compute_pkg);
+   hypre_StructVectorReindex(x, base_grid, dom_stride);
+   hypre_StructVectorResize(x, data_space);
+
 
    ndim          = hypre_StructVectorNDim(x);
-   /* Copy content of x into xtmp, which is a vector on the fine grid space */
-   if (hypre_StructMatrixDomainIsCoarse(A))
-   {
-      hypre_Box *c_box, *f_box, *c_data_box, *f_data_box;
-      hypre_IndexRef c_start, r_stride, d_stride;
-      HYPRE_Complex *xtp;
-      hypre_Index loop_size, f_start;
-      HYPRE_Int vc, vf;
-
-      d_stride = hypre_StructMatrixDomStride(A);
-      r_stride = hypre_StructMatrixRanStride(A);
-
-      xtmp = hypre_StructVectorCreate(hypre_StructVectorComm(y), fgrid); 
-      hypre_StructVectorInitialize(xtmp);
-
-      fi = 0;
-      hypre_ForBoxI(ci, cboxes)
-      {
-         while (f_ids[fi] != c_ids[ci]) fi++;
-	 c_box = hypre_BoxArrayBox(cboxes, ci);
-	 c_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), ci);
-         c_start = hypre_BoxIMin(c_box);
-	 f_box = hypre_BoxArrayBox(fboxes, fi);
-         hypre_CopyIndex(c_start, f_start);
-         hypre_MapToFineIndex(f_start,NULL,d_stride,ndim);
-	 f_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xtmp), fi);
-         xp = hypre_StructVectorBoxData(x, ci);
-         xtp = hypre_StructVectorBoxData(xtmp, fi);
-
-         hypre_BoxGetStrideSize(c_box, r_stride, loop_size);
-
-         hypre_BoxLoop2Begin(ndim, loop_size,
-		c_data_box, c_start, r_stride, vc,
-		f_data_box, f_start, d_stride, vf);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop2For(vc, vf)
-         {
-            xtp[vf] = xp[vc];
-         }
-         hypre_BoxLoop2End(vc, vf);
-      }
-      hypre_StructVectorAssemble(xtmp);
-   }
-
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
@@ -283,10 +275,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       {
          case 0:
          {
-            if (hypre_StructMatrixDomainIsCoarse(A))
-               xp = hypre_StructVectorData(xtmp);
-            else
-               xp = hypre_StructVectorData(x);
+            xp = hypre_StructVectorData(x);
             hypre_InitializeIndtComputations(compute_pkg, xp, &comm_handle);
             compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
 
@@ -312,8 +301,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   {
                      hypre_BoxGetSize(box, loop_size);
 
-                     hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
-                                         y_data_box, start, stride, yi);
+                     hypre_BoxLoop1Begin(ndim, loop_size,
+                                         y_data_box, start, y_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
@@ -327,8 +316,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   {
                      hypre_BoxGetSize(box, loop_size);
 
-                     hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
-                                         y_data_box, start, stride, yi);
+                     hypre_BoxLoop1Begin(ndim, loop_size,
+                                         y_data_box, start, y_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
@@ -357,47 +346,57 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
       if (hypre_StructMatrixRangeIsCoarse(A))
       {
-         fi = 0;
-         hypre_ForBoxI(ci, cboxes)
+         ci = 0;
+         for (i=0; i < ran_nboxes; i++) 
+         /*hypre_ForBoxI(ci, cboxes)*/
          {
-            hypre_IndexRef r_stride, x_start;
-
-            while (f_ids[fi] != c_ids[ci]) fi++;
+            hypre_IndexRef x_start;
+            fi = ran_boxnums[i];
+            /* This assumes that the grid boxes of y are a subset of the grid boxes 
+		of A */
+            while (y_ids[ci] > base_ids[fi]) 
+            {
+               i++;
+               fi = ran_boxnums[i];
+            }
+            /*while (base_ids[fi] < y_ids[ci]) ci++; */
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
             A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
             x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), fi);
             y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), ci);
             xp = hypre_StructVectorBoxData(x, fi);
             yp = hypre_StructVectorBoxData(y, ci);
+            ran_stride = hypre_StructMatrixRanStride(A);
+            dom_stride = hypre_StructMatrixDomStride(A);
+            ci++;
             hypre_ForBoxI(j, compute_box_a)
             {
                hypre_Box *tmp_box;
                hypre_Index y_start;
                compute_box = hypre_BoxArrayBox(compute_box_a, j);
 	       start  = hypre_BoxIMin(compute_box);
-               r_stride = hypre_StructMatrixRanStride(A);
 	       tmp_box = hypre_BoxCreate(ndim);
                hypre_CopyBox(compute_box, tmp_box);
-               hypre_ProjectBox(tmp_box, origin, r_stride);
-               hypre_BoxGetStrideSize(tmp_box, r_stride ,loop_size);
+               hypre_ProjectBox(tmp_box, origin, ran_stride);
+               hypre_BoxGetStrideSize(tmp_box, ran_stride ,loop_size);
 	       x_start  = hypre_BoxIMin(tmp_box);
                hypre_CopyIndex(x_start,y_start);
-               hypre_SnapIndexNeg(y_start, origin, r_stride, ndim);
-               hypre_MapToCoarseIndex(y_start, origin, r_stride, ndim);
+               hypre_SnapIndexNeg(y_start, origin, ran_stride, ndim);
+               hypre_MapToCoarseIndex(y_start, origin, ran_stride, ndim);
 
                /* TODO (later, for optimization): Unroll these loops */
-               for (si = 0; si < stencil_size; si++)
+              for (si = 0; si < stencil_size; si++)
                {
 
                   Ap = hypre_StructMatrixBoxData(A, fi, si);
                   xoff = hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
                   if (hypre_StructMatrixConstEntry(A, si))
-                  {
+                  { 
                      /* Constant coefficient case */
                      hypre_BoxLoop2Begin(ndim, loop_size,
-                                      x_data_box, x_start, r_stride, xi,
-                                      y_data_box, y_start, stride, yi);
+                                      x_data_box, x_start, ran_stride, xi,
+                                      y_data_box, y_start, dom_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
@@ -408,12 +407,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      hypre_BoxLoop2End(xi, yi);
                   }
                   else
-                  {
+                  { 
                   /* Variable coefficient case */
                      hypre_BoxLoop3Begin(ndim, loop_size,
                                       A_data_box, y_start, stride, Ai,
-                                      x_data_box, x_start, r_stride, xi,
-                                      y_data_box, y_start, stride, yi);
+                                      x_data_box, x_start, ran_stride, xi,
+                                      y_data_box, y_start, dom_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
@@ -442,29 +441,29 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             }
          }
       }
-      else
+      else 
       {
-         hypre_ForBoxArrayI(i, compute_box_aa) 
+         ci = 0;
+         for (i=0; i < ran_nboxes; i++) 
          {
-            hypre_IndexRef r_stride;
             hypre_Index A_start;
-
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
-
-            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-            y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-
-            if (hypre_StructMatrixDomainIsCoarse(A))
+            hypre_Index x_start;
+            fi = ran_boxnums[i];
+            /* This assumes that the grid boxes of y are a superset of the grid boxes 
+		of A */
+            while (y_ids[ci] < base_ids[fi]) 
             {
-               x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xtmp), i);
-               xp = hypre_StructVectorBoxData(xtmp, i);
+               ci++;
             }
-            else
-            {
-               x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-               xp = hypre_StructVectorBoxData(x, i);
-            }
-            yp = hypre_StructVectorBoxData(y, i);
+
+            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+
+            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
+            y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), ci);
+            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), fi);
+
+            xp = hypre_StructVectorBoxData(x, fi);
+            yp = hypre_StructVectorBoxData(y, ci);
 
             hypre_ForBoxI(j, compute_box_a)
             {
@@ -476,7 +475,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                {
                   hypre_BoxGetSize(compute_box, loop_size);
                   start  = hypre_BoxIMin(compute_box);
+                  hypre_CopyIndex(start, x_start); 
+                  hypre_CopyIndex(start, A_start); 
                }
+               dom_stride = hypre_StructMatrixDomStride(A);
+               ran_stride = hypre_StructMatrixRanStride(A);
 
                /* TODO (later, for optimization): Unroll these loops */
                for (si = 0; si < stencil_size; si++)
@@ -485,95 +488,56 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                    * range compute box based on the current stencil entry */
                   if (hypre_StructMatrixDomainIsCoarse(A))
                   {
-                     stride = hypre_StructMatrixDomStride(A);
-                     r_stride = hypre_StructMatrixRanStride(A);
                      hypre_CopyBox(compute_box, tmp_box);
-                     hypre_BoxShiftPos(tmp_box, stencil_shape[si]);
-                     hypre_ProjectBox(tmp_box, origin, stride);
                      hypre_BoxShiftNeg(tmp_box, stencil_shape[si]);
-
-                     hypre_BoxGetStrideSize(tmp_box, stride, loop_size);
+                     hypre_ProjectBox(tmp_box, origin, dom_stride);
                      start = hypre_BoxIMin(tmp_box);
+                     hypre_CopyIndex(start, x_start); 
+                     hypre_StructVectorMapDataIndex(x, x_start);
+                     hypre_BoxShiftPos(tmp_box, stencil_shape[si]);
+                     hypre_BoxGetStrideSize(tmp_box, dom_stride, loop_size);
                      hypre_CopyIndex(start, A_start);
-                     hypre_SnapIndexNeg(A_start, origin, stride, ndim);
-		     hypre_MapToCoarseIndex(A_start, origin, stride, ndim);
+                     hypre_StructMatrixMapDataIndex(A, A_start);
                   }
-
-                  Ap = hypre_StructMatrixBoxData(A, i, si);
+                  Ap = hypre_StructMatrixBoxData(A, fi, si);
                   xoff = hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
-
                   if (hypre_StructMatrixConstEntry(A, si))
                   {
                      /* Constant coefficient case */
-                     if (hypre_StructMatrixDomainIsCoarse(A))
-                     {
-                        hypre_BoxLoop2Begin(ndim, loop_size,
-                                      x_data_box, start, stride, xi,
-                                      y_data_box, start, stride, yi);
+                     hypre_BoxLoop2Begin(ndim, loop_size,
+                                  x_data_box, x_start, ran_stride, xi,
+                                  y_data_box, start, dom_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
 #endif
-                        hypre_BoxLoop2For(xi, yi)
-                        {
-                           yp[yi] += Ap[0] * xp[xi + xoff];
-                        }
-                        hypre_BoxLoop2End(xi, yi);
-                     }
-                     else
+                     hypre_BoxLoop2For(xi, yi)
                      {
-                        hypre_BoxLoop2Begin(ndim, loop_size,
-                                      x_data_box, start, stride, xi,
-                                      y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop2For(xi, yi)
-                        {
-                           yp[yi] += Ap[0] * xp[xi + xoff];
-                        }
-                        hypre_BoxLoop2End(xi, yi);
+                        yp[yi] += Ap[0] * xp[xi + xoff];
                      }
+                     hypre_BoxLoop2End(xi, yi);
                   }
                   else
                   {
                      /* Variable coefficient case */
-                     if (hypre_StructMatrixDomainIsCoarse(A))
-                     {
-                        hypre_BoxLoop3Begin(ndim, loop_size,
-                                      A_data_box, A_start, r_stride, Ai,
-                                      x_data_box, start, stride, xi,
-                                      y_data_box, start, stride, yi);
+                     hypre_BoxLoop3Begin(ndim, loop_size,
+                                   A_data_box, A_start, stride, Ai,
+                                   x_data_box, x_start, ran_stride, xi,
+                                   y_data_box, start, dom_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
 #endif
-                        hypre_BoxLoop3For(Ai, xi, yi)
-                        {
-                           yp[yi] += Ap[Ai] * xp[xi + xoff];
-                        }
-                        hypre_BoxLoop3End(Ai, xi, yi);
-                     }
-                     else
+                     hypre_BoxLoop3For(Ai, xi, yi)
                      {
-                        hypre_BoxLoop3Begin(ndim, loop_size,
-                                      A_data_box, start, stride, Ai,
-                                      x_data_box, start, stride, xi,
-                                      y_data_box, start, stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop3For(Ai, xi, yi)
-                        {
-                           yp[yi] += Ap[Ai] * xp[xi + xoff];
-                        }
-                        hypre_BoxLoop3End(Ai, xi, yi);
+                        yp[yi] += Ap[Ai] * xp[xi + xoff];
                      }
+                     hypre_BoxLoop3End(Ai, xi, yi);
                   }
                }
 
                if (alpha != 1.0)
                {
                   hypre_BoxLoop1Begin(ndim, loop_size,
-                                   y_data_box, start, stride, yi);
+                                y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
 #endif
@@ -584,13 +548,20 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                   hypre_BoxLoop1End(yi);
                }
                if (hypre_StructMatrixDomainIsCoarse(A))
-		  hypre_BoxDestroy(tmp_box);
+	          hypre_BoxDestroy(tmp_box);
             }
          }
       }
    }
-   if (hypre_StructMatrixDomainIsCoarse(A))
-      hypre_StructVectorDestroy(xtmp); 
+
+   if (x_tmp)
+   {
+      hypre_StructVectorDestroy(x_tmp);
+      x = y;
+   }
+
+   /* This restores the original grid and data layout */
+   hypre_StructVectorRestore(x);
 
    return hypre_error_flag;
 }
@@ -629,10 +600,7 @@ hypre_StructMatvec( HYPRE_Complex       alpha,
    void *matvec_data;
 
    matvec_data = hypre_StructMatvecCreate();
-   if (hypre_StructMatrixDomainIsCoarse(A))
-      hypre_StructMatvecSetup(matvec_data, A, y);
-   else
-      hypre_StructMatvecSetup(matvec_data, A, x);
+   hypre_StructMatvecSetup(matvec_data, A, x);
    hypre_StructMatvecCompute(matvec_data, alpha, A, x, beta, y);
    hypre_StructMatvecDestroy(matvec_data);
 

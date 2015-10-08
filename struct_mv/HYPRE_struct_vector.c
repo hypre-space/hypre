@@ -345,4 +345,16 @@ HYPRE_CommPkgDestroy( HYPRE_CommPkg comm_pkg )
    return ( hypre_CommPkgDestroy(comm_pkg) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorClone
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructVectorClone( HYPRE_StructVector x,
+                         HYPRE_StructVector *y_ptr )
+{
+   *y_ptr = hypre_StructVectorClone(x);
+
+   return hypre_error_flag;
+}
 

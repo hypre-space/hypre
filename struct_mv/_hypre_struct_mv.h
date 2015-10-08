@@ -2132,9 +2132,9 @@ typedef struct hypre_StructVector_struct
 
 #define hypre_StructVectorComm(vector)          ((vector) -> comm)
 #define hypre_StructVectorGrid(vector)          ((vector) -> grid)
-#define hypre_StructVectorNBoxes(matrix)        ((vector) -> nboxes)
-#define hypre_StructVectorBoxnums(matrix)       ((vector) -> boxnums)
-#define hypre_StructVectorStride(matrix)        ((vector) -> stride)
+#define hypre_StructVectorNBoxes(vector)        ((vector) -> nboxes)
+#define hypre_StructVectorBoxnums(vector)       ((vector) -> boxnums)
+#define hypre_StructVectorStride(vector)        ((vector) -> stride)
 #define hypre_StructVectorData(vector)          ((vector) -> data)
 #define hypre_StructVectorDataSpace(vector)     ((vector) -> data_space)
 #define hypre_StructVectorDataAlloced(vector)   ((vector) -> data_alloced)
@@ -2315,6 +2315,7 @@ HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info , hypre_BoxAr
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg , HYPRE_Complex *data , hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeIndtComputations ( hypre_CommHandle *comm_handle );
+HYPRE_Int HYPRE_StructVectorClone ( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
 
 /* project.c */
 HYPRE_Int hypre_SnapIndexPos( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
@@ -2477,6 +2478,7 @@ HYPRE_Int hypre_StructVectorMigrate ( hypre_CommPkg *comm_pkg , hypre_StructVect
 HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *vector , HYPRE_Int all );
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector , HYPRE_Real *max_value , HYPRE_Int *max_index , hypre_Index max_xyz_index );
+hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
 
 
 #ifdef __cplusplus

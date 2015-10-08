@@ -39,6 +39,7 @@ HYPRE_Int
 hypre_StructVectorMapDataBox( hypre_StructVector *vector,
                               hypre_Box          *dbox )
 {
+   hypre_ProjectBox(dbox, NULL, hypre_StructVectorStride(vector));
    hypre_StructVectorMapDataIndex(vector, hypre_BoxIMin(dbox));
    hypre_StructVectorMapDataIndex(vector, hypre_BoxIMax(dbox));
 
@@ -120,6 +121,28 @@ hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
    }
 
    boxaa = hypre_CommInfoSendRBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructVectorMapDataBox(vector, box);
+      }
+   }
+
+   boxaa = hypre_CommInfoRecvBoxes(comm_info);
+   hypre_ForBoxArrayI(i, boxaa)
+   {
+      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+      hypre_ForBoxI(j, boxa)
+      {
+         box = hypre_BoxArrayBox(boxa, j);
+         hypre_StructVectorMapDataBox(vector, box);
+      }
+   }
+
+   boxaa = hypre_CommInfoRecvRBoxes(comm_info);
    hypre_ForBoxArrayI(i, boxaa)
    {
       boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
@@ -321,7 +344,7 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
 /*--------------------------------------------------------------------------
  * This routine takes new data space information and recomputes entries in the
  * vector that depend on it (e.g., data_indices and data_size).  The routine
- * will also re-allocate the vector data if their was data to begin with.
+ * will also re-allocate the vector data if there was data to begin with.
  *
  * The boxes in the data_space argument may be larger (but not smaller) than
  * those computed by the routine VectorComputeDataSpace().
@@ -1613,5 +1636,51 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    *max_index = maxindex;
 
    return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructVectorClone
+ * Returns a complete copy of x - a deep copy, with its own copy of the data.
+ *--------------------------------------------------------------------------*/
+
+hypre_StructVector *
+hypre_StructVectorClone( hypre_StructVector *x )
+{
+   MPI_Comm             comm = hypre_StructVectorComm(x);
+   hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
+   hypre_BoxArray      *data_space = hypre_StructVectorDataSpace(x);
+   HYPRE_Int           *data_indices = hypre_StructVectorDataIndices(x);
+   HYPRE_Int            n_boxes = hypre_StructVectorNBoxes(x);
+   HYPRE_Int           *box_nums = hypre_StructVectorBoxnums(x);
+   HYPRE_Int            data_size = hypre_StructVectorDataSize(x);
+   HYPRE_Int            ndim = hypre_StructGridNDim(grid);
+   HYPRE_Int            data_space_size = hypre_BoxArraySize(data_space);
+   HYPRE_Int            i;
+   hypre_StructVector  *y = hypre_StructVectorCreate(comm, grid);
+
+   hypre_StructVectorNBoxes(y) = n_boxes;
+   hypre_StructVectorBoxnums(y) = hypre_CTAlloc(HYPRE_Int, n_boxes);
+   for (i=0; i < n_boxes; i++)
+       hypre_StructVectorBoxnums(y)[i] = box_nums[i];
+   hypre_CopyIndex(hypre_StructVectorStride(x), hypre_StructVectorStride(y));
+
+   hypre_StructVectorDataSize(y) = data_size;
+   hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
+   hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
+
+   hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
+
+   for (i=0; i < data_space_size; i++)
+       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+
+   hypre_StructVectorCopy( x, y );
+
+   for (i=0; i < 2*ndim; i++)
+      hypre_StructVectorNumGhost(y)[i] = hypre_StructVectorNumGhost(x)[i];
+
+   hypre_StructVectorBGhostNotClear(y) = hypre_StructVectorBGhostNotClear(x);
+   hypre_StructVectorGlobalSize(y) = hypre_StructVectorGlobalSize(x);
+
+   return y;
 }
 
