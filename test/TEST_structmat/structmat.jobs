@@ -5,23 +5,23 @@
 #=============================================================================
 
 # interpolate in x direction
-mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.x -mat-mat 3 1T 0 1 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.x -mat-mat 3 1T 0 1 -r 10 10 \
  > structmat.out.2D0.x
-mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.x -mat-mat 3 1T 0 1 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.x -mat-mat 3 1T 0 1 -r 10 10 \
  > structmat.out.2D1.x
-mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.x -mat-mat 3 1T 0 1 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.x -mat-mat 3 1T 0 1 -r 10 10 \
  > structmat.out.2D2.x
-mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x -mat-mat 3 1T 0 1 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x -mat-mat 3 1T 0 1 -r 10 10 \
  > structmat.out.2D3.x
 
 # interpolate in y direction
-mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.y -mat-mat 3 3T 0 3 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.y -mat-mat 3 3T 0 3 -r 10 10 \
  > structmat.out.2D0.y
-mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.y -mat-mat 3 3T 0 3 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.y -mat-mat 3 3T 0 3 -r 10 10 \
  > structmat.out.2D1.y
-mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y -mat-mat 3 3T 0 3 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y -mat-mat 3 3T 0 3 -r 10 10 \
  > structmat.out.2D2.y
-mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y -mat-mat 3 3T 0 3 -r 2 2 \
+mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y -mat-mat 3 3T 0 3 -r 10 10 \
  > structmat.out.2D3.y
 
 #=============================================================================
@@ -29,22 +29,22 @@ mpirun -np 1 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y -mat-mat 
 #=============================================================================
 
 # interpolate in x direction
-mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.x4 -mat-mat 3 1T 0 1 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.x4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 \
  > structmat.out.2D0.x4
-mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.x4 -mat-mat 3 1T 0 1 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.x4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 \
  > structmat.out.2D1.x4
-mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.x4 -mat-mat 3 1T 0 1 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.x4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 \
  > structmat.out.2D2.x4
-mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x4 -mat-mat 3 1T 0 1 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.x4 -mat-mat 3 1T 0 1 -r 5 5 -P 2 2 \
  > structmat.out.2D3.x4
 
 # interpolate in y direction
-mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.y4 -mat-mat 3 3T 0 3 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D0 -out structmat.out.2D0.y4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 \
  > structmat.out.2D0.y4
-mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.y4 -mat-mat 3 3T 0 3 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.y4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 \
  > structmat.out.2D1.y4
-mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y4 -mat-mat 3 3T 0 3 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 \
  > structmat.out.2D2.y4
-mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y4 -mat-mat 3 3T 0 3 -P 2 2 \
+mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 \
  > structmat.out.2D3.y4
 

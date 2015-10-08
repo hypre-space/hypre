@@ -2325,7 +2325,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
             {
                hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), box);
                hypre_StructMatrixGetStencilSpace(matrix, e, origin, stride);
-               hypre_ProjectBox(box, origin, stride);
+               /*hypre_ProjectBox(box, origin, stride);*/
                dbox = hypre_BoxArrayBox(data_space, i);
                boundary = hypre_BoxArrayCreate(0, ndim);
                hypre_GeneralBoxBoundaryIntersect(box, grid, stencil_offset, boundary);
@@ -2333,18 +2333,22 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
                hypre_ForBoxI(j, boundary)
                {
                   tbox = hypre_BoxArrayBox(boundary, j);
-                  hypre_StructMatrixMapDataBox(matrix, tbox);
-                  hypre_BoxGetSize(tbox, loop_size);
-                  dstart = hypre_BoxIMin(tbox);
-                  hypre_BoxLoop1Begin(ndim, loop_size, dbox, dstart, dstride, di);
+                  hypre_ProjectBox(tbox, origin, stride);
+                  if (hypre_BoxVolume(tbox))
+                  {
+                     hypre_StructMatrixMapDataBox(matrix, tbox);
+                     hypre_BoxGetSize(tbox, loop_size);
+                     dstart = hypre_BoxIMin(tbox);
+                     hypre_BoxLoop1Begin(ndim, loop_size, dbox, dstart, dstride, di);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,di) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop1For(di)
-                  {
-                     data[di] = 0.0;
+                     hypre_BoxLoop1For(di)
+                     {
+                        data[di] = 0.0;
+                     }
+                     hypre_BoxLoop1End(di);
                   }
-                  hypre_BoxLoop1End(di);
                }
                hypre_BoxArrayDestroy(boundary);
             }
