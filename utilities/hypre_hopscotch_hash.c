@@ -1,18 +1,18 @@
 #include "hypre_hopscotch_hash.h"
 
-static int NearestPowerOfTwo( int value )
+static hypre_uint NearestPowerOfTwo( hypre_uint value )
 {
-  int rc = 1;
+  hypre_uint rc = 1;
   while (rc < value) {
     rc <<= 1;
   }
   return rc;
 }
 
-static unsigned int CalcDivideShift( const unsigned int _value )
+static hypre_uint CalcDivideShift( hypre_uint _value )
 {
-  unsigned int numShift = 0;
-  unsigned int curr = 1;
+  hypre_uint numShift = 0;
+  hypre_uint curr = 1;
   while (curr < _value)
   {
     curr <<= 1;
@@ -21,169 +21,118 @@ static unsigned int CalcDivideShift( const unsigned int _value )
   return numShift;
 }
 
-/*inline void InitBucket(Bucket *b)
+static void InitBucket(hypre_HopscotchBucket *b)
 {
-  b->hopInfo = 0U;
-  //b->hash = HYPRE_HOPSCOTCH_HASH_EMPTY;
-  //b->key = _EMPTY_KEY;
-}*/
-
-static void InitBucketWithIntData(BucketWithIntData *b)
-{
-  b->hopInfo = 0U;
+  b->hopInfo = 0;
   b->hash = HYPRE_HOPSCOTCH_HASH_EMPTY;
 }
 
-static void InitBucketWithPointerData(BucketWithPointerData *b)
-{
-  b->hopInfo = 0U;
-  b->hash = HYPRE_HOPSCOTCH_HASH_EMPTY;
-}
-
-static void InitSegment(hypre_HopscotchHashSegment *s)
+#ifdef HYPRE_USING_OPENMP
+static void InitSegment(hypre_HopscotchSegment *s)
 {
   s->timestamp = 0;
-#ifdef HYPRE_USING_OPENMP
   omp_init_lock(&s->lock);
-#endif
 }
 
-static void DestroySegment(hypre_HopscotchHashSegment *s)
+static void DestroySegment(hypre_HopscotchSegment *s)
 {
-#ifdef HYPRE_USING_OPENMP
   omp_destroy_lock(&s->lock);
-#endif
 }
+#endif
 
 void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
-                                  HYPRE_Int inCapacity,
-                                  HYPRE_Int concurrencyLevel) 
+                                  hypre_uint inCapacity,
+                                  hypre_uint concurrencyLevel) 
 {
   s->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
-  s->segmentShift = CalcDivideShift(NearestPowerOfTwo(concurrencyLevel/(NearestPowerOfTwo(concurrencyLevel)))-1);
+  if (inCapacity < s->segmentMask + 1)
+  {
+    inCapacity = s->segmentMask + 1;
+  }
 
   //ADJUST INPUT ............................
-  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity);
-  HYPRE_Int adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
-  HYPRE_Int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
+  hypre_uint adjInitCap = NearestPowerOfTwo(inCapacity);
+  hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
+  hypre_uint num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   s->bucketMask = adjInitCap - 1;
 
-  //ALLOCATE THE SEGMENTS ...................
-  s->segments = hypre_TAlloc(hypre_HopscotchHashSegment, s->segmentMask + 1);
-  s->hopInfo = hypre_TAlloc(HYPRE_Int, num_buckets);
-  s->key = hypre_TAlloc(HYPRE_Int, num_buckets);
-#ifdef BITMAP
-  s->bitmap = hypre_TAlloc(__int64, (num_buckets + 63)/64);
-#else
-  s->hash = hypre_TAlloc(HYPRE_Int, num_buckets);
-#endif
-
   HYPRE_Int i;
+
+  //ALLOCATE THE SEGMENTS ...................
+#ifdef HYPRE_USING_OPENMP
+  s->segments = hypre_TAlloc(hypre_HopscotchSegment, s->segmentMask + 1);
   for (i = 0; i <= s->segmentMask; ++i)
   {
     InitSegment(&s->segments[i]);
   }
+#endif
+
+  s->hopInfo = hypre_TAlloc(hypre_uint, num_buckets);
+  s->key = hypre_TAlloc(HYPRE_Int, num_buckets);
+  s->hash = hypre_TAlloc(hypre_uint, num_buckets);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for
 #endif
-  for (i=0; i < num_buckets; ++i)
+  for (i = 0; i < num_buckets; ++i)
   {
     s->hopInfo[i] = 0;
-#ifndef BITMAP
     s->hash[i] = HYPRE_HOPSCOTCH_HASH_EMPTY;
-#endif
   }
-
-#ifdef BITMAP
-#pragma omp parallel for
-  for (i=0; i < (num_buckets + 63)/64; ++i)
-  {
-    s->bitmap[i] = 0;
-  }
-#endif
 }
 
 void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
-                                  HYPRE_Int inCapacity,
-                                  HYPRE_Int concurrencyLevel) 
+                                  hypre_uint inCapacity,
+                                  hypre_uint concurrencyLevel) 
 {
   m->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
-  m->segmentShift = CalcDivideShift(NearestPowerOfTwo(concurrencyLevel/(NearestPowerOfTwo(concurrencyLevel)))-1);
+  if (inCapacity < m->segmentMask + 1)
+  {
+    inCapacity = m->segmentMask + 1;
+  }
 
   //ADJUST INPUT ............................
-  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity);
-  HYPRE_Int adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
-  HYPRE_Int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
+  hypre_uint adjInitCap = NearestPowerOfTwo(inCapacity);
+  hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
+  hypre_uint num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   m->bucketMask = adjInitCap - 1;
 
-  //ALLOCATE THE SEGMENTS ...................
-  m->segments = hypre_TAlloc(hypre_HopscotchHashSegment, m->segmentMask + 1);
-  m->table = hypre_TAlloc(BucketWithIntData, num_buckets);
-
   HYPRE_Int i;
+
+  //ALLOCATE THE SEGMENTS ...................
+#ifdef HYPRE_USING_OPENMP
+  m->segments = hypre_TAlloc(hypre_HopscotchSegment, m->segmentMask + 1);
   for (i = 0; i <= m->segmentMask; i++)
   {
     InitSegment(&m->segments[i]);
   }
+#endif
 
-  BucketWithIntData* curr_bucket = m->table;
+  m->table = hypre_TAlloc(hypre_HopscotchBucket, num_buckets);
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for
 #endif
   for (i = 0; i < num_buckets; i++)
   {
-    InitBucketWithIntData(&m->table[i]);
+    InitBucket(&m->table[i]);
   }
 }
-
-/*inline void HopscotchHashMapWithPointerDataCreate(HopscotchHashMapWithPointerData *h, int inCapacity, int concurrencyLevel) 
-{
-  h->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
-  h->segmentShift = CalcDivideShift(NearestPowerOfTwo(concurrencyLevel/(NearestPowerOfTwo(concurrencyLevel)))-1);
-
-  //ADJUST INPUT ............................
-  const int adjInitCap = NearestPowerOfTwo(inCapacity);
-  const int adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
-  const int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
-  h->bucketMask = adjInitCap - 1;
-
-  //ALLOCATE THE SEGMENTS ...................
-  h->segments = (Segment*) _mm_malloc( (h->segmentMask + 1) * sizeof(Segment), CACHE_LINE_SIZE );
-  h->table = (BucketWithPointerData*) _mm_malloc( num_buckets * sizeof(BucketWithPointerData), CACHE_LINE_SIZE );
-
-  Segment* curr_seg = h->segments;
-  int iSeg;
-  for (iSeg = 0; iSeg <= h->segmentMask; ++iSeg, ++curr_seg) {
-    InitSegment(curr_seg);
-  }
-
-  BucketWithPointerData* curr_bucket = h->table;
-  int iElm;
-  for (iElm=0; iElm < num_buckets; ++iElm, ++curr_bucket) {
-    InitBucketWithPointerData(curr_bucket);
-  }
-}*/
-
 
 void hypre_UnorderedIntSetDestroy( hypre_UnorderedIntSet *s )
 {
   hypre_TFree(s->hopInfo);
   hypre_TFree(s->key);
-#ifdef BITMAP
-  hypre_TFree(s->bitmap);
-#else
   hypre_TFree(s->hash);
-#endif
 
 #ifdef HYPRE_USING_OPENMP
   HYPRE_Int i;
-  for (i = 0; i < s->segmentMask; i++)
+  for (i = 0; i <= s->segmentMask; i++)
   {
     DestroySegment(&s->segments[i]);
   }
-#endif
   hypre_TFree(s->segments);
+#endif
 }
 
 void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m)
@@ -192,15 +141,15 @@ void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m)
 
 #ifdef HYPRE_USING_OPENMP
   HYPRE_Int i;
-  for (i = 0; i < m->segmentMask; i++)
+  for (i = 0; i <= m->segmentMask; i++)
   {
     DestroySegment(&m->segments[i]);
   }
-#endif
   hypre_TFree(m->segments);
+#endif
 }
 
-HYPRE_Int *hypre_UnorderedIntCreateArrayCopy( hypre_UnorderedIntSet *s, HYPRE_Int *len )
+HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int *len )
 {
   HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
   HYPRE_Int *ret_array = NULL;
@@ -214,7 +163,8 @@ HYPRE_Int *hypre_UnorderedIntCreateArrayCopy( hypre_UnorderedIntSet *s, HYPRE_In
     hypre_GetSimpleThreadPartition(&i_begin, &i_end, n);
 
     HYPRE_Int cnt = 0;
-    for (HYPRE_Int i = i_begin; i < i_end; i++)
+    HYPRE_Int i;
+    for (i = i_begin; i < i_end; i++)
     {
       if (HYPRE_HOPSCOTCH_HASH_EMPTY != s->hash[i]) cnt++;
     }
@@ -232,7 +182,7 @@ HYPRE_Int *hypre_UnorderedIntCreateArrayCopy( hypre_UnorderedIntSet *s, HYPRE_In
 #pragma omp barrier
 #endif
 
-    for (HYPRE_Int i = i_begin; i < i_end; i++)
+    for (i = i_begin; i < i_end; i++)
     {
       if (HYPRE_HOPSCOTCH_HASH_EMPTY != s->hash[i]) ret_array[cnt++] = s->key[i];
     }

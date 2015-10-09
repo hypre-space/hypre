@@ -15,6 +15,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_USING_OPENMP
+#include <omp.h>
+#endif
+
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int               hypre_int;
 typedef long int          hypre_longint;
@@ -919,69 +923,74 @@ HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len
 
 void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
 
-/* hypre_map.cc */
-typedef struct HYPRE_IntSet HYPRE_IntSet;
-  // wrapper of std::unordered_set<HYPRE_Int>
+/* hypre_hopscotch_hash.c */
 
-HYPRE_IntSet *hypre_IntSetCreate( void );
-void hypre_IntSetDestroy( HYPRE_IntSet *set );
-
-void hypre_IntSetInsert ( HYPRE_IntSet *set, HYPRE_Int x );
-/**
- * @return 1 if set has x
- */
-HYPRE_Int hypre_IntSetContain ( HYPRE_IntSet *set, HYPRE_Int x );
-
-HYPRE_Int hypre_IntSetSize ( HYPRE_IntSet *set );
-
-// Support only iterator for a set at a time
-// A typical loop
-// hypre_IntSetBegin(set);
-// while (hypre_IntSetHasNext(set))
-// { i = hypre_IntSetNext(set); do_something(i); }
-void hypre_IntSetBegin( HYPRE_IntSet *set );
-HYPRE_Int hypre_IntSetNext( HYPRE_IntSet *set );
-/**
- * @ret 1 if set has more elements to iterate
- */
-HYPRE_Int hypre_IntSetHasNext( HYPRE_IntSet *set );
-
-typedef struct HYPRE_Int2Int HYPRE_Int2Int;
-  // wrapper of std::unordered_map<HYPRE_Int, HYPRE_Int>
-
-HYPRE_Int2Int *hypre_Int2IntCreate();
-void hypre_Int2IntDestroy( HYPRE_Int2Int *map );
-
-void hypre_Int2IntInsert( HYPRE_Int2Int *map, HYPRE_Int key, HYPRE_Int value );
-/**
- * @ret NULL if map doesn't have key
- */
-HYPRE_Int *hypre_Int2IntFind( HYPRE_Int2Int *map, HYPRE_Int key );
-
-typedef struct HYPRE_Int2IntSet HYPRE_Int2IntSet;
-  // wrapper of std::unordered_map<HYPRE_Int, std::set<HYPRE_Int> >
-
-HYPRE_Int2IntSet *hypre_Int2IntSetCreate();
-void hypre_Int2IntSetDestroy( HYPRE_Int2IntSet *map );
-
-void hypre_Int2IntSetInsert( HYPRE_Int2IntSet *map, HYPRE_Int key, HYPRE_Int value );
-  // map[key].insert(value)
-  // if map doesn't have key, create an empty set and insert value
-/**
- * @ret NULL if map doesn't have key
- * @note do not destroy the return value (it's owned by map)
- */
-HYPRE_IntSet *hypre_Int2IntSetFind( HYPRE_Int2IntSet *map, HYPRE_Int key );
+#ifdef HYPRE_USING_OPENMP
+typedef struct {
+  hypre_uint volatile timestamp;
+  omp_lock_t         lock;
+} hypre_HopscotchSegment;
+#endif
 
 /**
- * @return length of output with duplication eliminated
+ * The current typical use case of unordered set is putting input sequence
+ * with lots of duplication (putting all colidx received from other ranks),
+ * followed by one sweep of enumeration.
+ * Since the capacity is set to the number of inputs, which is much larger
+ * than the number of unique elements, we optimize for initialization and
+ * enumeration whose time is proportional to the capacity.
+ * For initialization and enumeration, structure of array (SoA) is better
+ * for vectorization, cache line utilization, and so on.
  */
-HYPRE_Int hypre_sort_unique_and_inverse_map(
-  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, HYPRE_Int2Int **inverse_map);
+typedef struct
+{
+	hypre_uint volatile              segmentMask;
+	hypre_uint volatile              bucketMask;
+#ifdef HYPRE_USING_OPENMP
+	hypre_HopscotchSegment* volatile segments;
+#endif
+  HYPRE_Int *volatile              key;
+  hypre_uint *volatile             hopInfo;
+	hypre_uint *volatile	           hash;
+} hypre_UnorderedIntSet;
+
+typedef struct
+{
+  hypre_uint volatile hopInfo;
+  hypre_uint volatile hash;
+  HYPRE_Int  volatile key;
+  HYPRE_Int  volatile data;
+} hypre_HopscotchBucket;
+
+/**
+ * The current typical use case of unoredered map is putting input sequence
+ * with no duplication (inverse map of a bijective mapping) followed by
+ * lots of lookups.
+ * For lookup, array of structure (AoS) gives better cache line utilization.
+ */
+typedef struct
+{
+	hypre_uint volatile              segmentMask;
+	hypre_uint volatile              bucketMask;
+#ifdef HYPRE_USING_OPENMP
+	hypre_HopscotchSegment*	volatile segments;
+#endif
+	hypre_HopscotchBucket* volatile	 table;
+} hypre_UnorderedIntMap;
+
+/**
+ * Sort array "in" with length len and put result in array "out"
+ * "in" will be deallocated unless in == *out
+ * inverse_map is an inverse hash table s.t. inverse_map[i] = j iff (*out)[j] = i
+ */
+void hypre_sort_and_create_inverse_map(
+  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
 
 #ifdef __cplusplus
 }
 #endif
+
+#include "hypre_hopscotch_hash.h"
 
 #endif
 

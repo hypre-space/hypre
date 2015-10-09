@@ -1192,7 +1192,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
    HYPRE_Int *S_ext_i = NULL;
    HYPRE_Int *S_ext_j = NULL;
 
-   HYPRE_Int prefix_sum_workspace[3*(hypre_NumThreads() + 1)];
+   HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];
 
    /*-----------------------------------------------------------------------
     *  Extract S_ext, i.e. portion of B that is stored on neighbor procs
@@ -1416,6 +1416,9 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
       HYPRE_Int temp_size = 0;
 
+      hypre_UnorderedIntSet found_set;
+      hypre_UnorderedIntSetCreate(&found_set, S_ext_i[num_cols_offd_S] + num_cols_offd_S, 16*hypre_NumThreads());
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,j)
 #endif
@@ -1426,13 +1429,11 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          HYPRE_Int i_begin, i_end;
          hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_S);
 
-         HYPRE_IntSet *temp_set = hypre_IntSetCreate();
-
          for (i = i_begin; i < i_end; i++)
          {
             if (CF_marker_offd[i] > 0)
             {
-               hypre_IntSetInsert(temp_set, fine_to_coarse_offd[i]);
+               hypre_UnorderedIntSetPut(&found_set, fine_to_coarse_offd[i]);
             }
             for (j=S_ext_i[i]; j < S_ext_i[i+1]; j++)
             {
@@ -1440,18 +1441,16 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
                if (i1 < my_first_cpt || i1 > my_last_cpt)
                {
                   S_ext_offd_size_private++;
-                  hypre_IntSetInsert(temp_set, i1);
+                  hypre_UnorderedIntSetPut(&found_set, i1);
                }
                else
                   S_ext_diag_size_private++;
             }
          }
 
-         HYPRE_Int temp_set_size = hypre_IntSetSize(temp_set);
-         hypre_prefix_sum_triple(
+         hypre_prefix_sum_pair(
             &S_ext_diag_size_private, &S_ext_diag_size,
             &S_ext_offd_size_private, &S_ext_offd_size,
-            &temp_set_size, &temp_size,
             prefix_sum_workspace);
 
 #ifdef HYPRE_USING_OPENMP
@@ -1462,8 +1461,6 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
                S_ext_diag_j = hypre_TAlloc(HYPRE_Int, S_ext_diag_size);
             if (S_ext_offd_size)
                S_ext_offd_j = hypre_TAlloc(HYPRE_Int, S_ext_offd_size);
-            if (temp_size)
-               temp = hypre_TAlloc(HYPRE_Int, temp_size);
          }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -1482,28 +1479,23 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
             S_ext_diag_i[i + 1] = S_ext_diag_size_private;
             S_ext_offd_i[i + 1] = S_ext_offd_size_private;
          }
-
-         hypre_IntSetBegin(temp_set);
-         while (hypre_IntSetHasNext(temp_set))
-         {
-            temp[temp_set_size++] = hypre_IntSetNext(temp_set);
-         }
-         hypre_IntSetDestroy(temp_set);
       } // omp parallel
+
+      temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_C);
       
       hypre_TFree(S_ext_i);
       hypre_TFree(S_ext_j);
 
-      HYPRE_Int2Int *col_map_offd_C_inverse;
-      num_cols_offd_C = hypre_sort_unique_and_inverse_map(temp, temp_size, &col_map_offd_C, &col_map_offd_C_inverse);
+      hypre_UnorderedIntMap col_map_offd_C_inverse;
+      hypre_sort_and_create_inverse_map(temp, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
       for (i=0 ; i < S_ext_offd_size; i++)
-         S_ext_offd_j[i] = *hypre_Int2IntFind(col_map_offd_C_inverse, S_ext_offd_j[i]);
+         S_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, S_ext_offd_j[i]);
 
-      hypre_Int2IntDestroy(col_map_offd_C_inverse);
+      hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
 
       if (num_cols_offd_S)
       {

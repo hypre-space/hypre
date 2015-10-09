@@ -60,7 +60,7 @@ FILES =\
  F90_HYPRE_error.c\
  hypre_prefix_sum.c\
  hypre_merge_sort.c\
- hypre_map.cc
+ hypre_hopscotch_hash.c
 
 OBJS = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(FILES)))
 
