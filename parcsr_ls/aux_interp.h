@@ -10,8 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void
 hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int *found,
@@ -47,3 +48,7 @@ HYPRE_Int exchange_interp_data(
     HYPRE_Int skip_fine_or_same_sign);
 
 void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd);
+
+#ifdef __cplusplus
+}
+#endif
