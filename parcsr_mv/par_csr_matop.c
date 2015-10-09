@@ -448,8 +448,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    B_ext_offd_size = 0;
    last_col_diag_B = first_col_diag_B + num_cols_diag_B -1;
 
-   HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
-   HYPRE_Int2Int *col_map_offd_C_inverse = NULL;
+   hypre_UnorderedIntSet set;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel 
@@ -533,13 +532,12 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
           B_ext_offd_j = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size);
           B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size);
        }
+       hypre_UnorderedIntSetCreate(&set, B_ext_offd_size + num_cols_offd_B, 16*hypre_NumThreads());
      }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
 #endif
-
-     HYPRE_IntSet *temp_set = hypre_IntSetCreate();
 
      cnt_offd = B_ext_offd_i[ns];
      cnt_diag = B_ext_diag_i[ns];
@@ -548,7 +546,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
        for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
          if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
          {
-            hypre_IntSetInsert(temp_set, Bs_ext_j[j]);
+            hypre_UnorderedIntSetPut(&set, Bs_ext_j[j]);
             B_ext_offd_j[cnt_offd] = Bs_ext_j[j];
             B_ext_offd_data[cnt_offd++] = Bs_ext_data[j];
          }
@@ -563,29 +561,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
      hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_B);
      for (i = i_begin; i < i_end; i++)
      {
-        hypre_IntSetInsert(temp_set, col_map_offd_B[i]);
+        hypre_UnorderedIntSetPut(&set, col_map_offd_B[i]);
      }
-
-     HYPRE_Int temp_set_size = hypre_IntSetSize(temp_set);
-     hypre_prefix_sum(&temp_set_size, &cnt, prefix_sum_workspace);
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp master
-#endif
-     {
-        if (cnt) temp = hypre_TAlloc(HYPRE_Int, cnt);
-     }
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp barrier
-#endif
-
-     hypre_IntSetBegin(temp_set);
-     while (hypre_IntSetHasNext(temp_set))
-     {
-        temp[temp_set_size++] = hypre_IntSetNext(temp_set);
-     }
-     hypre_IntSetDestroy(temp_set);
    } /* omp parallel */
 
     if (num_procs > 1)
@@ -594,7 +571,10 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
        Bs_ext = NULL;
     }
 
-    num_cols_offd_C = hypre_sort_unique_and_inverse_map(temp, cnt, &col_map_offd_C, &col_map_offd_C_inverse);
+    col_map_offd_C = hypre_UnorderedIntSetCopyToArray(&set, &num_cols_offd_C);
+    hypre_UnorderedIntSetDestroy(&set);
+    hypre_UnorderedIntMap col_map_offd_C_inverse;
+    hypre_sort_and_create_inverse_map(col_map_offd_C, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
 
     HYPRE_Int i, j;
 #ifdef HYPRE_USING_OPENMP
@@ -602,9 +582,12 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 #endif
     for (i = 0; i < num_cols_offd_A; i++)
        for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
-          B_ext_offd_j[j] = *hypre_Int2IntFind(col_map_offd_C_inverse, B_ext_offd_j[j]);
+          B_ext_offd_j[j] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, B_ext_offd_j[j]);
 
-    hypre_Int2IntDestroy(col_map_offd_C_inverse);
+    if (num_cols_offd_C)
+    {
+       hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
+    }
 
     hypre_TFree(my_diag_array);
     hypre_TFree(my_offd_array);
@@ -1212,8 +1195,6 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
                   }
                 }
               }
-
-              assert(B_int_i[j + 1] == count - count_begin);
             }
           }
           else
