@@ -453,12 +453,6 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    HYPRE_Int *bucket = hypre_TAlloc(
     HYPRE_Int, (num_colsA + 1)*hypre_NumThreads());
 
-#ifndef NDEBUG
-  for (i = 0; i < num_rowsA; ++i) {
-    assert(A_i[i + 1] >= A_i[i]);
-  }
-#endif
-
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
 #endif
@@ -482,7 +476,6 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    for (j = A_i[iBegin]; j < A_i[iEnd]; ++j) {
      HYPRE_Int idx = A_j[j];
-     assert(idx >= 0 && idx < num_colsA);
      bucket[my_thread_num*num_colsA + idx]++;
    }
 
@@ -545,7 +538,6 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
           HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
 
-          assert(offset >= 0 && offset < num_nonzerosA);
           AT_data[offset] = A_data[j];
           AT_j[offset] = i;
         }
