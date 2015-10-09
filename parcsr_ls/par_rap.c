@@ -452,7 +452,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       for (i = send_map_starts_RT[0]; i < send_map_starts_RT[num_sends_RT]; i++)
       {
          HYPRE_Int idx = hypre_UnorderedIntMapGet(&send_map_elmts_RT_inverse_map, send_map_elmts_RT[i]);
+#ifdef HYPRE_USING_OPENMP
 #pragma omp atomic
+#endif
          send_map_elmts_starts_RT_aggregated[idx]++;
       }
 
