@@ -1,11 +1,9 @@
 #include "_hypre_utilities.h"
-//#include "../seq_mv/HYPRE_seq_mv.h"
-#define DBG_MERGE_SORT
+#include "../seq_mv/HYPRE_seq_mv.h"
+//#define DBG_MERGE_SORT
 #ifdef DBG_MERGE_SORT
 #include <assert.h>
 #include <algorithm>
-#endif
-#ifndef NDEBUG
 #include <unordered_map>
 #endif
 
@@ -309,7 +307,7 @@ void hypre_sort_and_create_inverse_map(
    {
       HYPRE_Int old = hypre_UnorderedIntMapPutIfAbsent(inverse_map, (*out)[i], i);
       assert(old == HYPRE_HOPSCOTCH_HASH_EMPTY);
-#ifndef NDEBUG
+#ifdef DBG_MERGE_SORT
       if (hypre_UnorderedIntMapGet(inverse_map, (*out)[i]) != i)
       {
          fprintf(stderr, "%d %d\n", i, (*out)[i]);
@@ -318,7 +316,7 @@ void hypre_sort_and_create_inverse_map(
 #endif
    }
 
-#ifndef NDEBUG
+#ifdef DBG_MERGE_SORT
   std::unordered_map<int, int> inverse_map2(len);
   for (int i = 0; i < len; ++i) {
     inverse_map2[(*out)[i]] = i;
