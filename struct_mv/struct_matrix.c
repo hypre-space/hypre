@@ -873,6 +873,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *constant   = hypre_StructMatrixConstant(matrix);
    hypre_IndexRef        ran_stride = hypre_StructMatrixRanStride(matrix);
    hypre_IndexRef        dom_stride = hypre_StructMatrixDomStride(matrix);
+   hypre_IndexRef        periodic   = hypre_StructGridPeriodic(grid);
 
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
@@ -880,7 +881,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int             stencil_size;
    HYPRE_Int             num_values, num_cvalues;
    HYPRE_Int            *symm_entries;
-   HYPRE_Int             domain_is_coarse;
+   HYPRE_Int             domain_is_coarse, consistent;
    hypre_BoxArray       *data_space;
    HYPRE_Int            *add_ghost;
    HYPRE_Int             i, j, d;
@@ -937,8 +938,21 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    }
    if (domain_is_coarse == -2)
    {
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Invalid matrix domain and range strides");
       return hypre_error_flag;
+   }
+
+   /*-----------------------------------------------------------------------
+    * Now check consistency of ran_stride, dom_stride, and periodic.
+    *-----------------------------------------------------------------------*/
+
+   for (d = 0; d < ndim; d++)
+   {
+      if ( (periodic[d]%ran_stride[d]) || (periodic[d]%dom_stride[d]) )
+      {
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Periodicity must be an integral multiple of the matrix domain and range strides");
+         return hypre_error_flag;
+      }
    }
 
    /*-----------------------------------------------------------------------
@@ -1921,11 +1935,16 @@ hypre_StructMatrixPrint( const char         *filename,
    HYPRE_Int             stencil_size;
    hypre_IndexRef        ran_stride, dom_stride;
    hypre_BoxArray       *data_space;
+   hypre_Index           data_origin;
+   hypre_Index          *offsets;   /* data index offsets for printing coefficients */
    HYPRE_Int            *symm_entries, *value_ids, *cvalue_ids;
    HYPRE_Int             ndim, num_values, num_cvalues;
    HYPRE_Int             i, d, ci, vi;
    HYPRE_Int             myid;
-   HYPRE_Complex         value;
+   HYPRE_Complex         value, *vdata;
+
+   /* This assumes that zero maps to/from zero in the data space */
+   hypre_SetIndex(data_origin, 0);
 
    /*----------------------------------------
     * Open file
@@ -1986,6 +2005,7 @@ hypre_StructMatrixPrint( const char         *filename,
    ci = 0;
    value_ids = hypre_TAlloc(HYPRE_Int, num_values);
    cvalue_ids = hypre_TAlloc(HYPRE_Int, num_cvalues);
+   offsets = hypre_TAlloc(hypre_Index, num_values);
    symm_entries = hypre_StructMatrixSymmEntries(matrix);
    stencil_size = hypre_StructStencilSize(stencil);
    for (i = 0; i < stencil_size; i++)
@@ -2006,7 +2026,9 @@ hypre_StructMatrixPrint( const char         *filename,
          }
          else
          {
-            value_ids[vi++] = i;
+            value_ids[vi] = i;
+            hypre_StructMatrixPlaceStencil(matrix, i, data_origin, offsets[vi]);
+            vi++;
          }
       }
    }
@@ -2048,8 +2070,75 @@ hypre_StructMatrixPrint( const char         *filename,
    }
 
    hypre_fprintf(file, "\nData:\n");
-   hypre_PrintBoxArrayData(file, boxes, data_space, num_values, value_ids, ndim,
-                           hypre_StructMatrixVData(matrix));
+
+   vdata = hypre_StructMatrixVData(matrix);
+   if (all)
+   {
+      /* Print in a storage-centric way */
+      hypre_PrintBoxArrayData(file, boxes, data_space, num_values, value_ids, ndim, vdata);
+   }
+   else
+   {
+      hypre_BoxArray  *grid_boxes = hypre_StructGridBoxes(grid);
+      hypre_Box       *grid_box;
+      hypre_Box       *data_box;
+      HYPRE_Int        data_box_volume;
+      HYPRE_Int        datai;
+      hypre_Index      loop_size;
+      hypre_IndexRef   start;
+      hypre_Index      stride;
+      hypre_Index      index, oindex;
+
+      /*----------------------------------------
+       * Print coefficients
+       *----------------------------------------*/
+
+      hypre_SetIndex(stride, 1);
+
+      hypre_ForBoxI(i, boxes)
+      {
+         box      = hypre_BoxArrayBox(boxes, i);
+         data_box = hypre_BoxArrayBox(data_space, i);
+         grid_box = hypre_BoxArrayBox(grid_boxes, i);
+
+         start = hypre_BoxIMin(box);
+         data_box_volume = hypre_BoxVolume(data_box);
+
+         hypre_BoxGetSize(box, loop_size);
+
+         hypre_BoxLoop1Begin(ndim, loop_size,
+                             data_box, start, stride, datai);
+         hypre_BoxLoop1For(datai)
+         {
+            /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
+            hypre_BoxLoopGetIndex(index);
+            hypre_AddIndexes(index, start, ndim, index);     /* shift by start */
+            hypre_StructMatrixUnMapDataIndex(matrix, index); /* map to the base index space */
+            for (vi = 0; vi < num_values; vi++)
+            {
+               hypre_AddIndexes(index, offsets[vi], ndim, oindex); /* shift by offset */
+               if ( hypre_IndexInBox(oindex, grid_box) )
+               {
+                  hypre_fprintf(file, "%d: (%d", i, hypre_IndexD(oindex, 0));
+                  for (d = 1; d < ndim; d++)
+                  {
+                     hypre_fprintf(file, ", %d", hypre_IndexD(oindex, d));
+                  }
+                  value = vdata[datai + vi*data_box_volume];
+#ifdef HYPRE_COMPLEX
+                  hypre_fprintf(file, "; %d) %.14e , %.14e\n",
+                                value_ids[vi], hypre_creal(value), hypre_cimag(value));
+#else
+                  hypre_fprintf(file, "; %d) %.14e\n", value_ids[vi], value);
+#endif
+               }
+            }
+         }
+         hypre_BoxLoop1End(datai);
+
+         vdata += num_values*data_box_volume;
+      }
+   }
 
    /*----------------------------------------
     * Clean up
@@ -2062,6 +2151,7 @@ hypre_StructMatrixPrint( const char         *filename,
 
    hypre_TFree(value_ids);
    hypre_TFree(cvalue_ids);
+   hypre_TFree(offsets);
  
    fflush(file);
    fclose(file);

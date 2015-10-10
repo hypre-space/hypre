@@ -48,3 +48,15 @@ mpirun -np 4 ./structmat -in structmat.in.2D2 -out structmat.out.2D2.y4 -mat-mat
 mpirun -np 4 ./structmat -in structmat.in.2D3 -out structmat.out.2D3.y4 -mat-mat 3 3T 0 3 -r 5 5 -P 2 2 \
  > structmat.out.2D3.y4
 
+#=============================================================================
+# 2D idle procs
+#=============================================================================
+
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.xidle -mat-mat 3 1T 0 1 -r 4 4 -P 1 1 \
+ > structmat.out.2D1.xidle
+mpirun -np 4 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.xidle4 -mat-mat 3 1T 0 1 -r 1 4 -P 4 1 \
+ > structmat.out.2D1.xidle4
+mpirun -np 1 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.yidle -mat-mat 3 3T 0 3 -r 4 5 -P 1 1 \
+ > structmat.out.2D1.yidle
+mpirun -np 5 ./structmat -in structmat.in.2D1 -out structmat.out.2D1.yidle5 -mat-mat 3 3T 0 3 -r 4 1 -P 1 5 \
+ > structmat.out.2D1.yidle5

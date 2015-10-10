@@ -33,6 +33,10 @@ FILES2D="\
  ${TNAME}.out.2D1.y4\
  ${TNAME}.out.2D2.y4\
  ${TNAME}.out.2D3.y4\
+ ${TNAME}.out.2D1.xidle\
+ ${TNAME}.out.2D1.xidle4\
+ ${TNAME}.out.2D1.yidle\
+ ${TNAME}.out.2D1.yidle5\
 "
 #=============================================================================
 # Diff the output with the saved output

@@ -579,7 +579,7 @@ main( hypre_int  argc,
 
    HYPRE_Real           *values;
 
-   HYPRE_Int             num_procs, myid, outlev;
+   HYPRE_Int             num_procs, myid, outlev, ierr;
    HYPRE_Int             time_index;
    HYPRE_Int             arg_index, box, mi, vi, ei, d, i, k;
    HYPRE_Int             do_matvec, do_matmat;
@@ -808,7 +808,15 @@ main( hypre_int  argc,
       HYPRE_StructMatrixSetSymmetric(matrices[mi], data.matrix_symmetric[mi]);
       HYPRE_StructMatrixSetConstantEntries(
          matrices[mi], data.matrix_ncentries[mi], data.matrix_centries[mi]);
-      HYPRE_StructMatrixInitialize(matrices[mi]);
+      HYPRE_ClearAllErrors();
+      ierr = HYPRE_StructMatrixInitialize(matrices[mi]);
+      if (ierr)
+      {
+         hypre_printf("Error constructing matrix %d: skipping...\n", mi);
+         matrices[mi] = NULL;
+         continue;
+      }
+      
       for (ei = 0; ei < data.matrix_sizes[mi]; ei++)
       {
          Index ilower, iupper, origin, stride;
@@ -880,8 +888,11 @@ main( hypre_int  argc,
    {
       for (mi = 0; mi < data.nmatrices; mi++)
       {
-         hypre_sprintf(filename, "%s.matrix%d", outfile, mi);
-         HYPRE_StructMatrixPrint(filename,  matrices[mi], 0);
+         if (matrices[mi] != NULL)
+         {
+            hypre_sprintf(filename, "%s.matrix%d", outfile, mi);
+            HYPRE_StructMatrixPrint(filename,  matrices[mi], 0);
+         }
       }
       for (vi = 0; vi < data.nvectors; vi++)
       {
