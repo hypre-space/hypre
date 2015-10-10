@@ -881,7 +881,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int             stencil_size;
    HYPRE_Int             num_values, num_cvalues;
    HYPRE_Int            *symm_entries;
-   HYPRE_Int             domain_is_coarse, consistent;
+   HYPRE_Int             domain_is_coarse;
    hypre_BoxArray       *data_space;
    HYPRE_Int            *add_ghost;
    HYPRE_Int             i, j, d;

@@ -812,7 +812,10 @@ main( hypre_int  argc,
       ierr = HYPRE_StructMatrixInitialize(matrices[mi]);
       if (ierr)
       {
-         hypre_printf("Error constructing matrix %d: skipping...\n", mi);
+         if (myid == 0)
+         {
+            hypre_printf("Error constructing matrix %d: skipping...\n", mi);
+         }
          matrices[mi] = NULL;
          continue;
       }
