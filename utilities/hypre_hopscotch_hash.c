@@ -27,7 +27,7 @@ static void InitBucket(hypre_HopscotchBucket *b)
   b->hash = HYPRE_HOPSCOTCH_HASH_EMPTY;
 }
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static void InitSegment(hypre_HopscotchSegment *s)
 {
   s->timestamp = 0;
@@ -59,7 +59,7 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
   HYPRE_Int i;
 
   //ALLOCATE THE SEGMENTS ...................
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   s->segments = hypre_TAlloc(hypre_HopscotchSegment, s->segmentMask + 1);
   for (i = 0; i <= s->segmentMask; ++i)
   {
@@ -71,7 +71,7 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
   s->key = hypre_TAlloc(HYPRE_Int, num_buckets);
   s->hash = hypre_TAlloc(hypre_uint, num_buckets);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for
 #endif
   for (i = 0; i < num_buckets; ++i)
@@ -100,7 +100,7 @@ void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
   HYPRE_Int i;
 
   //ALLOCATE THE SEGMENTS ...................
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   m->segments = hypre_TAlloc(hypre_HopscotchSegment, m->segmentMask + 1);
   for (i = 0; i <= m->segmentMask; i++)
   {
@@ -110,7 +110,7 @@ void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
 
   m->table = hypre_TAlloc(hypre_HopscotchBucket, num_buckets);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for
 #endif
   for (i = 0; i < num_buckets; i++)
@@ -125,7 +125,7 @@ void hypre_UnorderedIntSetDestroy( hypre_UnorderedIntSet *s )
   hypre_TFree(s->key);
   hypre_TFree(s->hash);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   HYPRE_Int i;
   for (i = 0; i <= s->segmentMask; i++)
   {
@@ -139,7 +139,7 @@ void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m)
 {
   hypre_TFree(m->table);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   HYPRE_Int i;
   for (i = 0; i <= m->segmentMask; i++)
   {
@@ -154,7 +154,7 @@ HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int
   HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
   HYPRE_Int *ret_array = NULL;
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel
 #endif
   {
@@ -171,14 +171,14 @@ HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int
 
     hypre_prefix_sum(&cnt, len, prefix_sum_workspace);
 
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp barrier
 #pragma omp master
 #endif
     {
       ret_array = hypre_TAlloc(HYPRE_Int, *len);
     }
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp barrier
 #endif
 

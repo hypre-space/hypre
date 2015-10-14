@@ -1409,6 +1409,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
       hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
       S_ext_diag_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_S+1);
       S_ext_diag_i[0] = 0;
       S_ext_offd_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_S+1);
@@ -1419,9 +1420,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       hypre_UnorderedIntSet found_set;
       hypre_UnorderedIntSetCreate(&found_set, S_ext_i[num_cols_offd_S] + num_cols_offd_S, 16*hypre_NumThreads());
 
-#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,j)
-#endif
       {
          HYPRE_Int S_ext_offd_size_private = 0;
          HYPRE_Int S_ext_diag_size_private = 0;
@@ -1453,18 +1452,15 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
             &S_ext_offd_size_private, &S_ext_offd_size,
             prefix_sum_workspace);
 
-#ifdef HYPRE_USING_OPENMP
 #pragma omp master
-#endif
          {
             if (S_ext_diag_size)
                S_ext_diag_j = hypre_TAlloc(HYPRE_Int, S_ext_diag_size);
             if (S_ext_offd_size)
                S_ext_offd_j = hypre_TAlloc(HYPRE_Int, S_ext_offd_size);
          }
-#ifdef HYPRE_USING_OPENMP
+
 #pragma omp barrier
-#endif
 
          for (i = i_begin; i < i_end; i++)
          {
@@ -1489,13 +1485,101 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       hypre_UnorderedIntMap col_map_offd_C_inverse;
       hypre_sort_and_create_inverse_map(temp, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
 
-#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
       for (i=0 ; i < S_ext_offd_size; i++)
          S_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, S_ext_offd_j[i]);
 
       hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
+#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+      S_ext_diag_size = 0;
+      S_ext_offd_size = 0;
+
+      for (i=0; i < num_cols_offd_S; i++)
+      {
+         for (j=S_ext_i[i]; j < S_ext_i[i+1]; j++)
+         {
+            if (S_ext_j[j] < my_first_cpt || S_ext_j[j] > my_last_cpt)
+               S_ext_offd_size++;
+            else
+               S_ext_diag_size++;
+         }
+      }
+      S_ext_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_S+1);
+      S_ext_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_S+1);
+
+      if (S_ext_diag_size)
+      {
+         S_ext_diag_j = hypre_CTAlloc(HYPRE_Int, S_ext_diag_size);
+      }
+      if (S_ext_offd_size)
+      {
+         S_ext_offd_j = hypre_CTAlloc(HYPRE_Int, S_ext_offd_size);
+      }
+
+      cnt_offd = 0;
+      cnt_diag = 0;
+      cnt = 0;
+      HYPRE_Int num_coarse_offd = 0;
+      for (i=0; i < num_cols_offd_S; i++)
+      {
+         if (CF_marker_offd[i] > 0) num_coarse_offd++;
+
+         for (j=S_ext_i[i]; j < S_ext_i[i+1]; j++)
+         {
+            i1 = S_ext_j[j];
+            if (i1 < my_first_cpt || i1 > my_last_cpt)
+               S_ext_offd_j[cnt_offd++] = i1;
+            else
+               S_ext_diag_j[cnt_diag++] = i1 - my_first_cpt;
+         }
+         S_ext_diag_i[++cnt] = cnt_diag;
+         S_ext_offd_i[cnt] = cnt_offd;
+      }
+
+      hypre_TFree(S_ext_i);
+      hypre_TFree(S_ext_j);
+
+      cnt = 0;
+      if (S_ext_offd_size || num_coarse_offd)
+      {
+         temp = hypre_CTAlloc(HYPRE_Int, S_ext_offd_size+num_coarse_offd);
+         for (i=0; i < S_ext_offd_size; i++)
+            temp[i] = S_ext_offd_j[i];
+         cnt = S_ext_offd_size;
+         for (i=0; i < num_cols_offd_S; i++)
+            if (CF_marker_offd[i] > 0) temp[cnt++] = fine_to_coarse_offd[i];
+      }
+      if (cnt)
+      {
+         qsort0(temp, 0, cnt-1);
+
+         num_cols_offd_C = 1;
+         value = temp[0];
+         for (i=1; i < cnt; i++)
+         {
+            if (temp[i] > value)
+            {
+               value = temp[i];
+               temp[num_cols_offd_C++] = value;
+            }
+         }
+      }
+
+      if (num_cols_offd_C)
+         col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C);
+
+      for (i=0; i < num_cols_offd_C; i++)
+         col_map_offd_C[i] = temp[i];
+
+      if (S_ext_offd_size || num_coarse_offd)
+         hypre_TFree(temp);
+
+      for (i=0 ; i < S_ext_offd_size; i++)
+         S_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_C,
+                                           S_ext_offd_j[i],
+                                           num_cols_offd_C);
+
+#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
 
       if (num_cols_offd_S)
       {
@@ -1524,7 +1608,6 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
    } /* num_procs > 1 */
 
-#if 1
    /*-----------------------------------------------------------------------
     *  Allocate and initialize some stuff.
     *-----------------------------------------------------------------------*/
@@ -2122,8 +2205,6 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          } /* for each row */
       } /* num_paths > 1 */
    } /* omp parallel */
-
-#endif
 
    S2 = hypre_ParCSRMatrixCreate(comm, global_num_coarse, 
 	global_num_coarse, coarse_row_starts,

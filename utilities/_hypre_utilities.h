@@ -926,6 +926,72 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 /* hypre_hopscotch_hash.c */
 
 #ifdef HYPRE_USING_OPENMP
+
+/* Check if atomic operations are available to use concurrent hopscotch hash table */
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+//#define HYPRE_USING_ATOMIC
+//#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
+//#define HYPRE_USING_ATOMIC
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+//#define HYPRE_USING_ATOMIC
+//#include <stdatomic.h>
+#endif
+
+#endif // HYPRE_USING_OPENMP
+
+#ifdef HYPRE_USING_ATOMIC
+inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+{
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+  return __sync_val_compare_and_swap(ptr, oldval, newval);
+//#elif defind _MSC_VER
+  //return _InterlockedCompareExchange((long *)ptr, newval, oldval);
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+  //_Atomic HYPRE_Int *atomic_ptr = ptr;
+  //atomic_compare_exchange_strong(atomic_ptr, &oldval, newval);
+  //return oldval;
+#endif
+}
+
+inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+{
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+  return __sync_fetch_and_add(ptr, value);
+//#elif defined _MSC_VER
+  //return _InterlockedExchangeAdd((long *)ptr, value);
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+  //_Atomic HYPRE_Int *atomic_ptr = ptr;
+  //return atomic_fetch_add(atomic_ptr, value);
+#endif
+}
+#else // HYPRE_USING_ATOMIC
+inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+{
+   if (*ptr == oldval)
+   {
+      *ptr = newval;
+      return oldval;
+   }
+   else return *ptr;
+}
+
+inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+{
+   HYPRE_Int oldval = *ptr;
+   *ptr += value;
+   return oldval;
+}
+#endif // HYPRE_USING_ATOMIC
+
+#ifdef HYPRE_USING_ATOMIC
+// concurrent hopscotch hasing is possible only with atomic supports
+#define HYPRE_CONCURRENT_HOPSCOTCH
+#endif
+
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 typedef struct {
   hypre_uint volatile timestamp;
   omp_lock_t         lock;
@@ -946,7 +1012,7 @@ typedef struct
 {
 	hypre_uint volatile              segmentMask;
 	hypre_uint volatile              bucketMask;
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 	hypre_HopscotchSegment* volatile segments;
 #endif
   HYPRE_Int *volatile              key;
@@ -972,7 +1038,7 @@ typedef struct
 {
 	hypre_uint volatile              segmentMask;
 	hypre_uint volatile              bucketMask;
-#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 	hypre_HopscotchSegment*	volatile segments;
 #endif
 	hypre_HopscotchBucket* volatile	 table;

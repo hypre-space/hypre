@@ -447,7 +447,169 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    B_ext_offd_size = 0;
    last_col_diag_B = first_col_diag_B + num_cols_diag_B -1;
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
    hypre_UnorderedIntSet set;
+
+#pragma omp parallel 
+   {
+     HYPRE_Int size, rest, ii;
+     HYPRE_Int ns, ne;
+     HYPRE_Int i1, i, j;
+     HYPRE_Int my_offd_size, my_diag_size;
+     HYPRE_Int cnt_offd, cnt_diag;
+     HYPRE_Int num_threads = hypre_NumActiveThreads();
+
+     size = num_cols_offd_A/num_threads;
+     rest = num_cols_offd_A - size*num_threads;
+     ii = hypre_GetThreadNum();
+     if (ii < rest)
+     {
+       ns = ii*size+ii;
+       ne = (ii+1)*size+ii+1;
+     }
+     else
+     {
+       ns = ii*size+rest;
+       ne = (ii+1)*size+rest;
+     }
+
+     my_diag_size = 0;
+     my_offd_size = 0;
+     for (i=ns; i < ne; i++)
+     {
+       B_ext_diag_i[i] = my_diag_size;
+       B_ext_offd_i[i] = my_offd_size;
+       for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
+            my_offd_size++;
+         else
+            my_diag_size++;
+     }
+     my_diag_array[ii] = my_diag_size;
+     my_offd_array[ii] = my_offd_size;
+
+#pragma omp barrier
+
+     if (ii)
+     {
+       my_diag_size = my_diag_array[0];
+       my_offd_size = my_offd_array[0];
+       for (i1 = 1; i1 < ii; i1++)
+       {
+          my_diag_size += my_diag_array[i1];
+          my_offd_size += my_offd_array[i1];
+       }
+
+       for (i1 = ns; i1 < ne; i1++)
+       {
+          B_ext_diag_i[i1] += my_diag_size;
+          B_ext_offd_i[i1] += my_offd_size;
+       }
+     }
+     else
+     {
+       B_ext_diag_size = 0;
+       B_ext_offd_size = 0;
+       for (i1 = 0; i1 < num_threads; i1++)
+       {
+          B_ext_diag_size += my_diag_array[i1];
+          B_ext_offd_size += my_offd_array[i1];
+       }
+       B_ext_diag_i[num_cols_offd_A] = B_ext_diag_size;
+       B_ext_offd_i[num_cols_offd_A] = B_ext_offd_size;
+
+       if (B_ext_diag_size)
+       {
+          B_ext_diag_j = hypre_CTAlloc(HYPRE_Int, B_ext_diag_size);
+          B_ext_diag_data = hypre_CTAlloc(HYPRE_Complex, B_ext_diag_size);
+       }
+       if (B_ext_offd_size)
+       {
+          B_ext_offd_j = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size);
+          B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size);
+       }
+       hypre_UnorderedIntSetCreate(&set, B_ext_offd_size + num_cols_offd_B, 16*hypre_NumThreads());
+     }
+
+#pragma omp barrier
+
+     cnt_offd = B_ext_offd_i[ns];
+     cnt_diag = B_ext_diag_i[ns];
+     for (i=ns; i < ne; i++)
+     {
+       for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
+         {
+            hypre_UnorderedIntSetPut(&set, Bs_ext_j[j]);
+            B_ext_offd_j[cnt_offd] = Bs_ext_j[j];
+            B_ext_offd_data[cnt_offd++] = Bs_ext_data[j];
+         }
+         else
+         {
+            B_ext_diag_j[cnt_diag] = Bs_ext_j[j] - first_col_diag_B;
+            B_ext_diag_data[cnt_diag++] = Bs_ext_data[j];
+         }
+     }
+
+     HYPRE_Int i_begin, i_end;
+     hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_B);
+     for (i = i_begin; i < i_end; i++)
+     {
+        hypre_UnorderedIntSetPut(&set, col_map_offd_B[i]);
+     }
+   } /* omp parallel */
+
+    if (num_procs > 1)
+    {
+       hypre_CSRMatrixDestroy(Bs_ext);
+       Bs_ext = NULL;
+    }
+
+    col_map_offd_C = hypre_UnorderedIntSetCopyToArray(&set, &num_cols_offd_C);
+    hypre_UnorderedIntSetDestroy(&set);
+    hypre_UnorderedIntMap col_map_offd_C_inverse;
+    hypre_sort_and_create_inverse_map(col_map_offd_C, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
+
+    HYPRE_Int i, j;
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+    for (i = 0; i < num_cols_offd_A; i++)
+       for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
+          B_ext_offd_j[j] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, B_ext_offd_j[j]);
+
+    if (num_cols_offd_C)
+    {
+       hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
+    }
+
+    hypre_TFree(my_diag_array);
+    hypre_TFree(my_offd_array);
+
+     if (num_cols_offd_B)
+     {
+         HYPRE_Int i;
+         map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
+
+#pragma omp parallel private(i)
+         {
+            HYPRE_Int i_begin, i_end;
+            hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_C);
+
+            HYPRE_Int cnt;
+            if (i_end > i_begin)
+            {
+               cnt = hypre_LowerBound(col_map_offd_B, col_map_offd_B + num_cols_offd_B, col_map_offd_C[i_begin]) - col_map_offd_B;
+            }
+
+            for (i = i_begin; i < i_end && cnt < num_cols_offd_B; i++)
+            {
+               if (col_map_offd_C[i] == col_map_offd_B[cnt])
+               {
+                  map_B_to_C[cnt++] = i;
+               }
+            }
+         }
+      }
+#else /* HYPRE_CONCURRENT_HOPSCOTCH */
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel 
@@ -531,7 +693,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
           B_ext_offd_j = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size);
           B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size);
        }
-       hypre_UnorderedIntSetCreate(&set, B_ext_offd_size + num_cols_offd_B, 16*hypre_NumThreads());
+       if (B_ext_offd_size || num_cols_offd_B)
+          temp = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size+num_cols_offd_B);
      }
 
 #ifdef HYPRE_USING_OPENMP
@@ -545,7 +708,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
        for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
          if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
          {
-            hypre_UnorderedIntSetPut(&set, Bs_ext_j[j]);
+            temp[cnt_offd] = Bs_ext_j[j];
             B_ext_offd_j[cnt_offd] = Bs_ext_j[j];
             B_ext_offd_data[cnt_offd++] = Bs_ext_data[j];
          }
@@ -556,37 +719,60 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          }
      }
 
-     HYPRE_Int i_begin, i_end;
-     hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_B);
-     for (i = i_begin; i < i_end; i++)
-     {
-        hypre_UnorderedIntSetPut(&set, col_map_offd_B[i]);
-     }
-   } /* omp parallel */
-
-    if (num_procs > 1)
-    {
-       hypre_CSRMatrixDestroy(Bs_ext);
-       Bs_ext = NULL;
-    }
-
-    col_map_offd_C = hypre_UnorderedIntSetCopyToArray(&set, &num_cols_offd_C);
-    hypre_UnorderedIntSetDestroy(&set);
-    hypre_UnorderedIntMap col_map_offd_C_inverse;
-    hypre_sort_and_create_inverse_map(col_map_offd_C, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
-
-    HYPRE_Int i, j;
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#pragma omp barrier
 #endif
-    for (i = 0; i < num_cols_offd_A; i++)
-       for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
-          B_ext_offd_j[j] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, B_ext_offd_j[j]);
 
-    if (num_cols_offd_C)
-    {
-       hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
-    }
+     if (ii == 0)
+     {
+
+      if (num_procs > 1)
+      {
+         hypre_CSRMatrixDestroy(Bs_ext);
+         Bs_ext = NULL;
+      }
+
+      cnt = 0;
+      if (B_ext_offd_size || num_cols_offd_B)
+      {
+         cnt = B_ext_offd_size;
+         for (i=0; i < num_cols_offd_B; i++)
+            temp[cnt++] = col_map_offd_B[i];
+         if (cnt)
+         {
+            qsort0(temp, 0, cnt-1);
+            num_cols_offd_C = 1;
+            value = temp[0];
+            for (i=1; i < cnt; i++)
+            {
+               if (temp[i] > value)
+               {
+                  value = temp[i];
+                  temp[num_cols_offd_C++] = value;
+               }
+            }
+         }
+
+         if (num_cols_offd_C)
+            col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C);
+
+         for (i=0; i < num_cols_offd_C; i++)
+            col_map_offd_C[i] = temp[i];
+
+         hypre_TFree(temp);
+      }
+     }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+     for (i=ns; i < ne; i++)
+        for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
+            B_ext_offd_j[j] = hypre_BinarySearch(col_map_offd_C, B_ext_offd_j[j],
+                                           num_cols_offd_C);
+
+    } /* end parallel region */
 
     hypre_TFree(my_diag_array);
     hypre_TFree(my_offd_array);
@@ -596,28 +782,16 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          HYPRE_Int i;
          map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
 
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i)
-#endif
-         {
-            HYPRE_Int i_begin, i_end;
-            hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_C);
-
-            HYPRE_Int cnt;
-            if (i_end > i_begin)
+         cnt = 0;
+         for (i=0; i < num_cols_offd_C; i++)
+            if (col_map_offd_C[i] == col_map_offd_B[cnt])
             {
-               cnt = hypre_LowerBound(col_map_offd_B, col_map_offd_B + num_cols_offd_B, col_map_offd_C[i_begin]) - col_map_offd_B;
+               map_B_to_C[cnt++] = i;
+               if (cnt == num_cols_offd_B) break;
             }
-
-            for (i = i_begin; i < i_end && cnt < num_cols_offd_B; i++)
-            {
-               if (col_map_offd_C[i] == col_map_offd_B[cnt])
-               {
-                  map_B_to_C[cnt++] = i;
-               }
-            }
-         }
       }
+
+#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
 
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
 
