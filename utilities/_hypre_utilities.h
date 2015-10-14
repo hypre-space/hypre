@@ -929,7 +929,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 
 /* Check if atomic operations are available to use concurrent hopscotch hash table */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
-//#define HYPRE_USING_ATOMIC
+#define HYPRE_USING_ATOMIC
 //#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
 //#define HYPRE_USING_ATOMIC
 //#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
