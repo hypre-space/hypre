@@ -81,6 +81,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    hypre_StructVectorReindex(x, grid, dom_stride);
    hypre_StructNumGhostFromStencil(stencil, &num_ghost);
    hypre_StructVectorComputeDataSpace(x, num_ghost, &data_space);
+   hypre_TFree(num_ghost);
 
    /* This computes the communication pattern for the new x data_space */
    hypre_CreateComputeInfo(grid, stencil, &compute_info);
@@ -258,7 +259,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    /* create new x */
    /* copy xorig into x */
 
-   /* This resizes the data for x using the data_space computed durig setup */
+   /* This resizes the data for x using the data_space computed during setup */
    data_space = hypre_ComputePkgDataSpace(compute_pkg);
    hypre_StructVectorReindex(x, base_grid, dom_stride);
    hypre_StructVectorResize(x, data_space);

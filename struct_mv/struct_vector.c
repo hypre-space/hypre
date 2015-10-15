@@ -464,6 +464,7 @@ hypre_StructVectorRestore( hypre_StructVector *vector )
          data = hypre_SharedCTAlloc(HYPRE_Complex, data_size);
       }
       hypre_StructDataCopy(old_data, old_data_space, old_ids, data, data_space, ids, ndim, 1);
+      hypre_TFree(old_data);
 
       /* Reset certain fields to enable the Resize call below */
       hypre_StructVectorSaveGrid(vector)      = NULL;

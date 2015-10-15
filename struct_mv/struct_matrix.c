@@ -275,6 +275,7 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
       HYPRE_Int             ndim         = hypre_StructMatrixNDim(matrix);
       hypre_StructStencil  *stencil      = hypre_StructMatrixStencil(matrix);
       HYPRE_Int             stencil_size = hypre_StructStencilSize(stencil);
+      HYPRE_Int            *constant     = hypre_StructMatrixConstant(matrix);
       HYPRE_Int            *symm         = hypre_StructMatrixSymmEntries(matrix);
       hypre_Index          *origins, origin, stride;
       HYPRE_Int            *v_to_s, *s_to_v, *order;
@@ -288,7 +289,7 @@ hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix,
       for (e = 0, i = 0; e < stencil_size; e++)
       {
          s_to_v[e] = -1;
-         if (symm[e] < 0)  /* this is a stored coefficient */
+         if ((symm[e] < 0) && (!constant[e]))  /* this is a stored variable coefficient */
          {
             v_to_s[i] = e;
             s_to_v[e] = i;

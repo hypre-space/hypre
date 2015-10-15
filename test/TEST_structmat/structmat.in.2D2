@@ -10,8 +10,10 @@
 #
 #   x (0): fine grid vector     ; value = 1
 #   xc(1): x-coarse grid vector ; value = 1
-#   y (2): fine grid vector     ; value = 0
-#   yc(3): y-coarse grid vector ; value = 0
+#   xc(2): y-coarse grid vector ; value = 1
+#   y (3): fine grid vector     ; value = 0
+#   yc(4): x-coarse grid vector ; value = 0
+#   yc(5): y-coarse grid vector ; value = 0
 #
 ##############################################################################
 
@@ -104,7 +106,7 @@ MatrixSetConstant: 4 3 (0 1 2)
 ###########################################################
 
 # Vector: nvectors
-Vector: 4
+Vector: 6
 
 ##### Vector x (0)
 
@@ -116,12 +118,22 @@ VectorCreate: 0 (1 1)  1.0
 # VectorCreate: vecnum map(ndim) value
 VectorCreate: 1 (2 1)  1.0
 
-##### Vector y (2)
+##### Vector xc (2)
 
 # VectorCreate: vecnum map(ndim) value
-VectorCreate: 2 (1 1)  0.0
+VectorCreate: 2 (1 2)  1.0
 
-##### Vector yc (3)
+##### Vector y (3)
 
 # VectorCreate: vecnum map(ndim) value
-VectorCreate: 3 (1 2)  0.0
+VectorCreate: 3 (1 1)  0.0
+
+##### Vector yc (4)
+
+# VectorCreate: vecnum map(ndim) value
+VectorCreate: 4 (2 1)  0.0
+
+##### Vector yc (5)
+
+# VectorCreate: vecnum map(ndim) value
+VectorCreate: 5 (1 2)  0.0
