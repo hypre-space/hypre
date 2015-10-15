@@ -43,12 +43,12 @@ install: all
 clean:
 	rm -f *.o
 
-veryclean: clean
+distclean: clean
+	rm -f stencilmult
 	rm -f one_to_many
 	rm -f one_to_many_vector
 	rm -f create_2d_laplacian 
 	rm -f create_3d_laplacian
-	rm -f Makefile
 
 ##################################################################
 # Rules
