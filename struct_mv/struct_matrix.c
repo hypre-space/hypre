@@ -444,10 +444,12 @@ hypre_StructMatrixCreate( MPI_Comm             comm,
    hypre_StructMatrixDomainIsCoarse(matrix) = 0;
    hypre_StructMatrixSymmetric(matrix) = 0;
    hypre_StructMatrixConstantCoefficient(matrix) = 0;
+   /* RDF TODO: Change to work with default num ghost of zero */
    for (i = 0; i < 2*ndim; i++)
    {
       hypre_StructMatrixNumGhost(matrix)[i] = hypre_StructGridNumGhost(grid)[i];
-      hypre_StructMatrixAddGhost(matrix)[i] = 0;
+      hypre_StructMatrixSymGhost(matrix)[i] = 0;
+      hypre_StructMatrixTrnGhost(matrix)[i] = 0;
    }
 
    return matrix;
@@ -481,7 +483,6 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          {
             hypre_SharedTFree(hypre_StructMatrixData(matrix));
          }
-         hypre_CommPkgDestroy(hypre_StructMatrixCommPkg(matrix));
          
          hypre_ForBoxI(i, hypre_StructMatrixDataSpace(matrix))
             hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
@@ -613,10 +614,11 @@ hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
 {
    HYPRE_Int          ndim      = hypre_StructMatrixNDim(matrix);
    hypre_StructGrid  *grid      = hypre_StructMatrixGrid(matrix);
-   HYPRE_Int         *add_ghost = hypre_StructMatrixAddGhost(matrix);
+   HYPRE_Int         *sym_ghost = hypre_StructMatrixSymGhost(matrix);
+   HYPRE_Int         *trn_ghost = hypre_StructMatrixTrnGhost(matrix);
    hypre_BoxArray    *data_space;
    hypre_Box         *data_box;
-   HYPRE_Int          i, d;
+   HYPRE_Int          i, d, d2;
 
    if (num_ghost == NULL)
    {
@@ -631,8 +633,10 @@ hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
       data_box = hypre_BoxArrayBox(data_space, i);
       for (d = 0; d < ndim; d++)
       {
-         hypre_BoxIMinD(data_box, d) -= num_ghost[2*d]     + add_ghost[2*d];
-         hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1] + add_ghost[2*d + 1];
+         d2 = d*2;
+         hypre_BoxIMinD(data_box, d) -= hypre_max(num_ghost[d2]+sym_ghost[d2], trn_ghost[d2]);
+         d2 = d*2+1;
+         hypre_BoxIMaxD(data_box, d) += hypre_max(num_ghost[d2]+sym_ghost[d2], trn_ghost[d2]);
       }
       hypre_StructMatrixMapDataBox(matrix, data_box);
    }
@@ -884,8 +888,8 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    HYPRE_Int            *symm_entries;
    HYPRE_Int             domain_is_coarse;
    hypre_BoxArray       *data_space;
-   HYPRE_Int            *add_ghost;
-   HYPRE_Int             i, j, d;
+   HYPRE_Int            *sym_ghost;
+   HYPRE_Int             i, j, d, resize;
 
    /*-----------------------------------------------------------------------
     * First, check consistency of ran_stride, dom_stride, and symmetric.
@@ -1031,7 +1035,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
     * point in the grid, including the user-specified ghost layer.
     *-----------------------------------------------------------------------*/
 
-   add_ghost     = hypre_StructMatrixAddGhost(matrix);
+   sym_ghost     = hypre_StructMatrixSymGhost(matrix);
    stencil       = hypre_StructMatrixStencil(matrix);
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
@@ -1040,7 +1044,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
    /* Initialize additional ghost size */
    for (d = 0; d < 2*ndim; d++)
    {
-      add_ghost[d] = 0;
+      sym_ghost[d] = 0;
    }
 
    /* Add ghost layers for symmetric storage */
@@ -1053,12 +1057,18 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
             for (d = 0; d < ndim; d++)
             {
                j = hypre_IndexD(stencil_shape[i], d);
-               add_ghost[2*d]     = hypre_max(add_ghost[2*d],    -j);
-               add_ghost[2*d + 1] = hypre_max(add_ghost[2*d + 1], j);
+               sym_ghost[2*d]     = hypre_max(sym_ghost[2*d],    -j);
+               sym_ghost[2*d + 1] = hypre_max(sym_ghost[2*d + 1], j);
             }
          }
       }
    }
+
+   /*-----------------------------------------------------------------------
+    * Compute the ghost layers needed for storing the transpose
+    *-----------------------------------------------------------------------*/
+
+   hypre_StructMatrixSetTranspose(matrix, hypre_StructMatrixTranspose(matrix), &resize);
 
    /*-----------------------------------------------------------------------
     * Set total number of nonzero coefficients.  For constant coefficients, this
@@ -1670,101 +1680,40 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
 HYPRE_Int 
 hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 {
-   HYPRE_Int              num_values   = hypre_StructMatrixNumValues(matrix);
-   HYPRE_Complex         *matrix_vdata = hypre_StructMatrixVData(matrix);
-   HYPRE_Int              constant_coefficient;
-   hypre_CommInfo        *comm_info;
-   hypre_CommPkg         *comm_pkg;
-   hypre_CommHandle      *comm_handle;
-
-   constant_coefficient = hypre_StructMatrixConstantCoefficient( matrix );
-
-   /*-----------------------------------------------------------------------
-    * If the CommPkg has not been set up, set it up
-    *-----------------------------------------------------------------------*/
-
-   /* RDF: hypre_StructMatrixComputeCommPkg(matrix, &comm_pkg) */
-
-   comm_pkg = hypre_StructMatrixCommPkg(matrix);
-
-   if ((!comm_pkg) && (num_values > 0))
-   {
-      HYPRE_Int  *num_ghost = hypre_StructMatrixNumGhost(matrix);
-      HYPRE_Int  *add_ghost = hypre_StructMatrixAddGhost(matrix);
-      HYPRE_Int   ndim      = hypre_StructMatrixNDim(matrix);
-      HYPRE_Int   i, tot_num_ghost[2*HYPRE_MAXDIM];
-
-      for (i = 0; i < 2*ndim; i++)
-      {
-         tot_num_ghost[i] = num_ghost[i] + add_ghost[i];
-      }
-
-      hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix),
-                                       tot_num_ghost, &comm_info);
-      /* RDF TODO: Use hypre_CommInfoProjectSend()/hypre_CommInfoProjectRecv()
-       * along with hypre_StructMatrixMapDataBox()?  Also need to "project"
-       * num_values, which means changing communication routines. */
-      hypre_CommPkgCreate(comm_info,
-                          hypre_StructMatrixDataSpace(matrix),
-                          hypre_StructMatrixDataSpace(matrix),
-                          num_values, NULL, 0,
-                          hypre_StructMatrixComm(matrix), &comm_pkg);
-      hypre_CommInfoDestroy(comm_info);
-
-      hypre_StructMatrixCommPkg(matrix) = comm_pkg;
-   }
+   HYPRE_Int  num_values = hypre_StructMatrixNumValues(matrix);
 
    /*-----------------------------------------------------------------------
     * Update the ghost data
     * This takes care of the communication needs of all known functions
     * referencing the matrix.
-    *
-    * At present this is the only place where matrix data gets communicated.
-    * However, comm_pkg is kept as long as the matrix is, in case some
-    * future version hypre has a use for it - e.g. if the user replaces
-    * a matrix with a very similar one, we may not want to recompute comm_pkg.
     *-----------------------------------------------------------------------*/
 
-   if (constant_coefficient != 1)
+   if (num_values > 0)
    {
-      hypre_InitializeCommunication(comm_pkg, &matrix_vdata, &matrix_vdata, 0, 0,
-                                    &comm_handle);
+      HYPRE_Int          ndim      = hypre_StructMatrixNDim(matrix);
+      HYPRE_Int         *num_ghost = hypre_StructMatrixNumGhost(matrix);
+      HYPRE_Int         *sym_ghost = hypre_StructMatrixSymGhost(matrix);
+      HYPRE_Int         *trn_ghost = hypre_StructMatrixTrnGhost(matrix);
+      hypre_CommInfo    *comm_info;
+      hypre_CommPkg     *comm_pkg;
+      hypre_CommHandle  *comm_handle;
+      HYPRE_Complex    **comm_data;
+      HYPRE_Int          i, tot_num_ghost[2*HYPRE_MAXDIM];
+
+      /* RDF TODO: Use CommStencil to do communication */
+
+      for (i = 0; i < 2*ndim; i++)
+      {
+         tot_num_ghost[i] = hypre_max(num_ghost[i]+sym_ghost[i], trn_ghost[i]);
+      }
+
+      hypre_CreateCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix), tot_num_ghost, &comm_info);
+      hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
+
+      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix,
-                               HYPRE_Int          *num_ghost )
-{
-   HYPRE_Int  d, ndim = hypre_StructMatrixNDim(matrix);
-
-   for (d = 0; d < ndim; d++)
-   {
-      hypre_StructMatrixNumGhost(matrix)[2*d]     = num_ghost[2*d];
-      hypre_StructMatrixNumGhost(matrix)[2*d + 1] = num_ghost[2*d + 1];
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_StructMatrixSetOneGhost( hypre_StructMatrix *matrix,
-                               HYPRE_Int           num_ghost )
-{
-   HYPRE_Int  i, ndim = hypre_StructMatrixNDim(matrix);
-
-   for (i = 0; i < 2*ndim; i++)
-   {
-      hypre_StructMatrixNumGhost(matrix)[i] = num_ghost;
+      hypre_CommPkgDestroy(comm_pkg);
+      hypre_TFree(comm_data);
    }
 
    return hypre_error_flag;
@@ -1834,6 +1783,101 @@ hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
    }
 
    hypre_StructMatrixConstantCoefficient(matrix) = constant_coefficient;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine may be called at any time.  The boolean 'resize' is returned to
+ * indicate whether a MatrixResize() is needed.  Because the matrix stencil is
+ * required to compute the correct ghost layer size for the transpose != 0 case,
+ * this routine is also called in the MatrixInitialize() routine.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSetTranspose( hypre_StructMatrix *matrix,
+                                HYPRE_Int           transpose,
+                                HYPRE_Int          *resize )
+{
+   HYPRE_Int   ndim = hypre_StructMatrixNDim(matrix);
+   HYPRE_Int  *trn_ghost = hypre_StructMatrixTrnGhost(matrix);
+   HYPRE_Int   lghost, rghost, d, e;
+
+   *resize = 0;
+   for (d = 0; d < ndim; d++)
+   {
+      lghost = 0;
+      rghost = 0;
+      if ( (transpose) && (hypre_StructMatrixStencil(matrix) != NULL) )
+      {
+         hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(matrix);
+         hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
+         HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil);
+         
+         for (e = 0; e < stencil_size; e++)
+         {
+            lghost = hypre_max(lghost, -hypre_IndexD(stencil_shape[e], d));
+            rghost = hypre_max(rghost,  hypre_IndexD(stencil_shape[e], d));
+         }
+      }
+      if (trn_ghost[2*d] != lghost)
+      {
+         trn_ghost[2*d] = lghost;
+         *resize = 1;
+      }
+      if (trn_ghost[2*d+1] != rghost)
+      {
+         trn_ghost[2*d+1] = rghost;
+         *resize = 1;
+      }
+   }
+
+   hypre_StructMatrixTranspose(matrix) = transpose;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * This routine may be called at any time.  The boolean 'resize' is returned to
+ * indicate whether a MatrixResize() is needed.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix,
+                               HYPRE_Int          *num_ghost,
+                               HYPRE_Int          *resize )
+{
+   HYPRE_Int  i, ndim = hypre_StructMatrixNDim(matrix);
+
+   *resize = 0;
+   for (i = 0; i < 2*ndim; i++)
+   {
+      if (hypre_StructMatrixNumGhost(matrix)[i] != num_ghost[i])
+      {
+         hypre_StructMatrixNumGhost(matrix)[i] = num_ghost[i];
+         *resize = 1;
+      }
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructMatrixSetGhost( hypre_StructMatrix *matrix,
+                            HYPRE_Int           ghost,
+                            HYPRE_Int          *resize )
+{
+   HYPRE_Int  i, ndim = hypre_StructMatrixNDim(matrix);
+   HYPRE_Int  num_ghost[2*HYPRE_MAXDIM];
+
+   for (i = 0; i < 2*ndim; i++)
+   {
+      num_ghost[i] = ghost;
+   }
+   hypre_StructMatrixSetNumGhost(matrix, num_ghost, resize);
 
    return hypre_error_flag;
 }
@@ -2327,7 +2371,7 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    matrix = hypre_StructMatrixCreate(comm, grid, stencil);
    hypre_StructMatrixSymmetric(matrix) = symmetric;
    hypre_StructMatrixConstantCoefficient(matrix) = constant_coefficient;
-   hypre_StructMatrixSetNumGhost(matrix, num_ghost);
+   HYPRE_StructMatrixSetNumGhost(matrix, num_ghost);
    hypre_StructMatrixInitialize(matrix);
 
    /*----------------------------------------

@@ -44,6 +44,13 @@
  * routine hypre_StructMatrixBoxData().  The number of boxes in data_boxes,
  * data_space, and data_indices is the same as in the base grid, even though
  * both ran_nboxes and dom_nboxes may be smaller.
+ *
+ * The 'num_ghost' and 'sym_ghost' arrays are used to determine how many ghost
+ * layers of storage to keep.  They determine the dimensions of 'data_space' and
+ * 'data_boxes', but they do not imply communication of any sort.  That is, the
+ * values stored in the ghost layers will not be correct without triggering some
+ * additional communication either explicitly or by setting the 'symmetric' or
+ * 'transpose' flags.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructMatrix_struct
@@ -83,12 +90,12 @@ typedef struct hypre_StructMatrix_struct
                                                    with variable diagonal} */
    HYPRE_Int             symmetric;      /* Is the matrix symmetric */
    HYPRE_Int            *symm_entries;   /* Which entries are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Min num ghost layers */
-   HYPRE_Int             add_ghost[2*HYPRE_MAXDIM];  /* Additional ghost layers */
+   HYPRE_Int             transpose;      /* Transpose stored also? */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Min num ghost layers */
+   HYPRE_Int             sym_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for symmetric */
+   HYPRE_Int             trn_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for transpose */
                       
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
-
-   hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
    HYPRE_Int             ref_count;
 
@@ -131,10 +138,11 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmEntries(matrix)   ((matrix) -> symm_entries)
+#define hypre_StructMatrixTranspose(matrix)     ((matrix) -> transpose)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
-#define hypre_StructMatrixAddGhost(matrix)      ((matrix) -> add_ghost)
+#define hypre_StructMatrixSymGhost(matrix)      ((matrix) -> sym_ghost)
+#define hypre_StructMatrixTrnGhost(matrix)      ((matrix) -> trn_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
 #define hypre_StructMatrixSaveData(matrix)      ((matrix) -> save_data)

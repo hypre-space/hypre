@@ -1953,6 +1953,13 @@ hypre_StMatrixNEntryCoeffs( hypre_StMatrix *matrix,
  * routine hypre_StructMatrixBoxData().  The number of boxes in data_boxes,
  * data_space, and data_indices is the same as in the base grid, even though
  * both ran_nboxes and dom_nboxes may be smaller.
+ *
+ * The 'num_ghost' and 'sym_ghost' arrays are used to determine how many ghost
+ * layers of storage to keep.  They determine the dimensions of 'data_space' and
+ * 'data_boxes', but they do not imply communication of any sort.  That is, the
+ * values stored in the ghost layers will not be correct without triggering some
+ * additional communication either explicitly or by setting the 'symmetric' or
+ * 'transpose' flags.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructMatrix_struct
@@ -1992,12 +1999,12 @@ typedef struct hypre_StructMatrix_struct
                                                    with variable diagonal} */
    HYPRE_Int             symmetric;      /* Is the matrix symmetric */
    HYPRE_Int            *symm_entries;   /* Which entries are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];  /* Min num ghost layers */
-   HYPRE_Int             add_ghost[2*HYPRE_MAXDIM];  /* Additional ghost layers */
+   HYPRE_Int             transpose;      /* Transpose stored also? */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Min num ghost layers */
+   HYPRE_Int             sym_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for symmetric */
+   HYPRE_Int             trn_ghost[2*HYPRE_MAXDIM]; /* Ghost layers for transpose */
                       
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
-
-   hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
    HYPRE_Int             ref_count;
 
@@ -2040,10 +2047,11 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmEntries(matrix)   ((matrix) -> symm_entries)
+#define hypre_StructMatrixTranspose(matrix)     ((matrix) -> transpose)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
-#define hypre_StructMatrixAddGhost(matrix)      ((matrix) -> add_ghost)
+#define hypre_StructMatrixSymGhost(matrix)      ((matrix) -> sym_ghost)
+#define hypre_StructMatrixTrnGhost(matrix)      ((matrix) -> trn_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
 #define hypre_StructMatrixSaveData(matrix)      ((matrix) -> save_data)
@@ -2410,8 +2418,10 @@ HYPRE_Int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix , HYP
 HYPRE_Int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix , hypre_Box *clear_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
-HYPRE_Int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix , HYPRE_Int nentries , HYPRE_Int *entries );
+HYPRE_Int hypre_StructMatrixSetTranspose ( hypre_StructMatrix *matrix , HYPRE_Int transpose , HYPRE_Int *resize );
+HYPRE_Int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , HYPRE_Int *num_ghost , HYPRE_Int *resize );
+HYPRE_Int hypre_StructMatrixSetGhost ( hypre_StructMatrix *matrix , HYPRE_Int ghost , HYPRE_Int *resize );
 HYPRE_Int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *matrix , HYPRE_Int all );
 HYPRE_Int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
@@ -2423,10 +2433,12 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , 
 
 /* struct_matvec.c */
 void *hypre_StructMatvecCreate ( void );
+HYPRE_Int hypre_StructMatvecSetTranspose ( void *matvec_vdata , HYPRE_Int transpose );
 HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 
 /* struct_scale.c */
 HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha , hypre_StructVector *y );

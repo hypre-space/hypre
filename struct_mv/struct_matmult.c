@@ -103,7 +103,7 @@
  * - Assumes there are at most two grid index spaces in the product
  *
  * RDF TODO: Compute symmetric matrix.  Make sure to compute comm_pkg correctly
- * using add_ghost or similar idea.
+ * using sym_ghost or similar idea.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -539,6 +539,8 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
 
       /* If matrix is all constant, num_ghost should be all zero */
       hypre_CommStencilCreateNumGhost(comm_stencils[m], &num_ghost);
+      /* RDF TODO: Make sure num_ghost is at least as large as before, so that
+       * when we call Restore() below, we don't lose any data */
       if (hypre_StructMatrixDomainIsCoarse(M))
       {
          /* Increase num_ghost (on both sides) to ensure that data spaces are

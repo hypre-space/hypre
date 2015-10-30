@@ -302,16 +302,6 @@ HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix )
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
-HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
-                               HYPRE_Int          *num_ghost )
-{
-   return ( hypre_StructMatrixSetNumGhost(matrix, num_ghost) );
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
- 
-HYPRE_Int
 HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
                                 HYPRE_Int           symmetric )
 {
@@ -329,6 +319,34 @@ HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
                                       HYPRE_Int          *entries )
 {
    hypre_StructMatrixSetConstantEntries(matrix, nentries, entries);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
+                                HYPRE_Int           transpose )
+{
+   HYPRE_Int resize;
+
+   hypre_StructMatrixSetTranspose(matrix, transpose, &resize);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+ 
+HYPRE_Int
+HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix  matrix,
+                               HYPRE_Int          *num_ghost )
+{
+   HYPRE_Int resize;
+
+   hypre_StructMatrixSetNumGhost(matrix, num_ghost, &resize);
 
    return hypre_error_flag;
 }
@@ -357,6 +375,21 @@ HYPRE_StructMatrixMatvec( HYPRE_Complex      alpha,
    return ( hypre_StructMatvec( alpha, (hypre_StructMatrix *) A,
                                 (hypre_StructVector *) x, beta,
                                 (hypre_StructVector *) y) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_StructMatrixMatvecT( HYPRE_Complex      alpha,
+                           HYPRE_StructMatrix A,
+                           HYPRE_StructVector x,
+                           HYPRE_Complex      beta,
+                           HYPRE_StructVector y     )
+{
+   return ( hypre_StructMatvecT( alpha, (hypre_StructMatrix *) A,
+                                 (hypre_StructVector *) x, beta,
+                                 (hypre_StructVector *) y) );
 }
 
 /*--------------------------------------------------------------------------

@@ -114,15 +114,13 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    {
       hypre_StructMatrixNumGhost(mask)[i] =
          hypre_StructMatrixNumGhost(matrix)[i];
-      hypre_StructMatrixAddGhost(mask)[i] =
-         hypre_StructMatrixAddGhost(matrix)[i];
+      hypre_StructMatrixSymGhost(mask)[i] =
+         hypre_StructMatrixSymGhost(matrix)[i];
    }
 
    hypre_StructMatrixGlobalSize(mask) =
       hypre_StructGridGlobalSize(hypre_StructMatrixGrid(mask)) *
       mask_stencil_size;
-
-   hypre_StructMatrixCommPkg(mask) = NULL;
 
    hypre_StructMatrixRefCount(mask) = 1;
 

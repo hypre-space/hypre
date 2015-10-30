@@ -251,7 +251,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
          if (smatrix != NULL)
          {
             HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
-            hypre_StructMatrixSetNumGhost(smatrix, num_ghost);
+            HYPRE_StructMatrixSetNumGhost(smatrix, num_ghost);
             hypre_StructMatrixInitialize(smatrix);
             /* needed to get AddTo accumulation correct between processors */
             hypre_StructMatrixClearGhostValues(smatrix);

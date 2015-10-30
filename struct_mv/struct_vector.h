@@ -72,6 +72,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorGrid(vector)          ((vector) -> grid)
 #define hypre_StructVectorNBoxes(vector)        ((vector) -> nboxes)
 #define hypre_StructVectorBoxnums(vector)       ((vector) -> boxnums)
+#define hypre_StructVectorBoxnum(vector, i)     ((vector) -> boxnums[i])
 #define hypre_StructVectorStride(vector)        ((vector) -> stride)
 #define hypre_StructVectorData(vector)          ((vector) -> data)
 #define hypre_StructVectorDataSpace(vector)     ((vector) -> data_space)

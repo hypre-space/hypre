@@ -364,6 +364,13 @@ HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
                                                 HYPRE_Int         *entries );
 
 /**
+ * Indicate whether the transpose coefficients should also be stored.
+ **/
+HYPRE_Int
+HYPRE_StructMatrixSetTranspose( HYPRE_StructMatrix  matrix,
+                                HYPRE_Int           transpose );
+
+/**
  * Set the ghost layer in the matrix 
  **/
 HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
@@ -378,11 +385,22 @@ HYPRE_Int HYPRE_StructMatrixPrint(const char         *filename,
                                   HYPRE_Int           all);
 
 /**
- * Matvec operator.  This operation is  $y = \alpha A x + \beta y$ .
+ * Matvec operation.  This operation is  $y = \alpha A x + \beta y$.
  * Note that you can do a simple matrix-vector multiply by setting
  * $\alpha=1$ and $\beta=0$.
  **/
-HYPRE_Int HYPRE_StructMatrixMatvec ( HYPRE_Complex alpha,
+HYPRE_Int HYPRE_StructMatrixMatvec( HYPRE_Complex alpha,
+                                    HYPRE_StructMatrix A,
+                                    HYPRE_StructVector x,
+                                    HYPRE_Complex beta,
+                                    HYPRE_StructVector y );
+
+/**
+ * Matvec transpose operation.  This operation is $y = \alpha A^T x + \beta y$.
+ * Note that you can do a simple matrix-vector multiply by setting $\alpha=1$
+ * and $\beta=0$.
+ **/
+HYPRE_Int HYPRE_StructMatrixMatvecT( HYPRE_Complex alpha,
                                      HYPRE_StructMatrix A,
                                      HYPRE_StructVector x,
                                      HYPRE_Complex beta,
