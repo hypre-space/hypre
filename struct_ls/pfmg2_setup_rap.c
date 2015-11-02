@@ -133,7 +133,7 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
    /*-----------------------------------------------------------------------
     * Set number of ghost points - one one each boundary
     *-----------------------------------------------------------------------*/
-   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }

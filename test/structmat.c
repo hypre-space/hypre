@@ -582,7 +582,7 @@ main( hypre_int  argc,
    HYPRE_Int             num_procs, myid, outlev, ierr;
    HYPRE_Int             time_index;
    HYPRE_Int             arg_index, box, mi, vi, ei, d, i, k;
-   HYPRE_Int             do_matvec, do_matmat;
+   HYPRE_Int             do_matvec, do_matvecT, do_matmat;
    HYPRE_Int             mv_A, mv_x, mv_y;
    HYPRE_Int             nterms, *terms, *trans;
    char                  transposechar;
@@ -648,6 +648,7 @@ main( hypre_int  argc,
    }
 
    do_matvec = 0;
+   do_matvecT = 0;
    do_matmat = 0;
 
    /*-----------------------------------------------------------
@@ -700,6 +701,14 @@ main( hypre_int  argc,
       {
          arg_index++;
          do_matvec = 1;
+         mv_A = atoi(argv[arg_index++]);
+         mv_x = atoi(argv[arg_index++]);
+         mv_y = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-matTvec") == 0 )
+      {
+         arg_index++;
+         do_matvecT = 1;
          mv_A = atoi(argv[arg_index++]);
          mv_x = atoi(argv[arg_index++]);
          mv_y = atoi(argv[arg_index++]);
@@ -963,8 +972,7 @@ main( hypre_int  argc,
       }
 #endif
 
-      HYPRE_StructMatrixMatvec(
-         1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
+      HYPRE_StructMatrixMatvec(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
       
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Matrix-vector multiply", hypre_MPI_COMM_WORLD);
@@ -974,6 +982,30 @@ main( hypre_int  argc,
       if (outlev >= 1)
       {
          hypre_sprintf(filename, "%s.matvec", outfile);
+         HYPRE_StructVectorPrint(filename, vectors[mv_y], 0);
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Transpose matrix-vector multiply
+    *-----------------------------------------------------------*/
+
+   if (do_matvecT)
+   {
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      time_index = hypre_InitializeTiming("Transpose matrix-vector multiply");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructMatrixMatvecT(1.0, matrices[mv_A], vectors[mv_x], 1.0, vectors[mv_y]);
+      
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Transpose matrix-vector multiply", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      if (outlev >= 1)
+      {
+         hypre_sprintf(filename, "%s.matvecT", outfile);
          HYPRE_StructVectorPrint(filename, vectors[mv_y], 0);
       }
    }

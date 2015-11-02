@@ -55,9 +55,7 @@ typedef struct
    HYPRE_Int            *active_l;  /* flags to relax on level l*/
 
    hypre_StructGrid    **grid_l;
-   hypre_StructGrid    **P_grid_l;
                     
-   HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;

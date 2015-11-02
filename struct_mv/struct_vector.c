@@ -104,52 +104,59 @@ HYPRE_Int
 hypre_StructVectorMapCommInfo( hypre_StructVector *vector,
                                hypre_CommInfo     *comm_info )
 {
-   hypre_BoxArrayArray  *boxaa;
-   hypre_BoxArray       *boxa;
-   hypre_Box            *box;
-   HYPRE_Int             i, j;
+   HYPRE_Int       ndim   = hypre_StructVectorNDim(vector);
+   hypre_IndexRef  stride = hypre_StructVectorStride(vector);
 
-   boxaa = hypre_CommInfoSendBoxes(comm_info);
-   hypre_ForBoxArrayI(i, boxaa)
+   /* Map the comm_info boxes only if the vector does not have a unit stride */
+   if (!hypre_IndexEqual(stride, 1, ndim))
    {
-      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
-      hypre_ForBoxI(j, boxa)
+      hypre_BoxArrayArray  *boxaa;
+      hypre_BoxArray       *boxa;
+      hypre_Box            *box;
+      HYPRE_Int             i, j;
+
+      boxaa = hypre_CommInfoSendBoxes(comm_info);
+      hypre_ForBoxArrayI(i, boxaa)
       {
-         box = hypre_BoxArrayBox(boxa, j);
-         hypre_StructVectorMapDataBox(vector, box);
+         boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+         hypre_ForBoxI(j, boxa)
+         {
+            box = hypre_BoxArrayBox(boxa, j);
+            hypre_StructVectorMapDataBox(vector, box);
+         }
       }
-   }
 
-   boxaa = hypre_CommInfoSendRBoxes(comm_info);
-   hypre_ForBoxArrayI(i, boxaa)
-   {
-      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
-      hypre_ForBoxI(j, boxa)
+      boxaa = hypre_CommInfoSendRBoxes(comm_info);
+      hypre_ForBoxArrayI(i, boxaa)
       {
-         box = hypre_BoxArrayBox(boxa, j);
-         hypre_StructVectorMapDataBox(vector, box);
+         boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+         hypre_ForBoxI(j, boxa)
+         {
+            box = hypre_BoxArrayBox(boxa, j);
+            hypre_StructVectorMapDataBox(vector, box);
+         }
       }
-   }
 
-   boxaa = hypre_CommInfoRecvBoxes(comm_info);
-   hypre_ForBoxArrayI(i, boxaa)
-   {
-      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
-      hypre_ForBoxI(j, boxa)
+      boxaa = hypre_CommInfoRecvBoxes(comm_info);
+      hypre_ForBoxArrayI(i, boxaa)
       {
-         box = hypre_BoxArrayBox(boxa, j);
-         hypre_StructVectorMapDataBox(vector, box);
+         boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+         hypre_ForBoxI(j, boxa)
+         {
+            box = hypre_BoxArrayBox(boxa, j);
+            hypre_StructVectorMapDataBox(vector, box);
+         }
       }
-   }
 
-   boxaa = hypre_CommInfoRecvRBoxes(comm_info);
-   hypre_ForBoxArrayI(i, boxaa)
-   {
-      boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
-      hypre_ForBoxI(j, boxa)
+      boxaa = hypre_CommInfoRecvRBoxes(comm_info);
+      hypre_ForBoxArrayI(i, boxaa)
       {
-         box = hypre_BoxArrayBox(boxa, j);
-         hypre_StructVectorMapDataBox(vector, box);
+         boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
+         hypre_ForBoxI(j, boxa)
+         {
+            box = hypre_BoxArrayBox(boxa, j);
+            hypre_StructVectorMapDataBox(vector, box);
+         }
       }
    }
 

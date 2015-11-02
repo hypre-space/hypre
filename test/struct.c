@@ -2801,8 +2801,10 @@ main( hypre_int argc,
       HYPRE_StructVectorDestroy(b);
       HYPRE_StructVectorDestroy(x);
 
-      for ( i = 0; i < (dim + 1); i++)
+      for ( i = 0; i < (2-sym)*dim + 1; i++)
+      {
          hypre_TFree(offsets[i]);
+      }
       hypre_TFree(offsets);
 
       hypre_FinalizeMemoryDebug();

@@ -219,7 +219,8 @@ HYPRE_Int hypre_StructMatrixUnMapDataIndex ( hypre_StructMatrix *matrix , hypre_
 HYPRE_Int hypre_StructMatrixUnMapDataBox ( hypre_StructMatrix *matrix , hypre_Box *dbox );
 HYPRE_Int hypre_StructMatrixUnMapDataStride ( hypre_StructMatrix *matrix , hypre_Index dstride );
 HYPRE_Int hypre_StructMatrixPlaceStencil ( hypre_StructMatrix *matrix , HYPRE_Int entry , hypre_Index dindex , hypre_Index index );
-HYPRE_Int hypre_StructMatrixGetStencilSpace( hypre_StructMatrix *matrix , HYPRE_Int entry , hypre_Index origin , hypre_Index stride );
+HYPRE_Int hypre_StructMatrixGetStencilStride ( hypre_StructMatrix *matrix , hypre_Index stride );
+HYPRE_Int hypre_StructMatrixGetStencilSpace ( hypre_StructMatrix *matrix , HYPRE_Int entry , HYPRE_Int transpose , hypre_Index origin , hypre_Index stride );
 HYPRE_Int hypre_StructMatrixMapCommInfo ( hypre_StructMatrix *matrix , hypre_IndexRef origin , hypre_Index stride , hypre_CommInfo *comm_info );
 HYPRE_Int hypre_StructMatrixCreateCommPkg( hypre_StructMatrix *matrix , hypre_CommInfo *comm_info , hypre_CommPkg **comm_pkg_ptr , HYPRE_Complex ***comm_data_ptr);
 HYPRE_Complex *hypre_StructMatrixExtractPointerByIndex ( hypre_StructMatrix *matrix , HYPRE_Int b , hypre_Index index );

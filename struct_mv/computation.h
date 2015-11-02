@@ -49,7 +49,6 @@ typedef struct hypre_ComputePkg_struct
    hypre_Index            stride;
 
    hypre_StructGrid      *grid;
-   hypre_BoxArray        *data_space;
    HYPRE_Int              num_values;
 
 } hypre_ComputePkg;
@@ -74,7 +73,6 @@ typedef struct hypre_ComputePkg_struct
 #define hypre_ComputePkgStride(compute_pkg)       (compute_pkg -> stride)
 
 #define hypre_ComputePkgGrid(compute_pkg)         (compute_pkg -> grid)
-#define hypre_ComputePkgDataSpace(compute_pkg)    (compute_pkg -> data_space)
 #define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
 
 #endif

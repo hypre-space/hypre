@@ -121,7 +121,7 @@ hypre_SMG2CreateRAPOp( hypre_StructMatrix *R,
       RAP_num_ghost[1] = 0;
       RAP_num_ghost[3] = 0;
    }
-   hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
    return RAP;
 }

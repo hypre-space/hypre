@@ -33,6 +33,7 @@ typedef struct
    hypre_StructMatrix  *A;
    hypre_StructVector  *x;
    hypre_ComputePkg    *compute_pkg;
+   hypre_BoxArray      *data_space;
    HYPRE_Int            transpose;
 
 } hypre_StructMatvecData;
@@ -107,7 +108,14 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 
    grid = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
-   dom_stride = hypre_StructMatrixDomStride(A);
+   if (matvec_data -> transpose)
+   {
+      dom_stride = hypre_StructMatrixRanStride(A);
+   }
+   else
+   {
+      dom_stride = hypre_StructMatrixDomStride(A);
+   }
 
    /* This computes a data_space with respect to the matrix grid and the
     * stencil pattern for the matvec */
@@ -118,11 +126,8 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 
    /* This computes the communication pattern for the new x data_space */
    hypre_CreateComputeInfo(grid, stencil, &compute_info);
-   if (hypre_StructMatrixDomainIsCoarse(A))
-   {
-       hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
-      /* Compute boxes will be appropriately projected in MatvecCompute */
-   }
+   hypre_StructVectorMapCommInfo(x, hypre_ComputeInfoCommInfo(compute_info));
+   /* Compute boxes will be appropriately projected in MatvecCompute */
    hypre_ComputePkgCreate(compute_info, data_space, 1, grid, &compute_pkg);
 
    /* This restores the original grid */
@@ -135,6 +140,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
    (matvec_data -> A)           = hypre_StructMatrixRef(A);
    (matvec_data -> x)           = hypre_StructVectorRef(x);
    (matvec_data -> compute_pkg) = compute_pkg;
+   (matvec_data -> data_space)  = data_space;
 
    return hypre_error_flag;
 }
@@ -220,6 +226,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Int 		   *ran_boxnums;
    hypre_IndexRef           ran_stride;
    hypre_IndexRef           dom_stride;
+   HYPRE_Int                dom_is_coarse;
 
    hypre_StructVector      *x_tmp = NULL;
 
@@ -238,11 +245,23 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    ndim = hypre_StructMatrixNDim(A);
 
-   ran_stride = hypre_StructMatrixRanStride(A);
-   ran_nboxes = hypre_StructMatrixRanNBoxes(A);
-   ran_boxnums = hypre_StructMatrixRanBoxnums(A);
-
-   dom_stride = hypre_StructMatrixDomStride(A);
+   /* Switch domain and range information if doing a transpose matvec */
+   if (transpose)
+   {
+      ran_stride    = hypre_StructMatrixDomStride(A);
+      ran_nboxes    = hypre_StructMatrixDomNBoxes(A);
+      ran_boxnums   = hypre_StructMatrixDomBoxnums(A);
+      dom_stride    = hypre_StructMatrixRanStride(A);
+      dom_is_coarse = hypre_StructMatrixRangeIsCoarse(A);
+   }
+   else
+   {
+      ran_stride    = hypre_StructMatrixRanStride(A);
+      ran_nboxes    = hypre_StructMatrixRanNBoxes(A);
+      ran_boxnums   = hypre_StructMatrixRanBoxnums(A);
+      dom_stride    = hypre_StructMatrixDomStride(A);
+      dom_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
+   }
 
    ygrid = hypre_StructVectorGrid(y);
    y_ids = hypre_StructGridIDs(ygrid);
@@ -260,7 +279,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    if (alpha == 0.0)
    {
       boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-      
       hypre_ForBoxI(i, boxes)
       {
          hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
@@ -296,7 +314,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     *-----------------------------------------------------------------------*/
 
    /* This resizes the data for x using the data_space computed during setup */
-   data_space = hypre_ComputePkgDataSpace(compute_pkg);
+   data_space = hypre_BoxArrayDuplicate(matvec_data -> data_space);
    hypre_StructVectorReindex(x, base_grid, dom_stride);
    hypre_StructVectorResize(x, data_space);
 
@@ -322,7 +340,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             temp = beta / alpha;
             if (temp != 1.0)
             {
-               boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+               boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
                hypre_ForBoxI(i, boxes)
                {
                   hypre_CopyBox(hypre_BoxArrayBox(boxes, i), compute_box);
@@ -375,7 +393,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
        * y += A*x (or A^T*x)
        *--------------------------------------------------------------------*/
 
-      hypre_StructMatrixGetStencilSpace(A, 0, origin, stride);
+      hypre_StructMatrixGetStencilStride(A, stride);
       hypre_CopyToIndex(stride, ndim, Adstride);
       hypre_StructMatrixMapDataStride(A, Adstride);
       hypre_CopyToIndex(stride, ndim, xdstride);
@@ -422,25 +440,43 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             for (si = 0; si < stencil_size; si++)
             {
                /* If the domain grid is coarse, the compute box will change
-                * based on the stencil entry.  Otherwise, this code block only
-                * needs to be called once on the first stencil iteration. */
-               if ((si == 0) || hypre_StructMatrixDomainIsCoarse(A))
+                * based on the stencil entry.  Otherwise, the next code block
+                * needs to be called only on the first stencil iteration.
+                *
+                * Note that the Adstart and xdstart values are set in different
+                * places depending on the value of transpose. */
+
+               if ((si == 0) || dom_is_coarse)
                {
                   hypre_CopyBox(hypre_BoxArrayBox(compute_box_a, j), compute_box);
-                  hypre_StructMatrixGetStencilSpace(A, si, origin, stride);
+                  hypre_StructMatrixGetStencilSpace(A, si, transpose, origin, stride);
                   hypre_ProjectBox(compute_box, origin, stride);
                   start = hypre_BoxIMin(compute_box);
 
-                  hypre_CopyToIndex(start, ndim, Adstart);
-                  hypre_StructMatrixMapDataIndex(A, Adstart);
+                  if (!transpose) /* Set Adstart here and xdstart below */
+                  {
+                     hypre_CopyToIndex(start, ndim, Adstart);
+                     hypre_StructMatrixMapDataIndex(A, Adstart);
+                  }
 
                   hypre_CopyToIndex(start, ndim, ydstart);
                   hypre_MapToCoarseIndex(ydstart, NULL, ran_stride, ndim);
 
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                }
-               hypre_AddIndexes(start, stencil_shape[si], ndim, xdstart);
-               hypre_StructVectorMapDataIndex(x, xdstart);
+
+               if (transpose)
+               {
+                  hypre_SubtractIndexes(start, stencil_shape[si], ndim, Adstart);
+                  hypre_StructMatrixMapDataIndex(A, Adstart);
+                  hypre_SubtractIndexes(start, stencil_shape[si], ndim, xdstart);
+                  hypre_StructVectorMapDataIndex(x, xdstart);
+               }
+               else /* Set Adstart above and xdstart here */
+               {
+                  hypre_AddIndexes(start, stencil_shape[si], ndim, xdstart);
+                  hypre_StructVectorMapDataIndex(x, xdstart);
+               }
 
                Ap = hypre_StructMatrixBoxData(A, Ab, si);
                if (hypre_StructMatrixConstEntry(A, si))
@@ -518,7 +554,8 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
    {
       hypre_StructMatrixDestroy(matvec_data -> A);
       hypre_StructVectorDestroy(matvec_data -> x);
-      hypre_ComputePkgDestroy(matvec_data -> compute_pkg );
+      hypre_ComputePkgDestroy(matvec_data -> compute_pkg);
+      hypre_BoxArrayDestroy(matvec_data -> data_space);
       hypre_TFree(matvec_data);
    }
 

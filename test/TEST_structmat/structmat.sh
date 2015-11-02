@@ -84,6 +84,17 @@ do
    done
 done
 
+# MatvecT tests
+for i in $FILESmatvec
+do
+   for j in ${i}.matvec.*
+   do
+      matvecT=`echo $j | sed 's/mv/mvT/' | sed 's/matvec/matvecT/'`
+      saved=`echo $j | sed 's/.out/.saved/'`
+      diff -U3 -bI"time" $matvecT $saved >&2
+   done
+done
+
 #=============================================================================
 # remove temporary files
 #=============================================================================

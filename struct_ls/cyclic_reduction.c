@@ -198,7 +198,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    {
       Ac_num_ghost[2*cdir + 1] = 1;
    }
-   hypre_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
+   HYPRE_StructMatrixSetNumGhost(Ac, Ac_num_ghost);
 
    hypre_StructMatrixInitializeShell(Ac);
  

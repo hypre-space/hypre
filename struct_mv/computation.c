@@ -301,7 +301,6 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
                    hypre_ComputePkgStride(compute_pkg));
 
    hypre_StructGridRef(grid, &hypre_ComputePkgGrid(compute_pkg));
-   hypre_ComputePkgDataSpace(compute_pkg) = data_space;
    hypre_ComputePkgNumValues(compute_pkg) = num_values;
 
    hypre_ComputeInfoDestroy(compute_info);
