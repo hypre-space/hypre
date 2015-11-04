@@ -564,6 +564,58 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
 }
 
 /*--------------------------------------------------------------------------
+ * Compute a list of boxnums based on a starting list and a stride, removing
+ * boxnums from the list whose corresponding boxes coarsen to size zero.
+ *
+ * If boxnums == NULL, start with all of the boxes in grid
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_StructGridComputeBoxnums( hypre_StructGrid *grid,
+                                HYPRE_Int         nboxes,
+                                HYPRE_Int        *boxnums,
+                                hypre_Index       stride,
+                                HYPRE_Int        *new_nboxes_ptr,
+                                HYPRE_Int       **new_boxnums_ptr )
+{
+   HYPRE_Int   new_nboxes, *new_boxnums, i, b;
+   hypre_Box  *box;
+
+   box = hypre_BoxCreate(hypre_StructGridNDim(grid));
+
+   if (boxnums == NULL)
+   {
+      nboxes = hypre_StructGridNumBoxes(grid);
+   }
+
+   new_boxnums = hypre_TAlloc(HYPRE_Int, nboxes);
+   new_nboxes = 0;
+   for (i = 0; i < nboxes; i++)
+   {
+      if (boxnums == NULL)
+      {
+         b = i;
+      }
+      else
+      {
+         b = boxnums[i];
+      }
+      hypre_CopyBox(hypre_StructGridBox(grid, b), box);
+      hypre_CoarsenBox(box, NULL, stride);
+      if (hypre_BoxVolume(box))
+      {
+         new_boxnums[new_nboxes++] = b;
+      }
+   }
+   *new_nboxes_ptr  = new_nboxes;
+   *new_boxnums_ptr = new_boxnums;
+
+   hypre_BoxDestroy(box);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_GatherAllBoxes
  *--------------------------------------------------------------------------*/
 

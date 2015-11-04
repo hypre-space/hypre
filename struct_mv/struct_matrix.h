@@ -78,6 +78,7 @@ typedef struct hypre_StructMatrix_struct
                                            data_indices[b][s] is the starting
                                            index of data for boxnum b and
                                            stencil coefficient s */
+   HYPRE_Int            *const_indices; /* Indices into the data array for constant data */
    HYPRE_Int             vdata_offset;  /* Offset to variable-coeff matrix data */
    HYPRE_Int             num_values;    /* Number of "stored" variable coeffs */
    HYPRE_Int             num_cvalues;   /* Number of "stored" constant coeffs */
@@ -130,6 +131,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixConstIndices(matrix)  ((matrix) -> const_indices)
 #define hypre_StructMatrixVDataOffset(matrix)   ((matrix) -> vdata_offset)
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixNumCValues(matrix)    ((matrix) -> num_cvalues)
@@ -157,5 +159,8 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
+
+#define hypre_StructMatrixConstData(matrix, s) \
+(hypre_StructMatrixData(matrix) + hypre_StructMatrixConstIndices(matrix)[s])
 
 #endif

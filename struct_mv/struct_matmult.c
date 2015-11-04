@@ -373,7 +373,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
                if (hypre_StructMatrixConstEntry(matrix, entry))
                {
                   /* Accumulate the constant contribution to the product */
-                  constp = hypre_StructMatrixBoxData(matrix, 0, entry);
+                  constp = hypre_StructMatrixConstData(matrix, entry);
                   a[i].cprod *= constp[0];
                   if (!transposes[id])
                   {
@@ -449,7 +449,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    /* Set constant values in M */
    for (i = 0; i < nconst; i++)
    {
-      constp = hypre_StructMatrixBoxData(M, 0, const_entries[i]);
+      constp = hypre_StructMatrixConstData(M, const_entries[i]);
       constp[0] = const_values[i];
    }
 
@@ -465,11 +465,14 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
       hypre_TFree(matrices);
       hypre_TFree(terms);
       hypre_TFree(a);
-      for (m = 0; m < nmatrices+1; m++)
+      if (hypre_StructGridNumBoxes(grid) > 0)
       {
-         hypre_CommStencilDestroy(comm_stencils[m]);
+         for (m = 0; m < nmatrices+1; m++)
+         {
+            hypre_CommStencilDestroy(comm_stencils[m]);
+         }
+         hypre_TFree(comm_stencils);
       }
-      hypre_TFree(comm_stencils);
 
       HYPRE_StructMatrixAssemble(M);
       return hypre_error_flag;

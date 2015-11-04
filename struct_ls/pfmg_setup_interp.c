@@ -61,7 +61,7 @@ hypre_zPFMGCreateInterpOp( hypre_StructMatrix *A,
    /* Set up the P matrix */
    P = hypre_StructMatrixCreate(hypre_StructMatrixComm(A), hypre_StructMatrixGrid(A), stencil);
    hypre_StructMatrixSetDomainStride(P, stride);
-   hypre_StructMatrixSetConstantEntries(P, 1, centries);
+   hypre_StructMatrixSetConstantEntries(P, ncentries, centries);
 
    hypre_StructStencilDestroy(stencil);
 
@@ -117,78 +117,64 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
       constant = 1; /* All entries are constant */
    }
 
-   compute_box = hypre_BoxCreate(ndim);
-
    /*----------------------------------------------------------
     * Compute P
     *----------------------------------------------------------*/
 
    /* Set center coefficient to 1 */
-   Pp0 = hypre_StructMatrixBoxData(P, 0, 0);
+   Pp0 = hypre_StructMatrixConstData(P, 0);
    Pp0[0] = 1;
 
-   Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
-   Pstenc2 = hypre_IndexD(P_stencil_shape[2], cdir);
-
-   /* Compute the constant part of the stencil collapse */
-   ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size);
-   nventries = 0;
-   Pconst0 = 0.0;
-   Pconst1 = 0.0;
-   Pconst2 = 0.0;
-   for (si = 0; si < A_stencil_size; si++)
-   {
-      if (hypre_StructMatrixConstEntry(A, si))
-      {
-         Ap = hypre_StructMatrixBoxData(A, 0, si);
-         Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
-         
-         if (Astenc == 0)
-         {
-            Pconst0 += Ap[0];
-         }
-         else if (Astenc == Pstenc1)
-         {
-            Pconst1 -= Ap[0];
-         }
-         else if (Astenc == Pstenc2)
-         {
-            Pconst2 -= Ap[0];
-         }
-      }
-      else
-      {
-         ventries[nventries++] = si;
-      }
-   }
-
-   /* Complete the stencil collapse and set the entries in P */
    if (constant)
    {
       /* Off-diagonal entries are constant */
 
-      Pp1 = hypre_StructMatrixBoxData(P, 0, 1);
-      Pp2 = hypre_StructMatrixBoxData(P, 0, 2);
+      Pp1 = hypre_StructMatrixConstData(P, 1);
+      Pp2 = hypre_StructMatrixConstData(P, 2);
 
-      center = Pconst0;
-      Pp1[0] = Pconst1;
-      Pp2[0] = Pconst2;
-
-      if (center)
-      {
-         Pp1[0] /= center;
-         Pp2[0] /= center;  
-      }
-      else
-      {
-         /* For some reason the interpolation coefficients sum to zero */
-         Pp1[0] = 0.0;
-         Pp2[0] = 0.0;  
-      }
+      Pp1[0] = 0.5;
+      Pp2[0] = 0.5;
    }
    else
    {
       /* Off-diagonal entries are variable */
+
+      compute_box = hypre_BoxCreate(ndim);
+
+      Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
+      Pstenc2 = hypre_IndexD(P_stencil_shape[2], cdir);
+
+      /* Compute the constant part of the stencil collapse */
+      ventries = hypre_TAlloc(HYPRE_Int, A_stencil_size);
+      nventries = 0;
+      Pconst0 = 0.0;
+      Pconst1 = 0.0;
+      Pconst2 = 0.0;
+      for (si = 0; si < A_stencil_size; si++)
+      {
+         if (hypre_StructMatrixConstEntry(A, si))
+         {
+            Ap = hypre_StructMatrixConstData(A, si);
+            Astenc = hypre_IndexD(A_stencil_shape[si], cdir);
+         
+            if (Astenc == 0)
+            {
+               Pconst0 += Ap[0];
+            }
+            else if (Astenc == Pstenc1)
+            {
+               Pconst1 -= Ap[0];
+            }
+            else if (Astenc == Pstenc2)
+            {
+               Pconst2 -= Ap[0];
+            }
+         }
+         else
+         {
+            ventries[nventries++] = si;
+         }
+      }
 
       /* Get the stencil space on the base grid for entry 1 of P (valid also for entry 2) */
       hypre_StructMatrixGetStencilSpace(P, 1, 0, origin, stride);
@@ -250,26 +236,26 @@ hypre_zPFMGSetupInterpOp( hypre_StructMatrix *P,
             if (center)
             {
                Pp1[Pi] /= center;
-               Pp2[Pi] /= center;  
+               Pp2[Pi] /= center;
             }
             else
             {
                /* For some reason the interpolation coefficients sum to zero */
                Pp1[Pi] = 0.0;
-               Pp2[Pi] = 0.0;  
+               Pp2[Pi] = 0.0;
             }
          }
          hypre_BoxLoop2End(Ai, Pi);
       }
+
+      hypre_BoxDestroy(compute_box);
+      hypre_TFree(ventries);
    }
 
    hypre_StructMatrixAssemble(P);
    /* The following call is needed to prevent cases where interpolation reaches
     * outside the boundary with nonzero coefficient */
    hypre_StructMatrixClearBoundary(P);
-
-   hypre_BoxDestroy(compute_box);
-   hypre_TFree(ventries);
 
    return hypre_error_flag;
 }
