@@ -146,15 +146,16 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ *
  * The grids for A, x, and y must be compatible with respect to matrix-vector
  * multiply, but the initial grid boxes and strides may differ.  The routines
  * Reindex() and Resize() are called to convert the grid for the vector x to
  * match the domain grid of the matrix A.  As a result, both A and x have the
  * same list of underlying boxes and the domain stride for A is the same as the
  * stride for x.  The grid for y is assumed to match the range grid for A, but
- * with potentially different boxes and strides.  The box ids are used to find
- * the boxnums for y.  Here are some examples (after the Reindex() and Resize()
- * have been called for x):
+ * with potentially different boxes and strides.  The number of boxes and the
+ * corresponding box ids must match, however, so it is not necessary to search.
+ * Here are some examples (after Reindex() and Resize() have been called for x):
  *
  *   RangeIsCoarse:                           DomainIsCoarse:
  *   Adstride = 1                             Adstride = 1
@@ -217,11 +218,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_Index             *stencil_shape;
    HYPRE_Int                stencil_size;
                           
-   hypre_StructGrid        *base_grid;
-   hypre_StructGrid        *ygrid;
-   HYPRE_Int 		   *base_ids;
-   HYPRE_Int 		   *y_ids;
-
+   hypre_StructGrid        *grid;
    HYPRE_Int 		    ran_nboxes;
    HYPRE_Int 		   *ran_boxnums;
    hypre_IndexRef           ran_stride;
@@ -263,11 +260,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       dom_is_coarse = hypre_StructMatrixDomainIsCoarse(A);
    }
 
-   ygrid = hypre_StructVectorGrid(y);
-   y_ids = hypre_StructGridIDs(ygrid);
-
-   base_grid = hypre_StructMatrixGrid(A);
-   base_ids = hypre_StructGridIDs(base_grid);
+   grid = hypre_StructMatrixGrid(A);
 
    compute_box = hypre_BoxCreate(ndim);
    hypre_SetIndex(ustride, 1);
@@ -315,7 +308,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
    /* This resizes the data for x using the data_space computed during setup */
    data_space = hypre_BoxArrayClone(matvec_data -> data_space);
-   hypre_StructVectorReindex(x, base_grid, dom_stride);
+   hypre_StructVectorReindex(x, grid, dom_stride);
    hypre_StructVectorResize(x, data_space);
 
    stencil       = hypre_StructMatrixStencil(A);
@@ -408,22 +401,10 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          hypre_Index  xdstart;
          hypre_Index  ydstart;
 
+         /* The corresponding box IDs for the following should match */
          Ab = ran_boxnums[i];
          xb = Ab;  /* Reindex ensures that A and x have the same grid boxes */
-         if (y_ids[yb] > base_ids[Ab])
-         {
-            continue;
-         }
-         while (y_ids[yb] < base_ids[Ab])
-         {
-            yb++;
-         }
-         /* There should be a matching id for y */
-         if (y_ids[yb] != base_ids[Ab])
-         {
-            hypre_error_w_msg(HYPRE_ERROR_GENERIC, "Matvec box ids don't match");
-            return hypre_error_flag;
-         }
+         yb = hypre_StructVectorBoxnum(y, i);
 
          compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, Ab);
 
