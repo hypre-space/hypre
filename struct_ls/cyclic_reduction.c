@@ -545,7 +545,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    grid = hypre_StructMatrixGrid(A);
 
    /* Compute a preliminary num_levels value based on the grid */
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    num_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
 
    grid_l    = hypre_TAlloc(hypre_StructGrid *, num_levels);
@@ -585,7 +585,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up base points
     *-----------------------------------------------------*/
 
-   base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[0]));
+   base_points = hypre_BoxArrayClone(hypre_StructGridBoxes(grid_l[0]));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
    (cyc_red_data -> base_points) = base_points;
@@ -602,13 +602,11 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
-      fine_points_l[l] =
-         hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
+      fine_points_l[l] = hypre_BoxArrayClone(hypre_StructGridBoxes(grid_l[l]));
       hypre_ProjectBoxArray(fine_points_l[l], findex, stride);
    }
   
-   fine_points_l[l] =
-      hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid_l[l]));
+   fine_points_l[l] = hypre_BoxArrayClone(hypre_StructGridBoxes(grid_l[l]));
    if (num_levels == 1)
    {
       hypre_ProjectBoxArray(fine_points_l[l], base_index, base_stride);

@@ -173,7 +173,7 @@ hypre_StructGridSetBoundingBox( hypre_StructGrid *grid,
 {
 
    hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
-   hypre_StructGridBoundingBox(grid) = hypre_BoxDuplicate(new_bb);
+   hypre_StructGridBoundingBox(grid) = hypre_BoxClone(new_bb);
    
    return hypre_error_flag;
 }

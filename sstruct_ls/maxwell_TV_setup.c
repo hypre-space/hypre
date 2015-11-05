@@ -583,7 +583,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       pgrid= hypre_SStructGridPGrid(grid, part);
       sgrid= hypre_SStructPGridCellSGrid(pgrid);
 
-      box= hypre_BoxDuplicate(hypre_StructGridBoundingBox(sgrid));
+      box= hypre_BoxClone(hypre_StructGridBoundingBox(sgrid));
       hypre_AppendBox(box, cboxes);
       /* since rfactor[i]>1, the following i will be an upper bound of
          the number of levels. */
@@ -877,7 +877,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                pgrid= hypre_SStructGridPGrid(egrid_l[l+1], part);
                sgrid= hypre_SStructPGridCellSGrid(pgrid);
 
-               box= hypre_BoxDuplicate(hypre_StructGridBoundingBox(sgrid));
+               box= hypre_BoxClone(hypre_StructGridBoundingBox(sgrid));
                hypre_CopyBox(box, hypre_BoxArrayBox(cboxes,part));
                hypre_BoxDestroy(box);
             }
@@ -1382,7 +1382,7 @@ hypre_CoarsenPGrid( hypre_SStructGrid  *fgrid,
    /*-----------------------------------------
     * Set the coarse sgrid
     *-----------------------------------------*/
-   boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(sgrid));
+   boxes = hypre_BoxArrayClone(hypre_StructGridBoxes(sgrid));
    for (i = 0; i < hypre_BoxArraySize(boxes); i++)
    {
       box = hypre_BoxArrayBox(boxes, i);

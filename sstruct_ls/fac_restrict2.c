@@ -451,8 +451,8 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    {
       s_rc     = hypre_SStructPVectorSVector(rc, vars);
       s_cvector= hypre_SStructPVectorSVector(fgrid_cvectors, vars);
-      send_rboxes= hypre_BoxArrayArrayDuplicate(send_boxes[vars]);
-      recv_rboxes= hypre_BoxArrayArrayDuplicate(recv_boxes[vars]);
+      send_rboxes= hypre_BoxArrayArrayClone(send_boxes[vars]);
+      recv_rboxes= hypre_BoxArrayArrayClone(recv_boxes[vars]);
 
       hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars],
                            send_processes[vars], recv_processes[vars],

@@ -80,7 +80,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
+   base_points = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
    hypre_CreateComputeInfo(grid, stencil, &compute_info);

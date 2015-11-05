@@ -610,8 +610,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       s_rc= hypre_SStructPVectorSVector(ec, vars);
 
       s_cvector= hypre_SStructPVectorSVector(recv_cvectors, vars);
-      send_rboxes= hypre_BoxArrayArrayDuplicate(send_boxes[vars]);
-      recv_rboxes= hypre_BoxArrayArrayDuplicate(recv_boxes[vars]);
+      send_rboxes= hypre_BoxArrayArrayClone(send_boxes[vars]);
+      recv_rboxes= hypre_BoxArrayArrayClone(recv_boxes[vars]);
 
       hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars],
                            send_processes[vars], recv_processes[vars],

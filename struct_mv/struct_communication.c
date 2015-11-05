@@ -352,7 +352,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
       recv_data_offsets = hypre_TAlloc(HYPRE_Int *, 1);
       boxes_match       = hypre_TAlloc(HYPRE_Int, 1);
       hypre_CopyIndex(recv_stride, recv_strides[0]);
-      recv_data_spaces[0] = hypre_BoxArrayDuplicate(recv_data_space);
+      recv_data_spaces[0] = hypre_BoxArrayClone(recv_data_space);
       recv_data_offsets[0] = data_offsets;
       boxes_match[0] = hypre_CommInfoBoxesMatch(comm_info);
       hypre_CommPkgNumBlocks(comm_pkg)       = 1;
@@ -1142,7 +1142,7 @@ hypre_CommPkgAgglomerate( HYPRE_Int        num_comm_pkgs,
             in_boxes_match       = hypre_CommPkgBoxesMatch(comm_pkgs[i]);
             j = block_starts[i] + b;
             hypre_CopyIndex(in_recv_strides[b], recv_strides[j]);
-            recv_data_spaces[j] = hypre_BoxArrayDuplicate(in_recv_data_spaces[b]);
+            recv_data_spaces[j] = hypre_BoxArrayClone(in_recv_data_spaces[b]);
             size = hypre_BoxArraySize(in_recv_data_spaces[b]);
             recv_data_offsets[j] = hypre_TAlloc(HYPRE_Int, size); 
             memcpy(recv_data_offsets[j], in_recv_data_offsets[b],

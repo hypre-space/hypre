@@ -299,7 +299,7 @@ hypre_CopyBox( hypre_Box  *box1,
  *--------------------------------------------------------------------------*/
 
 hypre_Box *
-hypre_BoxDuplicate( hypre_Box *box )
+hypre_BoxClone( hypre_Box *box )
 {
    hypre_Box  *new_box;
 
@@ -712,7 +712,7 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
  *--------------------------------------------------------------------------*/
 
 hypre_BoxArray *
-hypre_BoxArrayDuplicate( hypre_BoxArray *box_array )
+hypre_BoxArrayClone( hypre_BoxArray *box_array )
 {
    hypre_BoxArray  *new_box_array;
 
@@ -894,7 +894,7 @@ hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array )
  *--------------------------------------------------------------------------*/
 
 hypre_BoxArrayArray *
-hypre_BoxArrayArrayDuplicate( hypre_BoxArrayArray *box_array_array )
+hypre_BoxArrayArrayClone( hypre_BoxArrayArray *box_array_array )
 {
    hypre_BoxArrayArray  *new_box_array_array;
    hypre_BoxArray      **new_box_arrays;

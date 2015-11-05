@@ -52,7 +52,7 @@ HYPRE_Int hypre_BoxDestroy ( hypre_Box *box );
 HYPRE_Int hypre_BoxInit( hypre_Box *box , HYPRE_Int  ndim );
 HYPRE_Int hypre_BoxSetExtents ( hypre_Box *box , hypre_Index imin , hypre_Index imax );
 HYPRE_Int hypre_CopyBox( hypre_Box *box1 , hypre_Box *box2 );
-hypre_Box *hypre_BoxDuplicate ( hypre_Box *box );
+hypre_Box *hypre_BoxClone ( hypre_Box *box );
 HYPRE_Int hypre_BoxVolume( hypre_Box *box );
 HYPRE_Real hypre_doubleBoxVolume( hypre_Box *box );
 HYPRE_Int hypre_IndexInBox ( hypre_Index index , hypre_Box *box );
@@ -71,14 +71,14 @@ HYPRE_Int hypre_BoxGrowByArray ( hypre_Box *box , HYPRE_Int *array );
 hypre_BoxArray *hypre_BoxArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayDestroy ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_BoxArraySetSize ( hypre_BoxArray *box_array , HYPRE_Int size );
-hypre_BoxArray *hypre_BoxArrayDuplicate ( hypre_BoxArray *box_array );
+hypre_BoxArray *hypre_BoxArrayClone ( hypre_BoxArray *box_array );
 HYPRE_Int hypre_AppendBox ( hypre_Box *box , hypre_BoxArray *box_array );
 HYPRE_Int hypre_DeleteBox ( hypre_BoxArray *box_array , HYPRE_Int index );
 HYPRE_Int hypre_DeleteMultipleBoxes ( hypre_BoxArray *box_array , HYPRE_Int *indices , HYPRE_Int num );
 HYPRE_Int hypre_AppendBoxArray ( hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 );
 hypre_BoxArrayArray *hypre_BoxArrayArrayCreate ( HYPRE_Int size , HYPRE_Int ndim );
 HYPRE_Int hypre_BoxArrayArrayDestroy ( hypre_BoxArrayArray *box_array_array );
-hypre_BoxArrayArray *hypre_BoxArrayArrayDuplicate ( hypre_BoxArrayArray *box_array_array );
+hypre_BoxArrayArray *hypre_BoxArrayArrayClone ( hypre_BoxArrayArray *box_array_array );
 
 /* box_manager.c */
 HYPRE_Int hypre_BoxManEntryGetInfo ( hypre_BoxManEntry *entry , void **info_ptr );

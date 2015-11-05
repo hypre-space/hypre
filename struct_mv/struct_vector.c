@@ -322,7 +322,7 @@ hypre_StructVectorComputeDataSpace( hypre_StructVector *vector,
    }
 
    /* Add ghost layers and map the data space */
-   data_space = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
+   data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
    hypre_ForBoxI(i, data_space)
    {
       data_box = hypre_BoxArrayBox(data_space, i);
@@ -735,7 +735,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    hypre_SetIndex(data_stride, 1);
  
    int_box = hypre_BoxCreate(hypre_StructVectorNDim(vector));
-   dval_box = hypre_BoxDuplicate(value_box);
+   dval_box = hypre_BoxClone(value_box);
    hypre_SetIndex(dval_stride, 1);
  
    for (i = istart; i < istop; i++)
@@ -1666,7 +1666,7 @@ hypre_StructVectorClone( hypre_StructVector *x )
    hypre_CopyIndex(hypre_StructVectorStride(x), hypre_StructVectorStride(y));
 
    hypre_StructVectorDataSize(y) = data_size;
-   hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
+   hypre_StructVectorDataSpace(y) = hypre_BoxArrayClone(data_space);
    hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
 
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);

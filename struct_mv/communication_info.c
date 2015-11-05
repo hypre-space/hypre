@@ -372,7 +372,7 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
       }
 
       size_aa = hypre_BoxArrayArraySize(comm_boxes);
-      clone_boxes = hypre_BoxArrayArrayDuplicate(comm_boxes);
+      clone_boxes = hypre_BoxArrayArrayClone(comm_boxes);
       hypre_CopyIndex(comm_stride, clone_stride);
       {
          clone_processes = hypre_CTAlloc(HYPRE_Int *, size_aa);
@@ -400,7 +400,7 @@ hypre_CommInfoClone( hypre_CommInfo   *comm_info,
             }
          }
       }
-      clone_rboxes = hypre_BoxArrayArrayDuplicate(comm_rboxes);
+      clone_rboxes = hypre_BoxArrayArrayClone(comm_rboxes);
       clone_transforms = NULL;
       if (comm_transforms != NULL)
       {
@@ -1160,14 +1160,14 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
             send_boxes = comm_boxes;
             send_procs = comm_procs;
             send_rboxnums = comm_boxnums;
-            send_rboxes = hypre_BoxArrayArrayDuplicate(comm_boxes);
+            send_rboxes = hypre_BoxArrayArrayClone(comm_boxes);
             break;
 
          case 1:
             recv_boxes = comm_boxes;
             recv_procs = comm_procs;
             recv_rboxnums = comm_boxnums;
-            recv_rboxes = hypre_BoxArrayArrayDuplicate(comm_boxes);
+            recv_rboxes = hypre_BoxArrayArrayClone(comm_boxes);
             break;
       }
    }

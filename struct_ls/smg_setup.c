@@ -99,7 +99,7 @@ hypre_SMGSetup( void               *smg_vdata,
    grid = hypre_StructMatrixGrid(A);
 
    /* Compute a new max_levels value based on the grid */
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    max_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
    if ((smg_data -> max_levels) > 0)
    {

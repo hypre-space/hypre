@@ -22,12 +22,10 @@
 /*--------------------------------------------------------------------------
  * hypre_StructVector:
  *
- * Most of the routines currently only work when the base grid and grid are
- * identically the same (i.e., when nboxes equals the number of boxes in the
- * grid and stride is the unit stride).  The number of boxes in data_space and
- * data_indices is the same as in the base grid, even though nboxes may be
- * smaller.  RDF: It's not clear yet if this is the structure we want to
- * maintain into the future.
+ * Most of the routines currently only work when the base grid and grid are the
+ * same (i.e., when nboxes equals the number of boxes in the grid and stride is
+ * the unit stride).  The number of boxes in data_space and data_indices is the
+ * same as in the base grid, even though nboxes may be smaller.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_StructVector_struct

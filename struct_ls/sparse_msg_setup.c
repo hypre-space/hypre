@@ -132,7 +132,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
 
    /* Determine num_grids[] and num_levels */
    num_levels = 1;
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    for (d = 0; d < dim; d++)
    {
       while ( hypre_BoxIMaxD(cbox,d) > hypre_BoxIMinD(cbox,d) )

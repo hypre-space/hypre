@@ -140,7 +140,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    dim   = hypre_StructGridNDim(sgrid);
 
    /* Compute a new max_levels value based on the grid */
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(sgrid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(sgrid));
    max_levels =
       hypre_Log2(hypre_BoxSizeD(cbox, 0)) + 2 +
       hypre_Log2(hypre_BoxSizeD(cbox, 1)) + 2 +

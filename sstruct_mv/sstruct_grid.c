@@ -397,7 +397,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
       sgrid = sgrids[t];
       if (sgrid != NULL)
       {
-         iboxarray = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(sgrid));
+         iboxarray = hypre_BoxArrayClone(hypre_StructGridBoxes(sgrid));
 
          hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
                                         ndim, varoffset);

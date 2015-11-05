@@ -114,7 +114,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    ndim  = hypre_StructGridNDim(grid);
 
    /* Compute a new max_levels value based on the grid */
-   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
+   cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
    max_levels = 1;
    for (d = 0; d < ndim; d++)
    {

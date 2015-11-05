@@ -670,7 +670,7 @@ hypre_StructMatrixComputeDataSpace( hypre_StructMatrix *matrix,
    }
 
    /* Add ghost layers and map the data space */
-   data_space = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
+   data_space = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
    hypre_ForBoxI(i, data_space)
    {
       data_box = hypre_BoxArrayBox(data_space, i);
@@ -733,7 +733,7 @@ hypre_StructMatrixResize( hypre_StructMatrix *matrix,
    }
 
    /* Set up data_boxes */
-   data_boxes = hypre_BoxArrayDuplicate(data_space);
+   data_boxes = hypre_BoxArrayClone(data_space);
    hypre_ForBoxI(i, data_boxes)
    {
       data_box = hypre_BoxArrayBox(data_boxes, i);
@@ -1368,7 +1368,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
    hypre_SetIndex(data_stride, 1);
 
    int_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
-   dval_box = hypre_BoxDuplicate(value_box);
+   dval_box = hypre_BoxClone(value_box);
    hypre_StructMatrixMapDataBox(matrix, dval_box);
    hypre_BoxIMinD(dval_box, 0) *= num_stencil_indices;
    hypre_BoxIMaxD(dval_box, 0) *= num_stencil_indices;
@@ -2150,7 +2150,7 @@ hypre_StructMatrixPrint( const char         *filename,
    }
    else
    {
-      boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
+      boxes = hypre_BoxArrayClone(hypre_StructGridBoxes(grid));
       hypre_ForBoxI(i, boxes)
       {
          box = hypre_BoxArrayBox(boxes, i);

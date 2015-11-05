@@ -622,11 +622,11 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
       switch (mtypes[m])
       {
          case 0: /* fine data space */
-            data_spaces[m] = hypre_BoxArrayDuplicate(fdata_space);
+            data_spaces[m] = hypre_BoxArrayClone(fdata_space);
             break;
 
          case 1: /* coarse data space */
-            data_spaces[m] = hypre_BoxArrayDuplicate(cdata_space);
+            data_spaces[m] = hypre_BoxArrayClone(cdata_space);
             break;
       }
       hypre_StructMatrixResize(matrices[m], data_spaces[m]);
@@ -635,7 +635,7 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
    /* Resize the bit mask data space */
    if (need_mask)
    {
-      data_spaces[nmatrices] = hypre_BoxArrayDuplicate(fdata_space);
+      data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
       hypre_StructVectorInitialize(mask);
    }

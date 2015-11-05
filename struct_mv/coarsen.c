@@ -278,7 +278,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* RDF TODO: Inherit num ghost from fgrid here... */
 
    /* coarsen my boxes and create the coarse grid ids (same as fgrid) */
-   my_boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(fgrid));
+   my_boxes = hypre_BoxArrayClone(hypre_StructGridBoxes(fgrid));
    cids = hypre_TAlloc(HYPRE_Int,  hypre_BoxArraySize(my_boxes));
    for (i = 0; i < hypre_BoxArraySize(my_boxes); i++)
    {
@@ -354,7 +354,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    }
 
    /* update the new bounding box */
-   bounding_box = hypre_BoxDuplicate(hypre_StructGridBoundingBox(fgrid));
+   bounding_box = hypre_BoxClone(hypre_StructGridBoundingBox(fgrid));
    hypre_CoarsenBox(bounding_box, origin, stride);
    
    hypre_StructGridSetBoundingBox(cgrid, bounding_box);

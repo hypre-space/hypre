@@ -82,8 +82,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixNumValues(mask) = hypre_StructMatrixNumValues(matrix);
 
-   hypre_StructMatrixDataSpace(mask) =
-      hypre_BoxArrayDuplicate(hypre_StructMatrixDataSpace(matrix));
+   hypre_StructMatrixDataSpace(mask) = hypre_BoxArrayClone(hypre_StructMatrixDataSpace(matrix));
 
    hypre_StructMatrixData(mask) = hypre_StructMatrixData(matrix);
    hypre_StructMatrixDataAlloced(mask) = 0;

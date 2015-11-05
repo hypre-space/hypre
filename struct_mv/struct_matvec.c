@@ -314,7 +314,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
     *-----------------------------------------------------------------------*/
 
    /* This resizes the data for x using the data_space computed during setup */
-   data_space = hypre_BoxArrayDuplicate(matvec_data -> data_space);
+   data_space = hypre_BoxArrayClone(matvec_data -> data_space);
    hypre_StructVectorReindex(x, base_grid, dom_stride);
    hypre_StructVectorResize(x, data_space);
 

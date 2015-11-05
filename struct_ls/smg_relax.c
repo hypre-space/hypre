@@ -920,7 +920,7 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
    grid  = hypre_StructVectorGrid(x);
    boxes = hypre_StructGridBoxes(grid);
 
-   base_box_array = hypre_BoxArrayDuplicate(boxes);
+   base_box_array = hypre_BoxArrayClone(boxes);
    hypre_ProjectBoxArray(base_box_array, 
                          (relax_data -> base_index),
                          (relax_data -> base_stride));

@@ -92,7 +92,7 @@ hypre_Maxwell_PNedelec_Bdy( hypre_StructGrid       *cell_grid,
          bdry[j]= hypre_TAlloc(hypre_BoxArrayArray *, nvars+1); 
         
         /* keep the cell-centred boxarrayarray of boundaries */
-         bdry[j][0]= hypre_BoxArrayArrayDuplicate(cellgrid_bdry); 
+         bdry[j][0]= hypre_BoxArrayArrayClone(cellgrid_bdry); 
 
          k= 2*(ndim-1);  /* 3-d requires 4 boundary faces to be checked */
          for (i= 0; i< nvars; i++)
