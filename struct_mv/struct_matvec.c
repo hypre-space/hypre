@@ -401,7 +401,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          hypre_Index  xdstart;
          hypre_Index  ydstart;
 
-         /* The corresponding box IDs for the following should match */
+         /* The corresponding box IDs for the following boxnums should match */
          Ab = ran_boxnums[i];
          xb = Ab;  /* Reindex ensures that A and x have the same grid boxes */
          yb = hypre_StructVectorBoxnum(y, i);

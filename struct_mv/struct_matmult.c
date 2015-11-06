@@ -480,9 +480,6 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
 
    /* Set variable values in M */
 
-   /* RDF: Agglomerate comm pkgs and do only one communication.  Test the
-    * separate case first to make debugging easier. */
-
    /* Create a bit mask with bit data for each matrix term that has constant
     * coefficients to prevent incorrect contributions in the matrix product.
     * The bit mask is a vector with appropriately set bits and updated ghost
@@ -632,49 +629,18 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
       hypre_StructMatrixResize(matrices[m], data_spaces[m]);
    }
 
-   /* Resize the bit mask data space */
+   /* Resize the bit mask data space and initialize */
    if (need_mask)
    {
+      HYPRE_Int  bitval;
+
       data_spaces[nmatrices] = hypre_BoxArrayClone(fdata_space);
       hypre_StructVectorResize(mask, data_spaces[nmatrices]);
       hypre_StructVectorInitialize(mask);
-   }
-
-   /* Update matrix ghost layers */
-   for (m = 0; m < nmatrices; m++)
-   {
-      hypre_CommInfo        *comm_info;
-      hypre_CommPkg         *comm_pkg;
-      hypre_CommHandle      *comm_handle;
-      HYPRE_Complex        **comm_data;
-
-      matrix = matrices[m];
-
-      if (hypre_StructMatrixNumValues(matrix) > 0)
-      {
-         hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
-         hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg, &comm_data);
-         hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
-         hypre_FinalizeCommunication(comm_handle);
-         hypre_CommPkgDestroy(comm_pkg);
-         hypre_TFree(comm_data);
-      }
-   }
-
-   /* Update bit mask ghost layer */
-   if (need_mask)
-   {
-      hypre_CommInfo        *comm_info;
-      hypre_CommPkg         *comm_pkg;
-      hypre_CommHandle      *comm_handle;
-      HYPRE_Complex         *data;
-      HYPRE_Int              bitval;
-
-      /* Initialize the bit mask first.  Use a[0].terms[t] to determine which
-       * matrix to use and whether it is transposed. */
 
       for (t = 0; t < nterms; t++)
       {
+         /* Use a[0].terms for the list of matrices and transpose statuses */
          st_term = &(a[0].terms[t]);
          id = hypre_StTermID(st_term);
          m = terms[id];
@@ -725,19 +691,70 @@ hypre_StructMatmult( HYPRE_Int            nmatrices_input,
             hypre_BoxLoop1End(fi);
          }
       }
+   }
 
-      hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
-      hypre_StructVectorMapCommInfo(mask, comm_info);
-      hypre_CommPkgCreate(comm_info,
-                          hypre_StructVectorDataSpace(mask),
-                          hypre_StructVectorDataSpace(mask), 1, NULL, 0,
-                          hypre_StructVectorComm(mask), &comm_pkg);
-      hypre_CommInfoDestroy(comm_info);
-      
-      data = hypre_StructVectorData(mask);
-      hypre_InitializeCommunication(comm_pkg, &data, &data, 0, 0, &comm_handle);
+   /* Update matrix and bit mask ghost layers in just one communication stage */
+   {
+      hypre_CommInfo        *comm_info;
+      hypre_CommPkg         *comm_pkg_a[MAXTERMS];
+      HYPRE_Complex        **comm_data_a[MAXTERMS];
+      hypre_CommPkg         *comm_pkg;
+      HYPRE_Complex        **comm_data;
+      hypre_CommHandle      *comm_handle;
+      HYPRE_Int              np, nb;
+
+      np = 0;
+      nb = 0;
+
+      /* Compute matrix communications */
+      for (m = 0; m < nmatrices; m++)
+      {
+         matrix = matrices[m];
+
+         if (hypre_StructMatrixNumValues(matrix) > 0)
+         {
+            hypre_CreateCommInfo(grid, comm_stencils[m], &comm_info);
+            hypre_StructMatrixCreateCommPkg(matrix, comm_info, &comm_pkg_a[np], &comm_data_a[np]);
+            nb += hypre_CommPkgNumBlocks(comm_pkg_a[np]);
+            np++;
+         }
+      }
+
+      /* Compute bit mask communications */
+      if (need_mask)
+      {
+         hypre_CreateCommInfo(grid, comm_stencils[nmatrices], &comm_info);
+         hypre_StructVectorMapCommInfo(mask, comm_info);
+         hypre_CommPkgCreate(comm_info,
+                             hypre_StructVectorDataSpace(mask),
+                             hypre_StructVectorDataSpace(mask), 1, NULL, 0,
+                             hypre_StructVectorComm(mask), &comm_pkg_a[np]);
+         hypre_CommInfoDestroy(comm_info);
+         comm_data_a[np] = hypre_TAlloc(HYPRE_Complex *, 1);
+         comm_data_a[np][0] = hypre_StructVectorData(mask);
+         nb++;
+         np++;
+      }
+
+      /* Put everything into one CommPkg */
+      hypre_CommPkgAgglomerate(np, comm_pkg_a, &comm_pkg);
+      comm_data = hypre_TAlloc(HYPRE_Complex *, nb);
+      nb = 0;
+      for (i = 0; i < np; i++)
+      {
+         for (j = 0; j < hypre_CommPkgNumBlocks(comm_pkg_a[i]); j++)
+         {
+            comm_data[nb++] = comm_data_a[i][j];
+         }
+         hypre_CommPkgDestroy(comm_pkg_a[i]);
+         hypre_TFree(comm_data_a[i]);
+      }
+
+      /* Communicate */
+      hypre_InitializeCommunication(comm_pkg, comm_data, comm_data, 0, 0, &comm_handle);
       hypre_FinalizeCommunication(comm_handle);
       hypre_CommPkgDestroy(comm_pkg);
+      hypre_TFree(comm_data);
    }
 
    /* Set a.types[] values */
