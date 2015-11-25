@@ -1477,6 +1477,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    hypre_TFree(q_count_sv);
    hypre_TFree(num_lost_sv);
    hypre_TFree(lost_value_sv);
+   hypre_TFree(lost_counter_q_sv);
    hypre_TFree(q_dist_value_sv);
    hypre_TFree(col_map);
    hypre_TFree(coarse_to_fine);
