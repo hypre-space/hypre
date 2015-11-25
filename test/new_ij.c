@@ -104,10 +104,12 @@ main( hypre_int argc,
    HYPRE_IJMatrix      ij_A; 
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
+   HYPRE_IJVector      *ij_rbm;
 
    HYPRE_ParCSRMatrix  parcsr_A;
    HYPRE_ParVector     b;
    HYPRE_ParVector     x;
+   HYPRE_ParVector     *interp_vecs = NULL;
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
@@ -140,6 +142,12 @@ main( hypre_int argc,
 
    HYPRE_Int use_nonsymm_schwarz = 0;
    HYPRE_Int test_ij = 0;
+   HYPRE_Int build_rbm = 0;
+   HYPRE_Int build_rbm_index = 0;
+   HYPRE_Int num_interp_vecs = 0;
+   HYPRE_Int interp_vec_variant = 0;
+   HYPRE_Int Q_max = 0;
+   HYPRE_Real Q_trunc = 0;
 
    const HYPRE_Real dt_inf = 1.e40;
    HYPRE_Real dt = dt_inf;
@@ -403,6 +411,13 @@ main( hypre_int argc,
       {
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rbm") == 0 )
+      {
+         arg_index++;
+         build_rbm      = 1;
+         num_interp_vecs = atoi(argv[arg_index++]);
+         build_rbm_index = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
       {
@@ -903,6 +918,21 @@ main( hypre_int argc,
       {
          arg_index++;
          P_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-interpvecvar") == 0 )
+      {
+         arg_index++;
+         interp_vec_variant  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-Qtr") == 0 )
+      {
+         arg_index++;
+         Q_trunc  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-Qmx") == 0 )
+      {
+         arg_index++;
+         Q_max = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-jtr") == 0 )
       {
@@ -1628,6 +1658,30 @@ main( hypre_int argc,
    }
 
    /*-----------------------------------------------------------
+    * Set up the interp vector
+    *-----------------------------------------------------------*/
+
+   if ( build_rbm)
+   {
+      char new_file_name[80];
+      /* RHS */
+      interp_vecs = hypre_CTAlloc(HYPRE_ParVector,num_interp_vecs);
+      ij_rbm = hypre_CTAlloc(HYPRE_IJVector,num_interp_vecs);
+      for (i=0; i < num_interp_vecs; i++)
+      {
+         hypre_sprintf(new_file_name, "%s.%d", argv[build_rbm_index],i);
+         ierr = HYPRE_IJVectorRead( new_file_name, hypre_MPI_COMM_WORLD, 
+                                 HYPRE_PARCSR, &ij_rbm[i] );
+         ierr = HYPRE_IJVectorGetObject( ij_rbm[i], &object );
+         interp_vecs[i] = (HYPRE_ParVector) object;
+      }
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in rbm!\n");
+         exit(1);
+      }
+   }
+   /*-----------------------------------------------------------
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
@@ -2253,6 +2307,13 @@ main( hypre_int argc,
          for (i=0; i < nongalerk_num_tol-1; i++)
             HYPRE_BoomerAMGSetLevelNonGalerkinTol(amg_solver, nongalerk_tol[i], i);
       }
+      if (build_rbm)
+      {
+         HYPRE_BoomerAMGSetInterpVectors(amg_solver, num_interp_vecs, interp_vecs);
+         HYPRE_BoomerAMGSetInterpVecVariant(amg_solver, interp_vec_variant);
+         HYPRE_BoomerAMGSetInterpVecQMax(amg_solver, Q_max);
+         HYPRE_BoomerAMGSetInterpVecAbsQTrunc(amg_solver, Q_trunc);
+      }
 
       /* BM Oct 23, 2006 */
       if (plot_grids) {
@@ -2550,6 +2611,13 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
             for (i=0; i < nongalerk_num_tol-1; i++)
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
+         if (build_rbm)
+         {
+            HYPRE_BoomerAMGSetInterpVectors(pcg_precond, num_interp_vecs, interp_vecs);
+            HYPRE_BoomerAMGSetInterpVecVariant(pcg_precond, interp_vec_variant);
+            HYPRE_BoomerAMGSetInterpVecQMax(pcg_precond, Q_max);
+            HYPRE_BoomerAMGSetInterpVecAbsQTrunc(pcg_precond, Q_trunc);
          }
          HYPRE_PCGSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -2904,6 +2972,13 @@ main( hypre_int argc,
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
             for (i=0; i < nongalerk_num_tol-1; i++)
                HYPRE_BoomerAMGSetLevelNonGalerkinTol(pcg_precond, nongalerk_tol[i], i);
+         }
+         if (build_rbm)
+         {
+            HYPRE_BoomerAMGSetInterpVectors(pcg_precond, 1, interp_vecs);
+            HYPRE_BoomerAMGSetInterpVecVariant(pcg_precond, interp_vec_variant);
+            HYPRE_BoomerAMGSetInterpVecQMax(pcg_precond, Q_max);
+            HYPRE_BoomerAMGSetInterpVecAbsQTrunc(pcg_precond, Q_trunc);
          }
          HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -3905,6 +3980,13 @@ main( hypre_int argc,
 
    HYPRE_IJVectorDestroy(ij_x);
 
+   if (build_rbm) 
+   {
+      for (i=0; i< num_interp_vecs; i++) 
+         HYPRE_IJVectorDestroy(ij_rbm[i]);
+      hypre_TFree(ij_rbm);
+      hypre_TFree(interp_vecs);
+   }
    if (nongalerk_tol) hypre_TFree (nongalerk_tol);
 
 /*
