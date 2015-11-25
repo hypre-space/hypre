@@ -210,8 +210,10 @@ typedef struct hypre_ParVector_struct
 
    HYPRE_Int      	 global_size;
    HYPRE_Int      	 first_index;
-   HYPRE_Int           last_index;
+   HYPRE_Int             last_index;
    HYPRE_Int      	*partitioning;
+   HYPRE_Int      	 actual_local_size; /* stores actual length of data in local vector
+			to allow memory manipulations for temporary vectors*/
    hypre_Vector	*local_vector; 
 
    /* Does the Vector create/destroy `data'? */
@@ -235,6 +237,7 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
 #define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
 #define hypre_ParVectorPartitioning(vector)     ((vector) -> partitioning)
+#define hypre_ParVectorActualLocalSize(vector)  ((vector) -> actual_local_size)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
@@ -782,6 +785,8 @@ HYPRE_Int hypre_ParCSRMatrixCopy ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B
 HYPRE_Int hypre_FillResponseParToCSRMatrix ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixCompleteClone ( hypre_ParCSRMatrix *A );
 hypre_ParCSRMatrix *hypre_ParCSRMatrixUnion ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
+
+/* parcsr_matrix.c */
 
 /* par_csr_matvec.c */
 HYPRE_Int hypre_ParCSRMatrixMatvec ( HYPRE_Complex alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , HYPRE_Complex beta , hypre_ParVector *y );

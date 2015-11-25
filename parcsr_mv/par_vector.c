@@ -79,6 +79,7 @@ hypre_ParVectorCreate( MPI_Comm   comm,
    /* set defaults */
    hypre_ParVectorOwnsData(vector) = 1;
    hypre_ParVectorOwnsPartitioning(vector) = 1;
+   hypre_ParVectorActualLocalSize(vector) = 0;
 
    return vector;
 }
@@ -142,7 +143,8 @@ hypre_ParVectorInitialize( hypre_ParVector *vector )
       return hypre_error_flag;
    }
    hypre_SeqVectorInitialize(hypre_ParVectorLocalVector(vector));
-
+   hypre_ParVectorActualLocalSize(vector) 
+	= hypre_VectorSize(hypre_ParVectorLocalVector(vector));
    return hypre_error_flag;
 }
 

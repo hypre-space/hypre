@@ -38,8 +38,10 @@ typedef struct hypre_ParVector_struct
 
    HYPRE_Int      	 global_size;
    HYPRE_Int      	 first_index;
-   HYPRE_Int           last_index;
+   HYPRE_Int             last_index;
    HYPRE_Int      	*partitioning;
+   HYPRE_Int      	 actual_local_size; /* stores actual length of data in local vector
+			to allow memory manipulations for temporary vectors*/
    hypre_Vector	*local_vector; 
 
    /* Does the Vector create/destroy `data'? */
@@ -63,6 +65,7 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
 #define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
 #define hypre_ParVectorPartitioning(vector)     ((vector) -> partitioning)
+#define hypre_ParVectorActualLocalSize(vector)  ((vector) -> actual_local_size)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
