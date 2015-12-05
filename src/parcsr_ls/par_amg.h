@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.42 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,7 +19,7 @@
 
 #define CUMNUMIT
 
-#include "../parcsr_block_mv/par_csr_block_matrix.h"
+#include "par_csr_block_matrix.h"
 
 
 /*--------------------------------------------------------------------------
@@ -58,6 +58,7 @@ typedef struct
    HYPRE_Int      CR_use_CG;
    HYPRE_Int      cgc_its;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      seq_threshold;
 
    /* solve params */
    HYPRE_Int      max_iter;
@@ -68,6 +69,9 @@ typedef struct
    HYPRE_Int    **grid_relax_points;
    HYPRE_Int      relax_order;
    HYPRE_Int      user_coarse_relax_type;   
+   HYPRE_Int      user_relax_type;   
+   HYPRE_Int      user_num_sweeps;   
+   double         user_relax_weight;   
    double  *relax_weight; 
    double  *omega;
    double   tol;
@@ -179,8 +183,13 @@ typedef struct
    HYPRE_Int               interp_refine;
    HYPRE_Int               smooth_interp_vectors;
    double           *expandp_weights; /* currently not set by user */
-   
 
+ /* enable redundant coarse grid solve */
+   HYPRE_Solver   coarse_solver;
+   hypre_ParCSRMatrix  *A_coarse;
+   hypre_ParVector  *f_coarse;
+   hypre_ParVector  *u_coarse;
+   MPI_Comm   new_comm;
 
 } hypre_ParAMGData;
 
@@ -220,6 +229,7 @@ typedef struct
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
  #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
  #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+ #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -229,6 +239,9 @@ typedef struct
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
+#define hypre_ParAMGDataUserRelaxType(amg_data) ((amg_data)->user_relax_type)
+#define hypre_ParAMGDataUserRelaxWeight(amg_data) ((amg_data)->user_relax_weight)
+#define hypre_ParAMGDataUserNumSweeps(amg_data) ((amg_data)->user_num_sweeps)
 #define hypre_ParAMGDataGridRelaxType(amg_data) ((amg_data)->grid_relax_type)
 #define hypre_ParAMGDataGridRelaxPoints(amg_data) \
 ((amg_data)->grid_relax_points)
@@ -345,6 +358,11 @@ typedef struct
 #define hypre_ParAMGSmoothInterpVectors(amg_data) ((amg_data)->smooth_interp_vectors)
 #define hypre_ParAMGDataExpandPWeights(amg_data) ((amg_data)->expandp_weights)
 
+#define hypre_ParAMGDataCoarseSolver(amg_data) ((amg_data)->coarse_solver)
+#define hypre_ParAMGDataACoarse(amg_data) ((amg_data)->A_coarse)
+#define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
+#define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
+#define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
 
 #endif
 

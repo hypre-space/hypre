@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * Started 9/28/95
  * George
  *
- * $Id: util.c,v 2.6 2010/12/20 19:27:34 falgout Exp $
+ * $Id: util.c,v 2.7 2011/11/07 18:12:01 kolev1 Exp $
  */
 
 #include "ilu.h"
@@ -170,7 +170,7 @@ HYPRE_Int hypre_DecKeyValueCmp(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_SortKeyValueNodesDec(KeyValueType *nodes, HYPRE_Int n)
 {
-  tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), hypre_DecKeyValueCmp);
+  hypre_tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), hypre_DecKeyValueCmp);
 }
 
 
@@ -210,13 +210,13 @@ static HYPRE_Int decshort(const void *v1, const void *v2)
 **************************************************************************/
 void hypre_sincsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), incshort);
+  hypre_tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), incshort);
 }
 
 
-void sdecsort(HYPRE_Int n, HYPRE_Int *a)
+void hypre_sdecsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), decshort);
+  hypre_tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), decshort);
 }
 
 

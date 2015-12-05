@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 #include "_hypre_utilities.h"
@@ -30,10 +30,8 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -644,7 +642,7 @@ j+hypre_IndexY(base), k+hypre_IndexZ(base))
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1043,7 +1041,7 @@ HYPRE_Int  kinc = (hypre_IndexZ(stride)*\
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1067,13 +1065,16 @@ HYPRE_Int  kinc = (hypre_IndexZ(stride)*\
 typedef struct 
 {
    /* the entries will be the same for all procs */  
-   hypre_BoxArray      *regions;
-   HYPRE_Int           num_regions;      
-   HYPRE_Int           *proc_partitions;
-   hypre_Index         *divisions;
+   hypre_BoxArray      *regions;  /* areas of the grid with boxes */
+   HYPRE_Int           num_regions;  /* how many regions */    
+   HYPRE_Int           *proc_partitions;  /* proc ids assigned to each region  
+                                             - this is size num_regions +1*/
+   hypre_Index         *divisions;        /* number of proc divisions in x y z 
+                                             direction
+                                             for each region */
    /* these entries are specific to each proc */
-   hypre_BoxArray      *my_partition;
-   hypre_BoxArray      *my_partition_boxes;
+   hypre_BoxArray      *my_partition;  /*the portion of grid that I own - at most 2 */
+   hypre_BoxArray      *my_partition_boxes;  /* boxes in my portion */
    HYPRE_Int           *my_partition_proc_ids;
    HYPRE_Int           *my_partition_boxnums;
    HYPRE_Int           my_partition_ids_size;   
@@ -1111,7 +1112,7 @@ typedef struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_BOX_MANAGER_HEADER
@@ -1326,7 +1327,7 @@ hypre_BoxManIndexTable(manager)[((k*hypre_BoxManSizeD(manager, 1) + j)*\
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1423,7 +1424,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1445,7 +1446,6 @@ typedef struct hypre_StructStencil_struct
 {
    hypre_Index   *shape;   /* Description of a stencil's shape */
    HYPRE_Int      size;    /* Number of stencil coefficients */
-   HYPRE_Int      max_offset;
                 
    HYPRE_Int      dim;     /* Number of dimensions */
 
@@ -1459,7 +1459,6 @@ typedef struct hypre_StructStencil_struct
 
 #define hypre_StructStencilShape(stencil)      ((stencil) -> shape)
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
-#define hypre_StructStencilMaxOffset(stencil)  ((stencil) -> max_offset)
 #define hypre_StructStencilDim(stencil)        ((stencil) -> dim)
 #define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
 
@@ -1476,7 +1475,7 @@ hypre_StructStencilShape(stencil)[i]
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1576,6 +1575,11 @@ typedef struct hypre_CommPkg_struct
 
    hypre_CommType   *copy_from_type;
    hypre_CommType   *copy_to_type;
+
+   /* these pointers are just to help free up memory for send/from types */
+   hypre_CommEntryType *entries;
+   HYPRE_Int           *rem_boxnums;
+   hypre_Box           *rem_boxes;
 
    HYPRE_Int         num_orders;
    HYPRE_Int       **orders;            /* num_orders x num_values */
@@ -1684,6 +1688,10 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
+#define hypre_CommPkgEntries(comm_pkg)         (comm_pkg -> entries)
+#define hypre_CommPkgRemBoxnums(comm_pkg)      (comm_pkg -> rem_boxnums)
+#define hypre_CommPkgRemBoxes(comm_pkg)        (comm_pkg -> rem_boxes)
+
 #define hypre_CommPkgNumOrders(comm_pkg)       (comm_pkg -> num_orders)
 #define hypre_CommPkgOrders(comm_pkg)          (comm_pkg -> orders)
 
@@ -1718,7 +1726,7 @@ typedef struct hypre_CommHandle_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1798,7 +1806,7 @@ typedef struct hypre_ComputePkg_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -1900,7 +1908,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -2247,6 +2255,7 @@ HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index
 HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *set_box , hypre_Box *value_box , double *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Index grid_index , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , HYPRE_Int boxnum , HYPRE_Int outside );
+HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
@@ -2255,7 +2264,6 @@ HYPRE_Int hypre_StructVectorSetFunctionValues ( hypre_StructVector *vector , dou
 HYPRE_Int hypre_StructVectorClearGhostValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorClearBoundGhostValues ( hypre_StructVector *vector , HYPRE_Int force );
 HYPRE_Int hypre_StructVectorScaleValues ( hypre_StructVector *vector , double factor );
-HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg ( hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 HYPRE_Int hypre_StructVectorMigrate ( hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *vector , HYPRE_Int all );

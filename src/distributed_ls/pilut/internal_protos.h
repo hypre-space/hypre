@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -90,7 +90,7 @@ void hypre_p_daxbyz( DataDistType *ddist , double alpha , double *x , double bet
 HYPRE_Int hypre_p_vprintf( DataDistType *ddist , double *x , hypre_PilutSolverGlobals *globals );
 
 /* distributed_qsort.c */
-void tex_qsort(char *base, HYPRE_Int n, HYPRE_Int size, HYPRE_Int (*compar) ());
+void hypre_tex_qsort(char *base, HYPRE_Int n, HYPRE_Int size, HYPRE_Int (*compar) ());
 /* distributed_qsort_si.c */
 void hypre_sincsort_fast( HYPRE_Int n , HYPRE_Int *base );
 void hypre_sdecsort_fast( HYPRE_Int n , HYPRE_Int *base );
@@ -98,8 +98,8 @@ void hypre_sdecsort_fast( HYPRE_Int n , HYPRE_Int *base );
 /* serilut.c */
 HYPRE_Int hypre_SerILUT( DataDistType *ddist , HYPRE_DistributedMatrix matrix , FactorMatType *ldu , ReduceMatType *rmat , HYPRE_Int maxnz , double tol , hypre_PilutSolverGlobals *globals );
 HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows , HYPRE_DistributedMatrix matrix , HYPRE_Int *external_rows , HYPRE_Int *newperm , HYPRE_Int *newiperm , hypre_PilutSolverGlobals *globals );
-HYPRE_Int FindStructuralUnion( HYPRE_DistributedMatrix matrix , HYPRE_Int **structural_union , hypre_PilutSolverGlobals *globals );
-HYPRE_Int ExchangeStructuralUnions( DataDistType *ddist , HYPRE_Int **structural_union , hypre_PilutSolverGlobals *globals );
+HYPRE_Int hypre_FindStructuralUnion( HYPRE_DistributedMatrix matrix , HYPRE_Int **structural_union , hypre_PilutSolverGlobals *globals );
+HYPRE_Int hypre_ExchangeStructuralUnions( DataDistType *ddist , HYPRE_Int **structural_union , hypre_PilutSolverGlobals *globals );
 void hypre_SecondDrop( HYPRE_Int maxnz , double tol , HYPRE_Int row , HYPRE_Int *perm , HYPRE_Int *iperm , FactorMatType *ldu , hypre_PilutSolverGlobals *globals );
 void hypre_SecondDropUpdate( HYPRE_Int maxnz , HYPRE_Int maxnzkeep , double tol , HYPRE_Int row , HYPRE_Int nlocal , HYPRE_Int *perm , HYPRE_Int *iperm , FactorMatType *ldu , ReduceMatType *rmat , hypre_PilutSolverGlobals *globals );
 
@@ -118,5 +118,5 @@ HYPRE_Int hypre_DecKeyValueCmp( const void *v1 , const void *v2 );
 void hypre_SortKeyValueNodesDec( KeyValueType *nodes , HYPRE_Int n );
 HYPRE_Int hypre_sasum( HYPRE_Int n , HYPRE_Int *x );
 void hypre_sincsort( HYPRE_Int n , HYPRE_Int *a );
-void sdecsort( HYPRE_Int n , HYPRE_Int *a );
+void hypre_sdecsort( HYPRE_Int n , HYPRE_Int *a );
 

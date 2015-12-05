@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -45,6 +45,8 @@
 #define dtrsm_   hypre_F90_NAME_BLAS(dtrsm,DTRSM)
 #define dtrsv_   hypre_F90_NAME_BLAS(dtrsv,DTRSV)
 #define idamax_  hypre_F90_NAME_BLAS(idamax,IDAMAX)
+#define s_cmp    hypre_F90_NAME_BLAS(s_cmp,S_CMP)
+#define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)
 
 /* blas_utils.c */
 logical lsame_ ( char *ca , char *cb );

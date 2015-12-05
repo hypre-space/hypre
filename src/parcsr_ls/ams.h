@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
 
 
@@ -37,20 +37,22 @@ typedef struct
    /* Is the mass term coefficient zero? */
    HYPRE_Int beta_is_zero;
 
-   /* Nedelec interpolation matrix (vertex^dim-to-edge) */
+   /* Nedelec nodal interpolation matrix (vertex^dim-to-edge) */
    hypre_ParCSRMatrix *Pi;
    /* Coarse grid matrix on the range of Pi^T */
    hypre_ParCSRMatrix *A_Pi;
    /* AMG solver for A_Pi */
    HYPRE_Solver B_Pi;
 
-   /* Componenets of the Nedelec interpolation matrix (vertex^dim-to-edge) */
+   /* Components of the Nedelec interpolation matrix (vertex-to-edge each) */
    hypre_ParCSRMatrix *Pix, *Piy, *Piz;
    /* Coarse grid matrices on the ranges of Pi{x,y,z}^T */
    hypre_ParCSRMatrix *A_Pix, *A_Piy, *A_Piz;
    /* AMG solvers for A_Pi{x,y,z} */
    HYPRE_Solver B_Pix, B_Piy, B_Piz;
 
+   /* Does the solver own the Nedelec interpolations? */
+   HYPRE_Int owns_Pi;
    /* Does the solver own the coarse grid matrices? */
    HYPRE_Int owns_A_G, owns_A_Pi;
 
@@ -130,6 +132,7 @@ typedef struct
 
 /* Vector vertex space data */
 #define hypre_AMSDataPiInterpolation(ams_data) ((ams_data)->Pi)
+#define hypre_AMSDataOwnsPiInterpolation(ams_data) ((ams_data)->owns_Pi)
 #define hypre_AMSDataPoissonAlpha(ams_data) ((ams_data)->A_Pi)
 #define hypre_AMSDataPoissonAlphaAMG(ams_data) ((ams_data)->B_Pi)
 #define hypre_AMSDataOwnsPoissonAlpha(ams_data) ((ams_data)->owns_A_Pi)
@@ -161,15 +164,15 @@ typedef struct
 #define hypre_AMSDataAChebyOrder(ams_data) ((ams_data)->A_cheby_order)
 #define hypre_AMSDataAChebyFraction(ams_data) ((ams_data)->A_cheby_fraction)
 
+#define hypre_AMSDataPoissonAlphaAMGCoarsenType(ams_data) ((ams_data)->B_Pi_coarsen_type)
+#define hypre_AMSDataPoissonAlphaAMGAggLevels(ams_data) ((ams_data)->B_Pi_agg_levels)
+#define hypre_AMSDataPoissonAlphaAMGRelaxType(ams_data) ((ams_data)->B_Pi_relax_type)
+#define hypre_AMSDataPoissonAlphaAMGStrengthThreshold(ams_data) ((ams_data)->B_Pi_theta)
 
 #define hypre_AMSDataPoissonBetaAMGCoarsenType(ams_data) ((ams_data)->B_G_coarsen_type)
 #define hypre_AMSDataPoissonBetaAMGAggLevels(ams_data) ((ams_data)->B_G_agg_levels)
 #define hypre_AMSDataPoissonBetaAMGRelaxType(ams_data) ((ams_data)->B_G_relax_type)
 #define hypre_AMSDataPoissonBetaAMGStrengthThreshold(ams_data) ((ams_data)->B_G_theta)
-#define hypre_AMSDataPoissonAlphaAMGCoarsenType(ams_data) ((ams_data)->B_Pi_coarsen_type)
-#define hypre_AMSDataPoissonAlphaAMGAggLevels(ams_data) ((ams_data)->B_Pi_agg_levels)
-#define hypre_AMSDataPoissonAlphaAMGRelaxType(ams_data) ((ams_data)->B_Pi_relax_type)
-#define hypre_AMSDataPoissonAlphaAMGStrengthThreshold(ams_data) ((ams_data)->B_Pi_theta)
 
 /* Temporary vectors */
 #define hypre_AMSDataTempEdgeVectorR(ams_data) ((ams_data)->r0)

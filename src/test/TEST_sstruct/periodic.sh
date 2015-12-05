@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.13 $
+# $Revision: 1.14 $
 #EHEADER**********************************************************************
 
 
@@ -64,6 +64,10 @@ tail -3 ${TNAME}.out.67 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+# Check that reverse communication used to AddValues still works
+#=============================================================================
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -85,6 +89,7 @@ FILES="\
  ${TNAME}.out.65\
  ${TNAME}.out.66\
  ${TNAME}.out.67\
+ ${TNAME}.out.70\
 "
 
 for i in $FILES

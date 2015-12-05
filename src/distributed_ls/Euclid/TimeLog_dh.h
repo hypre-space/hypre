@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,7 +33,7 @@ extern void TimeLog_dhDestroy(TimeLog_dh t);
 extern void TimeLog_dhStart(TimeLog_dh t);
 extern void TimeLog_dhStop(TimeLog_dh t);
 extern void TimeLog_dhReset(TimeLog_dh t);
-extern void TimeLog_dhMark(TimeLog_dh t, char *description);
+extern void TimeLog_dhMark(TimeLog_dh t, const char *description);
 extern void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint);
 
 #endif

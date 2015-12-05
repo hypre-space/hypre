@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -25,7 +23,6 @@
    in the future, it needs to use the box manager instead of the neighbors 
    structure */
 
-
 /*--------------------------------------------------------------------------
  * hypre_StructOverlapInnerProd
  *--------------------------------------------------------------------------*/
@@ -34,13 +31,11 @@
 double          *local_result_ref[hypre_MAX_THREADS];
 #endif
 
-double           final_innerprod_result;
-
-
 double
 hypre_StructOverlapInnerProd( hypre_StructVector *x,
                               hypre_StructVector *y )
 {
+   double               final_innerprod_result;
    double               local_result, overlap_result;
    double               process_result;
                    

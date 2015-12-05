@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -149,6 +149,12 @@ void MatrixDestroy(Matrix *mat)
 
     for (i=0; i<mat->num_send; i++)
         hypre_MPI_Request_free(&mat->send_req[i]);
+
+    for (i=0; i<mat->num_send; i++)
+        hypre_MPI_Request_free(&mat->recv_req2[i]);
+
+    for (i=0; i<mat->num_recv; i++)
+        hypre_MPI_Request_free(&mat->send_req2[i]);
 
     free(mat->recv_req);
     free(mat->send_req);

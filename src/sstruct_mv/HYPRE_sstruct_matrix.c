@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.27 $
+ * $Revision: 2.29 $
  ***********************************************************************EHEADER*/
 
 
@@ -405,6 +405,40 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+HYPRE_SStructMatrixGetFEMValues( HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *index,
+                                 double              *values )
+{
+   HYPRE_Int           ndim         = hypre_SStructMatrixNDim(matrix);
+   hypre_SStructGraph *graph        = hypre_SStructMatrixGraph(matrix);
+   hypre_SStructGrid  *grid         = hypre_SStructGraphGrid(graph);
+   HYPRE_Int           fem_nsparse  = hypre_SStructGraphFEMPNSparse(graph, part);
+   HYPRE_Int          *fem_sparse_i = hypre_SStructGraphFEMPSparseI(graph, part);
+   HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
+   HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
+   HYPRE_Int           s, i, d, vindex[3];
+
+   for (s = 0; s < fem_nsparse; s++)
+   {
+      i = fem_sparse_i[s];
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vindex[d] = index[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+      hypre_SStructMatrixSetValues(
+         matrix, part, vindex, fem_vars[i], 1, &fem_entries[s], &values[s], -1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
                                  HYPRE_Int            part,
                                  HYPRE_Int           *ilower,
@@ -734,70 +768,27 @@ HYPRE_Int
 HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
                               void                **object )
 {
-   HYPRE_Int      type     = hypre_SStructMatrixObjectType(matrix);
-   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
-   hypre_SStructPMatrix *pA;
-   hypre_StructMatrix   *sA;
+   HYPRE_Int             type     = hypre_SStructMatrixObjectType(matrix);
+   hypre_SStructPMatrix *pmatrix;
+   hypre_StructMatrix   *smatrix;
    HYPRE_Int             part, var;
  
-
-   if (type == HYPRE_PARCSR)
+   if (type == HYPRE_SSTRUCT)
    {
-       HYPRE_IJMatrixGetObject(ijmatrix, object);
+      *object = matrix;
    }
-
-   else if (type == HYPRE_SSTRUCT)
+   else if (type == HYPRE_PARCSR)
    {
-      *object= matrix;
+      *object = hypre_SStructMatrixParCSRMatrix(matrix);
    }
-
    else if (type == HYPRE_STRUCT)
    {
       /* only one part & one variable */
-      part= 0;
-      pA  = hypre_SStructMatrixPMatrix(matrix, part);
+      part = 0;
       var = 0;
-      sA  = hypre_SStructPMatrixSMatrix(pA, var, var);
-     *object= sA;
-   }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * RDF: Why is this here?  Isn't in the header file.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_SStructMatrixGetObject2( HYPRE_SStructMatrix   matrix,
-                               void                **object )
-{
-   HYPRE_Int      type     = hypre_SStructMatrixObjectType(matrix);
-   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
-   hypre_SStructPMatrix *pA;
-   hypre_StructMatrix   *sA;
-   HYPRE_Int             part, var;
- 
-
-   if (type == HYPRE_PARCSR)
-   {
-      /* only difference from ..GetObject: here returns an IJMatrix, not a ParCSRMatrix */
-      *object = ijmatrix;
-   }
-
-   else if (type == HYPRE_SSTRUCT)
-   {
-      *object= matrix;
-   }
-
-   else if (type == HYPRE_STRUCT)
-   {
-      /* only one part & one variable */
-      part= 0;
-      pA  = hypre_SStructMatrixPMatrix(matrix, part);
-      var = 0;
-      sA  = hypre_SStructPMatrixSMatrix(pA, var, var);
-     *object= sA;
+      pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
+      smatrix = hypre_SStructPMatrixSMatrix(pmatrix, var, var);
+     *object = smatrix;
    }
 
    return hypre_error_flag;

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.97 $
+ * $Revision: 1.101 $
  ***********************************************************************EHEADER*/
 
 dnl *********************************************************************
@@ -55,8 +55,8 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.7.0b])
-m4_define([M4_HYPRE_DATE],    [2011/01/27])
+m4_define([M4_HYPRE_VERSION], [2.8.0b])
+m4_define([M4_HYPRE_DATE],    [2011/11/14])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -66,7 +66,7 @@ m4_include([config/hypre_lapack_macros.m4])
 m4_include([config/hypre_macros_misc.m4])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.97 2011/01/28 00:28:34 falgout Exp $)
+AC_REVISION($Id: configure.in,v 1.101 2011/11/14 22:36:27 falgout Exp $)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -742,13 +742,11 @@ dnl *********************************************************************
 if test "$hypre_using_c" = "yes"
 then
    AC_PROG_CC
-   AC_PROG_CPP
 fi
 
 if test "$hypre_using_cxx" = "yes"
 then
    AC_PROG_CXX
-   AC_PROG_CXXCPP
 fi
 
 if test "$hypre_using_fortran" = "yes"
@@ -967,7 +965,12 @@ then
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
    BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
-   BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   if test "$hypre_using_fei" = "yes"
+   then
+      BUILD_CC_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+   else
+      BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
    SHARED_SET_SONAME="-Wl,-soname,"
    SHARED_OPTIONS="-Wl,-z,defs"

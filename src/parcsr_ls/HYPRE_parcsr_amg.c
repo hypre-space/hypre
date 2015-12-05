@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -142,6 +142,24 @@ HYPRE_BoomerAMGGetMaxCoarseSize( HYPRE_Solver solver,
                           HYPRE_Int        * max_coarse_size  )
 {
    return( hypre_BoomerAMGGetMaxCoarseSize( (void *) solver, max_coarse_size ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSeqThreshold, HYPRE_BoomerAMGGetSeqThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSeqThreshold( HYPRE_Solver solver,
+                          HYPRE_Int          seq_threshold  )
+{
+   return( hypre_BoomerAMGSetSeqThreshold( (void *) solver, seq_threshold ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetSeqThreshold( HYPRE_Solver solver,
+                          HYPRE_Int        * seq_threshold  )
+{
+   return( hypre_BoomerAMGGetSeqThreshold( (void *) solver, seq_threshold ) );
 }
 
 /*--------------------------------------------------------------------------

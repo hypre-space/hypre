@@ -152,390 +152,394 @@
 <a name="line145">145</a>       <font color="#444444">/* Create the graph object */</font>
 <a name="line146">146</a>       <font color="#2040a0">HYPRE_SStructGraphCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">grid</font>, <font color="4444FF">&amp;</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line147">147</a> 
-<a name="line148">148</a>       <font color="#444444">/* Now we need to tell the graph which stencil to use for each
-<a name="line149">149</a>          variable on each part (we only have one variable and one part) */</font>
-<a name="line150">150</a>       <font color="#2040a0">HYPRE_SStructGraphSetStencil</font><font color="4444FF">(</font><font color="#2040a0">graph</font>, <font color="#2040a0">part</font>, <font color="#2040a0">var</font>, <font color="#2040a0">stencil</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line148">148</a>       <font color="#444444">/* See MatrixSetObjectType below */</font>
+<a name="line149">149</a>       <font color="#2040a0">object_type</font> <font color="4444FF">=</font> <font color="#2040a0">HYPRE_STRUCT</font><font color="4444FF">;</font>
+<a name="line150">150</a>       <font color="#2040a0">HYPRE_SStructGraphSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">graph</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line151">151</a> 
-<a name="line152">152</a>       <font color="#444444">/* Here we could establish connections between parts if we
-<a name="line153">153</a>          had more than one part using the graph. For example, we could
-<a name="line154">154</a>          use HYPRE_GraphAddEntries() routine or HYPRE_GridSetNeighborBox() */</font>
+<a name="line152">152</a>       <font color="#444444">/* Now we need to tell the graph which stencil to use for each
+<a name="line153">153</a>          variable on each part (we only have one variable and one part) */</font>
+<a name="line154">154</a>       <font color="#2040a0">HYPRE_SStructGraphSetStencil</font><font color="4444FF">(</font><font color="#2040a0">graph</font>, <font color="#2040a0">part</font>, <font color="#2040a0">var</font>, <font color="#2040a0">stencil</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line155">155</a> 
-<a name="line156">156</a>       <font color="#444444">/* Assemble the graph */</font>
-<a name="line157">157</a>       <font color="#2040a0">HYPRE_SStructGraphAssemble</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line158">158</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line156">156</a>       <font color="#444444">/* Here we could establish connections between parts if we
+<a name="line157">157</a>          had more than one part using the graph. For example, we could
+<a name="line158">158</a>          use HYPRE_GraphAddEntries() routine or HYPRE_GridSetNeighborBox() */</font>
 <a name="line159">159</a> 
-<a name="line160">160</a>    <font color="#444444">/* 4. Set up a SStruct Matrix */</font>
-<a name="line161">161</a>    <font color="4444FF"><strong>{</strong></font>
-<a name="line162">162</a>       <strong>int</strong> <font color="#2040a0">i</font>,<font color="#2040a0">j</font><font color="4444FF">;</font>
-<a name="line163">163</a>       <strong>int</strong> <font color="#2040a0">part</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line164">164</a>       <strong>int</strong> <font color="#2040a0">var</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line165">165</a> 
-<a name="line166">166</a>       <font color="#444444">/* Create the empty matrix object */</font>
-<a name="line167">167</a>       <font color="#2040a0">HYPRE_SStructMatrixCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">graph</font>, <font color="4444FF">&amp;</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line168">168</a> 
-<a name="line169">169</a>       <font color="#444444">/* Set the object type (by default HYPRE_SSTRUCT). This determines the
-<a name="line170">170</a>          data structure used to store the matrix.  If you want to use unstructured
-<a name="line171">171</a>          solvers, e.g. BoomerAMG, the object type should be HYPRE_PARCSR.
-<a name="line172">172</a>          If the problem is purely structured (with one part), you may want to use
-<a name="line173">173</a>          HYPRE_STRUCT to access the structured solvers. Here we have a purely
-<a name="line174">174</a>          structured example. */</font>
-<a name="line175">175</a>       <font color="#2040a0">object_type</font> <font color="4444FF">=</font> <font color="#2040a0">HYPRE_STRUCT</font><font color="4444FF">;</font>
-<a name="line176">176</a>       <font color="#2040a0">HYPRE_SStructMatrixSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line177">177</a> 
-<a name="line178">178</a>       <font color="#444444">/* Get ready to set values */</font>
-<a name="line179">179</a>       <font color="#2040a0">HYPRE_SStructMatrixInitialize</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line180">180</a> 
-<a name="line181">181</a>       <font color="#444444">/* Each processor must set the stencil values for their boxes on each part.
-<a name="line182">182</a>          In this example, we only set stencil entries and therefore use
-<a name="line183">183</a>          HYPRE_SStructMatrixSetBoxValues.  If we need to set non-stencil entries,
-<a name="line184">184</a>          we have to use HYPRE_SStructMatrixSetValues (shown in a later example). */</font>
-<a name="line185">185</a> 
-<a name="line186">186</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line187">187</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line188">188</a>          <font color="#444444">/* Set the matrix coefficients for some set of stencil entries
-<a name="line189">189</a>             over all the gridpoints in my first box (account for boundary
-<a name="line190">190</a>             grid points later) */</font>
-<a name="line191">191</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line192">192</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line193">193</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line194">194</a> 
-<a name="line195">195</a>             <strong>int</strong> <font color="#2040a0">nentries</font> <font color="4444FF">=</font> <font color="#FF0000">5</font><font color="4444FF">;</font>
-<a name="line196">196</a>             <strong>int</strong> <font color="#2040a0">nvalues</font>  <font color="4444FF">=</font> <font color="#FF0000">30</font><font color="4444FF">;</font> <font color="#444444">/* 6 grid points, each with 5 stencil entries */</font>
-<a name="line197">197</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">30</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line160">160</a>       <font color="#444444">/* Assemble the graph */</font>
+<a name="line161">161</a>       <font color="#2040a0">HYPRE_SStructGraphAssemble</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line162">162</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line163">163</a> 
+<a name="line164">164</a>    <font color="#444444">/* 4. Set up a SStruct Matrix */</font>
+<a name="line165">165</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line166">166</a>       <strong>int</strong> <font color="#2040a0">i</font>,<font color="#2040a0">j</font><font color="4444FF">;</font>
+<a name="line167">167</a>       <strong>int</strong> <font color="#2040a0">part</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line168">168</a>       <strong>int</strong> <font color="#2040a0">var</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line169">169</a> 
+<a name="line170">170</a>       <font color="#444444">/* Create the empty matrix object */</font>
+<a name="line171">171</a>       <font color="#2040a0">HYPRE_SStructMatrixCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">graph</font>, <font color="4444FF">&amp;</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line172">172</a> 
+<a name="line173">173</a>       <font color="#444444">/* Set the object type (by default HYPRE_SSTRUCT). This determines the
+<a name="line174">174</a>          data structure used to store the matrix.  If you want to use unstructured
+<a name="line175">175</a>          solvers, e.g. BoomerAMG, the object type should be HYPRE_PARCSR.
+<a name="line176">176</a>          If the problem is purely structured (with one part), you may want to use
+<a name="line177">177</a>          HYPRE_STRUCT to access the structured solvers. Here we have a purely
+<a name="line178">178</a>          structured example. */</font>
+<a name="line179">179</a>       <font color="#2040a0">object_type</font> <font color="4444FF">=</font> <font color="#2040a0">HYPRE_STRUCT</font><font color="4444FF">;</font>
+<a name="line180">180</a>       <font color="#2040a0">HYPRE_SStructMatrixSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line181">181</a> 
+<a name="line182">182</a>       <font color="#444444">/* Get ready to set values */</font>
+<a name="line183">183</a>       <font color="#2040a0">HYPRE_SStructMatrixInitialize</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line184">184</a> 
+<a name="line185">185</a>       <font color="#444444">/* Each processor must set the stencil values for their boxes on each part.
+<a name="line186">186</a>          In this example, we only set stencil entries and therefore use
+<a name="line187">187</a>          HYPRE_SStructMatrixSetBoxValues.  If we need to set non-stencil entries,
+<a name="line188">188</a>          we have to use HYPRE_SStructMatrixSetValues (shown in a later example). */</font>
+<a name="line189">189</a> 
+<a name="line190">190</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line191">191</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line192">192</a>          <font color="#444444">/* Set the matrix coefficients for some set of stencil entries
+<a name="line193">193</a>             over all the gridpoints in my first box (account for boundary
+<a name="line194">194</a>             grid points later) */</font>
+<a name="line195">195</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line196">196</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line197">197</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
 <a name="line198">198</a> 
-<a name="line199">199</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line200">200</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font> <font color="#444444">/* label the stencil indices -
-<a name="line201">201</a>                                               these correspond to the offsets
-<a name="line202">202</a>                                               defined above */</font>
-<a name="line203">203</a>                <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">j</font><font color="4444FF">;</font>
-<a name="line204">204</a> 
-<a name="line205">205</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">nentries</font><font color="4444FF">)</font>
-<a name="line206">206</a>             <font color="4444FF"><strong>{</strong></font>
-<a name="line207">207</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
-<a name="line208">208</a>                <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line209">209</a>                   <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line210">210</a>             <font color="4444FF"><strong>}</strong></font>
-<a name="line211">211</a> 
-<a name="line212">212</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line213">213</a>                                             <font color="#2040a0">var</font>, <font color="#2040a0">nentries</font>,
-<a name="line214">214</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line215">215</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line216">216</a> 
-<a name="line217">217</a>          <font color="#444444">/* Set the matrix coefficients for some set of stencil entries
-<a name="line218">218</a>             over the gridpoints in my second box */</font>
-<a name="line219">219</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line220">220</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">0</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line221">221</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">2</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line222">222</a> 
-<a name="line223">223</a>             <strong>int</strong> <font color="#2040a0">nentries</font> <font color="4444FF">=</font> <font color="#FF0000">5</font><font color="4444FF">;</font>
-<a name="line224">224</a>             <strong>int</strong> <font color="#2040a0">nvalues</font>  <font color="4444FF">=</font> <font color="#FF0000">60</font><font color="4444FF">;</font> <font color="#444444">/* 12 grid points, each with 5 stencil entries */</font>
-<a name="line225">225</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">60</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line199">199</a>             <strong>int</strong> <font color="#2040a0">nentries</font> <font color="4444FF">=</font> <font color="#FF0000">5</font><font color="4444FF">;</font>
+<a name="line200">200</a>             <strong>int</strong> <font color="#2040a0">nvalues</font>  <font color="4444FF">=</font> <font color="#FF0000">30</font><font color="4444FF">;</font> <font color="#444444">/* 6 grid points, each with 5 stencil entries */</font>
+<a name="line201">201</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">30</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line202">202</a> 
+<a name="line203">203</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line204">204</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font> <font color="#444444">/* label the stencil indices -
+<a name="line205">205</a>                                               these correspond to the offsets
+<a name="line206">206</a>                                               defined above */</font>
+<a name="line207">207</a>                <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">j</font><font color="4444FF">;</font>
+<a name="line208">208</a> 
+<a name="line209">209</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">nentries</font><font color="4444FF">)</font>
+<a name="line210">210</a>             <font color="4444FF"><strong>{</strong></font>
+<a name="line211">211</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
+<a name="line212">212</a>                <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line213">213</a>                   <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line214">214</a>             <font color="4444FF"><strong>}</strong></font>
+<a name="line215">215</a> 
+<a name="line216">216</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line217">217</a>                                             <font color="#2040a0">var</font>, <font color="#2040a0">nentries</font>,
+<a name="line218">218</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line219">219</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line220">220</a> 
+<a name="line221">221</a>          <font color="#444444">/* Set the matrix coefficients for some set of stencil entries
+<a name="line222">222</a>             over the gridpoints in my second box */</font>
+<a name="line223">223</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line224">224</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">0</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line225">225</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">2</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
 <a name="line226">226</a> 
-<a name="line227">227</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line228">228</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line229">229</a>                <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">j</font><font color="4444FF">;</font>
+<a name="line227">227</a>             <strong>int</strong> <font color="#2040a0">nentries</font> <font color="4444FF">=</font> <font color="#FF0000">5</font><font color="4444FF">;</font>
+<a name="line228">228</a>             <strong>int</strong> <font color="#2040a0">nvalues</font>  <font color="4444FF">=</font> <font color="#FF0000">60</font><font color="4444FF">;</font> <font color="#444444">/* 12 grid points, each with 5 stencil entries */</font>
+<a name="line229">229</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">60</font><font color="4444FF">]</font><font color="4444FF">;</font>
 <a name="line230">230</a> 
-<a name="line231">231</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">nentries</font><font color="4444FF">)</font>
-<a name="line232">232</a>             <font color="4444FF"><strong>{</strong></font>
-<a name="line233">233</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
-<a name="line234">234</a>                <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line235">235</a>                   <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line236">236</a>             <font color="4444FF"><strong>}</strong></font>
-<a name="line237">237</a> 
-<a name="line238">238</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line239">239</a>                                             <font color="#2040a0">var</font>, <font color="#2040a0">nentries</font>,
-<a name="line240">240</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line241">241</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line242">242</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line243">243</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
-<a name="line244">244</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line245">245</a>          <font color="#444444">/* Set the matrix coefficients for some set of stencil entries
-<a name="line246">246</a>             over the gridpoints in my box */</font>
-<a name="line247">247</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line248">248</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line249">249</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line250">250</a> 
-<a name="line251">251</a>             <strong>int</strong> <font color="#2040a0">nentries</font> <font color="4444FF">=</font> <font color="#FF0000">5</font><font color="4444FF">;</font>
-<a name="line252">252</a>             <strong>int</strong> <font color="#2040a0">nvalues</font>  <font color="4444FF">=</font> <font color="#FF0000">80</font><font color="4444FF">;</font> <font color="#444444">/* 16 grid points, each with 5 stencil entries */</font>
-<a name="line253">253</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">80</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line231">231</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line232">232</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line233">233</a>                <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">j</font><font color="4444FF">;</font>
+<a name="line234">234</a> 
+<a name="line235">235</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">nentries</font><font color="4444FF">)</font>
+<a name="line236">236</a>             <font color="4444FF"><strong>{</strong></font>
+<a name="line237">237</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
+<a name="line238">238</a>                <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line239">239</a>                   <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line240">240</a>             <font color="4444FF"><strong>}</strong></font>
+<a name="line241">241</a> 
+<a name="line242">242</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line243">243</a>                                             <font color="#2040a0">var</font>, <font color="#2040a0">nentries</font>,
+<a name="line244">244</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line245">245</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line246">246</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line247">247</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line248">248</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line249">249</a>          <font color="#444444">/* Set the matrix coefficients for some set of stencil entries
+<a name="line250">250</a>             over the gridpoints in my box */</font>
+<a name="line251">251</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line252">252</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line253">253</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
 <a name="line254">254</a> 
-<a name="line255">255</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line256">256</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line257">257</a>                <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">j</font><font color="4444FF">;</font>
+<a name="line255">255</a>             <strong>int</strong> <font color="#2040a0">nentries</font> <font color="4444FF">=</font> <font color="#FF0000">5</font><font color="4444FF">;</font>
+<a name="line256">256</a>             <strong>int</strong> <font color="#2040a0">nvalues</font>  <font color="4444FF">=</font> <font color="#FF0000">80</font><font color="4444FF">;</font> <font color="#444444">/* 16 grid points, each with 5 stencil entries */</font>
+<a name="line257">257</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">80</font><font color="4444FF">]</font><font color="4444FF">;</font>
 <a name="line258">258</a> 
-<a name="line259">259</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">nentries</font><font color="4444FF">)</font>
-<a name="line260">260</a>             <font color="4444FF"><strong>{</strong></font>
-<a name="line261">261</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
-<a name="line262">262</a>                <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line263">263</a>                   <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line264">264</a>             <font color="4444FF"><strong>}</strong></font>
-<a name="line265">265</a> 
-<a name="line266">266</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line267">267</a>                                             <font color="#2040a0">var</font>, <font color="#2040a0">nentries</font>,
-<a name="line268">268</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line269">269</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line270">270</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line271">271</a> 
-<a name="line272">272</a>       <font color="#444444">/* For each box, set any coefficients that reach ouside of the
-<a name="line273">273</a>          boundary to 0 */</font>
-<a name="line274">274</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line275">275</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line276">276</a>          <strong>int</strong> <font color="#2040a0">maxnvalues</font> <font color="4444FF">=</font> <font color="#FF0000">6</font><font color="4444FF">;</font>
-<a name="line277">277</a>          <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">6</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line278">278</a> 
-<a name="line279">279</a>          <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">maxnvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line280">280</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
-<a name="line281">281</a> 
-<a name="line282">282</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line283">283</a>             <font color="#444444">/* Values below our first AND second box */</font>
-<a name="line284">284</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line285">285</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">2</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line286">286</a> 
-<a name="line287">287</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">3</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line288">288</a> 
-<a name="line289">289</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line290">290</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line291">291</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line292">292</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line293">293</a> 
-<a name="line294">294</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line295">295</a>             <font color="#444444">/* Values to the left of our first box */</font>
-<a name="line296">296</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line297">297</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line298">298</a> 
-<a name="line299">299</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line300">300</a> 
-<a name="line301">301</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line302">302</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line303">303</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line304">304</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line305">305</a> 
-<a name="line306">306</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line307">307</a>             <font color="#444444">/* Values above our first box */</font>
-<a name="line308">308</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line309">309</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line310">310</a> 
-<a name="line311">311</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line312">312</a> 
-<a name="line313">313</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line314">314</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line315">315</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line316">316</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line317">317</a> 
-<a name="line318">318</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line319">319</a>             <font color="#444444">/* Values to the left of our second box (that do not border the
-<a name="line320">320</a>                first box). */</font>
-<a name="line321">321</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">3</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line322">322</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line323">323</a> 
-<a name="line324">324</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line325">325</a> 
-<a name="line326">326</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line327">327</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line328">328</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line329">329</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line330">330</a> 
-<a name="line331">331</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line332">332</a>             <font color="#444444">/* Values above our second box */</font>
-<a name="line333">333</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line334">334</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">2</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line335">335</a> 
-<a name="line336">336</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line337">337</a> 
-<a name="line338">338</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line339">339</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line340">340</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line341">341</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line342">342</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line343">343</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
-<a name="line344">344</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line345">345</a>          <strong>int</strong> <font color="#2040a0">maxnvalues</font> <font color="4444FF">=</font> <font color="#FF0000">4</font><font color="4444FF">;</font>
-<a name="line346">346</a>          <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">4</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line347">347</a>          <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">maxnvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line348">348</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
-<a name="line349">349</a> 
-<a name="line350">350</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line351">351</a>             <font color="#444444">/* Values below our box */</font>
-<a name="line352">352</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line353">353</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line354">354</a> 
-<a name="line355">355</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">3</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line356">356</a> 
-<a name="line357">357</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line358">358</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line359">359</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line360">360</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line361">361</a> 
-<a name="line362">362</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line363">363</a>             <font color="#444444">/* Values to the right of our box */</font>
-<a name="line364">364</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line365">365</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line366">366</a> 
-<a name="line367">367</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line368">368</a> 
-<a name="line369">369</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line370">370</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line371">371</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line372">372</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line373">373</a> 
-<a name="line374">374</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line375">375</a>             <font color="#444444">/* Values above our box */</font>
-<a name="line376">376</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">3</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line377">377</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line378">378</a> 
-<a name="line379">379</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line380">380</a> 
-<a name="line381">381</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
-<a name="line382">382</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
-<a name="line383">383</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line384">384</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line385">385</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line386">386</a> 
-<a name="line387">387</a>       <font color="#444444">/* This is a collective call finalizing the matrix assembly.
-<a name="line388">388</a>          The matrix is now ``ready to be used'' */</font>
-<a name="line389">389</a>       <font color="#2040a0">HYPRE_SStructMatrixAssemble</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line390">390</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line391">391</a> 
-<a name="line392">392</a> 
-<a name="line393">393</a>    <font color="#444444">/* 5. Set up SStruct Vectors for b and x */</font>
-<a name="line394">394</a>    <font color="4444FF"><strong>{</strong></font>
-<a name="line395">395</a>       <strong>int</strong> <font color="#2040a0">i</font><font color="4444FF">;</font>
+<a name="line259">259</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line260">260</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line261">261</a>                <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">j</font><font color="4444FF">;</font>
+<a name="line262">262</a> 
+<a name="line263">263</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">nentries</font><font color="4444FF">)</font>
+<a name="line264">264</a>             <font color="4444FF"><strong>{</strong></font>
+<a name="line265">265</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
+<a name="line266">266</a>                <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">j</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font> <font color="#2040a0">j</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nentries</font><font color="4444FF">;</font> <font color="#2040a0">j</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line267">267</a>                   <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">j</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line268">268</a>             <font color="4444FF"><strong>}</strong></font>
+<a name="line269">269</a> 
+<a name="line270">270</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line271">271</a>                                             <font color="#2040a0">var</font>, <font color="#2040a0">nentries</font>,
+<a name="line272">272</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line273">273</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line274">274</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line275">275</a> 
+<a name="line276">276</a>       <font color="#444444">/* For each box, set any coefficients that reach ouside of the
+<a name="line277">277</a>          boundary to 0 */</font>
+<a name="line278">278</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line279">279</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line280">280</a>          <strong>int</strong> <font color="#2040a0">maxnvalues</font> <font color="4444FF">=</font> <font color="#FF0000">6</font><font color="4444FF">;</font>
+<a name="line281">281</a>          <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">6</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line282">282</a> 
+<a name="line283">283</a>          <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">maxnvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line284">284</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
+<a name="line285">285</a> 
+<a name="line286">286</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line287">287</a>             <font color="#444444">/* Values below our first AND second box */</font>
+<a name="line288">288</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line289">289</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">2</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line290">290</a> 
+<a name="line291">291</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">3</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line292">292</a> 
+<a name="line293">293</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line294">294</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line295">295</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line296">296</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line297">297</a> 
+<a name="line298">298</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line299">299</a>             <font color="#444444">/* Values to the left of our first box */</font>
+<a name="line300">300</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line301">301</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line302">302</a> 
+<a name="line303">303</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line304">304</a> 
+<a name="line305">305</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line306">306</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line307">307</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line308">308</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line309">309</a> 
+<a name="line310">310</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line311">311</a>             <font color="#444444">/* Values above our first box */</font>
+<a name="line312">312</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line313">313</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line314">314</a> 
+<a name="line315">315</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line316">316</a> 
+<a name="line317">317</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line318">318</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line319">319</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line320">320</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line321">321</a> 
+<a name="line322">322</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line323">323</a>             <font color="#444444">/* Values to the left of our second box (that do not border the
+<a name="line324">324</a>                first box). */</font>
+<a name="line325">325</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">3</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line326">326</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line327">327</a> 
+<a name="line328">328</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line329">329</a> 
+<a name="line330">330</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line331">331</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line332">332</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line333">333</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line334">334</a> 
+<a name="line335">335</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line336">336</a>             <font color="#444444">/* Values above our second box */</font>
+<a name="line337">337</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line338">338</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">2</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line339">339</a> 
+<a name="line340">340</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line341">341</a> 
+<a name="line342">342</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line343">343</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line344">344</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line345">345</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line346">346</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line347">347</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line348">348</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line349">349</a>          <strong>int</strong> <font color="#2040a0">maxnvalues</font> <font color="4444FF">=</font> <font color="#FF0000">4</font><font color="4444FF">;</font>
+<a name="line350">350</a>          <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">4</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line351">351</a>          <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">maxnvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line352">352</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
+<a name="line353">353</a> 
+<a name="line354">354</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line355">355</a>             <font color="#444444">/* Values below our box */</font>
+<a name="line356">356</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line357">357</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line358">358</a> 
+<a name="line359">359</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">3</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line360">360</a> 
+<a name="line361">361</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line362">362</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line363">363</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line364">364</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line365">365</a> 
+<a name="line366">366</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line367">367</a>             <font color="#444444">/* Values to the right of our box */</font>
+<a name="line368">368</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line369">369</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line370">370</a> 
+<a name="line371">371</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line372">372</a> 
+<a name="line373">373</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line374">374</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line375">375</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line376">376</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line377">377</a> 
+<a name="line378">378</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line379">379</a>             <font color="#444444">/* Values above our box */</font>
+<a name="line380">380</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">3</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line381">381</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line382">382</a> 
+<a name="line383">383</a>             <strong>int</strong> <font color="#2040a0">stencil_indices</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line384">384</a> 
+<a name="line385">385</a>             <font color="#2040a0">HYPRE_SStructMatrixSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>,
+<a name="line386">386</a>                                             <font color="#2040a0">var</font>, <font color="#FF0000">1</font>,
+<a name="line387">387</a>                                             <font color="#2040a0">stencil_indices</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line388">388</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line389">389</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line390">390</a> 
+<a name="line391">391</a>       <font color="#444444">/* This is a collective call finalizing the matrix assembly.
+<a name="line392">392</a>          The matrix is now ``ready to be used'' */</font>
+<a name="line393">393</a>       <font color="#2040a0">HYPRE_SStructMatrixAssemble</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line394">394</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line395">395</a> 
 <a name="line396">396</a> 
-<a name="line397">397</a>       <font color="#444444">/* We have one part and one variable. */</font>
-<a name="line398">398</a>       <strong>int</strong> <font color="#2040a0">part</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line399">399</a>       <strong>int</strong> <font color="#2040a0">var</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line397">397</a>    <font color="#444444">/* 5. Set up SStruct Vectors for b and x */</font>
+<a name="line398">398</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line399">399</a>       <strong>int</strong> <font color="#2040a0">i</font><font color="4444FF">;</font>
 <a name="line400">400</a> 
-<a name="line401">401</a>       <font color="#444444">/* Create an empty vector object */</font>
-<a name="line402">402</a>       <font color="#2040a0">HYPRE_SStructVectorCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">grid</font>, <font color="4444FF">&amp;</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line403">403</a>       <font color="#2040a0">HYPRE_SStructVectorCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">grid</font>, <font color="4444FF">&amp;</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line401">401</a>       <font color="#444444">/* We have one part and one variable. */</font>
+<a name="line402">402</a>       <strong>int</strong> <font color="#2040a0">part</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line403">403</a>       <strong>int</strong> <font color="#2040a0">var</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
 <a name="line404">404</a> 
-<a name="line405">405</a>       <font color="#444444">/* As with the matrix,  set the object type for the vectors
-<a name="line406">406</a>          to be the struct type */</font>
-<a name="line407">407</a>       <font color="#2040a0">object_type</font> <font color="4444FF">=</font> <font color="#2040a0">HYPRE_STRUCT</font><font color="4444FF">;</font>
-<a name="line408">408</a>       <font color="#2040a0">HYPRE_SStructVectorSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line409">409</a>       <font color="#2040a0">HYPRE_SStructVectorSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line410">410</a> 
-<a name="line411">411</a>       <font color="#444444">/* Indicate that the vector coefficients are ready to be set */</font>
-<a name="line412">412</a>       <font color="#2040a0">HYPRE_SStructVectorInitialize</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line413">413</a>       <font color="#2040a0">HYPRE_SStructVectorInitialize</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line405">405</a>       <font color="#444444">/* Create an empty vector object */</font>
+<a name="line406">406</a>       <font color="#2040a0">HYPRE_SStructVectorCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">grid</font>, <font color="4444FF">&amp;</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line407">407</a>       <font color="#2040a0">HYPRE_SStructVectorCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">grid</font>, <font color="4444FF">&amp;</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line408">408</a> 
+<a name="line409">409</a>       <font color="#444444">/* As with the matrix,  set the object type for the vectors
+<a name="line410">410</a>          to be the struct type */</font>
+<a name="line411">411</a>       <font color="#2040a0">object_type</font> <font color="4444FF">=</font> <font color="#2040a0">HYPRE_STRUCT</font><font color="4444FF">;</font>
+<a name="line412">412</a>       <font color="#2040a0">HYPRE_SStructVectorSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line413">413</a>       <font color="#2040a0">HYPRE_SStructVectorSetObjectType</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">object_type</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line414">414</a> 
-<a name="line415">415</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line416">416</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line417">417</a>          <font color="#444444">/* Set the vector coefficients over the gridpoints in my first box */</font>
-<a name="line418">418</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line419">419</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line420">420</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line421">421</a> 
-<a name="line422">422</a>             <strong>int</strong> <font color="#2040a0">nvalues</font> <font color="4444FF">=</font> <font color="#FF0000">6</font><font color="4444FF">;</font>  <font color="#444444">/* 6 grid points */</font>
-<a name="line423">423</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">6</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line424">424</a> 
-<a name="line425">425</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line426">426</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line427">427</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line415">415</a>       <font color="#444444">/* Indicate that the vector coefficients are ready to be set */</font>
+<a name="line416">416</a>       <font color="#2040a0">HYPRE_SStructVectorInitialize</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line417">417</a>       <font color="#2040a0">HYPRE_SStructVectorInitialize</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line418">418</a> 
+<a name="line419">419</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line420">420</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line421">421</a>          <font color="#444444">/* Set the vector coefficients over the gridpoints in my first box */</font>
+<a name="line422">422</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line423">423</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line424">424</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font><font color="4444FF">-</font><font color="#FF0000">1</font>, <font color="#FF0000">2</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line425">425</a> 
+<a name="line426">426</a>             <strong>int</strong> <font color="#2040a0">nvalues</font> <font color="4444FF">=</font> <font color="#FF0000">6</font><font color="4444FF">;</font>  <font color="#444444">/* 6 grid points */</font>
+<a name="line427">427</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">6</font><font color="4444FF">]</font><font color="4444FF">;</font>
 <a name="line428">428</a> 
 <a name="line429">429</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line430">430</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
-<a name="line431">431</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line432">432</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line433">433</a> 
-<a name="line434">434</a>          <font color="#444444">/* Set the vector coefficients over the gridpoints in my second box */</font>
-<a name="line435">435</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line436">436</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line437">437</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">2</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line438">438</a> 
-<a name="line439">439</a>             <strong>int</strong> <font color="#2040a0">nvalues</font> <font color="4444FF">=</font> <font color="#FF0000">12</font><font color="4444FF">;</font> <font color="#444444">/* 12 grid points */</font>
-<a name="line440">440</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">12</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line441">441</a> 
-<a name="line442">442</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line443">443</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line444">444</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line430">430</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line431">431</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line432">432</a> 
+<a name="line433">433</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line434">434</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
+<a name="line435">435</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line436">436</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line437">437</a> 
+<a name="line438">438</a>          <font color="#444444">/* Set the vector coefficients over the gridpoints in my second box */</font>
+<a name="line439">439</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line440">440</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">0</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line441">441</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">2</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line442">442</a> 
+<a name="line443">443</a>             <strong>int</strong> <font color="#2040a0">nvalues</font> <font color="4444FF">=</font> <font color="#FF0000">12</font><font color="4444FF">;</font> <font color="#444444">/* 12 grid points */</font>
+<a name="line444">444</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">12</font><font color="4444FF">]</font><font color="4444FF">;</font>
 <a name="line445">445</a> 
 <a name="line446">446</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line447">447</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
-<a name="line448">448</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line449">449</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line450">450</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line451">451</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
-<a name="line452">452</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line453">453</a>          <font color="#444444">/* Set the vector coefficients over the gridpoints in my box */</font>
-<a name="line454">454</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line455">455</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line456">456</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
-<a name="line457">457</a> 
-<a name="line458">458</a>             <strong>int</strong> <font color="#2040a0">nvalues</font> <font color="4444FF">=</font> <font color="#FF0000">16</font><font color="4444FF">;</font> <font color="#444444">/* 16 grid points */</font>
-<a name="line459">459</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">16</font><font color="4444FF">]</font><font color="4444FF">;</font>
-<a name="line460">460</a> 
-<a name="line461">461</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line462">462</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line463">463</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line447">447</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line448">448</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line449">449</a> 
+<a name="line450">450</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line451">451</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
+<a name="line452">452</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line453">453</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line454">454</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line455">455</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line456">456</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line457">457</a>          <font color="#444444">/* Set the vector coefficients over the gridpoints in my box */</font>
+<a name="line458">458</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line459">459</a>             <strong>int</strong> <font color="#2040a0">ilower</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">3</font>, <font color="#FF0000">1</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line460">460</a>             <strong>int</strong> <font color="#2040a0">iupper</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF"><strong>{</strong></font> <font color="#FF0000">6</font>, <font color="#FF0000">4</font><font color="4444FF"><strong>}</strong></font><font color="4444FF">;</font>
+<a name="line461">461</a> 
+<a name="line462">462</a>             <strong>int</strong> <font color="#2040a0">nvalues</font> <font color="4444FF">=</font> <font color="#FF0000">16</font><font color="4444FF">;</font> <font color="#444444">/* 16 grid points */</font>
+<a name="line463">463</a>             <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">16</font><font color="4444FF">]</font><font color="4444FF">;</font>
 <a name="line464">464</a> 
 <a name="line465">465</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
-<a name="line466">466</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
-<a name="line467">467</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line468">468</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line469">469</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line470">470</a> 
-<a name="line471">471</a>       <font color="#444444">/* This is a collective call finalizing the vector assembly.
-<a name="line472">472</a>          The vectors are now ``ready to be used'' */</font>
-<a name="line473">473</a>       <font color="#2040a0">HYPRE_SStructVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line474">474</a>       <font color="#2040a0">HYPRE_SStructVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line475">475</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line476">476</a> 
-<a name="line477">477</a> 
-<a name="line478">478</a>    <font color="#444444">/* 6. Set up and use a solver (See the Reference Manual for descriptions
-<a name="line479">479</a>       of all of the options.) */</font>
-<a name="line480">480</a>    <font color="4444FF"><strong>{</strong></font>
-<a name="line481">481</a>       <font color="#2040a0">HYPRE_StructMatrix</font> <font color="#2040a0">sA</font><font color="4444FF">;</font>
-<a name="line482">482</a>       <font color="#2040a0">HYPRE_StructVector</font> <font color="#2040a0">sb</font><font color="4444FF">;</font>
-<a name="line483">483</a>       <font color="#2040a0">HYPRE_StructVector</font> <font color="#2040a0">sx</font><font color="4444FF">;</font>
-<a name="line484">484</a> 
-<a name="line485">485</a>       <font color="#444444">/* Because we are using a struct solver, we need to get the
-<a name="line486">486</a>          object of the matrix and vectors to pass in to the struct solvers */</font>
-<a name="line487">487</a>       <font color="#2040a0">HYPRE_SStructMatrixGetObject</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">sA</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line488">488</a>       <font color="#2040a0">HYPRE_SStructVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">sb</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line489">489</a>       <font color="#2040a0">HYPRE_SStructVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">sx</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line490">490</a> 
-<a name="line491">491</a>       <font color="#444444">/* Create an empty PCG Struct solver */</font>
-<a name="line492">492</a>       <font color="#2040a0">HYPRE_StructPCGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line493">493</a> 
-<a name="line494">494</a>       <font color="#444444">/* Set PCG parameters */</font>
-<a name="line495">495</a>       <font color="#2040a0">HYPRE_StructPCGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1.0e-06</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line496">496</a>       <font color="#2040a0">HYPRE_StructPCGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line497">497</a>       <font color="#2040a0">HYPRE_StructPCGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">50</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line498">498</a> 
-<a name="line499">499</a>       <font color="#444444">/* Create the Struct SMG solver for use as a preconditioner */</font>
-<a name="line500">500</a>       <font color="#2040a0">HYPRE_StructSMGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line501">501</a> 
-<a name="line502">502</a>       <font color="#444444">/* Set SMG parameters */</font>
-<a name="line503">503</a>       <font color="#2040a0">HYPRE_StructSMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line504">504</a>       <font color="#2040a0">HYPRE_StructSMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.0</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line505">505</a>       <font color="#2040a0">HYPRE_StructSMGSetZeroGuess</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line506">506</a>       <font color="#2040a0">HYPRE_StructSMGSetNumPreRelax</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line507">507</a>       <font color="#2040a0">HYPRE_StructSMGSetNumPostRelax</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line508">508</a> 
-<a name="line509">509</a>       <font color="#444444">/* Set preconditioner and solve */</font>
-<a name="line510">510</a>       <font color="#2040a0">HYPRE_StructPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">HYPRE_StructSMGSolve</font>,
-<a name="line511">511</a>                            <font color="#2040a0">HYPRE_StructSMGSetup</font>, <font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line512">512</a>       <font color="#2040a0">HYPRE_StructPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">sA</font>, <font color="#2040a0">sb</font>, <font color="#2040a0">sx</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line513">513</a>       <font color="#2040a0">HYPRE_StructPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">sA</font>, <font color="#2040a0">sb</font>, <font color="#2040a0">sx</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line514">514</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line515">515</a> 
-<a name="line516">516</a>    <font color="#444444">/* Free memory */</font>
-<a name="line517">517</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line518">518</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line519">519</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line520">520</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line521">521</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line522">522</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line523">523</a> 
-<a name="line524">524</a>    <font color="#2040a0">HYPRE_StructPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line525">525</a>    <font color="#2040a0">HYPRE_StructSMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line526">526</a> 
-<a name="line527">527</a>    <font color="#444444">/* Finalize MPI */</font>
-<a name="line528">528</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line529">529</a> 
-<a name="line530">530</a>    <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line531">531</a> <font color="4444FF"><strong>}</strong></font>
+<a name="line466">466</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line467">467</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line468">468</a> 
+<a name="line469">469</a>             <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font> <font color="#2040a0">nvalues</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line470">470</a>                <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
+<a name="line471">471</a>             <font color="#2040a0">HYPRE_SStructVectorSetBoxValues</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">part</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">var</font>, <font color="#2040a0">values</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line472">472</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line473">473</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line474">474</a> 
+<a name="line475">475</a>       <font color="#444444">/* This is a collective call finalizing the vector assembly.
+<a name="line476">476</a>          The vectors are now ``ready to be used'' */</font>
+<a name="line477">477</a>       <font color="#2040a0">HYPRE_SStructVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line478">478</a>       <font color="#2040a0">HYPRE_SStructVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line479">479</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line480">480</a> 
+<a name="line481">481</a> 
+<a name="line482">482</a>    <font color="#444444">/* 6. Set up and use a solver (See the Reference Manual for descriptions
+<a name="line483">483</a>       of all of the options.) */</font>
+<a name="line484">484</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line485">485</a>       <font color="#2040a0">HYPRE_StructMatrix</font> <font color="#2040a0">sA</font><font color="4444FF">;</font>
+<a name="line486">486</a>       <font color="#2040a0">HYPRE_StructVector</font> <font color="#2040a0">sb</font><font color="4444FF">;</font>
+<a name="line487">487</a>       <font color="#2040a0">HYPRE_StructVector</font> <font color="#2040a0">sx</font><font color="4444FF">;</font>
+<a name="line488">488</a> 
+<a name="line489">489</a>       <font color="#444444">/* Because we are using a struct solver, we need to get the
+<a name="line490">490</a>          object of the matrix and vectors to pass in to the struct solvers */</font>
+<a name="line491">491</a>       <font color="#2040a0">HYPRE_SStructMatrixGetObject</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">sA</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line492">492</a>       <font color="#2040a0">HYPRE_SStructVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">sb</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line493">493</a>       <font color="#2040a0">HYPRE_SStructVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">sx</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line494">494</a> 
+<a name="line495">495</a>       <font color="#444444">/* Create an empty PCG Struct solver */</font>
+<a name="line496">496</a>       <font color="#2040a0">HYPRE_StructPCGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line497">497</a> 
+<a name="line498">498</a>       <font color="#444444">/* Set PCG parameters */</font>
+<a name="line499">499</a>       <font color="#2040a0">HYPRE_StructPCGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1.0e-06</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line500">500</a>       <font color="#2040a0">HYPRE_StructPCGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line501">501</a>       <font color="#2040a0">HYPRE_StructPCGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">50</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line502">502</a> 
+<a name="line503">503</a>       <font color="#444444">/* Create the Struct SMG solver for use as a preconditioner */</font>
+<a name="line504">504</a>       <font color="#2040a0">HYPRE_StructSMGCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line505">505</a> 
+<a name="line506">506</a>       <font color="#444444">/* Set SMG parameters */</font>
+<a name="line507">507</a>       <font color="#2040a0">HYPRE_StructSMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line508">508</a>       <font color="#2040a0">HYPRE_StructSMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line509">509</a>       <font color="#2040a0">HYPRE_StructSMGSetZeroGuess</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line510">510</a>       <font color="#2040a0">HYPRE_StructSMGSetNumPreRelax</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line511">511</a>       <font color="#2040a0">HYPRE_StructSMGSetNumPostRelax</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line512">512</a> 
+<a name="line513">513</a>       <font color="#444444">/* Set preconditioner and solve */</font>
+<a name="line514">514</a>       <font color="#2040a0">HYPRE_StructPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">HYPRE_StructSMGSolve</font>,
+<a name="line515">515</a>                            <font color="#2040a0">HYPRE_StructSMGSetup</font>, <font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line516">516</a>       <font color="#2040a0">HYPRE_StructPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">sA</font>, <font color="#2040a0">sb</font>, <font color="#2040a0">sx</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line517">517</a>       <font color="#2040a0">HYPRE_StructPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">sA</font>, <font color="#2040a0">sb</font>, <font color="#2040a0">sx</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line518">518</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line519">519</a> 
+<a name="line520">520</a>    <font color="#444444">/* Free memory */</font>
+<a name="line521">521</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line522">522</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line523">523</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line524">524</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line525">525</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line526">526</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line527">527</a> 
+<a name="line528">528</a>    <font color="#2040a0">HYPRE_StructPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line529">529</a>    <font color="#2040a0">HYPRE_StructSMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line530">530</a> 
+<a name="line531">531</a>    <font color="#444444">/* Finalize MPI */</font>
+<a name="line532">532</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line533">533</a> 
+<a name="line534">534</a>    <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line535">535</a> <font color="4444FF"><strong>}</strong></font>
 
 </pre>
 <hr>

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -243,6 +243,15 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond, HYPRE_PARCSRGMRESSETPRECOND)
               hypre_F90_PassObj (HYPRE_Solver, solver),
               HYPRE_ParCSRParaSailsSolve,
               HYPRE_ParCSRParaSailsSetup,
+              (void *)       *precond_solver ) );
+   } 
+   else if (*precond_id == 5)
+   {
+      *ierr = (hypre_F90_Int)
+         ( HYPRE_ParCSRGMRESSetPrecond(
+              hypre_F90_PassObj (HYPRE_Solver, solver),
+              HYPRE_EuclidSolve,
+              HYPRE_EuclidSetup,
               (void *)       *precond_solver ) );
    } 
    else

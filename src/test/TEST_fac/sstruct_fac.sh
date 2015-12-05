@@ -12,9 +12,9 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 
-tail -3 ${TNAME}.out.2 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+# tail -3 ${TNAME}.out.2 > ${TNAME}.testdata
+# tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+# diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 
@@ -47,8 +47,6 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 FILES="\
  ${TNAME}.out.0\
  ${TNAME}.out.1\
- ${TNAME}.out.2\
- ${TNAME}.out.3\
  ${TNAME}.out.4\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
@@ -58,6 +56,8 @@ FILES="\
  ${TNAME}.out.10\
  ${TNAME}.out.11\
 "
+#  ${TNAME}.out.2\
+#  ${TNAME}.out.3\
 
 for i in $FILES
 do

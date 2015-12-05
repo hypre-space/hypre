@@ -1,0 +1,77 @@
+This directory contains scripts that use the GLVis visualization tool to plot
+the numerical results for most of the hypre example codes.
+
+To use the scripts, one first needs to download and install the latest versions
+of GLVis and the MFEM finite element library (you will need versions 2.0, or
+later) from the following websites:
+
+http://glvis.googlecode.com
+http://mfem.googlecode.com
+
+See http://code.google.com/p/mfem/wiki/Building for building instructions.
+
+Assuming that the "glvis" binary is in your $PATH, you can use it to examine
+the results from hypre's example codes as follows:
+
+1) Run an example with the "-vis" option, e.g.
+
+mpirun -np 16 ex4 -n 10 -U0 2 -K 2 -F 4 -vis
+
+   This will save a number of files describing the solution and the mesh with
+   the example name prefix in the vis/ sub-directory. These files can be cleaned
+   by "make clean" in the examples/ or the vis/ directories.
+
+2) Execute the corresponding "glvis" shell script from the vis/ directory, e.g.
+
+vis/glvis-ex4.sh
+
+   The scripts can be run from either examples/ or the vis/ directories and will
+   check if the solution data exists before visualizing it. Note that some of
+   the scripts, such as glvis-ex3.sh, use pre-processing to merge the parallel
+   results into serial form, while others (e.g. most of the examples based on
+   finite elements) directly visualize parallel data.
+
+3) Interact with the solution in the GLVis window using the mouse buttons and
+   command keystrokes documented in http://glvis.googlecode.com/hg/README. Some
+   of the more frequently used keystrokes are as follows:
+
+                h - Prints a short help message in the terminal
+                m - Toggle mesh level lines
+                a - Toggle bounding box axes
+                c - Display/Hide the colorbar
+                p - Cycle through color palettes
+                t - Cycle materials and lights
+                r - Reset the plot to 3D view
+                R - Cycle through different 2D projections
+                j - Turn on/off perspective
+                l - Turn on/off light
+                g - Toggle background color
+                A - Turn on/off OpenGL anti-aliasing/multi-sampling
+                q - Exit
+
+The glvis binary can also be used directly to visualize the solutions of the
+finite element-based examples 13, 14, 15 and 16. For example:
+
+mpirun -np 6 ex13 -n 30 -vis
+glvis -np 6 -m vis/ex13.mesh -g vis/ex13.sol
+
+Pressing the keys "AbjRl************" in the GLVis interactive window will now
+produce the same result as running vis/glvis-ex13.sh.
+
+In this parallel finite element mode, one can use the F11/F12 and the "b" keys
+to shrink/zoom or plot the boundary of the processor subdomains. Individual
+processor subdomains with their solutions can also be visualized directly, and
+the command keystrokes can be passed with the -k option:
+
+glvis -m vis/ex13.mesh.000005 -g vis/ex13.sol.000005 -k "Aaammcb"
+
+Various finite elements are directly supported in GLVis, such as high-order
+nodal elements:
+
+mpirun -np 4 ex16 -n 2 -vis
+vis/glvis-ex16.sh
+
+or Nedelec (edge) elements:
+
+mpirun -np 8 ex15 -a 1 -vis
+vis/glvis-ex15.sh

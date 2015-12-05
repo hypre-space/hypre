@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.104 $
+ * $Revision: 2.113 $
  ***********************************************************************EHEADER*/
 
 
@@ -167,6 +167,14 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMaxCoarseSize(HYPRE_Solver solver,
                                     HYPRE_Int          max_coarse_size);
+
+/**
+ * (Optional) Sets maximal size for redundant coarse grid solve. 
+ * When the system is smaller than this threshold, sequential AMG is used 
+ * on all remaining active processors.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
+                                    HYPRE_Int          seq_threshold);
 
 /**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
@@ -1383,6 +1391,41 @@ HYPRE_Int HYPRE_AMSSetEdgeConstantVectors(HYPRE_Solver    solver,
                                           HYPRE_ParVector Gz);
 
 /**
+ * (Optional) Set the (components of) the Nedelec interpolation matrix
+ * $\Pi = [ \Pi^x, \Pi^y, \Pi^z ]$.
+ *
+ * This function is generally intended to be used only for high-order Nedelec
+ * discretizations (in the lowest order case, $\Pi$ is constructed internally in
+ * AMS from the discreet gradient matrix and the coordinates of the vertices),
+ * though it can also be used in the lowest-order case or for other types of
+ * discretizations (e.g. ones based on the second family of Nedelec elements).
+ *
+ * By definition, $\Pi$ is the matrix representation of the linear operator that
+ * interpolates (high-order) vector nodal finite elements into the (high-order)
+ * Nedelec space. The component matrices are defined as $\Pi^x \varphi = \Pi
+ * (\varphi,0,0)$ and similarly for $\Pi^y$ and $\Pi^z$. Note that all these
+ * operators depend on the choice of the basis and degrees of freedom in the
+ * high-order spaces.
+ *
+ * The column numbering of Pi should be node-based, i.e. the $x$/$y$/$z$
+ * components of the first node (vertex or high-order dof) should be listed
+ * first, followed by the $x$/$y$/$z$ components of the second node and so on
+ * (see the documentation of HYPRE\_BoomerAMGSetDofFunc).
+ *
+ * If used, this function should be called before HYPRE\_AMSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only one of the sets
+ * $\{\Pi\}$ and $\{\Pi^x,\Pi^y,\Pi^z\}$ needs to be specified (though it is OK
+ * to provide both).  If Pix is NULL, then scalar $\Pi$-based AMS cycles,
+ * i.e. those with cycle\_type > 10, will be unavailable. Similarly, AMS cycles
+ * based on monolithic $\Pi$ (cycle\_type < 10) require that Pi is not NULL.
+ **/
+HYPRE_Int HYPRE_AMSSetInterpolations(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix Pi,
+                                     HYPRE_ParCSRMatrix Pix,
+                                     HYPRE_ParCSRMatrix Piy,
+                                     HYPRE_ParCSRMatrix Piz);
+
+/**
  * (Optional) Sets the matrix $A_\alpha$ corresponding to the Poisson
  * problem with coefficient $\alpha$ (the curl-curl term coefficient in
  * the Maxwell problem).
@@ -1545,10 +1588,9 @@ HYPRE_Int HYPRE_AMSProjectOutGradients(HYPRE_Solver    solver,
                                        HYPRE_ParVector x);
 
 /**
- * Construct and return the discrete gradient matrix G using some
- * edge and vertex information. We assume that edge\_vertex lists
- * the edge vertices consecutively, and that the orientation of all
- * edges is consistent.
+ * Construct and return the lowest-order discrete gradient matrix G using some
+ * edge and vertex information. We assume that edge\_vertex lists the edge
+ * vertices consecutively, and that the orientation of all edges is consistent.
  *
  * If edge\_orientation = 1, the edges are already oriented.
  *
@@ -1560,6 +1602,207 @@ HYPRE_Int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix  A,
                                              HYPRE_Int          *edge_vertex,
                                              HYPRE_Int           edge_orientation,
                                              HYPRE_ParCSRMatrix *G);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR ADS Solver and Preconditioner
+ *
+ * Parallel auxiliary space divergence solver and preconditioner
+ **/
+/*@{*/
+
+/**
+ * Create an ADS solver object.
+ **/
+HYPRE_Int HYPRE_ADSCreate(HYPRE_Solver *solver);
+
+/**
+ * Destroy an ADS solver object.
+ **/
+HYPRE_Int HYPRE_ADSDestroy(HYPRE_Solver solver);
+
+/**
+ * Set up the ADS solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+HYPRE_Int HYPRE_ADSSetup(HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x);
+
+/**
+ * Solve the system or apply ADS as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_ADSSolve(HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x);
+
+/**
+ * Sets the discrete curl matrix $C$.
+ * This function should be called before HYPRE\_ADSSetup()!
+ **/
+HYPRE_Int HYPRE_ADSSetDiscreteCurl(HYPRE_Solver solver , HYPRE_ParCSRMatrix C);
+
+/**
+ * Sets the discrete gradient matrix $G$.
+ * This function should be called before HYPRE\_ADSSetup()!
+ **/
+HYPRE_Int HYPRE_ADSSetDiscreteGradient(HYPRE_Solver solver , HYPRE_ParCSRMatrix G);
+
+/**
+ * Sets the $x$, $y$ and $z$ coordinates of the vertices in the mesh.
+ * This function should be called before HYPRE\_ADSSetup()!
+ **/
+HYPRE_Int HYPRE_ADSSetCoordinateVectors(HYPRE_Solver solver , HYPRE_ParVector x , HYPRE_ParVector y ,
+                                        HYPRE_ParVector z);
+
+/**
+ * (Optional) Set the (components of) the Raviart-Thomas ($\Pi_{RT}$) and the Nedelec
+ * ($\Pi_{ND}$) interpolation matrices.
+ *
+ * This function is generally intended to be used only for high-order $H(div)$
+ * discretizations (in the lowest order case, these matrices are constructed
+ * internally in ADS from the discreet gradient and curl matrices and the
+ * coordinates of the vertices), though it can also be used in the lowest-order
+ * case or for other types of discretizations.
+ *
+ * By definition, RT\_Pi and ND\_Pi are the matrix representations of the linear
+ * operators $\Pi_{RT}$ and $\Pi_{ND}$ that interpolate (high-order) vector
+ * nodal finite elements into the (high-order) Raviart-Thomas and Nedelec
+ * spaces. The component matrices are defined in both cases as $\Pi^x \varphi =
+ * \Pi (\varphi,0,0)$ and similarly for $\Pi^y$ and $\Pi^z$. Note that all these
+ * operators depend on the choice of the basis and degrees of freedom in the
+ * high-order spaces.
+ *
+ * The column numbering of RT\_Pi and ND\_Pi should be node-based, i.e. the
+ * $x$/$y$/$z$ components of the first node (vertex or high-order dof) should be
+ * listed first, followed by the $x$/$y$/$z$ components of the second node and
+ * so on (see the documentation of HYPRE\_BoomerAMGSetDofFunc).
+ *
+ * If used, this function should be called before hypre\_ADSSetup() and there is
+ * no need to provide the vertex coordinates. Furthermore, only one of the sets
+ * $\{\Pi_{RT}\}$ and $\{\Pi_{RT}^x,\Pi_{RT}^y,\Pi_{RT}^z\}$ needs to be
+ * specified (though it is OK to provide both).  If RT\_Pix is NULL, then scalar
+ * $\Pi$-based ADS cycles, i.e. those with cycle\_type > 10, will be
+ * unavailable. Similarly, ADS cycles based on monolithic $\Pi$ (cycle\_type <
+ * 10) require that RT\_Pi is not NULL. The same restrictions hold for the sets
+ * $\{\Pi_{ND}\}$ and $\{\Pi_{ND}^x,\Pi_{ND}^y,\Pi_{ND}^z\}$ -- only one of them
+ * needs to be specified, and the availability of each enables different AMS
+ * cycle type options.
+ **/
+HYPRE_Int HYPRE_ADSSetInterpolations(HYPRE_Solver solver,
+                                     HYPRE_ParCSRMatrix RT_Pi,
+                                     HYPRE_ParCSRMatrix RT_Pix,
+                                     HYPRE_ParCSRMatrix RT_Piy,
+                                     HYPRE_ParCSRMatrix RT_Piz,
+                                     HYPRE_ParCSRMatrix ND_Pi,
+                                     HYPRE_ParCSRMatrix ND_Pix,
+                                     HYPRE_ParCSRMatrix ND_Piy,
+                                     HYPRE_ParCSRMatrix ND_Piz);
+/**
+ * (Optional) Sets maximum number of iterations, if ADS is used
+ * as a solver. To use ADS as a preconditioner, set the maximum
+ * number of iterations to $1$. The default is $20$.
+ **/
+HYPRE_Int HYPRE_ADSSetMaxIter(HYPRE_Solver solver , HYPRE_Int maxit);
+
+/**
+ * (Optional) Set the convergence tolerance, if ADS is used
+ * as a solver. When using ADS as a preconditioner, set the tolerance
+ * to $0.0$. The default is $10^{-6}$.
+ **/
+HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver , double tol);
+
+/**
+ * (Optional) Choose which auxiliary-space solver to use. Possible values are:
+ *
+ * \begin{tabular}{|c|l|}
+ * \hline
+ *   1 & 3-level multiplicative solver (01210) \\
+ *   2 & 3-level additive solver (0+1+2) \\
+ *   3 & 3-level multiplicative solver (02120) \\
+ *   4 & 3-level additive solver (010+2) \\
+ *   5 & 3-level multiplicative solver (0102010) \\
+ *   6 & 3-level additive solver (1+020) \\
+ *   7 & 3-level multiplicative solver (0201020) \\
+ *   8 & 3-level additive solver (0(1+2)0) \\
+ *  11 & 5-level multiplicative solver (013454310) \\
+ *  12 & 5-level additive solver (0+1+3+4+5) \\
+ *  13 & 5-level multiplicative solver (034515430) \\
+ *  14 & 5-level additive solver (01(3+4+5)10) \\
+ * \hline
+ * \end{tabular}
+ *
+ * The default is $1$. See the user's manual for more details.
+ **/
+HYPRE_Int HYPRE_ADSSetCycleType(HYPRE_Solver solver , HYPRE_Int cycle_type);
+
+/**
+ * (Optional) Control how much information is printed during the
+ * solution iterations.
+ * The default is $1$ (print residual norm at each step).
+ **/
+HYPRE_Int HYPRE_ADSSetPrintLevel(HYPRE_Solver solver , HYPRE_Int print_level);
+
+/**
+ * (Optional) Sets relaxation parameters for $A$.
+ * The defaults are $2$, $1$, $1.0$, $1.0$.
+ *
+ * The available options for relax\_type are:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 1 & $\ell_1$-scaled Jacobi \\
+ * 2 & $\ell_1$-scaled block symmetric Gauss-Seidel/SSOR \\
+ * 3 & Kaczmarz \\
+ * 4 & truncated version of $\ell_1$-scaled block symmetric Gauss-Seidel/SSOR \\
+ * 16 & Chebyshev \\
+ * \hline
+ * \end{tabular}
+ **/
+HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver , HYPRE_Int relax_type , HYPRE_Int relax_times , double relax_weight , double omega);
+
+/**
+ * (Optional) Sets parameters for Chebyshev relaxation.
+ * The defaults are $2$, $0.3$.
+ **/
+HYPRE_Int HYPRE_ADSSetChebySmoothingOptions(HYPRE_Solver solver , HYPRE_Int cheby_order , HYPRE_Int cheby_fraction);
+
+/**
+ * (Optional) Sets AMS parameters for $B_C$.
+ * The defaults are $11$, $10$, $1$, $3$, $0.25$, $0$, $0$.
+ * Note that cycle\_type should be greater than 10, unless the high-order
+ * interface of HYPRE\_ADSSetInterpolations is being used!
+ * See the user's manual for more details.
+ **/
+HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver , HYPRE_Int cycle_type , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
+
+/**
+ * (Optional) Sets AMG parameters for $B_\Pi$.
+ * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
+ **/
+HYPRE_Int HYPRE_ADSSetAMGOptions(HYPRE_Solver solver , HYPRE_Int coarsen_type , HYPRE_Int agg_levels , HYPRE_Int relax_type , double strength_threshold , HYPRE_Int interp_type , HYPRE_Int Pmax);
+
+/**
+ * Returns the number of iterations taken.
+ **/
+HYPRE_Int HYPRE_ADSGetNumIterations(HYPRE_Solver solver , HYPRE_Int *num_iterations);
+
+/**
+ * Returns the norm of the final relative residual.
+ **/
+HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver solver , double *rel_resid_norm);
 
 /*@}*/
 
@@ -2345,7 +2588,24 @@ HYPRE_ParCSRHybridSetOuterWt(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_ParCSRHybridSetLevelOuterWt(HYPRE_Solver solver,
                                   double       outer_wt,
-                                  HYPRE_Int          level);
+                                  HYPRE_Int    level);
+
+/**
+ * (Optional) Defines the maximal coarse grid size.
+ * The default is 9.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetMaxCoarseSize(HYPRE_Solver solver,
+                               HYPRE_Int        max_coarse_size);
+
+/**
+ * (Optional) enables redundant coarse grid size. If the system size becomes
+ * smaller than seq_threshold, sequential AMG is used on all remaining processors.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_ParCSRHybridSetSeqThreshold(HYPRE_Solver solver,
+                               HYPRE_Int       seq_threshold);
 
 /*
  *

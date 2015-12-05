@@ -1,0 +1,91 @@
+#!/bin/ksh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision: 1.1 $
+#EHEADER**********************************************************************
+
+#=============================================================================
+# Test solvers with some processors having no data
+#=============================================================================
+
+# SMG
+mpirun -np 4 ./struct -n 12 12 12 -P 2 1 2       -solver 0 > emptyproc.out.00a
+mpirun -np 6 ./struct -n 12 12 12 -P 2 1 2       -solver 0 > emptyproc.out.00a.a
+mpirun -np 7 ./struct -n 6 6 6 -b 2 2 2 -P 2 1 2 -solver 0 > emptyproc.out.00a.b
+
+# PFMG
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1       -solver 1 > emptyproc.out.01a
+mpirun -np 6 ./struct -n 12 12 12 -P 2 2 1       -solver 1 > emptyproc.out.01a.a
+mpirun -np 7 ./struct -n 6 6 6 -b 2 2 2 -P 2 2 1 -solver 1 > emptyproc.out.01a.b
+# non-Galerkin
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1 -rap 1 -skip 1 -relax 2 -solver 1 \
+> emptyproc.out.01b
+mpirun -np 7 ./struct -n 12 12 12 -P 2 2 1 -rap 1 -skip 1 -relax 2 -solver 1 \
+> emptyproc.out.01b.a
+
+# PFMG constant 3
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1       -solver 3 > emptyproc.out.03a
+mpirun -np 6 ./struct -n 12 12 12 -P 2 2 1       -solver 3 > emptyproc.out.03a.a
+mpirun -np 7 ./struct -n 6 6 6 -b 2 2 2 -P 2 2 1 -solver 3 > emptyproc.out.03a.b
+# non-Galerkin
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1 -rap 1 -skip 1 -relax 2 -solver 3 \
+> emptyproc.out.03b
+mpirun -np 7 ./struct -n 12 12 12 -P 2 2 1 -rap 1 -skip 1 -relax 2 -solver 3 \
+> emptyproc.out.03b.a
+
+# PFMG constant 4
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1       -solver 4 > emptyproc.out.04a
+mpirun -np 6 ./struct -n 12 12 12 -P 2 2 1       -solver 4 > emptyproc.out.04a.a
+mpirun -np 7 ./struct -n 6 6 6 -b 2 2 2 -P 2 2 1 -solver 4 > emptyproc.out.04a.b
+# non-Galerkin
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1 -rap 1 -skip 1 -relax 2 -solver 4 \
+> emptyproc.out.04b
+mpirun -np 7 ./struct -n 12 12 12 -P 2 2 1 -rap 1 -skip 1 -relax 2 -solver 4 \
+> emptyproc.out.04b.a
+
+# PFMG-CG
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1       -solver 11 > emptyproc.out.11a
+mpirun -np 7 ./struct -n 12 12 12 -P 2 2 1       -solver 11 > emptyproc.out.11a.a
+
+# PFMG-CG constant 3
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1       -solver 13 > emptyproc.out.13a
+mpirun -np 7 ./struct -n 12 12 12 -P 2 2 1       -solver 13 > emptyproc.out.13a.a
+
+# PFMG-CG constant 4
+mpirun -np 4 ./struct -n 12 12 12 -P 2 2 1       -solver 14 > emptyproc.out.14a
+mpirun -np 7 ./struct -n 12 12 12 -P 2 2 1       -solver 14 > emptyproc.out.14a.a
+
+# Jacobi-CG
+mpirun -np 4 ./struct -n 10 10 10 -P 1 2 2       -solver 17 > emptyproc.out.17a
+mpirun -np 7 ./struct -n 10 10 10 -P 1 2 2       -solver 17 > emptyproc.out.17a.a
+
+# DS-CG
+mpirun -np 4 ./struct -n 11 11 11 -P 1 2 2       -solver 18 > emptyproc.out.18a
+mpirun -np 7 ./struct -n 11 11 11 -P 1 2 2       -solver 18 > emptyproc.out.18a.a
+
+# Hybrid PFMG
+mpirun -np 4 ./struct -n 10 10 10 -P 1 2 2       -solver 21 > emptyproc.out.21a
+mpirun -np 7 ./struct -n 10 10 10 -P 1 2 2       -solver 21 > emptyproc.out.21a.a
+
+# PFMG-GMRES
+mpirun -np 4 ./struct -n 11 11 11 -P 2 2 1       -solver 31 > emptyproc.out.31a
+mpirun -np 7 ./struct -n 11 11 11 -P 2 2 1       -solver 31 > emptyproc.out.31a.a
+
+# PFMG-BiCGSTAB
+mpirun -np 4 ./struct -n 11 11 11 -P 2 2 1       -solver 41 > emptyproc.out.41a
+mpirun -np 7 ./struct -n 11 11 11 -P 2 2 1       -solver 41 > emptyproc.out.41a.a
+
+# PFMG-LGMRES
+mpirun -np 4 ./struct -n 11 11 11 -P 2 2 1       -solver 51 > emptyproc.out.51a
+mpirun -np 7 ./struct -n 11 11 11 -P 2 2 1       -solver 51 > emptyproc.out.51a.a
+
+# PFMG-FlexGMRES
+mpirun -np 4 ./struct -n 11 11 11 -P 2 2 1       -solver 61 > emptyproc.out.61a
+mpirun -np 7 ./struct -n 11 11 11 -P 2 2 1       -solver 61 > emptyproc.out.61a.a

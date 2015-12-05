@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.65 $
+ * $Revision: 2.70 $
  ***********************************************************************EHEADER*/
 
 
@@ -63,6 +63,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int 	    IS_type;
    HYPRE_Int 	    CR_use_CG;
    HYPRE_Int 	    cgc_its;
+   HYPRE_Int 	    seq_threshold;
 
    /* solve params */
    HYPRE_Int      min_iter;
@@ -116,6 +117,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    max_levels = 25;
    max_coarse_size = 9;
+   seq_threshold = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
@@ -201,6 +203,9 @@ hypre_BoomerAMGCreate()
    amg_data = hypre_CTAlloc(hypre_ParAMGData, 1);
 
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
+   hypre_ParAMGDataUserRelaxType(amg_data) = -1;
+   hypre_ParAMGDataUserNumSweeps(amg_data) = -1;
+   hypre_ParAMGDataUserRelaxWeight(amg_data) = 1.0;
    hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
@@ -327,6 +332,12 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGSmoothInterpVectors(amg_data) = 0;
    hypre_ParAMGDataExpandPWeights(amg_data) = NULL;
 
+   /* for redundant coarse grid solve */
+   hypre_ParAMGDataCoarseSolver(amg_data) = NULL;
+   hypre_ParAMGDataACoarse(amg_data) = NULL;
+   hypre_ParAMGDataFCoarse(amg_data) = NULL;
+   hypre_ParAMGDataUCoarse(amg_data) = NULL;
+   hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
 
    return (void *) amg_data;
 }
@@ -342,6 +353,8 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
+   void *amg = hypre_ParAMGDataCoarseSolver(amg_data);
+   MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int i;
 
    if (hypre_ParAMGDataMaxEigEst(amg_data))
@@ -533,7 +546,21 @@ hypre_BoomerAMGDestroy( void *data )
    
    }
    
+   if (amg) hypre_BoomerAMGDestroy(amg);
 
+   if (hypre_ParAMGDataACoarse(amg_data))
+      hypre_ParCSRMatrixDestroy(hypre_ParAMGDataACoarse(amg_data));
+
+   if (hypre_ParAMGDataUCoarse(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataUCoarse(amg_data));
+
+   if (hypre_ParAMGDataFCoarse(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
+
+   if (new_comm != hypre_MPI_COMM_NULL) 
+   {
+       MPI_Comm_free (&new_comm);
+   }
    hypre_TFree(amg_data);
    return hypre_error_flag;
 }
@@ -640,6 +667,48 @@ hypre_BoomerAMGGetMaxCoarseSize( void *data,
    } 
 
    *max_coarse_size = hypre_ParAMGDataMaxCoarseSize(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetSeqThreshold( void *data,
+                          HYPRE_Int   seq_threshold )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (seq_threshold < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataSeqThreshold(amg_data) = seq_threshold;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetSeqThreshold( void *data,
+                             HYPRE_Int *  seq_threshold )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
 
    return hypre_error_flag;
 }
@@ -1295,6 +1364,8 @@ hypre_BoomerAMGSetNumSweeps( void     *data,
       num_grid_sweeps[i] = num_sweeps;
    num_grid_sweeps[3] = 1;
 
+   hypre_ParAMGDataUserNumSweeps(amg_data) = num_sweeps;
+
    return hypre_error_flag;
 }
  
@@ -1442,6 +1513,7 @@ hypre_BoomerAMGSetRelaxType( void     *data,
       grid_relax_type[i] = relax_type;
    grid_relax_type[3] = 9;
    hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
+   hypre_ParAMGDataUserRelaxType(amg_data) = relax_type;
 
    return hypre_error_flag;
 }
@@ -1707,6 +1779,8 @@ hypre_BoomerAMGSetRelaxWt( void     *data,
    relax_weight_array = hypre_ParAMGDataRelaxWeight(amg_data);
    for (i=0; i < num_levels; i++)
       relax_weight_array[i] = relax_weight;
+
+   hypre_ParAMGDataUserRelaxWeight(amg_data) = relax_weight;
    
    return hypre_error_flag;
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,13 +31,16 @@
 typedef struct 
 {
    /* the entries will be the same for all procs */  
-   hypre_BoxArray      *regions;
-   HYPRE_Int           num_regions;      
-   HYPRE_Int           *proc_partitions;
-   hypre_Index         *divisions;
+   hypre_BoxArray      *regions;  /* areas of the grid with boxes */
+   HYPRE_Int           num_regions;  /* how many regions */    
+   HYPRE_Int           *proc_partitions;  /* proc ids assigned to each region  
+                                             - this is size num_regions +1*/
+   hypre_Index         *divisions;        /* number of proc divisions in x y z 
+                                             direction
+                                             for each region */
    /* these entries are specific to each proc */
-   hypre_BoxArray      *my_partition;
-   hypre_BoxArray      *my_partition_boxes;
+   hypre_BoxArray      *my_partition;  /*the portion of grid that I own - at most 2 */
+   hypre_BoxArray      *my_partition_boxes;  /* boxes in my portion */
    HYPRE_Int           *my_partition_proc_ids;
    HYPRE_Int           *my_partition_boxnums;
    HYPRE_Int           my_partition_ids_size;   

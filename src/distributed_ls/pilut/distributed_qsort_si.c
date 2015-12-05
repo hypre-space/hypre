@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,7 +35,7 @@ static void sdqst(HYPRE_Int *, HYPRE_Int *);
 
 
 /*
- * tex_qsort:
+ * hypre_tex_qsort:
  * First, set up some global parameters for qst to share.  Then, quicksort
  * with qst(), and then a cleanup insertion sort ourselves.  Sound simple?
  * It's not...

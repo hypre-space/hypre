@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -696,7 +696,7 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
 }
 
 HYPRE_Int
-utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
+utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, const char *fileName) {
 
   hypre_longint i, j, h, w, jump;
   double* p;

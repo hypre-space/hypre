@@ -7,13 +7,55 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.116 $
+# $Revision: 2.121 $
 #EHEADER**********************************************************************
 
 #=============================================================================
 # This file chronicles user-level changes to hypre, beginning with the most
 # recent release.
 #=============================================================================
+
+Version 2.8.0b released 2011/11/14
+
+- Added the new Auxiliary-space Divergence Solver (ADS) which targets div-div
+  problems discretized with lowest order Raviart-Thomas "face" finite elements.
+  ADS is very similar to AMS, and in general its relationship to AMS is
+  analogous to the relationship between AMS and AMG.
+
+- Added a redundant coarse-grid solve option to BoomerAMG, which can improve
+  solution times on machines with high communication latencies.
+
+- Extended the AMS and ADS solvers to support (arbitrary) high-order H(curl) and
+  H(div) discretization methods.  The high-order interface allows the users to
+  set directly the Nedelec and Raviart-Thomas interpolation matrices, which can
+  be used to precondition other types of discretizations (e.g. ones based on the
+  second family of Nedelec elements).
+
+- Added a Euclid preconditioner option to the Fortran interfaces for the ParCSR
+  Krylov solvers.
+
+- Fixed a bug with periodic problems in the SStruct interface.
+
+- Fixed a bug in CGNR.
+
+- Added a new higher order FEM example (ex16).
+
+- Added visualization capabilities to the examples based on the GLVis package.
+
+#====================================
+
+Version 2.7.1a released 2011/03/18
+
+- Fixed a long-standing O(P) memory allocation problem in the communication
+  setup routines for Struct.
+
+- Fixed some OpenMP threading problems in Struct.
+
+- Made some optimizations to the constant coefficient version of PFMG.
+
+- Added a 64-bit version of Example 15 (file 'ex15big.c' in examples/)
+
+#====================================
 
 Version 2.7.0b released 2011/01/27
 

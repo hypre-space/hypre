@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -262,7 +262,7 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
    hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
       {
@@ -320,9 +320,13 @@ hypre_PFMGSetupInterpOp_CC0
             Pp1[Pi] = 0.0;
       }
    hypre_BoxLoop2End(Ai, Pi);
-  
+
    if (warning_cnt)
-      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+   {
+      hypre_error_w_msg(
+         HYPRE_ERROR_GENERIC,
+         "Warning 0 center in interpolation. Setting interp = 0.");
+   }
 
    return hypre_error_flag;
 }
@@ -419,7 +423,11 @@ hypre_PFMGSetupInterpOp_CC1
       Pp1[Pi] = 0.0;
 
    if (warning_cnt)
-      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+   {
+      hypre_error_w_msg(
+         HYPRE_ERROR_GENERIC,
+         "Warning 0 center in interpolation. Setting interp = 0.");
+   }
 
    return hypre_error_flag;
 }
@@ -564,7 +572,11 @@ hypre_PFMGSetupInterpOp_CC2
    }
 
    if (warning_cnt)
-      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+   {
+      hypre_error_w_msg(
+         HYPRE_ERROR_GENERIC,
+         "Warning 0 center in interpolation. Setting interp = 0.");
+   }
 
    return hypre_error_flag;
 }

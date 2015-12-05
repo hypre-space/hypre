@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.22 $
+ * $Revision: 2.24 $
  ***********************************************************************EHEADER*/
 
 #define TIME_DEBUG 0
@@ -81,7 +81,7 @@ hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,\
                             hypre_BoxIMax(box))
 
 /*--------------------------------------------------------------------------
- * New version of hypre_StructCoarsen that uses the BoxManager (AHB 9/12)
+ * New version of hypre_StructCoarsen that uses the BoxManager (AHB 12/06)
  *
  * This routine coarsens the grid, 'fgrid', by the coarsening factor, 'stride',
  * using the index mapping in 'hypre_StructMapFineToCoarse'.
@@ -218,6 +218,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    {
       coarsen_factor = hypre_IndexD(stride,i); 
       hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
+   }
+   for (i = dim; i < 3; i++)
+   {
+      hypre_IndexD(new_dist, i) = 2;
    }
    
    hypre_BoxManGetAllGlobalKnown (fboxman, &known );

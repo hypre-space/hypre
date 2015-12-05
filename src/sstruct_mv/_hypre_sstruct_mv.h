@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_SSTRUCT_MV_HEADER
@@ -33,7 +33,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -332,7 +332,7 @@ typedef struct hypre_SStructGrid_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -373,8 +373,6 @@ typedef struct hypre_SStructStencil_struct
 hypre_StructStencilShape( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilSize(stencil) \
 hypre_StructStencilSize( hypre_SStructStencilSStencil(stencil) )
-#define hypre_SStructStencilMaxOffset(stencil) \
-hypre_StructStencilMaxOffset( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilNDim(stencil) \
 hypre_StructStencilDim( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilEntry(stencil, i) \
@@ -390,7 +388,7 @@ hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -572,7 +570,7 @@ typedef struct hypre_SStructGraph_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -710,7 +708,7 @@ typedef struct hypre_SStructMatrix_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -858,6 +856,7 @@ HYPRE_Int HYPRE_SStructMatrixSetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int 
 HYPRE_Int HYPRE_SStructMatrixAddToValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
 HYPRE_Int HYPRE_SStructMatrixAddFEMValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructMatrixGetValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
+HYPRE_Int HYPRE_SStructMatrixGetFEMValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructMatrixSetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
 HYPRE_Int HYPRE_SStructMatrixAddToBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
 HYPRE_Int HYPRE_SStructMatrixGetBoxValues ( HYPRE_SStructMatrix matrix , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , HYPRE_Int nentries , HYPRE_Int *entries , double *values );
@@ -866,7 +865,6 @@ HYPRE_Int HYPRE_SStructMatrixSetSymmetric ( HYPRE_SStructMatrix matrix , HYPRE_I
 HYPRE_Int HYPRE_SStructMatrixSetNSSymmetric ( HYPRE_SStructMatrix matrix , HYPRE_Int symmetric );
 HYPRE_Int HYPRE_SStructMatrixSetObjectType ( HYPRE_SStructMatrix matrix , HYPRE_Int type );
 HYPRE_Int HYPRE_SStructMatrixGetObject ( HYPRE_SStructMatrix matrix , void **object );
-HYPRE_Int HYPRE_SStructMatrixGetObject2 ( HYPRE_SStructMatrix matrix , void **object );
 HYPRE_Int HYPRE_SStructMatrixPrint ( const char *filename , HYPRE_SStructMatrix matrix , HYPRE_Int all );
 HYPRE_Int HYPRE_SStructMatrixMatvec ( double alpha , HYPRE_SStructMatrix A , HYPRE_SStructVector x , double beta , HYPRE_SStructVector y );
 
@@ -883,6 +881,7 @@ HYPRE_Int HYPRE_SStructVectorSetValues ( HYPRE_SStructVector vector , HYPRE_Int 
 HYPRE_Int HYPRE_SStructVectorAddToValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , double *value );
 HYPRE_Int HYPRE_SStructVectorAddFEMValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructVectorGetValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , double *value );
+HYPRE_Int HYPRE_SStructVectorGetFEMValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *index , double *values );
 HYPRE_Int HYPRE_SStructVectorSetBoxValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , double *values );
 HYPRE_Int HYPRE_SStructVectorAddToBoxValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , double *values );
 HYPRE_Int HYPRE_SStructVectorGetBoxValues ( HYPRE_SStructVector vector , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int var , double *values );

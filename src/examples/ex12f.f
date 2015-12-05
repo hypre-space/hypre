@@ -168,6 +168,9 @@ c-----------------------------------------------------------------------
 c     Create the graph object
       call HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, graph, ierr)
 
+c     See MatrixSetObjectType below
+      call HYPRE_SStructGraphSetObjectType(graph, object_type, ierr)
+
 c     Now we need to tell the graph which stencil to use for each
 c     variable on each part (we only have one variable and one part)
       call HYPRE_SStructGraphSetStencil(graph, part, var, stencil, ierr)

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -187,11 +187,11 @@ HYPRE_Int* activeMask
 }
 
 static void
-lobpcg_errorMessage( HYPRE_Int verbosityLevel, char* message )
+lobpcg_errorMessage( HYPRE_Int verbosityLevel, const char* message )
 {
   if ( verbosityLevel ) {
     hypre_fprintf( stderr, "Error in LOBPCG:\n" );
-    hypre_fprintf( stderr, message );
+    hypre_fprintf( stderr, "%s", message );
   }
 }
 

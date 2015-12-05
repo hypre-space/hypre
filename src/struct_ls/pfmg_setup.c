@@ -7,39 +7,31 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.22 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
-
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
 
 #include "headers.h"
 #include "pfmg.h"
 
 #define DEBUG 0
 
-#define hypre_PFMGSetCIndex(cdir, cindex) \
-{\
-   hypre_SetIndex(cindex, 0, 0, 0);\
-   hypre_IndexD(cindex, cdir) = 0;\
-}
+#define hypre_PFMGSetCIndex(cdir, cindex)       \
+   {                                            \
+      hypre_SetIndex(cindex, 0, 0, 0);          \
+      hypre_IndexD(cindex, cdir) = 0;           \
+   }
 
-#define hypre_PFMGSetFIndex(cdir, findex) \
-{\
-   hypre_SetIndex(findex, 0, 0, 0);\
-   hypre_IndexD(findex, cdir) = 1;\
-}
+#define hypre_PFMGSetFIndex(cdir, findex)       \
+   {                                            \
+      hypre_SetIndex(findex, 0, 0, 0);          \
+      hypre_IndexD(findex, cdir) = 1;           \
+   }
 
-#define hypre_PFMGSetStride(cdir, stride) \
-{\
-   hypre_SetIndex(stride, 1, 1, 1);\
-   hypre_IndexD(stride, cdir) = 2;\
-}
+#define hypre_PFMGSetStride(cdir, stride)       \
+   {                                            \
+      hypre_SetIndex(stride, 1, 1, 1);          \
+      hypre_IndexD(stride, cdir) = 2;           \
+   }
 
 
 /*--------------------------------------------------------------------------
@@ -538,7 +530,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          maxiter = hypre_min(maxwork, cmaxsize);
 #if 0
          hypre_printf("maxwork = %d, cmaxsize = %d, maxiter = %d\n",
-                maxwork, cmaxsize, maxiter);
+                      maxwork, cmaxsize, maxiter);
 #endif
          hypre_PFMGRelaxSetMaxIter(relax_data_l[l], maxiter);
       }
@@ -611,9 +603,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    HYPRE_Int              Ai;
                         
    double                *Ap;
-   double                 cxyz[3];
-   double                 sqcxyz[3];
-   double                 tcxyz[3];
+   double                 cxyz[3], sqcxyz[3], tcxyz[3];
    double                 cxyz_max;
 
    HYPRE_Int              tot_size; 
@@ -634,8 +624,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    HYPRE_Int              loopi, loopj, loopk;
 
    HYPRE_Int              ierr = 0;
-   double                 cx, cy, cz;
-   double                 sqcx, sqcy, sqcz;
+   double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -651,13 +640,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
     * Compute cxyz (use arithmetic mean)
     *----------------------------------------------------------*/
 
-   cxyz[0] = 0.0;
-   cxyz[1] = 0.0;
-   cxyz[2] = 0.0;
+   cx = 0.0;
+   cy = 0.0;
+   cz = 0.0;
 
-   sqcxyz[0] = 0.0;
-   sqcxyz[1] = 0.0;
-   sqcxyz[2] = 0.0;
+   sqcx = 0.0;
+   sqcy = 0.0;
+   sqcz = 0.0;
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
@@ -666,32 +655,72 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    tot_size= hypre_StructGridGlobalSize(hypre_StructMatrixGrid(A));
 
    hypre_ForBoxI(i, compute_boxes)
+   {
+      compute_box = hypre_BoxArrayBox(compute_boxes, i);
+
+      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+
+      start  = hypre_BoxIMin(compute_box);
+
+      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+      /* all coefficients constant or variable diagonal */
+      if ( constant_coefficient )
       {
-         compute_box = hypre_BoxArrayBox(compute_boxes, i);
+         Ai = hypre_CCBoxIndexRank( A_dbox, start );
 
+         tcx = 0.0;
+         tcy = 0.0;
+         tcz = 0.0;
 
-         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-
-         start  = hypre_BoxIMin(compute_box);
-
-         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-         cx = cxyz[0];
-         cy = cxyz[1];
-         cz = cxyz[2];
-
-         sqcx = sqcxyz[0];
-         sqcy = sqcxyz[1];
-         sqcz = sqcxyz[2];
-
-         /* all coefficients constant or variable diagonal */
-         if ( constant_coefficient )
+         for (si = 0; si < stencil_size; si++)
          {
-            Ai = hypre_CCBoxIndexRank( A_dbox, start );
+            Ap = hypre_StructMatrixBoxData(A, i, si);
 
-            tcxyz[0] = 0.0;
-            tcxyz[1] = 0.0;
-            tcxyz[2] = 0.0;
+            /* x-direction */
+            Astenc = hypre_IndexD(stencil_shape[si], 0);
+            if (Astenc)
+            {
+               tcx -= Ap[Ai];
+            }
+
+            /* y-direction */
+            Astenc = hypre_IndexD(stencil_shape[si], 1);
+            if (Astenc)
+            {
+               tcy -= Ap[Ai];
+            }
+
+            /* z-direction */
+            Astenc = hypre_IndexD(stencil_shape[si], 2);
+            if (Astenc)
+            {
+               tcz -= Ap[Ai];
+            }
+         }
+
+         cx += tcx;
+         cy += tcy;
+         cz += tcz;
+
+         sqcx += (tcx*tcx);
+         sqcy += (tcy*tcy);
+         sqcz += (tcz*tcz);
+      }
+
+      /* constant_coefficient==0, all coefficients vary with space */
+      else
+      {
+         hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,si,Astenc,tcx,tcy,tcz
+#define HYPRE_SMP_REDUCTION_OP +
+#define HYPRE_SMP_REDUCTION_VARS cx,cy,cz,sqcx,sqcy,sqcz
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+         {
+            tcx = 0.0;
+            tcy = 0.0;
+            tcz = 0.0;
 
             for (si = 0; si < stencil_size; si++)
             {
@@ -701,93 +730,43 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                Astenc = hypre_IndexD(stencil_shape[si], 0);
                if (Astenc)
                {
-                  tcxyz[0] -= Ap[Ai];
+                  tcx -= Ap[Ai];
                }
 
                /* y-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 1);
                if (Astenc)
                {
-                  tcxyz[1] -= Ap[Ai];
+                  tcy -= Ap[Ai];
                }
 
                /* z-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 2);
                if (Astenc)
                {
-                  tcxyz[2] -= Ap[Ai];
+                  tcz -= Ap[Ai];
                }
             }
 
-            cx += tcxyz[0];
-            cy += tcxyz[1];
-            cz += tcxyz[2];
-
-            sqcx += (tcxyz[0]*tcxyz[0]);
-            sqcy += (tcxyz[1]*tcxyz[1]);
-            sqcz += (tcxyz[2]*tcxyz[2]);
+            cx += tcx;
+            cy += tcy;
+            cz += tcz;
+            
+            sqcx += (tcx*tcx);
+            sqcy += (tcy*tcy);
+            sqcz += (tcz*tcz);
          }
-
-         /* constant_coefficient==0, all coefficients vary with space */
-         else
-         {
-            hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS cx,cy,cz
-#include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
-               {
-                  tcxyz[0] = 0.0;
-                  tcxyz[1] = 0.0;
-                  tcxyz[2] = 0.0;
-
-                  for (si = 0; si < stencil_size; si++)
-                  {
-                     Ap = hypre_StructMatrixBoxData(A, i, si);
-
-                     /* x-direction */
-                     Astenc = hypre_IndexD(stencil_shape[si], 0);
-                     if (Astenc)
-                     {
-                        tcxyz[0] -= Ap[Ai];
-                     }
-
-                     /* y-direction */
-                     Astenc = hypre_IndexD(stencil_shape[si], 1);
-                     if (Astenc)
-                     {
-                        tcxyz[1] -= Ap[Ai];
-                     }
-
-                     /* z-direction */
-                     Astenc = hypre_IndexD(stencil_shape[si], 2);
-                     if (Astenc)
-                     {
-                        tcxyz[2] -= Ap[Ai];
-                     }
-                  }
-
-                  cx += tcxyz[0];
-                  cy += tcxyz[1];
-                  cz += tcxyz[2];
-
-                  sqcx += (tcxyz[0]*tcxyz[0]);
-                  sqcy += (tcxyz[1]*tcxyz[1]);
-                  sqcz += (tcxyz[2]*tcxyz[2]);
-               }
-            hypre_BoxLoop1End(Ai);
-
-         }
-
-         cxyz[0] = cx;
-         cxyz[1] = cy;
-         cxyz[2] = cz;
-
-         sqcxyz[0] = sqcx;
-         sqcxyz[1] = sqcy;
-         sqcxyz[2] = sqcz;
+         hypre_BoxLoop1End(Ai);
       }
+   }
+
+   cxyz[0] = cx;
+   cxyz[1] = cy;
+   cxyz[2] = cz;
+   
+   sqcxyz[0] = sqcx;
+   sqcxyz[1] = sqcy;
+   sqcxyz[2] = sqcz;
 
    /*----------------------------------------------------------
     * Compute dxyz
@@ -931,8 +910,3 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    
    return zero_diag;
 }
-
-
-
-
-

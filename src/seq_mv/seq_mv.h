@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.18 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 
@@ -45,19 +45,20 @@ extern "C" {
 
 typedef struct
 {
-   double  *data;
    HYPRE_Int     *i;
    HYPRE_Int     *j;
    HYPRE_Int      num_rows;
    HYPRE_Int      num_cols;
    HYPRE_Int      num_nonzeros;
 
-  /* for compressing rows in matrix multiplication  */
-   HYPRE_Int     *rownnz;
-   HYPRE_Int      num_rownnz;
-
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    HYPRE_Int      owns_data;
+
+   double  *data;
+
+   /* for compressing rows in matrix multiplication  */
+   HYPRE_Int     *rownnz;
+   HYPRE_Int      num_rownnz;
 
 } hypre_CSRMatrix;
 
@@ -246,7 +247,7 @@ hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B 
 /* csr_matvec.c */
 HYPRE_Int hypre_CSRMatrixMatvec ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
 HYPRE_Int hypre_CSRMatrixMatvecT ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
-HYPRE_Int hypre_CSRMatrixMatvec_FF( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
+HYPRE_Int hypre_CSRMatrixMatvec_FF ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_Int length , HYPRE_Int num_procs , HYPRE_Int **part_ptr );

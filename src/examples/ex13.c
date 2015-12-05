@@ -80,6 +80,7 @@
 #define M_PI 3.14159265358979
 #endif
 
+#include "vis.c"
 
 /*
    This routine computes the bilinear finite element stiffness matrix and
@@ -141,7 +142,7 @@ int main (int argc, char *argv[])
    int myid, num_procs;
    int n;
    double gamma, h;
-   int print_solution;
+   int vis;
 
    HYPRE_SStructGrid     grid;
    HYPRE_SStructGraph    graph;
@@ -159,7 +160,7 @@ int main (int argc, char *argv[])
 
    /* Set default parameters */
    n = 10;
-   print_solution = 0;
+   vis = 0;
 
    /* Parse command line */
    {
@@ -173,10 +174,10 @@ int main (int argc, char *argv[])
             arg_index++;
             n = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
+         else if ( strcmp(argv[arg_index], "-vis") == 0 )
          {
             arg_index++;
-            print_solution = 1;
+            vis = 1;
          }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
@@ -195,7 +196,7 @@ int main (int argc, char *argv[])
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
          printf("  -n <n>              : problem size per processor (default: 10)\n");
-         printf("  -print_solution     : print the solution vector\n");
+         printf("  -vis                : save the solution for GLVis visualization\n");
          printf("\n");
       }
 
@@ -374,6 +375,9 @@ int main (int argc, char *argv[])
 
       /* Create the graph object */
       HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+
+      /* See MatrixSetObjectType below */
+      HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);
 
       /* Now we need to tell the graph which stencil to use for each
          variable on each part (we only have one variable) */
@@ -611,37 +615,56 @@ int main (int argc, char *argv[])
       /* Gather the solution vector */
       HYPRE_SStructVectorGather(x);
 
-      /* Print the solution with replicated shared data */
-      if (print_solution)
+      /* Save the solution for GLVis visualization, see vis/glvis-ex13.sh */
+      if (vis)
       {
          FILE *file;
-         char  filename[255];
+         char filename[255];
 
          int i, part = myid, var = 0;
          int nvalues = (n+1)*(n+1);
-         double *values;
+         double *values = calloc(nvalues, sizeof(double));
          int ilower[2] = {0,0};
          int iupper[2] = {n,n};
-
-         values = calloc(nvalues, sizeof(double));
 
          /* get all local data (including a local copy of the shared values) */
          HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
                                          var, values);
 
-         sprintf(filename, "sstruct.out.x.00.00.%05d", part);
+         sprintf(filename, "%s.%06d", "vis/ex13.sol", myid);
          if ((file = fopen(filename, "w")) == NULL)
          {
             printf("Error: can't open output file %s\n", filename);
             MPI_Finalize();
             exit(1);
          }
+
+         /* finite element space header */
+         fprintf(file, "FiniteElementSpace\n");
+         fprintf(file, "FiniteElementCollection: H1_2D_P1\n");
+         fprintf(file, "VDim: 1\n");
+         fprintf(file, "Ordering: 0\n\n");
+
+         /* save solution */
          for (i = 0; i < nvalues; i++)
             fprintf(file, "%.14e\n", values[i]);
+
          fflush(file);
          fclose(file);
-
          free(values);
+
+         /* save local finite element mesh */
+         GLVis_PrintLocalRhombusMesh("vis/ex13.mesh", n, myid, gamma);
+
+         /* additional visualization data */
+         if (myid == 0)
+         {
+            sprintf(filename, "%s", "vis/ex13.data");
+            file = fopen(filename, "w");
+            fprintf(file, "np %d\n", num_procs);
+            fflush(file);
+            fclose(file);
+         }
       }
 
       if (myid == 0)

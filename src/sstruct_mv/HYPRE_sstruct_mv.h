@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.28 $
+ * $Revision: 2.31 $
  ***********************************************************************EHEADER*/
 
 
@@ -323,6 +323,11 @@ HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
  * actual period.  For example, periodicity in the first and third dimensions
  * for a 10x11x12 part is indicated by the array [10,0,12].
  *
+ * NOTE: Currently, this routine will only have an effect for matrix object
+ * types {\tt HYPRE\_SSTRUCT} and {\tt HYPRE\_STRUCT}.  For {\tt HYPRE\_PARCSR},
+ * periodicity must be set up manually through other routines such as
+ * \Ref{HYPRE_SStructGridSetNeighborPart}.
+ *
  * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
  * of the periodic dimensions.
  **/
@@ -622,6 +627,23 @@ HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
                              double              *values);
 
 /**
+ * Get finite element stiffness matrix coefficients index by index.  The layout
+ * of the data in {\tt values} is determined by the routines
+ * \Ref{HYPRE_SStructGridSetFEMOrdering} and
+ * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+HYPRE_Int
+HYPRE_SStructMatrixGetFEMValues(HYPRE_SStructMatrix  matrix,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                double              *values);
+
+/**
  * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
  * as follows:
  *
@@ -870,7 +892,9 @@ HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
                                 double              *values);
 
 /**
- * Get vector coefficients index by index.
+ * Get vector coefficients index by index.  Users must first call the routine
+ * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * processes is correct.
  *
  * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorGetBoxValues} to get
  * coefficients a box at a time.
@@ -889,6 +913,24 @@ HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
                              HYPRE_Int           *index,
                              HYPRE_Int            var,
                              double              *value);
+
+/**
+ * Get finite element vector coefficients index by index.  The layout of the
+ * data in {\tt values} is determined by the routine
+ * \Ref{HYPRE_SStructGridSetFEMOrdering}.  Users must first call the routine
+ * \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * processes is correct.
+ *
+ * If the vector is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructVectorSetComplex
+ **/
+HYPRE_Int
+HYPRE_SStructVectorGetFEMValues(HYPRE_SStructVector  vector,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                double              *values);
 
 /**
  * Set vector coefficients a box at a time.  The data in {\tt values} is ordered
@@ -943,7 +985,9 @@ HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
 
 /**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
- * as in \Ref{HYPRE_SStructVectorSetBoxValues}.
+ * as in \Ref{HYPRE_SStructVectorSetBoxValues}.  Users must first call the
+ * routine \Ref{HYPRE_SStructVectorGather} to ensure that data owned by multiple
+ * processes is correct.
  *
  * NOTE: Users may only get values on processes that own the associated
  * variables.
@@ -969,7 +1013,7 @@ HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
 
 /**
  * Gather vector data so that efficient {\tt GetValues} can be done.  This
- * routine must be called prior to calling {\tt GetValues} to insure that
+ * routine must be called prior to calling {\tt GetValues} to ensure that
  * correct and consistent values are returned, especially for non cell-centered
  * data that is shared between more than one processor.
  **/

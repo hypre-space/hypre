@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.27 $
+ * $Revision: 2.29 $
  ***********************************************************************EHEADER*/
 
 
@@ -54,8 +54,8 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 
    /* GEC1002 initializing to NULL */
 
-    hypre_SStructVectorDataIndices(vector) = NULL;
-    hypre_SStructVectorData(vector)        = NULL;
+   hypre_SStructVectorDataIndices(vector) = NULL;
+   hypre_SStructVectorData(vector)        = NULL;
 
    /* GEC1002 moving the creation of the ijvector the the initialize part  
     *   ilower = hypre_SStructGridStartRank(grid); 
@@ -84,7 +84,7 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    HYPRE_Int              nparts;
    hypre_SStructPVector **pvectors;
    HYPRE_Int              part;
-   HYPRE_Int             vector_type = hypre_SStructVectorObjectType(vector);
+   HYPRE_Int              vector_type = hypre_SStructVectorObjectType(vector);
 
    /* GEC1002 destroying dataindices and data in vector  */
 
@@ -108,11 +108,11 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
           * unlike the structvector                               */                      
 
 	 /* GEC if data has been allocated then free the pointer */
-          hypre_TFree(hypre_SStructVectorDataIndices(vector));
+         hypre_TFree(hypre_SStructVectorDataIndices(vector));
          
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
 	 {
-             hypre_TFree(hypre_SStructVectorData(vector));
+            hypre_TFree(hypre_SStructVectorData(vector));
          }
 
          hypre_TFree(vector);
@@ -132,28 +132,28 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
 HYPRE_Int 
 HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 {
-  HYPRE_Int                datasize;
-  HYPRE_Int                nvars ;
-  HYPRE_Int                nparts = hypre_SStructVectorNParts(vector) ;
-  HYPRE_Int                var,part  ;
-  double                  *data ;
-  double                  *pdata ;
-  double                  *sdata  ;
-  hypre_SStructPVector    *pvector;
-  hypre_StructVector      *svector;
-  HYPRE_Int               *dataindices;
-  HYPRE_Int               *pdataindices;
-  HYPRE_Int               vector_type = hypre_SStructVectorObjectType(vector);
-  hypre_SStructGrid      *grid =  hypre_SStructVectorGrid(vector);
-  MPI_Comm                comm = hypre_SStructVectorComm(vector);
-  HYPRE_IJVector          ijvector;
-  hypre_SStructPGrid     *pgrid;
-  HYPRE_SStructVariable  *vartypes;
+   HYPRE_Int               datasize;
+   HYPRE_Int               nvars ;
+   HYPRE_Int               nparts = hypre_SStructVectorNParts(vector) ;
+   HYPRE_Int               var,part  ;
+   double                 *data ;
+   double                 *pdata ;
+   double                 *sdata  ;
+   hypre_SStructPVector   *pvector;
+   hypre_StructVector     *svector;
+   HYPRE_Int              *dataindices;
+   HYPRE_Int              *pdataindices;
+   HYPRE_Int               vector_type = hypre_SStructVectorObjectType(vector);
+   hypre_SStructGrid      *grid =  hypre_SStructVectorGrid(vector);
+   MPI_Comm                comm = hypre_SStructVectorComm(vector);
+   HYPRE_IJVector          ijvector;
+   hypre_SStructPGrid     *pgrid;
+   HYPRE_SStructVariable  *vartypes;
 
- /* GEC0902 addition of variables for ilower and iupper   */
+   /* GEC0902 addition of variables for ilower and iupper   */
    HYPRE_Int               ilower, iupper;
-   hypre_ParVector          *par_vector;
-   hypre_Vector             *parlocal_vector;
+   hypre_ParVector        *par_vector;
+   hypre_Vector           *parlocal_vector;
  
 
    /* GEC0902 getting the datasizes and indices we need  */
@@ -168,52 +168,52 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    hypre_SStructVectorData(vector)  = data;
   
-  for (part = 0; part < nparts; part++)
-  {
-     pvector = hypre_SStructVectorPVector(vector,part);
-     pdataindices = hypre_SStructPVectorDataIndices(pvector);
-     /* shift-num   = dataindices[part]; */
-     pdata = data + dataindices[part];
-     nvars = hypre_SStructPVectorNVars(pvector);
+   for (part = 0; part < nparts; part++)
+   {
+      pvector = hypre_SStructVectorPVector(vector,part);
+      pdataindices = hypre_SStructPVectorDataIndices(pvector);
+      /* shift-num   = dataindices[part]; */
+      pdata = data + dataindices[part];
+      nvars = hypre_SStructPVectorNVars(pvector);
 
-     pgrid    = hypre_SStructPVectorPGrid(pvector);
-     vartypes = hypre_SStructPGridVarTypes(pgrid);
-     for (var = 0; var < nvars; var++)
-     {     
-       svector = hypre_SStructPVectorSVector(pvector, var);
-       /*  shift-pnum    = pdataindices[var]; */ 
-       sdata   = pdata + pdataindices[var];
+      pgrid    = hypre_SStructPVectorPGrid(pvector);
+      vartypes = hypre_SStructPGridVarTypes(pgrid);
+      for (var = 0; var < nvars; var++)
+      {     
+         svector = hypre_SStructPVectorSVector(pvector, var);
+         /*  shift-pnum    = pdataindices[var]; */ 
+         sdata   = pdata + pdataindices[var];
 
-       /* GEC1002 initialization of inside data pointer of a svector
-        * because no data is alloced, we make sure the flag is zero. This
-        * affects the destroy */
-       hypre_StructVectorInitializeData(svector, sdata);
-       hypre_StructVectorDataAlloced(svector) = 0;
-       if (vartypes[var] > 0)
-       {
-          /* needed to get AddTo accumulation correct between processors */
-          hypre_StructVectorClearGhostValues(svector);
-       }
-     }
+         /* GEC1002 initialization of inside data pointer of a svector
+          * because no data is alloced, we make sure the flag is zero. This
+          * affects the destroy */
+         hypre_StructVectorInitializeData(svector, sdata);
+         hypre_StructVectorDataAlloced(svector) = 0;
+         if (vartypes[var] > 0)
+         {
+            /* needed to get AddTo accumulation correct between processors */
+            hypre_StructVectorClearGhostValues(svector);
+         }
+      }
    }
    
-  /* GEC1002 this is now the creation of the ijmatrix and the initialization  
-   * by checking the type of the vector */
+   /* GEC1002 this is now the creation of the ijmatrix and the initialization  
+    * by checking the type of the vector */
 
    if(vector_type == HYPRE_PARCSR )
    {
-     ilower = hypre_SStructGridStartRank(grid);
-     iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
+      ilower = hypre_SStructGridStartRank(grid);
+      iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
    }
    
    if(vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-     ilower = hypre_SStructGridGhstartRank(grid);
-     iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
+      ilower = hypre_SStructGridGhstartRank(grid);
+      iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
    }    
  
    HYPRE_IJVectorCreate(comm, ilower, iupper,
-                      &hypre_SStructVectorIJVector(vector)); 
+                        &hypre_SStructVectorIJVector(vector)); 
 
    /* GEC1002, once the partitioning is done, it is time for the actual
     * initialization                                                 */
@@ -239,10 +239,10 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-     par_vector = hypre_IJVectorObject(ijvector);
-     parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-     hypre_TFree(hypre_VectorData(parlocal_vector));
-     hypre_VectorData(parlocal_vector) = data ;
+      par_vector = hypre_IJVectorObject(ijvector);
+      parlocal_vector = hypre_ParVectorLocalVector(par_vector);
+      hypre_TFree(hypre_VectorData(parlocal_vector));
+      hypre_VectorData(parlocal_vector) = data ;
    }
 
    return hypre_error_flag;
@@ -357,6 +357,37 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
    else
    {
       /* TODO */
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SStructVectorGetFEMValues( HYPRE_SStructVector  vector,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *index,
+                                 double              *values )
+{
+   HYPRE_Int             ndim         = hypre_SStructVectorNDim(vector);
+   hypre_SStructGrid    *grid         = hypre_SStructVectorGrid(vector);
+   hypre_SStructPVector *pvector      = hypre_SStructVectorPVector(vector, part);
+   HYPRE_Int             fem_nvars    = hypre_SStructGridFEMPNVars(grid, part);
+   HYPRE_Int            *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
+   hypre_Index          *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
+   HYPRE_Int             i, d, vindex[3];
+
+   hypre_ClearIndex(vindex);
+   for (i = 0; i < fem_nvars; i++)
+   {
+      for (d = 0; d < ndim; d++)
+      {
+         /* note: these offsets are different from what the user passes in */
+         vindex[d] = index[d] + hypre_IndexD(fem_offsets[i], d);
+      }
+      hypre_SStructPVectorGetValues(pvector, vindex, fem_vars[i], &values[i]);
    }
 
    return hypre_error_flag;
@@ -511,7 +542,7 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
    HYPRE_IJVectorAssemble(ijvector);
 
    HYPRE_IJVectorGetObject(ijvector, 
-                          (void **) &hypre_SStructVectorParVector(vector));
+                           (void **) &hypre_SStructVectorParVector(vector));
 
    /*------------------------------------------------------
     *------------------------------------------------------*/
@@ -521,7 +552,7 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
    if (hypre_SStructVectorObjectType(vector) == HYPRE_PARCSR)
    {
       hypre_SStructVectorParConvert(vector, 
-                                   &hypre_SStructVectorParVector(vector));
+                                    &hypre_SStructVectorParVector(vector));
    }
 
    return hypre_error_flag;
@@ -638,30 +669,27 @@ HYPRE_Int
 HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
                               void                **object )
 {
-   HYPRE_Int vector_type = hypre_SStructVectorObjectType(vector);
+   HYPRE_Int             type = hypre_SStructVectorObjectType(vector);
    hypre_SStructPVector *pvector;
    hypre_StructVector   *svector;
+   HYPRE_Int             part, var;
 
-   HYPRE_Int part, var;
-
-   /* GEC1102 in case the vector is HYPRE_SSTRUCT  */
-
-   if (vector_type == HYPRE_SSTRUCT)
+   if (type == HYPRE_SSTRUCT)
    {
-      hypre_SStructVectorConvert(vector, (hypre_ParVector **) object);
+      *object = vector;
    }
-   else if (vector_type == HYPRE_PARCSR)
+   else if (type == HYPRE_PARCSR)
    {
-     *object= hypre_SStructVectorParVector(vector);
+      *object = hypre_SStructVectorParVector(vector);
    }
-   else if (vector_type == HYPRE_STRUCT)
+   else if (type == HYPRE_STRUCT)
    {
       /* only one part & one variable */
-      part= 0;
+      part = 0;
       var = 0;
-      pvector= hypre_SStructVectorPVector(vector, part);
-      svector= hypre_SStructPVectorSVector(pvector, var);
-     *object = svector;
+      pvector = hypre_SStructVectorPVector(vector, part);
+      svector = hypre_SStructPVectorSVector(pvector, var);
+      *object = svector;
    }
 
    return hypre_error_flag;

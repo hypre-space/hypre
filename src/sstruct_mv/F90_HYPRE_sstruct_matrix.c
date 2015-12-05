@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -329,22 +329,6 @@ hypre_F90_IFACE(hypre_sstructmatrixgetobject, HYPRE_SSTRUCTMATRIXGETOBJECT)
       (HYPRE_SStructMatrixGetObject(
           hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
           (void **)              object )) ;
-}
-
-/*--------------------------------------------------------------------------
- *  HYPRE_SStructMatrixGetObject2
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_sstructmatrixgetobject2, HYPRE_SSTRUCTMATRIXGETOBJECT2)
-   (hypre_F90_Obj *matrix,
-    hypre_F90_Obj *object,
-    hypre_F90_Int *ierr)
-{
-   *ierr = (hypre_F90_Int)
-      (HYPRE_SStructMatrixGetObject2(
-          hypre_F90_PassObj (HYPRE_SStructMatrix, matrix),
-          (void **)               object )) ;
 }
 
 /*--------------------------------------------------------------------------

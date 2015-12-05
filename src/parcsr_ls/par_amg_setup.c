@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.94 $
+ * $Revision: 2.95 $
  ***********************************************************************EHEADER*/
 
 
@@ -114,6 +114,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       not_finished_coarsening = 1;
    HYPRE_Int       Setup_err_flag = 0;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
+   HYPRE_Int       seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
    HYPRE_Int       j, k;
    HYPRE_Int       num_procs,my_id,num_threads;
    HYPRE_Int      *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
@@ -178,6 +179,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    num_threads = hypre_NumThreads();
 
+   
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    amg_logging = hypre_ParAMGDataLogging(amg_data);
@@ -213,6 +215,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrixSetDNumNonzeros(A);
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
+   if (num_procs == 1) seq_threshold = 0;
    if (setup_type == 0) return Setup_err_flag;
 
    S = NULL;
@@ -1671,12 +1674,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	coarsen_type = 0;      
       }
 
-      if ( (level == max_levels-1) || 
-           (coarse_size <= coarse_threshold) )
+
       {
-         not_finished_coarsening = 0;
+	 HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
+         if ( (level == max_levels-1) || (coarse_size <= max_thresh) )
+         {
+            not_finished_coarsening = 0;
+         }
       }
    } 
+
+   /* redundant coarse grid solve */
+   if (  (seq_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1))
+   {
+      hypre_seqAMGSetup( amg_data, level, coarse_threshold);
+   }
+
+
    if (level > 0)
    {
       if (block_mode)

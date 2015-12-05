@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -48,8 +48,6 @@ typedef struct hypre_SStructStencil_struct
 hypre_StructStencilShape( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilSize(stencil) \
 hypre_StructStencilSize( hypre_SStructStencilSStencil(stencil) )
-#define hypre_SStructStencilMaxOffset(stencil) \
-hypre_StructStencilMaxOffset( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilNDim(stencil) \
 hypre_StructStencilDim( hypre_SStructStencilSStencil(stencil) )
 #define hypre_SStructStencilEntry(stencil, i) \

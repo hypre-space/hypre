@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.29 $
+ * $Revision: 2.30 $
  ***********************************************************************EHEADER*/
 
 
@@ -66,6 +66,8 @@ typedef struct
    HYPRE_Int			interp_type;
    HYPRE_Int			cycle_type;
    HYPRE_Int		        relax_order;
+   HYPRE_Int		        max_coarse_size;
+   HYPRE_Int		        seq_threshold;
    HYPRE_Int		       *num_grid_sweeps;
    HYPRE_Int		       *grid_relax_type;
    HYPRE_Int		      **grid_relax_points;
@@ -127,6 +129,8 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> interp_type)  = 0;
    (AMGhybrid_data -> cycle_type)  = 1;
    (AMGhybrid_data -> relax_order)  = 1;
+   (AMGhybrid_data -> max_coarse_size)  = 9;
+   (AMGhybrid_data -> seq_threshold)  = 0;
    (AMGhybrid_data -> num_grid_sweeps)  = NULL;
    (AMGhybrid_data -> grid_relax_type)  = NULL;
    (AMGhybrid_data -> grid_relax_points)  = NULL;
@@ -897,6 +901,56 @@ hypre_AMGHybridSetRelaxOrder( void *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetMaxCoarseSize
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetMaxCoarseSize( void *AMGhybrid_vdata,
+                        HYPRE_Int   max_coarse_size  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (max_coarse_size < 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> max_coarse_size) = max_coarse_size;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetSeqThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_AMGHybridSetSeqThreshold( void *AMGhybrid_vdata,
+                        HYPRE_Int   seq_threshold  )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (seq_threshold < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   (AMGhybrid_data -> seq_threshold) = seq_threshold;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMGHybridSetNumGridSweeps
  *--------------------------------------------------------------------------*/
 
@@ -1467,6 +1521,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    HYPRE_Int                i, j;
    HYPRE_Int		      sol_print_level; /* print_level for solver */
    HYPRE_Int		      pre_print_level; /* print_level for preconditioner */
+   HYPRE_Int		      max_coarse_size, seq_threshold; 
 
    if (!AMGhybrid_data)
    {
@@ -1513,6 +1568,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    grid_relax_points = (AMGhybrid_data -> grid_relax_points);
    relax_weight = (AMGhybrid_data -> relax_weight);
    omega = (AMGhybrid_data -> omega);
+   max_coarse_size = (AMGhybrid_data -> max_coarse_size);
+   seq_threshold = (AMGhybrid_data -> seq_threshold);
    dof_func = (AMGhybrid_data -> dof_func);
    pcg_default    = (AMGhybrid_data -> pcg_default);
    if (!b)
@@ -1757,6 +1814,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetPrintLevel(pcg_precond, pre_print_level);
          hypre_BoomerAMGSetMaxLevels(pcg_precond,  max_levels);
          hypre_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         hypre_BoomerAMGSetMaxCoarseSize(pcg_precond, max_coarse_size);
+         hypre_BoomerAMGSetSeqThreshold(pcg_precond, seq_threshold);
          hypre_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          hypre_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          hypre_BoomerAMGSetNumFunctions(pcg_precond, num_functions);

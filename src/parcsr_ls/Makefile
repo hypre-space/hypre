@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.35 $
+# $Revision: 2.37 $
 #EHEADER**********************************************************************
 
 
@@ -65,6 +65,7 @@ FILES =\
  F90_HYPRE_parcsr_pilut.c\
  F90_HYPRE_parcsr_schwarz.c\
  F90_HYPRE_ams.c\
+ gen_redcs_mat.c\
  HYPRE_parcsr_amg.c\
  HYPRE_parcsr_bicgstab.c\
  HYPRE_parcsr_block.c\
@@ -80,6 +81,7 @@ FILES =\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
  HYPRE_ams.c\
+ HYPRE_ads.c\
  HYPRE_ame.c\
  par_amg.c\
  par_amg_setup.c\
@@ -121,6 +123,7 @@ FILES =\
  schwarz.c\
  block_tridiag.c\
  ams.c\
+ ads.c\
  ame.c
 
 OBJS = ${FILES:.c=.o}

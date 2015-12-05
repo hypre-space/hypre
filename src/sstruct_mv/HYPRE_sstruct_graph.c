@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.20 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -83,10 +80,9 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphObjectType(graph)  = HYPRE_SSTRUCT;
 
    hypre_SStructGraphEntries(graph)     = NULL;
-   hypre_SStructNGraphEntries(graph)    =0;
-   hypre_SStructAGraphEntries(graph)    =0;
+   hypre_SStructNGraphEntries(graph)    = 0;
+   hypre_SStructAGraphEntries(graph)    = 0;
    
-
    *graph_ptr = graph;
 
    return hypre_error_flag;
@@ -148,6 +144,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          hypre_TFree(fem_sparse_i);
          hypre_TFree(fem_sparse_j);
          hypre_TFree(fem_entries);
+         /* RDF: THREAD? */
          for (i = 0; i < nUventries; i++)
          {
             Uventry = Uventries[iUventries[i]];
@@ -190,8 +187,7 @@ HYPRE_SStructGraphSetStencil( HYPRE_SStructGraph   graph,
                               HYPRE_Int            var,
                               HYPRE_SStructStencil stencil )
 {
-   hypre_SStructStencilRef(stencil,
-                           &hypre_SStructGraphStencil(graph, part, var));
+   hypre_SStructStencilRef(stencil, &hypre_SStructGraphStencil(graph, part, var));
 
    return hypre_error_flag;
 }
@@ -241,7 +237,6 @@ HYPRE_SStructGraphSetFEMSparsity( HYPRE_SStructGraph  graph,
 /*--------------------------------------------------------------------------
  *   THIS IS FOR A NON-OVERLAPPING GRID GRAPH.
  *
- *   
  *   Now we just keep track of calls to this function and do all the "work"
  *   in the assemble.
  *--------------------------------------------------------------------------*/
@@ -255,12 +250,10 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
                               HYPRE_Int           *to_index,
                               HYPRE_Int            to_var )
 {
+   hypre_SStructGrid        *grid      = hypre_SStructGraphGrid(graph);
+   HYPRE_Int                 ndim      = hypre_SStructGridNDim(grid);
 
-
-   hypre_SStructGrid     *grid       = hypre_SStructGraphGrid(graph);
-   HYPRE_Int              ndim       = hypre_SStructGridNDim(grid);
-
-   hypre_SStructGraphEntry **entries = hypre_SStructGraphEntries(graph);
+   hypre_SStructGraphEntry **entries   = hypre_SStructGraphEntries(graph);
    hypre_SStructGraphEntry  *new_entry;
    
    HYPRE_Int                 n_entries = hypre_SStructNGraphEntries(graph);
@@ -295,14 +288,14 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    hypre_SStructGraphEntryToVar(new_entry) = to_var;
 
    hypre_CopyToCleanIndex(index, ndim, hypre_SStructGraphEntryIndex(new_entry));
-   hypre_CopyToCleanIndex(to_index, ndim, hypre_SStructGraphEntryToIndex(new_entry));
+   hypre_CopyToCleanIndex(
+      to_index, ndim, hypre_SStructGraphEntryToIndex(new_entry));
      
    entries[n_entries] = new_entry;
 
    /* update count */
    n_entries++;
    hypre_SStructNGraphEntries(graph) = n_entries;
-
 
    return hypre_error_flag;
 }
@@ -370,7 +363,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    HYPRE_Int                 ndim       = hypre_SStructGridNDim(grid);
    hypre_SStructUEntry      *Uentries;
 
-
 #if  HYPRE_NO_GLOBAL_PARTITION
 
    /* may need to re-do box managers for the AP*/
@@ -390,16 +382,17 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_Box                 *bbox, *new_box;
    hypre_StructGrid          *sgrid;
    HYPRE_Int                 *num_ghost;
+
    /*---------------------------------------------------------
     *  If AP, then may need to redo the box managers
     *---------------------------------------------------------*/
 
    new_box = hypre_BoxCreate();
    
-   /* if any processor has added entries, then all 
-      need to participate */
+   /* if any processor has added entries, then all need to participate */
 
-   hypre_MPI_Allreduce(&n_add_entries, &global_n_add_entries, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   hypre_MPI_Allreduce(&n_add_entries, &global_n_add_entries,
+                       1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
  
    if (global_n_add_entries > 0 )
    {
@@ -426,12 +419,9 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                                hypre_StructGridComm(sgrid),
                                &new_managers[part][var]);
 
-
             /* need to set the num ghost for new manager also */
             num_ghost = hypre_StructGridNumGhost(sgrid);
             hypre_BoxManSetNumGhost(new_managers[part][var], num_ghost);
-
-
          }
       } /* end loop over parts */
 
@@ -456,9 +446,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          
          if (hypre_IndexInBoxP(index,bbox) != 0)
          {
-
-            hypre_BoxManGatherEntries( new_boxman,  
-                                       index, index);
+            hypre_BoxManGatherEntries(new_boxman,index, index);
          }
          
          /* now repeat the check for to_part, to_var, to_index */
@@ -472,16 +460,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          
          if (hypre_IndexInBoxP(to_index,bbox) != 0)
          {
-            hypre_BoxManGatherEntries( new_boxman,  
-                                       to_index, to_index);
+            hypre_BoxManGatherEntries(new_boxman,to_index, to_index);
          }
-
       }
       
-      /* Now go through the managers and if gather has been called (on
-         any processor) then populate the new manager with the entries
-         from the old manager and then assemble and delete the old
-         manager. */
+      /* Now go through the managers and if gather has been called (on any
+         processor) then populate the new manager with the entries from the old
+         manager and then assemble and delete the old manager. */
       for (part = 0; part < nparts; part++)
       {
          pgrid = hypre_SStructGridPGrid(grid, part);
@@ -490,9 +475,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          for (var = 0; var < nvars; var++)
          {
             new_boxman = new_managers[part][var];
-            hypre_BoxManGetGlobalIsGatherCalled( new_boxman, 
-                                                 comm, 
-                                                 &is_gather );
+            hypre_BoxManGetGlobalIsGatherCalled(new_boxman, comm, &is_gather);
             if (is_gather)
             {
                /* Gather has been called on at least 1 proc - copy
@@ -500,12 +483,10 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                
                orig_boxman = managers[part][var];
 
-               hypre_BoxManGetAllEntries(orig_boxman , 
-                                         &num_entries, &all_entries);
+               hypre_BoxManGetAllEntries(orig_boxman, &num_entries, &all_entries);
                
                for (j=0; j< num_entries; j++)
                {
-                  
                   entry = &all_entries[j];
                   
                   hypre_BoxManEntryGetInfo(entry, &info);
@@ -516,23 +497,20 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                                        hypre_BoxManEntryProc(entry),
                                        hypre_BoxManEntryId(entry),
                                        info);
-                  
                }
                
-               
-
                /* call assemble for new boxmanager*/
                hypre_BoxManAssemble(new_boxman);
 
                /* TEMP for testing
-               if (hypre_BoxManNEntries(new_boxman) != num_entries)
-               {
+                  if (hypre_BoxManNEntries(new_boxman) != num_entries)
+                  {
                   hypre_MPI_Comm_rank(comm, &myproc);
                   hypre_printf("myid = %d, new_entries = %d, old entries = %d\n", myproc, hypre_BoxManNEntries(new_boxman), num_entries);
-               } */
+                  } */
                
                /* destroy old manager */
-                hypre_BoxManDestroy (managers[part][var]);
+               hypre_BoxManDestroy (managers[part][var]);
             }
             else /* no gather called */
             {
@@ -550,19 +528,16 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    
       /* assign the new ones */
       hypre_SStructGridBoxManagers(grid) = new_managers;
-      
    }
 
    /* clean up */
-      hypre_BoxDestroy(new_box);
+   hypre_BoxDestroy(new_box);
 
    /* end of AP stuff */
 #endif
 
-
    hypre_MPI_Comm_size(comm, &nprocs);
    hypre_MPI_Comm_rank(comm, &myproc);
-
 
    /*---------------------------------------------------------
     * First we do the work that was previously in the AddEntries:
@@ -638,7 +613,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
       hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
 
-
       i = nUentries - 1;
       hypre_SStructUVEntryToPart(Uventry, i) = to_part;
       hypre_CopyToCleanIndex(to_index, ndim,
@@ -663,18 +637,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       
       hypre_SStructGraphTotUEntries(graph) ++;
 
-
       /*free each add entry after copying */
       hypre_TFree(new_entry);
-      
-  
+
    }/* end of loop through add entries */
    
-
    /* free the storage for the add entires */
    hypre_TFree(add_entries);
-   
-
    
    /*---------------------------------------------------------
     * Set up the FEM stencil information
@@ -822,8 +791,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
     * Compute non-stencil column numbers (if possible), and
     * start building requests for needed off-process info.
     *---------------------------------------------------------*/
-
   
+   /* RDF: THREAD? */
    for (i = 0; i < nUventries; i++)
    {
       Uventry = Uventries[iUventries[i]];
@@ -852,13 +821,12 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          }
          else   
          {
-            /* This should not happen (TO DO: take out print statement)*/
-            hypre_printf("Error in HYPRE_SStructGraphAssemble, my id = %d\n", myproc);
-
+            /* This should not happen (TO DO: take out print statement) */
+            hypre_printf("Error in HYPRE_SStructGraphAssemble, my id = %d\n",
+                         myproc);
          }
       }
    }
-
 
    return hypre_error_flag;
 }

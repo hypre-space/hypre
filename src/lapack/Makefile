@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.25 $
+# $Revision: 1.26 $
 #EHEADER**********************************************************************
 
 
@@ -111,7 +111,8 @@ distclean: clean
 # Rules
 #################################################################
 
+# compile without optimization
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} ${SHARED_COMPILE_FLAG} ${C_COMPILE_FLAGS} -c dlamch.c
+	${CC} ${CFLAGS} -O0 -c dlamch.c
 
 ${OBJS}: ${LAPACK_HEADERS}

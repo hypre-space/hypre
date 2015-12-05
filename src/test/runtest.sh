@@ -9,7 +9,7 @@ RunString=""
 RunEcho=""
 ExecFileNames=""           #string of executable file names used
 TestDirNames=""            #string of names of TEST_* directories used
-HOST=`hostname|cut -c1-4`  #first 4 characters of host platform name
+HOST=`hostname`
 NumThreads=0               #number of OpenMP threads to use if > 0
 
 function usage
@@ -86,7 +86,7 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
-      dawn*) shift
+      *dawn*) shift
          BatchMode=1
          MY_NUM_TASKS=$1  
          MY_EXECUTE_DIR=`pwd`
@@ -105,7 +105,7 @@ function MpirunString
             RunString="srun -p pdebug -n$*"
          fi
          ;;
-      zeus*) shift
+      *zeus*) shift
          RunString="srun -p pdebug -n$*"
          ;;
       atla*) shift
@@ -144,13 +144,13 @@ function CalcNodes
          ;;
       up*) CPUS_PER_NODE=8
          ;;
-      dawn*) CPUS_PER_NODE=4
+      *dawn*) CPUS_PER_NODE=4
          ;;
       vert*) CPUS_PER_NODE=2
          ;;
       hera*) CPUS_PER_NODE=16
          ;;
-      zeus*) CPUS_PER_NODE=8
+      *zeus*) CPUS_PER_NODE=8
          ;;
       *) CPUS_PER_NODE=1
          ;;
@@ -201,13 +201,13 @@ function CheckBatch
          ;;
       up*) BATCH_MODE=0
          ;;
-      dawn*) BATCH_MODE=1
+      *dawn*) BATCH_MODE=1
          ;;
       vert*) BATCH_MODE=0
          ;;
       hera*) BATCH_MODE=0
          ;;
-      zeus*) BATCH_MODE=0
+      *zeus*) BATCH_MODE=0
          ;;
       *) BATCH_MODE=0
          ;;
@@ -264,11 +264,11 @@ function PsubCmdStub
          ;;
       up*) PsubCmd="psub -c up -pool pbatch -b a_casc -r $RunName -ln $NumProcs"
          ;;
-      dawn*) PsubCmd="psub -c dawndev -pool pdebug -r $RunName"
+      *dawn*) PsubCmd="psub -c dawndev -pool pdebug -r $RunName"
          ;;
       hera*) PsubCmd="psub -c hera,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
-      zeus*) PsubCmd="psub -c zeus,pbatch -b casc -r $RunName -ln $NumProcs"
+      *zeus*) PsubCmd="psub -c zeus,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       atla*) PsubCmd="psub -c atlas,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
@@ -314,6 +314,9 @@ function ExecuteJobs
             BatchFile=""
             ;;
 
+         *"#"*) :
+            ;; 
+
          *mpirun*)
             RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` 
             RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`
@@ -334,7 +337,7 @@ EOF
             case $HOST in
                *bgl*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
                       ;;
-               dawn*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
+               *dawn*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
                       ;;
             esac
             if [ "$BatchMode" -eq 0 ] ; then
@@ -351,7 +354,7 @@ EOF
                   case $HOST in
                      *bgl*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
                             ;;
-                     dawn*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
+                     *dawn*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
                             ;;
                          *) PsubCmd="$PsubCmd -o $OutFile -e $ErrFile `pwd`/$BatchFile"
                             ;;
@@ -381,9 +384,6 @@ EOF
                fi                           # BatchFlag set
             fi                              # BatchMode set
             ;;
-
-         *"#"*) :
-            ;; 
 
          *)
             NOTBLANK=`echo $InputLine | sed 's/[ \n\t]//g'`

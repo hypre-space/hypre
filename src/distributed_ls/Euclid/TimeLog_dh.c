@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -73,7 +73,7 @@ void TimeLog_dhStop(TimeLog_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "TimeLog_dhMark"
-void TimeLog_dhMark(TimeLog_dh t, char *desc)
+void TimeLog_dhMark(TimeLog_dh t, const char *desc)
 {
   START_FUNC_DH
   if (t->last < MAX_TIME_MARKS - 3) {
@@ -81,7 +81,7 @@ void TimeLog_dhMark(TimeLog_dh t, char *desc)
     Timer_dhStop(t->timer);
     t->time[t->last] = Timer_dhReadWall(t->timer);
     Timer_dhStart(t->timer);
-    hypre_sprintf(t->desc[t->last], desc);
+    hypre_sprintf(t->desc[t->last], "%s", desc);
     t->last += 1;
   }
   END_FUNC_DH

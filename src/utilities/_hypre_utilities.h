@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_UTILITIES_HEADER
@@ -40,7 +40,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -78,7 +78,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -118,6 +118,7 @@ extern "C" {
 
 #define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
 #define MPI_COMM_NULL       hypre_MPI_COMM_NULL
+#define MPI_COMM_SELF       hypre_MPI_COMM_SELF
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -208,6 +209,7 @@ typedef struct
 typedef HYPRE_Int  hypre_MPI_Op;
 typedef HYPRE_Int  hypre_MPI_Aint;
 
+#define  hypre_MPI_COMM_SELF 1
 #define  hypre_MPI_COMM_WORLD 0
 #define  hypre_MPI_COMM_NULL  -1
 
@@ -246,6 +248,7 @@ typedef MPI_Aint     hypre_MPI_Aint;
 #define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
 #define  hypre_MPI_BOTTOM     MPI_BOTTOM
+#define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
 
 #define  hypre_MPI_DOUBLE MPI_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */
@@ -342,7 +345,7 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -475,7 +478,7 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -589,7 +592,7 @@ HYPRE_Int MPI_Irsend( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPR
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -677,7 +680,7 @@ extern HYPRE_Int hypre_NumThreads;
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -812,7 +815,7 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -863,7 +866,7 @@ typedef hypre_ListElement  *hypre_LinkList;
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -931,7 +934,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -950,8 +953,9 @@ extern HYPRE_Int hypre__global_error;
  * HYPRE error macros
  *--------------------------------------------------------------------------*/
 
-void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr);
-#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR)
+void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, const char *msg);
+#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR, NULL)
+#define hypre_error_w_msg(IERR, msg)  hypre_error_handler(__FILE__, __LINE__, IERR, msg)
 #define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
 #ifdef NDEBUG
 #define hypre_assert(EX)
