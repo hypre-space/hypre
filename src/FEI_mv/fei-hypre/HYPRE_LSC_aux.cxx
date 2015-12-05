@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.55 $
- ***********************************************************************EHEADER*/
-
-
-
-
+ * $Revision: 2.57 $
+ *********************************************************************EHEADER*/
 
 //***************************************************************************
 // This file holds the other functions for HYPRE_LinSysCore
@@ -32,16 +28,16 @@
 #include <assert.h>
 #include <math.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
+#endif
 #endif
 
 //#define HAVE_SYSPDE 
 
 //#define HAVE_DSUPERLU 
 #include "dsuperlu_include.h"
-
-#define HAVE_MLI 
 
 //---------------------------------------------------------------------------
 // HYPRE include files
@@ -75,8 +71,8 @@
 //---------------------------------------------------------------------------
 
 #ifdef HAVE_SUPERLU
-#include "SRC/slu_ddefs.h"
-#include "SRC/slu_util.h"
+#include "slu_ddefs.h"
+#include "slu_util.h"
 #endif
 
 //---------------------------------------------------------------------------
@@ -167,6 +163,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    int    solver_override=0, solver_index=-1, precon_index=-1;
    double weight, dtemp;
    char   param[256], param1[256], param2[80], param3[80];
+   int    recognized;
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
@@ -243,6 +240,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       // help menu 
       //----------------------------------------------------------------
 
+      recognized = 1;
       if ( !strcmp(param1, "help") )
       {
          printf("%4d : HYPRE_LinSysCore::parameters - available ones : \n",
@@ -897,11 +895,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    param2);
       }
 
+      else recognized = 0;
+
       //----------------------------------------------------------------
       // amg preconditoner : coarsening type 
       //----------------------------------------------------------------
 
-      else if ( !strcmp(param1, "amgMaxLevels") )
+      if (!recognized)
+      {
+      recognized = 1;
+      if ( !strcmp(param1, "amgMaxLevels") )
       {
          sscanf(params[i],"%s %d", param, &amgMaxLevels_);
          if ( amgMaxLevels_ <= 0 ) amgMaxLevels_ = 30;
@@ -1209,11 +1212,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    amgGSMGNSamples_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // parasails preconditoner : threshold ( >= 0.0 )
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "parasailsThreshold") )
+      if (!recognized)
+      {
+      recognized = 1;
+      if ( !strcmp(param1, "parasailsThreshold") )
       {
          sscanf(params[i],"%s %lg", param, &parasailsThreshold_);
          if ( parasailsThreshold_ < 0.0 ) parasailsThreshold_ = 0.1;
@@ -1288,11 +1297,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    parasailsReuse_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // Euclid preconditoner : fill-in 
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "euclidNlevels") )
+      if (!recognized)
+      {
+      recognized = 1;
+      if ( !strcmp(param1, "euclidNlevels") )
       {
          sscanf(params[i],"%s %d", param, &olevel);
          if ( olevel < 0 ) olevel = 0;
@@ -1377,11 +1392,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
             HYPRE_LSI_UzawaSetParams(HYPrecon_, params[i]); 
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // mlpack preconditoner : no of relaxation sweeps per level
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "mlNumPresweeps") )
+      if (!recognized)
+      {
+      recognized = 1;
+      if ( !strcmp(param1, "mlNumPresweeps") )
       {
          sscanf(params[i],"%s %d", param, &nsweeps);
          if ( nsweeps < 1 ) nsweeps = 1;
@@ -1553,11 +1574,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    mlNumPDEs_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // ams preconditoner : no of PDEs (block size)
       //---------------------------------------------------------------
 
-      else if ( !strcmp(param1, "amsNumPDEs") )
+      if (!recognized)
+      {
+      recognized = 1;
+      if ( !strcmp(param1, "amsNumPDEs") )
       {
          sscanf(params[i],"%s %d", param, &amsNumPDEs_);
          if ( amsNumPDEs_ < 1 ) amsNumPDEs_ = 1;
@@ -1865,11 +1892,14 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
                    sysPDENVars_);
       }
 
+      else recognized = 0;
+      }
+
       //---------------------------------------------------------------
       // error 
       //---------------------------------------------------------------
 
-      else
+      if (!recognized)
       {
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
             printf("HYPRE_LSC::parameters WARNING : %s not recognized\n",

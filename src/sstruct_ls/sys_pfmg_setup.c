@@ -7,42 +7,33 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
 #define DEBUG 0
 
-#define hypre_PFMGSetCIndex(cdir, cindex) \
-{\
-   hypre_SetIndex(cindex, 0, 0, 0);\
-   hypre_IndexD(cindex, cdir) = 0;\
-}
+#define hypre_PFMGSetCIndex(cdir, cindex)       \
+   {                                            \
+      hypre_SetIndex(cindex, 0, 0, 0);          \
+      hypre_IndexD(cindex, cdir) = 0;           \
+   }
 
-#define hypre_PFMGSetFIndex(cdir, findex) \
-{\
-   hypre_SetIndex(findex, 0, 0, 0);\
-   hypre_IndexD(findex, cdir) = 1;\
-}
+#define hypre_PFMGSetFIndex(cdir, findex)       \
+   {                                            \
+      hypre_SetIndex(findex, 0, 0, 0);          \
+      hypre_IndexD(findex, cdir) = 1;           \
+   }
 
-#define hypre_PFMGSetStride(cdir, stride) \
-{\
-   hypre_SetIndex(stride, 1, 1, 1);\
-   hypre_IndexD(stride, cdir) = 2;\
-}
+#define hypre_PFMGSetStride(cdir, stride)       \
+   {                                            \
+      hypre_SetIndex(stride, 1, 1, 1);          \
+      hypre_IndexD(stride, cdir) = 2;           \
+   }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -118,7 +109,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
                        
    HYPRE_Int             nvars;
 
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -162,6 +152,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    (sys_pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
+   dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
       mean = hypre_CTAlloc(double, 3);
@@ -459,12 +450,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       /* set up the interpolation routine */
       hypre_SysSemiInterpCreate(&interp_data_l[l]);
       hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l],
-                            cindex, findex, stride);
+                               cindex, findex, stride);
 
       /* set up the restriction routine */
       hypre_SysSemiRestrictCreate(&restrict_data_l[l]);
       hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1],
-                              cindex, findex, stride);
+                                 cindex, findex, stride);
    }
 
    /* set up fine grid relaxation */
@@ -512,7 +503,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          maxiter = hypre_min(maxwork, cmaxsize);
 #if 0
          hypre_printf("maxwork = %d, cmaxsize = %d, maxiter = %d\n",
-                maxwork, cmaxsize, maxiter);
+                      maxwork, cmaxsize, maxiter);
 #endif
          hypre_SysPFMGRelaxSetMaxIter(relax_data_l[l], maxiter);
       }
@@ -568,11 +559,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_SStructPVectorDestroy(x);
    hypre_SStructPVectorDestroy(b);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysStructCoarsen
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -582,8 +572,6 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
                         HYPRE_Int            prune,
                         hypre_SStructPGrid **cgrid_ptr )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_SStructPGrid   *cgrid;
 
    hypre_StructGrid     *sfgrid;
@@ -647,6 +635,6 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
 
    *cgrid_ptr = cgrid;
 
-   return ierr;
+   return hypre_error_flag;
 }
 

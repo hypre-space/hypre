@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -17,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -33,41 +32,68 @@ hypre_SStructGraphRef( hypre_SStructGraph  *graph,
 }
 
 /*--------------------------------------------------------------------------
- * NOTE: This may search an Octree in the future.
+ * Uventries are stored in an array indexed via a local rank that comes from an
+ * ordering of the local grid boxes with ghost zones added.  Since a grid index
+ * may intersect multiple grid boxes, the box with the smallest boxnum is used.
  *
- * 9/09 AB - modified to use the box manager
+ * RDF: Consider using another "local" BoxManager to optimize.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
-                               HYPRE_Int              part,
-                               hypre_Index            index,
-                               HYPRE_Int              var,
-                               hypre_SStructUVEntry **Uventry_ptr )
+hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph    *graph,
+                                  HYPRE_Int              part,
+                                  HYPRE_Int              var,
+                                  hypre_Index            index,
+                                  HYPRE_Int             *rank )
 {
-   hypre_SStructUVEntry **Uventries = hypre_SStructGraphUVEntries(graph);
-   hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
-   HYPRE_Int             type       = hypre_SStructGraphObjectType(graph);
-   hypre_BoxManEntry     *boxman_entry;
-   HYPRE_Int              rank;
+   HYPRE_Int              ndim  = hypre_SStructGraphNDim(graph);
+   hypre_SStructGrid     *grid  = hypre_SStructGraphGrid(graph);
+   hypre_SStructPGrid    *pgrid = hypre_SStructGridPGrid(grid, part);
+   hypre_StructGrid      *sgrid = hypre_SStructPGridSGrid(pgrid, var);
+   hypre_BoxArray        *boxes = hypre_StructGridBoxes(sgrid);
+   hypre_Box             *box;
+   HYPRE_Int              i, d, vol, found;
 
 
-   
-   /* Should we be checking the neighbor box manager also ?*/
-
-   hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
-   hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &rank, type);
-
-   if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)
+   *rank = hypre_SStructGraphUVEOffset(graph, part, var);
+   hypre_ForBoxI(i, boxes)
    {
-    rank -= hypre_SStructGridGhstartRank(grid);
+      box = hypre_BoxArrayBox(boxes, i);
+      found = 1;
+      for (d = 0; d < ndim; d++)
+      {
+         if ( (hypre_IndexD(index, d) < (hypre_BoxIMinD(box, d)-1)) ||
+              (hypre_IndexD(index, d) > (hypre_BoxIMaxD(box, d)+1)) )
+         {
+            /* not in this box */
+            found = 0;
+            break;
+         }
+      }
+      if (found)
+      {
+         vol = 0;
+         for (d = (ndim-1); d > -1; d--)
+         {
+            vol = vol*(hypre_BoxSizeD(box, d) + 2) +
+               (hypre_IndexD(index, d) - hypre_BoxIMinD(box, d) + 1);
+         }
+         *rank += vol;
+         return hypre_error_flag;
+      }
+      else
+      {
+         vol = 1;
+         for (d = 0; d < ndim; d++)
+         {
+            vol *= (hypre_BoxSizeD(box, d) + 2);
+         }
+         *rank += vol;
+      }
    }
-   if (type == HYPRE_PARCSR)
-   {
-    rank -= hypre_SStructGridStartRank(grid);
-   }
- 
-   *Uventry_ptr = Uventries[rank];
+
+   /* a value of -1 indicates that the index was not found */
+   *rank = -1;
 
    return hypre_error_flag;
 }

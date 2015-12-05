@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef TIMER_DH_H
 #define TIMER_DH_H
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 /*--------------------------------------------------------------*/
 /* Stuph in this block isn't really needed for multi-processor

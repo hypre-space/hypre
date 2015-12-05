@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -18,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_StructStencilCreate
@@ -60,8 +58,6 @@ hypre_StructStencilRef( hypre_StructStencil *stencil )
 HYPRE_Int
 hypre_StructStencilDestroy( hypre_StructStencil *stencil )
 {
-   HYPRE_Int ierr = 0;
-
    if (stencil)
    {
       hypre_StructStencilRefCount(stencil) --;
@@ -72,7 +68,7 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -131,8 +127,6 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
    HYPRE_Int             no_symmetric_stencil_element;
    HYPRE_Int             i, j, d;
                        
-   HYPRE_Int             ierr = 0;
-
    /*------------------------------------------------------
     * Copy stencil elements into `symm_stencil_shape'
     *------------------------------------------------------*/
@@ -196,6 +190,6 @@ hypre_StructStencilSymmetrize( hypre_StructStencil  *stencil,
    *symm_stencil_ptr  = symm_stencil;
    *symm_elements_ptr = symm_elements;
 
-   return ierr;
+   return hypre_error_flag;
 }
 

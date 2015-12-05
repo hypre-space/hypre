@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -19,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * Box memory data structure and static variables used to manage free
@@ -46,7 +44,6 @@ static HYPRE_Int         s_count     = 0;
 static HYPRE_Int
 hypre_AllocateBoxBlock()
 {
-   HYPRE_Int         ierr = 0;
    union box_memory *ptr;
    HYPRE_Int         i;
 
@@ -60,7 +57,7 @@ hypre_AllocateBoxBlock()
       s_free = &ptr[i];
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -70,14 +67,12 @@ hypre_AllocateBoxBlock()
 HYPRE_Int
 hypre_BoxInitializeMemory( const HYPRE_Int at_a_time )
 {
-   HYPRE_Int ierr = 0;
-
    if (at_a_time > 0)
    {
       s_at_a_time = at_a_time;
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
    
 /*--------------------------------------------------------------------------
@@ -89,7 +84,6 @@ hypre_BoxInitializeMemory( const HYPRE_Int at_a_time )
 HYPRE_Int
 hypre_BoxFinalizeMemory()
 {
-   HYPRE_Int         ierr = 0;
    union box_memory *byebye;
 
    while (s_finalize)
@@ -101,7 +95,7 @@ hypre_BoxFinalizeMemory()
    s_finalize = NULL;
    s_free = NULL;
 
-   return ierr;
+   return hypre_error_flag;
 }
       
 /*--------------------------------------------------------------------------
@@ -122,6 +116,7 @@ hypre_BoxAlloc()
    ptr = s_free;
    s_free = (s_free -> d_next);
    s_count++;
+
    return( &(ptr -> d_box) );
 }
 
@@ -132,7 +127,6 @@ hypre_BoxAlloc()
 HYPRE_Int
 hypre_BoxFree( hypre_Box *box )
 {
-   HYPRE_Int         ierr = 0;
    union box_memory *ptr = (union box_memory *) box;
 
    (ptr -> d_next) = s_free;
@@ -144,6 +138,6 @@ hypre_BoxFree( hypre_Box *box )
       hypre_BoxFinalizeMemory();
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 

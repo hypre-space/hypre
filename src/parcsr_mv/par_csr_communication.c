@@ -7,13 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 /*==========================================================================*/
 
@@ -468,7 +468,7 @@ hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A)
 
    HYPRE_Int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
 
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
 
    HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
    HYPRE_Int        global_num_cols;

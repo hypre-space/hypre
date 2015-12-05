@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.31 $
+ * $Revision: 2.32 $
  ***********************************************************************EHEADER*/
 
 
@@ -315,18 +315,13 @@ HYPRE_Int
 HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
 /**
- * Set the periodicity a particular part.
+ * Set the periodicity on a particular part.
  *
  * The argument {\tt periodic} is an {\tt ndim}-dimensional integer array that
  * contains the periodicity for each dimension.  A zero value for a dimension
  * means non-periodic, while a nonzero value means periodic and contains the
  * actual period.  For example, periodicity in the first and third dimensions
  * for a 10x11x12 part is indicated by the array [10,0,12].
- *
- * NOTE: Currently, this routine will only have an effect for matrix object
- * types {\tt HYPRE\_SSTRUCT} and {\tt HYPRE\_STRUCT}.  For {\tt HYPRE\_PARCSR},
- * periodicity must be set up manually through other routines such as
- * \Ref{HYPRE_SStructGridSetNeighborPart}.
  *
  * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
  * of the periodic dimensions.

@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.16 $
+# $Revision: 2.17 $
 #EHEADER**********************************************************************
 
 
@@ -28,7 +28,6 @@ C_COMPILE_FLAGS =\
 HEADERS =\
  aux_parcsr_matrix.h\
  aux_par_vector.h\
- headers.h\
  HYPRE_IJ_mv.h\
  _hypre_IJ_mv.h\
  IJ_matrix.h\

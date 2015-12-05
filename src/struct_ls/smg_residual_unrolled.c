@@ -7,19 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * Routine for computing residuals in the SMG code
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SMGResidualData data structure
@@ -177,7 +168,6 @@ hypre_SMGResidual( void               *residual_vdata,
    HYPRE_Int               stencil_size;
 
    HYPRE_Int               compute_i, i, j, si;
-   HYPRE_Int               loopi, loopj, loopk;
 
    double            *Ap1, *Ap2;
    double            *Ap3, *Ap4;
@@ -220,30 +210,31 @@ hypre_SMGResidual( void               *residual_vdata,
 
             compute_box_a = base_points;
             hypre_ForBoxI(i, compute_box_a)
+            {
+               compute_box = hypre_BoxArrayBox(compute_box_a, i);
+               start = hypre_BoxIMin(compute_box);
+
+               b_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
+               r_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+
+               bp = hypre_StructVectorBoxData(b, i);
+               rp = hypre_StructVectorBoxData(r, i);
+
+               hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+               hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
+                                   b_data_box, start, base_stride, bi,
+                                   r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ri) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(bi, ri)
                {
-                  compute_box = hypre_BoxArrayBox(compute_box_a, i);
-                  start = hypre_BoxIMin(compute_box);
-
-                  b_data_box =
-                     hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-                  r_data_box =
-                     hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
-
-                  bp = hypre_StructVectorBoxData(b, i);
-                  rp = hypre_StructVectorBoxData(r, i);
-
-                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop2Begin(loop_size,
-                                      b_data_box, start, base_stride, bi,
-                                      r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ri
-#include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, bi, ri)
-                     {
-                        rp[ri] = bp[bi];
-                     }
-                  hypre_BoxLoop2End(bi, ri);
+                  rp[ri] = bp[bi];
                }
+               hypre_BoxLoop2End(bi, ri);
+            }
          }
          break;
 
@@ -260,23 +251,23 @@ hypre_SMGResidual( void               *residual_vdata,
        *--------------------------------------------------------------------*/
 
       hypre_ForBoxArrayI(i, compute_box_aa)
+      {
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+         A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+         x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+         r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
+
+         rp = hypre_StructVectorBoxData(r, i);
+
+         /*--------------------------------------------------------------
+          * Switch statement to direct control (based on stencil size) to
+          * code to get pointers and offsets fo A and x.
+          *--------------------------------------------------------------*/
+
+         switch (stencil_size)
          {
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
-
-            A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-            x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-            r_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r), i);
-
-            rp = hypre_StructVectorBoxData(r, i);
-
-            /*--------------------------------------------------------------
-             * Switch statement to direct control (based on stencil size) to
-             * code to get pointers and offsets fo A and x.
-             *--------------------------------------------------------------*/
-
-            switch (stencil_size)
-            {
-               case 1:
+            case 1:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                xp0 = hypre_StructVectorBoxData(x, i) +
@@ -284,7 +275,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 3:
+            case 3:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -299,7 +290,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 5:
+            case 5:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -320,7 +311,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 7:
+            case 7:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -347,7 +338,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 9:
+            case 9:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -380,7 +371,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 15:
+            case 15:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -431,7 +422,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 19:
+            case 19:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -494,7 +485,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               case 27:
+            case 27:
 
                Ap0 = hypre_StructMatrixBoxData(A, i, 0);
                Ap1 = hypre_StructMatrixBoxData(A, i, 1);
@@ -581,287 +572,296 @@ hypre_SMGResidual( void               *residual_vdata,
 
                break;
 
-               default:
+            default:
                ;
-            }
+         }
 
-            hypre_ForBoxI(j, compute_box_a)
-               {
-                  compute_box = hypre_BoxArrayBox(compute_box_a, j);
+         hypre_ForBoxI(j, compute_box_a)
+         {
+            compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-                  start  = hypre_BoxIMin(compute_box);
+            start  = hypre_BoxIMin(compute_box);
 
-                  /*------------------------------------------------------
-                   * Switch statement to direct control to appropriate
-                   * box loop depending on stencil size
-                   *------------------------------------------------------*/
+            /*------------------------------------------------------
+             * Switch statement to direct control to appropriate
+             * box loop depending on stencil size
+             *------------------------------------------------------*/
 
-                  switch (stencil_size)
+            switch (stencil_size)
+            {
+
+               case 1:
+   
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
 
-                     case 1:
-   
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi];
 
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi];
-
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-
-                     break;
-
-                     case 3:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
- 
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi];
-
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-
-                     break;
-
-                     case 5:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
- 
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi]
-                              - Ap3[Ai] * xp3[xi]
-                              - Ap4[Ai] * xp4[xi];
-
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-
-                     break;
-
-                     case 7:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
-
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi]
-                              - Ap3[Ai] * xp3[xi]
-                              - Ap4[Ai] * xp4[xi]
-                              - Ap5[Ai] * xp5[xi]
-                              - Ap6[Ai] * xp6[xi];
-
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-
-                     break;
-
-                     case 9:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
-   
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi]
-                              - Ap3[Ai] * xp3[xi]
-                              - Ap4[Ai] * xp4[xi]
-                              - Ap5[Ai] * xp5[xi]
-                              - Ap6[Ai] * xp6[xi]
-                              - Ap7[Ai] * xp7[xi]
-                              - Ap8[Ai] * xp8[xi];
-   
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-
-                     break;
-
-                     case 15:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
-   
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi]
-                              - Ap3[Ai] * xp3[xi]
-                              - Ap4[Ai] * xp4[xi]
-                              - Ap5[Ai] * xp5[xi]
-                              - Ap6[Ai] * xp6[xi]
-                              - Ap7[Ai] * xp7[xi]
-                              - Ap8[Ai] * xp8[xi]
-                              - Ap9[Ai] * xp9[xi]
-                              - Ap10[Ai] * xp10[xi]
-                              - Ap11[Ai] * xp11[xi]
-                              - Ap12[Ai] * xp12[xi]
-                              - Ap13[Ai] * xp13[xi]
-                              - Ap14[Ai] * xp14[xi];
-
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-
-                     break;
-
-                     case 19:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
-   
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi]
-                              - Ap3[Ai] * xp3[xi]
-                              - Ap4[Ai] * xp4[xi]
-                              - Ap5[Ai] * xp5[xi]
-                              - Ap6[Ai] * xp6[xi]
-                              - Ap7[Ai] * xp7[xi]
-                              - Ap8[Ai] * xp8[xi]
-                              - Ap9[Ai] * xp9[xi]
-                              - Ap10[Ai] * xp10[xi]
-                              - Ap11[Ai] * xp11[xi]
-                              - Ap12[Ai] * xp12[xi]
-                              - Ap13[Ai] * xp13[xi]
-                              - Ap14[Ai] * xp14[xi]
-                              - Ap15[Ai] * xp15[xi]
-                              - Ap16[Ai] * xp16[xi]
-                              - Ap17[Ai] * xp17[xi]
-                              - Ap18[Ai] * xp18[xi];
-   
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-   
-                     break;
-   
-                     case 27:
-
-                     hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                     hypre_BoxLoop3Begin(loop_size,
-                                         A_data_box, start, base_stride, Ai,
-                                         x_data_box, start, base_stride, xi,
-                                         r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                        {
-   
-                           rp[ri] = rp[ri]
-                              - Ap0[Ai] * xp0[xi]
-                              - Ap1[Ai] * xp1[xi]
-                              - Ap2[Ai] * xp2[xi]
-                              - Ap3[Ai] * xp3[xi]
-                              - Ap4[Ai] * xp4[xi]
-                              - Ap5[Ai] * xp5[xi]
-                              - Ap6[Ai] * xp6[xi]
-                              - Ap7[Ai] * xp7[xi]
-                              - Ap8[Ai] * xp8[xi]
-                              - Ap9[Ai] * xp9[xi]
-                              - Ap10[Ai] * xp10[xi]
-                              - Ap11[Ai] * xp11[xi]
-                              - Ap12[Ai] * xp12[xi]
-                              - Ap13[Ai] * xp13[xi]
-                              - Ap14[Ai] * xp14[xi]
-                              - Ap15[Ai] * xp15[xi]
-                              - Ap16[Ai] * xp16[xi]
-                              - Ap17[Ai] * xp17[xi]
-                              - Ap18[Ai] * xp18[xi]
-                              - Ap19[Ai] * xp19[xi]
-                              - Ap20[Ai] * xp20[xi]
-                              - Ap21[Ai] * xp21[xi]
-                              - Ap22[Ai] * xp22[xi]
-                              - Ap23[Ai] * xp23[xi]
-                              - Ap24[Ai] * xp24[xi]
-                              - Ap25[Ai] * xp25[xi]
-                              - Ap26[Ai] * xp26[xi];
-
-                        }
-                     hypre_BoxLoop3End(Ai, xi, ri);
-   
-                     break;
-
-                     default:
-
-                     for (si = 0; si < stencil_size; si++)
-                     {
-                        Ap0 = hypre_StructMatrixBoxData(A, i, si);
-                        xp0 = hypre_StructVectorBoxData(x, i) +
-                           hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
-
-                        hypre_BoxGetStrideSize(compute_box, base_stride,
-                                               loop_size);
-                        hypre_BoxLoop3Begin(loop_size,
-                                            A_data_box, start, base_stride, Ai,
-                                            x_data_box, start, base_stride, xi,
-                                            r_data_box, start, base_stride, ri);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi,ri
-#include "hypre_box_smp_forloop.h"
-                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
-                           {
-                              rp[ri] -= Ap0[Ai] * xp0[xi];
-                           }
-                        hypre_BoxLoop3End(Ai, xi, ri);
-                     }
                   }
-               }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+
+                  break;
+
+               case 3:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+ 
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi];
+
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+
+                  break;
+
+               case 5:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+ 
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi]
+                        - Ap3[Ai] * xp3[xi]
+                        - Ap4[Ai] * xp4[xi];
+
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+
+                  break;
+
+               case 7:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi]
+                        - Ap3[Ai] * xp3[xi]
+                        - Ap4[Ai] * xp4[xi]
+                        - Ap5[Ai] * xp5[xi]
+                        - Ap6[Ai] * xp6[xi];
+
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+
+                  break;
+
+               case 9:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+   
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi]
+                        - Ap3[Ai] * xp3[xi]
+                        - Ap4[Ai] * xp4[xi]
+                        - Ap5[Ai] * xp5[xi]
+                        - Ap6[Ai] * xp6[xi]
+                        - Ap7[Ai] * xp7[xi]
+                        - Ap8[Ai] * xp8[xi];
+   
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+
+                  break;
+
+               case 15:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+   
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi]
+                        - Ap3[Ai] * xp3[xi]
+                        - Ap4[Ai] * xp4[xi]
+                        - Ap5[Ai] * xp5[xi]
+                        - Ap6[Ai] * xp6[xi]
+                        - Ap7[Ai] * xp7[xi]
+                        - Ap8[Ai] * xp8[xi]
+                        - Ap9[Ai] * xp9[xi]
+                        - Ap10[Ai] * xp10[xi]
+                        - Ap11[Ai] * xp11[xi]
+                        - Ap12[Ai] * xp12[xi]
+                        - Ap13[Ai] * xp13[xi]
+                        - Ap14[Ai] * xp14[xi];
+
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+
+                  break;
+
+               case 19:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+   
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi]
+                        - Ap3[Ai] * xp3[xi]
+                        - Ap4[Ai] * xp4[xi]
+                        - Ap5[Ai] * xp5[xi]
+                        - Ap6[Ai] * xp6[xi]
+                        - Ap7[Ai] * xp7[xi]
+                        - Ap8[Ai] * xp8[xi]
+                        - Ap9[Ai] * xp9[xi]
+                        - Ap10[Ai] * xp10[xi]
+                        - Ap11[Ai] * xp11[xi]
+                        - Ap12[Ai] * xp12[xi]
+                        - Ap13[Ai] * xp13[xi]
+                        - Ap14[Ai] * xp14[xi]
+                        - Ap15[Ai] * xp15[xi]
+                        - Ap16[Ai] * xp16[xi]
+                        - Ap17[Ai] * xp17[xi]
+                        - Ap18[Ai] * xp18[xi];
+   
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+   
+                  break;
+   
+               case 27:
+
+                  hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                      A_data_box, start, base_stride, Ai,
+                                      x_data_box, start, base_stride, xi,
+                                      r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                  hypre_BoxLoop3For(Ai, xi, ri)
+                  {
+   
+                     rp[ri] = rp[ri]
+                        - Ap0[Ai] * xp0[xi]
+                        - Ap1[Ai] * xp1[xi]
+                        - Ap2[Ai] * xp2[xi]
+                        - Ap3[Ai] * xp3[xi]
+                        - Ap4[Ai] * xp4[xi]
+                        - Ap5[Ai] * xp5[xi]
+                        - Ap6[Ai] * xp6[xi]
+                        - Ap7[Ai] * xp7[xi]
+                        - Ap8[Ai] * xp8[xi]
+                        - Ap9[Ai] * xp9[xi]
+                        - Ap10[Ai] * xp10[xi]
+                        - Ap11[Ai] * xp11[xi]
+                        - Ap12[Ai] * xp12[xi]
+                        - Ap13[Ai] * xp13[xi]
+                        - Ap14[Ai] * xp14[xi]
+                        - Ap15[Ai] * xp15[xi]
+                        - Ap16[Ai] * xp16[xi]
+                        - Ap17[Ai] * xp17[xi]
+                        - Ap18[Ai] * xp18[xi]
+                        - Ap19[Ai] * xp19[xi]
+                        - Ap20[Ai] * xp20[xi]
+                        - Ap21[Ai] * xp21[xi]
+                        - Ap22[Ai] * xp22[xi]
+                        - Ap23[Ai] * xp23[xi]
+                        - Ap24[Ai] * xp24[xi]
+                        - Ap25[Ai] * xp25[xi]
+                        - Ap26[Ai] * xp26[xi];
+
+                  }
+                  hypre_BoxLoop3End(Ai, xi, ri);
+   
+                  break;
+
+               default:
+
+                  for (si = 0; si < stencil_size; si++)
+                  {
+                     Ap0 = hypre_StructMatrixBoxData(A, i, si);
+                     xp0 = hypre_StructVectorBoxData(x, i) +
+                        hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+
+                     hypre_BoxGetStrideSize(compute_box, base_stride,
+                                            loop_size);
+                     hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#endif
+                     hypre_BoxLoop3For(Ai, xi, ri)
+                     {
+                        rp[ri] -= Ap0[Ai] * xp0[xi];
+                     }
+                     hypre_BoxLoop3End(Ai, xi, ri);
+                  }
+            }
          }
+      }
    }
    
    /*-----------------------------------------------------------------------

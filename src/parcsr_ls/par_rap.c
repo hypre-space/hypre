@@ -7,14 +7,14 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * OLD NOTES:
@@ -267,9 +267,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RAP_ext;
 
-   double          *RAP_ext_data;
-   HYPRE_Int             *RAP_ext_i;
-   HYPRE_Int             *RAP_ext_j;
+   double          *RAP_ext_data = NULL;
+   HYPRE_Int             *RAP_ext_i = NULL;
+   HYPRE_Int             *RAP_ext_j = NULL;
 
    hypre_CSRMatrix *RAP_diag;
 
@@ -279,9 +279,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RAP_offd;
 
-   double          *RAP_offd_data;
-   HYPRE_Int             *RAP_offd_i;
-   HYPRE_Int             *RAP_offd_j;
+   double          *RAP_offd_data = NULL;
+   HYPRE_Int             *RAP_offd_i = NULL;
+   HYPRE_Int             *RAP_offd_j = NULL;
 
    HYPRE_Int              RAP_size;
    HYPRE_Int              RAP_ext_size;
@@ -311,18 +311,18 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *Ps_ext_i;
    HYPRE_Int             *Ps_ext_j;
 
-   double          *P_ext_diag_data;
-   HYPRE_Int             *P_ext_diag_i;
-   HYPRE_Int             *P_ext_diag_j;
+   double          *P_ext_diag_data = NULL;
+   HYPRE_Int             *P_ext_diag_i = NULL;
+   HYPRE_Int             *P_ext_diag_j = NULL;
 
-   double          *P_ext_offd_data;
-   HYPRE_Int             *P_ext_offd_i;
-   HYPRE_Int             *P_ext_offd_j;
+   double          *P_ext_offd_data = NULL;
+   HYPRE_Int             *P_ext_offd_i = NULL;
+   HYPRE_Int             *P_ext_offd_j = NULL;
 
    HYPRE_Int             *col_map_offd_Pext;
-   HYPRE_Int             *map_P_to_Pext;
-   HYPRE_Int             *map_P_to_RAP;
-   HYPRE_Int             *map_Pext_to_RAP;
+   HYPRE_Int             *map_P_to_Pext = NULL;
+   HYPRE_Int             *map_P_to_RAP = NULL;
+   HYPRE_Int             *map_Pext_to_RAP = NULL;
 
    HYPRE_Int             *P_marker;
    HYPRE_Int            **P_mark_array;
@@ -521,8 +521,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
   {
    jj_count = hypre_CTAlloc(HYPRE_Int, num_threads);
 
-#define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker) HYPRE_SMP_SCHEDULE
+#endif
    for (ii = 0; ii < num_threads; ii++)
    {
      size = num_cols_offd_RT/num_threads;
@@ -728,8 +729,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
     *  Second Pass: Fill in RAP_int_data and RAP_int_j.
     *-----------------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker,r_entry,r_a_product,r_a_p_product
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker,r_entry,r_a_product,r_a_p_product) HYPRE_SMP_SCHEDULE
+#endif
    for (ii = 0; ii < num_threads; ii++)
    {
      size = num_cols_offd_RT/num_threads;
@@ -1101,8 +1103,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    jj_cnt_diag = hypre_CTAlloc(HYPRE_Int, num_threads);
    jj_cnt_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
-#define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker) HYPRE_SMP_SCHEDULE
+#endif
    for (ii = 0; ii < num_threads; ii++)
    {
      size = num_cols_diag_RT/num_threads;
@@ -1372,8 +1375,9 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
     *  Second Pass: Fill in RAP_offd_data and RAP_offd_j.
     *-----------------------------------------------------------------------*/
 
-#define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker,r_entry,r_a_product,r_a_p_product
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker,r_entry,r_a_product,r_a_p_product) HYPRE_SMP_SCHEDULE
+#endif
    for (ii = 0; ii < num_threads; ii++)
    {
      size = num_cols_diag_RT/num_threads;

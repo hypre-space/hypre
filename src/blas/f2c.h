@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /* f2c.h  --  Standard Fortran to C header file */
 
@@ -23,8 +20,9 @@
 #define F2C_INCLUDE
 
 /* MPI is not needed here, so don't include mpi.h */
+#include "HYPRE_config.h"
 #ifndef HYPRE_SEQUENTIAL
-#define HYPRE_SEQUENTIAL 1
+#define HYPRE_SEQUENTIAL
 #endif
 #include "_hypre_utilities.h"
 
@@ -195,8 +193,10 @@ typedef struct Namelist Namelist;
 #undef abs
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 #define dabs(x) (doublereal)abs(x)
+#ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
 #define dmin(a,b) (doublereal)min(a,b)
 #define dmax(a,b) (doublereal)max(a,b)
 #define bit_test(a,b)	((a) >> (b) & 1)

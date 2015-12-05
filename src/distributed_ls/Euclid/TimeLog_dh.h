@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /*
     Euclid employs a global object: 
@@ -21,12 +18,10 @@
     for recording timing information.  
 */
 
-
-
 #ifndef TIMELOG_DH_DH
 #define TIMELOG_DH_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 extern void TimeLog_dhCreate(TimeLog_dh *t);
 extern void TimeLog_dhDestroy(TimeLog_dh t);

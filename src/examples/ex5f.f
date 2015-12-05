@@ -26,8 +26,6 @@ c                        3 - set up a pilut preconditioner
 c                        4 - set up a ParaSails preconditioner
 c
 
-
-
       program ex5f
 
 
@@ -258,8 +256,9 @@ c        Run info - needed logging turned on
 
          if (myid .eq. 0) then
             print *
-            print *, "Iterations = ", num_iterations
-            print *, "Final Relative Residual Norm = ", final_res_norm
+            print '(A,I2)', " Iterations = ", num_iterations
+            print '(A,ES16.8)',
+     1            " Final Relative Residual Norm = ", final_res_norm
             print *
          endif
          

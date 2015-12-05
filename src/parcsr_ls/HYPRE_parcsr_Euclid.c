@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.20 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "./HYPRE_parcsr_ls.h"
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
@@ -26,13 +23,13 @@
 /* #include "../parcsr_mv/par_vector.h" */
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
 
-
-  /* These are what we need from Euclid */
-#include "../distributed_ls/Euclid/Mem_dh.h"
-#include "../distributed_ls/Euclid/io_dh.h"
-#include "../distributed_ls/Euclid/TimeLog_dh.h"
-#include "../distributed_ls/Euclid/Parser_dh.h"
-#include "../distributed_ls/Euclid/Euclid_dh.h"
+/* These are what we need from Euclid */
+#include "distributed_ls/Euclid/_hypre_Euclid.h"
+/* #include "../distributed_ls/Euclid/Mem_dh.h" */
+/* #include "../distributed_ls/Euclid/io_dh.h" */
+/* #include "../distributed_ls/Euclid/TimeLog_dh.h" */
+/* #include "../distributed_ls/Euclid/Parser_dh.h" */
+/* #include "../distributed_ls/Euclid/Euclid_dh.h" */
 
 /*------------------------------------------------------------------
  * Error checking

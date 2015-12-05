@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 /*
@@ -22,7 +22,7 @@
 #ifndef IO_DH
 #define IO_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 /*--------------------------------------------------------------------------
  * open and close files, with error checking

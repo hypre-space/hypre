@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.24 $
+# $Revision: 2.25 $
 #EHEADER**********************************************************************
 
 
@@ -35,7 +35,6 @@ HEADERS =\
  HYPRE_sstruct_ls.h\
  _hypre_sstruct_ls.h\
  fac.h\
- headers.h\
  maxwell_TV.h\
  nd1_amge_interpolation.h\
  sstruct_owninfo.h\

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.35 $
+ * $Revision: 2.37 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
@@ -376,6 +376,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParCSRMatrix) A_array[level],
                                  (HYPRE_ParVector) Aux_F,
                                   (HYPRE_ParVector) Aux_U);
+              }
+              /*else if (relax_type == 99)*/
+              else if (relax_type == 9 || relax_type == 99)
+              { /* Gaussian elimination */
+                 hypre_GaussElimSolve(amg_data, level, relax_type);
               }
               else if (relax_type == 18)
               {   /* L1 - Jacobi*/

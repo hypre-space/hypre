@@ -7,14 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "Parser_dh.h"
-#include "Mem_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Parser_dh.h" */
+/* #include "Mem_dh.h" */
 
 /* TODO: error checking is not complete; memRecord_dh  need to
          be done in Mem_dhMalloc() and Mem_dhFree()l

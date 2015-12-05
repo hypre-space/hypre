@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
 
 
@@ -89,6 +89,7 @@ typedef struct
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      rel_change;
+   HYPRE_Int      skip_real_r_check;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
    double   tol;

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 #include "_hypre_utilities.h"
@@ -565,6 +565,17 @@ hypre_MPI_Type_free( hypre_MPI_Datatype *datatype )
    return(0);
 }
 
+HYPRE_Int
+hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre_MPI_Op *op )
+{
+   return(0);
+}
+
+HYPRE_Int
+hypre_MPI_Op_free( hypre_MPI_Op *op )
+{
+   return(0);
+}
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
@@ -1098,6 +1109,18 @@ HYPRE_Int
 hypre_MPI_Type_free( hypre_MPI_Datatype *datatype )
 {
    return (HYPRE_Int) MPI_Type_free(datatype);
+}
+
+HYPRE_Int
+hypre_MPI_Op_free( hypre_MPI_Op *op )
+{
+   return (HYPRE_Int) MPI_Op_free(op);
+}
+
+HYPRE_Int
+hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre_MPI_Op *op )
+{
+   return (HYPRE_Int) MPI_Op_create(function, commute, op);
 }
 
 #endif

@@ -7,13 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 void RowsWithColumn_original
 ( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_Int column, hypre_ParCSRMatrix * A )

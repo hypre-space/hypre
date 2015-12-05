@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -18,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructVectorCreate
@@ -29,11 +27,9 @@ HYPRE_StructVectorCreate( MPI_Comm             comm,
                           HYPRE_StructGrid     grid,
                           HYPRE_StructVector  *vector )
 {
-   HYPRE_Int ierr = 0;
-
    *vector = hypre_StructVectorCreate(comm, grid);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -68,7 +64,6 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
    hypre_Index  new_grid_index;
                 
    HYPRE_Int    d;
-   HYPRE_Int    ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0; d < hypre_StructGridDim(hypre_StructVectorGrid(vector)); d++)
@@ -76,9 +71,9 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = hypre_StructVectorSetValues(vector, new_grid_index, &values, 0, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, &values, 0, -1, 0);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -96,7 +91,6 @@ HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
    hypre_Box    *new_value_box;
                  
    HYPRE_Int     d;
-   HYPRE_Int     ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -108,12 +102,12 @@ HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
    new_value_box = hypre_BoxCreate();
    hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
 
-   ierr = hypre_StructVectorSetBoxValues(vector, new_value_box, new_value_box,
-                                         values, 0, -1, 0);
+   hypre_StructVectorSetBoxValues(vector, new_value_box, new_value_box,
+                                  values, 0, -1, 0);
 
    hypre_BoxDestroy(new_value_box);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -128,7 +122,6 @@ HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
    hypre_Index  new_grid_index;
                 
    HYPRE_Int    d;
-   HYPRE_Int    ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0; d < hypre_StructGridDim(hypre_StructVectorGrid(vector)); d++)
@@ -136,9 +129,9 @@ HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = hypre_StructVectorSetValues(vector, new_grid_index, &values, 1, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, &values, 1, -1, 0);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -156,7 +149,6 @@ HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
    hypre_Box    *new_value_box;
                  
    HYPRE_Int     d;
-   HYPRE_Int     ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -168,12 +160,12 @@ HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
    new_value_box = hypre_BoxCreate();
    hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
 
-   ierr = hypre_StructVectorSetBoxValues(vector, new_value_box, new_value_box,
-                                         values, 1, -1, 0);
+   hypre_StructVectorSetBoxValues(vector, new_value_box, new_value_box,
+                                  values, 1, -1, 0);
 
    hypre_BoxDestroy(new_value_box);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -199,7 +191,6 @@ HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
    hypre_Index  new_grid_index;
                 
    HYPRE_Int    d;
-   HYPRE_Int    ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0; d < hypre_StructGridDim(hypre_StructVectorGrid(vector)); d++)
@@ -207,9 +198,9 @@ HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
 
-   ierr = hypre_StructVectorSetValues(vector, new_grid_index, values, -1, -1, 0);
+   hypre_StructVectorSetValues(vector, new_grid_index, values, -1, -1, 0);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -227,7 +218,6 @@ HYPRE_StructVectorGetBoxValues( HYPRE_StructVector  vector,
    hypre_Box    *new_value_box;
                  
    HYPRE_Int     d;
-   HYPRE_Int     ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -239,12 +229,12 @@ HYPRE_StructVectorGetBoxValues( HYPRE_StructVector  vector,
    new_value_box = hypre_BoxCreate();
    hypre_BoxSetExtents(new_value_box, new_ilower, new_iupper);
 
-   ierr = hypre_StructVectorSetBoxValues(vector, new_value_box, new_value_box,
-                                         values, -1, -1, 0);
+   hypre_StructVectorSetBoxValues(vector, new_value_box, new_value_box,
+                                  values, -1, -1, 0);
 
    hypre_BoxDestroy(new_value_box);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -313,11 +303,9 @@ HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector  from_vector,
                                      HYPRE_StructVector  to_vector,
                                      HYPRE_CommPkg      *comm_pkg )
 {
-   HYPRE_Int ierr = 0;
-
    *comm_pkg = hypre_StructVectorGetMigrateCommPkg(from_vector, to_vector);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

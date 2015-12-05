@@ -7,19 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
-
-
-
-
-/******************************************************************************
- *
- * HYPRE_ParCSRBiCGSTAB interface
- *
- *****************************************************************************/
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABCreate
@@ -28,7 +19,14 @@
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   hypre_BiCGSTABFunctions * bicgstab_functions =
+   hypre_BiCGSTABFunctions * bicgstab_functions;
+
+   if (!solver)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   bicgstab_functions =
       hypre_BiCGSTABFunctionsCreate(
          hypre_ParKrylovCreateVector,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
@@ -38,10 +36,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
-
    *solver = ( (HYPRE_Solver) hypre_BiCGSTABCreate( bicgstab_functions) );
-   if (!solver)
-      hypre_error_in_arg(2);
     
    return hypre_error_flag;
 }
@@ -62,9 +57,9 @@ HYPRE_ParCSRBiCGSTABDestroy( HYPRE_Solver solver )
 
 HYPRE_Int 
 HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
-                        HYPRE_ParCSRMatrix A,
-                        HYPRE_ParVector b,
-                        HYPRE_ParVector x      )
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector b,
+                           HYPRE_ParVector x      )
 {
    return( HYPRE_BiCGSTABSetup( solver,
                                 (HYPRE_Matrix) A,
@@ -78,9 +73,9 @@ HYPRE_ParCSRBiCGSTABSetup( HYPRE_Solver solver,
 
 HYPRE_Int 
 HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
-                        HYPRE_ParCSRMatrix A,
-                        HYPRE_ParVector b,
-                        HYPRE_ParVector x      )
+                           HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector b,
+                           HYPRE_ParVector x      )
 {
    return( HYPRE_BiCGSTABSolve( solver,
                                 (HYPRE_Matrix) A,
@@ -94,7 +89,7 @@ HYPRE_ParCSRBiCGSTABSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
-                         double             tol    )
+                            double             tol    )
 {
    return( HYPRE_BiCGSTABSetTol( solver, tol ) );
 }
@@ -104,7 +99,7 @@ HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
-                         double             a_tol    )
+                                    double             a_tol    )
 {
    return( HYPRE_BiCGSTABSetAbsoluteTol( solver, a_tol ) );
 }
@@ -114,7 +109,7 @@ HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetMinIter( HYPRE_Solver solver,
-                             HYPRE_Int          min_iter )
+                                HYPRE_Int          min_iter )
 {
    return( HYPRE_BiCGSTABSetMinIter( solver, min_iter ) );
 }
@@ -125,7 +120,7 @@ HYPRE_ParCSRBiCGSTABSetMinIter( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetMaxIter( HYPRE_Solver solver,
-                             HYPRE_Int          max_iter )
+                                HYPRE_Int          max_iter )
 {
    return( HYPRE_BiCGSTABSetMaxIter( solver, max_iter ) );
 }
@@ -136,7 +131,7 @@ HYPRE_ParCSRBiCGSTABSetMaxIter( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetStopCrit( HYPRE_Solver solver,
-                              HYPRE_Int          stop_crit )
+                                 HYPRE_Int          stop_crit )
 {
    return( HYPRE_BiCGSTABSetStopCrit( solver, stop_crit ) );
 }
@@ -163,7 +158,7 @@ HYPRE_ParCSRBiCGSTABSetPrecond( HYPRE_Solver         solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetPrecond( HYPRE_Solver  solver,
-                             HYPRE_Solver *precond_data_ptr )
+                                HYPRE_Solver *precond_data_ptr )
 {
    return( HYPRE_BiCGSTABGetPrecond( solver, precond_data_ptr ) );
 }
@@ -174,7 +169,7 @@ HYPRE_ParCSRBiCGSTABGetPrecond( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
-                             HYPRE_Int logging)
+                                HYPRE_Int logging)
 {
    return( HYPRE_BiCGSTABSetLogging( solver, logging ) );
 }
@@ -185,7 +180,7 @@ HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver,
-                             HYPRE_Int print_level)
+                                   HYPRE_Int print_level)
 {
    return( HYPRE_BiCGSTABSetPrintLevel( solver, print_level ) );
 }
@@ -196,7 +191,7 @@ HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver  solver,
-                                   HYPRE_Int                *num_iterations )
+                                      HYPRE_Int                *num_iterations )
 {
    return( HYPRE_BiCGSTABGetNumIterations( solver, num_iterations ) );
 }
@@ -207,7 +202,7 @@ HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                                  double             *norm   )
 {
    return( HYPRE_BiCGSTABGetFinalRelativeResidualNorm( solver, norm ) );
 }

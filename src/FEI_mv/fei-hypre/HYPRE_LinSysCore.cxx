@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.80 $
- ***********************************************************************EHEADER*/
-
+ * $Revision: 2.82 $
+ *********************************************************************EHEADER*/
 
 //***************************************************************************
 // system includes
@@ -22,8 +21,10 @@
 #include <assert.h>
 #include <math.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
+#endif
 #endif
 
 //***************************************************************************
@@ -120,7 +121,6 @@ extern "C" {
    void  qsort1(int *, double *, int, int);
 }
 
-#define HAVE_MLI
 #define habs(x)  ( ( (x) > 0 ) ? x : -(x))
 
 //***************************************************************************
@@ -2361,7 +2361,8 @@ This should ultimately be taken out even for newer ale3d implementation
             printf("putNodalFieldData WARNING : \n");
             printf("    set nodeNumbers = NULL, set numNodes = 0.\n");
          }
-         MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
+         nRows = localEndRow_ - localStartRow_ + 1;
+         MLI_NodalCoord_ = new double[nRows];
          for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = data[i];
       }
    }
@@ -2674,7 +2675,7 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
 
    //**/================================================================
    //**/ The following is for multiple right hand side (Mar 2009)
-   if (mRHSFlag_ == 1 && currentRHS_ != 0 & mRHSNumGEqns_ > 0)
+   if (mRHSFlag_ == 1 && currentRHS_ != 0 && mRHSNumGEqns_ > 0)
    {
       for( i = 0; i < leng; i++ )
       {
@@ -2918,7 +2919,7 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
    //============================================================
    //**/ The following is for multiple right hand side (Mar 2009)
 
-   if (mRHSFlag_ == 1 && currentRHS_ != 0 & mRHSNumGEqns_ > 0)
+   if (mRHSFlag_ == 1 && currentRHS_ != 0 && mRHSNumGEqns_ > 0)
    {
       for( i = 0; i < numEqns; i++ )
       {

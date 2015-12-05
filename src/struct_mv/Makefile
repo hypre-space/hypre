@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.20 $
+# $Revision: 2.22 $
 #EHEADER**********************************************************************
 
 
@@ -30,8 +30,6 @@ HEADERS =\
  box_manager.h\
  box_pthreads.h\
  computation.h\
- headers.h\
- hypre_box_smp_forloop.h\
  struct_communication.h\
  struct_grid.h\
  struct_matrix.h\

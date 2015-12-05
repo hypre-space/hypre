@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,7 +25,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 void hypre_ParChordMatrix_RowStarts(
    hypre_ParChordMatrix *Ac, MPI_Comm comm,

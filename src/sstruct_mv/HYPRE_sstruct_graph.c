@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.20 $
+ * $Revision: 2.27 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -70,18 +70,19 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphFEMSparseI(graph) = fem_sparse_j;
    hypre_SStructGraphFEMEntries(graph) = fem_entries;
 
-   hypre_SStructGraphNUVEntries(graph)  = 0;
-   hypre_SStructGraphAUVEntries(graph)  = 0;
-   hypre_SStructGraphIUVEntries(graph)  = NULL;
+   hypre_SStructGraphNUVEntries(graph) = 0;
+   hypre_SStructGraphIUVEntries(graph) = NULL;
+   hypre_SStructGraphUVEntries(graph)  = NULL;
+   hypre_SStructGraphUVESize(graph)    = 0;
+   hypre_SStructGraphUEMaxSize(graph)  = 0;
+   hypre_SStructGraphUVEOffsets(graph) = NULL;
 
-   hypre_SStructGraphUVEntries(graph)   = NULL;
-   hypre_SStructGraphTotUEntries(graph) = 0;
-   hypre_SStructGraphRefCount(graph)    = 1;
-   hypre_SStructGraphObjectType(graph)  = HYPRE_SSTRUCT;
+   hypre_SStructGraphRefCount(graph)   = 1;
+   hypre_SStructGraphObjectType(graph) = HYPRE_SSTRUCT;
 
-   hypre_SStructGraphEntries(graph)     = NULL;
-   hypre_SStructNGraphEntries(graph)    = 0;
-   hypre_SStructAGraphEntries(graph)    = 0;
+   hypre_SStructGraphEntries(graph)    = NULL;
+   hypre_SStructNGraphEntries(graph)   = 0;
+   hypre_SStructAGraphEntries(graph)   = 0;
    
    *graph_ptr = graph;
 
@@ -103,9 +104,9 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    HYPRE_Int             **fem_entries;
    HYPRE_Int               nUventries;
    HYPRE_Int              *iUventries;
- 
-   hypre_SStructUVEntry  **Uventries;
+    hypre_SStructUVEntry **Uventries;
    hypre_SStructUVEntry   *Uventry;
+   HYPRE_Int             **Uveoffsets;
    HYPRE_Int               nvars;
    HYPRE_Int               part, var, i;
 
@@ -123,8 +124,8 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          fem_entries  = hypre_SStructGraphFEMEntries(graph);
          nUventries = hypre_SStructGraphNUVEntries(graph);
          iUventries = hypre_SStructGraphIUVEntries(graph);
-
          Uventries  = hypre_SStructGraphUVEntries(graph);
+         Uveoffsets = hypre_SStructGraphUVEOffsets(graph);
          for (part = 0; part < nparts; part++)
          {
             nvars = hypre_SStructPGridNVars(pgrids[part]);
@@ -136,6 +137,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
             hypre_TFree(fem_sparse_i[part]);
             hypre_TFree(fem_sparse_j[part]);
             hypre_TFree(fem_entries[part]);
+            hypre_TFree(Uveoffsets[part]);
          }
          HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
          HYPRE_SStructGridDestroy(hypre_SStructGraphDomainGrid(graph));
@@ -157,6 +159,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          }
          hypre_TFree(iUventries);
          hypre_TFree(Uventries);
+         hypre_TFree(Uveoffsets);
          hypre_TFree(graph);
       }
    }
@@ -302,68 +305,53 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
 
 /*--------------------------------------------------------------------------
  * This routine mainly computes the column numbers for the non-stencil
- * graph entries (i.e., those created by GraphAddEntries calls).  The
- * routine will compute as many of these numbers on-process, but if
- * the information needed to compute a column is not stored locally,
- * it will be computed off-process instead.
- *
- * RDF: Is this off-process code really needed?
- *
- * To do this, column info is first requested from other processes
- * (tag=1 communications).  While waiting for this info, requests from
- * other processes are filled (tag=2).  Simultaneously, a fanin/fanout
- * procedure (tag=0) is invoked to determine when to stop: each
- * process participates in the send portion of the fanin once it has
- * received all of its requested column data and once it has completed
- * its receive portion of the fanin; each process then participates in
- * the fanout.
- *
+ * graph entries (i.e., those created by GraphAddEntries calls).
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 {
 
-   MPI_Comm               comm        = hypre_SStructGraphComm(graph);
-   hypre_SStructGrid     *grid        = hypre_SStructGraphGrid(graph);
-   hypre_SStructGrid     *dom_grid    = hypre_SStructGraphDomainGrid(graph);
-   HYPRE_Int              nparts      = hypre_SStructGraphNParts(graph);
-   hypre_SStructStencil ***stencils    = hypre_SStructGraphStencils(graph);
-   HYPRE_Int              nUventries;
-   HYPRE_Int             *iUventries;
-   hypre_SStructUVEntry **Uventries;
-   
-   HYPRE_Int              type        = hypre_SStructGraphObjectType(graph);
-
-
-   hypre_SStructUVEntry  *Uventry;
-   HYPRE_Int              nUentries;
-   HYPRE_Int              to_part;
-   hypre_IndexRef         to_index;
-   HYPRE_Int              to_var;
-   HYPRE_Int              to_boxnum;
-   HYPRE_Int              to_proc;
-   HYPRE_Int              rank;
-   hypre_BoxManEntry     *boxman_entry;
-
-   HYPRE_Int              nprocs, myproc;
-   
-   HYPRE_Int              i, j;
-
-   /* data from add entries calls */
+   MPI_Comm                  comm        = hypre_SStructGraphComm(graph);
+   HYPRE_Int                 ndim        = hypre_SStructGraphNDim(graph);
+   hypre_SStructGrid        *grid        = hypre_SStructGraphGrid(graph);
+   hypre_SStructGrid        *dom_grid    = hypre_SStructGraphDomainGrid(graph);
+   HYPRE_Int                 nparts      = hypre_SStructGraphNParts(graph);
+   hypre_SStructStencil   ***stencils    = hypre_SStructGraphStencils(graph);
+   HYPRE_Int                 nUventries;
+   HYPRE_Int                *iUventries;
+   hypre_SStructUVEntry    **Uventries;
+   HYPRE_Int                 Uvesize;
+   HYPRE_Int               **Uveoffsets;
+   HYPRE_Int                 type        = hypre_SStructGraphObjectType(graph);
    hypre_SStructGraphEntry **add_entries = hypre_SStructGraphEntries(graph);
    HYPRE_Int                 n_add_entries = hypre_SStructNGraphEntries(graph);
+
+   hypre_SStructPGrid       *pgrid;
+   hypre_StructGrid         *sgrid;
+   HYPRE_Int                 nvars;
+   hypre_BoxArray           *boxes;
+   hypre_Box                *box;
+   HYPRE_Int                 vol, d;
+
    hypre_SStructGraphEntry  *new_entry;
+   hypre_SStructUVEntry     *Uventry;
+   HYPRE_Int                 nUentries;
+   hypre_SStructUEntry      *Uentries;
+   HYPRE_Int                 to_part;
+   hypre_IndexRef            to_index;
+   HYPRE_Int                 to_var;
+   HYPRE_Int                 to_boxnum;
+   HYPRE_Int                 to_proc;
+   HYPRE_Int                 Uverank, rank;
+   hypre_BoxManEntry        *boxman_entry;
+                         
+   HYPRE_Int                 nprocs, myproc;
    HYPRE_Int                 part, var;
    hypre_IndexRef            index;
-   hypre_Index               cindex;
-   HYPRE_Int                 startrank;
-   HYPRE_Int                 boxnum;
-   HYPRE_Int                 aUventries;
-   HYPRE_Int                 ndim       = hypre_SStructGridNDim(grid);
-   hypre_SStructUEntry      *Uentries;
+   HYPRE_Int                 i, j;
 
-#if  HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
 
    /* may need to re-do box managers for the AP*/
    hypre_BoxManager        ***managers = hypre_SStructGridBoxManagers(grid);
@@ -372,19 +360,31 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_BoxManager          *new_boxman;
    
    HYPRE_Int                  global_n_add_entries;
-   HYPRE_Int                  is_gather;
+   HYPRE_Int                  is_gather, k;
    
-   hypre_SStructPGrid        *pgrid;
-   HYPRE_Int                  nvars;
    hypre_BoxManEntry         *all_entries, *entry;
    HYPRE_Int                  num_entries;
    void                      *info;
    hypre_Box                 *bbox, *new_box;
-   hypre_StructGrid          *sgrid;
+   hypre_Box               ***new_gboxes, *new_gbox;
    HYPRE_Int                 *num_ghost;
 
    /*---------------------------------------------------------
     *  If AP, then may need to redo the box managers
+    *
+    *  Currently using bounding boxes based on the indexes in add_entries to
+    *  determine which boxes to gather in the box managers.  We refer to these
+    *  bounding boxes as "gather boxes" here (new_gboxes).  This should work
+    *  well in most cases, but it does have the potential to cause lots of grid
+    *  boxes to be gathered (hence lots of communication).
+    *
+    *  A better algorithm would use more care in computing gather boxes that
+    *  aren't "too big", while not computing "too many" either (which can also
+    *  be slow).  One approach might be to compute an octree with leaves that
+    *  have the same volume as the maximum grid box volume.  The leaves would
+    *  then serve as the gather boxes.  The number of gather boxes would then be
+    *  on the order of the number of local grid boxes (assuming the add_entries
+    *  are local, which is generally how they should be used).
     *---------------------------------------------------------*/
 
    new_box = hypre_BoxCreate();
@@ -398,6 +398,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    {
       /* create new managers */
       new_managers = hypre_TAlloc(hypre_BoxManager **, nparts);
+      new_gboxes = hypre_TAlloc(hypre_Box **, nparts);
 
       for (part = 0; part < nparts; part++)
       {
@@ -405,19 +406,25 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          nvars = hypre_SStructPGridNVars(pgrid);
          
          new_managers[part] = hypre_TAlloc(hypre_BoxManager *, nvars);
+         new_gboxes[part] = hypre_TAlloc(hypre_Box *, nvars);
          
          for (var = 0; var < nvars; var++)
          {
             sgrid = hypre_SStructPGridSGrid(pgrid, var);
        
             orig_boxman = managers[part][var];
+            bbox =  hypre_BoxManBoundingBox(orig_boxman);
             
             hypre_BoxManCreate(hypre_BoxManNEntries(orig_boxman), 
                                hypre_BoxManEntryInfoSize(orig_boxman), 
-                               hypre_StructGridDim(sgrid),
-                               hypre_BoxManBoundingBox(orig_boxman),  
+                               hypre_StructGridDim(sgrid), bbox,
                                hypre_StructGridComm(sgrid),
                                &new_managers[part][var]);
+            /* create gather box with flipped bounding box extents */
+            new_gboxes[part][var] = hypre_BoxCreate();
+            hypre_BoxSetExtents(new_gboxes[part][var],
+                                hypre_BoxIMax(bbox), hypre_BoxIMin(bbox));
+
 
             /* need to set the num ghost for new manager also */
             num_ghost = hypre_StructGridNumGhost(sgrid);
@@ -430,37 +437,42 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       {
          new_entry = add_entries[j];
 
-         /* check part, var, index */
-         part =  hypre_SStructGraphEntryPart(new_entry);
-         var = hypre_SStructGraphEntryVar(new_entry);
-         index = hypre_SStructGraphEntryIndex(new_entry);
-
-         /* if the index is not within the bounds of the struct grid
-            bounding box (which has been set in the box manager) then
-            there should noit be a coupling here (doens't make
-            sense */
-
-         new_boxman = new_managers[part][var];
-
-         bbox =  hypre_BoxManBoundingBox(new_boxman);
-         
-         if (hypre_IndexInBoxP(index,bbox) != 0)
+         /* check part, var, index, to_part, to_var, to_index */
+         for (k = 0; k < 2; k++)
          {
-            hypre_BoxManGatherEntries(new_boxman,index, index);
-         }
-         
-         /* now repeat the check for to_part, to_var, to_index */
-         to_part =  hypre_SStructGraphEntryToPart(new_entry) ;
-         to_var =  hypre_SStructGraphEntryToVar(new_entry);
-         to_index = hypre_SStructGraphEntryToIndex(new_entry);
+            switch(k)
+            {
+               case 0:
+                  part =  hypre_SStructGraphEntryPart(new_entry);
+                  var = hypre_SStructGraphEntryVar(new_entry);
+                  index = hypre_SStructGraphEntryIndex(new_entry);
+                  break;
+               case 1:
+                  part =  hypre_SStructGraphEntryToPart(new_entry) ;
+                  var =  hypre_SStructGraphEntryToVar(new_entry);
+                  index = hypre_SStructGraphEntryToIndex(new_entry);
+                  break;
+            }
 
-         new_boxman = new_managers[to_part][to_var];
- 
-         bbox =  hypre_BoxManBoundingBox(new_boxman);
-         
-         if (hypre_IndexInBoxP(to_index,bbox) != 0)
-         {
-            hypre_BoxManGatherEntries(new_boxman,to_index, to_index);
+            /* if the index is not within the bounds of the struct grid bounding
+               box (which has been set in the box manager) then there should not
+               be a coupling here (doesn't make sense) */
+            
+            new_boxman = new_managers[part][var];
+            new_gbox = new_gboxes[part][var];
+            bbox =  hypre_BoxManBoundingBox(new_boxman);
+            
+            if (hypre_IndexInBoxP(index,bbox) != 0)
+            {
+               /* compute new gather box extents based on index */
+               for (d = 0; d < ndim; d++)
+               {
+                  hypre_BoxIMinD(new_gbox, d) =
+                     hypre_min(hypre_BoxIMinD(new_gbox, d), hypre_IndexD(index, d));
+                  hypre_BoxIMaxD(new_gbox, d) =
+                     hypre_max(hypre_BoxIMaxD(new_gbox, d), hypre_IndexD(index, d));
+               }
+            }
          }
       }
       
@@ -475,11 +487,20 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          for (var = 0; var < nvars; var++)
          {
             new_boxman = new_managers[part][var];
+            new_gbox = new_gboxes[part][var];
+
+            /* call gather if non-empty gather box */
+            if (hypre_BoxVolume(new_gbox) > 0)
+            {
+               hypre_BoxManGatherEntries(
+                  new_boxman, hypre_BoxIMin(new_gbox), hypre_BoxIMax(new_gbox));
+            }
+
+            /* check to see if gather was called by some processor */
             hypre_BoxManGetGlobalIsGatherCalled(new_boxman, comm, &is_gather);
             if (is_gather)
             {
-               /* Gather has been called on at least 1 proc - copy
-                * orig boxman information to the new boxman*/
+               /* copy orig boxman information to the new boxman*/
                
                orig_boxman = managers[part][var];
 
@@ -521,10 +542,13 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
                new_managers[part][var] = managers[part][var];
             }
             
+            hypre_BoxDestroy(new_gboxes[part][var]);
          } /* end of var loop */
          hypre_TFree(managers[part]);
+         hypre_TFree(new_gboxes[part]);
       } /* end of part loop */
       hypre_TFree(managers);
+      hypre_TFree(new_gboxes);
    
       /* assign the new ones */
       hypre_SStructGridBoxManagers(grid) = new_managers;
@@ -540,17 +564,42 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    hypre_MPI_Comm_rank(comm, &myproc);
 
    /*---------------------------------------------------------
-    * First we do the work that was previously in the AddEntries:
-    * set up the UVEntry and iUventries
+    * Set up UVEntries and iUventries
     *---------------------------------------------------------*/
 
-   /* allocate proper storage */
-   aUventries = hypre_max(hypre_SStructGridGhlocalSize(grid), n_add_entries);
+   /* first set up Uvesize and Uveoffsets */
 
-   iUventries = hypre_TAlloc(HYPRE_Int, aUventries);
-   Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, aUventries);
+   Uvesize = 0;
+   Uveoffsets = hypre_TAlloc(HYPRE_Int *, nparts);
+   for (part = 0; part < nparts; part++)
+   {
+      pgrid = hypre_SStructGridPGrid(grid, part);
+      nvars = hypre_SStructPGridNVars(pgrid);
+      Uveoffsets[part] = hypre_TAlloc(HYPRE_Int, nvars);
+      for (var = 0; var < nvars; var++)
+      {
+         Uveoffsets[part][var] = Uvesize;
+         sgrid = hypre_SStructPGridSGrid(pgrid, var);
+         boxes = hypre_StructGridBoxes(sgrid);
+         hypre_ForBoxI(i, boxes)
+         {
+            box = hypre_BoxArrayBox(boxes, i);
+            vol = 1;
+            for (d = 0; d < ndim; d++)
+            {
+               vol *= (hypre_BoxSizeD(box, d) + 2);
+            }
+            Uvesize += vol;
+         }
+      }
+   }
+   hypre_SStructGraphUVESize(graph)    = Uvesize;
+   hypre_SStructGraphUVEOffsets(graph) = Uveoffsets;
 
-   hypre_SStructGraphAUVEntries(graph) = aUventries;
+   /* now set up nUventries, iUventries, and Uventries */
+
+   iUventries = hypre_TAlloc(HYPRE_Int, n_add_entries);
+   Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, Uvesize);
    hypre_SStructGraphIUVEntries(graph) = iUventries;
    hypre_SStructGraphUVEntries(graph)  = Uventries;
 
@@ -569,73 +618,58 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       to_index = hypre_SStructGraphEntryToIndex(new_entry);
       
       /* compute location (rank) for Uventry */
-      hypre_CopyToCleanIndex(index, ndim, cindex);
+      hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
 
-      hypre_SStructGridFindBoxManEntry(grid, part, cindex, var, &boxman_entry);
-    
-      /* GEC0203 getting the rank */ 
-      hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, cindex, &rank, type);
-      
-      /* GEC 0902 filling up the iUventries with local ghrank
-       * since HYPRE_SSTRUCT is chosen */
-
-      if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT) 
-      { 
-         startrank = hypre_SStructGridGhstartRank(grid);
-      }
-      if (type == HYPRE_PARCSR)
+      if (Uverank > -1)
       {
-         startrank = hypre_SStructGridStartRank(grid);
+         iUventries[nUventries] = Uverank;
+
+         if (Uventries[Uverank] == NULL)
+         {
+            Uventry = hypre_TAlloc(hypre_SStructUVEntry, 1);
+            hypre_SStructUVEntryPart(Uventry) = part;
+            hypre_CopyIndex(index, hypre_SStructUVEntryIndex(Uventry));
+            hypre_SStructUVEntryVar(Uventry) = var;
+            hypre_SStructGridFindBoxManEntry(grid, part, index, var, &boxman_entry);
+            hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index, &rank, type);
+            hypre_SStructUVEntryRank(Uventry) = rank;
+            nUentries = 1;
+            Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
+         }
+         else
+         {
+            Uventry = Uventries[Uverank];
+            nUentries = hypre_SStructUVEntryNUEntries(Uventry) + 1;
+            Uentries = hypre_SStructUVEntryUEntries(Uventry);
+            Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
+         }
+         hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
+         hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
+         hypre_SStructGraphUEMaxSize(graph) =
+            hypre_max(hypre_SStructGraphUEMaxSize(graph), nUentries);
+
+         i = nUentries - 1;
+         hypre_SStructUVEntryToPart(Uventry, i) = to_part;
+         hypre_CopyIndex(to_index, hypre_SStructUVEntryToIndex(Uventry, i));
+         hypre_SStructUVEntryToVar(Uventry, i) = to_var;
+      
+         hypre_SStructGridFindBoxManEntry(
+            dom_grid, to_part, to_index, to_var, &boxman_entry);
+         hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
+         hypre_SStructUVEntryToBoxnum(Uventry, i) = to_boxnum;
+         hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);
+         hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
+         hypre_SStructBoxManEntryGetGlobalRank(
+            boxman_entry, to_index, &rank, type);          
+         hypre_SStructUVEntryToRank(Uventry, i) = rank;
+      
+         Uventries[Uverank] = Uventry;
+      
+         nUventries++;
+         hypre_SStructGraphNUVEntries(graph) = nUventries;
+
+         hypre_SStructGraphUVEntries(graph) = Uventries;
       }
-
-      rank -= startrank;
-
-      iUventries[nUventries] = rank;
-
-      if (Uventries[rank] == NULL)
-      {
-         Uventry = hypre_TAlloc(hypre_SStructUVEntry, 1);
-         hypre_SStructUVEntryPart(Uventry) = part;
-         hypre_CopyToCleanIndex(index, ndim, hypre_SStructUVEntryIndex(Uventry));
-         hypre_SStructUVEntryVar(Uventry) = var;
-         hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &boxnum);
-         hypre_SStructUVEntryBoxnum(Uventry) = boxnum;
-         nUentries = 1;
-         Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
-      }
-      else
-      {
-         Uventry = Uventries[rank];
-         nUentries = hypre_SStructUVEntryNUEntries(Uventry) + 1;
-         Uentries = hypre_SStructUVEntryUEntries(Uventry);
-         Uentries = hypre_TReAlloc(Uentries, hypre_SStructUEntry, nUentries);
-      }
-      hypre_SStructUVEntryNUEntries(Uventry) = nUentries;
-      hypre_SStructUVEntryUEntries(Uventry)  = Uentries;
-
-      i = nUentries - 1;
-      hypre_SStructUVEntryToPart(Uventry, i) = to_part;
-      hypre_CopyToCleanIndex(to_index, ndim,
-                             hypre_SStructUVEntryToIndex(Uventry, i));
-      hypre_SStructUVEntryToVar(Uventry, i) = to_var;
-      
-      hypre_CopyToCleanIndex(to_index, ndim, cindex);
-           
-      hypre_SStructGridFindBoxManEntry(
-         dom_grid, to_part, cindex, to_var, &boxman_entry);
-      hypre_SStructBoxManEntryGetBoxnum(boxman_entry, &to_boxnum);
-      hypre_SStructUVEntryToBoxnum(Uventry, i) = to_boxnum;
-      hypre_SStructBoxManEntryGetProcess(boxman_entry, &to_proc);
-      hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
-      
-      Uventries[rank] = Uventry; /* GEC1102 where rank labels Uventries */
-      
-      nUventries++;
-      hypre_SStructGraphNUVEntries(graph) = nUventries;
-
-      hypre_SStructGraphUVEntries(graph) = Uventries;
-      
-      hypre_SStructGraphTotUEntries(graph) ++;
 
       /*free each add entry after copying */
       hypre_TFree(new_entry);
@@ -785,47 +819,6 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       }
       nUventries = j;
       hypre_SStructGraphNUVEntries(graph) = nUventries;
-   }
-
-   /*---------------------------------------------------------
-    * Compute non-stencil column numbers (if possible), and
-    * start building requests for needed off-process info.
-    *---------------------------------------------------------*/
-  
-   /* RDF: THREAD? */
-   for (i = 0; i < nUventries; i++)
-   {
-      Uventry = Uventries[iUventries[i]];
-      nUentries = hypre_SStructUVEntryNUEntries(Uventry);
-      for (j = 0; j < nUentries; j++)
-      {
-         to_part  = hypre_SStructUVEntryToPart(Uventry, j);
-         to_index = hypre_SStructUVEntryToIndex(Uventry, j);
-         to_var   = hypre_SStructUVEntryToVar(Uventry, j);
-
-         /*---------------------------------------------------------
-          * used in future? The to_boxnum corresponds to the first
-          * map_entry on the map_entry link list.
-          *---------------------------------------------------------*/
-
-         to_boxnum = hypre_SStructUVEntryToBoxnum(Uventry, j);
-         to_proc   = hypre_SStructUVEntryToProc(Uventry, j);
-         hypre_SStructGridBoxProcFindBoxManEntry(
-            dom_grid, to_part, to_var, to_boxnum, to_proc, &boxman_entry);
-         if (boxman_entry != NULL)
-         {
-            /* compute ranks locally */
-            hypre_SStructBoxManEntryGetGlobalRank(
-               boxman_entry, to_index, &rank, type);          
-            hypre_SStructUVEntryRank(Uventry, j) = rank;
-         }
-         else   
-         {
-            /* This should not happen (TO DO: take out print statement) */
-            hypre_printf("Error in HYPRE_SStructGraphAssemble, my id = %d\n",
-                         myproc);
-         }
-      }
    }
 
    return hypre_error_flag;

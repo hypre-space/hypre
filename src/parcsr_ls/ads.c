@@ -7,14 +7,14 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
 #include "ads.h"
@@ -111,6 +111,12 @@ void * hypre_ADSCreate()
 HYPRE_Int hypre_ADSDestroy(void *solver)
 {
    hypre_ADSData *ads_data = solver;
+
+   if (!ads_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    if (ads_data -> A_C)
       hypre_ParCSRMatrixDestroy(ads_data -> A_C);

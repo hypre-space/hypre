@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -206,6 +206,24 @@ HYPRE_GMRESGetRelChange( HYPRE_Solver solver,
                          HYPRE_Int              * rel_change )
 {
    return( hypre_GMRESGetRelChange( (void *) solver, rel_change ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetSkipRealResidualCheck, HYPRE_GMRESGetSkipRealResidualCheck
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_GMRESSetSkipRealResidualCheck( HYPRE_Solver solver,
+                                     HYPRE_Int skip_real_r_check )
+{
+   return( hypre_GMRESSetSkipRealResidualCheck( (void *) solver, skip_real_r_check ) );
+}
+
+HYPRE_Int
+HYPRE_GMRESGetSkipRealResidualCheck( HYPRE_Solver solver,
+                                     HYPRE_Int *skip_real_r_check )
+{
+   return( hypre_GMRESGetSkipRealResidualCheck( (void *) solver, skip_real_r_check ) );
 }
 
 /*--------------------------------------------------------------------------

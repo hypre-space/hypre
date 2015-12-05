@@ -7,19 +7,20 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
-#include "Mat_dh.h"
-#include "getRow_dh.h"
-#include "SubdomainGraph_dh.h"
-#include "TimeLog_dh.h"
-#include "Mem_dh.h"
-#include "Numbering_dh.h"
-#include "Parser_dh.h"
-#include "mat_dh_private.h"
-#include "io_dh.h"
-#include "Hash_i_dh.h"
+#include "_hypre_Euclid.h"
+/* #include "Mat_dh.h" */
+/* #include "getRow_dh.h" */
+/* #include "SubdomainGraph_dh.h" */
+/* #include "TimeLog_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Numbering_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "mat_dh_private.h" */
+/* #include "io_dh.h" */
+/* #include "Hash_i_dh.h" */
 
 static void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist);
 static void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *end_rows,

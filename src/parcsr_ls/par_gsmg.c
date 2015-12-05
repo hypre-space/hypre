@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.43 $
+ * $Revision: 2.45 $
  ***********************************************************************EHEADER*/
 
 
@@ -24,7 +24,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
 #ifdef HYPRE_USING_ESSL
@@ -949,8 +949,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -961,8 +962,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/
 
 /* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,i1,jj,ns,ne,size,rest) HYPRE_SMP_SCHEDULE
+#endif
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -1068,8 +1070,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
+#endif
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -1113,16 +1116,18 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,jj,ns,ne,size,rest,P_marker,jj_counter,jj_counter_offd
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,jl,i1,jj,ns,ne,size,rest,P_marker,jj_counter,jj_counter_offd) HYPRE_SMP_SCHEDULE
+#endif
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -1238,8 +1243,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, P_offd_size);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
@@ -1261,8 +1267,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
       for (i=0; i < num_cols_P_offd; i++)
          col_map_offd_P[i] = P_marker[i];
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
@@ -1507,8 +1514,9 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
    jj_counter = start_indexing;
@@ -1519,8 +1527,9 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
     *-----------------------------------------------------------------------*/
 
 /* RDF: this looks a little tricky, but doable */
-#define HYPRE_SMP_PRIVATE i,j,i1,jj,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,i1,jj,ns,ne,size,rest) HYPRE_SMP_SCHEDULE
+#endif
    for (j = 0; j < num_threads; j++)
    {
      size = n_fine/num_threads;
@@ -1633,8 +1642,9 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd); 
 
-#define HYPRE_SMP_PRIVATE i,j,ns,ne,size,rest,coarse_shift
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
+#endif
    for (j = 0; j < num_threads; j++)
    {
      coarse_shift = 0;
@@ -1678,16 +1688,18 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,strong_f_marker,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd) HYPRE_SMP_SCHEDULE
+#endif
    for (jl = 0; jl < num_threads; jl++)
    {
      size = n_fine/num_threads;
@@ -2090,8 +2102,9 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    {
       P_marker = hypre_CTAlloc(HYPRE_Int, P_offd_size);
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
@@ -2113,8 +2126,9 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
       for (i=0; i < num_cols_P_offd; i++)
          col_map_offd_P[i] = P_marker[i];
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i=0; i < P_offd_size; i++)
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],

@@ -7,21 +7,20 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
-
-
+#include "_hypre_Euclid.h"
 
 /* to do: re-integrate fix-smalll-pivots */
 
-#include "ilu_dh.h"
-#include "Mem_dh.h"
-#include "Parser_dh.h"
-#include "Euclid_dh.h"
-#include "getRow_dh.h"
-#include "Factor_dh.h"
-#include "SubdomainGraph_dh.h"
+/* #include "ilu_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "Parser_dh.h" */
+/* #include "Euclid_dh.h" */
+/* #include "getRow_dh.h" */
+/* #include "Factor_dh.h" */
+/* #include "SubdomainGraph_dh.h" */
 
 static bool check_constraint_private(Euclid_dh ctx, HYPRE_Int b, HYPRE_Int j);
 

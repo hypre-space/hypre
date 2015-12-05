@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -18,10 +16,10 @@
  *
  *****************************************************************************/
 
+#define HYPRE_TIMING
 #define HYPRE_TIMING_GLOBALS
 #include "_hypre_utilities.h"
 #include "timing.h"
-
 
 /*-------------------------------------------------------
  * Timing macros

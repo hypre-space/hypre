@@ -7,21 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.20 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SemiInterpData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -38,7 +29,6 @@ typedef struct
 } hypre_SemiInterpData;
 
 /*--------------------------------------------------------------------------
- * hypre_SemiInterpCreate
  *--------------------------------------------------------------------------*/
 
 void *
@@ -53,7 +43,6 @@ hypre_SemiInterpCreate( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SemiInterpSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -73,8 +62,6 @@ hypre_SemiInterpSetup( void               *interp_vdata,
                        
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
-
-   HYPRE_Int               ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -101,11 +88,10 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_CopyIndex(findex, (interp_data -> findex));
    hypre_CopyIndex(stride, (interp_data -> stride));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SemiInterp:
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -114,8 +100,6 @@ hypre_SemiInterp( void               *interp_vdata,
                   hypre_StructVector *xc,
                   hypre_StructVector *e            )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_SemiInterpData   *interp_data = interp_vdata;
 
    HYPRE_Int               P_stored_as_transpose;
@@ -158,7 +142,6 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
-   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -195,36 +178,37 @@ hypre_SemiInterp( void               *interp_vdata,
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
+   {
+      while (fgrid_ids[fi] != cgrid_ids[ci])
       {
-         while (fgrid_ids[fi] != cgrid_ids[ci])
-         {
-            fi++;
-         }
-
-         compute_box = hypre_BoxArrayBox(cgrid_boxes, ci);
-
-         hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
-         hypre_StructMapCoarseToFine(startc, cindex, stride, start);
-
-         e_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
-         xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
-
-         ep  = hypre_StructVectorBoxData(e, fi);
-         xcp = hypre_StructVectorBoxData(xc, ci);
-
-         hypre_BoxGetSize(compute_box, loop_size);
-
-         hypre_BoxLoop2Begin(loop_size,
-                             e_dbox, start, stride, ei,
-                             xc_dbox, startc, stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
-            {
-               ep[ei] = xcp[xci];
-            }
-         hypre_BoxLoop2End(ei, xci);
+         fi++;
       }
+
+      compute_box = hypre_BoxArrayBox(cgrid_boxes, ci);
+
+      hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
+      hypre_StructMapCoarseToFine(startc, cindex, stride, start);
+
+      e_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
+      xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
+
+      ep  = hypre_StructVectorBoxData(e, fi);
+      xcp = hypre_StructVectorBoxData(xc, ci);
+
+      hypre_BoxGetSize(compute_box, loop_size);
+
+      hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+                          e_dbox, start, stride, ei,
+                          xc_dbox, startc, stridec, xci);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop2For(ei, xci)
+      {
+         ep[ei] = xcp[xci];
+      }
+      hypre_BoxLoop2End(ei, xci);
+   }
 
    /*-----------------------------------------------------------------------
     * Compute e at fine points
@@ -251,75 +235,77 @@ hypre_SemiInterp( void               *interp_vdata,
       }
 
       hypre_ForBoxArrayI(fi, compute_box_aa)
+      {
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+
+         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
+         e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
+
+         if (P_stored_as_transpose)
          {
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
-
-            P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-            e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
-
-            if (P_stored_as_transpose)
+            if ( constant_coefficient )
             {
-               if ( constant_coefficient )
-               {
-                  Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-                  Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                     hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
-               }
-               else
-               {
-                  Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-                  Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                     hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
-               }
+               Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
+               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
+                  hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
             }
             else
             {
-               Pp0 = hypre_StructMatrixBoxData(P, fi, 0);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 1);
+               Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
+               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
+                  hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
             }
-            ep  = hypre_StructVectorBoxData(e, fi);
-            ep0 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
-            ep1 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
-
-            hypre_ForBoxI(j, compute_box_a)
-               {
-                  compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                  hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-                  hypre_StructMapFineToCoarse(start, findex, stride, startc);
-
-                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-                  if ( constant_coefficient )
-                  {
-                     Pi = hypre_CCBoxIndexRank( P_dbox, startc );
-                     hypre_BoxLoop1Begin(loop_size,
-                                         e_dbox, start, stride, ei);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop1For(loopi, loopj, loopk, ei)
-                        {
-                           ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                                      Pp1[Pi] * ep1[ei]);
-                        }
-                     hypre_BoxLoop1End(ei);
-                  }
-                  else
-                  {
-                     hypre_BoxLoop2Begin(loop_size,
-                                         P_dbox, startc, stridec, Pi,
-                                         e_dbox, start, stride, ei);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
-                        {
-                           ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                                      Pp1[Pi] * ep1[ei]);
-                        }
-                     hypre_BoxLoop2End(Pi, ei);
-                  }
-               }
          }
+         else
+         {
+            Pp0 = hypre_StructMatrixBoxData(P, fi, 0);
+            Pp1 = hypre_StructMatrixBoxData(P, fi, 1);
+         }
+         ep  = hypre_StructVectorBoxData(e, fi);
+         ep0 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
+         ep1 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
+
+         hypre_ForBoxI(j, compute_box_a)
+         {
+            compute_box = hypre_BoxArrayBox(compute_box_a, j);
+
+            hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+            hypre_StructMapFineToCoarse(start, findex, stride, startc);
+
+            hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+            if ( constant_coefficient )
+            {
+               Pi = hypre_CCBoxIndexRank( P_dbox, startc );
+               hypre_BoxLoop1Begin(hypre_StructMatrixDim(P), loop_size,
+                                   e_dbox, start, stride, ei);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop1For(ei)
+               {
+                  ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                             Pp1[Pi] * ep1[ei]);
+               }
+               hypre_BoxLoop1End(ei);
+            }
+            else
+            {
+               hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+                                   P_dbox, startc, stridec, Pi,
+                                   e_dbox, start, stride, ei);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(Pi, ei)
+               {
+                  ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                             Pp1[Pi] * ep1[ei]);
+               }
+               hypre_BoxLoop2End(Pi, ei);
+            }
+         }
+      }
    }
 
    /*-----------------------------------------------------------------------
@@ -329,18 +315,15 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_IncFLOPCount(3*hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(interp_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SemiInterpDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SemiInterpDestroy( void *interp_vdata )
 {
-   HYPRE_Int ierr = 0;
-
    hypre_SemiInterpData *interp_data = interp_vdata;
 
    if (interp_data)
@@ -351,6 +334,6 @@ hypre_SemiInterpDestroy( void *interp_vdata )
       hypre_TFree(interp_data);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 

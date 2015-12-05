@@ -7,18 +7,15 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef EUCLID_MPI_INTERFACE_DH
 #define EUCLID_MPI_INTERFACE_DH
 
 #define DEFAULT_DROP_TOL 0.01
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 /*======================================================================
  * Naming convention: functions ending in _mpi are located in

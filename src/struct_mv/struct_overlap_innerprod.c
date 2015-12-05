@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -17,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /* this is all commented out now as it is currently not used - if used
    in the future, it needs to use the box manager instead of the neighbors 
@@ -67,7 +67,6 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    HYPRE_Int            i, j;
    HYPRE_Int            myid;
    HYPRE_Int            boxarray_size;
-   HYPRE_Int            loopi, loopj, loopk;
 #ifdef HYPRE_USE_PTHREADS
    HYPRE_Int            threadid = hypre_GetThreadID();
 #endif
@@ -106,19 +105,18 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
       hypre_BoxGetSize(boxi, loop_size);
 
 #ifdef HYPRE_USE_PTHREADS
-   local_result_ref[threadid] = &local_result;
+      local_result_ref[threadid] = &local_result;
 #endif
 
-      hypre_BoxLoop2Begin(loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS local_result
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) reduction(+:local_result) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop2For(xi, yi)
       {
-          local_result += xp[xi] * yp[yi];
+         local_result += xp[xi] * yp[yi];
       }
       hypre_BoxLoop2End(xi, yi);
 
@@ -133,7 +131,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
 
          if (hypre_BoxVolume(&intersect_box))
          {
-             hypre_AppendBox(&intersect_box, overlap_boxes);
+            hypre_AppendBox(&intersect_box, overlap_boxes);
          }
       }
 
@@ -154,12 +152,13 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
             start = hypre_BoxIMin(boxj);
 
             hypre_BoxGetSize(boxj, loop_size);
-            hypre_BoxLoop2Begin(loop_size,
+            hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
                                 x_data_box, start, unit_stride, xi,
                                 y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
-#include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop2For(xi, yi)
             {
                overlap_result += xp[xi] * yp[yi];
             }
@@ -177,7 +176,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
     * to subtract only overlaps with boxes on processors with id < myid.
     *-----------------------------------------------------------------------*/
    neighbor_boxes = hypre_BoxArrayCreate(0);
-   hypre_BoxManGetAllEntriesBoxesProc(boxman, neighbor_boxes, neighbors_procs);
+   hypre_BoxManGetAllEntriesBoxesProc(boxman, neighbor_boxes, &neighbors_procs);
    
    selected_nboxes= hypre_BoxArrayCreate(0);
 
@@ -190,6 +189,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
       }
    }
    hypre_BoxArrayDestroy(neighbor_boxes);
+   hypre_TFree(neighbors_procs);
 
    boxes= hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    overlap_boxes= hypre_BoxArrayCreate(0);
@@ -203,7 +203,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
          hypre_IntersectBoxes(boxi, boxj, &intersect_box);
          if (hypre_BoxVolume(&intersect_box))
          {
-             hypre_AppendBox(&intersect_box, overlap_boxes);
+            hypre_AppendBox(&intersect_box, overlap_boxes);
          }
       }
    }
@@ -241,12 +241,13 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
                start= hypre_BoxIMin(&intersect_box);
                hypre_BoxGetSize(&intersect_box, loop_size);
 
-               hypre_BoxLoop2Begin(loop_size,
+               hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
                                    x_data_box, start, unit_stride, xi,
                                    y_data_box, start, unit_stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
-#include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
+#endif
+               hypre_BoxLoop2For(xi, yi)
                {
                   overlap_result += xp[xi] * yp[yi];
                }
@@ -287,13 +288,13 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
 
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                 hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
+                       hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
 
 #ifdef HYPRE_USE_PTHREADS
    if (threadid == 0 || threadid == hypre_NumThreads)
 #endif
-   hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
+      hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
    return final_innerprod_result;
 }

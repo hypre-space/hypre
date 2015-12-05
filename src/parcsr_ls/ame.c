@@ -7,14 +7,14 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
 
@@ -72,11 +72,24 @@ void * hypre_AMECreate()
 HYPRE_Int hypre_AMEDestroy(void *esolver)
 {
    hypre_AMEData *ame_data = esolver;
-   hypre_AMSData *ams_data = ame_data -> precond;
-   mv_InterfaceInterpreter*
-      interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
-   mv_MultiVectorPtr
-      eigenvectors = (mv_MultiVectorPtr) ame_data -> eigenvectors;
+   hypre_AMSData *ams_data;
+   mv_InterfaceInterpreter* interpreter;
+   mv_MultiVectorPtr eigenvectors;
+
+   if (!ame_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   ams_data = ame_data -> precond;
+   interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
+   eigenvectors = (mv_MultiVectorPtr) ame_data -> eigenvectors;
+   if (!ams_data || !interpreter || !eigenvectors)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
 
    if (ame_data -> G)
       hypre_ParCSRMatrixDestroy(ame_data -> G);

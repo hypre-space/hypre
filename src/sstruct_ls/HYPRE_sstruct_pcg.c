@@ -7,20 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
-
-
-
-
-/******************************************************************************
- *
- * HYPRE_SStructPCG interface
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -42,7 +32,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
 
    *solver = ( (HYPRE_SStructSolver) hypre_PCGCreate( pcg_functions ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -201,6 +191,7 @@ HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver  solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
                              HYPRE_SStructMatrix A,
@@ -216,14 +207,13 @@ HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
                         HYPRE_SStructMatrix A,
                         HYPRE_SStructVector y,
                         HYPRE_SStructVector x      )
 {
-   HYPRE_Int ierr = 0;
-
    HYPRE_Int                nparts= hypre_SStructMatrixNParts(A);
 
    hypre_SStructPMatrix    *pA;
@@ -255,7 +245,7 @@ HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 

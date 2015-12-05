@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -155,8 +155,9 @@ hypre_SeqMultivectorSetConstantValues(hypre_Multivector *v, double value)
           
    if (v->num_active_vectors == v->num_vectors)
    {
-#define HYPRE_SMP_PRIVATE j
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
       for (j = 0; j < v->num_vectors*size; j++) vector_data[j] = value;
    }
    else
@@ -166,8 +167,9 @@ hypre_SeqMultivectorSetConstantValues(hypre_Multivector *v, double value)
          start_offset = v->active_indices[i]*size;
          end_offset = start_offset+size;
 
-#define HYPRE_SMP_PRIVATE j
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
          for (j = start_offset; j < end_offset; j++) vector_data[j]= value;
       }
    }
@@ -294,8 +296,9 @@ hypre_SeqMultivectorAxpy(double alpha, hypre_Multivector *x,
          src = x_data + x_active_ind[i]*size;
          dest = y_data + y_active_ind[i]*size;
 
-#define HYPRE_SMP_PRIVATE j
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
 
          for (j = 0; j < size; j++) dest[j] += alpha * src[j];
       }
@@ -347,8 +350,9 @@ hypre_SeqMultivectorByDiag(hypre_Multivector *x, HYPRE_Int *mask, HYPRE_Int n,
       dest = y_data + y_active_ind[i]*size;
       current_alpha=alpha[ al_active_ind[i] ];
 
-#define HYPRE_SMP_PRIVATE j
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
 
       for (j = 0; j < size; j++)
          dest[j] = current_alpha*src[j];
@@ -392,10 +396,9 @@ HYPRE_Int hypre_SeqMultivectorInnerProd(hypre_Multivector *x, hypre_Multivector 
          x_ptr = x_data + x_active_ind[i]*size;
          current_product = 0.0;
 
-#define HYPRE_SMP_PRIVATE k
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS current_product
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(k) reduction(+:current_product) HYPRE_SMP_SCHEDULE
+#endif
 
          for(k = 0; k < size; k++)
             current_product += x_ptr[k]*y_ptr[k];
@@ -434,10 +437,9 @@ HYPRE_Int hypre_SeqMultivectorInnerProdDiag(hypre_Multivector *x,
       y_ptr = y_data + y_active_ind[i]*size;
       current_product = 0.0;
       
-#define HYPRE_SMP_PRIVATE k
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS current_product
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(k) reduction(+:current_product) HYPRE_SMP_SCHEDULE
+#endif
       
       for(k=0; k<size; k++)
             current_product += x_ptr[k]*y_ptr[k];
@@ -472,8 +474,9 @@ hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int
       x_ptr = x_data + x_active_ind[0]*size;
       current_coef = *rVal++;
 
-#define HYPRE_SMP_PRIVATE k
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(k) HYPRE_SMP_SCHEDULE
+#endif
       for (k=0; k<size; k++)
          y_ptr[k] = current_coef * x_ptr[k];
          
@@ -483,8 +486,9 @@ hypre_SeqMultivectorByMatrix(hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int
          x_ptr = x_data + x_active_ind[i]*size;
          current_coef = *rVal++;
 
-#define HYPRE_SMP_PRIVATE k
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(k) HYPRE_SMP_SCHEDULE
+#endif
          for (k=0; k<size; k++)
             y_ptr[k] += current_coef * x_ptr[k];
       }
@@ -520,8 +524,9 @@ hypre_SeqMultivectorXapy (hypre_Multivector *x, HYPRE_Int rGHeight, HYPRE_Int rH
          x_ptr = x_data + x_active_ind[i]*size;
          current_coef = *rVal++;
 
-#define HYPRE_SMP_PRIVATE k
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(k) HYPRE_SMP_SCHEDULE
+#endif
          for (k=0; k<size; k++)
             y_ptr[k] += current_coef * x_ptr[k];
       }

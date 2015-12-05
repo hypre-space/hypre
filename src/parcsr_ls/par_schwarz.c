@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "schwarz.h"
 
 /*--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ hypre_SchwarzDestroy( void *data )
    if (hypre_SchwarzDataDofFunc(schwarz_data))
       hypre_TFree (hypre_SchwarzDataDofFunc(schwarz_data));
    hypre_CSRMatrixDestroy(hypre_SchwarzDataDomainStructure(schwarz_data));
-   if (hypre_SchwarzDataVariant(schwarz_data) == 3);
+   if (hypre_SchwarzDataVariant(schwarz_data) == 3)
       hypre_CSRMatrixDestroy(hypre_SchwarzDataABoundary(schwarz_data));
    hypre_ParVectorDestroy(hypre_SchwarzDataVtemp(schwarz_data));
 

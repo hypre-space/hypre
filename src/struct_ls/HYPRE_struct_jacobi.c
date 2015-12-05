@@ -7,22 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * HYPRE_StructJacobi interface
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -31,11 +21,10 @@ HYPRE_StructJacobiCreate( MPI_Comm            comm,
 {
    *solver = ( (HYPRE_StructSolver) hypre_JacobiCreate( comm ) );
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -45,7 +34,6 @@ HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -61,7 +49,6 @@ HYPRE_StructJacobiSetup( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
@@ -77,7 +64,6 @@ HYPRE_StructJacobiSolve( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -88,7 +74,6 @@ HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiGetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -99,7 +84,6 @@ HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -110,7 +94,6 @@ HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiGetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -121,7 +104,6 @@ HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiSetZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -131,7 +113,6 @@ HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiGetZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -142,7 +123,6 @@ HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiSetNonZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -152,13 +132,9 @@ HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver )
 }
 
 
-
-
-
 /* NOT YET IMPLEMENTED */
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -169,7 +145,6 @@ HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructJacobiGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

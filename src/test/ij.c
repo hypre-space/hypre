@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.30 $
+ * $Revision: 1.31 $
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -1925,6 +1925,17 @@ main( hypre_int argc,
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
+
+      HYPRE_BoomerAMGGetNumIterations(amg_solver, &num_iterations);
+      HYPRE_BoomerAMGGetFinalRelativeResidualNorm(amg_solver, &final_res_norm);
+
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("BoomerAMG Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
+      }
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */

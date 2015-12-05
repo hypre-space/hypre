@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.14 $
+# $Revision: 1.15 $
 #EHEADER**********************************************************************
 
 
@@ -68,34 +68,45 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 #=============================================================================
 
 #=============================================================================
+# Check SetPeriodic for node/cell problems and STRUCT, SSTRUCT, PARCSR types
+#=============================================================================
+
+tail -3 ${TNAME}.out.80 > ${TNAME}.testdata
+TNUM="81 82 83 84 85"
+for i in $TNUM
+do
+  tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
+  diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+done
+
+tail -3 ${TNAME}.out.90 > ${TNAME}.testdata
+TNUM="91 92 93 94 95"
+for i in $TNUM
+do
+  tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
+  diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+done
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
-FILES="\
- ${TNAME}.out.20\
- ${TNAME}.out.21\
- ${TNAME}.out.30\
- ${TNAME}.out.31\
- ${TNAME}.out.40\
- ${TNAME}.out.41\
- ${TNAME}.out.42\
- ${TNAME}.out.50\
- ${TNAME}.out.51\
- ${TNAME}.out.52\
- ${TNAME}.out.60\
- ${TNAME}.out.61\
- ${TNAME}.out.62\
- ${TNAME}.out.63\
- ${TNAME}.out.65\
- ${TNAME}.out.66\
- ${TNAME}.out.67\
- ${TNAME}.out.70\
+TNUM="\
+ 20 21\
+ 30 31\
+ 40 41 42\
+ 50 51 52\
+ 60 61 62 63 65 66 67\
+ 70\
+ 80 81 82 83 85\
+ 90 91 92 93 95\
 "
 
-for i in $FILES
+for i in $TNUM
 do
-  echo "# Output file: $i"
-  tail -3 $i
+  FILE="${TNAME}.out.$i"
+  echo "# Output file: ${FILE}"
+  tail -3 ${FILE}
 done > ${TNAME}.out
 
 # Make sure that the output files are reasonable

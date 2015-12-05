@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,7 +20,7 @@
 /* following should be in a header file */
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 
 
@@ -68,7 +68,7 @@
   \end{itemize}
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
   
@@ -102,7 +102,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   double             *A_offd_data;
+   double             *A_offd_data = NULL;
    HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
@@ -119,8 +119,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    HYPRE_Int                *S_diag_j;
    /* double             *S_diag_data; */
    hypre_CSRMatrix    *S_offd;
-   HYPRE_Int                *S_offd_i;
-   HYPRE_Int                *S_offd_j;
+   HYPRE_Int                *S_offd_i = NULL;
+   HYPRE_Int                *S_offd_j = NULL;
    /* double             *S_offd_data; */
                  
    double              diag, row_scale, row_sum;
@@ -216,8 +216,9 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
 
-#define HYPRE_SMP_PRIVATE i,diag,row_scale,row_sum,jA
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,diag,row_scale,row_sum,jA) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < num_variables; i++)
    {
       diag = A_diag_data[A_diag_i[i]];
@@ -491,7 +492,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
   \end{itemize}
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
   
@@ -525,7 +526,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   double             *A_offd_data;
+   double             *A_offd_data = NULL;
    HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
@@ -542,8 +543,8 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    HYPRE_Int                *S_diag_j;
    /* double             *S_diag_data; */
    hypre_CSRMatrix    *S_offd;
-   HYPRE_Int                *S_offd_i;
-   HYPRE_Int                *S_offd_j;
+   HYPRE_Int                *S_offd_i = NULL;
+   HYPRE_Int                *S_offd_j = NULL;
    /* double             *S_offd_data; */
                  
    double              diag, row_scale, row_sum;
@@ -639,8 +640,9 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    /* give S same nonzero structure as A */
    hypre_ParCSRMatrixCopy(A,S,0);
 
-#define HYPRE_SMP_PRIVATE i,diag,row_scale,row_sum,jA
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,diag,row_scale,row_sum,jA) HYPRE_SMP_SCHEDULE
+#endif
    for (i = 0; i < num_variables; i++)
    {
       diag = A_diag_data[A_diag_i[i]];

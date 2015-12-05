@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.20 $
+ * $Revision: 2.22 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
  
-#include "headers.h"
+#include "_hypre_IJ_mv.h"
 #include "../HYPRE.h"
 
 /******************************************************************************
@@ -1174,7 +1174,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       {
          row = off_proc_i[i]; 
          row_list[i] = row;
-         hypre_GetAssumedPartitionProcFromRow (row, global_num_rows, &proc_id);
+         hypre_GetAssumedPartitionProcFromRow (comm, row, global_num_rows, &proc_id);
          a_proc_id[i] = proc_id;
          orig_order[i] = i;
       }
@@ -1224,7 +1224,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          ex_contact_buf[counter*2] =  row_list[i];
          counter++;
          
-         hypre_GetAssumedPartitionRowRange(proc_id, global_num_rows, 
+         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_num_rows, 
                                            &range_start, &range_end); 
 
 

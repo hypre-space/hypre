@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.24 $
+ * $Revision: 2.26 $
  ***********************************************************************EHEADER*/
 
 #define TIME_DEBUG 0
@@ -17,7 +17,7 @@ static HYPRE_Int s_coarsen_num = 0;
 #endif
 
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 #define DEBUG 0
 
@@ -47,7 +47,7 @@ hypre_StructMapFineToCoarse( hypre_Index findex,
    hypre_IndexZ(cindex) =
       (hypre_IndexZ(findex) - hypre_IndexZ(index)) / hypre_IndexZ(stride);
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -70,15 +70,15 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
    hypre_IndexZ(findex) =
       hypre_IndexZ(cindex) * hypre_IndexZ(stride) + hypre_IndexZ(index);
 
-   return 0;
+   return hypre_error_flag;
 }
 
-#define hypre_StructCoarsenBox(box, index, stride) \
-hypre_ProjectBox(box, index, stride);\
-hypre_StructMapFineToCoarse(hypre_BoxIMin(box), index, stride,\
-                            hypre_BoxIMin(box));\
-hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,\
-                            hypre_BoxIMax(box))
+#define hypre_StructCoarsenBox(box, index, stride)                      \
+   hypre_ProjectBox(box, index, stride);                                \
+   hypre_StructMapFineToCoarse(hypre_BoxIMin(box), index, stride,       \
+                               hypre_BoxIMin(box));                     \
+   hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,       \
+                               hypre_BoxIMax(box))
 
 /*--------------------------------------------------------------------------
  * New version of hypre_StructCoarsen that uses the BoxManager (AHB 12/06)
@@ -101,6 +101,7 @@ hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,\
  *   4. We do not need a separate version for the assumed partition case
  *
  *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                      hypre_Index        index,
@@ -337,15 +338,15 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 #if 0   
    /* if there is an assumed partition in the fg, then coarsen those boxes as
       well and add to cg */
-    hypre_BoxManGetAssumedPartition ( fboxman, &fap);
+   hypre_BoxManGetAssumedPartition ( fboxman, &fap);
     
-    if (fap)
-    {
-       /* coarsen fap to get cap */ 
+   if (fap)
+   {
+      /* coarsen fap to get cap */ 
 
-       /* set cap */  
-       hypre_BoxManSetAssumedPartition (cboxman, cap);
-    }
+      /* set cap */  
+      hypre_BoxManSetAssumedPartition (cboxman, cap);
+   }
 #endif
 
    /* assign new box manager */
@@ -366,8 +367,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
 #undef hypre_StructCoarsenBox
 
-
-
 /*--------------------------------------------------------------------------
  * hypre_Merge
  *
@@ -384,8 +383,6 @@ hypre_Merge( HYPRE_Int   **arrays,
              HYPRE_Int   **mergei_ptr,
              HYPRE_Int   **mergej_ptr )
 {
-   HYPRE_Int ierr = 0;
-
    HYPRE_Int  *mergei;
    HYPRE_Int  *mergej;
 
@@ -408,6 +405,7 @@ hypre_Merge( HYPRE_Int   **arrays,
    mergei = hypre_TAlloc(HYPRE_Int, num+1);
    mergej = hypre_TAlloc(HYPRE_Int, num+1);
 
+   list = NULL;
    if (num > 0)
    {
       /* Create the sorted linked list (temporarily use merge arrays) */
@@ -499,6 +497,6 @@ hypre_Merge( HYPRE_Int   **arrays,
    *mergei_ptr = mergei;
    *mergej_ptr = mergej;
 
-   return ierr;
+   return hypre_error_flag;
 }
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.18 $
+ * $Revision: 2.20 $
  ***********************************************************************EHEADER*/
 
 
@@ -18,7 +18,7 @@
  *  AHB 6/04                                            
  *-----------------------------------------------------*/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 
 /* some debugging tools*/
 #define mydebug 0
@@ -219,7 +219,7 @@ hypre_NewCommPkgCreate_core(
       {
 
 
-         hypre_GetAssumedPartitionProcFromRow(col_map_off_d[i], 
+         hypre_GetAssumedPartitionProcFromRow(comm, col_map_off_d[i], 
                                               global_num_cols, &tmp_id);
 
          if (ex_num_contacts == size) /*need more space? */ 
@@ -241,7 +241,7 @@ hypre_NewCommPkgCreate_core(
          
          ex_num_contacts++;
 
-         hypre_GetAssumedPartitionRowRange(tmp_id, global_num_cols, 
+         hypre_GetAssumedPartitionRowRange(comm, tmp_id, global_num_cols, 
                                            &range_start, &range_end); 
 
       }

@@ -7,22 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "sys_pfmg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGCreate
  *--------------------------------------------------------------------------*/
 
 void *
@@ -60,7 +51,6 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -69,7 +59,6 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
 
    HYPRE_Int l;
-   HYPRE_Int ierr = 0;
 
    if (sys_pfmg_data)
    {
@@ -128,11 +117,10 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
       hypre_TFree(sys_pfmg_data);
    }
 
-   return(ierr);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetTol
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -140,15 +128,13 @@ hypre_SysPFMGSetTol( void   *sys_pfmg_vdata,
                      double  tol       )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> tol) = tol;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -156,15 +142,13 @@ hypre_SysPFMGSetMaxIter( void *sys_pfmg_vdata,
                          HYPRE_Int   max_iter  )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> max_iter) = max_iter;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetRelChange
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -172,15 +156,13 @@ hypre_SysPFMGSetRelChange( void *sys_pfmg_vdata,
                            HYPRE_Int   rel_change  )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> rel_change) = rel_change;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetZeroGuess
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -188,15 +170,13 @@ hypre_SysPFMGSetZeroGuess( void *sys_pfmg_vdata,
                            HYPRE_Int   zero_guess )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> zero_guess) = zero_guess;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetRelaxType
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -204,15 +184,13 @@ hypre_SysPFMGSetRelaxType( void *sys_pfmg_vdata,
                            HYPRE_Int   relax_type )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> relax_type) = relax_type;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetJacobiWeight
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
@@ -227,7 +205,6 @@ hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -235,15 +212,13 @@ hypre_SysPFMGSetNumPreRelax( void *sys_pfmg_vdata,
                              HYPRE_Int   num_pre_relax )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> num_pre_relax) = num_pre_relax;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -251,15 +226,13 @@ hypre_SysPFMGSetNumPostRelax( void *sys_pfmg_vdata,
                               HYPRE_Int   num_post_relax )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> num_post_relax) = num_post_relax;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetNumSkipRelax
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -267,15 +240,13 @@ hypre_SysPFMGSetSkipRelax( void *sys_pfmg_vdata,
                            HYPRE_Int  skip_relax )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> skip_relax) = skip_relax;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetDxyz
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -283,17 +254,15 @@ hypre_SysPFMGSetDxyz( void   *sys_pfmg_vdata,
                       double *dxyz       )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
 
    (sys_pfmg_data -> dxyz[0]) = dxyz[0];
    (sys_pfmg_data -> dxyz[1]) = dxyz[1];
    (sys_pfmg_data -> dxyz[2]) = dxyz[2];
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetLogging
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -301,15 +270,13 @@ hypre_SysPFMGSetLogging( void *sys_pfmg_vdata,
                          HYPRE_Int   logging)
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> logging) = logging;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -317,15 +284,13 @@ hypre_SysPFMGSetPrintLevel( void *sys_pfmg_vdata,
                             HYPRE_Int   print_level)
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
  
    (sys_pfmg_data -> print_level) = print_level;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -333,15 +298,13 @@ hypre_SysPFMGGetNumIterations( void *sys_pfmg_vdata,
                                HYPRE_Int  *num_iterations )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
 
    *num_iterations = (sys_pfmg_data -> num_iterations);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGPrintLogging
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -349,7 +312,6 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
                            HYPRE_Int   myid)
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
-   HYPRE_Int          ierr = 0;
    HYPRE_Int          i;
    HYPRE_Int          num_iterations  = (sys_pfmg_data -> num_iterations);
    HYPRE_Int          logging   = (sys_pfmg_data -> logging);
@@ -359,24 +321,23 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
 
    if (myid == 0)
    {
-     if (print_level > 0 )
-     {
+      if (print_level > 0 )
+      {
          if (logging > 0)
          {
             for (i = 0; i < num_iterations; i++)
             {
-              hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
-              hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+               hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
+               hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
             }
          }
-     }
+      }
    }
   
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -390,14 +351,11 @@ hypre_SysPFMGGetFinalRelativeResidualNorm( void   *sys_pfmg_vdata,
    HYPRE_Int          logging         = (sys_pfmg_data -> logging);
    double            *rel_norms       = (sys_pfmg_data -> rel_norms);
             
-   HYPRE_Int          ierr = 0;
-
-   
    if (logging > 0)
    {
       if (max_iter == 0)
       {
-         ierr = 1;
+         hypre_error_in_arg(1);
       }
       else if (num_iterations == max_iter)
       {
@@ -409,7 +367,7 @@ hypre_SysPFMGGetFinalRelativeResidualNorm( void   *sys_pfmg_vdata,
       }
    }
    
-   return ierr;
+   return hypre_error_flag;
 }
 
 

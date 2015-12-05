@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 #include "HYPRE_krylov.h"
@@ -38,7 +38,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -225,7 +225,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -391,7 +391,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -473,6 +473,7 @@ typedef struct
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      rel_change;
+   HYPRE_Int      skip_real_r_check;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
    double   tol;
@@ -561,7 +562,7 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -737,7 +738,7 @@ hypre_LGMRESCreate( hypre_LGMRESFunctions *lgmres_functions );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -911,7 +912,7 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.39 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
 
 
@@ -1167,6 +1168,8 @@ HYPRE_Int hypre_GMRESSetMaxIter ( void *gmres_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_GMRESGetMaxIter ( void *gmres_vdata , HYPRE_Int *max_iter );
 HYPRE_Int hypre_GMRESSetRelChange ( void *gmres_vdata , HYPRE_Int rel_change );
 HYPRE_Int hypre_GMRESGetRelChange ( void *gmres_vdata , HYPRE_Int *rel_change );
+HYPRE_Int hypre_GMRESSetSkipRealResidualCheck ( void *gmres_vdata , HYPRE_Int skip_real_r_check );
+HYPRE_Int hypre_GMRESGetSkipRealResidualCheck ( void *gmres_vdata , HYPRE_Int *skip_real_r_check );
 HYPRE_Int hypre_GMRESSetStopCrit ( void *gmres_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_GMRESGetStopCrit ( void *gmres_vdata , HYPRE_Int *stop_crit );
 HYPRE_Int hypre_GMRESSetPrecond ( void *gmres_vdata , HYPRE_Int (*precond )(), HYPRE_Int (*precond_setup )(), void *precond_data );
@@ -1296,6 +1299,8 @@ HYPRE_Int HYPRE_GMRESSetStopCrit ( HYPRE_Solver solver , HYPRE_Int stop_crit );
 HYPRE_Int HYPRE_GMRESGetStopCrit ( HYPRE_Solver solver , HYPRE_Int *stop_crit );
 HYPRE_Int HYPRE_GMRESSetRelChange ( HYPRE_Solver solver , HYPRE_Int rel_change );
 HYPRE_Int HYPRE_GMRESGetRelChange ( HYPRE_Solver solver , HYPRE_Int *rel_change );
+HYPRE_Int HYPRE_GMRESSetSkipRealResidualCheck ( HYPRE_Solver solver , HYPRE_Int skip_real_r_check );
+HYPRE_Int HYPRE_GMRESGetSkipRealResidualCheck ( HYPRE_Solver solver , HYPRE_Int *skip_real_r_check );
 HYPRE_Int HYPRE_GMRESSetPrecond ( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 HYPRE_Int HYPRE_GMRESGetPrecond ( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int HYPRE_GMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int level );

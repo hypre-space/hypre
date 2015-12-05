@@ -7,21 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGCreateInterpOp
  *--------------------------------------------------------------------------*/
 
 hypre_SStructPMatrix *
@@ -67,16 +58,14 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    /* create interpolation matrix */
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid,
-                                    P_stencils, &P);
+                              P_stencils, &P);
 
    hypre_TFree(stencil_shape);
 
- 
    return P;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetupInterpOp
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -91,21 +80,14 @@ hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
    hypre_StructMatrix    *P_s;
    HYPRE_Int              vi;
 
-   HYPRE_Int              ierr;
-
    nvars = hypre_SStructPMatrixNVars(A);
 
    for (vi = 0; vi < nvars; vi++)
    {
       A_s = hypre_SStructPMatrixSMatrix(A, vi, vi);
       P_s = hypre_SStructPMatrixSMatrix(P, vi, vi);
-      ierr = hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s, 0);
+      hypre_PFMGSetupInterpOp(A_s, cdir, findex, stride, P_s, 0);
    }
 
-   /*-----------------------------------------------------------------------
-    * Return
-    *-----------------------------------------------------------------------*/
-
-   return ierr;
+   return hypre_error_flag;
 }
-

@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
-
-
-
-
 
 /******************************************************************************
  *
@@ -27,10 +23,9 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructSolver data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_SStructSolver_struct
@@ -234,6 +229,12 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
          syH = (HYPRE_StructVector) sy;
          switch(ssolver)
          {
+            default:
+               /* If no solver is matched, use Jacobi, but throw and error */
+               if (ssolver != HYPRE_Jacobi)
+               {
+                  hypre_error(HYPRE_ERROR_GENERIC);
+               } /* don't break */
             case HYPRE_Jacobi:
                HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructJacobiSetMaxIter(sdata, 1);
@@ -336,7 +337,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_ParVector         *pary;
 
    HYPRE_Int                iter, part, vi, vj;
-   double                   b_dot_b, r_dot_r;
+   double                   b_dot_b = 0, r_dot_r;
 
 
 

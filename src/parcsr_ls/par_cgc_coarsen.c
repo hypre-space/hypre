@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,7 +19,7 @@
 /* following should be in a header file */
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "../HYPRE.h" /* BM Aug 15, 2006 */
 
 #define C_PT 1
@@ -672,7 +672,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
     hypre_printf ("Starting CGC matrix communication\n");
   }
 #endif
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
  {
   /* classical CGC does not really make sense in combination with HYPRE_NO_GLOBAL_PARTITION,
      but anyway, here it is:
@@ -750,7 +750,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
 #endif
   HYPRE_IJMatrixDestroy (ijG);
   if (vertexrange) hypre_TFree (vertexrange);
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
   if (vertexrange_all) hypre_TFree (vertexrange_all);
 #endif
   if (CF_marker_offd)  hypre_TFree (CF_marker_offd);
@@ -888,7 +888,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
 /*   HYPRE_Int *S_i = hypre_CSRMatrixI(S_diag); */
 /*   HYPRE_Int *S_j = hypre_CSRMatrixJ(S_diag); */
   HYPRE_Int *S_offd_i = hypre_CSRMatrixI(S_offd);
-  HYPRE_Int *S_offd_j;
+  HYPRE_Int *S_offd_j = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
@@ -915,7 +915,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
   pointrange = hypre_ParCSRMatrixRowStarts (S);
   pointrange_nonlocal = hypre_CTAlloc  (HYPRE_Int, 2*num_recvs);
   vertexrange_nonlocal = hypre_CTAlloc (HYPRE_Int, 2*num_recvs);
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
   {
     HYPRE_Int num_sends  =  hypre_ParCSRCommPkgNumSends (comm_pkg);
     HYPRE_Int *send_procs =  hypre_ParCSRCommPkgSendProcs (comm_pkg);
@@ -1298,7 +1298,7 @@ HYPRE_Int AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HYPRE_In
   HYPRE_Int *S_i = hypre_CSRMatrixI(S_diag);
   HYPRE_Int *S_j = hypre_CSRMatrixJ(S_diag);
   HYPRE_Int *S_offd_i = hypre_CSRMatrixI(S_offd);
-  HYPRE_Int *S_offd_j;
+  HYPRE_Int *S_offd_j = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int added_cpts=0;

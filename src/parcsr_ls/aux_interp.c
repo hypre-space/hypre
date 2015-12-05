@@ -7,12 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
 
 /*---------------------------------------------------------------------------
@@ -221,7 +221,7 @@ hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int
   /* use found instead of col_map_offd in A, and newoff instead 
       of num_cols_offd*/
 
-#if HYPRE_NO_GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
 
    HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
    HYPRE_Int        global_num_cols;
@@ -669,14 +669,17 @@ void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HY
     {
       diag_ftc[i] = -1;
       offd_ftc[i] = -1;
-      diag_pm[i] = -1;
-      offd_pm[i] = -1;
       tmp_CF[i] = -1;
+      if(diag_pm != NULL)
+      {  diag_pm[i] = -1; }
+      if(offd_pm != NULL)
+      {  offd_pm[i] = -1;}
     }
     for(i = offd_n; i < diag_n; i++)
     { 
       diag_ftc[i] = -1;
-      diag_pm[i] = -1;
+      if(diag_pm != NULL)
+      {  diag_pm[i] = -1; }
     }
   }
   else
@@ -685,15 +688,18 @@ void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HY
     {
       diag_ftc[i] = -1;
       offd_ftc[i] = -1;
-      diag_pm[i] = -1;
-      offd_pm[i] = -1;
       tmp_CF[i] = -1;
+      if(diag_pm != NULL)
+      {  diag_pm[i] = -1;}
+      if(offd_pm != NULL)
+      {  offd_pm[i] = -1;}
     }
     for(i = diag_n; i < offd_n; i++)
     { 
       offd_ftc[i] = -1;
-      offd_pm[i] = -1;
       tmp_CF[i] = -1;
+      if(offd_pm != NULL)
+      {  offd_pm[i] = -1;}
     }
   }
   return;

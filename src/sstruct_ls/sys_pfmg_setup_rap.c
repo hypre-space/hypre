@@ -7,21 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGCreateRAPOp
  *--------------------------------------------------------------------------*/
  
 hypre_SStructPMatrix *
@@ -71,10 +62,10 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
    RAP_shapes = hypre_CTAlloc(hypre_Index *, nvars);
    sstencil_sizes = hypre_CTAlloc(HYPRE_Int, nvars);
 
-/*--------------------------------------------------------------------------
- * Symmetry within a block is exploited, but not symmetry of the form
- * A_{vi,vj} = A_{vj,vi}^T.
- *--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------
+    * Symmetry within a block is exploited, but not symmetry of the form
+    * A_{vi,vj} = A_{vj,vi}^T.
+    *--------------------------------------------------------------------------*/
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -97,7 +88,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
             sstencil_sizes[vj] = hypre_StructStencilSize(sstencil);
             stencil_size += sstencil_sizes[vj];
             RAP_shapes[vj] = hypre_CTAlloc(hypre_Index,
-                                          sstencil_sizes[vj]);
+                                           sstencil_sizes[vj]);
             for (s = 0; s < sstencil_sizes[vj]; s++)
             {
                hypre_CopyIndex(shape[s],RAP_shapes[vj][s]);
@@ -115,8 +106,7 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
             for (s = 0; s < sstencil_sizes[vj]; s++)
             {
                HYPRE_SStructStencilSetEntry(RAP_stencils[vi],
-                                            sten_cntr, RAP_shapes[vj][s],
-                                            vj);
+                                            sten_cntr, RAP_shapes[vj][s], vj);
                sten_cntr++;
             }
             hypre_TFree(RAP_shapes[vj]);
@@ -126,15 +116,15 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
 
    /* create RAP Pmatrix */
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), 
-                                     coarse_grid, RAP_stencils, &RAP);
+                              coarse_grid, RAP_stencils, &RAP);
 
    hypre_TFree(RAP_shapes);
    hypre_TFree(sstencil_sizes);
+
    return RAP;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysPFMGSetupRAPOp
  *--------------------------------------------------------------------------*/
  
 HYPRE_Int
@@ -146,8 +136,6 @@ hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
                          hypre_Index           cstride,
                          hypre_SStructPMatrix *Ac      )
 {
-   HYPRE_Int ierr = 0;
- 
    HYPRE_Int               nvars;
    HYPRE_Int               vi,vj;
 
@@ -161,10 +149,11 @@ hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
 
    nvars = hypre_SStructPMatrixNVars(A);
 
-/*--------------------------------------------------------------------------
- * Symmetry within a block is exploited, but not symmetry of the form
- * A_{vi,vj} = A_{vj,vi}^T.
- *--------------------------------------------------------------------------*/
+   /*--------------------------------------------------------------------------
+    * Symmetry within a block is exploited, but not symmetry of the form
+    * A_{vi,vj} = A_{vj,vi}^T.
+    *--------------------------------------------------------------------------*/
+
    for (vi = 0; vi < nvars; vi++)
    {
       R_s = hypre_SStructPMatrixSMatrix(R, vi, vi);
@@ -175,16 +164,14 @@ hypre_SysPFMGSetupRAPOp( hypre_SStructPMatrix *R,
          P_s  = hypre_SStructPMatrixSMatrix(P, vj, vj);
          if (A_s != NULL)
          {
-            ierr = hypre_SemiBuildRAP(A_s, P_s, R_s,
-                              cdir, cindex, cstride,
-                              P_stored_as_transpose,
-                              Ac_s);
+            hypre_SemiBuildRAP(A_s, P_s, R_s, cdir, cindex, cstride,
+                               P_stored_as_transpose, Ac_s);
             /* Assemble here? */
             hypre_StructMatrixAssemble(Ac_s);
          }
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.23 $
+ * $Revision: 2.25 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
 /* following should be in a header file */
 
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 
 
@@ -78,7 +78,7 @@
   \end{itemize}
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
   
@@ -117,7 +117,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    hypre_CSRMatrix    *S_offd          = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int                *S_offd_i        = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int                *S_offd_j;
+   HYPRE_Int                *S_offd_j = NULL;
 
    HYPRE_Int 		      *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
    HYPRE_Int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
@@ -125,9 +125,9 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    HYPRE_Int		       col_n = col_1 + hypre_CSRMatrixNumCols(S_diag);
    HYPRE_Int 		       num_cols_offd = 0;
                   
-   hypre_CSRMatrix    *S_ext;
-   HYPRE_Int                *S_ext_i;
-   HYPRE_Int                *S_ext_j;
+   hypre_CSRMatrix          *S_ext;
+   HYPRE_Int                *S_ext_i = NULL;
+   HYPRE_Int                *S_ext_j = NULL;
 
    HYPRE_Int		       num_sends = 0;
    HYPRE_Int  	      *int_buf_data;
@@ -876,14 +876,14 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    HYPRE_Int             *S_i           = hypre_CSRMatrixI(S_diag);
    HYPRE_Int             *S_j           = hypre_CSRMatrixJ(S_diag);
    HYPRE_Int             *S_offd_i      = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int             *S_offd_j;
+   HYPRE_Int             *S_offd_j = NULL;
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
    HYPRE_Int 	           *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
                   
-   hypre_CSRMatrix *S_ext;
-   HYPRE_Int             *S_ext_i;
-   HYPRE_Int             *S_ext_j;
+   hypre_CSRMatrix       *S_ext = NULL;
+   HYPRE_Int             *S_ext_i = NULL;
+   HYPRE_Int             *S_ext_j = NULL;
                  
    hypre_CSRMatrix *ST;
    HYPRE_Int             *ST_i;

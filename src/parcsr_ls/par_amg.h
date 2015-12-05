@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.42 $
+ * $Revision: 2.44 $
  ***********************************************************************EHEADER*/
 
 
@@ -58,6 +58,7 @@ typedef struct
    HYPRE_Int      CR_use_CG;
    HYPRE_Int      cgc_its;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      min_coarse_size;
    HYPRE_Int      seq_threshold;
 
    /* solve params */
@@ -191,6 +192,11 @@ typedef struct
    hypre_ParVector  *u_coarse;
    MPI_Comm   new_comm;
 
+ /* store matrix, vector and communication info for Gaussian elimination */
+   double *A_mat;
+   double *b_vec;
+   HYPRE_Int *comm_info;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -229,6 +235,7 @@ typedef struct
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
  #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
  #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+ #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
  #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
@@ -363,6 +370,10 @@ typedef struct
 #define hypre_ParAMGDataFCoarse(amg_data) ((amg_data)->f_coarse)
 #define hypre_ParAMGDataUCoarse(amg_data) ((amg_data)->u_coarse)
 #define hypre_ParAMGDataNewComm(amg_data) ((amg_data)->new_comm)
+
+#define hypre_ParAMGDataAMat(amg_data) ((amg_data)->A_mat)
+#define hypre_ParAMGDataBVec(amg_data) ((amg_data)->b_vec)
+#define hypre_ParAMGDataCommInfo(amg_data) ((amg_data)->comm_info)
 
 #endif
 

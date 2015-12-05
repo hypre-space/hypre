@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -18,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_GrowBoxByStencil:
@@ -90,13 +88,13 @@ hypre_GrowBoxArrayByStencil( hypre_BoxArray      *box_array,
       hypre_BoxArrayArrayCreate(hypre_BoxArraySize(box_array));
 
    hypre_ForBoxI(i, box_array)
-      {
-         hypre_BoxArrayDestroy(
-            hypre_BoxArrayArrayBoxArray(grow_box_array_array, i));
-         hypre_BoxArrayArrayBoxArray(grow_box_array_array, i) =
-            hypre_GrowBoxByStencil(hypre_BoxArrayBox(box_array, i),
-                                   stencil, transpose);
-      }
+   {
+      hypre_BoxArrayDestroy(
+         hypre_BoxArrayArrayBoxArray(grow_box_array_array, i));
+      hypre_BoxArrayArrayBoxArray(grow_box_array_array, i) =
+         hypre_GrowBoxByStencil(hypre_BoxArrayBox(box_array, i),
+                                stencil, transpose);
+   }
 
    return grow_box_array_array;
 }

@@ -7,10 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.23 $
+ * $Revision: 2.29 $
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 #define DEBUG 0
@@ -33,9 +33,7 @@
       hypre_IndexD(stride, cdir) = 2;           \
    }
 
-
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -106,7 +104,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -132,13 +129,13 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    (pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
+   dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
       mean = hypre_CTAlloc(double, 3);
       deviation = hypre_CTAlloc(double, 3);
       hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
         
-      dxyz_flag= 0;
       for (d = 0; d < dim; d++)
       {
          deviation[d] -= mean[d]*mean[d];
@@ -582,11 +579,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGComputeDxyz
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -620,11 +616,9 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    hypre_IndexRef         start;
    hypre_Index            stride;
                         
-   HYPRE_Int              i, si, d;
-   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              i, si, d, sdiag;
 
-   HYPRE_Int              ierr = 0;
-   double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz;
+   double                 cx, cy, cz, sqcx, sqcy, sqcz, tcx, tcy, tcz, diag;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -654,6 +648,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    tot_size= hypre_StructGridGlobalSize(hypre_StructMatrixGrid(A));
 
+   /* find diagonal stencil entry */
+   for (si = 0; si < stencil_size; si++)
+   {
+      if ((hypre_IndexD(stencil_shape[si], 0) == 0) &&
+          (hypre_IndexD(stencil_shape[si], 1) == 0) &&
+          (hypre_IndexD(stencil_shape[si], 2) == 0))
+      {
+         sdiag = si;
+         break;
+      }
+   }
+
    hypre_ForBoxI(i, compute_boxes)
    {
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
@@ -673,6 +679,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          tcy = 0.0;
          tcz = 0.0;
 
+         /* get sign of diagonal */
+         Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+         diag = 1.0;
+         if (Ap[Ai] < 0)
+         {
+            diag = -1.0;
+         }
+
          for (si = 0; si < stencil_size; si++)
          {
             Ap = hypre_StructMatrixBoxData(A, i, si);
@@ -681,21 +695,21 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             Astenc = hypre_IndexD(stencil_shape[si], 0);
             if (Astenc)
             {
-               tcx -= Ap[Ai];
+               tcx -= Ap[Ai]*diag;
             }
 
             /* y-direction */
             Astenc = hypre_IndexD(stencil_shape[si], 1);
             if (Astenc)
             {
-               tcy -= Ap[Ai];
+               tcy -= Ap[Ai]*diag;
             }
 
             /* z-direction */
             Astenc = hypre_IndexD(stencil_shape[si], 2);
             if (Astenc)
             {
-               tcz -= Ap[Ai];
+               tcz -= Ap[Ai]*diag;
             }
          }
 
@@ -711,16 +725,24 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-         hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,si,Astenc,tcx,tcy,tcz
-#define HYPRE_SMP_REDUCTION_OP +
-#define HYPRE_SMP_REDUCTION_VARS cx,cy,cz,sqcx,sqcy,sqcz
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+         hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
+                             A_dbox, start, stride, Ai);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
+#endif
+         hypre_BoxLoop1For(Ai)
          {
             tcx = 0.0;
             tcy = 0.0;
             tcz = 0.0;
+
+            /* get sign of diagonal */
+            Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
 
             for (si = 0; si < stencil_size; si++)
             {
@@ -730,21 +752,21 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                Astenc = hypre_IndexD(stencil_shape[si], 0);
                if (Astenc)
                {
-                  tcx -= Ap[Ai];
+                  tcx -= Ap[Ai]*diag;
                }
 
                /* y-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 1);
                if (Astenc)
                {
-                  tcy -= Ap[Ai];
+                  tcy -= Ap[Ai]*diag;
                }
 
                /* z-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 2);
                if (Astenc)
                {
-                  tcz -= Ap[Ai];
+                  tcz -= Ap[Ai]*diag;
                }
             }
 
@@ -827,16 +849,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
    }
 
-   /*-----------------------------------------------------------------------
-    * Return
-    *-----------------------------------------------------------------------*/
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ZeroDiagonal
- *
  * Returns 1 if there is a diagonal coefficient that is zero,
  * otherwise returns 0.
  *--------------------------------------------------------------------------*/
@@ -856,7 +872,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Int              Ai;
 
    HYPRE_Int              i;
-   HYPRE_Int              loopi, loopj, loopk;
 
    hypre_Index            diag_index;
    double                 diag_product = 1.0;
@@ -890,12 +905,12 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-         hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
-#define HYPRE_SMP_REDUCTION_OP *
-#define HYPRE_SMP_REDUCTION_VARS diag_product
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+         hypre_BoxLoop1Begin(hypre_StructMatrixDim(A), loop_size,
+                             A_dbox, start, stride, Ai);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
+#endif
+         hypre_BoxLoop1For(Ai)
          {
             diag_product *= Ap[Ai];
          }

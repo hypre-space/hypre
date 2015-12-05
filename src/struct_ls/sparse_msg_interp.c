@@ -7,17 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SparseMSGInterpData data structure
@@ -157,7 +150,6 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
-   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -188,36 +180,37 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
+   {
+      while (fgrid_ids[fi] != cgrid_ids[ci])
       {
-         while (fgrid_ids[fi] != cgrid_ids[ci])
-         {
-            fi++;
-         }
-
-         compute_box = hypre_BoxArrayBox(cgrid_boxes, ci);
-
-         hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
-         hypre_StructMapCoarseToFine(startc, cindex, stride, start);
-
-         e_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
-         xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
-
-         ep  = hypre_StructVectorBoxData(e, fi);
-         xcp = hypre_StructVectorBoxData(xc, ci);
-
-         hypre_BoxGetSize(compute_box, loop_size);
-
-         hypre_BoxLoop2Begin(loop_size,
-                             e_dbox,  start,  stride,  ei,
-                             xc_dbox, startc, stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
-            {
-               ep[ei] = xcp[xci];
-            }
-         hypre_BoxLoop2End(ei, xci);
+         fi++;
       }
+
+      compute_box = hypre_BoxArrayBox(cgrid_boxes, ci);
+
+      hypre_CopyIndex(hypre_BoxIMin(compute_box), startc);
+      hypre_StructMapCoarseToFine(startc, cindex, stride, start);
+
+      e_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
+      xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
+
+      ep  = hypre_StructVectorBoxData(e, fi);
+      xcp = hypre_StructVectorBoxData(xc, ci);
+
+      hypre_BoxGetSize(compute_box, loop_size);
+
+      hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+                          e_dbox,  start,  stride,  ei,
+                          xc_dbox, startc, stridec, xci);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop2For(ei, xci)
+      {
+         ep[ei] = xcp[xci];
+      }
+      hypre_BoxLoop2End(ei, xci);
+   }
 
    /*-----------------------------------------------------------------------
     * Compute e at fine points
@@ -244,41 +237,42 @@ hypre_SparseMSGInterp( void               *interp_vdata,
       }
 
       hypre_ForBoxArrayI(fi, compute_box_aa)
+      {
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+
+         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
+         e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
+
+         Pp0 = hypre_StructMatrixBoxData(P, fi, 0);
+         Pp1 = hypre_StructMatrixBoxData(P, fi, 1);
+         ep  = hypre_StructVectorBoxData(e, fi);
+         ep0 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
+         ep1 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
+
+         hypre_ForBoxI(j, compute_box_a)
          {
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+            compute_box = hypre_BoxArrayBox(compute_box_a, j);
 
-            P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-            e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
+            hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+            hypre_StructMapFineToCoarse(start,  findex, stride,  startc);
+            hypre_StructMapCoarseToFine(startc, cindex, strideP, startP);
 
-            Pp0 = hypre_StructMatrixBoxData(P, fi, 0);
-            Pp1 = hypre_StructMatrixBoxData(P, fi, 1);
-            ep  = hypre_StructVectorBoxData(e, fi);
-            ep0 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
-            ep1 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
+            hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-            hypre_ForBoxI(j, compute_box_a)
-               {
-                  compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                  hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
-                  hypre_StructMapFineToCoarse(start,  findex, stride,  startc);
-                  hypre_StructMapCoarseToFine(startc, cindex, strideP, startP);
-
-                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-                  hypre_BoxLoop2Begin(loop_size,
-                                      P_dbox, startP, strideP, Pi,
-                                      e_dbox, start,  stride,  ei);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
-#include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
-                     {
-                        ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                                   Pp1[Pi] * ep1[ei]);
-                     }
-                  hypre_BoxLoop2End(Pi, ei);
-               }
+            hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+                                P_dbox, startP, strideP, Pi,
+                                e_dbox, start,  stride,  ei);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop2For(Pi, ei)
+            {
+               ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                          Pp1[Pi] * ep1[ei]);
+            }
+            hypre_BoxLoop2End(Pi, ei);
          }
+      }
    }
 
    /*-----------------------------------------------------------------------

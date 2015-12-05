@@ -1,0 +1,99 @@
+
+##############################################################################
+#
+# This is a simple example that tests GraphAddEntries() when data is shared by
+# multiple processors.
+#
+#                 *************************************************
+#                 *     |     |     |     |     |     |     |(9,9)*
+#                 *     |     |     |     |     |     |     |     *
+#     part 1 -->  *-----|-----|-----|-----|-----|-----|-----|-----*
+#                 *     |     |     |     |     |     |     |     *
+#                 *     |     |     |     |     |     |     |     *
+#     *************-----|-----|-----|-----|-----|-----|-----|-----*
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *-----|-----|-----|-----|-----|-----|-----|-----*
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *     |     |     |     |     |     |     |     *
+#     *-----------*-----|-----|-----|-----|-----|-----|-----|-----*
+#     *           *     |     |     |(5,5)|     |     |     |     *
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *-----|-----|-----|-----|-----|-----|-----|-----*
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *     |     |     |     |     |     |     |     *
+#     *-----------*-----|-----|-----|-----|-----|-----|-----|-----*
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *-----|-----|-----|-----|-----|-----|-----|-----*
+#     *           *     |     |     |     |     |     |     |     *
+#     *           *(2,2)|     |     |     |     |     |     |     *
+#     *-----------*************************************************
+#     *           |           |           |           *
+#     *           |           |           |           *
+#     *           |           |           |           *  <-- part 0
+#     *           |           |           |           *
+#     *(0,0)      |           |           |           *
+#     *************************************************
+#
+##############################################################################
+
+# GridCreate: ndim nparts
+GridCreate: 2 2
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (0- 0-) (3+ 3+)
+GridSetExtents: 1 (2- 2-) (9+ 9+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# NODE  = 1
+GridSetVariables: 0 1 [1]
+GridSetVariables: 1 1 [1]
+
+###########################################################
+# (note: Stencil and FEMStencil cannot be used together)
+
+# StencilCreate: nstencils sizes[nstencils]
+StencilCreate: 1 [5]
+ 
+# StencilSetEntry: stencil_num entry offset[ndim] var value
+StencilSetEntry: 0  0 [ 0  0] 0  5.0
+StencilSetEntry: 0  1 [-1  0] 0 -1.0
+StencilSetEntry: 0  2 [ 1  0] 0 -1.0
+StencilSetEntry: 0  3 [ 0 -1] 0 -1.0
+StencilSetEntry: 0  4 [ 0  1] 0 -1.0
+ 
+# RhsSet: value
+RhsSet: 1.0
+
+###########################################################
+
+# GraphSetStencil: part var stencil_num
+GraphSetStencil: 0 0 0
+GraphSetStencil: 1 0 0
+
+# GraphAddEntries: \
+#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
+#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
+#   index_map[ndim] entry value
+# (note: this could be made to work with FEMStencil, but 'entry' needs to change)
+GraphAddEntries: 0 (1- 1- : -1 -1) (2+ 2+ : 0 0) [1 1] 0   1 (2- 2- : -1 -1) (5+ 5+ : 0 0) [2 2] 0 [0 1] 5 -0.5
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 0 1
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 2
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+
+###########################################################
+

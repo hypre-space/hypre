@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -17,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*==========================================================================*/
 /*==========================================================================*/
@@ -25,7 +25,7 @@
   Augments measures by some random value between 0 and 1.
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
 
@@ -85,7 +85,7 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
   independent set by simply comparing the measures of adjacent nodes.
 
   {\bf Input files:}
-  headers.h
+  _hypre_parcsr_ls.h
 
   @return Error code.
 
@@ -118,7 +118,7 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    HYPRE_Int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
    HYPRE_Int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int             *S_offd_j;
+   HYPRE_Int             *S_offd_j = NULL;
 
    HYPRE_Int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int              i, j, ig, jS, jj;

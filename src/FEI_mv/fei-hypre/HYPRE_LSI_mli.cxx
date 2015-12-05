@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.25 $
- ***********************************************************************EHEADER*/
-
-
-
+ * $Revision: 2.27 $
+ *********************************************************************EHEADER*/
 
 /****************************************************************************/ 
 /* HYPRE_LSI_MLI interface                                                  */
@@ -59,20 +56,20 @@
 #include <assert.h>
 #include <math.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
 #endif
-
-#define HAVE_MLI 
+#endif
 
 /****************************************************************************/ 
 /* MLI include files                                                        */
 /*--------------------------------------------------------------------------*/
 
 #ifdef HAVE_MLI
-#include "base/mli.h"
-#include "util/mli_utils.h"
-#include "amgs/mli_method.h"
+#include "mli.h"
+#include "mli_utils.h"
+#include "mli_method.h"
 #endif
 #include "HYPRE_LSI_mli.h"
 

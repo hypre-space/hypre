@@ -7,23 +7,18 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /* This is similar to the Hash_i_dh class (woe, for a lack
    of templates); this this class is for hashing data
    consisting of single, non-negative integers.
 */
 
-
 #ifndef HASH_I_DH
 #define HASH_I_DH
 
-#include "euclid_common.h"
-
+/* #include "euclid_common.h" */
                                  
 /*
     class methods 

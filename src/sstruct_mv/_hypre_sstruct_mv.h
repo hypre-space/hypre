@@ -7,18 +7,20 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_SSTRUCT_MV_HEADER
 #define hypre_SSTRUCT_MV_HEADER
 
-#include "HYPRE_sstruct_mv.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
+#include "HYPRE_sstruct_mv.h"
 #include "_hypre_utilities.h"
 #include "_hypre_struct_mv.h"
 #include "_hypre_IJ_mv.h"
-#include "HYPRE.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,9 +35,8 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -332,11 +333,8 @@ typedef struct hypre_SStructGrid_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -388,9 +386,8 @@ hypre_StructStencilElement( hypre_SStructStencilSStencil(stencil), i )
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -416,8 +413,6 @@ typedef struct
 
 } hypre_SStructGraphEntry;
 
-
-
 typedef struct
 {
    HYPRE_Int     to_part;
@@ -425,7 +420,7 @@ typedef struct
    HYPRE_Int     to_var;
    HYPRE_Int     to_boxnum;      /* local box number */
    HYPRE_Int     to_proc;
-   HYPRE_Int     rank;
+   HYPRE_Int     to_rank;
 
 } hypre_SStructUEntry;
 
@@ -434,7 +429,7 @@ typedef struct
    HYPRE_Int            part;
    hypre_Index          index;
    HYPRE_Int            var;
-   HYPRE_Int            boxnum;  /* local box number */
+   HYPRE_Int            rank;
    HYPRE_Int            nUentries;
    hypre_SStructUEntry *Uentries;
 
@@ -456,26 +451,23 @@ typedef struct hypre_SStructGraph_struct
    HYPRE_Int             **fem_sparse_j;
    HYPRE_Int             **fem_entries;
 
-   /* U-graph info: Entries are referenced via local grid-variable rank. */
-   HYPRE_Int               nUventries;  /* number of iUventries */
-   HYPRE_Int               aUventries;  /* alloc size of iUventries */
-   HYPRE_Int              *iUventries;
-
+   /* U-graph info: Entries are referenced via a local rank that comes from an
+    * ordering of the local grid boxes with ghost zones added. */
+   HYPRE_Int               nUventries; /* number of Uventries */
+   HYPRE_Int              *iUventries; /* rank indexes into Uventries */
    hypre_SStructUVEntry  **Uventries;
-   HYPRE_Int               totUentries;
+   HYPRE_Int               Uvesize;    /* size of Uventries array */
+   HYPRE_Int               Uemaxsize;  /* max size of Uentries */
+   HYPRE_Int             **Uveoffsets; /* offsets for computing rank indexes */
 
    HYPRE_Int               ref_count;
 
    HYPRE_Int               type;    /* GEC0203 */
 
-   hypre_SStructGraphEntry **graph_entries; /* these are stored from
-                                             * the AddGraphEntries calls
-                                             * and then deleted in the
-                                             * GraphAssemble */
+   /* These are created in GraphAddEntries() then deleted in GraphAssemble() */
+   hypre_SStructGraphEntry **graph_entries;
    HYPRE_Int               n_graph_entries; /* number graph entries */
    HYPRE_Int               a_graph_entries; /* alloced graph entries */
-   
-
 
 } hypre_SStructGraph;
 
@@ -505,18 +497,20 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructGraphFEMPEntries(graph, p) ((graph) -> fem_entries[p])
 
 #define hypre_SStructGraphNUVEntries(graph)     ((graph) -> nUventries)
-#define hypre_SStructGraphAUVEntries(graph)     ((graph) -> aUventries)
 #define hypre_SStructGraphIUVEntries(graph)     ((graph) -> iUventries)
 #define hypre_SStructGraphIUVEntry(graph, i)    ((graph) -> iUventries[i])
 #define hypre_SStructGraphUVEntries(graph)      ((graph) -> Uventries)
 #define hypre_SStructGraphUVEntry(graph, i)     ((graph) -> Uventries[i])
-#define hypre_SStructGraphTotUEntries(graph)    ((graph) -> totUentries)
+#define hypre_SStructGraphUVESize(graph)        ((graph) -> Uvesize)
+#define hypre_SStructGraphUEMaxSize(graph)      ((graph) -> Uemaxsize)
+#define hypre_SStructGraphUVEOffsets(graph)     ((graph) -> Uveoffsets)
+#define hypre_SStructGraphUVEOffset(graph, p, v)((graph) -> Uveoffsets[p][v])
+
 #define hypre_SStructGraphRefCount(graph)       ((graph) -> ref_count)
 #define hypre_SStructGraphObjectType(graph)     ((graph) -> type)
 #define hypre_SStructGraphEntries(graph)        ((graph) -> graph_entries)
 #define hypre_SStructNGraphEntries(graph)       ((graph) -> n_graph_entries)
 #define hypre_SStructAGraphEntries(graph)       ((graph) -> a_graph_entries)
-
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUVEntry
@@ -525,7 +519,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryPart(Uv)        ((Uv) -> part)
 #define hypre_SStructUVEntryIndex(Uv)       ((Uv) -> index)
 #define hypre_SStructUVEntryVar(Uv)         ((Uv) -> var)
-#define hypre_SStructUVEntryBoxnum(Uv)      ((Uv) -> boxnum)
+#define hypre_SStructUVEntryRank(Uv)        ((Uv) -> rank)
 #define hypre_SStructUVEntryNUEntries(Uv)   ((Uv) -> nUentries)
 #define hypre_SStructUVEntryUEntries(Uv)    ((Uv) -> Uentries)
 #define hypre_SStructUVEntryUEntry(Uv, i)  &((Uv) -> Uentries[i])
@@ -534,7 +528,8 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
 #define hypre_SStructUVEntryToBoxnum(Uv, i) ((Uv) -> Uentries[i].to_boxnum)
 #define hypre_SStructUVEntryToProc(Uv, i)   ((Uv) -> Uentries[i].to_proc)
-#define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
+#define hypre_SStructUVEntryToRank(Uv, i)   ((Uv) -> Uentries[i].to_rank)
+
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUEntry
  *--------------------------------------------------------------------------*/
@@ -544,21 +539,18 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
 #define hypre_SStructUEntryToBoxnum(U) ((U) -> to_boxnum)
 #define hypre_SStructUEntryToProc(U)   ((U) -> to_proc)
-#define hypre_SStructUEntryRank(U)     ((U) -> rank)
-
+#define hypre_SStructUEntryToRank(U)   ((U) -> to_rank)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructGraphEntry
  *--------------------------------------------------------------------------*/
+
 #define hypre_SStructGraphEntryPart(g)     ((g) -> part)
 #define hypre_SStructGraphEntryIndex(g)    ((g) -> index)
 #define hypre_SStructGraphEntryVar(g)      ((g) -> var)
 #define hypre_SStructGraphEntryToPart(g)   ((g) -> to_part)
 #define hypre_SStructGraphEntryToIndex(g)  ((g) -> to_index)
 #define hypre_SStructGraphEntryToVar(g)    ((g) -> to_var)
-
-
-
 
 #endif
 /*BHEADER**********************************************************************
@@ -570,11 +562,8 @@ typedef struct hypre_SStructGraph_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -607,7 +596,7 @@ typedef struct
    HYPRE_Int              *sentries;
 
    HYPRE_Int               accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               iscomplex;    /* Matrix complex? */
 
    HYPRE_Int               ref_count;
 
@@ -638,7 +627,7 @@ typedef struct hypre_SStructMatrix_struct
    double                 *tmp_coeffs;
 
    HYPRE_Int               ns_symmetric; /* Non-stencil entries symmetric? */
-   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               iscomplex;    /* Matrix complex? */
    HYPRE_Int               global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int               ref_count;
@@ -669,7 +658,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
 #define hypre_SStructMatrixTmpCoeffs(mat)      ((mat) -> tmp_coeffs)
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
-#define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
+#define hypre_SStructMatrixIsComplex(mat)      ((mat) -> iscomplex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
 #define hypre_SStructMatrixObjectType(mat)       ((mat) -> object_type)
@@ -680,6 +669,8 @@ typedef struct hypre_SStructMatrix_struct
 
 #define hypre_SStructPMatrixComm(pmat)              ((pmat) -> comm)
 #define hypre_SStructPMatrixPGrid(pmat)             ((pmat) -> pgrid)
+#define hypre_SStructPMatrixNDim(pmat) \
+hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 #define hypre_SStructPMatrixStencils(pmat)          ((pmat) -> stencils)
 #define hypre_SStructPMatrixNVars(pmat)             ((pmat) -> nvars)
 #define hypre_SStructPMatrixStencil(pmat, var)      ((pmat) -> stencils[var])
@@ -695,7 +686,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
-#define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
+#define hypre_SStructPMatrixIsComplex(pmat)         ((pmat) -> iscomplex)
 #define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif
@@ -708,11 +699,8 @@ typedef struct hypre_SStructMatrix_struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -737,7 +725,7 @@ typedef struct
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
    HYPRE_Int               accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int               complex;      /* Is the vector complex */
+   HYPRE_Int               iscomplex;    /* Is the vector complex */
 
    HYPRE_Int               ref_count;
 
@@ -773,7 +761,7 @@ typedef struct hypre_SStructVector_struct
                                           of vector data for the part=partx    */
    HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
 
-   HYPRE_Int               complex;      /* Is the vector complex */
+   HYPRE_Int               iscomplex;    /* Is the vector complex */
    HYPRE_Int               global_size;  /* Total number coefficients */
 
    HYPRE_Int               ref_count;
@@ -794,7 +782,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
 #define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
 #define hypre_SStructVectorNborNComms(vec)     ((vec) -> nbor_ncomms)
-#define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
+#define hypre_SStructVectorIsComplex(vec)      ((vec) -> iscomplex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
 #define hypre_SStructVectorData(vec)           ((vec) -> data )
@@ -814,12 +802,23 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
-#define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
+#define hypre_SStructPVectorIsComplex(pvec)   ((pvec) -> iscomplex)
 #define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
 #define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )
 #define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize  )
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.17 $
+ ***********************************************************************EHEADER*/
 
 /* HYPRE_sstruct_graph.c */
 HYPRE_Int HYPRE_SStructGraphCreate ( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
@@ -907,7 +906,7 @@ HYPRE_Int hypre_SStructCopy ( hypre_SStructVector *x , hypre_SStructVector *y );
 
 /* sstruct_graph.c */
 HYPRE_Int hypre_SStructGraphRef ( hypre_SStructGraph *graph , hypre_SStructGraph **graph_ref );
-HYPRE_Int hypre_SStructGraphFindUVEntry ( hypre_SStructGraph *graph , HYPRE_Int part , hypre_Index index , HYPRE_Int var , hypre_SStructUVEntry **Uventry_ptr );
+HYPRE_Int hypre_SStructGraphGetUVEntryRank( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , hypre_Index index, HYPRE_Int *rank );
 HYPRE_Int hypre_SStructGraphFindBoxEndpt ( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , HYPRE_Int proc , HYPRE_Int endpt , HYPRE_Int boxi );
 HYPRE_Int hypre_SStructGraphFindSGridEndpts ( hypre_SStructGraph *graph , HYPRE_Int part , HYPRE_Int var , HYPRE_Int proc , HYPRE_Int endpt , HYPRE_Int *endpts );
 
@@ -1017,6 +1016,7 @@ HYPRE_Int hypre_SStructVectorParRestore ( hypre_SStructVector *vector , hypre_Pa
 HYPRE_Int hypre_SStructPVectorInitializeShell ( hypre_SStructPVector *pvector );
 HYPRE_Int hypre_SStructVectorInitializeShell ( hypre_SStructVector *vector );
 HYPRE_Int hypre_SStructVectorClearGhostValues ( hypre_SStructVector *vector );
+
 
 #ifdef __cplusplus
 }

@@ -7,20 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
-
-
-
-
-/******************************************************************************
- *
- * Struct matrix-vector implementation of PCG interface routines.
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParKrylovCAlloc
@@ -28,7 +18,7 @@
 
 char *
 hypre_ParKrylovCAlloc( HYPRE_Int count,
-                 HYPRE_Int elt_size )
+                       HYPRE_Int elt_size )
 {
    return( hypre_CAlloc( count, elt_size ) );
 }
@@ -81,8 +71,8 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    for (i=0; i < n; i++)
    {
       new_vector[i] = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
-				       hypre_ParVectorGlobalSize(vector),	
-                                       hypre_ParVectorPartitioning(vector) );
+                                             hypre_ParVectorGlobalSize(vector),	
+                                             hypre_ParVectorPartitioning(vector) );
       hypre_ParVectorSetPartitioningOwner(new_vector[i],0);
       hypre_ParVectorInitialize(new_vector[i]);
    }
@@ -108,7 +98,7 @@ hypre_ParKrylovDestroyVector( void *vvector )
 
 void *
 hypre_ParKrylovMatvecCreate( void   *A,
-                       void   *x )
+                             void   *x )
 {
    void *matvec_data;
 
@@ -123,17 +113,17 @@ hypre_ParKrylovMatvecCreate( void   *A,
 
 HYPRE_Int
 hypre_ParKrylovMatvec( void   *matvec_data,
-                 double  alpha,
-                 void   *A,
-                 void   *x,
-                 double  beta,
-                 void   *y           )
+                       double  alpha,
+                       void   *A,
+                       void   *x,
+                       double  beta,
+                       void   *y           )
 {
    return ( hypre_ParCSRMatrixMatvec ( alpha,
-                              (hypre_ParCSRMatrix *) A,
-                              (hypre_ParVector *) x,
-                               beta,
-                              (hypre_ParVector *) y ) );
+                                       (hypre_ParCSRMatrix *) A,
+                                       (hypre_ParVector *) x,
+                                       beta,
+                                       (hypre_ParVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -142,17 +132,17 @@ hypre_ParKrylovMatvec( void   *matvec_data,
 
 HYPRE_Int
 hypre_ParKrylovMatvecT(void   *matvec_data,
-                 double  alpha,
-                 void   *A,
-                 void   *x,
-                 double  beta,
-                 void   *y           )
+                       double  alpha,
+                       void   *A,
+                       void   *x,
+                       double  beta,
+                       void   *y           )
 {
    return ( hypre_ParCSRMatrixMatvecT( alpha,
-                              (hypre_ParCSRMatrix *) A,
-                              (hypre_ParVector *) x,
-                               beta,
-                              (hypre_ParVector *) y ) );
+                                       (hypre_ParCSRMatrix *) A,
+                                       (hypre_ParVector *) x,
+                                       beta,
+                                       (hypre_ParVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -171,10 +161,10 @@ hypre_ParKrylovMatvecDestroy( void *matvec_data )
 
 double
 hypre_ParKrylovInnerProd( void *x, 
-                    void *y )
+                          void *y )
 {
    return ( hypre_ParVectorInnerProd( (hypre_ParVector *) x,
-                                (hypre_ParVector *) y ) );
+                                      (hypre_ParVector *) y ) );
 }
 
 
@@ -184,7 +174,7 @@ hypre_ParKrylovInnerProd( void *x,
 
 HYPRE_Int
 hypre_ParKrylovCopyVector( void *x, 
-                     void *y )
+                           void *y )
 {
    return ( hypre_ParVectorCopy( (hypre_ParVector *) x,
                                  (hypre_ParVector *) y ) );
@@ -206,7 +196,7 @@ hypre_ParKrylovClearVector( void *x )
 
 HYPRE_Int
 hypre_ParKrylovScaleVector( double  alpha,
-                      void   *x     )
+                            void   *x     )
 {
    return ( hypre_ParVectorScale( alpha, (hypre_ParVector *) x ) );
 }
@@ -217,11 +207,11 @@ hypre_ParKrylovScaleVector( double  alpha,
 
 HYPRE_Int
 hypre_ParKrylovAxpy( double alpha,
-               void   *x,
-               void   *y )
+                     void   *x,
+                     void   *y )
 {
    return ( hypre_ParVectorAxpy( alpha, (hypre_ParVector *) x,
-                              (hypre_ParVector *) y ) );
+                                 (hypre_ParVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -243,9 +233,9 @@ hypre_ParKrylovCommInfo( void   *A, HYPRE_Int *my_id, HYPRE_Int *num_procs)
 
 HYPRE_Int
 hypre_ParKrylovIdentitySetup( void *vdata,
-                        void *A,
-                        void *b,
-                        void *x     )
+                              void *A,
+                              void *b,
+                              void *x     )
 
 {
    return 0;
@@ -257,9 +247,9 @@ hypre_ParKrylovIdentitySetup( void *vdata,
 
 HYPRE_Int
 hypre_ParKrylovIdentity( void *vdata,
-                   void *A,
-                   void *b,
-                   void *x     )
+                         void *A,
+                         void *b,
+                         void *x     )
 
 {
    return( hypre_ParKrylovCopyVector( b, x ) );

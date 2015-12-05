@@ -39,8 +39,8 @@ MatrixSetSymmetric: -1 -1 -1  1
 
 # MatrixSetValues: \
 #   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-#MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 0 0 0.0
-#MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 0 3 0.0
+#MatrixSetValues: 0 (0- 0-) (0- 7+) [1 1] 0 0 0.0
+#MatrixSetValues: 0 (7+ 0-) (7+ 7+) [1 1] 0 3 0.0
 MatrixSetValues: 0 (0- 0-) (7+ 0-) [1 1] 0 1 0.0
 MatrixSetValues: 0 (0- 7+) (7+ 7+) [1 1] 0 4 0.0
 

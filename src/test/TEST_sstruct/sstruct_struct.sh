@@ -8,17 +8,13 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.10 $
+# $Revision: 1.11 $
 #EHEADER**********************************************************************
-
-
-
-
 
 TNAME=`basename $0 .sh`
 
 #=============================================================================
-# sstruct: Tests the struct solvers called from the sstruct interface
+# Compare the struct solvers called from sstruct & struct interfaces
 #=============================================================================
 
 tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
@@ -32,6 +28,26 @@ tail -3 ${TNAME}.out.201 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+# Compare 19pt, 7pt, positive, and negative definite
+#=============================================================================
+
+tail -3 ${TNAME}.out.10 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.11 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.12 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.13 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.15 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.16 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.17 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.18 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -40,6 +56,14 @@ FILES="\
  ${TNAME}.out.1\
  ${TNAME}.out.200\
  ${TNAME}.out.201\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+ ${TNAME}.out.12\
+ ${TNAME}.out.13\
+ ${TNAME}.out.15\
+ ${TNAME}.out.16\
+ ${TNAME}.out.17\
+ ${TNAME}.out.18\
 "
 
 for i in $FILES

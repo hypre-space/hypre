@@ -7,35 +7,26 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "smg.h"
 
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
- * hypre_SMGSolve
- *    This is the main solve routine for the Schaffer multigrid method.
- *    This solver works for 1D, 2D, or 3D linear systems.  The dimension
- *    is determined by the hypre_StructStencilDim argument of the matrix
- *    stencil.  The hypre_StructGridDim argument of the matrix grid is
- *    allowed to be larger than the dimension of the solver, and in fact,
- *    this feature is used in the smaller-dimensional solves required
- *    in the relaxation method for both the 2D and 3D algorithms.  This
- *    allows one to do multiple 2D or 1D solves in parallel (e.g., multiple
- *    2D solves, where the 2D problems are "stacked" planes in 3D).
- *    The only additional requirement is that the linear system(s) data
- *    be contiguous in memory.
+ * This is the main solve routine for the Schaffer multigrid method.
+ * This solver works for 1D, 2D, or 3D linear systems.  The dimension
+ * is determined by the hypre_StructStencilDim argument of the matrix
+ * stencil.  The hypre_StructGridDim argument of the matrix grid is
+ * allowed to be larger than the dimension of the solver, and in fact,
+ * this feature is used in the smaller-dimensional solves required
+ * in the relaxation method for both the 2D and 3D algorithms.  This
+ * allows one to do multiple 2D or 1D solves in parallel (e.g., multiple
+ * 2D solves, where the 2D problems are "stacked" planes in 3D).
+ * The only additional requirement is that the linear system(s) data
+ * be contiguous in memory.
  *
  * Notes:
  * - Iterations are counted as follows: 1 iteration consists of a
@@ -89,12 +80,11 @@ hypre_SMGSolve( void               *smg_vdata,
    double               *norms           = (smg_data -> norms);
    double               *rel_norms       = (smg_data -> rel_norms);
 
-   double                b_dot_b, r_dot_r, eps;
-   double                e_dot_e, x_dot_x;
+   double                b_dot_b = 0, r_dot_r, eps = 0;
+   double                e_dot_e = 0, x_dot_x = 1;
                     
    HYPRE_Int             i, l;
                     
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -124,7 +114,7 @@ hypre_SMGSolve( void               *smg_vdata,
       }
 
       hypre_EndTiming(smg_data -> time_index);
-      return ierr;
+      return hypre_error_flag;
    }
 
    /* part of convergence check */
@@ -145,7 +135,7 @@ hypre_SMGSolve( void               *smg_vdata,
          }
 
          hypre_EndTiming(smg_data -> time_index);
-         return ierr;
+         return hypre_error_flag;
       }
    }
 
@@ -330,5 +320,5 @@ hypre_SMGSolve( void               *smg_vdata,
 
    hypre_EndTiming(smg_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }

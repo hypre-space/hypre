@@ -1,5 +1,16 @@
 
 ###########################################################
+#
+#   -----------------------------
+#   |             |             |
+#   |   part 0    |   part 1    |
+#   |             |             | 
+#   | j           | j           |
+#   | |           | |           |
+#   | ---i        | ---i        |
+#   -----------------------------
+#
+###########################################################
 
 # GridCreate: ndim nparts
 GridCreate: 2 2
@@ -41,6 +52,36 @@ StencilSetEntry: 0  8 [ 0  0] 0  8.0
 # GraphSetStencil: part var stencil_num
 GraphSetStencil: 0 0 0
 GraphSetStencil: 1 0 0
+
+###########################################################
+
+# MatrixSetValues: \
+#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
+MatrixSetValues: 0 ( 2-  2-) ( 2-  3+) [1 1] 0 0 0.0
+MatrixSetValues: 0 ( 2-  2-) ( 2-  3+) [1 1] 0 1 0.0
+MatrixSetValues: 0 ( 2-  2-) ( 2-  3+) [1 1] 0 2 0.0
+#MatrixSetValues: 0 (13+  2-) (13+  3+) [1 1] 0 4 0.0
+#MatrixSetValues: 0 (13+  2-) (13+  3+) [1 1] 0 5 0.0
+#MatrixSetValues: 0 (13+  2-) (13+  3+) [1 1] 0 6 0.0
+MatrixSetValues: 0 ( 2-  2-) (13+  2-) [1 1] 0 0 0.0
+MatrixSetValues: 0 ( 2-  2-) (13+  2-) [1 1] 0 6 0.0
+MatrixSetValues: 0 ( 2-  2-) (13+  2-) [1 1] 0 7 0.0
+MatrixSetValues: 0 ( 2-  3+) (13+  3+) [1 1] 0 2 0.0
+MatrixSetValues: 0 ( 2-  3+) (13+  3+) [1 1] 0 3 0.0
+MatrixSetValues: 0 ( 2-  3+) (13+  3+) [1 1] 0 4 0.0
+
+#MatrixSetValues: 1 ( 2-  2-) ( 2-  3+) [1 1] 0 0 0.0
+#MatrixSetValues: 1 ( 2-  2-) ( 2-  3+) [1 1] 0 1 0.0
+#MatrixSetValues: 1 ( 2-  2-) ( 2-  3+) [1 1] 0 2 0.0
+MatrixSetValues: 1 (13+  2-) (13+  3+) [1 1] 0 4 0.0
+MatrixSetValues: 1 (13+  2-) (13+  3+) [1 1] 0 5 0.0
+MatrixSetValues: 1 (13+  2-) (13+  3+) [1 1] 0 6 0.0
+MatrixSetValues: 1 ( 2-  2-) (13+  2-) [1 1] 0 0 0.0
+MatrixSetValues: 1 ( 2-  2-) (13+  2-) [1 1] 0 6 0.0
+MatrixSetValues: 1 ( 2-  2-) (13+  2-) [1 1] 0 7 0.0
+MatrixSetValues: 1 ( 2-  3+) (13+  3+) [1 1] 0 2 0.0
+MatrixSetValues: 1 ( 2-  3+) (13+  3+) [1 1] 0 3 0.0
+MatrixSetValues: 1 ( 2-  3+) (13+  3+) [1 1] 0 4 0.0
 
 ###########################################################
 

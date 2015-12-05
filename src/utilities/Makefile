@@ -7,14 +7,14 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.29 $
+# $Revision: 2.32 $
 #EHEADER**********************************************************************
 
 
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-CDEFS = ${TIMERDEFS} -DHYPRE_TIMING
+CDEFS = ${TIMERDEFS}
 
 C_COMPILE_FLAGS =\
    -I..\
@@ -30,7 +30,6 @@ HEADERS =\
  fortran_matrix.h\
  general.h\
  hypre_memory.h\
- hypre_smp_forloop.h\
  HYPRE_utilities.h\
  mpistubs.h\
  threading.h\
@@ -82,7 +81,7 @@ install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 #	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
+	rm -f *.o libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean

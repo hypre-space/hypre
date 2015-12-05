@@ -7,18 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.20 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -27,16 +19,15 @@
  * allow for coarsening to be done in the x-direction also.
  *--------------------------------------------------------------------------*/
 
-#define MapIndex(in_index, cdir, out_index) \
-hypre_IndexD(out_index, 2)    = hypre_IndexD(in_index, 2);\
-hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);\
-cdir = (cdir + 1) % 2;\
-hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 0);\
-cdir = (cdir + 1) % 2;
+#define MapIndex(in_index, cdir, out_index)                     \
+   hypre_IndexD(out_index, 2)    = hypre_IndexD(in_index, 2);   \
+   hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);   \
+   cdir = (cdir + 1) % 2;                                       \
+   hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 0);   \
+   cdir = (cdir + 1) % 2;
 
 /*--------------------------------------------------------------------------
- * hypre_PFMG2CreateRAPOp 
- *    Sets up new coarse grid operator stucture.
+ * Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
  
 hypre_StructMatrix *
@@ -185,7 +176,6 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
    HYPRE_Int             constant_coefficient;
    HYPRE_Int             constant_coefficient_A;
    HYPRE_Int             fi, ci;
-   HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -213,37 +203,37 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
+   {
+      while (fgrid_ids[fi] != cgrid_ids[ci])
       {
-         while (fgrid_ids[fi] != cgrid_ids[ci])
-         {
-            fi++;
-         }
+         fi++;
+      }
 
-         /*-----------------------------------------------------------------
-          * Switch statement to direct control to apropriate BoxLoop depending
-          * on stencil size. Default is full 9-point.
-          *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+       * Switch statement to direct control to apropriate BoxLoop depending
+       * on stencil size. Default is full 9-point.
+       *-----------------------------------------------------------------*/
 
-         switch (fine_stencil_size)
-         {
+      switch (fine_stencil_size)
+      {
 
-            /*--------------------------------------------------------------
-             * Loop for symmetric 5-point fine grid operator; produces a
-             * symmetric 9-point coarse grid operator. We calculate only the
-             * lower triangular stencil entries: (southwest, south, southeast,
-             * west, and center).
-             *--------------------------------------------------------------*/
+         /*--------------------------------------------------------------
+          * Loop for symmetric 5-point fine grid operator; produces a
+          * symmetric 9-point coarse grid operator. We calculate only the
+          * lower triangular stencil entries: (southwest, south, southeast,
+          * west, and center).
+          *--------------------------------------------------------------*/
 
-            case 5:
+         case 5:
 
             if ( constant_coefficient==1 )
             {
-               ierr += hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
+               hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
             else
             {
-               ierr += hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
+               hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
@@ -256,27 +246,27 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
              * west, and center).
              *--------------------------------------------------------------*/
 
-            default:
+         default:
 
             if ( constant_coefficient==1 )
             {
-               ierr += hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
+               hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
             else
             {
-               ierr += hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
+               hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
             break;
 
-         } /* end switch statement */
+      } /* end switch statement */
 
-      } /* end ForBoxI */
+   } /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 5, constant coefficient 0 */
@@ -307,8 +297,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    HYPRE_Int             constant_coefficient_A;
 
-   HYPRE_Int             loopi, loopj, loopk;
-
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *R_dbox;
@@ -334,8 +322,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    HYPRE_Int             xOffsetP; 
    HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int             ierr = 0;
-
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -494,42 +480,43 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA;
-            iAp1 = iA + yOffsetA;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA;
+         iAp1 = iA + yOffsetA;
 
-            iP1 = iP - yOffsetP - xOffsetP;
-            rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
+         iP1 = iP - yOffsetP - xOffsetP;
+         rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
 
-            iP1 = iP - yOffsetP;
-            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-               +          rb[iR] * a_cs[iAm1]
-               +                   a_cs[iA]   * pa[iP1];
+         iP1 = iP - yOffsetP;
+         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR] * a_cs[iAm1]
+            +                   a_cs[iA]   * pa[iP1];
 
-            iP1 = iP - yOffsetP + xOffsetP;
-            rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
+         iP1 = iP - yOffsetP + xOffsetP;
+         rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
 
-            iP1 = iP - xOffsetP;
-            rap_cw[iAc] =          a_cw[iA]
-               +          rb[iR] * a_cw[iAm1] * pb[iP1]
-               +          ra[iR] * a_cw[iAp1] * pa[iP1];
+         iP1 = iP - xOffsetP;
+         rap_cw[iAc] =          a_cw[iA]
+            +          rb[iR] * a_cw[iAm1] * pb[iP1]
+            +          ra[iR] * a_cw[iAp1] * pa[iP1];
 
-            rap_cc[iAc] =          a_cc[iA]
-               +          rb[iR] * a_cc[iAm1] * pb[iP]
-               +          ra[iR] * a_cc[iAp1] * pa[iP]
-               +          rb[iR] * a_cn[iAm1]
-               +          ra[iR] * a_cs[iAp1]
-               +                   a_cs[iA]   * pb[iP]
-               +                   a_cn[iA]   * pa[iP];
-         }
+         rap_cc[iAc] =          a_cc[iA]
+            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          ra[iR] * a_cc[iAp1] * pa[iP]
+            +          rb[iR] * a_cn[iAm1]
+            +          ra[iR] * a_cs[iAp1]
+            +                   a_cs[iA]   * pb[iP]
+            +                   a_cn[iA]   * pa[iP];
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
    else
@@ -547,48 +534,49 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
       a_cw_offdm1 = a_cw[iA_offdm1];
       a_ce_offdm1 = a_ce[iA_offdm1];
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA_diag;
-            iAp1 = iA + yOffsetA_diag;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA_diag;
+         iAp1 = iA + yOffsetA_diag;
 
-            iP1 = iP - yOffsetP - xOffsetP;
-            rap_csw[iAc] = rb[iR] * a_cw_offdm1 * pa[iP1];
+         iP1 = iP - yOffsetP - xOffsetP;
+         rap_csw[iAc] = rb[iR] * a_cw_offdm1 * pa[iP1];
 
-            iP1 = iP - yOffsetP;
-            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-               +          rb[iR] * a_cs_offdm1
-               +                   a_cs_offd   * pa[iP1];
+         iP1 = iP - yOffsetP;
+         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR] * a_cs_offdm1
+            +                   a_cs_offd   * pa[iP1];
 
-            iP1 = iP - yOffsetP + xOffsetP;
-            rap_cse[iAc] = rb[iR] * a_ce_offdm1 * pa[iP1];
+         iP1 = iP - yOffsetP + xOffsetP;
+         rap_cse[iAc] = rb[iR] * a_ce_offdm1 * pa[iP1];
 
-            iP1 = iP - xOffsetP;
-            rap_cw[iAc] =          a_cw_offd
-               +          rb[iR] * a_cw_offdm1 * pb[iP1]
-               +          ra[iR] * a_cw_offdp1 * pa[iP1];
+         iP1 = iP - xOffsetP;
+         rap_cw[iAc] =          a_cw_offd
+            +          rb[iR] * a_cw_offdm1 * pb[iP1]
+            +          ra[iR] * a_cw_offdp1 * pa[iP1];
 
-            rap_cc[iAc] =          a_cc[iA]
-               +          rb[iR] * a_cc[iAm1] * pb[iP]
-               +          ra[iR] * a_cc[iAp1] * pa[iP]
-               +          rb[iR] * a_cn_offdm1
-               +          ra[iR] * a_cs_offdp1
-               +                   a_cs_offd  * pb[iP]
-               +                   a_cn_offd  * pa[iP];
-         }
+         rap_cc[iAc] =          a_cc[iA]
+            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          ra[iR] * a_cc[iAp1] * pa[iP]
+            +          rb[iR] * a_cn_offdm1
+            +          ra[iR] * a_cs_offdp1
+            +                   a_cs_offd  * pb[iP]
+            +                   a_cn_offd  * pa[iP];
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
 
 /*      } *//* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 5, constant coefficient 1 */
@@ -638,8 +626,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    HYPRE_Int             xOffsetP; 
    HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int             ierr = 0;
-
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -821,7 +807,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
 
 /*      } *//* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 9, constant coefficient 0 */
@@ -853,8 +839,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    HYPRE_Int             constant_coefficient_A;
 
-   HYPRE_Int             loopi, loopj, loopk;
-
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
    hypre_Box            *R_dbox;
@@ -883,8 +867,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    HYPRE_Int             xOffsetP; 
    HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int             ierr = 0;
-
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -1061,51 +1043,52 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA;
-            iAp1 = iA + yOffsetA;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA;
+         iAp1 = iA + yOffsetA;
 
-            iP1 = iP - yOffsetP - xOffsetP;
-            rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-               +           rb[iR] * a_csw[iAm1]
-               +                    a_csw[iA]  * pa[iP1];
+         iP1 = iP - yOffsetP - xOffsetP;
+         rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
+            +           rb[iR] * a_csw[iAm1]
+            +                    a_csw[iA]  * pa[iP1];
 
-            iP1 = iP - yOffsetP;
-            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-               +          rb[iR] * a_cs[iAm1]
-               +                   a_cs[iA]   * pa[iP1];
+         iP1 = iP - yOffsetP;
+         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR] * a_cs[iAm1]
+            +                   a_cs[iA]   * pa[iP1];
 
-            iP1 = iP - yOffsetP + xOffsetP;
-            rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-               +           rb[iR] * a_cse[iAm1]
-               +                    a_cse[iA]  * pa[iP1];
+         iP1 = iP - yOffsetP + xOffsetP;
+         rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
+            +           rb[iR] * a_cse[iAm1]
+            +                    a_cse[iA]  * pa[iP1];
 
-            iP1 = iP - xOffsetP;
-            rap_cw[iAc] =          a_cw[iA]
-               +          rb[iR] * a_cw[iAm1] * pb[iP1]
-               +          ra[iR] * a_cw[iAp1] * pa[iP1]
-               +          rb[iR] * a_cnw[iAm1]
-               +          ra[iR] * a_csw[iAp1]
-               +                   a_csw[iA]  * pb[iP1]
-               +                   a_cnw[iA]  * pa[iP1];
+         iP1 = iP - xOffsetP;
+         rap_cw[iAc] =          a_cw[iA]
+            +          rb[iR] * a_cw[iAm1] * pb[iP1]
+            +          ra[iR] * a_cw[iAp1] * pa[iP1]
+            +          rb[iR] * a_cnw[iAm1]
+            +          ra[iR] * a_csw[iAp1]
+            +                   a_csw[iA]  * pb[iP1]
+            +                   a_cnw[iA]  * pa[iP1];
 
-            rap_cc[iAc] =          a_cc[iA]
-               +          rb[iR] * a_cc[iAm1] * pb[iP]
-               +          ra[iR] * a_cc[iAp1] * pa[iP]
-               +          rb[iR] * a_cn[iAm1]
-               +          ra[iR] * a_cs[iAp1]
-               +                   a_cs[iA]   * pb[iP]
-               +                   a_cn[iA]   * pa[iP];
+         rap_cc[iAc] =          a_cc[iA]
+            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          ra[iR] * a_cc[iAp1] * pa[iP]
+            +          rb[iR] * a_cn[iAm1]
+            +          ra[iR] * a_cs[iAp1]
+            +                   a_cs[iA]   * pb[iP]
+            +                   a_cn[iA]   * pa[iP];
 
-         }
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
    else
@@ -1131,57 +1114,58 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
       a_cnw_offdm1 = a_cnw[iA_offdm1];
 
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA_diag;
-            iAp1 = iA + yOffsetA_diag;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA_diag;
+         iAp1 = iA + yOffsetA_diag;
 
-            iP1 = iP - yOffsetP - xOffsetP;
-            rap_csw[iAc] = rb[iR] * a_cw_offdm1 * pa[iP1]
-               +           rb[iR] * a_csw_offdm1
-               +                    a_csw_offd  * pa[iP1];
+         iP1 = iP - yOffsetP - xOffsetP;
+         rap_csw[iAc] = rb[iR] * a_cw_offdm1 * pa[iP1]
+            +           rb[iR] * a_csw_offdm1
+            +                    a_csw_offd  * pa[iP1];
 
-            iP1 = iP - yOffsetP;
-            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-               +          rb[iR] * a_cs_offdm1
-               +                   a_cs_offd   * pa[iP1];
+         iP1 = iP - yOffsetP;
+         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR] * a_cs_offdm1
+            +                   a_cs_offd   * pa[iP1];
 
-            iP1 = iP - yOffsetP + xOffsetP;
-            rap_cse[iAc] = rb[iR] * a_ce_offdm1 * pa[iP1]
-               +           rb[iR] * a_cse_offdm1
-               +                    a_cse_offd  * pa[iP1];
+         iP1 = iP - yOffsetP + xOffsetP;
+         rap_cse[iAc] = rb[iR] * a_ce_offdm1 * pa[iP1]
+            +           rb[iR] * a_cse_offdm1
+            +                    a_cse_offd  * pa[iP1];
 
-            iP1 = iP - xOffsetP;
-            rap_cw[iAc] =          a_cw_offd
-               +          rb[iR] * a_cw_offdm1 * pb[iP1]
-               +          ra[iR] * a_cw_offdp1 * pa[iP1]
-               +          rb[iR] * a_cnw_offdm1
-               +          ra[iR] * a_csw_offdp1
-               +                   a_csw_offd  * pb[iP1]
-               +                   a_cnw_offd  * pa[iP1];
+         iP1 = iP - xOffsetP;
+         rap_cw[iAc] =          a_cw_offd
+            +          rb[iR] * a_cw_offdm1 * pb[iP1]
+            +          ra[iR] * a_cw_offdp1 * pa[iP1]
+            +          rb[iR] * a_cnw_offdm1
+            +          ra[iR] * a_csw_offdp1
+            +                   a_csw_offd  * pb[iP1]
+            +                   a_cnw_offd  * pa[iP1];
 
-            rap_cc[iAc] =          a_cc[iA]
-               +          rb[iR] * a_cc[iAm1] * pb[iP]
-               +          ra[iR] * a_cc[iAp1] * pa[iP]
-               +          rb[iR] * a_cn_offdm1
-               +          ra[iR] * a_cs_offdp1
-               +                   a_cs_offd   * pb[iP]
-               +                   a_cn_offd   * pa[iP];
+         rap_cc[iAc] =          a_cc[iA]
+            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          ra[iR] * a_cc[iAp1] * pa[iP]
+            +          rb[iR] * a_cn_offdm1
+            +          ra[iR] * a_cs_offdp1
+            +                   a_cs_offd   * pb[iP]
+            +                   a_cn_offd   * pa[iP];
 
-         }
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
 
 /*      }*/ /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 9, constant coefficient 1 */
@@ -1231,8 +1215,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    HYPRE_Int             xOffsetP; 
    HYPRE_Int             yOffsetP; 
                       
-   HYPRE_Int             ierr = 0;
-
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -1444,10 +1426,8 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
 
 /*      }*/ /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
-
-
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -1473,7 +1453,6 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
    HYPRE_Int             fi, ci;
    HYPRE_Int             constant_coefficient;
    HYPRE_Int             constant_coefficient_A;
-   HYPRE_Int             ierr = 0;
 
    fine_stencil = hypre_StructMatrixStencil(A);
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
@@ -1496,44 +1475,44 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
    else
    {
 /*      hypre_assert( hypre_StructMatrixConstantCoefficient(R)==0 );
-      hypre_assert( hypre_StructMatrixConstantCoefficient(A)==0 );
-      hypre_assert( hypre_StructMatrixConstantCoefficient(P)==0 );
+        hypre_assert( hypre_StructMatrixConstantCoefficient(A)==0 );
+        hypre_assert( hypre_StructMatrixConstantCoefficient(P)==0 );
 */
    }
 
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
+   {
+      while (fgrid_ids[fi] != cgrid_ids[ci])
       {
-         while (fgrid_ids[fi] != cgrid_ids[ci])
-         {
-            fi++;
-         }
+         fi++;
+      }
 
-         /*-----------------------------------------------------------------
-          * Switch statement to direct control to appropriate BoxLoop depending
-          * on stencil size. Default is full 27-point.
-          *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+       * Switch statement to direct control to appropriate BoxLoop depending
+       * on stencil size. Default is full 27-point.
+       *-----------------------------------------------------------------*/
 
-         switch (fine_stencil_size)
-         {
+      switch (fine_stencil_size)
+      {
 
-            /*--------------------------------------------------------------
-             * Loop for 5-point fine grid operator; produces upper triangular
-             * part of 9-point coarse grid operator - excludes diagonal.
-             * stencil entries: (northeast, north, northwest, and east)
-             *--------------------------------------------------------------*/
+         /*--------------------------------------------------------------
+          * Loop for 5-point fine grid operator; produces upper triangular
+          * part of 9-point coarse grid operator - excludes diagonal.
+          * stencil entries: (northeast, north, northwest, and east)
+          *--------------------------------------------------------------*/
 
          case 5:
 
             if ( constant_coefficient==1 )
             {
-               ierr += hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
+               hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
             else
             {
-               ierr += hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
+               hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
@@ -1549,23 +1528,23 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             if ( constant_coefficient==1 )
             {
-               ierr += hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
+               hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
             else
             {
-               ierr += hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
+               hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                   ci, fi, A, P, R, cdir, cindex, cstride, RAP );
             }
 
             break;
 
-         } /* end switch statement */
+      } /* end switch statement */
 
-      } /* end ForBoxI */
+   } /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 5, constant coefficient 0 */
@@ -1594,7 +1573,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int             loopi, loopj, loopk;
    HYPRE_Int             constant_coefficient_A;
 
    hypre_Box            *A_dbox;
@@ -1619,8 +1597,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int             ierr = 0;
-
    /*hypre_printf("nosym 5.0\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -1770,34 +1746,35 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    if ( constant_coefficient_A == 0 )
    {
       /*hypre_printf("nosym 5.0.0\n");*/
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA;
-            iAp1 = iA + yOffsetA;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA;
+         iAp1 = iA + yOffsetA;
 
-            iP1 = iP + yOffsetP + xOffsetP;
-            rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
+         iP1 = iP + yOffsetP + xOffsetP;
+         rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
 
-            iP1 = iP + yOffsetP;
-            rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-               +          ra[iR] * a_cn[iAp1]
-               +                   a_cn[iA]   * pb[iP1];
+         iP1 = iP + yOffsetP;
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+            +          ra[iR] * a_cn[iAp1]
+            +                   a_cn[iA]   * pb[iP1];
 
-            iP1 = iP + yOffsetP - xOffsetP;
-            rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
+         iP1 = iP + yOffsetP - xOffsetP;
+         rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
 
-            iP1 = iP + xOffsetP;
-            rap_ce[iAc] =          a_ce[iA]
-               +          rb[iR] * a_ce[iAm1] * pb[iP1]
-               +          ra[iR] * a_ce[iAp1] * pa[iP1];
-         }
+         iP1 = iP + xOffsetP;
+         rap_ce[iAc] =          a_ce[iA]
+            +          rb[iR] * a_ce[iAm1] * pb[iP1]
+            +          ra[iR] * a_ce[iAp1] * pa[iP1];
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
    else
@@ -1815,39 +1792,40 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       a_ce_offdm1 = a_ce[iA_offdm1];
       a_ce_offdp1 = a_ce[iA_offdp1];
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAp1 = iA + yOffsetA_diag;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAp1 = iA + yOffsetA_diag;
 
-            iP1 = iP + yOffsetP + xOffsetP;
-            rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1];
+         iP1 = iP + yOffsetP + xOffsetP;
+         rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1];
 
-            iP1 = iP + yOffsetP;
-            rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-               +          ra[iR] * a_cn_offdp1
-               +                   a_cn_offd   * pb[iP1];
+         iP1 = iP + yOffsetP;
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+            +          ra[iR] * a_cn_offdp1
+            +                   a_cn_offd   * pb[iP1];
 
-            iP1 = iP + yOffsetP - xOffsetP;
-            rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1];
+         iP1 = iP + yOffsetP - xOffsetP;
+         rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1];
 
-            iP1 = iP + xOffsetP;
-            rap_ce[iAc] =          a_ce_offd
-               +          rb[iR] * a_ce_offdm1 * pb[iP1]
-               +          ra[iR] * a_ce_offdp1 * pa[iP1];
-         }
+         iP1 = iP + xOffsetP;
+         rap_ce[iAc] =          a_ce_offd
+            +          rb[iR] * a_ce_offdm1 * pb[iP1]
+            +          ra[iR] * a_ce_offdp1 * pa[iP1];
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
 
 /*      }*/ /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 5, constant coefficient 1 */
@@ -1894,8 +1872,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int             ierr = 0;
-
    /* hypre_printf("nosym 5.1\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -2060,7 +2036,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
 
 /*      }*/ /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 9, constant coefficient 0 */
@@ -2089,7 +2065,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_IndexRef        stridef;
    hypre_Index           loop_size;
 
-   HYPRE_Int             loopi, loopj, loopk;
    HYPRE_Int             constant_coefficient_A;
 
    hypre_Box            *A_dbox;
@@ -2116,8 +2091,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int             ierr = 0;
-
    /*hypre_printf("nosym 9.0\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -2293,43 +2266,44 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    if ( constant_coefficient_A==0 )
    {
       /*hypre_printf("nosym 9.0.0\n");*/
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA;
-            iAp1 = iA + yOffsetA;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA;
+         iAp1 = iA + yOffsetA;
 
-            iP1 = iP + yOffsetP + xOffsetP;
-            rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-               +           ra[iR] * a_cne[iAp1]
-               +                    a_cne[iA]  * pb[iP1];
+         iP1 = iP + yOffsetP + xOffsetP;
+         rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+            +           ra[iR] * a_cne[iAp1]
+            +                    a_cne[iA]  * pb[iP1];
 
-            iP1 = iP + yOffsetP;
-            rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-               +          ra[iR] * a_cn[iAp1]
-               +                   a_cn[iA]   * pb[iP1];
+         iP1 = iP + yOffsetP;
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+            +          ra[iR] * a_cn[iAp1]
+            +                   a_cn[iA]   * pb[iP1];
 
-            iP1 = iP + yOffsetP - xOffsetP;
-            rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-               +           ra[iR] * a_cnw[iAp1]
-               +                    a_cnw[iA]  * pb[iP1];
+         iP1 = iP + yOffsetP - xOffsetP;
+         rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+            +           ra[iR] * a_cnw[iAp1]
+            +                    a_cnw[iA]  * pb[iP1];
 
-            iP1 = iP + xOffsetP;
-            rap_ce[iAc] =          a_ce[iA]
-               +          rb[iR] * a_ce[iAm1] * pb[iP1]
-               +          ra[iR] * a_ce[iAp1] * pa[iP1]
-               +          rb[iR] * a_cne[iAm1]
-               +          ra[iR] * a_cse[iAp1]
-               +                   a_cse[iA]  * pb[iP1]
-               +                   a_cne[iA]  * pa[iP1];
+         iP1 = iP + xOffsetP;
+         rap_ce[iAc] =          a_ce[iA]
+            +          rb[iR] * a_ce[iAm1] * pb[iP1]
+            +          ra[iR] * a_ce[iAp1] * pa[iP1]
+            +          rb[iR] * a_cne[iAm1]
+            +          ra[iR] * a_cse[iAp1]
+            +                   a_cse[iA]  * pb[iP1]
+            +                   a_cne[iA]  * pa[iP1];
 
-         }
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
    else
@@ -2353,49 +2327,50 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
       a_cnw_offd = a_cnw[iA_offd];
       a_cnw_offdp1 = a_cnw[iA_offdp1];
 
-      hypre_BoxLoop4Begin(loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-         {
-            iAm1 = iA - yOffsetA_diag;
-            iAp1 = iA + yOffsetA_diag;
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop4For(iP, iR, iA, iAc)
+      {
+         iAm1 = iA - yOffsetA_diag;
+         iAp1 = iA + yOffsetA_diag;
 
-            iP1 = iP + yOffsetP + xOffsetP;
-            rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1]
-               +           ra[iR] * a_cne_offdp1
-               +                    a_cne_offd  * pb[iP1];
+         iP1 = iP + yOffsetP + xOffsetP;
+         rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1]
+            +           ra[iR] * a_cne_offdp1
+            +                    a_cne_offd  * pb[iP1];
 
-            iP1 = iP + yOffsetP;
-            rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-               +          ra[iR] * a_cn_offdp1
-               +                   a_cn_offd   * pb[iP1];
+         iP1 = iP + yOffsetP;
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+            +          ra[iR] * a_cn_offdp1
+            +                   a_cn_offd   * pb[iP1];
 
-            iP1 = iP + yOffsetP - xOffsetP;
-            rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1]
-               +           ra[iR] * a_cnw_offdp1
-               +                    a_cnw_offd  * pb[iP1];
+         iP1 = iP + yOffsetP - xOffsetP;
+         rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1]
+            +           ra[iR] * a_cnw_offdp1
+            +                    a_cnw_offd  * pb[iP1];
 
-            iP1 = iP + xOffsetP;
-            rap_ce[iAc] =          a_ce_offd
-               +          rb[iR] * a_ce_offdm1 * pb[iP1]
-               +          ra[iR] * a_ce_offdp1 * pa[iP1]
-               +          rb[iR] * a_cne_offdm1
-               +          ra[iR] * a_cse_offdp1
-               +                   a_cse_offd  * pb[iP1]
-               +                   a_cne_offd  * pa[iP1];
+         iP1 = iP + xOffsetP;
+         rap_ce[iAc] =          a_ce_offd
+            +          rb[iR] * a_ce_offdm1 * pb[iP1]
+            +          ra[iR] * a_ce_offdp1 * pa[iP1]
+            +          rb[iR] * a_cne_offdm1
+            +          ra[iR] * a_cse_offdp1
+            +                   a_cse_offd  * pb[iP1]
+            +                   a_cne_offd  * pa[iP1];
 
-         }
+      }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
 
 /*      }*/ /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /* for fine stencil size 9, constant coefficient 1 */
@@ -2443,8 +2418,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
                      
-   HYPRE_Int             ierr = 0;
-
    /*hypre_printf("nosym 9.1\n");*/
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -2640,7 +2613,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
 
 /*      }*/ /* end ForBoxI */
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 

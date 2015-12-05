@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.70 $
+ * $Revision: 2.75 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include <assert.h>
 
@@ -36,6 +36,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    HYPRE_Int      max_levels;
    HYPRE_Int      max_coarse_size;
+   HYPRE_Int      min_coarse_size;
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
@@ -117,6 +118,7 @@ hypre_BoomerAMGCreate()
    /* setup params */
    max_levels = 25;
    max_coarse_size = 9;
+   min_coarse_size = 0;
    seq_threshold = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
@@ -208,6 +210,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataUserRelaxWeight(amg_data) = 1.0;
    hypre_BoomerAMGSetMaxLevels(amg_data, max_levels);
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
+   hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
@@ -338,6 +341,11 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataFCoarse(amg_data) = NULL;
    hypre_ParAMGDataUCoarse(amg_data) = NULL;
    hypre_ParAMGDataNewComm(amg_data) = hypre_MPI_COMM_NULL;
+
+   /* for Gaussian elimination coarse grid solve */
+   hypre_ParAMGDataAMat(amg_data) = NULL;
+   hypre_ParAMGDataBVec(amg_data) = NULL;
+   hypre_ParAMGDataCommInfo(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -557,9 +565,13 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataFCoarse(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
 
+   if (hypre_ParAMGDataAMat(amg_data)) hypre_TFree(hypre_ParAMGDataAMat(amg_data));
+   if (hypre_ParAMGDataBVec(amg_data)) hypre_TFree(hypre_ParAMGDataBVec(amg_data));
+   if (hypre_ParAMGDataCommInfo(amg_data)) hypre_TFree(hypre_ParAMGDataCommInfo(amg_data));
+
    if (new_comm != hypre_MPI_COMM_NULL) 
    {
-       MPI_Comm_free (&new_comm);
+       hypre_MPI_Comm_free (&new_comm);
    }
    hypre_TFree(amg_data);
    return hypre_error_flag;
@@ -667,6 +679,48 @@ hypre_BoomerAMGGetMaxCoarseSize( void *data,
    } 
 
    *max_coarse_size = hypre_ParAMGDataMaxCoarseSize(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetMinCoarseSize( void *data,
+                          HYPRE_Int   min_coarse_size )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (min_coarse_size < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataMinCoarseSize(amg_data) = min_coarse_size;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetMinCoarseSize( void *data,
+                             HYPRE_Int *  min_coarse_size )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
 
    return hypre_error_flag;
 }

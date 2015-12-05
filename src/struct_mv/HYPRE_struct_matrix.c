@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -18,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructMatrixCreate
@@ -191,10 +189,8 @@ HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
                                      HYPRE_Int      *stencil_indices,
                                      double         *values )
 {
-   return hypre_StructMatrixSetConstantValues( matrix,
-                                               num_stencil_indices,
-                                               stencil_indices,
-                                               values, 0 );
+   return hypre_StructMatrixSetConstantValues(
+      matrix, num_stencil_indices, stencil_indices, values, 0 );
 }
 
 /*--------------------------------------------------------------------------
@@ -270,10 +266,8 @@ HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
                                        HYPRE_Int      *stencil_indices,
                                        double         *values )
 {
-   return hypre_StructMatrixSetConstantValues( matrix,
-                                               num_stencil_indices,
-                                               stencil_indices,
-                                               values, 1 );
+   return hypre_StructMatrixSetConstantValues(
+      matrix, num_stencil_indices, stencil_indices, values, 1 );
 }
 
 /*--------------------------------------------------------------------------

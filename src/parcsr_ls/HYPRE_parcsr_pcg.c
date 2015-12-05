@@ -7,19 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
-
-
-
-
-/******************************************************************************
- *
- * HYPRE_ParCSRPCG interface
- *
- *****************************************************************************/
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGCreate
@@ -28,12 +19,14 @@
 HYPRE_Int
 HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   /* The function names with a PCG in them are in
-      parcsr_ls/pcg_par.c .  These functions do rather little -
-      e.g., cast to the correct type - before calling something else.
-      These names should be called, e.g., hypre_struct_Free, to reduce the
-      chance of name conflicts. */
-   hypre_PCGFunctions * pcg_functions =
+   hypre_PCGFunctions * pcg_functions;
+
+   if (!solver)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   pcg_functions =
       hypre_PCGFunctionsCreate(
          hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
          hypre_ParKrylovCreateVector,
@@ -43,9 +36,7 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
-
    *solver = ( (HYPRE_Solver) hypre_PCGCreate( pcg_functions ) );
-   if (!solver) hypre_error_in_arg(2);
 
    return hypre_error_flag;
 }
@@ -98,7 +89,7 @@ HYPRE_ParCSRPCGSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
-                       double             tol    )
+                       double       tol    )
 {
    return( HYPRE_PCGSetTol( solver, tol ) );
 }
@@ -108,7 +99,7 @@ HYPRE_ParCSRPCGSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetAbsoluteTol( HYPRE_Solver solver,
-                               double             a_tol    )
+                               double       a_tol    )
 {
    return( HYPRE_PCGSetAbsoluteTol( solver, a_tol ) );
 }
@@ -119,7 +110,7 @@ HYPRE_ParCSRPCGSetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
-                           HYPRE_Int                max_iter )
+                           HYPRE_Int    max_iter )
 {
    return( HYPRE_PCGSetMaxIter( solver, max_iter ) );
 }
@@ -130,7 +121,7 @@ HYPRE_ParCSRPCGSetMaxIter( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver,
-                            HYPRE_Int          stop_crit )
+                            HYPRE_Int    stop_crit )
 {
    return( HYPRE_PCGSetStopCrit( solver, stop_crit ) );
 }
@@ -141,7 +132,7 @@ HYPRE_ParCSRPCGSetStopCrit( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver,
-                           HYPRE_Int                two_norm )
+                           HYPRE_Int    two_norm )
 {
    return( HYPRE_PCGSetTwoNorm( solver, two_norm ) );
 }
@@ -152,7 +143,7 @@ HYPRE_ParCSRPCGSetTwoNorm( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
-                             HYPRE_Int                rel_change )
+                             HYPRE_Int    rel_change )
 {
    return( HYPRE_PCGSetRelChange( solver, rel_change ) );
 }
@@ -214,7 +205,7 @@ HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver  solver,
-                                 HYPRE_Int                *num_iterations )
+                                 HYPRE_Int    *num_iterations )
 {
    return( HYPRE_PCGGetNumIterations( solver, num_iterations ) );
 }
@@ -225,7 +216,7 @@ HYPRE_ParCSRPCGGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                             double             *norm   )
+                                             double       *norm   )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
@@ -265,7 +256,7 @@ HYPRE_ParCSRDiagScale( HYPRE_Solver solver,
 
    for (i=0; i < local_size; i++)
    {
-	x_data[i] = y_data[i]/A_data[A_i[i]];
+      x_data[i] = y_data[i]/A_data[A_i[i]];
    } 
  
    return ierr;

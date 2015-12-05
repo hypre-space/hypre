@@ -7,19 +7,15 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /* for internal use */
 
 #ifndef EXTERNAL_ROWS_DH_H
 #define EXTERNAL_ROWS_DH_H
 
-
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 extern void ExternalRows_dhCreate(ExternalRows_dh *er);
 extern void ExternalRows_dhDestroy(ExternalRows_dh er);

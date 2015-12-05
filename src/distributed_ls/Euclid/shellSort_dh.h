@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef SUPPORT_DH
 #define SUPPORT_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 extern void shellSort_int(const HYPRE_Int n, HYPRE_Int *x);
 extern void shellSort_float(HYPRE_Int n, double *v);

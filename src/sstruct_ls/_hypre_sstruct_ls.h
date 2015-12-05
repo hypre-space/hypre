@@ -7,15 +7,19 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
+
+#ifndef hypre_SSTRUCT_LS_HEADER
+#define hypre_SSTRUCT_LS_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 #include <HYPRE_config.h>
 
 #include "HYPRE_sstruct_ls.h"
-
-#ifndef hypre_SSTRUCT_LS_HEADER
-#define hypre_SSTRUCT_LS_HEADER
 
 #include "_hypre_utilities.h"
 #include "krylov.h"
@@ -37,7 +41,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -89,7 +93,7 @@ typedef struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -121,7 +125,7 @@ typedef struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -154,7 +158,7 @@ typedef struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -180,7 +184,7 @@ typedef struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -294,7 +298,7 @@ typedef struct
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 

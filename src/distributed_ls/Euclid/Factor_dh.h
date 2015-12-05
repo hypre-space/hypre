@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef FACTOR_DH
 #define FACTOR_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _factor_dh {
   /* dimensions of local rectangular submatrix; global matrix is n*n */

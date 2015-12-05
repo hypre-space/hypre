@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.26 $
+# $Revision: 1.27 $
 #EHEADER**********************************************************************
 
 
@@ -97,10 +97,8 @@ OBJS = ${LAPACK_FILES:.c=.o}
 #################################################################
 
 all: ${OBJS} dlamch.o
-	cp -fp *.o ${HYPRE_SRC_TOP_DIR}/utilities
 
 install: all
-	cp -fp *.h ${HYPRE_INC_INSTALL}/include
 
 clean:
 	rm -rf *.o

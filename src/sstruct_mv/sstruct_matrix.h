@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -44,7 +41,7 @@ typedef struct
    HYPRE_Int              *sentries;
 
    HYPRE_Int               accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               iscomplex;    /* Matrix complex? */
 
    HYPRE_Int               ref_count;
 
@@ -75,7 +72,7 @@ typedef struct hypre_SStructMatrix_struct
    double                 *tmp_coeffs;
 
    HYPRE_Int               ns_symmetric; /* Non-stencil entries symmetric? */
-   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               iscomplex;    /* Matrix complex? */
    HYPRE_Int               global_size;  /* Total number of nonzero coeffs */
 
    HYPRE_Int               ref_count;
@@ -106,7 +103,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructMatrixTmpColCoords(mat)   ((mat) -> tmp_col_coords)
 #define hypre_SStructMatrixTmpCoeffs(mat)      ((mat) -> tmp_coeffs)
 #define hypre_SStructMatrixNSSymmetric(mat)    ((mat) -> ns_symmetric)
-#define hypre_SStructMatrixComplex(mat)        ((mat) -> complex)
+#define hypre_SStructMatrixIsComplex(mat)      ((mat) -> iscomplex)
 #define hypre_SStructMatrixGlobalSize(mat)     ((mat) -> global_size)
 #define hypre_SStructMatrixRefCount(mat)       ((mat) -> ref_count)
 #define hypre_SStructMatrixObjectType(mat)       ((mat) -> object_type)
@@ -117,6 +114,8 @@ typedef struct hypre_SStructMatrix_struct
 
 #define hypre_SStructPMatrixComm(pmat)              ((pmat) -> comm)
 #define hypre_SStructPMatrixPGrid(pmat)             ((pmat) -> pgrid)
+#define hypre_SStructPMatrixNDim(pmat) \
+hypre_SStructPGridNDim(hypre_SStructPMatrixPGrid(pmat))
 #define hypre_SStructPMatrixStencils(pmat)          ((pmat) -> stencils)
 #define hypre_SStructPMatrixNVars(pmat)             ((pmat) -> nvars)
 #define hypre_SStructPMatrixStencil(pmat, var)      ((pmat) -> stencils[var])
@@ -132,7 +131,7 @@ typedef struct hypre_SStructMatrix_struct
 #define hypre_SStructPMatrixSEntriesSize(pmat)      ((pmat) -> sentries_size)
 #define hypre_SStructPMatrixSEntries(pmat)          ((pmat) -> sentries)
 #define hypre_SStructPMatrixAccumulated(pmat)       ((pmat) -> accumulated)
-#define hypre_SStructPMatrixComplex(pmat)           ((pmat) -> complex)
+#define hypre_SStructPMatrixIsComplex(pmat)         ((pmat) -> iscomplex)
 #define hypre_SStructPMatrixRefCount(pmat)          ((pmat) -> ref_count)
 
 #endif

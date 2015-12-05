@@ -7,11 +7,15 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 #include "HYPRE_parcsr_mv.h"
 #include "_hypre_utilities.h"
@@ -20,10 +24,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-
-
 
 #ifndef HYPRE_PAR_CSR_COMMUNICATION_HEADER
 #define HYPRE_PAR_CSR_COMMUNICATION_HEADER
@@ -622,11 +622,11 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt ( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , HYPRE_Int data , HYPRE_Int **pA_ext_row_map );
 
 /* par_csr_assumed_part.c */
-HYPRE_Int hypre_LocateAssummedPartition ( HYPRE_Int row_start , HYPRE_Int row_end , HYPRE_Int global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
+HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_Int row_start , HYPRE_Int row_end , HYPRE_Int global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
 HYPRE_Int hypre_ParCSRMatrixCreateAssumedPartition ( hypre_ParCSRMatrix *matrix );
 HYPRE_Int hypre_ParCSRMatrixDestroyAssumedPartition ( hypre_ParCSRMatrix *matrix );
-HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( HYPRE_Int row , HYPRE_Int global_num_rows , HYPRE_Int *proc_id );
-HYPRE_Int hypre_GetAssumedPartitionRowRange ( HYPRE_Int proc_id , HYPRE_Int global_num_rows , HYPRE_Int *row_start , HYPRE_Int *row_end );
+HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( MPI_Comm comm , HYPRE_Int row , HYPRE_Int global_num_rows , HYPRE_Int *proc_id );
+HYPRE_Int hypre_GetAssumedPartitionRowRange ( MPI_Comm comm , HYPRE_Int proc_id , HYPRE_Int global_num_rows , HYPRE_Int *row_start , HYPRE_Int *row_end );
 HYPRE_Int hypre_ParVectorCreateAssumedPartition ( hypre_ParVector *vector );
 HYPRE_Int hypre_ParVectorDestroyAssumedPartition ( hypre_ParVector *vector );
 

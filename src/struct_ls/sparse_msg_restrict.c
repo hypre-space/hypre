@@ -7,17 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SparseMSGRestrictData data structure
@@ -155,7 +148,6 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
-   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
@@ -205,49 +197,50 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
 
       fi = 0;
       hypre_ForBoxI(ci, cgrid_boxes)
+      {
+         while (fgrid_ids[fi] != cgrid_ids[ci])
          {
-            while (fgrid_ids[fi] != cgrid_ids[ci])
-            {
-               fi++;
-            }
-
-            compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
-
-            R_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R),  fi);
-            r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
-            rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
-
-            Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
-               hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
-            Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
-            rp  = hypre_StructVectorBoxData(r, fi);
-            rp0 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[0]);
-            rp1 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[1]);
-            rcp = hypre_StructVectorBoxData(rc, ci);
-
-            hypre_ForBoxI(j, compute_box_a)
-               {
-                  compute_box = hypre_BoxArrayBox(compute_box_a, j);
-
-                  start  = hypre_BoxIMin(compute_box);
-                  hypre_StructMapFineToCoarse(start,  cindex, stride,  startc);
-                  hypre_StructMapCoarseToFine(startc, cindex, strideR, startR);
-
-                  hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop3Begin(loop_size,
-                                      R_dbox,  startR, strideR, Ri,
-                                      r_dbox,  start,  stride,  ri,
-                                      rc_dbox, startc, stridec, rci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
-#include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
-                     {
-                        rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                             Rp1[Ri] * rp1[ri]);
-                     }
-                  hypre_BoxLoop3End(Ri, ri, rci);
-               }
+            fi++;
          }
+
+         compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, fi);
+
+         R_dbox  = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R),  fi);
+         r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
+         rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
+
+         Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
+            hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
+         Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+         rp  = hypre_StructVectorBoxData(r, fi);
+         rp0 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[0]);
+         rp1 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[1]);
+         rcp = hypre_StructVectorBoxData(rc, ci);
+
+         hypre_ForBoxI(j, compute_box_a)
+         {
+            compute_box = hypre_BoxArrayBox(compute_box_a, j);
+
+            start  = hypre_BoxIMin(compute_box);
+            hypre_StructMapFineToCoarse(start,  cindex, stride,  startc);
+            hypre_StructMapCoarseToFine(startc, cindex, strideR, startR);
+
+            hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+            hypre_BoxLoop3Begin(hypre_StructMatrixDim(R), loop_size,
+                                R_dbox,  startR, strideR, Ri,
+                                r_dbox,  start,  stride,  ri,
+                                rc_dbox, startc, stridec, rci);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ri,ri,rci) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop3For(Ri, ri, rci)
+            {
+               rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                    Rp1[Ri] * rp1[ri]);
+            }
+            hypre_BoxLoop3End(Ri, ri, rci);
+         }
+      }
    }
 
    /*-----------------------------------------------------------------------

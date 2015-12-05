@@ -75,8 +75,12 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
       double *A_offd_data = hypre_CSRMatrixData(A_offd);
       HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
       HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+      HYPRE_Int new_num_procs, *row_starts;
 
-      hypre_MPI_Group orig_group, new_group; 
+      hypre_GenerateSubComm(comm, num_rows, &new_comm); 
+
+
+      /*hypre_MPI_Group orig_group, new_group; 
       HYPRE_Int *ranks, new_num_procs, *row_starts;
 
       info = hypre_CTAlloc(HYPRE_Int, num_procs);
@@ -93,14 +97,19 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             info[new_num_procs++] = info[i];
          }
 
-      MPI_Comm_group(comm, &orig_group);
+      hypre_MPI_Comm_group(comm, &orig_group);
       hypre_MPI_Group_incl(orig_group, new_num_procs, ranks, &new_group);
-      MPI_Comm_create(comm, new_group, &new_comm);
+      hypre_MPI_Comm_create(comm, new_group, &new_comm);
       hypre_MPI_Group_free(&new_group);
-      hypre_MPI_Group_free(&orig_group);
+      hypre_MPI_Group_free(&orig_group); */
 
       if (num_rows)
       {
+         hypre_MPI_Comm_size(new_comm, &new_num_procs); 
+         info = hypre_CTAlloc(HYPRE_Int, new_num_procs);
+
+         hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
+
          /* alloc space in seq data structure only for participating procs*/
          HYPRE_BoomerAMGCreate(&coarse_solver);
          HYPRE_BoomerAMGSetMaxRowSum(coarse_solver,
@@ -202,6 +211,7 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
                        A_seq_data, info, displs2,
                        hypre_MPI_DOUBLE, new_comm );
 
+         hypre_TFree(info);
          hypre_TFree(displs);
          hypre_TFree(displs2);
          hypre_TFree(A_tmp_i);
@@ -242,8 +252,6 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          hypre_ParAMGDataUCoarse(amg_data) = U_seq;
          hypre_ParAMGDataNewComm(amg_data) = new_comm;
       }
-      hypre_TFree(info);
-      hypre_TFree(ranks);
    }
  
    return 0;
@@ -360,5 +368,113 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
    }
 
    return(Solve_err_flag);
+}
+
+/* generate sub communicator, which contains only idle processors */
+
+HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *new_comm_ptr) 
+{
+   MPI_Comm new_comm;
+   hypre_MPI_Group orig_group, new_group; 
+   hypre_MPI_Op hypre_MPI_MERGE;
+   HYPRE_Int *info, *ranks, new_num_procs, my_info, my_id, num_procs;
+   HYPRE_Int *list_len;
+
+   hypre_MPI_Comm_rank(comm,&my_id);
+
+   if (participate) 
+      my_info = 1;
+   else
+      my_info = 0;
+
+   hypre_MPI_Allreduce(&my_info, &new_num_procs, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+
+   if (new_num_procs == 0)
+   {
+      new_comm = hypre_MPI_COMM_NULL;
+      *new_comm_ptr = new_comm;
+      return 0;
+   }
+   ranks = hypre_CTAlloc(HYPRE_Int, new_num_procs+2);
+   if (new_num_procs == 1)
+   {
+      if (participate) my_info = my_id;
+      hypre_MPI_Allreduce(&my_info, &ranks[2], 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+   }
+   else
+   {
+      info = hypre_CTAlloc(HYPRE_Int, new_num_procs+2);
+      list_len = hypre_CTAlloc(HYPRE_Int, 1);
+
+      if (participate) 
+      {
+         info[0] = 1;
+         info[1] = 1;
+         info[2] = my_id;
+      }
+      else
+         info[0] = 0;
+
+      list_len[0] = new_num_procs + 2;
+
+      hypre_MPI_Op_create((hypre_MPI_User_function *)hypre_merge_lists, 0, &hypre_MPI_MERGE);
+
+      hypre_MPI_Allreduce(info, ranks, list_len[0], HYPRE_MPI_INT, hypre_MPI_MERGE, comm);
+
+      hypre_MPI_Op_free (&hypre_MPI_MERGE);
+      hypre_TFree(list_len);
+      hypre_TFree(info);
+   }
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_group(comm, &orig_group);
+   hypre_MPI_Group_incl(orig_group, new_num_procs, &ranks[2], &new_group);
+   hypre_MPI_Comm_create(comm, new_group, &new_comm);
+   hypre_MPI_Group_free(&new_group);
+   hypre_MPI_Group_free(&orig_group);
+
+   hypre_TFree(ranks);
+   
+   *new_comm_ptr = new_comm;
+   
+   return 0;
+}
+
+
+void hypre_merge_lists (HYPRE_Int *list1, HYPRE_Int* list2, hypre_int *np1, hypre_MPI_Datatype *dptr)
+{
+   HYPRE_Int i, len1, len2, indx1, indx2;
+
+   if (list1[0] == 0 || (list2[0] == 0 && list1[0] == 0))
+   {
+      return;
+   }
+   else
+   {
+      list2[0] = 1;
+      len1 = list1[1];
+      len2 = list2[1];
+      list2[1] = len1+len2;
+      if ((hypre_int)(list2[1]) > *np1+2) printf("segfault in MPI User function merge_list\n");
+      indx1 = len1+1;
+      indx2 = len2+1;
+      for (i=len1+len2+1; i > 1; i--)
+      {
+	 if (indx2 > 1 && indx1 > 1 && list1[indx1] > list2[indx2])
+         {
+            list2[i] = list1[indx1];
+            indx1--;
+         }
+         else if (indx2 > 1)
+         {
+            list2[i] = list2[indx2];
+            indx2--;
+         }
+         else if (indx1 > 1)
+         {
+            list2[i] = list1[indx1];
+            indx1--;
+         }
+      }
+   }
 }
 

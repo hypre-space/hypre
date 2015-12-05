@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef SORTED_SET_DH
 #define SORTED_SET_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _sortedset_dh {
   HYPRE_Int n;   /* max items that can be stored */

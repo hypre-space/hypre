@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,7 +26,6 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
-#include "headers.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSTABLData

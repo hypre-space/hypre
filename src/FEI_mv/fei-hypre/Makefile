@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.26 $
+# $Revision: 2.29 $
 #EHEADER**********************************************************************
 
 
@@ -15,13 +15,13 @@ include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
-SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
+SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
-CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED
-CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX
+CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DHAVE_MLI
+CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX -DHAVE_MLI
 
 C_COMPILE_FLAGS = \
  ${CDEFS}\

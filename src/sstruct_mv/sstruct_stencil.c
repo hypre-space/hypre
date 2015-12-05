@@ -7,19 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- * Member functions for hypre_SStructStencil class.
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SStructStencilRef
@@ -32,6 +23,6 @@ hypre_SStructStencilRef( hypre_SStructStencil  *stencil,
    hypre_SStructStencilRefCount(stencil) ++;
    *stencil_ref = stencil;
 
-   return 0;
+   return hypre_error_flag;
 }
 

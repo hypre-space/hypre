@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef MEM_DH_DH
 #define MEM_DH_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 extern void  Mem_dhCreate(Mem_dh *m);
 extern void  Mem_dhDestroy(Mem_dh m);

@@ -7,21 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiRestrictData data structure
  *--------------------------------------------------------------------------*/
 
 typedef struct
@@ -31,23 +22,20 @@ typedef struct
 } hypre_SysSemiRestrictData;
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiRestrictCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SysSemiRestrictCreate( void **sys_restrict_vdata_ptr) 
 {
-   HYPRE_Int                  ierr = 0;
    hypre_SysSemiRestrictData *sys_restrict_data;
 
    sys_restrict_data = hypre_CTAlloc(hypre_SysSemiRestrictData, 1);
    *sys_restrict_vdata_ptr = (void *) sys_restrict_data;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiRestrictSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -60,8 +48,6 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
                             hypre_Index           findex,
                             hypre_Index           stride                )
 {
-   HYPRE_Int                ierr = 0;
-
    hypre_SysSemiRestrictData  *sys_restrict_data = sys_restrict_vdata;
    void                      **srestrict_data;
 
@@ -83,18 +69,16 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
       r_s  = hypre_SStructPVectorSVector(r, vi);
       srestrict_data[vi] = hypre_SemiRestrictCreate( );
       hypre_SemiRestrictSetup( srestrict_data[vi], R_s, R_stored_as_transpose,
-                             r_s, rc_s, cindex, findex, stride);
+                               r_s, rc_s, cindex, findex, stride);
    }
 
    (sys_restrict_data -> nvars)        = nvars;
    (sys_restrict_data -> srestrict_data) = srestrict_data;
 
-   return ierr;
-
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiRestrict:
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -103,11 +87,9 @@ hypre_SysSemiRestrict( void                 *sys_restrict_vdata,
                        hypre_SStructPVector *r,
                        hypre_SStructPVector *rc             )
 {
-   HYPRE_Int                   ierr = 0;
-  
    hypre_SysSemiRestrictData  *sys_restrict_data = sys_restrict_vdata;
    void                      **srestrict_data
-                                = (sys_restrict_data -> srestrict_data);
+      = (sys_restrict_data -> srestrict_data);
    HYPRE_Int                   nvars = (sys_restrict_data -> nvars);
 
    void                       *sdata;
@@ -126,19 +108,15 @@ hypre_SysSemiRestrict( void                 *sys_restrict_vdata,
       hypre_SemiRestrict(sdata, R_s, r_s, rc_s);
    }
 
-   return ierr;
-
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SysSemiRestrictDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SysSemiRestrictDestroy( void *sys_restrict_vdata )
 {
-   HYPRE_Int               ierr = 0;
-
    hypre_SysSemiRestrictData *sys_restrict_data = sys_restrict_vdata;
 
    HYPRE_Int               nvars;
@@ -159,7 +137,7 @@ hypre_SysSemiRestrictDestroy( void *sys_restrict_vdata )
       hypre_TFree(srestrict_data);
       hypre_TFree(sys_restrict_data);
    }
-   return ierr;
 
+   return hypre_error_flag;
 }
 

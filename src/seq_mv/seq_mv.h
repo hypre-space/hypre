@@ -7,26 +7,25 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.21 $
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_MV_HEADER
+#define hypre_MV_HEADER
 
-
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 #include <HYPRE_config.h>
 
 #include "HYPRE_seq_mv.h"
-
-#ifndef hypre_MV_HEADER
-#define hypre_MV_HEADER
 
 #include "_hypre_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /******************************************************************************
  *
@@ -240,6 +239,7 @@ HYPRE_Int hypre_CSRMatrixSetDataOwner ( hypre_CSRMatrix *matrix , HYPRE_Int owns
 HYPRE_Int hypre_CSRMatrixSetRownnz ( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
 HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix , char *file_name );
+HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_name );
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );

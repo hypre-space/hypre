@@ -7,16 +7,14 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  * 
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -27,7 +25,6 @@ hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
                          hypre_BoxArrayArray  *dept_boxes,
                          hypre_ComputeInfo   **compute_info_ptr )
 {
-   HYPRE_Int  ierr = 0;
    hypre_ComputeInfo  *compute_info;
 
    compute_info = hypre_TAlloc(hypre_ComputeInfo, 1);
@@ -40,7 +37,7 @@ hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
 
    *compute_info_ptr = compute_info;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -51,12 +48,10 @@ hypre_ComputeInfoProjectSend( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   HYPRE_Int  ierr = 0;
-
    hypre_CommInfoProjectSend(hypre_ComputeInfoCommInfo(compute_info),
                              index, stride);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -67,12 +62,10 @@ hypre_ComputeInfoProjectRecv( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   HYPRE_Int  ierr = 0;
-
    hypre_CommInfoProjectRecv(hypre_ComputeInfoCommInfo(compute_info),
                              index, stride);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -83,15 +76,13 @@ hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
                               hypre_Index         index,
                               hypre_Index         stride )
 {
-   HYPRE_Int  ierr = 0;
-
    hypre_ProjectBoxArrayArray(hypre_ComputeInfoIndtBoxes(compute_info),
                               index, stride);
    hypre_ProjectBoxArrayArray(hypre_ComputeInfoDeptBoxes(compute_info),
                               index, stride);
    hypre_CopyIndex(stride, hypre_ComputeInfoStride(compute_info));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -100,11 +91,9 @@ hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
 HYPRE_Int
 hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 {
-   HYPRE_Int  ierr = 0;
-
    hypre_TFree(compute_info);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -121,8 +110,6 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_StructStencil   *stencil,
                          hypre_ComputeInfo    **compute_info_ptr )
 {
-   HYPRE_Int                ierr = 0;
-
    hypre_CommInfo          *comm_info;
    hypre_BoxArrayArray     *indt_boxes;
    hypre_BoxArrayArray     *dept_boxes;
@@ -185,37 +172,37 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
 
    rembox = hypre_BoxCreate();
    hypre_ForBoxI(i, boxes)
-      {
-         cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-         hypre_BoxArraySetSize(cbox_array, 6);
+   {
+      cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
+      hypre_BoxArraySetSize(cbox_array, 6);
 
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), rembox);
-         cbox_array_size = 0;
-         for (d = 0; d < 3; d++)
+      hypre_CopyBox(hypre_BoxArrayBox(boxes, i), rembox);
+      cbox_array_size = 0;
+      for (d = 0; d < 3; d++)
+      {
+         if ( (hypre_BoxVolume(rembox)) && (border[d][0]) )
          {
-            if ( (hypre_BoxVolume(rembox)) && (border[d][0]) )
-            {
-               cbox = hypre_BoxArrayBox(cbox_array, cbox_array_size);
-               hypre_CopyBox(rembox, cbox);
-               hypre_BoxIMaxD(cbox, d) =
-                  hypre_BoxIMinD(cbox, d) + border[d][0] - 1;
-               hypre_BoxIMinD(rembox, d) =
-                  hypre_BoxIMinD(cbox, d) + border[d][0];
-               cbox_array_size++;
-            }
-            if ( (hypre_BoxVolume(rembox)) && (border[d][1]) )
-            {
-               cbox = hypre_BoxArrayBox(cbox_array, cbox_array_size);
-               hypre_CopyBox(rembox, cbox);
-               hypre_BoxIMinD(cbox, d) =
-                  hypre_BoxIMaxD(cbox, d) - border[d][1] + 1;
-               hypre_BoxIMaxD(rembox, d) =
-                  hypre_BoxIMaxD(cbox, d) - border[d][1];
-               cbox_array_size++;
-            }
+            cbox = hypre_BoxArrayBox(cbox_array, cbox_array_size);
+            hypre_CopyBox(rembox, cbox);
+            hypre_BoxIMaxD(cbox, d) =
+               hypre_BoxIMinD(cbox, d) + border[d][0] - 1;
+            hypre_BoxIMinD(rembox, d) =
+               hypre_BoxIMinD(cbox, d) + border[d][0];
+            cbox_array_size++;
          }
-         hypre_BoxArraySetSize(cbox_array, cbox_array_size);
+         if ( (hypre_BoxVolume(rembox)) && (border[d][1]) )
+         {
+            cbox = hypre_BoxArrayBox(cbox_array, cbox_array_size);
+            hypre_CopyBox(rembox, cbox);
+            hypre_BoxIMinD(cbox, d) =
+               hypre_BoxIMaxD(cbox, d) - border[d][1] + 1;
+            hypre_BoxIMaxD(rembox, d) =
+               hypre_BoxIMaxD(cbox, d) - border[d][1];
+            cbox_array_size++;
+         }
       }
+      hypre_BoxArraySetSize(cbox_array, cbox_array_size);
+   }
    hypre_BoxDestroy(rembox);
 
    /*------------------------------------------------------
@@ -225,24 +212,24 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    indt_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
 
    hypre_ForBoxI(i, boxes)
-      {
-         cbox_array = hypre_BoxArrayArrayBoxArray(indt_boxes, i);
-         hypre_BoxArraySetSize(cbox_array, 1);
-         cbox = hypre_BoxArrayBox(cbox_array, 0);
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
+   {
+      cbox_array = hypre_BoxArrayArrayBoxArray(indt_boxes, i);
+      hypre_BoxArraySetSize(cbox_array, 1);
+      cbox = hypre_BoxArrayBox(cbox_array, 0);
+      hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
 
-         for (d = 0; d < 3; d++)
+      for (d = 0; d < 3; d++)
+      {
+         if ( (border[d][0]) )
          {
-            if ( (border[d][0]) )
-            {
-               hypre_BoxIMinD(cbox, d) += border[d][0];
-            }
-            if ( (border[d][1]) )
-            {
-               hypre_BoxIMaxD(cbox, d) -= border[d][1];
-            }
+            hypre_BoxIMinD(cbox, d) += border[d][0];
+         }
+         if ( (border[d][1]) )
+         {
+            hypre_BoxIMaxD(cbox, d) -= border[d][1];
          }
       }
+   }
 
 #else
 
@@ -259,12 +246,12 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    dept_boxes = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxes));
 
    hypre_ForBoxI(i, boxes)
-      {
-         cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
-         hypre_BoxArraySetSize(cbox_array, 1);
-         cbox = hypre_BoxArrayBox(cbox_array, 0);
-         hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
-      }
+   {
+      cbox_array = hypre_BoxArrayArrayBoxArray(dept_boxes, i);
+      hypre_BoxArraySetSize(cbox_array, 1);
+      cbox = hypre_BoxArrayBox(cbox_array, 0);
+      hypre_CopyBox(hypre_BoxArrayBox(boxes, i), cbox);
+   }
 
 #endif
 
@@ -275,7 +262,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
    hypre_ComputeInfoCreate(comm_info, indt_boxes, dept_boxes,
                            compute_info_ptr);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -292,7 +279,6 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
                         hypre_StructGrid      *grid,
                         hypre_ComputePkg     **compute_pkg_ptr )
 {
-   HYPRE_Int          ierr = 0;
    hypre_ComputePkg  *compute_pkg;
    hypre_CommPkg     *comm_pkg;
 
@@ -319,7 +305,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
 
    *compute_pkg_ptr = compute_pkg;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -329,8 +315,6 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
 HYPRE_Int
 hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
 {
-   HYPRE_Int ierr = 0;
-
    if (compute_pkg)
    {
       hypre_CommPkgDestroy(hypre_ComputePkgCommPkg(compute_pkg));
@@ -343,7 +327,7 @@ hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
       hypre_TFree(compute_pkg);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -357,12 +341,11 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
                                   double            *data,
                                   hypre_CommHandle **comm_handle_ptr )
 {
-   HYPRE_Int      ierr = 0;
    hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
 
-   ierr = hypre_InitializeCommunication(comm_pkg, data, data, 0, 0, comm_handle_ptr);
+   hypre_InitializeCommunication(comm_pkg, data, data, 0, 0, comm_handle_ptr);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -373,9 +356,7 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
 HYPRE_Int
 hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )
 {
-   HYPRE_Int ierr = 0;
+   hypre_FinalizeCommunication(comm_handle );
 
-   ierr = hypre_FinalizeCommunication(comm_handle );
-
-   return ierr;
+   return hypre_error_flag;
 }

@@ -7,18 +7,15 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef SORTEDLIST_DH_H
 #define SORTEDLIST_DH_H
 
 /* for private use by mpi factorization algorithms */
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 typedef struct _srecord {
     HYPRE_Int    col;

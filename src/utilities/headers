@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.17 $
+# $Revision: 2.18 $
 #EHEADER**********************************************************************
 
 
@@ -40,6 +40,7 @@ extern "C" {
 
 cat general.h                  >> $INTERNAL_HEADER
 cat mpistubs.h                 >> $INTERNAL_HEADER
+cat hypre_smp.h                >> $INTERNAL_HEADER
 cat hypre_memory.h             >> $INTERNAL_HEADER
 cat thread_mpistubs.h          >> $INTERNAL_HEADER
 cat threading.h                >> $INTERNAL_HEADER		          

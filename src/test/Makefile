@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.58 $
+# $Revision: 1.59 $
 #EHEADER**********************************************************************
 
 
@@ -65,6 +65,7 @@ BABELLIBFLAGS =\
 ##################################################################
 
 HYPRE_DRIVERS =\
+ zboxloop.c\
  ij.c\
  ij_mv.c\
  new_ij.c\
@@ -156,6 +157,10 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
+
+zboxloop: zboxloop.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 struct: struct.o
 	@echo  "Building" $@ "... "

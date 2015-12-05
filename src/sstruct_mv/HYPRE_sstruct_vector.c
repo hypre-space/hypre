@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.29 $
+ * $Revision: 2.32 $
  ***********************************************************************EHEADER*/
 
 
@@ -17,7 +17,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_mv.h"
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -65,6 +65,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
 
    hypre_SStructVectorIJVector(vector)   = NULL;
    hypre_SStructVectorParVector(vector)  = NULL;
+   hypre_SStructVectorIsComplex(vector)  = 0;
    hypre_SStructVectorGlobalSize(vector) = 0;
    hypre_SStructVectorRefCount(vector)   = 1;
    hypre_SStructVectorDataSize(vector)   = 0;
@@ -84,12 +85,13 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
    HYPRE_Int              nparts;
    hypre_SStructPVector **pvectors;
    HYPRE_Int              part;
-   HYPRE_Int              vector_type = hypre_SStructVectorObjectType(vector);
+   HYPRE_Int              vector_type;
 
-   /* GEC1002 destroying dataindices and data in vector  */
+   /* GEC1002 destroying data indices and data in vector  */
 
    if (vector)
    {
+      vector_type = hypre_SStructVectorObjectType(vector);
       hypre_SStructVectorRefCount(vector) --;
       if (hypre_SStructVectorRefCount(vector) == 0)
       {

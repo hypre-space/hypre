@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.22 $
+# $Revision: 2.23 $
 #EHEADER**********************************************************************
 
 
@@ -24,7 +24,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- headers.h\
  HYPRE_parcsr_mv.h\
  _hypre_parcsr_mv.h\
  new_commpkg.h\

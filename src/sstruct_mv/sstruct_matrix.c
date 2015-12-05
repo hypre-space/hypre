@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.33 $
+ * $Revision: 2.39 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_mv.h"
 
 /*==========================================================================
  * SStructPMatrix routines
@@ -228,10 +228,19 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
    HYPRE_Int             nvars        = hypre_SStructPMatrixNVars(pmatrix);
    HYPRE_Int           **symmetric    = hypre_SStructPMatrixSymmetric(pmatrix);
-   HYPRE_Int             num_ghost[6] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             num_ghost[6];
    hypre_StructMatrix   *smatrix;
-   HYPRE_Int             vi, vj;
+   HYPRE_Int             vi, vj, d, ndim;
 
+   ndim = hypre_SStructPMatrixNDim(pmatrix);
+   for (d = 0; d < ndim; d++)
+   {
+      num_ghost[2*d] = num_ghost[2*d+1] = 1;
+   }
+   for (d = ndim; d < 3; d++)
+   {
+      num_ghost[2*d] = num_ghost[2*d+1] = 0;
+   }
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
@@ -517,6 +526,10 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
       return hypre_error_flag;
    }
 
+   for (d = ndim; d < 3; d++)
+   {
+      num_ghost[2*d] = num_ghost[2*d+1] = 0;
+   }
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
@@ -527,10 +540,9 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
             sgrid = hypre_StructMatrixGrid(smatrix);
             /* assumes vi and vj vartypes are the same */
             hypre_SStructVariableGetOffset(vartypes[vi], ndim, varoffset);
-            for (d = 0; d < 3; d++)
+            for (d = 0; d < ndim; d++)
             {
-               num_ghost[2*d]   = hypre_IndexD(varoffset, d);
-               num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
+               num_ghost[2*d]   = num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
             }
          
             /* accumulate values from AddTo */
@@ -679,8 +691,8 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    hypre_SStructStencil   *stencil;
    HYPRE_Int              *split;
    HYPRE_Int               nvars;
-   HYPRE_Int               nrows, nnzs ;
-   HYPRE_Int               part, var, entry, b, loopi, loopj, loopk, m, mi;
+   HYPRE_Int               nrows, rowstart, nnzs ;
+   HYPRE_Int               part, var, entry, b, m, mi;
    HYPRE_Int              *row_sizes;
    HYPRE_Int               max_row_size;
 
@@ -693,14 +705,16 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
    /* GEC1002 the ghlocalsize is used to set the number of rows   */
- 
-   if (matrix_type == HYPRE_PARCSR)
-   {
-      nrows = hypre_SStructGridLocalSize(grid);
-   }
+
    if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
+      rowstart = hypre_SStructGridGhstartRank(grid);
       nrows = hypre_SStructGridGhlocalSize(grid) ;
+   }
+   else /* matrix_type == HYPRE_PARCSR */
+   {
+      rowstart = hypre_SStructGridStartRank(grid);
+      nrows = hypre_SStructGridLocalSize(grid);
    }
 
    /* set row sizes */
@@ -744,10 +758,12 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             }
             start = hypre_BoxIMin(box);
             hypre_BoxGetSize(box, loop_size);
-            hypre_BoxLoop1Begin(loop_size, ghost_box, start, stride, mi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,mi 
-#include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop1For(loopi, loopj, loopk, mi)
+            hypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
+                                ghost_box, start, stride, mi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi ) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop1For(mi)
             {
                row_sizes[m+mi] = nnzs;
             }
@@ -772,9 +788,13 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    /* RDF: THREAD? */
    for (entry = 0; entry < nUventries; entry++)
    {
-      m = iUventries[entry];
-      row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[m]);
-      max_row_size = hypre_max(max_row_size, row_sizes[m]);
+      mi = iUventries[entry];
+      m = hypre_SStructUVEntryRank(Uventries[mi]) - rowstart;
+      if ((m > -1) && (m < nrows))
+      {
+         row_sizes[m] += hypre_SStructUVEntryNUEntries(Uventries[mi]);
+         max_row_size = hypre_max(max_row_size, row_sizes[m]);
+      }
    }
 
    /* ZTODO: Update row_sizes based on neighbor off-part couplings */
@@ -827,7 +847,7 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    HYPRE_Int               *col_coords;
    HYPRE_Int                ncoeffs;
    double                  *coeffs;
-   HYPRE_Int                i, entry;
+   HYPRE_Int                i, entry, Uverank;
    /* GEC1002 the matrix type */
    HYPRE_Int                matrix_type = hypre_SStructMatrixObjectType(matrix);
 
@@ -890,11 +910,15 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
       {
          /* non-stencil entries */
          entry -= size;
-         hypre_SStructGraphFindUVEntry(graph, part, index, var, &Uventry);
-        
-	 col_coords[ncoeffs] = hypre_SStructUVEntryRank(Uventry, entry);   
-         coeffs[ncoeffs] = values[i];
-         ncoeffs++;
+         hypre_SStructGraphGetUVEntryRank(graph, part, var, index, &Uverank);
+
+         if (Uverank > -1)
+         {
+            Uventry = hypre_SStructGraphUVEntry(graph, Uverank);
+            col_coords[ncoeffs] = hypre_SStructUVEntryToRank(Uventry, entry);   
+            coeffs[ncoeffs] = values[i];
+            ncoeffs++;
+         }
       }
    }
 
@@ -987,8 +1011,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       hypre_BoxSetExtents(box, ilower, iupper);
       nrows    = hypre_BoxVolume(box)*nentries;
       ncols    = hypre_CTAlloc(HYPRE_Int, nrows);
-#define HYPRE_SMP_PRIVATE i
-#include "hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < nrows; i++)
       {
          ncols[i] = 1;

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -8,12 +8,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.12 $
+# $Revision: 1.14 $
 #EHEADER**********************************************************************
-
-
-
-
 
 TNAME=`basename $0 .sh`
 
@@ -47,7 +43,7 @@ FILES="\
 for i in $FILES
 do
   echo "# Output file: $i"
-  tail -17 $i | head -6
+  tail -21 $i | head -6
 done > ${TNAME}.out
 
 # Make sure that the output files are reasonable

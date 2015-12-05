@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -18,7 +18,7 @@
  *  Note that the level solves compute corrections to the composite solution.
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
 #define DEBUG 0
@@ -70,8 +70,8 @@ hypre_FACSolve3( void                 *fac_vdata,
    hypre_ParVector         *parx;
    hypre_ParVector         *pary;
 
-   double                   b_dot_b, r_dot_r, eps;
-   double                   e_dot_e, e_dot_e_l, x_dot_x;
+   double                   b_dot_b = 0, r_dot_r, eps = 0;
+   double                   e_dot_e = 0, e_dot_e_l, x_dot_x = 1;
                     
    HYPRE_Int                level, i;
    HYPRE_Int                ierr = 0;

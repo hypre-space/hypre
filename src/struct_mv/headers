@@ -8,12 +8,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.12 $
+# $Revision: 2.13 $
 #EHEADER**********************************************************************
-
-
-
-
 
 INTERNAL_HEADER=_hypre_struct_mv.h
 
@@ -24,12 +20,15 @@ INTERNAL_HEADER=_hypre_struct_mv.h
 cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
 cat >> $INTERNAL_HEADER <<@
 
-#include "_hypre_utilities.h"
-
-#include "HYPRE_struct_mv.h"
-
 #ifndef hypre_STRUCT_MV_HEADER
 #define hypre_STRUCT_MV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "HYPRE_struct_mv.h"
+#include "_hypre_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,18 +40,18 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat box.h                 >> $INTERNAL_HEADER	
-cat box_pthreads.h        >> $INTERNAL_HEADER	
-cat assumed_part.h        >> $INTERNAL_HEADER
-cat box_manager.h        >> $INTERNAL_HEADER
-cat struct_grid.h         >> $INTERNAL_HEADER	
-cat struct_stencil.h      >> $INTERNAL_HEADER	
-cat struct_communication.h>> $INTERNAL_HEADER	
-cat computation.h         >> $INTERNAL_HEADER	
-cat struct_matrix.h       >> $INTERNAL_HEADER	
-cat struct_vector.h       >> $INTERNAL_HEADER	
+cat box.h                  >> $INTERNAL_HEADER	
+cat box_pthreads.h         >> $INTERNAL_HEADER	
+cat assumed_part.h         >> $INTERNAL_HEADER
+cat box_manager.h          >> $INTERNAL_HEADER
+cat struct_grid.h          >> $INTERNAL_HEADER	
+cat struct_stencil.h       >> $INTERNAL_HEADER	
+cat struct_communication.h >> $INTERNAL_HEADER	
+cat computation.h          >> $INTERNAL_HEADER	
+cat struct_matrix.h        >> $INTERNAL_HEADER	
+cat struct_vector.h        >> $INTERNAL_HEADER	
 
-../utilities/protos [!F]*.c   >> $INTERNAL_HEADER
+cat protos.h               >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

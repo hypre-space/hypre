@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.22 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,7 +20,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "Common.h"
 
 #ifdef HYPRE_USING_ESSL
@@ -71,7 +71,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double 	  *Vext_data;
+   double 	  *Vext_data = NULL;
    double 	  *v_buf_data;
    double 	  *tmp_data;
 
@@ -165,8 +165,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
          
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -183,8 +184,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
             for (i = 0; i < n; i++)
             {
 
@@ -217,8 +219,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
          else
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
             for (i = 0; i < n; i++)
             {
 
@@ -297,8 +300,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
          if (relax_points == 0)
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
             for (i = 0; i < n; i++)	/* interior points first */
             {
 
@@ -330,8 +334,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
          else
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,jj,res) HYPRE_SMP_SCHEDULE
+#endif
             for (i = 0; i < n; i++) /* relax interior points */
             {
 
@@ -423,12 +428,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
           {
 	   tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -509,12 +516,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
 	  {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -593,8 +602,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
 	else
         {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -605,12 +615,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -708,12 +720,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  {
              tmp_data = Ztemp_data;
 
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1197,12 +1211,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
           {
 	   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1284,12 +1300,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
 	  {
 	   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1369,8 +1387,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          }
 	 else
          {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -1381,12 +1400,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
           {
 	   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1484,12 +1505,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
 	  {
 	   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1649,12 +1672,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1788,12 +1813,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
 	  {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -1930,8 +1957,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
         else
         {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -1942,12 +1970,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -2109,12 +2139,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	  if (num_threads > 1)
 	  {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
 	   {
 	    size = n/num_threads;
@@ -2372,12 +2404,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
               tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
            {
             size = n/num_threads;
@@ -2511,12 +2545,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
               tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
            {
             size = n/num_threads;
@@ -2653,8 +2689,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
         else
         {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < n; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -2665,12 +2702,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
               tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
            {
             size = n/num_threads;
@@ -2832,12 +2871,14 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           if (num_threads > 1)
           {
              tmp_data = Ztemp_data;
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
            for (i = 0; i < n; i++)
               tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#endif
            for (j = 0; j < num_threads; j++)
            {
             size = n/num_threads;
@@ -3050,8 +3091,6 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }
 
             relax_error = gselim(A_mat,b_vec,n_global);
-            /* use version with pivoting */
-            /* relax_error = gselim_piv(A_mat,b_vec,n_global);*/
 
             for (i = 0; i < n; i++)
             {
@@ -3186,6 +3225,173 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  *                      Gaussian Elimination
  *
  *------------------------------------------------------------------------ */
+
+HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int relax_type)
+{
+   /* Par Data Structure variables */
+   hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm           new_comm;
+
+   /* Generate sub communicator */
+   hypre_GenerateSubComm(comm, num_rows, &new_comm);
+
+   if (num_rows)
+   {
+      hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+      HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+      HYPRE_Int *A_diag_i = hypre_CSRMatrixI(A_diag);
+      HYPRE_Int *A_offd_i = hypre_CSRMatrixI(A_offd);
+      HYPRE_Int *A_diag_j = hypre_CSRMatrixJ(A_diag);
+      HYPRE_Int *A_offd_j = hypre_CSRMatrixJ(A_offd);
+      double *A_diag_data = hypre_CSRMatrixData(A_diag);
+      double *A_offd_data = hypre_CSRMatrixData(A_offd);
+      double *A_mat, *A_mat_local;
+      HYPRE_Int *comm_info, *info, *displs;
+      HYPRE_Int *mat_info, *mat_displs;
+      HYPRE_Int new_num_procs, A_mat_local_size, i, jj, column;
+      HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+
+      hypre_MPI_Comm_size(new_comm, &new_num_procs);
+      comm_info = hypre_CTAlloc(HYPRE_Int, 2*new_num_procs+1);
+      mat_info = hypre_CTAlloc(HYPRE_Int, new_num_procs);
+      mat_displs = hypre_CTAlloc(HYPRE_Int, new_num_procs+1);
+      info = &comm_info[0];
+      displs = &comm_info[new_num_procs];
+      hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
+      displs[0] = 0;
+      mat_displs[0] = 0;
+      for (i=0; i < new_num_procs; i++)
+      {
+         displs[i+1] = displs[i]+info[i];
+         mat_displs[i+1] = global_num_rows*displs[i+1];
+         mat_info[i] = global_num_rows*info[i];
+      }
+      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(double, global_num_rows);
+      A_mat_local_size =  global_num_rows*num_rows;
+      A_mat_local = hypre_CTAlloc(double, A_mat_local_size);
+      A_mat = hypre_CTAlloc(double, global_num_rows*global_num_rows);
+      /* load local matrix into A_mat_local */
+      for (i = 0; i < num_rows; i++)
+      {
+         for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+         {
+             /* need col major */
+             column = A_diag_j[jj]+first_row_index;
+             A_mat_local[i*global_num_rows + column] = A_diag_data[jj];
+         }
+         for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+         {
+             /* need col major */
+             column = col_map_offd[A_offd_j[jj]];
+             A_mat_local[i*global_num_rows + column] = A_offd_data[jj];
+         }
+      }
+      hypre_MPI_Allgatherv( A_mat_local, A_mat_local_size, hypre_MPI_DOUBLE, A_mat, 
+		mat_info, mat_displs, hypre_MPI_DOUBLE, new_comm);
+      if (relax_type == 99)
+      {
+          double *AT_mat;
+	  AT_mat = hypre_CTAlloc(double, global_num_rows*global_num_rows);
+          for (i=0; i < global_num_rows; i++)
+	     for (jj=0; jj < global_num_rows; jj++)
+                 AT_mat[i*global_num_rows + jj] = A_mat[i+ jj*global_num_rows];
+          hypre_ParAMGDataAMat(amg_data) = AT_mat;
+          hypre_TFree (A_mat);
+      }
+      else
+         hypre_ParAMGDataAMat(amg_data) = A_mat;
+      hypre_ParAMGDataCommInfo(amg_data) = comm_info;
+      hypre_ParAMGDataNewComm(amg_data) = new_comm;
+      hypre_TFree(mat_info);
+      hypre_TFree(mat_displs);
+      hypre_TFree(A_mat_local);
+   }
+   
+   return hypre_error_flag;
+}
+
+
+HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int relax_type)
+{
+   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
+   HYPRE_Int  n        = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int  error_flag = 0;
+
+   if (n)
+   {
+      MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
+      hypre_ParVector *f = hypre_ParAMGDataFArray(amg_data)[level]; 
+      hypre_ParVector *u = hypre_ParAMGDataUArray(amg_data)[level]; 
+      double *A_mat = hypre_ParAMGDataAMat(amg_data);
+      double *b_vec = hypre_ParAMGDataBVec(amg_data);
+      double *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f)); 
+      double *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u)); 
+      double *A_tmp;
+      HYPRE_Int *comm_info = hypre_ParAMGDataCommInfo(amg_data);
+      HYPRE_Int *displs, *info;
+      HYPRE_Int  n_global = hypre_ParCSRMatrixGlobalNumRows(A);
+      HYPRE_Int new_num_procs, i, my_info;
+      HYPRE_Int first_index = hypre_ParCSRMatrixFirstRowIndex(A);
+      HYPRE_Int one_i = 1;
+
+      hypre_MPI_Comm_size(new_comm, &new_num_procs);
+      info = &comm_info[0];
+      displs = &comm_info[new_num_procs];
+      hypre_MPI_Allgatherv ( f_data, n, hypre_MPI_DOUBLE,
+                          b_vec, info, displs,
+                          hypre_MPI_DOUBLE, new_comm );
+
+      A_tmp = hypre_CTAlloc (double, n_global*n_global);
+      for (i=0; i < n_global*n_global; i++)
+         A_tmp[i] = A_mat[i];
+
+      if (relax_type == 9)
+      {
+         error_flag = gselim(A_tmp,b_vec,n_global);
+      }
+      else if (relax_type == 99) /* use pivoting */
+      {
+         HYPRE_Int *piv;
+         piv = hypre_CTAlloc(HYPRE_Int, n_global);
+
+         /* write over A with LU */
+#ifdef HYPRE_USING_ESSL
+         dgetrf(n_global, n_global, A_tmp, n_global, piv, &my_info);
+
+#else
+         hypre_F90_NAME_LAPACK(dgetrf, DGETRF)(&n_global, &n_global, 
+                                      A_tmp, &n_global, piv, &my_info);
+#endif
+            
+         /*now b_vec = inv(A)*b_vec  */
+#ifdef HYPRE_USING_ESSL
+         dgetrs("N", n_global, &one_i, A_tmp, 
+                     n_global, piv, b_vec, 
+                     n_global, &my_info);
+
+#else
+         hypre_F90_NAME_LAPACK(dgetrs, DGETRS)("N", &n_global, &one_i, A_tmp, 
+                                             &n_global, piv, b_vec, 
+                                             &n_global, &my_info);
+#endif
+         hypre_TFree(piv);
+      }
+      for (i = 0; i < n; i++)
+      {
+         u_data[i] = b_vec[first_index+i];
+      }
+      hypre_TFree(A_tmp);
+   }
+   if (error_flag) hypre_error(HYPRE_ERROR_GENERIC);
+
+   return hypre_error_flag;
+}
+
 
 HYPRE_Int gselim(A,x,n)
 double *A;

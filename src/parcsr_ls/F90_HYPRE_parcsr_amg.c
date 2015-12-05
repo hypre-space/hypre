@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.25 $
+ * $Revision: 2.27 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
@@ -182,6 +182,38 @@ hypre_F90_IFACE(hypre_boomeramggetmaxcoarsesize, HYPRE_BOOMERAMGGETMAXCOARSESIZE
       ( HYPRE_BoomerAMGGetMaxCoarseSize(
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassIntRef (max_coarse_size) ) );
+}
+
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMinCoarseSize, HYPRE_BoomerAMGGetMinCoarseSize
+ *--------------------------------------------------------------------------*/
+
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetmincoarsesize, HYPRE_BOOMERAMGSETMINCOARSESIZE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *min_coarse_size,
+     hypre_F90_Int *ierr        )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetMinCoarseSize(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (min_coarse_size) ) );
+}
+
+
+
+void
+hypre_F90_IFACE(hypre_boomeramggetmincoarsesize, HYPRE_BOOMERAMGGETMINCOARSESIZE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *min_coarse_size,
+     hypre_F90_Int *ierr        )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGGetMinCoarseSize(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassIntRef (min_coarse_size) ) );
 }
 
 

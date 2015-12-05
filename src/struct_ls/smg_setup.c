@@ -7,20 +7,15 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
-/******************************************************************************
- *
- *
- *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "smg.h"
 
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
- * hypre_SMGSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -86,7 +81,6 @@ hypre_SMGSetup( void               *smg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -433,6 +427,6 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 #endif
 
-   return ierr;
+   return hypre_error_flag;
 }
 

@@ -7,18 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_Log2:
@@ -41,5 +33,5 @@ hypre_Log2(HYPRE_Int p)
       p /= 2;
    }
  
-   return  e;
+   return e;
 }

@@ -7,20 +7,19 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
-
-
+#include "_hypre_Euclid.h"
 
 /* Contains definitions of globally scoped  objects; 
  * Also, functions for error handling and message logging.
  */
 
-#include "euclid_common.h"
-#include "Parser_dh.h"
-#include "Mem_dh.h"
-#include "TimeLog_dh.h"
+/* #include "euclid_common.h" */
+/* #include "Parser_dh.h" */
+/* #include "Mem_dh.h" */
+/* #include "TimeLog_dh.h" */
 extern void sigRegister_dh(); /* use sig_dh.h if not for euclid_signals_len */
 
 /*-------------------------------------------------------------------------

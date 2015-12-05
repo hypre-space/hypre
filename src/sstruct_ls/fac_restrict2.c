@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -23,23 +23,23 @@
  *  inside patch.
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
-#define MapCellRank(i, j , k, rank) \
-{\
-   rank = 4*k + 2*j + i;\
-}
+#define MapCellRank(i, j , k, rank)             \
+   {                                            \
+      rank = 4*k + 2*j + i;                     \
+   }
 
-#define InverseMapCellRank(rank, stencil) \
-{\
-   HYPRE_Int ij,ii,jj,kk;\
-   ij = (rank%4);\
-   ii = (ij%2);\
-   jj = (ij-ii)/2;\
-   kk = (rank-2*jj-ii)/4;\
-   hypre_SetIndex(stencil, ii, jj, kk);\
-}
+#define InverseMapCellRank(rank, stencil)       \
+   {                                            \
+      HYPRE_Int ij,ii,jj,kk;                    \
+      ij = (rank%4);                            \
+      ii = (ij%2);                              \
+      jj = (ij-ii)/2;                           \
+      kk = (rank-2*jj-ii)/4;                    \
+      hypre_SetIndex(stencil, ii, jj, kk);      \
+   }
 
 /*--------------------------------------------------------------------------
  * hypre_FacSemiRestrictData data structure
@@ -76,7 +76,7 @@ hypre_FacSemiRestrictCreate2( void **fac_restrict_vdata_ptr)
    hypre_FacSemiRestrictData2 *fac_restrict_data;
 
    fac_restrict_data       = hypre_CTAlloc(hypre_FacSemiRestrictData2, 1);
-  *fac_restrict_vdata_ptr  = (void *) fac_restrict_data;
+   *fac_restrict_vdata_ptr  = (void *) fac_restrict_data;
 
    return ierr;
 }
@@ -154,7 +154,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    hypre_ClearIndex(zero_index);
 
    nvars= hypre_SStructPVectorNVars(rc);
-  (fac_restrict_data -> nvars)=  nvars;
+   (fac_restrict_data -> nvars)=  nvars;
    hypre_CopyIndex(rfactors, (fac_restrict_data -> stride));
    for (i= ndim; i< 3; i++)
    {
@@ -220,7 +220,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    for (vars= 0; vars< nvars; vars++)
    {
       boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
-                                part_fine, vars);
+                                          part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
       identity_arrayboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
@@ -229,7 +229,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
       { 
          hypre_CopyBox(hypre_BoxArrayBox(boxarray, ci), &box);
          hypre_AppendBox(&box, 
-                          hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
+                         hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
        
          hypre_StructMapCoarseToFine(hypre_BoxIMin(&box), zero_index,
                                      rfactors, hypre_BoxIMin(&scaled_box));
@@ -290,7 +290,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    for (vars= 0; vars< nvars; vars++)
    {
       boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
-                                       part_crse, vars);
+                                          part_crse, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       fullwgt_sendboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
       fullwgt_ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
@@ -339,22 +339,22 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
             if (proc != myproc)
             {
                hypre_AppendBox(&box,
-                                hypre_BoxArrayArrayBoxArray(fullwgt_sendboxes[vars], fi));
+                               hypre_BoxArrayArrayBoxArray(fullwgt_sendboxes[vars], fi));
                hypre_AppendBox(&box,
-                                hypre_BoxArrayArrayBoxArray(send_boxes[vars], fi));
+                               hypre_BoxArrayArrayBoxArray(send_boxes[vars], fi));
 
                send_processes[vars][fi][cnt1]= proc;
                hypre_SStructBoxManEntryGetBoxnum(boxman_entries[i],
-                                              &send_remote_boxnums[vars][fi][cnt1]);
+                                                 &send_remote_boxnums[vars][fi][cnt1]);
                cnt1++;
             }
            
             else
             {
                hypre_AppendBox(&box,
-                                hypre_BoxArrayArrayBoxArray(fullwgt_ownboxes[vars], fi));
+                               hypre_BoxArrayArrayBoxArray(fullwgt_ownboxes[vars], fi));
                hypre_SStructBoxManEntryGetBoxnum(boxman_entries[i],
-                                              &own_cboxnums[vars][fi][cnt2]);
+                                                 &own_cboxnums[vars][fi][cnt2]);
                cnt2++;
             }
          }
@@ -363,9 +363,9 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
       }  /* hypre_ForBoxI(fi, boxarray) */
    }     /* for (vars= 0; vars< nvars; vars++) */
 
-  (fac_restrict_data -> fullwgt_sendboxes)= fullwgt_sendboxes;
-  (fac_restrict_data -> fullwgt_ownboxes)= fullwgt_ownboxes;
-  (fac_restrict_data -> own_cboxnums)= own_cboxnums;
+   (fac_restrict_data -> fullwgt_sendboxes)= fullwgt_sendboxes;
+   (fac_restrict_data -> fullwgt_ownboxes)= fullwgt_ownboxes;
+   (fac_restrict_data -> own_cboxnums)= own_cboxnums;
    
    /*--------------------------------------------------------------------------
     * coarsened fboxes this processor will receive. 
@@ -384,7 +384,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    for (vars= 0; vars< nvars; vars++)
    {
       boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
-                                part_fine, vars);
+                                          part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       
       recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
@@ -430,7 +430,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                hypre_StructMapFineToCoarse(hypre_BoxIMax(&box), zero_index,
                                            rfactors, hypre_BoxIMax(&box));
                hypre_AppendBox(&box,
-                                hypre_BoxArrayArrayBoxArray(recv_boxes[vars], ci));
+                               hypre_BoxArrayArrayBoxArray(recv_boxes[vars], ci));
 
                recv_processes[vars][ci][cnt1]= proc;
                cnt1++;
@@ -463,15 +463,15 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                           hypre_StructVectorComm(s_rc),
                           &interlevel_comm[vars]);
       hypre_CommInfoDestroy(comm_info);
-  }
-  hypre_TFree(send_boxes);
-  hypre_TFree(recv_boxes);
-  hypre_TFree(send_processes);
-  hypre_TFree(recv_processes);
-  hypre_TFree(send_remote_boxnums);
-  hypre_TFree(recv_remote_boxnums);
+   }
+   hypre_TFree(send_boxes);
+   hypre_TFree(recv_boxes);
+   hypre_TFree(send_processes);
+   hypre_TFree(recv_processes);
+   hypre_TFree(send_remote_boxnums);
+   hypre_TFree(recv_remote_boxnums);
       
-  (fac_restrict_data -> interlevel_comm)= interlevel_comm;
+   (fac_restrict_data -> interlevel_comm)= interlevel_comm;
 
    return ierr;
 
@@ -523,7 +523,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    double               ***xcp;
    double               ***xcp_temp;
 
-   hypre_Index             loop_size;
+   hypre_Index             loop_size, lindex;
    hypre_Index             start, fbox_size, node_offset;
    hypre_Index             startc;
    hypre_Index             stridec;
@@ -531,7 +531,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_Index             temp_index1, temp_index2;
 
    HYPRE_Int               fi, ci;
-   HYPRE_Int               loopi, loopj, loopk;
    HYPRE_Int               nvars, var;
    HYPRE_Int               volume_crse_cell;
 
@@ -658,21 +657,21 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 
       hypre_ForBoxI(fi, fgrid_boxes)
       {
-          fgrid_box= hypre_BoxArrayBox(fgrid_boxes, fi);
+         fgrid_box= hypre_BoxArrayBox(fgrid_boxes, fi);
 
          /*--------------------------------------------------------------------
           * Get the ptrs for the fine struct_vectors.
           *--------------------------------------------------------------------*/
-          xf_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xf_var), fi);
-          for (k= 0; k< rfactors[2]; k++)
-          {
-             for (j=0; j< rfactors[1]; j++)
-             {
-                hypre_SetIndex(temp_index1, 0, j, k);
-                xfp[k][j]= hypre_StructVectorBoxData(xf_var, fi) +
-                           hypre_BoxOffsetDistance(xf_dbox, temp_index1);
-             }
-          }
+         xf_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xf_var), fi);
+         for (k= 0; k< rfactors[2]; k++)
+         {
+            for (j=0; j< rfactors[1]; j++)
+            {
+               hypre_SetIndex(temp_index1, 0, j, k);
+               xfp[k][j]= hypre_StructVectorBoxData(xf_var, fi) +
+                  hypre_BoxOffsetDistance(xf_dbox, temp_index1);
+            }
+         }
 
          /*--------------------------------------------------------------------
           * Get the ptrs for the coarse struct_vectors. Note that the coarse
@@ -680,128 +679,130 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
           * Work vectors were created this way. 
           * Dimensionally dependent.
           *--------------------------------------------------------------------*/
-          xc_temp_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_temp), fi);
-          if (ndim > 1)
-          {
-             for (k= 0; k< (ndim-1); k++)
-             {
-                for (j=0; j< 2; j++)
-                {
-                   hypre_SetIndex(temp_index1, 0, j, k);
-                   xcp_temp[k][j]= hypre_StructVectorBoxData(xc_temp, fi) +
-                                   hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
-                }
-             }
-          }
-          else /* 1d case */
-          {
-             hypre_ClearIndex(temp_index1);
-             xcp_temp[0][0]= hypre_StructVectorBoxData(xc_temp, fi) +
-                             hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
-          }
-          hypre_CopyIndex(hypre_BoxIMin(fgrid_box), start);
-          hypre_CopyIndex(hypre_BoxIMax(fgrid_box), fbox_size);
+         xc_temp_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_temp), fi);
+         if (ndim > 1)
+         {
+            for (k= 0; k< (ndim-1); k++)
+            {
+               for (j=0; j< 2; j++)
+               {
+                  hypre_SetIndex(temp_index1, 0, j, k);
+                  xcp_temp[k][j]= hypre_StructVectorBoxData(xc_temp, fi) +
+                     hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
+               }
+            }
+         }
+         else /* 1d case */
+         {
+            hypre_ClearIndex(temp_index1);
+            xcp_temp[0][0]= hypre_StructVectorBoxData(xc_temp, fi) +
+               hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
+         }
+         hypre_CopyIndex(hypre_BoxIMin(fgrid_box), start);
+         hypre_CopyIndex(hypre_BoxIMax(fgrid_box), fbox_size);
 
          /*--------------------------------------------------------------------
           * Adjust "fbox_size" so that this hypre_Index is appropriate for
           * ndim < 3. 
           *    fbox_size= hypre_BoxIMax(fgrid_box)-hypre_BoxIMin(fgrid_box)+1.
           *--------------------------------------------------------------------*/
-          for (i= 0; i< 3; i++)
-          {
-             fbox_size[i]-= (start[i]-1);
-          }
+         for (i= 0; i< 3; i++)
+         {
+            fbox_size[i]-= (start[i]-1);
+         }
 
          /*--------------------------------------------------------------------
           * The fine intersection box may not be divisible by the refinement
           * factor. We need to know the remainder to determine which
           * coarse node gets the restricted values.
           *--------------------------------------------------------------------*/
-          hypre_ClearIndex(node_offset);
-          for (i= 0; i< ndim; i++)
-          {
-             node_offset[i]= rfactors[i]-(start[i]%rfactors[i])-1;
-          }
+         hypre_ClearIndex(node_offset);
+         for (i= 0; i< ndim; i++)
+         {
+            node_offset[i]= rfactors[i]-(start[i]%rfactors[i])-1;
+         }
 
-          hypre_SetIndex(temp_index2, 0, 0, 0);
-          hypre_StructMapFineToCoarse(start, temp_index2, rfactors, startc);
+         hypre_SetIndex(temp_index2, 0, 0, 0);
+         hypre_StructMapFineToCoarse(start, temp_index2, rfactors, startc);
 
-          hypre_BoxGetSize(fgrid_box, temp_index1);
-          hypre_StructMapFineToCoarse(temp_index1, temp_index2, rfactors, loop_size);
+         hypre_BoxGetSize(fgrid_box, temp_index1);
+         hypre_StructMapFineToCoarse(temp_index1, temp_index2, rfactors, loop_size);
 
-          hypre_BoxLoop2Begin(loop_size,
-                              xf_dbox, start, stride,  xfi,
-                              xc_temp_dbox, startc, stridec, xci);
+         hypre_BoxLoop2Begin(ndim, loop_size,
+                             xf_dbox, start, stride,  xfi,
+                             xc_temp_dbox, startc, stridec, xci);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2
-#include "hypre_box_smp_forloop.h"
-#else
-          hypre_BoxLoopSetOneBlock();
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2) HYPRE_SMP_SCHEDULE
 #endif
-          hypre_BoxLoop2For(loopi, loopj, loopk, xfi, xci)
-          {
-              /*-----------------------------------------------------------------
-               * Arithmetic average the refinement patch values to get 
-               * restricted coarse grid values in an agglomerate; i.e.,
-               * piecewise constant restriction.  
-               *-----------------------------------------------------------------*/
-               imax= hypre_min( (fbox_size[0]-loopi*stride[0]), rfactors[0] );
-               jmax= hypre_min( (fbox_size[1]-loopj*stride[1]), rfactors[1] );
-               kmax= hypre_min( (fbox_size[2]-loopk*stride[2]), rfactors[2] );
+#else
+         hypre_BoxLoopSetOneBlock();
+#endif
+         hypre_BoxLoop2For(xfi, xci)
+         {
+            /*-----------------------------------------------------------------
+             * Arithmetic average the refinement patch values to get 
+             * restricted coarse grid values in an agglomerate; i.e.,
+             * piecewise constant restriction.  
+             *-----------------------------------------------------------------*/
+            hypre_BoxLoopGetIndex(lindex);
+            imax= hypre_min( (fbox_size[0]-lindex[0]*stride[0]), rfactors[0] );
+            jmax= hypre_min( (fbox_size[1]-lindex[1]*stride[1]), rfactors[1] );
+            kmax= hypre_min( (fbox_size[2]-lindex[2]*stride[2]), rfactors[2] );
 
-               for (i= 0; i< num_coarse_cells; i++)
+            for (i= 0; i< num_coarse_cells; i++)
+            {
+               sum[i]= 0.0;
+            }
+
+            for (k= 0; k< kmax; k++)
+            {
+               kcell= 1;
+               if (k <= node_offset[2])
                {
-                  sum[i]= 0.0;
+                  kcell= 0;
                }
 
-               for (k= 0; k< kmax; k++)
+               for (j= 0; j< jmax; j++)
                {
-                  kcell= 1;
-                  if (k <= node_offset[2])
+                  jcell= 1;
+                  if (j <= node_offset[1])
                   {
-                     kcell= 0;
+                     jcell= 0;
                   }
 
-                  for (j= 0; j< jmax; j++)
+                  for (i= 0; i< imax; i++)
                   {
-                     jcell= 1;
-                     if (j <= node_offset[1])
+                     icell= 1;
+                     if (i <= node_offset[0])
                      {
-                         jcell= 0;
+                        icell= 0;
                      }
 
-                     for (i= 0; i< imax; i++)
-                     {
-                        icell= 1;
-                        if (i <= node_offset[0])
-                        {
-                           icell= 0;
-                        }
-
-                        MapCellRank(icell, jcell , kcell, ijkcell);
-                        sum[ijkcell]+= xfp[k][j][xfi+i];
-                     }   
-                  }     
-               }       
+                     MapCellRank(icell, jcell , kcell, ijkcell);
+                     sum[ijkcell]+= xfp[k][j][xfi+i];
+                  }   
+               }     
+            }       
  
-              /*-----------------------------------------------------------------
-               * Add the compute averages to the correct coarse cell.
-               *-----------------------------------------------------------------*/
-               for (ijkcell= 0; ijkcell< num_coarse_cells; ijkcell++)
+            /*-----------------------------------------------------------------
+             * Add the compute averages to the correct coarse cell.
+             *-----------------------------------------------------------------*/
+            for (ijkcell= 0; ijkcell< num_coarse_cells; ijkcell++)
+            {
+               if (sum[ijkcell] != 0.0)
                {
-                  if (sum[ijkcell] != 0.0)
-                  {
-                     sum[ijkcell]/= scaling;
-                     InverseMapCellRank(ijkcell, temp_index2);
-                     i=  temp_index2[0];
-                     j=  temp_index2[1];
-                     k=  temp_index2[2];
-                     xcp_temp[k][j][xci+i]+= sum[ijkcell];
-                  }
+                  sum[ijkcell]/= scaling;
+                  InverseMapCellRank(ijkcell, temp_index2);
+                  i=  temp_index2[0];
+                  j=  temp_index2[1];
+                  k=  temp_index2[2];
+                  xcp_temp[k][j][xci+i]+= sum[ijkcell];
                }
+            }
 
-          }
-          hypre_BoxLoop2End(xfi, xci);
+         }
+         hypre_BoxLoop2End(xfi, xci);
 
       }   /* hypre_ForBoxI(fi, fgrid_boxes) */
    }      /* for (var= 0; var< nvars; var++)*/
@@ -813,14 +814,14 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
     *------------------------------------------------------------------*/
    for (var= 0; var< nvars; var++)
    {
-       xc_temp= hypre_SStructPVectorSVector(fgrid_cvectors, var);
-       xc_var= hypre_SStructPVectorSVector(xc, var);
-       hypre_InitializeCommunication(interlevel_comm[var], 
-                                     hypre_StructVectorData(xc_temp),
-                                     hypre_StructVectorData(xc_var), 0, 0,
-                                     &comm_handle);
+      xc_temp= hypre_SStructPVectorSVector(fgrid_cvectors, var);
+      xc_var= hypre_SStructPVectorSVector(xc, var);
+      hypre_InitializeCommunication(interlevel_comm[var], 
+                                    hypre_StructVectorData(xc_temp),
+                                    hypre_StructVectorData(xc_var), 0, 0,
+                                    &comm_handle);
 
-       hypre_FinalizeCommunication(comm_handle);
+      hypre_FinalizeCommunication(comm_handle);
    }
 
    /*------------------------------------------------------------------
@@ -842,10 +843,10 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
          xc_temp_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_temp), ci);
          xcp_temp[0][0]= hypre_StructVectorBoxData(xc_temp, ci);
 
-        /*--------------------------------------------------------------
-         * Each ci box of cgrid_box has a boxarray of subboxes. Copy
-         * each of these subboxes to the coarse vector.
-         *--------------------------------------------------------------*/
+         /*--------------------------------------------------------------
+          * Each ci box of cgrid_box has a boxarray of subboxes. Copy
+          * each of these subboxes to the coarse vector.
+          *--------------------------------------------------------------*/
          own_boxes= hypre_BoxArrayArrayBoxArray(arrayarray_ownboxes, ci);
          boxnums  = own_cboxnums[var][ci];
          hypre_ForBoxI(i, own_boxes)
@@ -855,14 +856,15 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             xcp[0][0]= hypre_StructVectorBoxData(xc_var, boxnums[i]);
 
             hypre_BoxGetSize(own_box, loop_size);
-            hypre_BoxLoop2Begin(loop_size,
+            hypre_BoxLoop2Begin(ndim, loop_size,
                                 xc_temp_dbox, hypre_BoxIMin(own_box), stridec, xfi,
                                 xf_dbox, hypre_BoxIMin(own_box), stridec, xci);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xfi,xci
-#include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop2For(loopi, loopj, loopk, xfi, xci)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xfi,xci) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop2For(xfi, xci)
             {
-                xcp[0][0][xci]+= xcp_temp[0][0][xfi];
+               xcp[0][0][xci]+= xcp_temp[0][0][xfi];
             }
             hypre_BoxLoop2End(xfi, xci);
          
@@ -873,7 +875,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_TFree(sum);
    for (k= 0; k< rfactors[2]; k++)
    {
-       hypre_TFree(xfp[k]);
+      hypre_TFree(xfp[k]);
    }
    hypre_TFree(xfp);
 
@@ -906,12 +908,13 @@ hypre_FacSemiRestrictDestroy2( void *fac_restrict_vdata )
 {
    HYPRE_Int                   ierr = 0;
    hypre_FacSemiRestrictData2 *fac_restrict_data = fac_restrict_vdata;
-   HYPRE_Int                   nvars= (fac_restrict_data-> nvars); 
+   HYPRE_Int                   nvars;
    HYPRE_Int                   i, j;
 
 
    if (fac_restrict_data)
    {
+      nvars= (fac_restrict_data-> nvars); 
       hypre_SStructPVectorDestroy(fac_restrict_data-> fgrid_cvectors);
 
       for (i= 0; i< nvars; i++)
@@ -920,7 +923,7 @@ hypre_FacSemiRestrictDestroy2( void *fac_restrict_vdata )
          hypre_BoxArrayArrayDestroy((fac_restrict_data -> fullwgt_sendboxes)[i]);
          for (j= 0; j< hypre_BoxArrayArraySize(fac_restrict_data->fullwgt_ownboxes[i]); j++)
          {
-             hypre_TFree((fac_restrict_data -> own_cboxnums)[i][j]);
+            hypre_TFree((fac_restrict_data -> own_cboxnums)[i][j]);
          }
          hypre_TFree((fac_restrict_data -> own_cboxnums)[i]);
 

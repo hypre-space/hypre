@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.15 $
+# $Revision: 2.16 $
 #EHEADER**********************************************************************
 
 
@@ -24,7 +24,6 @@ C_COMPILE_FLAGS =\
 
 HEADERS =\
  csr_matrix.h\
- headers.h\
  HYPRE_seq_mv.h\
  mapped_matrix.h\
  multiblock_matrix.h\

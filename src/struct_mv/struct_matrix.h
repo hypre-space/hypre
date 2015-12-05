@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -84,6 +82,9 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
+
+#define hypre_StructMatrixDim(matrix) \
+hypre_StructGridDim(hypre_StructMatrixGrid(matrix))
 
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)

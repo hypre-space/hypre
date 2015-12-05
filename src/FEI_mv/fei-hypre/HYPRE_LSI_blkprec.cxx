@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
- ***********************************************************************EHEADER*/
-
-
-
-
+ * $Revision: 2.20 $
+ *********************************************************************EHEADER*/
 
 //******************************************************************************
 //******************************************************************************
@@ -42,11 +38,11 @@
 #include <string.h>
 #include <stdio.h>
 
+#if 0 /* RDF: Not sure this is really needed */
 #ifdef WIN32
 #define strcmp _stricmp
 #endif
-
-#define HAVE_MLI
+#endif
 
 //******************************************************************************
 // HYPRE include files

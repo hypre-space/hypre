@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -20,7 +20,7 @@
  *
  ******************************************************************************/
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_Maxwell_Grad.c
@@ -77,10 +77,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    double                *vals;
 
    hypre_Index            index;
-   hypre_Index            loop_size, start;
+   hypre_Index            loop_size, start, lindex;
    hypre_Index            shift, shift2;
    hypre_Index           *offsets, *varoffsets;
-   HYPRE_Int              loopi, loopj, loopk;
 
    HYPRE_Int              nparts= hypre_SStructGridNParts(grid);
    HYPRE_Int              ndim  = hypre_SStructGridNDim(grid);
@@ -109,15 +108,15 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       hypre_IndexD(shift, i)= -1;
    }
 
-  /* To get the correct ranks, separate node & edge grids must be formed. 
-     Note that the edge vars must be ordered the same way as is in grid.*/
+   /* To get the correct ranks, separate node & edge grids must be formed. 
+      Note that the edge vars must be ordered the same way as is in grid.*/
    HYPRE_SStructGridCreate(comm, ndim, nparts, &node_grid);
    HYPRE_SStructGridCreate(comm, ndim, nparts, &edge_grid);
 
    vartype_node = HYPRE_SSTRUCT_VARIABLE_NODE;
    vartype_edges= hypre_TAlloc(HYPRE_SStructVariable, ndim);
 
-  /* Assuming the same edge variable types on all parts */
+   /* Assuming the same edge variable types on all parts */
    pgrid   = hypre_SStructGridPGrid(grid, 0);
    vartypes= hypre_SStructPGridVarTypes(pgrid);
    nvars   = hypre_SStructPGridNVars(pgrid);
@@ -174,11 +173,11 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       boxes= hypre_StructGridBoxes(var_grid);
       hypre_ForBoxI(j, boxes)
       {
-          box= hypre_BoxArrayBox(boxes, j);
-          HYPRE_SStructGridSetExtents(node_grid, part,
-                                      hypre_BoxIMin(box), hypre_BoxIMax(box));
-          HYPRE_SStructGridSetExtents(edge_grid, part,
-                                      hypre_BoxIMin(box), hypre_BoxIMax(box));
+         box= hypre_BoxArrayBox(boxes, j);
+         HYPRE_SStructGridSetExtents(node_grid, part,
+                                     hypre_BoxIMin(box), hypre_BoxIMax(box));
+         HYPRE_SStructGridSetExtents(edge_grid, part,
+                                     hypre_BoxIMin(box), hypre_BoxIMax(box));
       }
       HYPRE_SStructGridSetVariables(node_grid, part, 1, &vartype_node);
       HYPRE_SStructGridSetVariables(edge_grid, part, ndim, vartype_edges);
@@ -186,13 +185,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_SStructGridAssemble(node_grid);
    HYPRE_SStructGridAssemble(edge_grid);
 
-  /* CREATE IJ_MATRICES- need to find the size of each one. Notice that the row
-     and col ranks of these matrices can be created using only grid information. 
-     Grab the first part, first variable, first box, and lower index (lower rank);
-     Grab the last part, last variable, last box, and upper index (upper rank). */
+   /* CREATE IJ_MATRICES- need to find the size of each one. Notice that the row
+      and col ranks of these matrices can be created using only grid information. 
+      Grab the first part, first variable, first box, and lower index (lower rank);
+      Grab the last part, last variable, last box, and upper index (upper rank). */
  
-  /* Grad: node(col) -> edge(row). Same for 2-d and 3-d */
-  /* lower rank */
+   /* Grad: node(col) -> edge(row). Same for 2-d and 3-d */
+   /* lower rank */
    part= 0;
    i   = 0;
 
@@ -210,7 +209,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    box     = hypre_BoxArrayBox(boxes, 0);
    hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &jlower);
 
-  /* upper rank */
+   /* upper rank */
    part= nparts-1;
 
    pgrid   = hypre_SStructGridPGrid(edge_grid, part);
@@ -239,11 +238,11 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_IJMatrixSetObjectType(T_grad, HYPRE_PARCSR);
    HYPRE_IJMatrixInitialize(T_grad);
 
-  /*------------------------------------------------------------------------------
-   * fill up the parcsr matrix.
-   *------------------------------------------------------------------------------*/
+   /*------------------------------------------------------------------------------
+    * fill up the parcsr matrix.
+    *------------------------------------------------------------------------------*/
 
-  /* count the no. of rows. Make sure repeated nodes along the boundaries are counted.*/
+   /* count the no. of rows. Make sure repeated nodes along the boundaries are counted.*/
    nrows = 0;
    nnodes= 0;
    for (part= 0; part< nparts; part++)
@@ -257,7 +256,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          hypre_ForBoxI(j, boxes)
          {
             box= hypre_BoxArrayBox(boxes, j);
-           /* make slightly bigger to handle any shared nodes */
+            /* make slightly bigger to handle any shared nodes */
             hypre_CopyBox(box, &layer);
             hypre_AddIndex(hypre_BoxIMin(&layer), shift, hypre_BoxIMin(&layer));
             hypre_SubtractIndex(hypre_BoxIMax(&layer), shift, hypre_BoxIMax(&layer));
@@ -271,7 +270,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       hypre_ForBoxI(j, boxes)
       {
          box= hypre_BoxArrayBox(boxes, j);
-        /* make slightly bigger to handle any shared nodes */
+         /* make slightly bigger to handle any shared nodes */
          hypre_CopyBox(box, &layer);
          hypre_AddIndex(hypre_BoxIMin(&layer), shift, hypre_BoxIMin(&layer));
          hypre_SubtractIndex(hypre_BoxIMax(&layer), shift, hypre_BoxIMax(&layer));
@@ -282,8 +281,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    eflag = hypre_CTAlloc(HYPRE_Int, nrows);
    nflag = hypre_CTAlloc(HYPRE_Int, nnodes);
 
-  /* Set eflag to have the number of nodes connected to an edge (2) and
-     nflag to have the number of edges connect to a node. */
+   /* Set eflag to have the number of nodes connected to an edge (2) and
+      nflag to have the number of edges connect to a node. */
    for (i= 0; i< nrows; i++)
    {
       eflag[i]= 2;
@@ -294,14 +293,14 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       nflag[i]= j;
    }
 
-  /* Determine physical boundary points. Get the rank and set flag[rank]= 0.
-     This will boundary dof, i.e., flag[rank]= 0 will flag a boundary dof. */
+   /* Determine physical boundary points. Get the rank and set flag[rank]= 0.
+      This will boundary dof, i.e., flag[rank]= 0 will flag a boundary dof. */
 
    start_rank1= hypre_SStructGridStartRank(node_grid);
    start_rank2= hypre_SStructGridStartRank(edge_grid);
    for (part= 0; part< nparts; part++)
    {
-     /* node flag */
+      /* node flag */
       pgrid   = hypre_SStructGridPGrid(node_grid, part);  
       var_grid= hypre_SStructPGridSGrid(pgrid, 0);
       boxes   = hypre_StructGridBoxes(var_grid);
@@ -324,21 +323,23 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
          
-               hypre_BoxLoop0Begin(loop_size);
+               hypre_BoxLoop0Begin(ndim, loop_size);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
+#endif
 #else
                hypre_BoxLoopSetOneBlock();
 #endif
-               hypre_BoxLoop0For(loopi, loopj, loopk)
+               hypre_BoxLoop0For()
                {
-                   hypre_SetIndex(index, loopi, loopj, loopk);
-                   hypre_AddIndex(index, start, index);
+                  hypre_BoxLoopGetIndex(lindex);
+                  hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
+                  hypre_AddIndex(index, start, index);
 
-                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
-                                                     &rank, matrix_type);
-                   nflag[rank-start_rank1]= 0; 
+                  hypre_SStructBoxManEntryGetGlobalRank(entry, index,
+                                                        &rank, matrix_type);
+                  nflag[rank-start_rank1]= 0; 
                }
                hypre_BoxLoop0End();
             }  /* if (hypre_BoxVolume(box_piece) < i) */
@@ -348,17 +349,17 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
       }  /* hypre_ForBoxI(j, boxes) */
 
-     /*-----------------------------------------------------------------
-      * edge flag. Since we want only the edges that completely lie
-      * on a boundary, whereas the boundary extraction routines mark
-      * edges that touch the boundary, we need to call the boundary
-      * routines in appropriate directions:
-      *    2-d horizontal edges (y faces)- search in j directions
-      *    2-d vertical edges (x faces)  - search in i directions
-      *    3-d x edges                   - search in j,k directions
-      *    3-d y edges                   - search in i,k directions
-      *    3-d z edges                   - search in i,j directions
-      *-----------------------------------------------------------------*/
+      /*-----------------------------------------------------------------
+       * edge flag. Since we want only the edges that completely lie
+       * on a boundary, whereas the boundary extraction routines mark
+       * edges that touch the boundary, we need to call the boundary
+       * routines in appropriate directions:
+       *    2-d horizontal edges (y faces)- search in j directions
+       *    2-d vertical edges (x faces)  - search in i directions
+       *    3-d x edges                   - search in j,k directions
+       *    3-d y edges                   - search in i,k directions
+       *    3-d z edges                   - search in i,j directions
+       *-----------------------------------------------------------------*/
       pgrid    = hypre_SStructGridPGrid(edge_grid, part);
       nvars    = hypre_SStructPGridNVars(pgrid);
       direction= hypre_TAlloc(HYPRE_Int, 2); /* only two directions at most */
@@ -431,16 +432,18 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-                     hypre_BoxLoop0Begin(loop_size);
+                     hypre_BoxLoop0Begin(ndim, loop_size);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
+#endif
 #else
                      hypre_BoxLoopSetOneBlock();
 #endif
-                     hypre_BoxLoop0For(loopi, loopj, loopk)
+                     hypre_BoxLoop0For()
                      {
-                        hypre_SetIndex(index, loopi, loopj, loopk);
+                        hypre_BoxLoopGetIndex(lindex);
+                        hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndex(index, start, index);
 
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index,
@@ -461,16 +464,18 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-                     hypre_BoxLoop0Begin(loop_size);
+                     hypre_BoxLoop0Begin(ndim, loop_size);
 #if 0 /* Are private static arrays a problem? */
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
+#endif
 #else
                      hypre_BoxLoopSetOneBlock();
 #endif
-                     hypre_BoxLoop0For(loopi, loopj, loopk)
+                     hypre_BoxLoop0For()
                      {
-                        hypre_SetIndex(index, loopi, loopj, loopk);
+                        hypre_BoxLoopGetIndex(lindex);
+                        hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
                         hypre_AddIndex(index, start, index);
 
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index,
@@ -489,12 +494,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       hypre_TFree(direction); 
    }  /* for (part= 0; part< nparts; part++) */
 
-  /* set vals. Will have more memory than is needed- extra allotted
-     for repeated nodes. */
+   /* set vals. Will have more memory than is needed- extra allotted
+      for repeated nodes. */
    inode= hypre_CTAlloc(HYPRE_Int, nrows);
    ncols= hypre_CTAlloc(HYPRE_Int, nrows);
 
-  /* each row can have at most two columns */
+   /* each row can have at most two columns */
    k= 2*nrows;
    jedge= hypre_CTAlloc(HYPRE_Int, k);
    vals = hypre_TAlloc(double, k);
@@ -503,9 +508,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       vals[i]=-1.0;
    }
 
-  /* to get the correct col connection to each node, we need to offset
-     index ijk. Determine these. Assuming the same var ordering for each 
-     part. Note that these are not the variable offsets. */
+   /* to get the correct col connection to each node, we need to offset
+      index ijk. Determine these. Assuming the same var ordering for each 
+      part. Note that these are not the variable offsets. */
    offsets   = hypre_TAlloc(hypre_Index, ndim);
    varoffsets= hypre_TAlloc(hypre_Index, ndim);
    for (i= 0; i< ndim; i++)
@@ -543,24 +548,24 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             hypre_SetIndex(offsets[i], 0, 0, 1);
             break;
          }
-     }   /*  switch(j) */
+      }   /*  switch(j) */
    }     /* for (i= 0; i< ndim; i++) */
 
    nrows= 0; i= 0;
    for (part= 0; part< nparts; part++)
    {
-     /* grab boxarray for node rank extracting later */
+      /* grab boxarray for node rank extracting later */
       pgrid       = hypre_SStructGridPGrid(node_grid, part);  
       var_grid    = hypre_SStructPGridSGrid(pgrid, 0);
       node_boxes  = hypre_StructGridBoxes(var_grid);
 
-     /* grab edge structures */
+      /* grab edge structures */
       pgrid     = hypre_SStructGridPGrid(edge_grid, part);  
 
-     /* the cell-centred reference box is used to get the correct 
-        interior edge box. For parallel distribution of the edge
-        grid, simple contraction of the edge box does not get the
-        correct interior edge box. Need to contract the cell box. */
+      /* the cell-centred reference box is used to get the correct 
+         interior edge box. For parallel distribution of the edge
+         grid, simple contraction of the edge box does not get the
+         correct interior edge box. Need to contract the cell box. */
       var_grid= hypre_SStructPGridCellSGrid(pgrid);
       cell_boxes= hypre_StructGridBoxes(var_grid);
 
@@ -577,15 +582,15 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
             hypre_CopyBox(cell_box, &interior_box);
 
-           /* shrink the cell_box to get the interior cell_box. All
-              edges in the interior box should be on this proc. */ 
+            /* shrink the cell_box to get the interior cell_box. All
+               edges in the interior box should be on this proc. */ 
             hypre_SubtractIndex(hypre_BoxIMin(&interior_box), shift, 
                                 hypre_BoxIMin(&interior_box));
 
             hypre_AddIndex(hypre_BoxIMax(&interior_box), shift, 
                            hypre_BoxIMax(&interior_box));
 
-           /* offset this to the variable interior box */
+            /* offset this to the variable interior box */
             hypre_CopyBox(&interior_box, &layer);
             hypre_SubtractIndex(hypre_BoxIMin(&layer), varoffsets[n], 
                                 hypre_BoxIMin(&layer));
@@ -593,23 +598,25 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             hypre_BoxGetSize(&layer, loop_size);
             hypre_CopyIndex(hypre_BoxIMin(&layer), start);
 
-           /* Interior box- loop over each edge and find the row rank and 
-              then the column ranks for the connected nodes. Change the 
-              appropriate values to 1. */
-            hypre_BoxLoop0Begin(loop_size);
+            /* Interior box- loop over each edge and find the row rank and 
+               then the column ranks for the connected nodes. Change the 
+               appropriate values to 1. */
+            hypre_BoxLoop0Begin(ndim, loop_size);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,entry,m,i,nrows) HYPRE_SMP_SCHEDULE
+#endif
 #else
             hypre_BoxLoopSetOneBlock();
 #endif
-            hypre_BoxLoop0For(loopi, loopj, loopk)
+            hypre_BoxLoop0For()
             {
-               hypre_SetIndex(index, loopi, loopj, loopk);
+               hypre_BoxLoopGetIndex(lindex);
+               hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
                hypre_AddIndex(index, start, index);
 
-              /* edge ijk connected to nodes ijk & ijk-offsets. Interior edges
-                 and so no boundary edges to consider. */ 
+               /* edge ijk connected to nodes ijk & ijk-offsets. Interior edges
+                  and so no boundary edges to consider. */ 
                hypre_SStructGridFindBoxManEntry(edge_grid, part, index, n,
                                                 &entry);
                hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, matrix_type);
@@ -634,18 +641,18 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             }
             hypre_BoxLoop0End();
 
-           /* now the boundary layers. To cases to consider: is the
-              edge totally on the boundary or is the edge connected
-              to the boundary. Need to check eflag & nflag. */
+            /* now the boundary layers. To cases to consider: is the
+               edge totally on the boundary or is the edge connected
+               to the boundary. Need to check eflag & nflag. */
             for (d= 0; d< ndim; d++)
             {
-              /*shift the layer box in the correct direction and distance.
-                distance= hypre_BoxIMax(box)[d]-hypre_BoxIMin(box)[d]+1-1
-                        = hypre_BoxIMax(box)[d]-hypre_BoxIMin(box)[d] */
+               /*shift the layer box in the correct direction and distance.
+                 distance= hypre_BoxIMax(box)[d]-hypre_BoxIMin(box)[d]+1-1
+                 = hypre_BoxIMax(box)[d]-hypre_BoxIMin(box)[d] */
                hypre_ClearIndex(shift2);
                shift2[d]= hypre_BoxIMax(box)[d]-hypre_BoxIMin(box)[d];
 
-              /* ndirection= 0 negative; ndirection= 1 positive */
+               /* ndirection= 0 negative; ndirection= 1 positive */
                for (ndirection= 0; ndirection< 2; ndirection++)
                {
                   hypre_CopyBox(box, &layer);
@@ -663,38 +670,40 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   hypre_BoxGetSize(&layer, loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&layer), start);
 
-                  hypre_BoxLoop0Begin(loop_size);
+                  hypre_BoxLoop0Begin(ndim, loop_size);
 #if 0
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
-#include "hypre_box_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,entry,m,i,nrows) HYPRE_SMP_SCHEDULE
+#endif
 #else
                   hypre_BoxLoopSetOneBlock();
 #endif
-                  hypre_BoxLoop0For(loopi, loopj, loopk)
+                  hypre_BoxLoop0For()
                   {
-                     hypre_SetIndex(index, loopi, loopj, loopk);
+                     hypre_BoxLoopGetIndex(lindex);
+                     hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
                      hypre_AddIndex(index, start, index);
 
-                    /* edge ijk connects to nodes ijk & ijk+offsets. */
+                     /* edge ijk connects to nodes ijk & ijk+offsets. */
                      hypre_SStructGridFindBoxManEntry(edge_grid, part, index, n,
                                                       &entry);
                      hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
                                                            matrix_type);
 
-                    /* check if the edge lies on the boundary & if not
-                       check if the connecting node is on the boundary. */
+                     /* check if the edge lies on the boundary & if not
+                        check if the connecting node is on the boundary. */
                      if (eflag[m-start_rank2])
                      {
                         inode[nrows]= m;
-                       /* edge not completely on the boundary. One connecting
-                          node must be in the interior. */
+                        /* edge not completely on the boundary. One connecting
+                           node must be in the interior. */
                         hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
                                                          &entry);
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
-                                                           matrix_type);
+                                                              matrix_type);
 
-                       /* check if node on my processor. If not, the node must
-                          be in the interior (draw a diagram to see this). */
+                        /* check if node on my processor. If not, the node must
+                           be in the interior (draw a diagram to see this). */
                         if (m >= start_rank1 && m <= jupper)
                         {
                            /* node on proc. Now check if on the boundary. */
@@ -716,13 +725,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                            ncols[nrows]++;
                         }
 
-                       /* ijk+offsets */
+                        /* ijk+offsets */
                         hypre_SubtractIndex(index, offsets[n], index);
                         hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
                                                          &entry);
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
                                                               matrix_type);
-                       /* boundary checks again */
+                        /* boundary checks again */
                         if (m >= start_rank1 && m <= jupper)
                         {
                            /* node on proc. Now check if on the boundary. */
@@ -759,8 +768,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_SStructGridDestroy(edge_grid);
 
    HYPRE_IJMatrixSetValues(T_grad, nrows, ncols,
-                          (const HYPRE_Int*) inode, (const HYPRE_Int*) jedge,
-                          (const double*) vals);
+                           (const HYPRE_Int*) inode, (const HYPRE_Int*) jedge,
+                           (const double*) vals);
    HYPRE_IJMatrixAssemble(T_grad);
 
    hypre_TFree(eflag);

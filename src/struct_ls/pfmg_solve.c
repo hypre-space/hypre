@@ -7,10 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 #define DEBUG 0
@@ -63,13 +63,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    double               *rel_norms       = (pfmg_data -> rel_norms);
    HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
-   double                b_dot_b, r_dot_r, eps;
+   double                b_dot_b = 0, r_dot_r, eps = 0;
    double                e_dot_e, x_dot_x;
                     
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;
 
-   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -101,7 +100,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       hypre_EndTiming(pfmg_data -> time_index);
-      return ierr;
+      return hypre_error_flag;
    }
 
    /* part of convergence check */
@@ -122,7 +121,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          hypre_EndTiming(pfmg_data -> time_index);
-         return ierr;
+         return hypre_error_flag;
       }
    }
 
@@ -324,6 +323,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
 
    hypre_EndTiming(pfmg_data -> time_index);
 
-   return ierr;
+   return hypre_error_flag;
 }
 

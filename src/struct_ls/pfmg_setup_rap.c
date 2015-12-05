@@ -7,18 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -56,13 +48,13 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
    {
       switch (hypre_StructStencilDim(stencil)) 
       {
-      case 2:
-         RAP = hypre_PFMG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
-         break;
+         case 2:
+            RAP = hypre_PFMG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
+            break;
     
-      case 3:
-         RAP = hypre_PFMG3CreateRAPOp(R ,A, P, coarse_grid, cdir);
-         break;
+         case 3:
+            RAP = hypre_PFMG3CreateRAPOp(R ,A, P, coarse_grid, cdir);
+            break;
       } 
    }
 
@@ -71,18 +63,18 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
       switch (hypre_StructStencilDim(stencil)) 
       {
          case 2:
-         RAP =  hypre_PFMGCreateCoarseOp5(R ,A, P, coarse_grid, cdir);
-         break;
+            RAP =  hypre_PFMGCreateCoarseOp5(R ,A, P, coarse_grid, cdir);
+            break;
     
          case 3:
-         RAP =  hypre_PFMGCreateCoarseOp7(R ,A, P, coarse_grid, cdir);
-         break;
+            RAP =  hypre_PFMGCreateCoarseOp7(R ,A, P, coarse_grid, cdir);
+            break;
       } 
    }
    else if (rap_type == 2)
    {
       RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir,
-                                        P_stored_as_transpose);
+                                  P_stored_as_transpose);
    }
 
 
@@ -127,7 +119,6 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
                       HYPRE_Int           rap_type,
                       hypre_StructMatrix *Ac      )
 {
-   HYPRE_Int              ierr = 0;
    HYPRE_Int              P_stored_as_transpose = 0;
    hypre_StructStencil   *stencil;
 
@@ -138,33 +129,33 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
       switch (hypre_StructStencilDim(stencil)) 
       {
          case 2:
-         /*--------------------------------------------------------------------
-          *    Set lower triangular (+ diagonal) coefficients
-          *--------------------------------------------------------------------*/
-         ierr = hypre_PFMG2BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac);
+            /*--------------------------------------------------------------------
+             *    Set lower triangular (+ diagonal) coefficients
+             *--------------------------------------------------------------------*/
+            hypre_PFMG2BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac);
 
-         /*--------------------------------------------------------------------
-          *    For non-symmetric A, set upper triangular coefficients as well
-          *--------------------------------------------------------------------*/
-         if(!hypre_StructMatrixSymmetric(A))
-            ierr += hypre_PFMG2BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac);
+            /*--------------------------------------------------------------------
+             *    For non-symmetric A, set upper triangular coefficients as well
+             *--------------------------------------------------------------------*/
+            if(!hypre_StructMatrixSymmetric(A))
+               hypre_PFMG2BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac);
 
-         break;
+            break;
 
          case 3:
 
-         /*--------------------------------------------------------------------
-          *    Set lower triangular (+ diagonal) coefficients
-          *--------------------------------------------------------------------*/
-         ierr = hypre_PFMG3BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac);
+            /*--------------------------------------------------------------------
+             *    Set lower triangular (+ diagonal) coefficients
+             *--------------------------------------------------------------------*/
+            hypre_PFMG3BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac);
 
-         /*--------------------------------------------------------------------
-          *    For non-symmetric A, set upper triangular coefficients as well
-          *--------------------------------------------------------------------*/
-         if(!hypre_StructMatrixSymmetric(A))
-            ierr += hypre_PFMG3BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac);
+            /*--------------------------------------------------------------------
+             *    For non-symmetric A, set upper triangular coefficients as well
+             *--------------------------------------------------------------------*/
+            if(!hypre_StructMatrixSymmetric(A))
+               hypre_PFMG3BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac);
 
-         break;
+            break;
       } 
    }
 
@@ -173,23 +164,23 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
       switch (hypre_StructStencilDim(stencil)) 
       {
          case 2:
-         ierr = hypre_PFMGBuildCoarseOp5(A, P, R, cdir, cindex, cstride, Ac);
-         break;
+            hypre_PFMGBuildCoarseOp5(A, P, R, cdir, cindex, cstride, Ac);
+            break;
 
          case 3:
-         ierr = hypre_PFMGBuildCoarseOp7(A, P, R, cdir, cindex, cstride, Ac);
-         break;
+            hypre_PFMGBuildCoarseOp7(A, P, R, cdir, cindex, cstride, Ac);
+            break;
       } 
    }
 
    else if (rap_type == 2)
    {
-      ierr = hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
-                                       P_stored_as_transpose, Ac);
+      hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
+                         P_stored_as_transpose, Ac);
    }
 
    hypre_StructMatrixAssemble(Ac);
 
-   return ierr;
+   return hypre_error_flag;
 }
 

@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -18,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_struct_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ProjectBox:
@@ -34,7 +32,6 @@ hypre_ProjectBox( hypre_Box    *box,
                   hypre_Index   stride )
 {
    HYPRE_Int  i, s, d, hl, hu, kl, ku;
-   HYPRE_Int  ierr = 0;
 
    /*------------------------------------------------------
     * project in all 3 dimensions
@@ -64,7 +61,7 @@ hypre_ProjectBox( hypre_Box    *box,
 
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -81,15 +78,14 @@ hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
 {
    hypre_Box  *box;
    HYPRE_Int   i;
-   HYPRE_Int   ierr = 0;
 
    hypre_ForBoxI(i, box_array)
-      {
-         box = hypre_BoxArrayBox(box_array, i);
-         hypre_ProjectBox(box, index, stride);
-      }
+   {
+      box = hypre_BoxArrayBox(box_array, i);
+      hypre_ProjectBox(box, index, stride);
+   }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -107,18 +103,17 @@ hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
    hypre_BoxArray  *box_array;
    hypre_Box       *box;
    HYPRE_Int        i, j;
-   HYPRE_Int        ierr = 0;
 
    hypre_ForBoxArrayI(i, box_array_array)
+   {
+      box_array = hypre_BoxArrayArrayBoxArray(box_array_array, i);
+      hypre_ForBoxI(j, box_array)
       {
-         box_array = hypre_BoxArrayArrayBoxArray(box_array_array, i);
-         hypre_ForBoxI(j, box_array)
-            {
-               box = hypre_BoxArrayBox(box_array, j);
-               hypre_ProjectBox(box, index, stride);
-            }
+         box = hypre_BoxArrayBox(box_array, j);
+         hypre_ProjectBox(box, index, stride);
       }
+   }
 
-   return ierr;
+   return hypre_error_flag;
 }
 

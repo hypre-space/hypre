@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_UTILITIES_HEADER
@@ -40,7 +40,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -78,7 +78,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -190,6 +190,9 @@ extern "C" {
 #define MPI_Type_struct     hypre_MPI_Type_struct      
 #define MPI_Type_commit     hypre_MPI_Type_commit
 #define MPI_Type_free       hypre_MPI_Type_free        
+#define MPI_Op_free         hypre_MPI_Op_free        
+#define MPI_Op_create       hypre_MPI_Op_create
+#define MPI_User_function   hypre_MPI_User_function
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -200,6 +203,7 @@ typedef HYPRE_Int hypre_MPI_Comm;
 typedef HYPRE_Int hypre_MPI_Group;
 typedef HYPRE_Int hypre_MPI_Request;
 typedef HYPRE_Int hypre_MPI_Datatype;
+typedef void (hypre_MPI_User_function) ();
 
 typedef struct
 {
@@ -244,6 +248,7 @@ typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
+typedef MPI_User_function    hypre_MPI_User_function;
 
 #define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
@@ -330,6 +335,8 @@ HYPRE_Int hypre_MPI_Type_hvector( HYPRE_Int count , HYPRE_Int blocklength , hypr
 HYPRE_Int hypre_MPI_Type_struct( HYPRE_Int count , HYPRE_Int *array_of_blocklengths , hypre_MPI_Aint *array_of_displacements , hypre_MPI_Datatype *array_of_types , hypre_MPI_Datatype *newtype );
 HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
+HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
 
 #ifdef __cplusplus
 }
@@ -345,7 +352,25 @@ HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
+ ***********************************************************************EHEADER*/
+
+#ifndef HYPRE_SMP_HEADER
+#define HYPRE_SMP_HEADER
+#endif
+
+#define HYPRE_SMP_SCHEDULE schedule(static)
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -478,7 +503,7 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -592,26 +617,25 @@ HYPRE_Int MPI_Irsend( void *buf , HYPRE_Int count , MPI_Datatype datatype , HYPR
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
-
-
 
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
 
-#if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
+#ifdef HYPRE_USING_OPENMP
 
 HYPRE_Int hypre_NumThreads( void );
+HYPRE_Int hypre_NumActiveThreads( void );
 HYPRE_Int hypre_GetThreadNum( void );
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_NumActiveThreads() 1
 #define hypre_GetThreadNum() 0
 
 #endif
-
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /* The pthreads stuff needs to be reworked */
@@ -680,7 +704,7 @@ extern HYPRE_Int hypre_NumThreads;
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -815,7 +839,7 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -866,7 +890,7 @@ typedef hypre_ListElement  *hypre_LinkList;
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -934,7 +958,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 

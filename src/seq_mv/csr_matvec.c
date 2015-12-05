@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "seq_mv.h"
 #include <assert.h>
 
 /*--------------------------------------------------------------------------
@@ -91,8 +91,9 @@ hypre_CSRMatrixMatvec( double           alpha,
 
     if (alpha == 0.0)
     {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
        for (i = 0; i < num_rows*num_vectors; i++)
           y_data[i] *= beta;
 
@@ -109,15 +110,17 @@ hypre_CSRMatrixMatvec( double           alpha,
    {
       if (temp == 0.0)
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 	 for (i = 0; i < num_rows*num_vectors; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 	 for (i = 0; i < num_rows*num_vectors; i++)
 	    y_data[i] *= temp;
       }
@@ -131,8 +134,9 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    if (num_rownnz < xpar*(num_rows))
    {
-#define HYPRE_SMP_PRIVATE i,jj,m,tempx
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,jj,m,tempx) HYPRE_SMP_SCHEDULE
+#endif
 
       for (i = 0; i < num_rownnz; i++)
       {
@@ -164,8 +168,9 @@ hypre_CSRMatrixMatvec( double           alpha,
    }
    else
    {
-#define HYPRE_SMP_PRIVATE i,jj,temp
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,jj,temp) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_rows; i++)
       {
          if ( num_vectors==1 )
@@ -195,8 +200,9 @@ hypre_CSRMatrixMatvec( double           alpha,
 
    if (alpha != 1.0)
    {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_rows*num_vectors; i++)
 	 y_data[i] *= alpha;
    }
@@ -271,8 +277,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    if (alpha == 0.0)
    {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_cols*num_vectors; i++)
 	 y_data[i] *= beta;
 
@@ -289,15 +296,17 @@ hypre_CSRMatrixMatvecT( double           alpha,
    {
       if (temp == 0.0)
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 	 for (i = 0; i < num_cols*num_vectors; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 	 for (i = 0; i < num_cols*num_vectors; i++)
 	    y_data[i] *= temp;
       }
@@ -310,8 +319,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
    if (num_threads > 1)
    {
 
-#define HYPRE_SMP_PRIVATE i, i1,jj,j,ns,ne,size,rest
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i, i1,jj,j,ns,ne,size,rest) HYPRE_SMP_SCHEDULE
+#endif
       for (i1 = 0; i1 < num_threads; i1++)
       {
          size = num_cols/num_threads;
@@ -389,8 +399,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    if (alpha != 1.0)
    {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_cols*num_vectors; i++)
 	 y_data[i] *= alpha;
    }
@@ -469,8 +480,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    if (alpha == 0.0)
    {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_cols*num_vectors; i++)
 	 y_data[i] *= beta;
 
@@ -487,15 +499,17 @@ hypre_CSRMatrixMatvecT( double           alpha,
    {
       if (temp == 0.0)
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 	 for (i = 0; i < num_cols*num_vectors; i++)
 	    y_data[i] = 0.0;
       }
       else
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 	 for (i = 0; i < num_cols*num_vectors; i++)
 	    y_data[i] *= temp;
       }
@@ -512,14 +526,15 @@ hypre_CSRMatrixMatvecT( double           alpha,
       if ( num_vectors==1 )
       {
 
-#define HYPRE_SMP_PRIVATE i,jj,j,my_thread_num,offset
-#define HYPRE_SMP_PAR_REGION
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(i,jj,j,my_thread_num,offset)
+#endif
          {                                      
             my_thread_num = hypre_GetThreadNum();
             offset =  y_size*my_thread_num;
-#define HYPRE_SMP_FOR
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for HYPRE_SMP_SCHEDULE
+#endif
             for (i = 0; i < num_rows; i++)
             {
                for (jj = A_i[i]; jj < A_i[i+1]; jj++)
@@ -530,8 +545,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
             }
 
             /* implied barrier (for threads)*/           
-#define HYPRE_SMP_FOR
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp for HYPRE_SMP_SCHEDULE
+#endif
             for (i = 0; i < y_size; i++)
             {
                for (j = 0; j < num_threads; j++)
@@ -595,8 +611,9 @@ hypre_CSRMatrixMatvecT( double           alpha,
 
    if (alpha != 1.0)
    {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_cols*num_vectors; i++)
 	 y_data[i] *= alpha;
    }
@@ -664,8 +681,9 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
                                                                                                               
     if (alpha == 0.0)
     {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
        for (i = 0; i < num_rows; i++)
           if (CF_marker_x[i] == fpt) y_data[i] *= beta;
                                                                                                               
@@ -682,15 +700,17 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
    {
       if (temp == 0.0)
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < num_rows; i++)
             if (CF_marker_x[i] == fpt) y_data[i] = 0.0;
       }
       else
       {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
          for (i = 0; i < num_rows; i++)
             if (CF_marker_x[i] == fpt) y_data[i] *= temp;
       }
@@ -700,8 +720,9 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
     * y += A*x
     *-----------------------------------------------------------------*/
                                                                                                               
-#define HYPRE_SMP_PRIVATE i,jj
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,jj) HYPRE_SMP_SCHEDULE
+#endif
                                                                                                               
    for (i = 0; i < num_rows; i++)
    {
@@ -721,8 +742,9 @@ hypre_CSRMatrixMatvec_FF( double           alpha,
                                                                                                               
    if (alpha != 1.0)
    {
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
       for (i = 0; i < num_rows; i++)
          if (CF_marker_x[i] == fpt) y_data[i] *= alpha;
    }

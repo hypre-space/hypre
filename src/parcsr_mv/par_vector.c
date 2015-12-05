@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.23 $
+ * $Revision: 2.25 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "_hypre_parcsr_mv.h"
 #include <assert.h>
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -948,6 +948,8 @@ hypre_ParVectorReadIJ( MPI_Comm             comm,
    {
       hypre_fscanf(file, "%d", partitioning+i);
    }
+   /* This is not yet implemented correctly! */
+   base_j = 0;
 #else
    partitioning = hypre_CTAlloc(HYPRE_Int,num_procs+1);
 

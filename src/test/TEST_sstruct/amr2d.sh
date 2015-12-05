@@ -8,14 +8,17 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.12 $
+# $Revision: 1.15 $
 #EHEADER**********************************************************************
 
-
-
-
-
 TNAME=`basename $0 .sh`
+
+#=============================================================================
+#=============================================================================
+
+tail -3 ${TNAME}.out.12 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.13 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 # compare with baseline case
@@ -31,6 +34,10 @@ FILES="\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
  ${TNAME}.out.8\
+ ${TNAME}.out.10\
+ ${TNAME}.out.11\
+ ${TNAME}.out.12\
+ ${TNAME}.out.13\
 "
 
 for i in $FILES
@@ -55,4 +62,4 @@ fi
 # remove temporary files
 #=============================================================================
 
-# rm -f ${TNAME}.testdata*
+rm -f ${TNAME}.testdata*

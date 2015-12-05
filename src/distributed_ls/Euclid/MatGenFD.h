@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef MATGENFD_DH_DH
 #define MATGENFD_DH_DH
@@ -56,8 +53,7 @@ Misc.
      -striped (may not work?)
 =====================================================================*/
 
-
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 struct _matgenfd {
   bool allocateMem; 

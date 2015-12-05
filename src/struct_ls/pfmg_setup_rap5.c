@@ -7,10 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.24 $
+ * $Revision: 2.27 $
  ***********************************************************************EHEADER*/
 
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
@@ -179,7 +179,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    HYPRE_Int             constant_coefficient;
 
    HYPRE_Int             fi, ci, fbi;
-   HYPRE_Int             loopi, loopj, loopk;
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
@@ -343,13 +342,14 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-         hypre_BoxLoop3Begin(loop_size,
+         hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop3For(loopi, loopj, loopk, iP, iA, iAc)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east) HYPRE_SMP_SCHEDULE
+#endif
+         hypre_BoxLoop3For(iP, iA, iAc)
          {
             iAm1 = iA - OffsetA;
             iAp1 = iA + OffsetA;
@@ -402,12 +402,13 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-         hypre_BoxLoop2Begin(loop_size,
+         hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
+         hypre_BoxLoop2For(iA, iAc)
          {
             rap_cc[iAc] = 2.0*a_cc[iA] + center_int;
          }
@@ -436,12 +437,13 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             hypre_BoxGetSize(bdy_box, loop_size);
             bfstart = hypre_BoxIMin(bdy_box);
             hypre_StructMapFineToCoarse(bfstart, cindex, cstride, bcstart);
-            hypre_BoxLoop2Begin(loop_size,
+            hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA,iAc
-#include "hypre_box_smp_forloop.h"
-            hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop2For(iA, iAc)
             {
                rap_cc[iAc] -= 0.5*a_cc[iA] + center_bdy;
             }

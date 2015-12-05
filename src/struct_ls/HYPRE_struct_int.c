@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
@@ -20,8 +17,6 @@ HYPRE_Int
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
                                    HYPRE_Int seed )
 {
-   HYPRE_Int    ierr = 0;
-
    hypre_Box          *v_data_box;
                     
    HYPRE_Int           vi;
@@ -34,7 +29,6 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Index         unit_stride;
 
    HYPRE_Int           i;
-   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -46,79 +40,80 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
  
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    hypre_ForBoxI(i, boxes)
-      {
-         box      = hypre_BoxArrayBox(boxes, i);
-         start = hypre_BoxIMin(box);
+   {
+      box      = hypre_BoxArrayBox(boxes, i);
+      start = hypre_BoxIMin(box);
 
-         v_data_box =
-            hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
-         vp = hypre_StructVectorBoxData(vector, i);
+      v_data_box =
+         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      vp = hypre_StructVectorBoxData(vector, i);
  
-         hypre_BoxGetSize(box, loop_size);
+      hypre_BoxGetSize(box, loop_size);
 
-         hypre_BoxLoop1Begin(loop_size,
-                             v_data_box, start, unit_stride, vi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-#include "hypre_box_smp_forloop.h"
-         hypre_BoxLoop1For(loopi, loopj, loopk, vi)
-            {
-               vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
-            }
-         hypre_BoxLoop1End(vi);
+      hypre_BoxLoop1Begin(hypre_StructVectorDim(vector), loop_size,
+                          v_data_box, start, unit_stride, vi);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop1For(vi)
+      {
+         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
       }
+      hypre_BoxLoop1End(vi);
+   }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 hypre_StructSetRandomValues( void* v, HYPRE_Int seed ) {
 
-  return hypre_StructVectorSetRandomValues( (hypre_StructVector*)v, seed );
+   return hypre_StructVectorSetRandomValues( (hypre_StructVector*)v, seed );
 }
 
 HYPRE_Int
 HYPRE_StructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
-  i->CreateVector = hypre_StructKrylovCreateVector;
-  i->DestroyVector = hypre_StructKrylovDestroyVector; 
-  i->InnerProd = hypre_StructKrylovInnerProd; 
-  i->CopyVector = hypre_StructKrylovCopyVector;
-  i->ClearVector = hypre_StructKrylovClearVector;
-  i->SetRandomValues = hypre_StructSetRandomValues;
-  i->ScaleVector = hypre_StructKrylovScaleVector;
-  i->Axpy = hypre_StructKrylovAxpy;
+   i->CreateVector = hypre_StructKrylovCreateVector;
+   i->DestroyVector = hypre_StructKrylovDestroyVector; 
+   i->InnerProd = hypre_StructKrylovInnerProd; 
+   i->CopyVector = hypre_StructKrylovCopyVector;
+   i->ClearVector = hypre_StructKrylovClearVector;
+   i->SetRandomValues = hypre_StructSetRandomValues;
+   i->ScaleVector = hypre_StructKrylovScaleVector;
+   i->Axpy = hypre_StructKrylovAxpy;
 
-  i->CreateMultiVector = mv_TempMultiVectorCreateFromSampleVector;
-  i->CopyCreateMultiVector = mv_TempMultiVectorCreateCopy;
-  i->DestroyMultiVector = mv_TempMultiVectorDestroy;
+   i->CreateMultiVector = mv_TempMultiVectorCreateFromSampleVector;
+   i->CopyCreateMultiVector = mv_TempMultiVectorCreateCopy;
+   i->DestroyMultiVector = mv_TempMultiVectorDestroy;
 
-  i->Width = mv_TempMultiVectorWidth;
-  i->Height = mv_TempMultiVectorHeight;
-  i->SetMask = mv_TempMultiVectorSetMask;
-  i->CopyMultiVector = mv_TempMultiVectorCopy;
-  i->ClearMultiVector = mv_TempMultiVectorClear;
-  i->SetRandomVectors = mv_TempMultiVectorSetRandom;
-  i->MultiInnerProd = mv_TempMultiVectorByMultiVector;
-  i->MultiInnerProdDiag = mv_TempMultiVectorByMultiVectorDiag;
-  i->MultiVecMat = mv_TempMultiVectorByMatrix;
-  i->MultiVecMatDiag = mv_TempMultiVectorByDiagonal;
-  i->MultiAxpy = mv_TempMultiVectorAxpy;
-  i->MultiXapy = mv_TempMultiVectorXapy;
-  i->Eval = mv_TempMultiVectorEval;
+   i->Width = mv_TempMultiVectorWidth;
+   i->Height = mv_TempMultiVectorHeight;
+   i->SetMask = mv_TempMultiVectorSetMask;
+   i->CopyMultiVector = mv_TempMultiVectorCopy;
+   i->ClearMultiVector = mv_TempMultiVectorClear;
+   i->SetRandomVectors = mv_TempMultiVectorSetRandom;
+   i->MultiInnerProd = mv_TempMultiVectorByMultiVector;
+   i->MultiInnerProdDiag = mv_TempMultiVectorByMultiVectorDiag;
+   i->MultiVecMat = mv_TempMultiVectorByMatrix;
+   i->MultiVecMatDiag = mv_TempMultiVectorByDiagonal;
+   i->MultiAxpy = mv_TempMultiVectorAxpy;
+   i->MultiXapy = mv_TempMultiVectorXapy;
+   i->Eval = mv_TempMultiVectorEval;
 
-  return 0;
+   return hypre_error_flag;
 }
 
 HYPRE_Int
 HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions * mv)
 {
-  mv->MatvecCreate = hypre_StructKrylovMatvecCreate;
-  mv->Matvec = hypre_StructKrylovMatvec;
-  mv->MatvecDestroy = hypre_StructKrylovMatvecDestroy;
+   mv->MatvecCreate = hypre_StructKrylovMatvecCreate;
+   mv->Matvec = hypre_StructKrylovMatvec;
+   mv->MatvecDestroy = hypre_StructKrylovMatvecDestroy;
 
-  mv->MatMultiVecCreate = NULL;
-  mv->MatMultiVec = NULL;
-  mv->MatMultiVecDestroy = NULL;
+   mv->MatMultiVecCreate = NULL;
+   mv->MatMultiVec = NULL;
+   mv->MatMultiVecDestroy = NULL;
 
-  return 0;
+   return hypre_error_flag;
 }

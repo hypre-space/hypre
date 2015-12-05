@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.101 $
+ * $Revision: 1.109 $
  ***********************************************************************EHEADER*/
 
 dnl *********************************************************************
@@ -55,8 +55,8 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.8.0b])
-m4_define([M4_HYPRE_DATE],    [2011/11/14])
+m4_define([M4_HYPRE_VERSION], [2.9.0b])
+m4_define([M4_HYPRE_DATE],    [2012/10/30])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -66,7 +66,7 @@ m4_include([config/hypre_lapack_macros.m4])
 m4_include([config/hypre_macros_misc.m4])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.101 2011/11/14 22:36:27 falgout Exp $)
+AC_REVISION($Id: configure.in,v 1.109 2012/10/29 21:54:16 falgout Exp $)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -261,7 +261,6 @@ else
    hypre_user_chose_cflags=yes
 fi
 
-
 dnl *********************************************************************
 dnl * Determine if user provided CXX compiler or flags
 dnl *********************************************************************
@@ -278,7 +277,6 @@ then
 else
    hypre_user_chose_cxxflags=yes
 fi
-
 
 dnl *********************************************************************
 dnl * Determine if user provided fortran compiler or flags
@@ -674,14 +672,21 @@ dnl * Select compilers if not already defined by command line options
 dnl *********************************************************************
 if test "$hypre_user_chose_ccompilers" = "no"
 then
-   if test "$hypre_using_openmp" = "yes"
+   if test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [mpxlc mpixlc_r xlc mpiicc icc mpguidec guidec pgcc cc], [""])
-   elif test "$hypre_using_mpi" = "no"
-   then
-      AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+      else
+         AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+      fi
    else
-      AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpcc mpicc mpipgcc], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpiicc mpicc mpipgcc])
+      else
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpicc mpipgcc])
+      fi
    fi
 
    if test "x$CC" = "x"
@@ -692,14 +697,21 @@ fi
 
 if test "$hypre_user_chose_cxxcompilers" = "no"
 then
-   if test "$hypre_using_openmp" = "yes"
+   if test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r xlC mpiicpc mpguidec++ guidec++ icpc pgCC CC], [""])
-   elif test "$hypre_using_mpi" = "no"
-   then
-      AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+      else
+         AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+      fi
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpCC mpiCC mpicxx mpipgCC], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC])
+      else
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC])
+      fi
    fi
 
    if test "x$CXX" = "x"
@@ -710,14 +722,21 @@ fi
 
 if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
-   if test "$hypre_using_openmp" = "yes"
+   if test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [mpxlf mpixlf77_r xlf mpiifort ifort mpguidef77 guidef77 pg77 f77], [""])
-   elif test "$hypre_using_mpi" = "no"
-   then
-      AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(F77, [xlf_r ifort gfortran g77 g95 pgf77 f77])
+      else
+         AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77])
+      fi
    else
-      AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpf77 mpif77 mpipgf77], [""])
+      if test "$hypre_using_openmp" = "yes"
+      then
+         AC_CHECK_PROGS(F77, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
+      else
+         AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
+      fi
    fi
 
    if test "x$F77" = "x"
@@ -895,7 +914,7 @@ then
    HYPRE_FEI_SRC_DIR="$HYPRE_SRCDIR/FEI_mv"
    HYPRE_FEI_SUBDIRS="femli fei-hypre"
    HYPRE_FEI_HYPRE_FILES="$HYPRE_SRCDIR/FEI_mv/fei-hypre/*.o"
-   HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/lib/*.o"
+   HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
    if test "$hypre_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"

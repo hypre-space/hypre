@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef SUBDOMAIN_GRAPH_DH
 #define SUBDOMAIN_GRAPH_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 #define MAX_SUBDOMAIN_COLOR 100
   /* could be done better: if we can't color the subdomain graph

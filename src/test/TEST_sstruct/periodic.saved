@@ -70,3 +70,43 @@ Final Relative Residual Norm = 5.012817e-07
 Iterations = 69
 Final Relative Residual Norm = 8.673863e-07
 
+# Output file: periodic.out.80
+Iterations = 4
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.81
+Iterations = 4
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.82
+Iterations = 4
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.83
+Iterations = 4
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.85
+Iterations = 4
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.90
+Iterations = 5
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.91
+Iterations = 5
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.92
+Iterations = 5
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.93
+Iterations = 5
+Final Relative Residual Norm = 0.000000e+00
+
+# Output file: periodic.out.95
+Iterations = 5
+Final Relative Residual Norm = 0.000000e+00
+

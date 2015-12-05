@@ -7,13 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
 
 
-#include "headers.h"
+#include "_hypre_sstruct_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_MaxwellSolve- note that there is no input operator Aee. We assume
@@ -81,7 +81,7 @@ hypre_MaxwellSolve2( void                * maxwell_vdata,
    HYPRE_Int              Solve_err_flag;
    HYPRE_Int              relax_local, cycle_param;
                                                                                                             
-   double                 b_dot_b, r_dot_r, eps;
+   double                 b_dot_b = 0, r_dot_r, eps = 0;
    double                 e_dot_e, x_dot_x;
 
    HYPRE_Int              i, j;

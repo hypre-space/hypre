@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.121 $
+ * $Revision: 2.122 $
  ***********************************************************************EHEADER*/
 
 
@@ -54,7 +54,7 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
                  HYUZAWA,HYMLMAXWELL,HYAMS,HYSYSPDE,HYDSLU};
 
-#define HYFEI_HIGHMASK      2147483647-255
+#define HYFEI_HIGHMASK     (2147483647-255)
 #define HYFEI_SPECIALMASK              255
 #define HYFEI_SLIDEREDUCE1             256
 #define HYFEI_SLIDEREDUCE2             512

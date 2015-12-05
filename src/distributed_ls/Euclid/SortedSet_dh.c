@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
-
-
-
-#include "SortedSet_dh.h"
-#include "shellSort_dh.h"
-#include "Mem_dh.h"
-
+#include "_hypre_Euclid.h"
+/* #include "SortedSet_dh.h" */
+/* #include "shellSort_dh.h" */
+/* #include "Mem_dh.h" */
 
 #undef __FUNC__
 #define __FUNC__ "SortedSet_dhCreate"

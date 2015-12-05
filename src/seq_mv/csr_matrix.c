@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -19,7 +16,7 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
+#include "seq_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixCreate
@@ -286,6 +283,79 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    }
 
    fclose(fp);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixPrintHB: print a CSRMatrix in Harwell-Boeing format
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_CSRMatrixPrintHB( hypre_CSRMatrix *matrix_input,
+                        char            *file_name )
+{
+   FILE            *fp;
+   hypre_CSRMatrix *matrix;
+   double          *matrix_data;
+   HYPRE_Int       *matrix_i;
+   HYPRE_Int       *matrix_j;
+   HYPRE_Int        num_rows;
+   HYPRE_Int        file_base = 1;
+   HYPRE_Int        j, totcrd, ptrcrd, indcrd, valcrd, rhscrd;
+   HYPRE_Int        ierr = 0;
+
+   /*----------------------------------------------------------
+    * Print the matrix data
+    *----------------------------------------------------------*/
+
+   /* First transpose the input matrix, since HB is in CSC format */
+   hypre_CSRMatrixTranspose(matrix_input, &matrix, 1);
+
+   matrix_data = hypre_CSRMatrixData(matrix);
+   matrix_i    = hypre_CSRMatrixI(matrix);
+   matrix_j    = hypre_CSRMatrixJ(matrix);
+   num_rows    = hypre_CSRMatrixNumRows(matrix);
+
+   fp = fopen(file_name, "w");
+
+   hypre_fprintf(fp, "%-70s  Key     \n", "Title");
+   ptrcrd = num_rows;
+   indcrd = matrix_i[num_rows];
+   valcrd = matrix_i[num_rows];
+   rhscrd = 0;
+   totcrd = ptrcrd + indcrd + valcrd + rhscrd;
+   hypre_fprintf (fp, "%14d%14d%14d%14d%14d\n",
+                  totcrd, ptrcrd, indcrd, valcrd, rhscrd);
+   hypre_fprintf (fp, "%-14s%14i%14i%14i%14i\n", "RUA",
+                  num_rows, num_rows, valcrd, 0);
+   hypre_fprintf (fp, "%-16s%-16s%-16s%26s\n", "(1I8)", "(1I8)", "(1E16.8)", "");
+
+   for (j = 0; j <= num_rows; j++)
+   {
+      hypre_fprintf(fp, "%8d\n", matrix_i[j] + file_base);
+   }
+
+   for (j = 0; j < matrix_i[num_rows]; j++)
+   {
+      hypre_fprintf(fp, "%8d\n", matrix_j[j] + file_base);
+   }
+
+   if (matrix_data)
+   {
+      for (j = 0; j < matrix_i[num_rows]; j++)
+      {
+         hypre_fprintf(fp, "%16.8e\n", matrix_data[j]);
+      }
+   }
+   else
+   {
+      hypre_fprintf(fp, "Warning: No matrix data!\n");
+   }
+
+   fclose(fp);
+
+   hypre_CSRMatrixDestroy(matrix);
 
    return ierr;
 }

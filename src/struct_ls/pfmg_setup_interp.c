@@ -7,22 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.18 $
+ * $Revision: 2.22 $
  ***********************************************************************EHEADER*/
 
-
-
-
-/******************************************************************************
- *
- *
- *****************************************************************************/
-
-#include "headers.h"
+#include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGCreateInterpOp
  *--------------------------------------------------------------------------*/
 
 hypre_StructMatrix *
@@ -64,11 +55,11 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    if ( constant_coefficient==2 )
    {
       if ( rap_type==0 )
-      /* A has variable diagonal, which will force all P coefficients to be variable */
+         /* A has variable diagonal, which will force all P coefficients to be variable */
          hypre_StructMatrixSetConstantCoefficient(P, 0 );
       else
       {
-      /* We will force P to be 0.5's everywhere, ignoring A. */
+         /* We will force P to be 0.5's everywhere, ignoring A. */
          hypre_StructMatrixSetConstantCoefficient(P, 1);
       }
    }
@@ -85,7 +76,6 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetupInterpOp
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -141,6 +131,8 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
     * Find stencil enties in A corresponding to P
     *----------------------------------------------------------*/
 
+   si0 = -1;
+   si1 = -1;
    for (si = 0; si < stencil_size; si++)
    {
       mrk0 = 0;
@@ -176,47 +168,47 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(P));
    hypre_ForBoxI(i, compute_boxes)
-      {
-         compute_box = hypre_BoxArrayBox(compute_boxes, i);
+   {
+      compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
-         A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-         P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
+      A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+      P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
 
-         Pp0 = hypre_StructMatrixBoxData(P, i, 0);
-         Pp1 = hypre_StructMatrixBoxData(P, i, 1);
+      Pp0 = hypre_StructMatrixBoxData(P, i, 0);
+      Pp1 = hypre_StructMatrixBoxData(P, i, 1);
 
-         Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
-         Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
+      Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
+      Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
  
-         startc  = hypre_BoxIMin(compute_box);
-         hypre_StructMapCoarseToFine(startc, findex, stride, start);
+      startc  = hypre_BoxIMin(compute_box);
+      hypre_StructMapCoarseToFine(startc, findex, stride, start);
 
-         hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
+      hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
-         if ( constant_coefficient==1 )
-            /* all coefficients are constant */
-         {
-            hypre_PFMGSetupInterpOp_CC1
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-         }
-
-         else if ( constant_coefficient==2 )
-            /* all coefficients are constant except the diagonal is variable */
-         {
-            hypre_PFMGSetupInterpOp_CC2
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-         }
-
-         else
-            /* constant_coefficient == 0 , all coefficients in A vary */
-         {
-            hypre_PFMGSetupInterpOp_CC0
-               ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-                 P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-         }
+      if ( constant_coefficient==1 )
+         /* all coefficients are constant */
+      {
+         hypre_PFMGSetupInterpOp_CC1
+            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
       }
+
+      else if ( constant_coefficient==2 )
+         /* all coefficients are constant except the diagonal is variable */
+      {
+         hypre_PFMGSetupInterpOp_CC2
+            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+      }
+
+      else
+         /* constant_coefficient == 0 , all coefficients in A vary */
+      {
+         hypre_PFMGSetupInterpOp_CC0
+            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
+      }
+   }
 
 #if 0
    hypre_StructMatrixAssemble(P);
@@ -252,73 +244,73 @@ hypre_PFMGSetupInterpOp_CC0
    double                *Ap;
    double                 center;
    HYPRE_Int              Astenc;
-   HYPRE_Int              loopi, loopj, loopk;
    HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
-   hypre_BoxLoop2Begin(loop_size,
+   hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1
-#include "hypre_box_smp_forloop.h"
-   hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
+#endif
+   hypre_BoxLoop2For(Ai, Pi)
+   {
+      center  = 0.0;
+      Pp0[Pi] = 0.0;
+      Pp1[Pi] = 0.0;
+      mrk0 = 0;
+      mrk1 = 0;
+
+      for (si = 0; si < stencil_size; si++)
       {
-         center  = 0.0;
-         Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;
-         mrk0 = 0;
-         mrk1 = 0;
+         Ap = hypre_StructMatrixBoxData(A, i, si);
+         Astenc = hypre_IndexD(stencil_shape[si], cdir);
 
-         for (si = 0; si < stencil_size; si++)
+         if (Astenc == 0)
          {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-            Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
-            if (Astenc == 0)
-            {
-               center += Ap[Ai];
-            }
-            else if (Astenc == Pstenc0)
-            {
-               Pp0[Pi] -= Ap[Ai];
-            }
-            else if (Astenc == Pstenc1)
-            {
-               Pp1[Pi] -= Ap[Ai];
-            }
-
-            if (si == si0 && Ap[Ai] == 0.0)
-               mrk0++;
-            if (si == si1 && Ap[Ai] == 0.0)
-               mrk1++;
+            center += Ap[Ai];
+         }
+         else if (Astenc == Pstenc0)
+         {
+            Pp0[Pi] -= Ap[Ai];
+         }
+         else if (Astenc == Pstenc1)
+         {
+            Pp1[Pi] -= Ap[Ai];
          }
 
-         if (!center)
-         {
-            warning_cnt++;
-            Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
-         }
-         else
-         {
-            Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
-         }
-
-         /*----------------------------------------------
-          * Set interpolation weight to zero, if stencil
-          * entry in same direction is zero. Prevents
-          * interpolation and operator stencils reaching
-          * outside domain.
-          *----------------------------------------------*/
-         if (mrk0 != 0)
-            Pp0[Pi] = 0.0;
-         if (mrk1 != 0)
-            Pp1[Pi] = 0.0;
+         if (si == si0 && Ap[Ai] == 0.0)
+            mrk0++;
+         if (si == si1 && Ap[Ai] == 0.0)
+            mrk1++;
       }
+
+      if (!center)
+      {
+         warning_cnt++;
+         Pp0[Pi] = 0.0;
+         Pp1[Pi] = 0.0;  
+      }
+      else
+      {
+         Pp0[Pi] /= center;
+         Pp1[Pi] /= center;  
+      }
+
+      /*----------------------------------------------
+       * Set interpolation weight to zero, if stencil
+       * entry in same direction is zero. Prevents
+       * interpolation and operator stencils reaching
+       * outside domain.
+       *----------------------------------------------*/
+      if (mrk0 != 0)
+         Pp0[Pi] = 0.0;
+      if (mrk1 != 0)
+         Pp1[Pi] = 0.0;
+   }
    hypre_BoxLoop2End(Ai, Pi);
 
    if (warning_cnt)
@@ -396,14 +388,14 @@ hypre_PFMGSetupInterpOp_CC1
    }
    if (!center)
    {
-        warning_cnt++;
-        Pp0[Pi] = 0.0;
-        Pp1[Pi] = 0.0;  
+      warning_cnt++;
+      Pp0[Pi] = 0.0;
+      Pp1[Pi] = 0.0;  
    }
    else
    {
-        Pp0[Pi] /= center;
-        Pp1[Pi] /= center;  
+      Pp0[Pi] /= center;
+      Pp1[Pi] /= center;  
    }
 
    /*----------------------------------------------
@@ -459,7 +451,6 @@ hypre_PFMGSetupInterpOp_CC2
    double                 P0, P1;
    double                 center, center_offd;
    HYPRE_Int              Astenc;
-   HYPRE_Int              loopi, loopj, loopk;
    HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
@@ -521,53 +512,54 @@ hypre_PFMGSetupInterpOp_CC2
       }
 
       si = diag_rank;
-      hypre_BoxLoop2Begin(loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,Ap,Astenc,mrk0,mrk1
-#include "hypre_box_smp_forloop.h"
-      hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
+#endif
+      hypre_BoxLoop2For(Ai, Pi)
+      {
+         Pp0[Pi] = P0;
+         Pp1[Pi] = P1;
+         center = center_offd;
+         mrk0 = mrk0_offd;
+         mrk1 = mrk1_offd;
+
+         Ap = hypre_StructMatrixBoxData(A, i, si);
+         Astenc = hypre_IndexD(stencil_shape[si], cdir);
+         hypre_assert( Astenc==0 );
+         center += Ap[Ai];
+
+         if (si == si0 && Ap[Ai] == 0.0)
+            mrk0++;
+         if (si == si1 && Ap[Ai] == 0.0)
+            mrk1++;
+
+         if (!center)
          {
-            Pp0[Pi] = P0;
-            Pp1[Pi] = P1;
-            center = center_offd;
-            mrk0 = mrk0_offd;
-            mrk1 = mrk1_offd;
-
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-            Astenc = hypre_IndexD(stencil_shape[si], cdir);
-            hypre_assert( Astenc==0 );
-            center += Ap[Ai];
-
-            if (si == si0 && Ap[Ai] == 0.0)
-               mrk0++;
-            if (si == si1 && Ap[Ai] == 0.0)
-               mrk1++;
-
-             if (!center)
-             {
-                warning_cnt++;
-                Pp0[Pi] = 0.0;
-                Pp1[Pi] = 0.0;  
-             }
-             else
-             {
-                Pp0[Pi] /= center;
-                Pp1[Pi] /= center;  
-             }
-
-            /*----------------------------------------------
-             * Set interpolation weight to zero, if stencil
-             * entry in same direction is zero. Prevents
-             * interpolation and operator stencils reaching
-             * outside domain.
-             *----------------------------------------------*/
-            if (mrk0 != 0)
-               Pp0[Pi] = 0.0;
-            if (mrk1 != 0)
-               Pp1[Pi] = 0.0;
-
+            warning_cnt++;
+            Pp0[Pi] = 0.0;
+            Pp1[Pi] = 0.0;  
          }
+         else
+         {
+            Pp0[Pi] /= center;
+            Pp1[Pi] /= center;  
+         }
+
+         /*----------------------------------------------
+          * Set interpolation weight to zero, if stencil
+          * entry in same direction is zero. Prevents
+          * interpolation and operator stencils reaching
+          * outside domain.
+          *----------------------------------------------*/
+         if (mrk0 != 0)
+            Pp0[Pi] = 0.0;
+         if (mrk1 != 0)
+            Pp1[Pi] = 0.0;
+
+      }
       hypre_BoxLoop2End(Ai, Pi);
    }
 

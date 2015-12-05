@@ -7,16 +7,13 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef ILU_MPI_DH
 #define ILU_MPI_DH
 
-#include "euclid_common.h"
+/* #include "euclid_common.h" */
 
 void reallocate_private(HYPRE_Int row, HYPRE_Int newEntries, HYPRE_Int *nzHave,
                 HYPRE_Int **rp, HYPRE_Int **cval, float **aval, double **avalD, HYPRE_Int **fill);
