@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.10 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -72,8 +72,9 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 
    hypre_IJVectorComm(vec)         = comm;
    hypre_IJVectorPartitioning(vec) = partitioning;
-   hypre_IJVectorObject(vec)       = NULL;
    hypre_IJVectorObjectType(vec)   = HYPRE_UNITIALIZED;
+   hypre_IJVectorObject(vec)       = NULL;
+   hypre_IJVectorTranslator(vec)   = NULL;
 
    *vector = (HYPRE_IJVector) vec;
   
@@ -110,10 +111,15 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    else */
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-
+   {
       ierr = hypre_IJVectorDestroyPar(vec) ;
-
-   else
+      if (hypre_IJVectorTranslator(vec))
+      {
+         ierr = hypre_AuxParVectorDestroy((hypre_AuxParVector *)
+		(hypre_IJVectorTranslator(vec)));
+      }
+   }
+   else if ( hypre_IJVectorObjectType(vec) != -1 )
    {
       printf("Unrecognized object type -- HYPRE_IJVectorDestroy\n");
       exit(1);
@@ -325,6 +331,44 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetMaxOffProcElmts
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJVectorSetMaxOffProcElmts( HYPRE_IJVector vector, 
+				  int max_off_proc_elmts)
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorSetObjectType\n");
+     exit(1);
+   } 
+
+   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
+
+      return( hypre_IJVectorSetMaxOffProcElmtsPETSc(vec, 
+		max_off_proc_elmts));
+
+   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
+      return( hypre_IJVectorSetMaxOffProcElmtsISIS(vec, 
+		max_off_proc_elmts));
+
+   else */ if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
+      return( hypre_IJVectorSetMaxOffProcElmtsPar(vec, 
+		max_off_proc_elmts));
+
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJVectorGetValues\n");
+      exit(1);
+   }
+
+   return -99;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
@@ -365,6 +409,34 @@ HYPRE_IJVectorGetObjectType( HYPRE_IJVector vector, int *type )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorGetLocalRange
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector, int *jlower, int *jupper )
+{
+   hypre_IJVector *vec = (hypre_IJVector *) vector;
+   MPI_Comm comm;
+   int *partitioning;
+   int my_id;
+
+   if (!vec)
+   {
+     printf("Variable vec is NULL -- HYPRE_IJVectorGetObjectType\n");
+     exit(1);
+   } 
+
+   comm = hypre_IJVectorComm(vec);
+   partitioning = hypre_IJVectorPartitioning(vec);
+   MPI_Comm_rank(comm, &my_id);
+
+   *jlower = partitioning[my_id];
+   *jupper = partitioning[my_id+1]-1;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorGetObject
  *--------------------------------------------------------------------------*/
 
@@ -394,29 +466,43 @@ HYPRE_IJVectorGetObject( HYPRE_IJVector vector, void **object )
 int
 HYPRE_IJVectorRead( const char     *filename,
                     MPI_Comm        comm,
-                    int             object_type,
-                    HYPRE_IJVector *vector )
+                    int             type,
+                    HYPRE_IJVector *vector_ptr )
 {
    int ierr = 0;
-   hypre_IJVector *vec;
+   HYPRE_IJVector  vector;
+   int             jlower, jupper, j;
+   double          value;
+   int             myid;
+   char            new_filename[255];
+   FILE           *file;
 
-   /* if ( object_type == HYPRE_PETSC )
-      ierr =  hypre_IJVectorReadPETSc( comm, filename, &vec );
-   else if ( object_type == HYPRE_ISIS )
-      ierr = hypre_IJVectorReadISIS( comm, filename, &vec );
-   else */
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
 
-   if ( object_type == HYPRE_PARCSR )
-      ierr = hypre_IJVectorReadPar( comm, filename, &vec );
-   else
+   if ((file = fopen(new_filename, "r")) == NULL)
    {
-      printf("Unrecognized object type -- HYPRE_IJVectorRead\n");
+      printf("Error: can't open input file %s\n", new_filename);
       exit(1);
    }
 
-   hypre_IJVectorObjectType(vec) = object_type;
+   fscanf(file, "%d %d", &jlower, &jupper);
+   ierr = HYPRE_IJVectorCreate(comm, jlower, jupper, &vector);
 
-   *vector =  (HYPRE_IJVector) vec;
+   ierr += HYPRE_IJVectorSetObjectType(vector, type);
+   ierr += HYPRE_IJVectorInitialize(vector);
+
+   while ( fscanf(file, "%d %le", &j, &value) != EOF )
+   {
+      ierr += HYPRE_IJVectorSetValues(vector, 1, &j, &value);
+   }
+
+   ierr += HYPRE_IJVectorAssemble(vector);
+
+   fclose(file);
+
+   *vector_ptr = vector;
 
    return ierr;
 }
@@ -426,30 +512,48 @@ HYPRE_IJVectorRead( const char     *filename,
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_IJVectorPrint( HYPRE_IJVector vector, const char *filename )
+HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
+                     const char     *filename )
 {
    int ierr = 0;
-   hypre_IJVector *vec = (hypre_IJVector *) vector;
+   MPI_Comm  comm = hypre_IJVectorComm(vector);
+   int      *partitioning;
+   int       jlower, jupper, j;
+   double    value;
+   int       myid;
+   char      new_filename[255];
+   FILE     *file;
 
-   if (!vec)
+   if (!vector)
    {
       printf("Variable vec is NULL -- HYPRE_IJVectorPrint\n");
       exit(1);
    } 
 
-   /* if ( hypre_IJVectorObjectType(vec) == HYPRE_PETSC )
-      ierr =  hypre_IJVectorPrintPETSc( vec, filename );
-   else if ( hypre_IJVectorObjectType(vec) == HYPRE_ISIS )
-      ierr = hypre_IJVectorPrintISIS( vec, filename );
-   else */
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
 
-   if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
-      ierr = hypre_IJVectorPrintPar( vec, filename );
-   else
+   if ((file = fopen(new_filename, "w")) == NULL)
    {
-      printf("Unrecognized object type -- HYPRE_IJVectorPrint\n");
+      printf("Error: can't open output file %s\n", new_filename);
       exit(1);
    }
+
+   partitioning = hypre_IJVectorPartitioning(vector);
+   jlower = partitioning[myid];
+   jupper = partitioning[myid+1] - 1;
+
+   fprintf(file, "%d %d\n", jlower, jupper);
+
+   for (j = jlower; j <= jupper; j++)
+   {
+      HYPRE_IJVectorGetValues(vector, 1, &j, &value);
+
+      fprintf(file, "%d %e\n", j, value);
+   }
+
+   fclose(file);
 
    return ierr;
 }

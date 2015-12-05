@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -12,3 +12,4 @@
 #include <math.h>
 
 #include "sstruct_ls.h"
+#include "fac.h"

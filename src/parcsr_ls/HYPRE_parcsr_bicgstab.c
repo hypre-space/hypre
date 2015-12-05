@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -158,6 +158,17 @@ HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
                              int logging)
 {
    return( HYPRE_BiCGSTABSetLogging( solver, logging ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver,
+                             int print_level)
+{
+   return( HYPRE_BiCGSTABSetPrintLevel( solver, print_level ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -143,6 +143,7 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)( long int 
     * 1 - set up a ds preconditioner
     * 2 - set up an amg preconditioner
     * 3 - set up a pilut preconditioner
+    * 4 - set up a ParaSails preconditioner
     *------------------------------------------------------------*/
 
    if (*precond_id == 0)
@@ -173,6 +174,14 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond, HYPRE_PARCSRPCGSETPRECOND)( long int 
                                HYPRE_ParCSRPilutSetup,
                                (void *)       *precond_solver) );
    }
+   else if (*precond_id == 4)
+   {
+      *ierr = (int) ( HYPRE_ParCSRPCGSetPrecond(
+                               (HYPRE_Solver) *solver,
+                               HYPRE_ParaSailsSolve,
+                               HYPRE_ParaSailsSetup,
+                               (void *)       *precond_solver) );
+   }
    else
    {
       *ierr = -1;
@@ -195,16 +204,16 @@ hypre_F90_IFACE(hypre_parcsrpcggetprecond, HYPRE_PARCSRPCGGETPRECOND)( long int 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGSetLogging
+ * HYPRE_ParCSRPCGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpcgsetlogging, HYPRE_PARCSRPCGSETLOGGING)( long int *solver,
-                                            int      *logging,
+hypre_F90_IFACE(hypre_parcsrpcgsetprintlevel, HYPRE_PARCSRPCGSETPRINTLEVEL)( long int *solver,
+                                            int      *level,
                                             int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_ParCSRPCGSetLogging( (HYPRE_Solver) *solver,
-                                              (int)          *logging ) );
+   *ierr = (int) ( HYPRE_ParCSRPCGSetPrintLevel( (HYPRE_Solver) *solver,
+                                                 (int)       *level ) );
 }
 
 /*--------------------------------------------------------------------------

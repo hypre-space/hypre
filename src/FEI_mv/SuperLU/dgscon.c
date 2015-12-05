@@ -6,14 +6,16 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 /*
  * File name:	dgscon.c
  * History:     Modified from lapack routines DGECON.
  */
 #include <math.h>
-#include "util.h"
 #include "dsp_defs.h"
+#include "superlu_util.h"
 
 void
 dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
@@ -45,12 +47,12 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     L       (input) SuperMatrix*
             The factor L from the factorization Pr*A*Pc=L*U as computed by
             dgstrf(). Use compressed row subscripts storage for supernodes,
-            i.e., L has types: Stype = SC, Dtype = _D, Mtype = TRLU.
+            i.e., L has types: Stype = SC, Dtype = D_D, Mtype = TRLU.
  
     U       (input) SuperMatrix*
             The factor U from the factorization Pr*A*Pc=L*U as computed by
             dgstrf(). Use column-wise storage scheme, i.e., U has types:
-            Stype = NC, Dtype = _D, Mtype = TRU.
+            Stype = NC, Dtype = D_D, Mtype = TRU.
 	    
     ANORM   (input) double
             If NORM = '1' or 'O', the 1-norm of the original matrix A.   
@@ -79,17 +81,17 @@ dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters. */
     *info = 0;
-    onenrm = *(unsigned char *)norm == '1' || lsame_(norm, "O");
-    if (! onenrm && ! lsame_(norm, "I")) *info = -1;
+    onenrm = *(unsigned char *)norm == '1' || superlu_lsame(norm, "O");
+    if (! onenrm && ! superlu_lsame(norm, "I")) *info = -1;
     else if (L->nrow < 0 || L->nrow != L->ncol ||
-             L->Stype != SC || L->Dtype != _D || L->Mtype != TRLU)
+             L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU)
 	 *info = -2;
     else if (U->nrow < 0 || U->nrow != U->ncol ||
-             U->Stype != NC || U->Dtype != _D || U->Mtype != TRU) 
+             U->Stype != NC || U->Dtype != D_D || U->Mtype != TRU) 
 	*info = -3;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgscon", &i);
+	superlu_xerbla("dgscon", &i);
 	return;
     }
 

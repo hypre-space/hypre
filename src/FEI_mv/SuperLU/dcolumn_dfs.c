@@ -21,7 +21,7 @@
 */
 
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 /* What type of supernodes we want */
 #define T2_SUPER

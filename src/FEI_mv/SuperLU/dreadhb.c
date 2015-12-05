@@ -1,5 +1,3 @@
-
-
 /*
  * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
@@ -11,6 +9,12 @@
 #include <stdlib.h>
 #include "dsp_defs.h"
 
+/* local prototypes */
+int dDumpLine ( FILE *fp );
+int dParseIntFormat ( char *buf , int *num , int *size );
+int dParseFloatFormat ( char *buf , int *num , int *size );
+int dReadVector ( FILE *fp , int n , int *where , int perline , int persize );
+int dReadValues ( FILE *fp , int n , double *destination , int perline , int persize );
 
 /* Eat up the rest of the current line */
 int dDumpLine(FILE *fp)

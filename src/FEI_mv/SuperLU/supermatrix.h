@@ -16,10 +16,10 @@ typedef enum {
 } Stype_t;
 
 typedef enum {
-    _S,         /* single */
-    _D,         /* double */
-    _C,         /* single complex */
-    _Z          /* double complex */
+    S_S,         /* single */
+    D_D,         /* double */
+    C_C,         /* single complex */
+    Z_Z          /* double complex */
 } Dtype_t;
 
 typedef enum {

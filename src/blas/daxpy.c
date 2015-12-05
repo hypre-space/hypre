@@ -5,6 +5,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int daxpy_(integer *n, doublereal *da, doublereal *dx, 
 	integer *incx, doublereal *dy, integer *incy)

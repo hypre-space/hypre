@@ -6,10 +6,13 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "fortran.h"
+#include "superlu_util.h"
 
 double
 dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c, 
@@ -32,17 +35,17 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
  * A        (input) SuperMatrix*
  *	    Original matrix A, permuted by columns, of dimension
  *          (A->nrow, A->ncol). The type of A can be:
- *          Stype = NC; Dtype = _D; Mtype = GE.
+ *          Stype = NC; Dtype = D_D; Mtype = GE.
  *
  * L        (output) SuperMatrix*
  *          The factor L from the factorization Pr*A=L*U; use compressed row 
  *          subscripts storage for supernodes, i.e., L has type: 
- *          Stype = SC; Dtype = _D; Mtype = TRLU.
+ *          Stype = SC; Dtype = D_D; Mtype = TRLU.
  *
  * U        (output) SuperMatrix*
  *	    The factor U from the factorization Pr*A*Pc=L*U. Use column-wise
  *          storage scheme, i.e., U has types: Stype = NC;
- *          Dtype = _D; Mtype = TRU.
+ *          Dtype = D_D; Mtype = TRU.
  *
  */
     NCformat *Astore;
@@ -53,12 +56,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     int      i, j, k, oldcol;
     int      *inv_perm_c;
     double   rpg, maxaj, maxuj;
-    extern   double dlamch_(char *);
+    extern   double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
     double   smlnum;
     double   *luval;
    
     /* Get machine constants. */
-    smlnum = dlamch_("S");
+    smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("S");
     rpg = 1. / smlnum;
 
     Astore = A->Store;

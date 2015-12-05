@@ -1,50 +1,24 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1997   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.3 $
+# $Revision: 2.2 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
-
-srcdir = .
+include ../config/Makefile.config
  
-CC =  mpicc
+## Euclid specific macros taken from distributed_ls/Euclid
+EUCLID_CFLAGS = -DMPI_MODE -DMPI_TIMING -DUSING_MPI -DHYPRE_GET_ROW \
+                -DHYPRE_MODE -DOPTIMIZED_DH
+
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES= 
-CDEFS =
- 
-#Pilut flags and definitions
-
-HYPRE_DIR = /home/treadway/hypre-1.6.0/src/linear_solvers
-
-# FC_LIB contains the libraries for a CLINKER to use for code containing
-# FORTRAN code (such as I/O or special Fortran runtimes).
-#
-FC_LIB         = -L/opt/SUNWspro/SC4.2/lib -lF77 -lM77 -lsunmath
-BLAS_LIB       =  -lHYPRE_blas
-
-PILUT_LIBFLAGS =\
- -L../distributed_ls/pilut\
- -L../distributed_matrix\
- -L../matrix_matrix\
- -l_HYPRE_DistributedMatrixPilutSolver \
- -l_HYPRE_MatrixMatrix \
- -l_HYPRE_DistributedMatrix \
- $(BLAS_LIB)
-
-
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS =\
+ ${EUCLID_CFLAGS}\
  -I..\
- -I../distributed_ls/Euclid/include\
+ -I../distributed_ls/Euclid\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
@@ -54,146 +28,93 @@ CFLAGS =\
  -I$(srcdir)/../distributed_matrix\
  -I$(srcdir)/../matrix_matrix\
  -I$(srcdir)/../IJ_mv\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES}
  
-RANLIB= ranlib
- 
-MPILIBFLAGS =   
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
- 
-LFLAGS =\
- -L.\
- -L../parcsr_mv\
- -L../seq_mv\
- -L../utilities\
- -lHYPRE_parcsr_ls\
- $(PILUT_LIBFLAGS)\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 HEADERS =\
+ Common.h\
  headers.h\
+ HYPRE_parcsr_ls.h\
  par_amg.h\
  parcsr_ls.h\
- schwarz.h\
- Common.h\
- HYPRE_parcsr_ls.h
+ schwarz.h
 
 FILES =\
- par_amg.c\
- par_amg_setup.c\
- par_amg_solve.c\
- par_amg_solveT.c\
- par_stats.c\
- par_strength.c\
- par_cycle.c\
- par_difconv.c\
- par_interp.c\
- par_coarsen.c\
- par_coarse_parms.c\
- par_relax.c\
- par_indepset.c\
- par_laplace.c\
- par_laplace_9pt.c\
- par_laplace_27pt.c\
- par_rap.c\
- par_rap_communication.c\
- par_scaled_matnorm.c\
- pcg_par.c\
- par_schwarz.c\
- schwarz.c\
- transpose.c\
- HYPRE_parcsr_amg.c\
- HYPRE_parcsr_bicgstab.c\
- HYPRE_parcsr_cgnr.c\
- HYPRE_parcsr_gmres.c\
- HYPRE_parcsr_pcg.c\
- HYPRE_parcsr_pilut.c\
- HYPRE_parcsr_schwarz.c\
- HYPRE_parcsr_ParaSails.c\
- HYPRE_parcsr_Euclid.c\
+ amg_hybrid.c\
+ F90_hypre_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
  F90_HYPRE_parcsr_cgnr.c\
  F90_HYPRE_parcsr_gmres.c\
+ F90_HYPRE_parcsr_ParaSails.c\
  F90_HYPRE_parcsr_pcg.c\
  F90_HYPRE_parcsr_pilut.c\
- F90_HYPRE_parcsr_ParaSails.c\
- F90_hypre_laplace.c
-
-DRIVER_FILES =\
- driver.c
+ HYPRE_parcsr_amg.c\
+ HYPRE_parcsr_bicgstab.c\
+ HYPRE_parcsr_cgnr.c\
+ HYPRE_parcsr_Euclid.c\
+ HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_hybrid.c\
+ HYPRE_parcsr_ParaSails.c\
+ HYPRE_parcsr_pcg.c\
+ HYPRE_parcsr_pilut.c\
+ HYPRE_parcsr_schwarz.c\
+ par_amg.c\
+ par_amg_setup.c\
+ par_amg_solve.c\
+ par_amg_solveT.c\
+ par_cg_relax_wt.c\
+ par_coarsen.c\
+ par_coarse_parms.c\
+ par_cycle.c\
+ par_difconv.c\
+ par_gsmg.c\
+ par_indepset.c\
+ par_interp.c\
+ par_laplace_27pt.c\
+ par_laplace_9pt.c\
+ par_laplace.c\
+ par_nodal_systems.c\
+ par_rap.c\
+ par_rap_communication.c\
+ par_relax.c\
+ par_relax_interface.c\
+ par_scaled_matnorm.c\
+ par_schwarz.c\
+ par_stats.c\
+ par_strength.c\
+ pcg_par.c\
+ schwarz.c
 
 OBJS = ${FILES:.c=.o}
-DRIVER_OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_parcsr_ls.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/parcsr_ls.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
  
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/parcsr_ls.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_parcsr_ls.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/parcsr_ls.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_parcsr_ls.a
-	@rm -f driver 
+distclean: clean
 
-##################################################################
-# Temporary Targets
-##################################################################
-
-####################
-# AMGe
-####################
-
-AMGE_HEADERS =\
- amge1.h\
- amge2.h
-
-AMGE_FILES =\
- amge1.c\
- amge2.c
-
-AMGE_OBJS = ${AMGE_FILES:.c=.o}
-
-amge: all ${AMGE_OBJS}
-	@echo  "Linking" $@ "... "
-	${CC} -o amge ${AMGE_OBJS} ${LFLAGS} 
-
-${AMGE_OBJS}: ${AMGE_HEADERS}
 
 ##################################################################
 # Rules
 ##################################################################
 
-driver: driver.o libHYPRE_parcsr_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o $@ driver.o ${LFLAGS} 
-
 libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
-	ranlib $@
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
  
 ${OBJS}: ${HEADERS}
- 
-${DRIVER_OBJS}: ${HEADERS}
- 
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

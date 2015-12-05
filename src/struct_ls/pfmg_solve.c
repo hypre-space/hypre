@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.7 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -55,7 +55,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    double                e_dot_e, x_dot_x;
                     
    int                   i, l;
-                    
+   int                   constant_coefficient;
+
    int                   ierr = 0;
 #if DEBUG
    char                  filename[255];
@@ -66,6 +67,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    hypre_BeginTiming(pfmg_data -> time_index);
+
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
    hypre_StructMatrixDestroy(A_l[0]);
    hypre_StructVectorDestroy(b_l[0]);
@@ -213,8 +216,15 @@ hypre_PFMGSolve( void               *pfmg_vdata,
           * Bottom
           *--------------------------------------------------*/
 
-         hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
-         hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         if (active_l[l])
+         {
+            hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
+            hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+         }
+         else
+         {
+            hypre_StructVectorSetConstantValues(x_l[l], 0.0);
+         }
 #if DEBUG
          sprintf(filename, "zout_xbottom.%02d", l);
          hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -227,6 +237,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
+            if (constant_coefficient>=1) hypre_StructVectorClearBoundGhostValues( e_l[l] );
             hypre_SemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
@@ -246,6 +257,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
+         if (constant_coefficient>=1) hypre_StructVectorClearBoundGhostValues( e_l[0] );
          hypre_SemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG

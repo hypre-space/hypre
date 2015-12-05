@@ -1,0 +1,54 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 1.1 $
+#EHEADER***********************************************************************
+
+#=============================================================================
+# sstruct: Check SetSymmetric for HYPRE_SSTRUCT data type (2D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.symm0.2D -r 10 10 10 -solver 18 \
+> symm.out.20
+mpirun -np 1 ./sstruct -in sstruct.in.symm1.2D -r 10 10 10 -solver 18 \
+> symm.out.21
+mpirun -np 1 ./sstruct -in sstruct.in.symm2.2D -r 10 10 10 -solver 18 \
+> symm.out.22
+mpirun -np 1 ./sstruct -in sstruct.in.symm3.2D -r 10 10 10 -solver 18 \
+> symm.out.23
+
+#=============================================================================
+# sstruct: Check SetSymmetric for HYPRE_PARCSR data type (2D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.symm0.2D -r 10 10 10 -solver 28 \
+> symm.out.24
+mpirun -np 1 ./sstruct -in sstruct.in.symm1.2D -r 10 10 10 -solver 28 \
+> symm.out.25
+
+#=============================================================================
+# sstruct: Check SetSymmetric for HYPRE_SSTRUCT data type (3D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.symm0 -r 10 10 10 -solver 18 \
+> symm.out.30
+mpirun -np 1 ./sstruct -in sstruct.in.symm1 -r 10 10 10 -solver 18 \
+> symm.out.31
+mpirun -np 1 ./sstruct -in sstruct.in.symm2 -r 10 10 10 -solver 18 \
+> symm.out.32
+mpirun -np 1 ./sstruct -in sstruct.in.symm3 -r 10 10 10 -solver 18 \
+> symm.out.33
+
+#=============================================================================
+# sstruct: Check SetSymmetric for HYPRE_PARCSR data type (3D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.symm0 -r 10 10 10 -solver 28 \
+> symm.out.34
+mpirun -np 1 ./sstruct -in sstruct.in.symm1 -r 10 10 10 -solver 28 \
+> symm.out.35
+

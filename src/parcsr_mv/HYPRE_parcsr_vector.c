@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -26,6 +26,22 @@ HYPRE_ParVectorCreate( MPI_Comm comm,
 {
    *vector = (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
                                                     partitioning) ;
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParMultiVectorCreate
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParMultiVectorCreate( MPI_Comm comm,
+                            int      global_size, 
+                            int     *partitioning,
+                            int      number_vectors,
+                            HYPRE_ParVector *vector )
+{
+   *vector = (HYPRE_ParVector) hypre_ParMultiVectorCreate
+      (comm, global_size, partitioning, number_vectors );
    return 0;
 }
 

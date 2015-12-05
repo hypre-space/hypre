@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#include "./distributed_matrix.h"
-#include "../HYPRE.h"
+#include "distributed_matrix.h"
+#include "HYPRE.h"
 
 /*--------------------------------------------------------------------------
  *     BASIC CONSTRUCTION/DESTRUCTION SEQUENCE

@@ -1,72 +1,413 @@
-# LaTeX2HTML 96.1-g (June 11, 1996)
+# LaTeX2HTML 2002 (1.62)
 # Associate images original text with physical files.
 
-$key = q/{_inline}$langlefloatrangle${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=53 HEIGHT=29 ALIGN=MIDDLE  SRC="img41.gif"  > |; 
-$key = q/{tabular}ll0;SPMamp;nooutput(default)1;SPMamp;matrixstatistics(includesinformationoninterpolationoperatorsand;SPMamp;matricesgeneratedoneachlevel)2;SPMamp;cyclestatistics(includesresidualsgeneratedduringsolvephase)3;SPMamp;matrixandcyclestatistics{tabular}/;
-$cached_env_img{$key} = q| <IMG WIDTH=580 HEIGHT=108 ALIGN=BOTTOM  SRC="img24.gif"  > |; 
-$key = q/{figure}centeringincludegraphics[width=5in]concep_iface.epslabelfig-conceptual-interface{figure}/;
-$cached_env_img{$key} = q| <IMG WIDTH=598 HEIGHT=330 ALIGN=BOTTOM  SRC="img1.gif"  > |; 
-$key = q/{_inline}$0leitnlevels${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=82 HEIGHT=27 ALIGN=MIDDLE  SRC="img26.gif"  > |; 
-$key = q/{_inline}$ttfilter=-0.9${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=116 HEIGHT=22 ALIGN=MIDDLE  SRC="img38.gif"  > |; 
-$key = q/{figure}[t]centeringincludegraphics[width=4in]block_structured.epslabelfig-block-structured-grid{figure}/;
-$cached_env_img{$key} = q| <IMG WIDTH=478 HEIGHT=436 ALIGN=BOTTOM  SRC="img9.gif"  > |; 
-$key = q/{_inline}$-a_i,jgeqthetamax_jneqi-a_ij${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=156 HEIGHT=27 ALIGN=MIDDLE  SRC="img20.gif"  > |; 
-$key = q/{_inline}$ttthresh=-0.9${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=116 HEIGHT=22 ALIGN=MIDDLE  SRC="img35.gif"  > |; 
-$key = q/{_inline}$itnlevels=1${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=83 HEIGHT=13 ALIGN=BOTTOM  SRC="img28.gif"  > |; 
-$key = q/{_inline}$langleintrangle${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=35 HEIGHT=29 ALIGN=MIDDLE  SRC="img40.gif"  > |; 
-$key = q/{_inline}$A_p${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=19 HEIGHT=26 ALIGN=MIDDLE  SRC="img15.gif"  > |; 
-$key = q/{_inline}$10^-7${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=34 HEIGHT=15 ALIGN=BOTTOM  SRC="img19.gif"  > |; 
-$key = q/{_inline}$|b~-~Ax^(n)|_2|b|_2leq${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=172 HEIGHT=33 ALIGN=MIDDLE  SRC="img18.gif"  > |; 
-$key = q/{table}[h]centertabular|l|p4.5in|hlineParameterName;SPMamp;ParameterValueshlinehlinesolver;SPMamp;codecg,codegmres(default),codebicgstab,codetfqmr,codeboomeramg,codesuperlu,codesuperluxpreconditioner;SPMamp;codediagonal(default),codepilut,codeparasails,codeboomeramg,codeeuclidgmresDim;SPMamp;anintegerspecifyingthevalueofcodeminrestartedGMRES(m).Thedefaultvalueis50.maxIterations;SPMamp;anintegerspecifyingthemaximumnumberofiterationspermittedforCGorGMRES.Thedefaultvalueis1000.tolerance;SPMamp;afloatingpointnumberspecifyingtheterminationcriterionforCGorGMRES.Thedefaultvalueis1.0E-10.pilutFillin;SPMamp;anintegerspecifyingthemaximumnumberofnonzeroskeptintheformationofincompleteLandU.Ifthisisnotcalled,avaluewillbeselectedbasedonthesparsityofthematrix.pilutDropTol;SPMamp;afloatingpointnumberspecifyingthethresholdtodropsmallentriesinLandU.Thedefaultvalueis0.0.euclidNlevels;SPMamp;anon-negativeintegerspecifyingthedesiredsparsityoftheincompletefactors.Thedefaultvalueis0.euclidThreshold;SPMamp;afloatingpointnumberspecifyingthethresholdusedtosparsifytheincompletefactors.Thedefaultvalueis0.0.superluOrdering;SPMamp;codenatural(default)orcodemmd(minimumdegreeordering).ThisorderingisusedtominimizethenumberofnonzerosgeneratedintheLUdecomposition.Thedefaultisnaturalordering.superluScale;SPMamp;codey(yes;performrowandcolumnscalingsbeforedecomposition)orcoden(no;default).amgCoarsenType;SPMamp;codefalgout,coderuge,orcodedefault(CLJP)coarseningforBoomerAMG.amgNumSweeps;SPMamp;anintegerspecifyingthenumberofpre-andpost-smoothingateachlevelofBoomerAMG.Thedefaultisonepre-andonepost-smoothings.amgRelaxType;SPMamp;codejacobi(DampedJacobi),codegs-slow(sequentialGauss-Seidel),codegs-fast(Gauss-Seideloninteriornodes),codehybrid,orcodedirect.Thedefaultiscodehybrid.amgRelaxWeight;SPMamp;afloatingpointnumberbetween0and1specifyingthedampingfactorforBoomerAMG'sdampedJacobismoother.Thedefaultvalueis0.5.amgStrongThreshold;SPMamp;afloatingpointnumberbetween0and1specifyingthethresholdusedtodeterminestrongcouplinginBoomerAMG'scoasening.Thedefaultvalueis0.25.parasailsThreshold;SPMamp;afloatingpointnumberbetween0and1specifyingthethresholdusedtoprunesmallentriesinsettingupthesparseapproximateinverse.Thedefaultvalueis0.0.parasailsNlevels;SPMamp;anintegerlargerthan0specifyingthedesiredsparsityoftheapproximateinverse.Thedefaultvalueis1.parasailsFilter;SPMamp;afloatingpointnumberbetween0and1definingthethresholdusedtoprunesmallentriesinA.Thedefaultis0.0.parasailsLoadbal;SPMamp;afloatingpointnumberbetween0and1specifyinghowloadbalancinghastobedone.Thedefaultis0.0.parasailsSymmetric;SPMamp;setParaSailstotakeAassymmetric.parasailsUnSymmetric;SPMamp;setParaSailstotakeAasnonsymmetric(default).parasailsReuse;SPMamp;setParaSailstoreusethesparsitypatternofA.hlinetabularlabeltable-fei-param{table}/;
-$cached_env_img{$key} = q| <IMG WIDTH=758 HEIGHT=1111 ALIGN=BOTTOM  SRC="img13.gif"  > |; 
-$key = q/{_inline}$theta${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=6 HEIGHT=13 ALIGN=BOTTOM  SRC="img21.gif"  > |; 
-$key = q/{tabular}ll0;SPMamp;CLJP-coarsening1;SPMamp;Ruge-Stuebencoarseningwithoutboundarytreatment3;SPMamp;Ruge-Stuebencoarseningwitha3rd'second'passontheboundaries6;SPMamp;Falgoutcoarsening(default){tabular}/;
-$cached_env_img{$key} = q| <IMG WIDTH=573 HEIGHT=85 ALIGN=BOTTOM  SRC="img22.gif"  > |; 
-$key = q/{tabular}|c|l|hlinevalue;SPMamp;meaninghline0;SPMamp;nonsymmetricandorindefiniteproblem,andnonsymmetricpreconditioner1;SPMamp;SPDproblem,andSPD(factored)preconditioner2;SPMamp;nonsymmetric,definiteproblem,andSPD(factored)preconditionerhline{tabular}/;
-$cached_env_img{$key} = q| <IMG WIDTH=683 HEIGHT=92 ALIGN=BOTTOM  SRC="img31.gif"  > |; 
-$key = q/{_inline}$-ttthresh${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=71 HEIGHT=20 ALIGN=MIDDLE  SRC="img34.gif"  > |; 
-$key = q/{_inline}$-ttfilter${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=72 HEIGHT=22 ALIGN=MIDDLE  SRC="img37.gif"  > |; 
-$key = q/{_inline}$tildeA^m${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=24 HEIGHT=16 ALIGN=BOTTOM  SRC="img29.gif"  > |; 
-$key = q/{_inline}$S_0${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=16 HEIGHT=25 ALIGN=MIDDLE  SRC="img5.gif"  > |; 
-$key = q/{table}centertabular|l|l|hlineCparameter;SPMamp;Fortranargumenthlinehlinecodeinti;SPMamp;codeintegericodedoubled;SPMamp;codedoubleprecisiondcodeint*array;SPMamp;codeintegerarray(*)codedouble*array;SPMamp;codedoubleprecisionarray(*)codechar*string;SPMamp;codecharacterstring(*)codeHYPRE_Typeobject;SPMamp;codeinteger*8objectcodeHYPRE_Type*object;SPMamp;codeinteger*8objecthlinetabularlabeltable-fortran-interface-types{table}/;
-$cached_env_img{$key} = q| <IMG WIDTH=451 HEIGHT=187 ALIGN=BOTTOM  SRC="img42.gif"  > |; 
-$key = q/{_inline}$S_3${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=16 HEIGHT=25 ALIGN=MIDDLE  SRC="img6.gif"  > |; 
-$key = q/{figure}[t]centeringincludegraphics[width=4in]fv_grid.epslabelfig-fv-grid{figure}/;
-$cached_env_img{$key} = q| <IMG WIDTH=480 HEIGHT=216 ALIGN=BOTTOM  SRC="img2.gif"  > |; 
-$key = q/{_inline}$0leitthreshle1${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=111 HEIGHT=27 ALIGN=MIDDLE  SRC="img25.gif"  > |; 
-$key = q/{_inline}$itthresh=0.1${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=92 HEIGHT=13 ALIGN=BOTTOM  SRC="img27.gif"  > |; 
-$key = q/{tabular}ll0;SPMamp;weightedJacobi1;SPMamp;sequentialGauss-Seidel(veryslow!)3;SPMamp;Gauss-SeidelJacobihybridmethod(default)6;SPMamp;symmetricGauss-SeidelJacobihybridmethod9;SPMamp;Gaussianelimination(onlyforthecoarsestlevel(k=3),notrecommed;SPMamp;ifthesystemonthecoarsestlevelislarge){tabular}/;
-$cached_env_img{$key} = q| <IMG WIDTH=616 HEIGHT=131 ALIGN=BOTTOM  SRC="img23.gif"  > |; 
-$key = q/{table}[h]centertabular|l||c|c|c|c|hline;SPMamp;multicolumn4|c|SystemInterfacesmulticolumn1|c||Solvers;SPMamp;Struct;SPMamp;SStruct;SPMamp;FEI;SPMamp;IJhlinehlineJacobi;SPMamp;X;SPMamp;;SPMamp;;SPMamp;SMG;SPMamp;X;SPMamp;;SPMamp;;SPMamp;PFMG;SPMamp;X;SPMamp;;SPMamp;;SPMamp;BoomerAMG;SPMamp;;SPMamp;X;SPMamp;X;SPMamp;XParaSails;SPMamp;;SPMamp;X;SPMamp;X;SPMamp;XEuclid;SPMamp;;SPMamp;X;SPMamp;X;SPMamp;XPILUT;SPMamp;;SPMamp;X;SPMamp;X;SPMamp;XPCG;SPMamp;X;SPMamp;X;SPMamp;X;SPMamp;XGMRES;SPMamp;X;SPMamp;X;SPMamp;X;SPMamp;Xhlinetabularlabeltable-solver-availability{table}/;
-$cached_env_img{$key} = q| <IMG WIDTH=366 HEIGHT=254 ALIGN=BOTTOM  SRC="img16.gif"  > |; 
-$key = q/{_inline}$tildeA${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=12 HEIGHT=16 ALIGN=BOTTOM  SRC="img30.gif"  > |; 
-$key = q/{_inline}$(A+A^T)2${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=90 HEIGHT=31 ALIGN=MIDDLE  SRC="img39.gif"  > |; 
-$key = q/{_inline}$ttthresh;SPMlt;0${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=88 HEIGHT=25 ALIGN=MIDDLE  SRC="img33.gif"  > |; 
-$key = q/{tabular}|c|c|c|c|c|l|hlineparameter;SPMamp;type;SPMamp;range;SPMamp;sug.values;SPMamp;default;SPMamp;meaninghlinettnlevel;SPMamp;integer;SPMamp;_inline$ttnlevelge0$_inline;SPMamp;0,1,2;SPMamp;1;SPMamp;_inline$m=ttnlevel+1$_inlinehlinettthresh;SPMamp;real;SPMamp;_inline$ttthreshge0$_inline;SPMamp;0,0.1,0.01;SPMamp;0.1;SPMamp;emthresh_inline$=$_inlinettthresh;SPMamp;;SPMamp;_inline$ttthresh;SPMlt;0$_inline;SPMamp;-0.75,-0.90;SPMamp;;SPMamp;emthreshselectedautomaticallyhlinettfilter;SPMamp;real;SPMamp;_inline$ttfilterge0$_inline;SPMamp;0,0.05,0.001;SPMamp;0.05;SPMamp;filtervalue_inline$=$_inlinettfilter;SPMamp;;SPMamp;_inline$ttfilter;SPMlt;0$_inline;SPMamp;-0.90;SPMamp;;SPMamp;filtervalueselectedautomaticallyhline{tabular}/;
-$cached_env_img{$key} = q| <IMG WIDTH=773 HEIGHT=139 ALIGN=BOTTOM  SRC="img32.gif"  > |; 
-$key = q/{_inline}$ttfilter;SPMlt;0${_inline}/;
-$cached_env_img{$key} = q| <IMG WIDTH=88 HEIGHT=25 ALIGN=MIDDLE  SRC="img36.gif"  > |; 
+
+$key = q/{displaymath}left[array{{ccc}(-1,1)&(0,1)&(1,1)(-1,0)&(0,0)&(1,0)(-1,-1)&(0,-1)&c}S_7&S_4&S_8S_1&S_0&S_2S_5&S_3&S_6array{right].{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="388" HEIGHT="73" BORDER="0"
+ SRC="|."$dir".q|img12.png"
+ ALT="\begin{displaymath}
+\left [
+\begin{array}{ccc}
+(-1, 1) &amp; ( 0, 1) &amp; ( 1, 1) \\\\
+(...
+... \\\\
+S_1 &amp; S_0 &amp; S_2 \\\\
+S_5 &amp; S_3 &amp; S_6
+\end{array}\right ] .
+\end{displaymath}">|; 
+
+$key = q/langleintrangle;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="41" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img50.png"
+ ALT="$\langle int \rangle$">|; 
+
+$key = q/M;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="23" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img46.png"
+ ALT="$M$">|; 
+
+$key = q/{{it{nlevels}=1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="88" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img30.png"
+ ALT="${\it nlevels} = 1$">|; 
+
+$key = q/{{tt{filter}=-0.9;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="118" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img45.png"
+ ALT="${\tt filter} = -0.9$">|; 
+
+$key = q/LU;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="30" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img54.png"
+ ALT="$ L U$">|; 
+
+$key = q/includegraphics[width=5in]{concep_iface.eps};LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="572" HEIGHT="316" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img1.png"
+ ALT="\includegraphics[width=5in]{concep_iface.eps}">|; 
+
+$key = q/=;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img38.png"
+ ALT="$=$">|; 
+
+$key = q/{{tt{filter}ge0;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="91" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img40.png"
+ ALT="${\tt filter} \ge 0$">|; 
+
+$key = q/(0,-1);MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="57" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img7.png"
+ ALT="$(0,-1)$">|; 
+
+$key = q/S_3;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="23" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img8.png"
+ ALT="$S_3$">|; 
+
+$key = q/P;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img15.png"
+ ALT="$P$">|; 
+
+$key = q/langlefloatrangle;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="58" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img51.png"
+ ALT="$\langle float \rangle$">|; 
+
+$key = q/-a_{i,j}geqthetamax_{jneqi}-a_{ij};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="156" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img25.png"
+ ALT="$-a_{i,j} \geq \theta
+\max_{j \neq i} \-a_{ij}$">|; 
+
+$key = q/0le{{it{nlevels};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="88" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img28.png"
+ ALT="$0 \le {\it nlevels}$">|; 
+
+$key = q/F=L+U-I;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="119" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img52.png"
+ ALT="$F = L+U-I$">|; 
+
+$key = q/tilde{A};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="17" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img33.png"
+ ALT="$\tilde{A}$">|; 
+
+$key = q/{displaymath}left{array{{ll}nabla^2u=f,&mbox{inthedomain},u=0,&mbox{ontheboundary}.array{right.{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="235" HEIGHT="54" BORDER="0"
+ SRC="|."$dir".q|img3.png"
+ ALT="\begin{displaymath}
+\left \{
+\begin{array}{ll}
+\nabla^2 u = f , &amp; \mbox{in the domain}, \\\\
+u = 0, &amp; \mbox{on the boundary}.
+\end{array}\right .
+\end{displaymath}">|; 
+
+$key = q/|b~-~Ax^{(n)}|_2slash|b|_2leq;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="172" HEIGHT="39" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img21.png"
+ ALT="$\Vert b&nbsp; -&nbsp; Ax^{(n)} \Vert _2 / \Vert b \Vert _2 \leq $">|; 
+
+$key = q/i;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="10" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img23.png"
+ ALT="$i$">|; 
+
+$key = q/U;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="18" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img57.png"
+ ALT="$U$">|; 
+
+$key = q/L;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="16" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img56.png"
+ ALT="$L$">|; 
+
+$key = q/{displaymath}nablacdot(Dnablau)+sigmau=f{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="155" HEIGHT="31" BORDER="0"
+ SRC="|."$dir".q|img20.png"
+ ALT="\begin{displaymath}
+\nabla \cdot ( D \nabla u ) + \sigma u = f
+\end{displaymath}">|; 
+
+$key = q/{{tt{thresh}<0;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="91" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img39.png"
+ ALT="${\tt thresh} &lt; 0$">|; 
+
+$key = q/tilde{A}^m;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="30" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img32.png"
+ ALT="$\tilde{A}^m$">|; 
+
+$key = q/10^{-7};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="40" HEIGHT="19" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img22.png"
+ ALT="$10 ^{-7}$">|; 
+
+$key = q/{{tt{filter}<0;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="91" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img41.png"
+ ALT="${\tt filter} &lt; 0$">|; 
+
+$key = q/M=LU;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="72" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img55.png"
+ ALT="$ M = L U $">|; 
+
+$key = q/F;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="18" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img53.png"
+ ALT="$F$">|; 
+
+$key = q/k;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="14" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img48.png"
+ ALT="$k$">|; 
+
+$key = q/{displaymath}left[array{{ccc}&-1&-1&4&-1&-1&array{right].{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="137" HEIGHT="73" BORDER="0"
+ SRC="|."$dir".q|img9.png"
+ ALT="\begin{displaymath}
+\left [
+\begin{array}{ccc}
+&amp; -1 &amp; \\\\
+-1 &amp; 4 &amp; -1 \\\\
+&amp; -1 &amp;
+\end{array}\right ] .
+\end{displaymath}">|; 
+
+$key = q/-1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="27" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img18.png"
+ ALT="$-1$">|; 
+
+$key = q/{displaymath}left[array{{ccc}-1&-1&-1-1&8&-1-1&-1&-1array{right].{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="137" HEIGHT="73" BORDER="0"
+ SRC="|."$dir".q|img13.png"
+ ALT="\begin{displaymath}
+\left [
+\begin{array}{ccc}
+-1 &amp; -1 &amp; -1 \\\\
+-1 &amp; 8 &amp; -1 \\\\
+-1 &amp; -1 &amp; -1
+\end{array}\right ] .
+\end{displaymath}">|; 
+
+$key = q/A_p;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="25" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img17.png"
+ ALT="$A_p$">|; 
+
+$key = q/+1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="27" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img19.png"
+ ALT="$+1$">|; 
+
+$key = q/includegraphics[width=4in]{block_structured.eps};LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="458" HEIGHT="418" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img11.png"
+ ALT="\includegraphics[width=4in]{block_structured.eps}">|; 
+
+$key = q/-{{tt{filter};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="73" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img44.png"
+ ALT="$-{\tt filter}$">|; 
+
+$key = q/{displaymath}left[array{{c}~~~~~~~~~~A_0~~~~~~~~~~A_1vdotsA_{P-1}array{right]{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="164" HEIGHT="102" BORDER="0"
+ SRC="|."$dir".q|img14.png"
+ ALT="\begin{displaymath}
+\left[
+\begin{array}{c}
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A_0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; \\\\
+A_1 \\\\
+\vdots \\\\
+A_{P-1}
+\end{array}\right]
+\end{displaymath}">|; 
+
+$key = q/{{tt{thresh}ge0;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="91" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img37.png"
+ ALT="${\tt thresh} \ge 0$">|; 
+
+$key = q/{{tt{nlevel}ge0;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="91" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img35.png"
+ ALT="${\tt nlevel} \ge 0$">|; 
+
+$key = q/A;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="17" HEIGHT="15" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img31.png"
+ ALT="$A$">|; 
+
+$key = q/j;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="13" HEIGHT="31" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img24.png"
+ ALT="$j$">|; 
+
+$key = q/m+1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="50" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img34.png"
+ ALT="$m+1$">|; 
+
+$key = q/S_0;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="23" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img6.png"
+ ALT="$S_0$">|; 
+
+$key = q/theta;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="13" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img26.png"
+ ALT="$\theta$">|; 
+
+$key = q/-{{tt{thresh};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="73" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img42.png"
+ ALT="$-{\tt thresh}$">|; 
+
+$key = q/(A+A^T)slash2;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="93" HEIGHT="38" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img47.png"
+ ALT="$(A+A^T)/2$">|; 
+
+$key = q/{displaymath}left[array{{ccc}&(0,1)&&(0,0)&(1,0)&&array{right]equivleft[array{{ccc}&S_2&&S_0&S_1&&array{right].{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="277" HEIGHT="73" BORDER="0"
+ SRC="|."$dir".q|img10.png"
+ ALT="\begin{displaymath}
+\left [
+\begin{array}{ccc}
+&amp; ( 0, 1) &amp; \\\\
+&amp; ( 0, 0) &amp; ( 1...
+...ccc}
+&amp; S_2 &amp; \\\\
+&amp; S_0 &amp; S_1 \\\\
+&amp; &amp;
+\end{array}\right ] .
+\end{displaymath}">|; 
+
+$key = q/(0,0);MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="43" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img5.png"
+ ALT="$(0,0)$">|; 
+
+$key = q/k=3;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="46" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img49.png"
+ ALT="$k = 3$">|; 
+
+$key = q/{{it{thresh}=0.1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="96" HEIGHT="16" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img29.png"
+ ALT="${\it thresh} = 0.1$">|; 
+
+$key = q/includegraphics[width=4in]{fv_grid.eps};LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="459" HEIGHT="207" ALIGN="BOTTOM" BORDER="0"
+ SRC="|."$dir".q|img2.png"
+ ALT="\includegraphics[width=4in]{fv_grid.eps}">|; 
+
+$key = q/m={{tt{nlevel}+1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="128" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img36.png"
+ ALT="$m={\tt nlevel}+1$">|; 
+
+$key = q/backslash;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="13" HEIGHT="34" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img58.png"
+ ALT="$\backslash$">|; 
+
+$key = q/0le{{it{thresh}le1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="115" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img27.png"
+ ALT="$0 \le {\it thresh} \le 1$">|; 
+
+$key = q/0,1,...,P-1;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="103" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img16.png"
+ ALT="$0, 1, ..., P-1$">|; 
+
+$key = q/{{tt{thresh}=-0.9;MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="118" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="|."$dir".q|img43.png"
+ ALT="${\tt thresh} = -0.9$">|; 
+
+$key = q/{displaymath}left[array{{ccc}&(0,1)&(-1,0)&(0,0)&(1,0)&(0,-1)&array{right]equivlft[array{{ccc}&S_4&S_1&S_0&S_2&S_3&array{right].{displaymath};MSF=1.6;LFS=11;AAT/;
+$cached_env_img{$key} = q|<IMG
+ WIDTH="361" HEIGHT="73" BORDER="0"
+ SRC="|."$dir".q|img4.png"
+ ALT="\begin{displaymath}
+\left [
+\begin{array}{ccc}
+&amp; ( 0, 1) &amp; \\\\
+(-1, 0) &amp; ( 0, 0...
+... S_4 &amp; \\\\
+S_1 &amp; S_0 &amp; S_2 \\\\
+&amp; S_3 &amp;
+\end{array}\right ] .
+\end{displaymath}">|; 
 
 1;
 

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -44,6 +44,17 @@ typedef struct
 			 in diag_j , diag_data assigned to row i */  
    int     *indx_offd; /* indx_offd[i] points to first empty space of portion
 			 in offd_j , offd_data assigned to row i */  
+   int	    max_off_proc_elmts; /* length of off processor stash set for
+					SetValues and AddTOValues */
+   int	    current_num_elmts; /* current no. of elements stored in stash */
+   int	    off_proc_i_indx; /* pointer to first empty space in 
+				set_off_proc_i_set */
+   int     *off_proc_i; /* length 2*num_off_procs_elmts, contains info pairs
+			(code, no. of elmts) where code contains global
+			row no. if  SetValues, and (-global row no. -1)
+			if  AddToValues*/
+   int     *off_proc_j; /* contains column indices */
+   double  *off_proc_data; /* contains corresponding data */
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -61,5 +72,12 @@ typedef struct
 
 #define hypre_AuxParCSRMatrixIndxDiag(matrix)  ((matrix) -> indx_diag)
 #define hypre_AuxParCSRMatrixIndxOffd(matrix)  ((matrix) -> indx_offd)
+
+#define hypre_AuxParCSRMatrixMaxOffProcElmts(matrix)  ((matrix) -> max_off_proc_elmts)
+#define hypre_AuxParCSRMatrixCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
+#define hypre_AuxParCSRMatrixOffProcIIndx(matrix)  ((matrix) -> off_proc_i_indx)
+#define hypre_AuxParCSRMatrixOffProcI(matrix)  ((matrix) -> off_proc_i)
+#define hypre_AuxParCSRMatrixOffProcJ(matrix)  ((matrix) -> off_proc_j)
+#define hypre_AuxParCSRMatrixOffProcData(matrix)  ((matrix) -> off_proc_data)
 
 #endif

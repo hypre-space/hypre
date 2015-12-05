@@ -6,12 +6,12 @@
  * Started 8/28/94
  * George
  *
- * $Id: parutil.c,v 2.0 2000/12/14 18:20:19 falgout Exp $
+ * $Id: parutil.c,v 2.2 2004/03/05 21:24:37 treadway Exp $
  *
  */
 
 #include "ilu.h"
-#include "./DistributedMatrixPilutSolver.h"
+#include "DistributedMatrixPilutSolver.h"
 
 
 /*************************************************************************
@@ -41,7 +41,7 @@ void hypre_errexit( char *f_str, ...)
 void hypre_my_abort( int inSignal, hypre_PilutSolverGlobals *globals )
 {
   printf( "PE %d caught sig %d\n", mype, inSignal );
-  fflush(0);
+  fflush(stdout);
   MPI_Abort( pilut_comm, inSignal );
 }
 

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.25 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -15,6 +15,7 @@
 
 #include "headers.h"
 #include "par_amg.h"
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCreate
@@ -30,11 +31,13 @@ hypre_BoomerAMGCreate()
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   S_commpkg_switch;
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
    int      setup_type;
    int 	    num_functions;
+   int 	    nodal;
 
    /* solve params */
    int      min_iter;
@@ -43,26 +46,32 @@ hypre_BoomerAMGCreate()
  
    double   tol;
 
-   int     *num_grid_sweeps;  
-   int     *grid_relax_type;   
-   int    **grid_relax_points; 
-   double  *relax_weight;
-   int     *smooth_option;  
-   int      smooth_num_sweep;
+   int      num_sweeps;  
+   int      relax_type;   
+   int      relax_order;   
+   double   relax_wt;
+   double   outer_wt;
+   int      smooth_type;
+   int      smooth_num_levels;
+   int      smooth_num_sweeps;
 
    int      variant, overlap, domain_type;
    double   schwarz_rlx_weight;
+   int	    level, sym;
+   double   thresh, filter;
+   double   drop_tol;
+   int	    max_nz_per_row;
+   char    *euclidfile;
 
    /* log info */
    int      num_iterations;
 
    /* output params */
-   int      ioutdat;
+   int      print_level;
+   int      logging;
    /* int      cycle_op_count; */
    char     log_file_name[256];
    int      debug_flag;
-
-   int      j;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -73,17 +82,29 @@ hypre_BoomerAMGCreate()
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
+   S_commpkg_switch = 1.0;
    interp_type = 200;
    coarsen_type = 6;
    measure_type = 0;
    setup_type = 1;
    num_functions = 1;
+   nodal = 0;
 
    variant = 0;
    overlap = 1;
    domain_type = 2;
    schwarz_rlx_weight = 1.0;
-   smooth_num_sweep = 1;
+   smooth_num_sweeps = 1;
+   smooth_num_levels = 0;
+   smooth_type = 6;
+
+   level = 1;
+   sym = 0;
+   thresh = 0.1;
+   filter = 0.05;
+   drop_tol = 0.0001;
+   max_nz_per_row = 20;
+   euclidfile = NULL;
 
    /* solve params */
    min_iter  = 0;
@@ -91,36 +112,18 @@ hypre_BoomerAMGCreate()
    cycle_type = 1;
    tol = 1.0e-7;
 
-   num_grid_sweeps = hypre_CTAlloc(int,4);
-   grid_relax_type = hypre_CTAlloc(int,4);
-   grid_relax_points = hypre_CTAlloc(int *,4);
-   relax_weight = hypre_CTAlloc(double,max_levels);
-   smooth_option = hypre_CTAlloc(int,max_levels);
-
-   for (j = 0; j < max_levels; j++)
-   {
-      relax_weight[j] = 1.0;
-      smooth_option[j] = -1; 
-   }
-
-   for (j = 0; j < 3; j++)
-   {
-      num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 3; 
-      grid_relax_points[j] = hypre_CTAlloc(int,2); 
-      grid_relax_points[j][0] = 1;
-      grid_relax_points[j][1] = -1;
-   }
-   num_grid_sweeps[3] = 1;
-   grid_relax_type[3] = 9;
-   grid_relax_points[3] = hypre_CTAlloc(int,1);
-   grid_relax_points[3][0] = 0;
+   num_sweeps = 1;
+   relax_type = 3;
+   relax_order = 1;
+   relax_wt = 1.0;
+   outer_wt = 1.0;
 
    /* log info */
    num_iterations = 0;
 
    /* output params */
-   ioutdat = 0;
+   print_level = 0;
+   logging = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
    /* cycle_op_count = 0; */
    debug_flag = 0;
@@ -136,39 +139,57 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
+   hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
    hypre_BoomerAMGSetInterpType(amg_data, interp_type);
-   hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
+   hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
+   hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
    hypre_BoomerAMGSetDomainType(amg_data, domain_type);
+   hypre_BoomerAMGSetSym(amg_data, sym);
+   hypre_BoomerAMGSetLevel(amg_data, level);
+   hypre_BoomerAMGSetThreshold(amg_data, thresh);
+   hypre_BoomerAMGSetFilter(amg_data, filter);
+   hypre_BoomerAMGSetDropTol(amg_data, drop_tol);
+   hypre_BoomerAMGSetMaxNzPerRow(amg_data, max_nz_per_row);
+   hypre_BoomerAMGSetEuclidFile(amg_data, euclidfile);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
    hypre_BoomerAMGSetTol(amg_data, tol); 
-   hypre_BoomerAMGSetNumGridSweeps(amg_data, num_grid_sweeps);
-   hypre_BoomerAMGSetGridRelaxType(amg_data, grid_relax_type);
-   hypre_BoomerAMGSetGridRelaxPoints(amg_data, grid_relax_points);
-   hypre_BoomerAMGSetRelaxWeight(amg_data, relax_weight);
-   hypre_BoomerAMGSetSmoothOption(amg_data, smooth_option);
-   hypre_BoomerAMGSetSmoothNumSweep(amg_data, smooth_num_sweep);
+   hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
+   hypre_BoomerAMGSetRelaxType(amg_data, relax_type);
+   hypre_BoomerAMGSetRelaxOrder(amg_data, relax_order);
+   hypre_BoomerAMGSetRelaxWt(amg_data, relax_wt);
+   hypre_BoomerAMGSetOuterWt(amg_data, outer_wt);
+   hypre_BoomerAMGSetSmoothType(amg_data, smooth_type);
+   hypre_BoomerAMGSetSmoothNumLevels(amg_data, smooth_num_levels);
+   hypre_BoomerAMGSetSmoothNumSweeps(amg_data, smooth_num_sweeps);
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
-   hypre_BoomerAMGSetIOutDat(amg_data, ioutdat);
-   hypre_BoomerAMGSetLogFileName(amg_data, log_file_name); 
+   hypre_BoomerAMGSetPrintLevel(amg_data, print_level);
+   hypre_BoomerAMGSetLogging(amg_data, logging);
+   hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name); 
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
 
    hypre_BoomerAMGSetRestriction(amg_data, 0);
+
+   hypre_BoomerAMGSetGSMG(amg_data, 0);
+   hypre_BoomerAMGSetNumSamples(amg_data, 0);
    
    hypre_ParAMGDataAArray(amg_data) = NULL;
    hypre_ParAMGDataPArray(amg_data) = NULL;
    hypre_ParAMGDataRArray(amg_data) = NULL;
    hypre_ParAMGDataCFMarkerArray(amg_data) = NULL;
    hypre_ParAMGDataVtemp(amg_data)  = NULL;
+   hypre_ParAMGDataRtemp(amg_data)  = NULL;
+   hypre_ParAMGDataPtemp(amg_data)  = NULL;
+   hypre_ParAMGDataZtemp(amg_data)  = NULL;
    hypre_ParAMGDataFArray(amg_data) = NULL;
    hypre_ParAMGDataUArray(amg_data) = NULL;
    hypre_ParAMGDataDofFunc(amg_data) = NULL;
@@ -191,20 +212,41 @@ hypre_BoomerAMGDestroy( void *data )
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
    int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   int smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
    int i;
 
    if (hypre_ParAMGDataNumGridSweeps(amg_data))
+   {
       hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
+      hypre_ParAMGDataNumGridSweeps(amg_data) = NULL; 
+   }
    if (hypre_ParAMGDataGridRelaxType(amg_data))
+   {
       hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
+      hypre_ParAMGDataGridRelaxType(amg_data) = NULL; 
+   }
    if (hypre_ParAMGDataRelaxWeight(amg_data))
+   {
       hypre_TFree (hypre_ParAMGDataRelaxWeight(amg_data));
+      hypre_ParAMGDataRelaxWeight(amg_data) = NULL; 
+   }
+   if (hypre_ParAMGDataOmega(amg_data))
+   {
+      hypre_TFree (hypre_ParAMGDataOmega(amg_data));
+      hypre_ParAMGDataOmega(amg_data) = NULL; 
+   }
+   if (hypre_ParAMGDataDofFunc(amg_data))
+   {
+      hypre_TFree (hypre_ParAMGDataDofFunc(amg_data));
+      hypre_ParAMGDataDofFunc(amg_data) = NULL; 
+   }
    if (hypre_ParAMGDataGridRelaxPoints(amg_data))
    {
       for (i=0; i < 4; i++)
    	hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data)[i]);
       hypre_TFree (hypre_ParAMGDataGridRelaxPoints(amg_data));
+      hypre_ParAMGDataGridRelaxPoints(amg_data) = NULL; 
    }
    for (i=1; i < num_levels; i++)
    {
@@ -213,7 +255,6 @@ hypre_BoomerAMGDestroy( void *data )
 	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataAArray(amg_data)[i]);
 	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
 	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
-	hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i-1]);
    }
    /* see comments in par_coarsen.c regarding special case for CF_marker */
    if (num_levels == 1)
@@ -225,58 +266,78 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataUArray(amg_data));
    hypre_TFree(hypre_ParAMGDataAArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
-   if (hypre_ParAMGDataRestriction(amg_data))
-	hypre_TFree(hypre_ParAMGDataRArray(amg_data));
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
-   hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[num_levels-1]);
-   hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
+   if (hypre_ParAMGDataRtemp(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));
+   if (hypre_ParAMGDataPtemp(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataPtemp(amg_data));
+   if (hypre_ParAMGDataZtemp(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(amg_data));
 
+   if (hypre_ParAMGDataDofFuncArray(amg_data))
+   {
+      for (i=1; i < num_levels; i++)
+	 hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataDofFuncArray(amg_data));
+      hypre_ParAMGDataDofFuncArray(amg_data) = NULL;
+   }
+   if (hypre_ParAMGDataRestriction(amg_data))
+   {
+      hypre_TFree(hypre_ParAMGDataRArray(amg_data));
+      hypre_ParAMGDataRArray(amg_data) = NULL;
+   }
    if (hypre_ParAMGDataDofPointArray(amg_data))
    {
       for (i=0; i < num_levels; i++)
 	 hypre_TFree(hypre_ParAMGDataDofPointArray(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataDofPointArray(amg_data));
+      hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    }
    if (hypre_ParAMGDataPointDofMapArray(amg_data))
    {
       for (i=0; i < num_levels; i++)
 	 hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data));
+      hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    }
-   if (hypre_ParAMGDataSmoothOption(amg_data)[0] > -1)
+   if (smooth_num_levels)
    {
-      for (i=0; i < num_levels; i++)
+      if (smooth_num_levels > num_levels-1)
+	smooth_num_levels = num_levels -1;
+      if (hypre_ParAMGDataSmoothType(amg_data) == 7)
       {
-         if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 7)
+         for (i=0; i < smooth_num_levels; i++)
          {
 	    HYPRE_ParCSRPilutDestroy(smoother[i]);
          }
-         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] == 8)
-	 {
+      }
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 8)
+      {
+         for (i=0; i < smooth_num_levels; i++)
+         {
 	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
          }
-         else if (hypre_ParAMGDataSmoothOption(amg_data)[i] > 2)
+      }
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 9)
+      {
+         for (i=0; i < smooth_num_levels; i++)
+	 {
+	    HYPRE_EuclidDestroy(smoother[i]);
+         }
+      }
+      else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
+      {
+         for (i=0; i < smooth_num_levels; i++)
 	 {
 	    HYPRE_SchwarzDestroy(smoother[i]);
-	    /* hypre_CSRMatrixDestroy(
-			hypre_ParAMGDataDomainStructure(amg_data)[i]);
-	    if (hypre_ParAMGDataScaleArray(amg_data))
-	       hypre_TFree (hypre_ParAMGDataScaleArray(amg_data)[i]); */
          } 
       }
-      if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 2)
-      {
-         hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
-      }
-      /* else if (hypre_ParAMGDataSmoothOption(amg_data)[0] > 4)
-      {
-	 hypre_TFree (hypre_ParAMGDataDomainStructure(amg_data));
-	 if (hypre_ParAMGDataScaleArray(amg_data))
-	    hypre_TFree (hypre_ParAMGDataScaleArray(amg_data));
-      } */
+      hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
    }
-   if (hypre_ParAMGDataSmoothOption(amg_data))
-      hypre_TFree(hypre_ParAMGDataSmoothOption(amg_data));
+   if ( hypre_ParAMGDataResidual(amg_data) ) {
+      hypre_TFree( hypre_ParAMGDataResidual(amg_data) );
+      hypre_ParAMGDataResidual(amg_data) = NULL;
+   }
 
    hypre_TFree(amg_data);
    return (ierr);
@@ -342,6 +403,18 @@ hypre_BoomerAMGSetTruncFactor( void     *data,
    hypre_ParAMGData  *amg_data = data;
 
    hypre_ParAMGDataTruncFactor(amg_data) = trunc_factor;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSCommPkgSwitch( void     *data,
+                                  double    S_commpkg_switch )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataSCommPkgSwitch(amg_data) = S_commpkg_switch;
 
    return (ierr);
 }
@@ -443,6 +516,54 @@ hypre_BoomerAMGSetTol( void     *data,
 }
 
 int
+hypre_BoomerAMGSetNumSweeps( void     *data,
+                              int      num_sweeps )
+{
+   int ierr = 0, i;
+   int *num_grid_sweeps;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (hypre_ParAMGDataNumGridSweeps(amg_data) == NULL)
+       hypre_ParAMGDataNumGridSweeps(amg_data) = hypre_CTAlloc(int,4);
+       
+   num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
+
+   for (i=0; i < 3; i++)
+      num_grid_sweeps[i] = num_sweeps;
+   num_grid_sweeps[3] = 1;
+
+   return (ierr);
+}
+ 
+int
+hypre_BoomerAMGSetCycleNumSweeps( void     *data,
+                                  int      num_sweeps,
+                                  int      k )
+{
+   int ierr = 0, i;
+   int *num_grid_sweeps;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (k < 0 || k > 3)
+   {
+      printf (" Warning! Invalid cycle! num_sweeps not set!\n");
+      return -99;
+   }
+
+   if (hypre_ParAMGDataNumGridSweeps(amg_data) == NULL)
+   {
+       num_grid_sweeps = hypre_CTAlloc(int,4);
+       for (i=0; i < 4; i++)
+	  num_grid_sweeps[i] = 1;
+       hypre_ParAMGDataNumGridSweeps(amg_data) = num_grid_sweeps;
+   }
+       
+   hypre_ParAMGDataNumGridSweeps(amg_data)[k] = num_sweeps;
+
+   return (ierr);
+}
+ 
+int
 hypre_BoomerAMGSetNumGridSweeps( void     *data,
                               int      *num_grid_sweeps )
 {
@@ -456,6 +577,69 @@ hypre_BoomerAMGSetNumGridSweeps( void     *data,
    return (ierr);
 }
  
+int
+hypre_BoomerAMGSetRelaxType( void     *data,
+                              int      relax_type )
+{
+   int ierr = 0, i;
+   int *grid_relax_type;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (hypre_ParAMGDataGridRelaxType(amg_data) == NULL)
+       hypre_ParAMGDataGridRelaxType(amg_data) = hypre_CTAlloc(int,4);
+   grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
+
+   for (i=0; i < 3; i++)
+      grid_relax_type[i] = relax_type;
+   grid_relax_type[3] = 9;
+   hypre_ParAMGDataUserCoarseRelaxType(amg_data) = 9;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetCycleRelaxType( void     *data,
+                                  int      relax_type,
+                                  int      k )
+{
+   int ierr = 0, i;
+   int *grid_relax_type;
+   hypre_ParAMGData  *amg_data = data;
+
+   if (k < 0 || k > 3)
+   {
+      printf (" Warning! Invalid cycle! relax_type not set!\n");
+      return -99;
+   }
+
+   if (hypre_ParAMGDataGridRelaxType(amg_data) == NULL)
+   {
+      grid_relax_type = hypre_CTAlloc(int,4);
+      for (i=0; i < 3; i++)
+         grid_relax_type[i] = 3;
+      grid_relax_type[3] = 9;
+      hypre_ParAMGDataGridRelaxType(amg_data) = grid_relax_type;
+   }
+      
+   hypre_ParAMGDataGridRelaxType(amg_data)[k] = relax_type;
+   if (k == 3)
+      hypre_ParAMGDataUserCoarseRelaxType(amg_data) = relax_type;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetRelaxOrder( void     *data,
+                              int       relax_order)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataRelaxOrder(amg_data) = relax_order;
+
+   return (ierr);
+}
+
 int
 hypre_BoomerAMGSetGridRelaxType( void     *data,
                               int      *grid_relax_type )
@@ -491,62 +675,195 @@ hypre_BoomerAMGSetGridRelaxPoints( void     *data,
 
 int
 hypre_BoomerAMGSetRelaxWeight( void     *data,
-                            double   *relax_weight )
+                               double   *relax_weight )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
-               
+
    if (hypre_ParAMGDataRelaxWeight(amg_data))
       hypre_TFree(hypre_ParAMGDataRelaxWeight(amg_data));
    hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
-   
-   return (ierr);
-}
-
-hypre_BoomerAMGSetSmoothOption( void     *data,
-                            int   *smooth_option )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
-               
-   if (hypre_ParAMGDataSmoothOption(amg_data))
-      hypre_TFree(hypre_ParAMGDataSmoothOption(amg_data));
-   hypre_ParAMGDataSmoothOption(amg_data) = smooth_option;
-   
-   return (ierr);
-}
-
-hypre_BoomerAMGSetSmoothNumSweep( void     *data,
-                            int   smooth_num_sweep )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
-               
-   hypre_ParAMGDataSmoothNumSweep(amg_data) = smooth_num_sweep;
-   
-   return (ierr);
-}
-
-int
-hypre_BoomerAMGSetIOutDat( void     *data,
-                        int       ioutdat )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
-
-   hypre_ParAMGDataIOutDat(amg_data) = ioutdat;
 
    return (ierr);
 }
 
 int
-hypre_BoomerAMGSetLogFileName( void       *data,
-                               const char *log_file_name )
+hypre_BoomerAMGSetRelaxWt( void     *data,
+                           double    relax_weight )
+{
+   int ierr = 0, i, num_levels;
+   double *relax_weight_array;
+   hypre_ParAMGData  *amg_data = data;
+
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (hypre_ParAMGDataRelaxWeight(amg_data) == NULL)
+      hypre_ParAMGDataRelaxWeight(amg_data) = hypre_CTAlloc(double,num_levels);
+                     
+   relax_weight_array = hypre_ParAMGDataRelaxWeight(amg_data);
+   for (i=0; i < num_levels; i++)
+      relax_weight_array[i] = relax_weight;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLevelRelaxWt( void    *data,
+                                double   relax_weight,
+                                int      level )
+{
+   int ierr = 0, i, num_levels;
+   hypre_ParAMGData  *amg_data = data;
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (level > num_levels-1) 
+   {
+      printf (" Warning! Invalid level! Relax weight not set!\n");
+      return -99;
+   }
+   if (hypre_ParAMGDataRelaxWeight(amg_data) == NULL)
+   {
+      hypre_ParAMGDataRelaxWeight(amg_data) = hypre_CTAlloc(double,num_levels);
+      for (i=0; i < num_levels; i++)
+         hypre_ParAMGDataRelaxWeight(amg_data)[i] = 1.0;
+   }
+               
+   hypre_ParAMGDataRelaxWeight(amg_data)[level] = relax_weight;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetOmega( void     *data,
+                         double   *omega )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
-   sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", log_file_name);
+   if (hypre_ParAMGDataOmega(amg_data))
+      hypre_TFree(hypre_ParAMGDataOmega(amg_data));
+   hypre_ParAMGDataOmega(amg_data) = omega;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetOuterWt( void     *data,
+                           double    omega )
+{
+   int ierr = 0, i, num_levels;
+   double *omega_array;
+   hypre_ParAMGData  *amg_data = data;
+
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (hypre_ParAMGDataOmega(amg_data) == NULL)
+      hypre_ParAMGDataOmega(amg_data) = hypre_CTAlloc(double,num_levels);
+                     
+   omega_array = hypre_ParAMGDataOmega(amg_data);
+   for (i=0; i < num_levels; i++)
+      omega_array[i] = omega;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLevelOuterWt( void    *data,
+                                double   omega,
+                                int      level )
+{
+   int ierr = 0, i, num_levels;
+   hypre_ParAMGData  *amg_data = data;
+   num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   if (level > num_levels-1) 
+   {
+      printf (" Warning! Invalid level! Outer weight not set!\n");
+      return -99;
+   }
+   if (hypre_ParAMGDataOmega(amg_data) == NULL)
+   {
+      hypre_ParAMGDataOmega(amg_data) = hypre_CTAlloc(double,num_levels);
+      for (i=0; i < num_levels; i++)
+         hypre_ParAMGDataOmega(amg_data)[i] = 1.0;
+   }
+               
+   hypre_ParAMGDataOmega(amg_data)[level] = omega;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSmoothType( void     *data,
+                              int   smooth_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   hypre_ParAMGDataSmoothType(amg_data) = smooth_type;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSmoothNumLevels( void     *data,
+                            int   smooth_num_levels )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   hypre_ParAMGDataSmoothNumLevels(amg_data) = smooth_num_levels;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSmoothNumSweeps( void     *data,
+                            int   smooth_num_sweeps )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   hypre_ParAMGDataSmoothNumSweeps(amg_data) = smooth_num_sweeps;
+   
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLogging( void     *data,
+                            int       logging )
+{
+   /* This function should be called before Setup.  Logging changes
+      may require allocation or freeing of arrays, which is presently
+      only done there.
+      It may be possible to support logging changes at other times,
+      but there is little need.
+   */
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataLogging(amg_data) = logging;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetPrintLevel( void     *data,
+                        int print_level )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   hypre_ParAMGDataPrintLevel(amg_data) = print_level;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetPrintFileName( void       *data,
+                               const char *print_file_name )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+   assert( strlen(print_file_name)<=256 );
+
+   sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", print_file_name);
 
    return (ierr);
 }
@@ -564,31 +881,6 @@ hypre_BoomerAMGSetNumIterations( void    *data,
 }
 
 int
-hypre_BoomerAMGSetLogging( void       *data,
-                           int         ioutdat,
-                           const char *log_file_name )
-{
-   int ierr = 0;
-   hypre_ParAMGData  *amg_data = data;
- 
-   /* FILE *fp; */
-
-   hypre_ParAMGDataIOutDat(amg_data) = ioutdat;
-/*   if (ioutdat > 0)
-   {
-      if (*log_file_name == 0)  
-         sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", "amg.out.log");
-      else
-         sprintf(hypre_ParAMGDataLogFileName(amg_data), "%s", log_file_name); 
-       
-      fp = fopen(hypre_ParAMGDataLogFileName(amg_data),"w");
-      fclose(fp);
-   }
-*/
-   return (ierr);
-}
-
-int
 hypre_BoomerAMGSetDebugFlag( void     *data,
                           int       debug_flag )
 {
@@ -600,6 +892,37 @@ hypre_BoomerAMGSetDebugFlag( void     *data,
    return (ierr);
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetGSMG
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetGSMG( void *data,
+                        int   par )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   amg_data->gsmg = par;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetNumSamples
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNumSamples( void *data,
+                        int   par )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+   amg_data->num_samples = par;
+
+   return (ierr);
+}
 
 /*--------------------------------------------------------------------------
  * Routines to set the problem data parameters
@@ -613,6 +936,22 @@ hypre_BoomerAMGSetNumFunctions( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataNumFunctions(amg_data) = num_functions;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicate whether to use nodal systems function
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNodal( void     *data,
+                          int    nodal )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataNodal(amg_data) = nodal;
 
    return (ierr);
 }
@@ -681,6 +1020,16 @@ hypre_BoomerAMGGetNumIterations( void     *data,
 }
 
 int
+hypre_BoomerAMGGetResidual( void * data, hypre_ParVector ** resid )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+   *resid = hypre_ParAMGDataResidual( amg_data );
+   return ierr;
+}
+                            
+
+int
 hypre_BoomerAMGGetRelResidualNorm( void     *data,
                                      double   *rel_resid_norm )
 {
@@ -736,6 +1085,90 @@ hypre_BoomerAMGSetSchwarzRlxWeight( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataSchwarzRlxWeight(amg_data) = schwarz_rlx_weight;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSym( void     *data,
+                            int       sym)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataSym(amg_data) = sym;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetLevel( void     *data,
+                            int       level)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataLevel(amg_data) = level;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetThreshold( void     *data,
+                             double    thresh)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataThreshold(amg_data) = thresh;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetFilter( void     *data,
+                          double    filter)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataFilter(amg_data) = filter;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetDropTol( void     *data,
+                           double    drop_tol)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataDropTol(amg_data) = drop_tol;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetMaxNzPerRow( void     *data,
+                               int       max_nz_per_row)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataMaxNzPerRow(amg_data) = max_nz_per_row;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetEuclidFile( void     *data,
+                              char     *euclidfile)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataEuclidFile(amg_data) = euclidfile;
 
    return (ierr);
 }

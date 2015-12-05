@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -91,6 +91,17 @@ HYPRE_StructPFMGSetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetMaxLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetMaxLevels( HYPRE_StructSolver solver,
+                              int                max_levels  )
+{
+   return( hypre_PFMGSetMaxLevels( (void *) solver, max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetRelChange
  *--------------------------------------------------------------------------*/
 
@@ -130,6 +141,17 @@ HYPRE_StructPFMGSetRelaxType( HYPRE_StructSolver solver,
                               int                relax_type )
 {
    return( hypre_PFMGSetRelaxType( (void *) solver, relax_type) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetRAPType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetRAPType( HYPRE_StructSolver solver,
+                            int                rap_type )
+{
+   return( hypre_PFMGSetRAPType( (void *) solver, rap_type) );
 }
 
 /*--------------------------------------------------------------------------
@@ -185,6 +207,17 @@ HYPRE_StructPFMGSetLogging( HYPRE_StructSolver solver,
                             int                logging )
 {
    return( hypre_PFMGSetLogging( (void *) solver, logging) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPFMGSetPrintLevel( HYPRE_StructSolver solver,
+                            int                  print_level )
+{
+   return( hypre_PFMGSetPrintLevel( (void *) solver, print_level) );
 }
 
 /*--------------------------------------------------------------------------

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -89,7 +89,9 @@ typedef struct
    int      max_iter;
    int      rel_change;
    int      stop_crit;
+   int      converged;
    double   tol;
+   int      cf_tol;
    double   rel_residual_norm;
 
    void  *A;
@@ -97,7 +99,7 @@ typedef struct
    void  *w;
    void  **p;
 
-   void  *matvec_data;
+   void    *matvec_data;
    void    *precond_data;
 
    hypre_GMRESFunctions * functions;
@@ -105,8 +107,8 @@ typedef struct
    /* log info (always logged) */
    int      num_iterations;
  
-   /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   int     print_level; /* printing when print_level>0 */
+   int     logging;  /* extra computations for logging when logging>0 */
    double  *norms;
    char    *log_file_name;
 

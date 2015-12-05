@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -362,5 +362,187 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
 
    return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_BoxGetStrideVolume:
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_BoxGetStrideVolume( hypre_Box   *box,
+                          hypre_Index  stride,
+                          int         *volume_ptr   )
+{
+   int  volume = 1;
+   int  d, s;
+
+   for (d = 0; d < 3; d++)
+   {
+      s = hypre_BoxSizeD(box, d);
+      if (s > 0)
+      {
+         s = (s - 1) / hypre_IndexD(stride, d) + 1;
+      }
+      volume *= s;
+   }
+
+   *volume_ptr = volume;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * GEC0209 function to expand a box given a ghostvector numexp
+ * the idea is to dilatate the box using two vectors.
+ *
+ * even components of numexp shift negatively the imin of the box
+ * odd  components of numexp shift positively the imax of the box
+ * 
+ * 
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxExpand( hypre_Box   *box,
+                 int         *numexp)
+{ 
+  int   ierr = 0;
+  int  *imin = hypre_BoxIMin(box);
+  int  *imax = hypre_BoxIMax(box);
+  int  d; 
+
+  for (d = 0; d < 3; d++)
+  {
+    imin[d] -= numexp[2*d];
+    imax[d] += numexp[2*d+1];
+  }
+  
+  return ierr;
+}
+        
+
+/*--------------------------------------------------------------------------
+ * hypre_DeleteMultipleBoxes:
+ *   Deletes boxes corrsponding to indices from box_array.
+ *   Assumes indices are in ascending order. (AB 11/04)
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array,
+                           int*  indices , int num )
+{
+   int  ierr  = 0;
+   int  i, j, start, array_size;
+
+
+   if (num < 1) return ierr;
+
+
+   array_size =  hypre_BoxArraySize(box_array);   
+   start = indices[0];
+   j = 0;
+   
+   for (i = start; (i + j) < array_size; i++)
+   {
+      if (j < num)
+      {
+         while ((i+j) == indices[j]) /* see if deleting consecutive items */
+         {
+            j++; /*increase the shift*/
+            if (j == num) break;
+         }
+      }
+            
+      if ( (i+j) < array_size)  /* if deleting the last item then no moving */
+      {
+         
+         hypre_CopyBox(hypre_BoxArrayBox(box_array, i+j),
+                       hypre_BoxArrayBox(box_array, i));
+      }
+      
+      
+   }
+
+
+   hypre_BoxArraySize(box_array) = array_size - num;
+   
+   return ierr;
+}
+
+
+/*--------------------------------------------------------------------------
+ * hypre_MaxIndexPosition  - which index coordinate is the min.?
+ *  (AB 11/04)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_MaxIndexPosition(hypre_Index index, int *position)
+{
+   int        ierr = 0;
+   int        i, value;
+
+   value = hypre_IndexD(index, 0);
+   *position = 0;
+   
+   for (i = 1; i< 3; i++)
+   {
+      if (value <  hypre_IndexD(index, i))
+      {
+         value =   hypre_IndexD(index, i);
+         *position = i;
+      }
+   }
+   
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_MinIndexPosition - which index coordinate is the max. ?
+ *  (AB 11/04)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_MinIndexPosition(hypre_Index index, int *position)
+{
+   int        ierr = 0;
+   int        i, value;
+
+   value = hypre_IndexD(index, 0);
+   *position = 0;
+   
+   for (i = 1; i< 3; i++)
+   {
+      if (value >  hypre_IndexD(index, i))
+      {
+         value =   hypre_IndexD(index, i);
+         *position = i;
+      }
+   }
+   
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_BoxExpandConstant - grow a box the same distance in each direction
+ *   (AB 11/04)
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxExpandConstant( hypre_Box   *box,
+                         int         expand)
+{ 
+  int   ierr = 0;
+  int  *imin = hypre_BoxIMin(box);
+  int  *imax = hypre_BoxIMax(box);
+  int  d; 
+
+  for (d = 0; d < 3; d++)
+  {
+    imin[d] -= expand;
+    imax[d] += expand;
+  }
+  
+  return ierr;
+}
+
+  
 
 

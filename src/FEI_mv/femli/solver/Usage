@@ -1,0 +1,32 @@
+To create a smoother/solver,
+
+1. instantiate the solver agent
+
+   solver = new MLI_SolverCreateFromName( name );
+  
+   where solver_id (solver_name) is one of :
+
+      Jacobi
+      BJacobi
+      GS
+      SGS
+      BSGS
+      ParaSails
+      MLS
+      CG 
+      Chebyshev
+      SuperLU
+      SeqSuperLU
+
+2. call setParams to set specific parameters
+
+   solver->setParams( param_string, argc, argv );
+
+3. call setup
+
+   solver->setup(MLI_Matrix *mat);
+
+4. call solve
+
+   solver->solve(MLI_Vector *, MLI_Vector *);
+

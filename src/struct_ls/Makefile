@@ -1,4 +1,3 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1997   The Regents of the University of California
 #
@@ -8,21 +7,11 @@
 # $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
-
-
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES= 
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
@@ -31,55 +20,25 @@ CFLAGS =\
  -I$(srcdir)/../struct_mv\
  ${CINCLUDES}
 
-RANLIB = ranlib
-
 HEADERS =\
  headers.h\
+ HYPRE_struct_ls.h\
  pfmg.h\
- sparse_msg.h\
+ red_black_gs.h\
  smg.h\
- struct_ls.h\
- HYPRE_struct_ls.h
+ sparse_msg.h\
+ struct_ls.h
 
 FILES =\
  coarsen.c\
  cyclic_reduction.c\
+ F90_HYPRE_struct_hybrid.c\
+ F90_HYPRE_struct_pcg.c\
+ F90_HYPRE_struct_pfmg.c\
+ F90_HYPRE_struct_smg.c\
  general.c\
  hybrid.c\
- jacobi.c\
- pcg_struct.c\
- pfmg.c\
- pfmg2_setup_rap.c\
- pfmg3_setup_rap.c\
- pfmg_relax.c\
- pfmg_setup.c\
- pfmg_setup_interp.c\
- pfmg_setup_rap.c\
- pfmg_solve.c\
- point_relax.c\
- semi_setup_rap.c\
- semi_interp.c\
- semi_restrict.c\
- sparse_msg.c\
- sparse_msg2_setup_rap.c\
- sparse_msg3_setup_rap.c\
- sparse_msg_filter.c\
- sparse_msg_interp.c\
- sparse_msg_restrict.c\
- sparse_msg_setup.c\
- sparse_msg_setup_rap.c\
- sparse_msg_solve.c\
- smg2_setup_rap.c\
- smg3_setup_rap.c\
- smg.c\
- smg_axpy.c\
- smg_relax.c\
- smg_residual.c\
- smg_setup.c\
- smg_setup_interp.c\
- smg_setup_rap.c\
- smg_setup_restrict.c\
- smg_solve.c\
+ HYPRE_struct_bicgstab.c\
  HYPRE_struct_hybrid.c\
  HYPRE_struct_jacobi.c\
  HYPRE_struct_pfmg.c\
@@ -87,10 +46,45 @@ FILES =\
  HYPRE_struct_sparse_msg.c\
  HYPRE_struct_pcg.c\
  HYPRE_struct_gmres.c\
- F90_HYPRE_struct_hybrid.c\
- F90_HYPRE_struct_pcg.c\
- F90_HYPRE_struct_pfmg.c\
- F90_HYPRE_struct_smg.c
+ jacobi.c\
+ pcg_struct.c\
+ pfmg2_setup_rap.c\
+ pfmg3_setup_rap.c\
+ pfmg.c\
+ pfmg_relax.c\
+ pfmg_setup.c\
+ pfmg_setup_interp.c\
+ pfmg_setup_rap5.c\
+ pfmg_setup_rap7.c\
+ pfmg_setup_rap.c\
+ pfmg_solve.c\
+ point_relax.c\
+ red_black_constantcoef_gs.c\
+ red_black_gs.c\
+ semi_interp.c\
+ semi_restrict.c\
+ semi_setup_rap.c\
+ smg2_setup_rap.c\
+ smg3_setup_rap.c\
+ smg_axpy.c\
+ smg.c\
+ smg_relax.c\
+ smg_residual.c\
+ smg_residual_unrolled.c\
+ smg_setup.c\
+ smg_setup_interp.c\
+ smg_setup_rap.c\
+ smg_setup_restrict.c\
+ smg_solve.c\
+ sparse_msg2_setup_rap.c\
+ sparse_msg3_setup_rap.c\
+ sparse_msg.c\
+ sparse_msg_filter.c\
+ sparse_msg_interp.c\
+ sparse_msg_restrict.c\
+ sparse_msg_setup.c\
+ sparse_msg_setup_rap.c\
+ sparse_msg_solve.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -99,18 +93,19 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_struct_ls.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/struct_ls.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/struct_ls.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_struct_ls.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/struct_ls.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+
 clean:
-	@rm -f *.o *.dxx 
-	@rm -f *.prj
-	@rm -f *.kdd
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
+distclean: clean
 
 
 ##################################################################
@@ -119,17 +114,7 @@ veryclean: clean
 
 libHYPRE_struct_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

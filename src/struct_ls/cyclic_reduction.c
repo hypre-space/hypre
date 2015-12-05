@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.6 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  * Cyclic reduction algorithm (coded as if it were a 1D MG method)
@@ -490,18 +490,12 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_StructVector    **x_l;
    hypre_ComputePkg      **down_compute_pkg_l;
    hypre_ComputePkg      **up_compute_pkg_l;
+   hypre_ComputeInfo      *compute_info;
 
    hypre_Index             cindex;
    hypre_Index             findex;
    hypre_Index             stride;
 
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-                       
    hypre_StructGrid       *grid;
 
    hypre_Box              *cbox;
@@ -656,41 +650,25 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
+       /* down-cycle */
       hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
-                              &send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              &indt_boxes, &dept_boxes);
- 
-      /* down-cycle */
-      hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             indt_boxes, dept_boxes,
-                             stride, grid_l[l],
+                              &compute_info);
+      hypre_ComputeInfoProjectSend(compute_info, findex, stride);
+      hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
+      hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
+      hypre_ComputePkgCreate(compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
-                             &down_compute_pkg_l[l]);
-
-      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
-                              &send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              &indt_boxes, &dept_boxes);
+                             grid_l[l], &down_compute_pkg_l[l]);
 
       /* up-cycle */
-      hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-      hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             indt_boxes, dept_boxes,
-                             stride, grid_l[l],
+      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
+                              &compute_info);
+      hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
+      hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
+      hypre_ComputeInfoProjectComp(compute_info, findex, stride);
+      hypre_ComputePkgCreate(compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
-                             &up_compute_pkg_l[l]);
+                             grid_l[l], &up_compute_pkg_l[l]);
    }
 
    (cyc_red_data -> down_compute_pkg_l) = down_compute_pkg_l;
@@ -871,12 +849,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
     * C-points and the current solution approximation at
     * F-points.  The coarse-grid solution vector contains
     * the restricted (injected) fine-grid residual.
-    * - The coarsest grid solve is built into this loop
-    * because it involves the same code as step 1.
     *--------------------------------------------------*/
  
-   /* The break out of this loop is just before step 2 below */
-   for (l = 0; ; l++)
+   for (l = 0; l < num_levels - 1 ; l++)
    {
       /* set cindex and stride */
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
@@ -912,9 +887,6 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_BoxLoop2End(Ai, xi);
          }
 
-      if (l == (num_levels - 1))
-         break;
-
       /* Step 2 */
       fgrid = hypre_StructVectorGrid(x_l[l]);
       fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -945,7 +917,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          }
 
          fi = 0;
-         hypre_ForBoxArrayI(ci, cgrid_boxes)
+         hypre_ForBoxI(ci, cgrid_boxes)
             {
                while (fgrid_ids[fi] != cgrid_ids[ci])
                {
@@ -1004,6 +976,52 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             }
       }
    }
+   /*--------------------------------------------------
+    * Coarsest grid:
+    *
+    * Do an F-relaxation sweep with zero initial guess
+    *
+    * This is the same as step 1 in above, but is
+    * broken out as a sepecial case to add a check
+    * for zero diagonal that can occur for singlar
+    * problems like the full Neumann problem.
+    *--------------------------------------------------*/
+ 
+   /* set cindex and stride */
+   hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
+   hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
+
+   compute_box_a = fine_points_l[l];
+   hypre_ForBoxI(fi, compute_box_a)
+      {
+         compute_box = hypre_BoxArrayBox(compute_box_a, fi);
+
+         A_dbox =
+            hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A_l[l]), fi);
+         x_dbox =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l]), fi);
+
+         hypre_SetIndex(index, 0, 0, 0);
+         Ap = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
+         xp = hypre_StructVectorBoxData(x_l[l], fi);
+
+         hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
+         hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+         hypre_BoxLoop2Begin(loop_size,
+                             A_dbox, start, stride, Ai,
+                             x_dbox, start, stride, xi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,xi
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+            {
+               if (Ap[Ai] != 0.0)
+               {
+                  xp[xi] /= Ap[Ai]; 
+               }
+            }
+         hypre_BoxLoop2End(Ai, xi);
+      }
 
    /*--------------------------------------------------
     * Up cycle:

@@ -1,0 +1,1250 @@
+/*
+ * This is the HYPRE SIDL interface description file, used with the
+ * Babel tool to provide multiple language support in hypre.  The
+ * prototype of this work was presented at the 2001 SIAM Parallel
+ * Processing conference.  The original authors were Andy Cleary, Jeff
+ * Painter, and Cal Ribbens (from HYPRE) and Scott Kohn and Gary
+ * Kumfert (from Components).
+ *
+ * For questions about SIDL and Babel, see the Components project web
+ * page at http://www.llnl.gov/CASC/components/.
+ **/
+
+/**
+ * The bHYPRE package defines interfaces for the HYPRE software package.
+ **/
+package bHYPRE version 1.0.0
+{
+
+   /*----------- Interface -------------------------------------------------*/
+
+   /**
+    * The purpose of a ProblemDefinition is to:
+    *
+    * \begin{itemize}
+    * \item provide a particular view of how to define a problem
+    * \item construct and return a {\it problem object}
+    * \end{itemize}
+    *
+    * A {\it problem object} is an intentionally vague term that
+    * corresponds to any useful object used to define a problem.
+    * Prime examples are:
+    * 
+    * \begin{itemize}
+    * \item a LinearOperator object, i.e., something with a matvec
+    * \item a MatrixAccess object, i.e., something with a getrow
+    * \item a Vector, i.e., something with a dot, axpy, ...
+    * \end{itemize}
+    *
+    * Note that {\tt Initialize} and {\tt Assemble} are reserved here
+    * for defining problem objects through a particular interface.
+    **/
+   interface ProblemDefinition 
+   {
+      /**
+       * Set the MPI Communicator.
+       **/
+      int SetCommunicator(in opaque mpi_comm);
+
+      /**
+       * Prepare an object for setting coefficient values, whether for
+       * the first time or subsequently.
+       **/
+      int Initialize();
+
+      /**
+       * Finalize the construction of an object before using, either
+       * for the first time or on subsequent uses. {\tt Initialize}
+       * and {\tt Assemble} always appear in a matched set, with
+       * Initialize preceding Assemble. Values can only be set in
+       * between a call to Initialize and Assemble.
+       **/
+      int Assemble();
+
+      /**
+       * The problem definition interface is a {\it builder} that
+       * creates an object that contains the problem definition
+       * information, e.g. a matrix. To perform subsequent operations
+       * with that object, it must be returned from the problem
+       * definition object. {\tt GetObject} performs this function.
+       * At compile time, the type of the returned object is unknown.
+       * Thus, the returned type is a SIDL.BaseInterface.
+       * QueryInterface or Cast must be used on the returned object to
+       * convert it into a known type.
+       **/
+      int GetObject(out SIDL.BaseInterface A);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   /**
+    * This interface represents a linear-algebraic conceptual view of a
+    * linear system.  The 'I' and 'J' in the name are meant to be
+    * mnemonic for the traditional matrix notation A(I,J).
+    **/
+   interface IJBuildMatrix extends ProblemDefinition 
+   {
+      /**
+       * Set the local range for a matrix object.  Each process owns
+       * some unique consecutive range of rows, indicated by the
+       * global row indices {\tt ilower} and {\tt iupper}.  The row
+       * data is required to be such that the value of {\tt ilower} on
+       * any process $p$ be exactly one more than the value of {\tt
+       * iupper} on process $p-1$.  Note that the first row of the
+       * global matrix may start with any integer value.  In
+       * particular, one may use zero- or one-based indexing.
+       *
+       * For square matrices, {\tt jlower} and {\tt jupper} typically
+       * should match {\tt ilower} and {\tt iupper}, respectively.
+       * For rectangular matrices, {\tt jlower} and {\tt jupper}
+       * should define a partitioning of the columns.  This
+       * partitioning must be used for any vector $v$ that will be
+       * used in matrix-vector products with the rectangular matrix.
+       * The matrix data structure may use {\tt jlower} and {\tt
+       * jupper} to store the diagonal blocks (rectangular in general)
+       * of the matrix separately from the rest of the matrix.
+       *
+       * Collective.
+       **/
+      int SetLocalRange(in int ilower,
+                        in int iupper,
+                        in int jlower,
+                        in int jupper);
+
+      /**
+       * Sets values for {\tt nrows} of the matrix.  The arrays {\tt
+       * ncols} and {\tt rows} are of dimension {\tt nrows} and
+       * contain the number of columns in each row and the row
+       * indices, respectively.  The array {\tt cols} contains the
+       * column indices for each of the {\tt rows}, and is ordered by
+       * rows.  The data in the {\tt values} array corresponds
+       * directly to the column entries in {\tt cols}.  Erases any
+       * previous values at the specified locations and replaces them
+       * with new ones, or, if there was no value there before,
+       * inserts a new one.
+       *
+       * Not collective.
+       **/
+      int SetValues(in int nrows,
+                    in array<int,1,column-major> ncols,
+                    in array<int,1,column-major> rows,
+                    in array<int,1,column-major> cols,
+                    in array<double,1,column-major> values);
+
+      /**
+       * Adds to values for {\tt nrows} of the matrix.  Usage details
+       * are analogous to {\tt SetValues}.  Adds to any previous
+       * values at the specified locations, or, if there was no value
+       * there before, inserts a new one.
+       *
+       * Not collective.
+       **/
+      int AddToValues(in int nrows,
+                      in array<int,1,column-major> ncols,
+                      in array<int,1,column-major> rows,
+                      in array<int,1,column-major> cols,
+                      in array<double,1,column-major> values);
+
+      /**
+       * Gets range of rows owned by this processor and range of
+       * column partitioning for this processor.
+       **/
+      int GetLocalRange(out int ilower,
+                        out int iupper,
+                        out int jlower,
+                        out int jupper);
+
+      /**
+       * Gets number of nonzeros elements for {\tt nrows} rows
+       * specified in {\tt rows} and returns them in {\tt ncols},
+       * which needs to be allocated by the user.
+       **/
+      int GetRowCounts(in int nrows,
+                       in array<int,1,column-major> rows,
+                       inout array<int,1,column-major> ncols);
+
+      /**
+       * Gets values for {\tt nrows} rows or partial rows of the
+       * matrix.  Usage details are analogous to {\tt SetValues}.
+       **/
+      int GetValues(in int nrows,
+                    in array<int,1,column-major> ncols,
+                    in array<int,1,column-major> rows,
+                    in array<int,1,column-major> cols,
+                    inout array<double,1,column-major> values);
+
+      /**
+       * (Optional) Set the max number of nonzeros to expect in each
+       * row.  The array {\tt sizes} contains estimated sizes for each
+       * row on this process.  This call can significantly improve the
+       * efficiency of matrix construction, and should always be
+       * utilized if possible.
+       *
+       * Not collective.
+       **/
+      int SetRowSizes(in array<int,1,column-major> sizes);
+
+      /**
+       * Print the matrix to file.  This is mainly for debugging
+       * purposes.
+       **/
+      int Print(in string filename);
+
+      /**
+       * Read the matrix from file.  This is mainly for debugging
+       * purposes.
+       **/
+      int Read(in string filename,
+               in opaque comm);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface IJBuildVector extends ProblemDefinition 
+   {
+      /**
+       * Set the local range for a vector object.  Each process owns
+       * some unique consecutive range of vector unknowns, indicated
+       * by the global indices {\tt jlower} and {\tt jupper}.  The
+       * data is required to be such that the value of {\tt jlower} on
+       * any process $p$ be exactly one more than the value of {\tt
+       * jupper} on process $p-1$.  Note that the first index of the
+       * global vector may start with any integer value.  In
+       * particular, one may use zero- or one-based indexing.
+       *
+       * Collective.
+       **/
+      int SetLocalRange(in int jlower,
+                        in int jupper);
+
+      /**
+       * Sets values in vector.  The arrays {\tt values} and {\tt
+       * indices} are of dimension {\tt nvalues} and contain the
+       * vector values to be set and the corresponding global vector
+       * indices, respectively.  Erases any previous values at the
+       * specified locations and replaces them with new ones.
+       *
+       * Not collective.
+       **/
+      int SetValues(in int nvalues,
+                    in array<int,1,column-major> indices,
+                    in array<double,1,column-major> values);
+
+      /**
+       * Adds to values in vector.  Usage details are analogous to
+       * {\tt SetValues}.
+       *
+       * Not collective.
+       **/
+      int AddToValues(in int nvalues,
+                      in array<int,1,column-major> indices,
+                      in array< double> values);
+
+      /**
+       * Returns range of the part of the vector owned by this
+       * processor.
+       **/
+      int GetLocalRange(out int jlower,
+                        out int jupper);
+
+      /**
+       * Gets values in vector.  Usage details are analogous to {\tt
+       * SetValues}.
+       *
+       * Not collective.
+       **/
+      int GetValues(in int nvalues,
+                    in array<int,1,column-major> indices,
+                    inout array<double,1,column-major> values);
+
+      /**
+       * Print the vector to file.  This is mainly for debugging
+       * purposes.
+       **/
+      int Print(in string filename);
+
+      /**
+       * Read the vector from file.  This is mainly for debugging
+       * purposes.
+       **/
+      int Read(in string filename,
+               in opaque comm);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface SStructBuildMatrix extends ProblemDefinition 
+   {
+      /**
+       * Set the matrix graph.
+       **/
+      int SetGraph(in SStructGraph graph);
+   
+      /**
+       * Set matrix coefficients index by index.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * NOTE: The entries in this routine must all be of the same
+       * type: either stencil or non-stencil, but not both.  Also, if
+       * they are stencil entries, they must all represent couplings
+       * to the same variable type (there are no such restrictions for
+       * non-stencil entries).
+       *
+       * If the matrix is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int SetValues(in int part,
+                    in array<int,1,column-major> index,
+                    in int var,
+                    in int nentries,
+                    in array<int,1,column-major> entries,
+                    in array<double,1,column-major> values);
+   
+      /**
+       * Set matrix coefficients a box at a time.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * NOTE: The entries in this routine must all be of the same
+       * type: either stencil or non-stencil, but not both.  Also, if
+       * they are stencil entries, they must all represent couplings
+       * to the same variable type (there are no such restrictions for
+       * non-stencil entries).
+       *
+       * If the matrix is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int SetBoxValues(in int part,
+                       in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
+                       in int var,
+                       in int nentries,
+                       in array<int,1,column-major> entries,
+                       in array<double,1,column-major> values);
+      /**
+       * Add to matrix coefficients index by index.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * NOTE: The entries in this routine must all be of the same
+       * type: either stencil or non-stencil, but not both.  Also, if
+       * they are stencil entries, they must all represent couplings
+       * to the same variable type.
+       *
+       * If the matrix is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int AddToValues(in int part,
+                      in array<int,1,column-major> index,
+                      in int var,
+                      in int nentries,
+                      in array<int,1,column-major> entries,
+                      in array<double,1,column-major> values);
+   
+      /**
+       * Add to matrix coefficients a box at a time.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * NOTE: The entries in this routine must all be of stencil
+       * type.  Also, they must all represent couplings to the same
+       * variable type.
+       *
+       * If the matrix is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int AddToBoxValues(in int part,
+                         in array<int,1,column-major> ilower,
+                         in array<int,1,column-major> iupper,
+                         in int var,
+                         in int nentries,
+                         in array<int,1,column-major> entries,
+                         in array<double,1,column-major> values);
+   
+      /**
+       * Define symmetry properties for the stencil entries in the
+       * matrix.  The boolean argument {\tt symmetric} is applied to
+       * stencil entries on part {\tt part} that couple variable {\tt
+       * var} to variable {\tt to\_var}.  A value of -1 may be used
+       * for {\tt part}, {\tt var}, or {\tt to\_var} to specify
+       * ``all''.  For example, if {\tt part} and {\tt to\_var} are
+       * set to -1, then the boolean is applied to stencil entries on
+       * all parts that couple variable {\tt var} to all other
+       * variables.
+       * 
+       * By default, matrices are assumed to be nonsymmetric.
+       * Significant storage savings can be made if the matrix is
+       * symmetric.
+       **/
+      int SetSymmetric(in int part,
+                       in int var,
+                       in int to_var,
+                       in int symmetric);
+   
+      /**
+       * Define symmetry properties for all non-stencil matrix
+       * entries.
+       **/
+      int SetNSSymmetric(in int symmetric);
+   
+      /**
+       * Set the matrix to be complex.
+       **/
+      int SetComplex();
+   
+      /**
+       * Print the matrix to file.  This is mainly for debugging
+       * purposes.
+       **/
+      int Print(in string filename,
+                in int all);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface SStructBuildVector extends ProblemDefinition 
+   {
+      /**
+       * Set the vector grid.
+       **/
+      int SetGrid(in SStructGrid grid);
+      
+      /**
+       * Set vector coefficients index by index.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * If the vector is complex, then {\tt value} consists of a pair
+       * of doubles representing the real and imaginary parts of the
+       * complex value.
+       **/
+      int SetValues(in int part,
+                    in array<int,1,column-major> index,
+                    in int var,
+                    in array<double,1,column-major> value);
+      
+      /**
+       * Set vector coefficients a box at a time.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * If the vector is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int SetBoxValues(in int part,
+                       in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
+                       in int var,
+                       in array<double,1,column-major> values);
+      /**
+       * Set vector coefficients index by index.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * If the vector is complex, then {\tt value} consists of a pair
+       * of doubles representing the real and imaginary parts of the
+       * complex value.
+       **/
+      int AddToValues(in int part,
+                      in array<int,1,column-major> index,
+                      in int var,
+                      in array<double,1,column-major> value);
+      
+      /**
+       * Set vector coefficients a box at a time.
+       *
+       * NOTE: Users are required to set values on all processes that
+       * own the associated variables.  This means that some data will
+       * be multiply defined.
+       *
+       * If the vector is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int AddToBoxValues(in int part,
+                         in array<int,1,column-major> ilower,
+                         in array<int,1,column-major> iupper,
+                         in int var,
+                         in array<double,1,column-major> values);
+      
+      /**
+       * Gather vector data before calling {\tt GetValues}.
+       **/
+      int Gather();
+      
+      
+      /**
+       * Get vector coefficients index by index.
+       *
+       * NOTE: Users may only get values on processes that own the
+       * associated variables.
+       *
+       * If the vector is complex, then {\tt value} consists of a pair
+       * of doubles representing the real and imaginary parts of the
+       * complex value.
+       **/
+      int GetValues(in int part,
+                    in array<int,1,column-major> index,
+                    in int var,
+                    out double value);
+      
+      /**
+       * Get vector coefficients a box at a time.
+       *
+       * NOTE: Users may only get values on processes that own the
+       * associated variables.
+       *
+       * If the vector is complex, then {\tt values} consists of pairs
+       * of doubles representing the real and imaginary parts of each
+       * complex value.
+       **/
+      int GetBoxValues(in int  part,
+                       in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
+                       in int var,
+                       inout array<double,1,column-major> values);
+      
+      /**
+       * Set the vector to be complex.
+       **/
+      int SetComplex();
+      
+      /**
+       * Print the vector to file.  This is mainly for debugging
+       * purposes.
+       **/
+      int Print(in string filename,
+                in int all);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   /* RDF: Complete and add comments */
+   interface StructBuildMatrix extends ProblemDefinition 
+   {
+      int SetGrid(in StructGrid grid);
+
+      int SetStencil(in StructStencil stencil);
+
+      int SetValues(in array<int,1,column-major> index, 
+                    in int num_stencil_indices,
+                    in array<int,1,column-major> stencil_indices,
+                    in array<double,1,column-major> values);
+
+      int SetBoxValues(in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
+                       in int num_stencil_indices,
+                       in array<int,1,column-major> stencil_indices,
+                       in array<double,1,column-major> values);
+
+      int SetNumGhost(in array<int,1,column-major> num_ghost);
+
+      int SetSymmetric(in int symmetric);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   /* RDF: Complete and add comments */
+   interface StructBuildVector extends ProblemDefinition 
+   {
+      int SetGrid(in StructGrid grid);
+
+      int SetStencil(in StructStencil stencil);   // really needed?
+
+      int SetValue(in array<int,1,column-major> grid_index,
+                   in double value);
+
+      int SetBoxValues(in array<int,1,column-major> ilower,
+                       in array<int,1,column-major> iupper,
+                       in array<double,1,column-major> values);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   /**
+    * An Operator is anything that maps one Vector to another.  The
+    * terms {\tt Setup} and {\tt Apply} are reserved for Operators.
+    * The implementation is allowed to assume that supplied parameter
+    * arrays will not be destroyed.
+    **/
+   interface Operator 
+   {
+      /**
+       * Set the MPI Communicator.
+       **/
+      int SetCommunicator(in opaque mpi_comm);
+
+      /**
+       * Set the int parameter associated with {\tt name}.
+       **/
+      int SetIntParameter(in string name,
+                          in int value);
+
+      /**
+       * Set the double parameter associated with {\tt name}.
+       **/
+      int SetDoubleParameter(in string name,
+                             in double value);
+
+      /**
+       * Set the string parameter associated with {\tt name}.
+       **/
+      int SetStringParameter(in string name,
+                             in string value);
+
+      /**
+       * Set the int 1-D array parameter associated with {\tt name}.
+       **/
+      int SetIntArray1Parameter(in string name,
+                                in array<int,1,column-major> value);
+
+      /**
+       * Set the int 2-D array parameter associated with {\tt name}.
+       **/
+      int SetIntArray2Parameter(in string name,
+                                in array<int,2,column-major> value);
+
+      /**
+       * Set the double 1-D array parameter associated with {\tt name}.
+       **/
+      int SetDoubleArray1Parameter(in string name,
+                                  in array<double,1,column-major> value);
+
+      /**
+       * Set the double 2-D array parameter associated with {\tt name}.
+       **/
+      int SetDoubleArray2Parameter(in string name,
+                                  in array<double,2,column-major> value);
+
+      /**
+       * Set the int parameter associated with {\tt name}.
+       **/
+      int GetIntValue(in string name,
+                      out int value);
+
+      /**
+       * Get the double parameter associated with {\tt name}.
+       **/
+      int GetDoubleValue(in string name,
+                         out double value);
+
+      /**
+       * (Optional) Do any preprocessing that may be necessary in
+       * order to execute {\tt Apply}.
+       **/
+      int Setup(in Vector b,
+                in Vector x);
+
+      /**
+       * Apply the operator to {\tt b}, returning {\tt x}.
+       **/
+      int Apply(in Vector b,
+                inout Vector x);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface Vector
+   {
+      /**
+       * Set {\tt self} to 0.
+       **/
+      int Clear();
+
+      /**
+       * Copy x into {\tt self}.
+       **/
+      int Copy(in Vector x);
+
+      /**
+       * Create an {\tt x} compatible with {\tt self}.
+       *
+       * NOTE: When this method is used in an inherited class, the
+       * cloned {\tt Vector} object can be cast to an object with the
+       * inherited class type.
+       **/
+      int Clone(out Vector x);
+
+      /**
+       * Scale {\tt self} by {\tt a}.
+       **/
+      int Scale(in double a);
+
+      /**
+       * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+       **/
+      int Dot(in Vector x,
+              out double d);
+
+      /**
+       * Add {\tt a}*{\tt x} to {\tt self}.
+       **/
+      int Axpy(in double a,
+               in Vector x);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface Solver extends Operator
+   {
+      /**
+       * Set the operator for the linear system being solved.
+       **/
+      int SetOperator(in Operator A);
+
+      /**
+       * (Optional) Set the convergence tolerance.
+       **/
+      int SetTolerance(in double tolerance);
+
+      /**
+       * (Optional) Set maximum number of iterations.
+       **/
+      int SetMaxIterations(in int max_iterations);
+
+      /**
+       * (Optional) Set the {\it logging level}, specifying the degree
+       * of additional informational data to be accumulated.  Does
+       * nothing by default (level = 0).  Other levels (if any) are
+       * implementation-specific.  Must be called before {\tt Setup}
+       * and {\tt Apply}.
+       **/
+      int SetLogging(in int level);
+
+      /**
+       * (Optional) Set the {\it print level}, specifying the degree
+       * of informational data to be printed either to the screen or
+       * to a file.  Does nothing by default (level=0).  Other levels
+       * (if any) are implementation-specific.  Must be called before
+       * {\tt Setup} and {\tt Apply}.
+       **/
+      int SetPrintLevel(in int level);
+
+      /**
+       * (Optional) Return the number of iterations taken.
+       **/
+      int GetNumIterations(out int num_iterations);
+
+      /**
+       * (Optional) Return the norm of the relative residual.
+       **/
+      int GetRelResidualNorm(out double norm);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface PreconditionedSolver extends Solver 
+   {
+      /**
+       * Set the preconditioner.
+       **/
+      int SetPreconditioner(in Solver s);
+   }
+
+   /*----------- Interface -------------------------------------------------*/
+
+   interface CoefficientAccess 
+   {
+      /**
+       * The GetRow method will allocate space for its two output
+       * arrays on the first call.  The space will be reused on
+       * subsequent calls.  Thus the user must not delete them, yet
+       * must not depend on the data from GetRow to persist beyond the
+       * next GetRow call.
+       **/
+      int GetRow(in int row, 
+                 out int size, 
+                 out array<int,1,column-major> col_ind,
+                 out array<double,1,column-major> values);
+   }
+
+   /*----------- Classes ---------------------------------------------------*/
+
+   /**
+    * The IJParCSR matrix class.
+    *
+    * Objects of this type can be cast to IJBuildMatrix, Operator, or
+    * CoefficientAccess objects using the {\tt \_\_cast} methods.
+    **/
+   class IJParCSRMatrix implements-all IJBuildMatrix, Operator,
+      CoefficientAccess
+   {
+      /**
+       * (Optional) Set the max number of nonzeros to expect in each
+       * row of the diagonal and off-diagonal blocks.  The diagonal
+       * block is the submatrix whose column numbers correspond to
+       * rows owned by this process, and the off-diagonal block is
+       * everything else.  The arrays {\tt diag\_sizes} and {\tt
+       * offdiag\_sizes} contain estimated sizes for each row of the
+       * diagonal and off-diagonal blocks, respectively.  This routine
+       * can significantly improve the efficiency of matrix
+       * construction, and should always be utilized if possible.
+       *
+       * Not collective.
+       **/
+      int SetDiagOffdSizes(in array<int,1,column-major> diag_sizes,
+                           in array<int,1,column-major> offdiag_sizes);
+   }
+
+   /**
+    * The IJParCSR vector class.
+    *
+    * Objects of this type can be cast to IJBuildVector or Vector
+    * objects using the {\tt \_\_cast} methods.
+    **/
+   class IJParCSRVector implements-all IJBuildVector, Vector
+   {
+   }
+
+   /*----------- Classes ---------------------------------------------------*/
+
+   /**
+    * The SStructParCSR matrix class.
+    *
+    * Objects of this type can be cast to SStructBuildMatrix or
+    * Operator objects using the {\tt \_\_cast} methods.
+    **/
+   class SStructParCSRMatrix implements-all SStructBuildMatrix, Operator
+   {
+   }
+
+   /**
+    * The SStructParCSR vector class.
+    *
+    * Objects of this type can be cast to SStructBuildVector or Vector
+    * objects using the {\tt \_\_cast} methods.
+    **/
+   class SStructParCSRVector implements-all SStructBuildVector, Vector
+   {
+   }
+
+   /*----------- Classes ---------------------------------------------------*/
+
+   /**
+    * The SStructVariable enumerated type.
+    * 
+    * An enumerated type that supports cell centered, node
+    * centered, face centered, and edge centered variables.  Face
+    * centered variables are split into x-face, y-face, and z-face
+    * variables, and edge centered variables are split into x-edge,
+    * y-edge, and z-edge variables.  The edge centered variable
+    * types are only used in 3D.  In 2D, edge centered variables
+    * are handled by the face centered types.
+    *
+    * Variables are referenced relative to an abstract (cell centered)
+    * index in the following way:
+    * \begin{itemize}
+    * \item cell centered variables are aligned with the index;
+    * \item node centered variables are aligned with the cell corner
+    *       at relative index (1/2, 1/2, 1/2);
+    * \item x-face, y-face, and z-face centered variables are aligned
+    *       with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
+    *       and (0, 0, 1/2), respectively;
+    * \item x-edge, y-edge, and z-edge centered variables are aligned
+    *       with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
+    *       and (1/2, 1/2, 0), respectively.
+    * \end{itemize}
+    *
+    * The supported identifiers are:
+    * \begin{itemize}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_CELL}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_NODE}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_XFACE}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_YFACE}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_ZFACE}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_XEDGE}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_YEDGE}
+    * \item {\tt HYPRE\_SSTRUCT\_VARIABLE\_ZEDGE}
+    * \end{itemize}
+    *
+    * NOTE: Although variables are referenced relative to a unique
+    * abstract cell-centered index, some variables are associated
+    * with multiple grid cells.  For example, node centered
+    * variables in 3D are associated with 8 cells (away from
+    * boundaries).  Although grid cells are distributed uniquely to
+    * different processes, variables may be owned by multiple
+    * processes because they may be associated with multiple cells.
+    **/
+   enum SStructVariable
+   {
+      UNDEFINED = -1,
+      CELL      =  0,
+      NODE      =  1,
+      XFACE     =  2,
+      YFACE     =  3,
+      ZFACE     =  4,
+      XEDGE     =  5,
+      YEDGE     =  6,
+      ZEDGE     =  7
+   };
+   
+   /**
+    * The semi-structured grid class.
+    **/
+   class SStructGrid 
+   {
+      /**
+       * Set the number of dimensions {\tt ndim} and the number of
+       * structured parts {\tt nparts}.
+       **/
+      int SetNumDimParts(in int ndim,
+                         in int nparts);
+   
+      /**
+       * Set the extents for a box on a structured part of the grid.
+       **/
+      int SetExtents(in int part,
+                     in array<int,1,column-major> ilower,
+                     in array<int,1,column-major> iupper);
+   
+      /**
+       * Describe the variables that live on a structured part of the
+       * grid.
+       **/
+      int SetVariable(in int part,
+                      in int var,
+                      in SStructVariable vartype);
+   
+      /**
+       * Describe additional variables that live at a particular
+       * index.  These variables are appended to the array of
+       * variables set in {\tt SetVariables}, and are referenced as
+       * such.
+       **/
+      int AddVariable(in int part,
+                      in array<int,1,column-major> index,
+                      in int var,
+                      in SStructVariable vartype);
+   
+      /**
+       * Describe how regions just outside of a part relate to other
+       * parts.  This is done a box at a time.
+       *
+       * The indexes {\tt ilower} and {\tt iupper} map directly to the
+       * indexes {\tt nbor\_ilower} and {\tt nbor\_iupper}.  Although,
+       * it is required that indexes increase from {\tt ilower} to
+       * {\tt iupper}, indexes may increase and/or decrease from {\tt
+       * nbor\_ilower} to {\tt nbor\_iupper}.
+       * 
+       * The {\tt index\_map} describes the mapping of indexes 0, 1,
+       * and 2 on part {\tt part} to the corresponding indexes on part
+       * {\tt nbor\_part}.  For example, triple (1, 2, 0) means that
+       * indexes 0, 1, and 2 on part {\tt part} map to indexes 1, 2,
+       * and 0 on part {\tt nbor\_part}, respectively.
+       *
+       * NOTE: All parts related to each other via this routine must
+       * have an identical list of variables and variable types.  For
+       * example, if part 0 has only two variables on it, a cell
+       * centered variable and a node centered variable, and we
+       * declare part 1 to be a neighbor of part 0, then part 1 must
+       * also have only two variables on it, and they must be of type
+       * cell and node.
+       **/
+      int SetNeighborBox(in int part,
+                         in array<int,1,column-major> ilower,
+                         in array<int,1,column-major> iupper,
+                         in int nbor_part,
+                         in array<int,1,column-major> nbor_ilower,
+                         in array<int,1,column-major> nbor_iupper,
+                         in array<int,1,column-major> index_map);
+   
+      /**
+       * Add an unstructured part to the grid.  The variables in the
+       * unstructured part of the grid are referenced by a global rank
+       * between 0 and the total number of unstructured variables
+       * minus one.  Each process owns some unique consecutive range
+       * of variables, defined by {\tt ilower} and {\tt iupper}.
+       *
+       * NOTE: This is just a placeholder.  This part of the interface
+       * is not finished.
+       **/
+      int AddUnstructuredPart(in int ilower,
+                              in int iupper);
+   
+      /**
+       * (Optional) Set periodic for a particular part.
+       **/
+      int SetPeriodic(in int  part,
+                      in array<int,1,column-major> periodic);
+
+      /**
+       * Setting ghost in the sgrids.
+       **/
+      int SetNumGhost(in array<int,1,column-major> num_ghost);
+   }
+   
+   /*-----------------------*/
+   
+   /**
+    * The semi-structured grid stencil class.
+    **/
+   class SStructStencil
+   {
+      /**
+       * Set the number of spatial dimensions and stencil entries.
+       **/
+      int SetNumDimSize(in int ndim,
+                        in int size);
+   
+      /**
+       * Set a stencil entry.
+       **/
+      int SetEntry(in int entry,
+                   in array<int,1,column-major> offset,
+                   in int var);
+   }
+   
+   /*-----------------------*/
+   
+   /**
+    * The semi-structured grid graph class.
+    **/
+   class SStructGraph
+   {
+      /**
+       * Set the grid.
+       **/
+      int SetGrid(in SStructGrid grid);
+      
+      /**
+       * Set the stencil for a variable on a structured part of the
+       * grid.
+       **/
+      int SetStencil(in int part,
+                     in int var,
+                     in SStructStencil stencil);
+   
+      /**
+       * Add a non-stencil graph entry at a particular index.  This
+       * graph entry is appended to the existing graph entries, and is
+       * referenced as such.
+       *
+       * NOTE: Users are required to set graph entries on all
+       * processes that own the associated variables.  This means that
+       * some data will be multiply defined.
+       **/
+      int AddEntries(in int part,
+                     in array<int,1,column-major> index,
+                     in int var,
+                     in int to_part,
+                     in array<int,1,column-major> to_index,
+                     in int to_var);
+   }
+   
+   /*-----------------------*/
+   
+   /**
+    * The semi-structured grid matrix class.
+    *
+    * Objects of this type can be cast to SStructBuildMatrix or
+    * Operator objects using the {\tt \_\_cast} methods.
+    **/
+   class SStructMatrix implements-all SStructBuildMatrix, Operator
+   {
+   }
+
+   /*-----------------------*/
+   
+   /**
+    * The semi-structured grid vector class.
+    *
+    * Objects of this type can be cast to SStructBuildVector or Vector
+    * objects using the {\tt \_\_cast} methods.
+    **/
+   class SStructVector implements-all SStructBuildVector, Vector
+   {
+   }
+
+   /*----------- Classes ---------------------------------------------------*/
+
+   /* RDF: Complete and add comments */
+
+   /**
+    * Define a structured stencil for a structured problem
+    * description.  More than one implementation is not envisioned,
+    * thus the decision has been made to make this a class rather than
+    * an interface.
+    **/
+   class StructStencil 
+   {
+      int SetDimension(in int dim);
+      int SetSize(in int size);
+      int SetElement(in int index,
+                     in array<int,1,column-major> offset);
+   }
+
+   /*-----------------------*/
+   
+   /**
+    * Define a structured grid class.
+    **/
+   class StructGrid 
+   {
+      /**
+       * Set the MPI Communicator.
+       **/
+      int SetCommunicator(in opaque mpi_comm);
+
+      int SetDimension(in int dim);
+
+      int SetExtents(in array<int,1,column-major> ilower,
+                     in array<int,1,column-major> iupper);
+
+      int SetPeriodic(in array<int,1,column-major> periodic);
+
+      int Assemble();
+   }
+
+   /*-----------------------*/
+   
+   /**
+    * A single class that implements both a build interface and an
+    * operator interface. It returns itself for GetConstructedObject.
+    **/
+   class StructMatrix implements-all StructBuildMatrix, Operator
+   { }
+
+   /*-----------------------*/
+   
+   class StructVector implements-all StructBuildVector, Vector
+   { }
+
+   /*----------- Classes ---------------------------------------------------*/
+
+   /**
+    * Diagonal scaling preconditioner for ParCSR matrix class.
+    *
+    * Objects of this type can be cast to Solver objects using the
+    * {\tt \_\_cast} methods.
+    **/
+   class ParCSRDiagScale implements-all Solver
+   {
+   }
+
+   /**
+    * Algebraic multigrid solver, based on classical Ruge-Stueben.
+    *
+    * The following optional parameters are available and may be set
+    * using the appropriate {\tt Parameter} function (as indicated in
+    * parentheses):
+    *
+    * \begin{description}
+    *
+    * \item[MaxLevels] ({\tt Int}) - maximum number of multigrid
+    * levels.
+    *
+    * \item[StrongThreshold] ({\tt Double}) - AMG strength threshold.
+    *
+    * \item[MaxRowSum] ({\tt Double}) -
+    *
+    * \item[CoarsenType] ({\tt Int}) - type of parallel coarsening
+    * algorithm used.
+    *
+    * \item[MeasureType] ({\tt Int}) - type of measure used; local or
+    * global.
+    *
+    * \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
+    * (default) or a W-cycle.
+    *
+    * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
+    * fine and coarse grid, up and down cycle.
+    *
+    * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
+    * fine and coarse grid, up and down cycle.
+    *
+    * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
+    * relaxation.
+    *
+    * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
+    * smoothed Jacobi and hybrid SOR.
+    *
+    * \item[TruncFactor] ({\tt Double}) - truncation factor for
+    * interpolation.
+    *
+    * \item[SmoothType] ({\tt Int}) - more complex smoothers.
+    *
+    * \item[SmoothNumLevels] ({\tt Int}) - number of levels for more
+    * complex smoothers.
+    *
+    * \item[SmoothNumSweeps] ({\tt Int}) - number of sweeps for more
+    * complex smoothers.
+    *
+    * \item[PrintFileName] ({\tt String}) - name of file printed to in
+    * association with {\tt SetPrintLevel}.  (not yet implemented).
+    *
+    * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
+    * (when using the systems version).
+    * 
+    * \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
+    * function to each variable (when using the systems version).
+    *
+    * \item[Variant] ({\tt Int}) - variant of Schwarz used.
+    *
+    * \item[Overlap] ({\tt Int}) - overlap for Schwarz.
+    *
+    * \item[DomainType] ({\tt Int}) - type of domain used for Schwarz.
+    *
+    * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
+    * for additive Schwarz.
+    *
+    * \item[DebugFlag] ({\tt Int}) -
+    *
+    * \end{description}
+    *
+    * Objects of this type can be cast to Solver objects using the
+    * {\tt \_\_cast} methods.
+    **/
+   class BoomerAMG implements-all Solver
+   {
+   }
+
+   /**
+    * Objects of this type can be cast to Solver objects using the
+    * {\tt \_\_cast} methods.
+    *
+    * RDF: Documentation goes here.
+    **/
+   class Pilut implements-all Solver
+   {
+   }
+
+   /**
+    * Objects of this type can be cast to PreconditionedSolver objects
+    * using the {\tt \_\_cast} methods.
+    *
+    * RDF: Documentation goes here.
+    **/
+   class PCG implements-all PreconditionedSolver
+   {
+   }
+
+   /**
+    * Objects of this type can be cast to PreconditionedSolver objects
+    * using the {\tt \_\_cast} methods.
+    *
+    * RDF: Documentation goes here.
+    **/
+   class GMRES implements-all PreconditionedSolver
+   {
+   }
+}

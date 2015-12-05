@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -111,7 +109,7 @@ void * hypre_BiCGSTABLCreate( )
 int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
 {
    hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (bicgstab_data)
    {
@@ -195,7 +193,7 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
    if ((bicgstab_data -> matvec_data) == NULL)
       (bicgstab_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -219,7 +217,6 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
 int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
 {
    hypre_BiCGSTABLData  *bicgstab_data   = bicgstab_vdata;
-   int               size         = (bicgstab_data -> size);
    int 		     max_iter     = (bicgstab_data -> max_iter);
    int 		     stop_crit    = (bicgstab_data -> stop_crit);
    double 	     accuracy     = (bicgstab_data -> tol);
@@ -245,21 +242,18 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int             logging        = (bicgstab_data -> logging);
    double         *norms          = (bicgstab_data -> norms);
-   char           *log_file_name  = (bicgstab_data -> log_file_name);
    
    int        ierr = 0;
    int        iter, flag; 
-   int        j, m; 
    int        my_id, num_procs;
    double     eta, chi, xi, psi, dtmp, dtmp2, r_norm, b_norm;
-   double     A11, A12, A21, A22, B1, B2, omega, epsmac = 1.e-16; 
+   double     A11, A12, A21, A22, B1, B2, omega; 
    double     epsilon, phi, delta, deltam1, omegam1;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (bicgstab_data -> norms);
-      log_file_name  = (bicgstab_data -> log_file_name);
    }
 
    /* initialize work arrays */
@@ -330,7 +324,6 @@ hypre_ParKrylovClearVector(x);
 
       if ( iter % 2 == 1 )
       {
-         m = ( iter - 1 ) / 2;
          precond(precond_data, A, wt, t);
          hypre_ParKrylovMatvec(matvec_data,1.0,A,t,0.0,awt);
          dtmp = hypre_ParKrylovInnerProd(wt,awt);
@@ -355,7 +348,6 @@ hypre_ParKrylovClearVector(x);
       }
       else
       {
-         m = ( iter - 2 ) / 2;
          dtmp = - 1.0;
          hypre_ParKrylovCopyVector(wt,t2);
          hypre_ParKrylovAxpy(dtmp,wh,t2);

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorCreate
@@ -48,6 +49,23 @@ hypre_ParVectorCreate(  MPI_Comm comm,
 
    return vector;
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParMultiVectorCreate
+ *--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParMultiVectorCreate(  MPI_Comm comm,
+			int global_size, 
+			int *partitioning,
+                        int num_vectors )
+{
+   /* note that global_size is the global length of a single vector */
+   hypre_ParVector * vector = hypre_ParVectorCreate( comm, global_size, partitioning );
+   hypre_ParVectorNumVectors(vector) = num_vectors;
+   return vector;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParVectorDestroy
@@ -119,6 +137,24 @@ hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorSetNumVectors
+ * call before calling hypre_ParVectorInitialize
+ * probably this will do more harm than good, use hypre_ParMultiVectorCreate
+ *--------------------------------------------------------------------------*/
+#if 0
+int 
+hypre_ParVectorSetNumVectors( hypre_ParVector *vector,
+                              int num_vectors )
+{
+   int    ierr=0;
+   hypre_Vector *local_vector = hypre_ParVectorLocalVector(v);
+
+   hypre_SeqVectorSetNumVectors( local_vector, num_vectors );
+
+   return ierr;
+}
+#endif
+/*--------------------------------------------------------------------------
  * hypre_ParVectorRead
  *--------------------------------------------------------------------------*/
 
@@ -158,6 +194,9 @@ hypre_ParVector
 
    sprintf(new_file_name,"%s.%d",file_name,my_id); 
    hypre_ParVectorLocalVector(par_vector) = hypre_SeqVectorRead(new_file_name);
+
+   /* multivector code not written yet >>> */
+   assert( hypre_ParVectorNumVectors(par_vector) == 1 );
 
    return par_vector;
 }
@@ -296,14 +335,16 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v, int *vec_starts)
 {
    int 			global_size;
    int 			local_size;
+   int                  num_vectors;
    int  		num_procs, my_id;
+   int                  global_vecstride, vecstride, idxstride;
    hypre_ParVector  	*par_vector;
    hypre_Vector     	*local_vector;
    double          	*v_data;
    double		*local_data;
    MPI_Request		*requests;
    MPI_Status		*status, status0;
-   int			i, j;
+   int			i, j, k, p;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -312,36 +353,62 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v, int *vec_starts)
    {
         global_size = hypre_VectorSize(v);
         v_data = hypre_VectorData(v);
+        num_vectors = hypre_VectorNumVectors(v); /* for multivectors */
+        global_vecstride = hypre_VectorVectorStride(v);
+
    }
 
    MPI_Bcast(&global_size,1,MPI_INT,0,comm);
+   MPI_Bcast(&num_vectors,1,MPI_INT,0,comm);
+   MPI_Bcast(&global_vecstride,1,MPI_INT,0,comm);
 
-   par_vector = hypre_ParVectorCreate(comm, global_size, vec_starts);
+   if ( num_vectors==1 )
+      par_vector = hypre_ParVectorCreate(comm, global_size, vec_starts);
+   else
+      par_vector = hypre_ParMultiVectorCreate(comm, global_size, vec_starts, num_vectors);
 
    vec_starts = hypre_ParVectorPartitioning(par_vector);
 
    local_size = vec_starts[my_id+1] - vec_starts[my_id];
+
    hypre_ParVectorInitialize(par_vector);
    local_vector = hypre_ParVectorLocalVector(par_vector);
    local_data = hypre_VectorData(local_vector);
+   vecstride = hypre_VectorVectorStride(local_vector);
+   idxstride = hypre_VectorIndexStride(local_vector);
+   assert( idxstride==1 );  /* <<< so far only the only implemented multivector StorageMethod is 0 <<< */
 
    if (my_id == 0)
    {
-	requests = hypre_CTAlloc(MPI_Request,num_procs-1);
-	status = hypre_CTAlloc(MPI_Status,num_procs-1);
-	j = 0;
-	for (i=1; i < num_procs; i++)
-		MPI_Isend(&v_data[vec_starts[i]],vec_starts[i+1]-vec_starts[i],
-		MPI_DOUBLE, i, 0, comm, &requests[j++]);
-	for (i=0; i < local_size; i++)
-		local_data[i] = v_data[i];
+	requests = hypre_CTAlloc(MPI_Request,num_vectors*(num_procs-1));
+	status = hypre_CTAlloc(MPI_Status,num_vectors*(num_procs-1));
+	k = 0;
+	for ( p=1; p<num_procs; p++)
+           for ( j=0; j<num_vectors; ++j )
+           {
+		MPI_Isend( &v_data[vec_starts[p]]+j*global_vecstride,
+                          (vec_starts[p+1]-vec_starts[p]),
+                          MPI_DOUBLE, p, 0, comm, &requests[k++] );
+           }
+        if ( num_vectors==1 )
+        {
+           for (i=0; i < local_size; i++)
+              local_data[i] = v_data[i];
+        }
+        else
+           for ( j=0; j<num_vectors; ++j )
+           {
+              for (i=0; i < local_size; i++)
+                 local_data[i+j*vecstride] = v_data[i+j*global_vecstride];
+           }
 	MPI_Waitall(num_procs-1,requests, status);
 	hypre_TFree(requests);
 	hypre_TFree(status);
    }
    else
    {
-	MPI_Recv(local_data,local_size,MPI_DOUBLE,0,0,comm,&status0);
+      for ( j=0; j<num_vectors; ++j )
+	MPI_Recv( local_data+j*vecstride, local_size, MPI_DOUBLE, 0, 0, comm,&status0 );
    }
 
    return par_vector;
@@ -362,6 +429,7 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
    int 			*vec_starts = hypre_ParVectorPartitioning(par_v);
    hypre_Vector     	*local_vector = hypre_ParVectorLocalVector(par_v);
    int  		num_procs, my_id;
+   int                  num_vectors = hypre_ParVectorNumVectors(par_v);
    hypre_Vector  	*vector;
    double		*vector_data;
    double		*local_data;
@@ -385,6 +453,7 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
  
    local_data = hypre_VectorData(local_vector);
    vector = hypre_SeqVectorCreate(global_size);
+   hypre_VectorNumVectors(vector) = num_vectors;
    hypre_SeqVectorInitialize(vector);
    vector_data = hypre_VectorData(vector);
 
@@ -412,16 +481,16 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
    {
         proc_id = used_procs[i];
         vec_len = vec_starts[proc_id+1] - vec_starts[proc_id];
-        MPI_Irecv(&vector_data[vec_starts[proc_id]], vec_len, MPI_DOUBLE,
+        MPI_Irecv(&vector_data[vec_starts[proc_id]], num_vectors*vec_len, MPI_DOUBLE,
                                 proc_id, 0, comm, &requests[j++]);
    }
    for (i = 0; i < num_types; i++)
    {
-        MPI_Isend(local_data, local_size, MPI_DOUBLE, used_procs[i],
+        MPI_Isend(local_data, num_vectors*local_size, MPI_DOUBLE, used_procs[i],
                           0, comm, &requests[j++]);
    }
  
-   for (i=0; i < local_size; i++)
+   for (i=0; i < num_vectors*local_size; i++)
         vector_data[vec_starts[my_id]+i] = local_data[i];
  
    MPI_Waitall(num_requests, requests, status);
@@ -454,6 +523,10 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    char              new_filename[255];
    FILE             *file;
 
+   /* multivector code not written yet >>> */
+   assert( hypre_ParVectorNumVectors(vector) == 1 );
+   if ( hypre_ParVectorNumVectors(vector) != 1 ) ++ierr;
+
    MPI_Comm_rank(comm, &myid);
    MPI_Comm_size(comm, &num_procs);
   
@@ -477,7 +550,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
    part0 = partitioning[myid];
    for (j = part0; j < partitioning[myid+1]; j++)
    {
-      fprintf(file, "%d %le\n", j + base_j, local_data[j-part0]);
+      fprintf(file, "%d %e\n", j + base_j, local_data[j-part0]);
    }
 
    fclose(file);
@@ -548,6 +621,10 @@ hypre_ParVectorReadIJ( MPI_Comm             comm,
 
    *base_j_ptr = base_j;
    *vector_ptr = vector;
+
+   /* multivector code not written yet >>> */
+   assert( hypre_ParVectorNumVectors(vector) == 1 );
+   if ( hypre_ParVectorNumVectors(vector) != 1 ) ++ierr;
 
    return ierr;
 }

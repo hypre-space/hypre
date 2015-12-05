@@ -130,7 +130,6 @@ void Euclid_dhSetup(Euclid_dh ctx)
    *----------------------------------------------------*/
   if (ctx->setupCount && ctx->printStats) {
     Euclid_dhPrintStatsShorter(ctx, stdout); CHECK_V_ERROR;
-    ctx->itsTotal += ctx->its;
     ctx->its = 0;
   }
 
@@ -393,7 +392,7 @@ void compute_rho_private(Euclid_dh ctx)
     bufLocal[1] = ctx->stats[NZF_STATS];      /* nzF */
     bufLocal[2] = ctx->stats[NZA_USED_STATS]; /* nzA used */
 
-    if (np_dh == 0) {
+    if (np_dh == 1) {
       bufGlobal[0] = bufLocal[0];
       bufGlobal[1] = bufLocal[1];
       bufGlobal[2] = bufLocal[2];

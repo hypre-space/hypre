@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
  * hypre_NodeRelaxData data structure
@@ -197,11 +198,11 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    double               **xp;
    double               **tp;
 
+   hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
    hypre_ComputePkg    ***svec_compute_pkgs;
    hypre_CommHandle     **comm_handle;
 
-   hypre_Index            unit_stride;
    hypre_Index            diag_index;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
@@ -215,14 +216,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_StructStencil   *sstencil_union;
    hypre_Index           *sstencil_union_shape;
    int                    sstencil_union_count;
-
-                       
-   hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
-   int                  **send_processes;
-   int                  **recv_processes;
-   hypre_BoxArrayArray   *indt_boxes;
-   hypre_BoxArrayArray   *dept_boxes;
 
    hypre_BoxArrayArray   *orig_indt_boxes;
    hypre_BoxArrayArray   *orig_dept_boxes;
@@ -316,7 +309,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    sgrid = hypre_StructMatrixGrid(hypre_SStructPMatrixSMatrix(A, 0, 0));
    dim = hypre_StructStencilDim(
                           hypre_SStructPMatrixSStencil(A, 0, 0));
-   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_nodesets);
    svec_compute_pkgs = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets);
@@ -420,10 +412,9 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                           sstencil_union_count, sstencil_union_shape);
 
 
-         hypre_CreateComputeInfo(sgrid, sstencil_union,
-                                &send_boxes, &recv_boxes,
-                                &send_processes, &recv_processes,
-                                &orig_indt_boxes, &orig_dept_boxes);
+         hypre_CreateComputeInfo(sgrid, sstencil_union, &compute_info);
+         orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
+         orig_dept_boxes = hypre_ComputeInfoDeptBoxes(compute_info);
 
          stride = nodeset_strides[p];
 
@@ -471,36 +462,30 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
             switch(compute_i)
             {
                case 0:
-               indt_boxes = new_box_aa;
+               hypre_ComputeInfoIndtBoxes(compute_info) = new_box_aa;
                break;
    
                case 1:
-               dept_boxes = new_box_aa;
+               hypre_ComputeInfoDeptBoxes(compute_info) = new_box_aa;
                break;
             }
          }
 
+         hypre_CopyIndex(stride, hypre_ComputeInfoStride(compute_info));
+
          if (vi == -1)
          {
-            hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                                   unit_stride, unit_stride,
-                                   send_processes, recv_processes,
-                                   indt_boxes, dept_boxes,
-                                   stride, sgrid,
+            hypre_ComputePkgCreate(compute_info,
                                    hypre_StructVectorDataSpace(
                                    hypre_SStructPVectorSVector(x, 0)),
-                                   1, &compute_pkgs[p]);
+                                   1, sgrid, &compute_pkgs[p]);
          }
          else
          {
-            hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                                   unit_stride, unit_stride,
-                                   send_processes, recv_processes,
-                                   indt_boxes, dept_boxes,
-                                   stride, sgrid,
+            hypre_ComputePkgCreate(compute_info,
                                    hypre_StructVectorDataSpace(
                                    hypre_SStructPVectorSVector(x, vi)),
-                                   1, &svec_compute_pkgs[p][vi]);
+                                   1, sgrid, &svec_compute_pkgs[p][vi]);
          }
    
          hypre_BoxArrayArrayDestroy(orig_indt_boxes);
@@ -659,6 +644,10 @@ hypre_NodeRelax(  void               *relax_vdata,
 
    if (zero_guess)
    {
+      if (num_nodesets > 1)
+      {
+         hypre_SStructPVectorSetConstantValues(x, 0.0);
+      }
       nodeset = nodeset_ranks[p];
       compute_pkg = compute_pkgs[nodeset];
       stride = nodeset_strides[nodeset];

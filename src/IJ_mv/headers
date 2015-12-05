@@ -5,7 +5,7 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.1 $
+# $Revision: 2.2 $
 #EHEADER***********************************************************************
 
 INTERNAL_HEADER=IJ_mv.h
@@ -37,6 +37,7 @@ extern "C" {
 #===========================================================================
 
 cat aux_parcsr_matrix.h  >> $INTERNAL_HEADER
+cat aux_par_vector.h     >> $INTERNAL_HEADER
 cat IJ_matrix.h          >> $INTERNAL_HEADER
 cat IJ_vector.h          >> $INTERNAL_HEADER
 

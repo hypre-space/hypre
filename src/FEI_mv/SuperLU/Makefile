@@ -1,42 +1,28 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 2001   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 1.2 $
+# $Revision: 1.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
-
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES=
-
-CFLAGS =\
+C_COMPILE_FLAGS = \
  -I$(srcdir)\
- ${C_COMPILE_FLAGS}\
+ -I$(srcdir)/../../\
+ -I$(srcdir)/../../utilities\
  ${CINCLUDES}
 
-RANLIB= ranlib
-
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
-
 HEADERS =\
- Cnames.h \
- colamd.h \
- dsp_defs.h \
- supermatrix.h \
- util.h
+ Cnames.h\
+ colamd.h\
+ dsp_defs.h\
+ superlu_util.h\
+ supermatrix.h
 
 FILES =\
  colamd.c \
@@ -56,8 +42,8 @@ FILES =\
  dmemory.c \
  dpanel_bmod.c \
  dpanel_dfs.c \
- dpivotL.c \
  dpivotgrowth.c \
+ dpivotL.c \
  dpruneL.c \
  dreadhb.c \
  dsnode_bmod.c \
@@ -66,14 +52,14 @@ FILES =\
  dsp_blas3.c \
  dutil.c \
  get_perm_c.c \
- memory.c \
  mmd.c \
  relax_snode.c \
  sp_coletree.c \
  sp_ienv.c \
  sp_preorder.c \
+ superlu_memory.c \
  superlu_timer.c \
- util.c
+ superlu_util.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -82,16 +68,19 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_superlu.a 
+	cp -fp *.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+	@echo  " "
 
-install: all
-	@cp -f *.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_superlu.a 
+	cp -f *.h $(HYPRE_INC_INSTALL)/.
+	cp -f libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+	@echo  " "
 
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
+distclean: clean
 
 ##################################################################
 # Rules
@@ -99,18 +88,7 @@ veryclean: clean
 
 libHYPRE_superlu.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-

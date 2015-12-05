@@ -19,16 +19,25 @@
  * either do nothing, or return -1.0; this is primarily for debugging.
  */
 
+#include "HYPRE_config.h"
+
 #ifdef EUCLID_TIMING
 #include <sys/times.h>
 #include <sys/types.h>
-#include <unistd.h>
+#if HAVE_UNISTD_H
+#  include <unistd.h>
+#endif /* HAVE_UNISTD_H */
 
 #elif !defined(JUNK_TIMING)
 /* #include <sys/types.h> 
 #include <sys/sysconfig.h>
 */
-#include <unistd.h>  /* needed for sysconf(_SC_CLK_TCK) */
+#ifdef WIN32
+#  include <time.h>
+#endif
+#if HAVE_UNISTD_H
+#  include <unistd.h>  /* needed for sysconf(_SC_CLK_TCK) */
+#endif /* HAVE_UNISTD_H */
 #endif
 
 

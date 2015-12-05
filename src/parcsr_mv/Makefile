@@ -1,84 +1,66 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1997   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.2 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent  
-CINCLUDES= 
-CDEFS = 
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../seq_mv\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES}
  
-RANLIB = ranlib
- 
-MPILIBFLAGS =    
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
- 
-LFLAGS =\
- -L.\
- -L../seq_mv\
- -L../utilities\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
 HEADERS =\
- communication.h\
  headers.h\
+ HYPRE_parcsr_mv.h\
+ new_commpkg.h\
+ numbers.h\
+ par_chord_matrix.h\
+ par_csr_communication.h\
  par_csr_matrix.h\
- par_vector.h\
  parcsr_mv.h\
- HYPRE_parcsr_mv.h
+ par_vector.h
 
 FILES =\
- communication.c\
+ communicationT.c\
+ F90_HYPRE_parcsr_matrix.c\
+ F90_HYPRE_parcsr_vector.c\
+ F90_parcsr_matrix.c\
+ F90_par_vector.c\
+ HYPRE_parcsr_matrix.c\
+ HYPRE_parcsr_vector.c\
+ new_commpkg.c\
+ numbers.c\
+ par_csr_aat.c\
+ par_csr_bool_matop.c\
+ par_csr_bool_matrix.c\
+ par_csr_communication.c\
  par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
- par_vector.c\
- par_csr_bool_matrix.c\
- par_csr_bool_matop.c\
- HYPRE_parcsr_matrix.c\
- HYPRE_parcsr_vector.c\
- F90_parcsr_matrix.c\
- F90_par_vector.c\
- F90_HYPRE_parcsr_matrix.c\
- F90_HYPRE_parcsr_vector.c\
- par_csr_aat.c\
- communicationT.c
+ par_vector.c
 
+EXTRA_FILES =\
+ parchord_to_parcsr.c\
 
 DRIVER_FILES =\
+ driver_aat.c\
+ driver_boolaat.c\
+ driver_boolmatmul.c\
  driver.c\
  driver_matmul.c\
+ driver_mat_multivec.c\
  driver_matvec.c\
- driver_aat.c\
- driver_boolmatmul.c\
- driver_boolaat.c
+ driver_multivec.c
 
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
@@ -88,6 +70,9 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_parcsr_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
  
 driver: driver.o libHYPRE_parcsr_mv.a 
 	@echo  "Linking" $@ "... "
@@ -113,17 +98,16 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/parcsr_mv.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_parcsr_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
  
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
+	rm -f driver driver_matvec driver_matmul
 
-veryclean: clean
-	@rm -f libHYPRE_parcsr_mv.a
-	@rm -f driver driver_matvec driver_matmul
+distclean: clean
 
 ##################################################################
 # Rules
@@ -131,17 +115,9 @@ veryclean: clean
 
 libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
-	ranlib $@
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
 
 ${DRIVER_OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

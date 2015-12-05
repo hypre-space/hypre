@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -167,6 +167,16 @@ HYPRE_StructSMGSetLogging( HYPRE_StructSolver solver,
    return( hypre_SMGSetLogging( (void *) solver, logging) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructSMGSetPrintLevel( HYPRE_StructSolver solver,
+                           int        print_level )
+{
+   return( hypre_SMGSetPrintLevel( (void *) solver, print_level) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGGetNumIterations
  *--------------------------------------------------------------------------*/

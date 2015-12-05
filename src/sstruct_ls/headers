@@ -5,7 +5,7 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.3 $
 #EHEADER***********************************************************************
 
 INTERNAL_HEADER=sstruct_ls.h
@@ -25,6 +25,7 @@ cat > $INTERNAL_HEADER <<@
 
 #include "utilities.h"
 #include "krylov.h"
+#include "struct_ls.h"
 #include "sstruct_mv.h"
 
 #ifdef __cplusplus
@@ -36,8 +37,11 @@ extern "C" {
 #===========================================================================
 # Structures and prototypes
 #===========================================================================
-
-../utilities/protos *.c   >> $INTERNAL_HEADER
+cat sstruct_owninfo.h     >> $INTERNAL_HEADER
+cat sstruct_recvinfo.h    >> $INTERNAL_HEADER
+cat sstruct_sendinfo.h    >> $INTERNAL_HEADER
+                                                                                                            
+../utilities/protos [!F]*.c   >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -546,6 +546,6 @@ hypre_thread_MPI_Type_commit( MPI_Datatype *datatype )
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty3;
 
 #endif

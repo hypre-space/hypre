@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -70,6 +70,17 @@ HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
    return( hypre_BiCGSTABSetTol( (void *) solver, tol ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver,
+                         double             cf_tol    )
+{
+   return( hypre_BiCGSTABSetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -144,6 +155,17 @@ HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver,
+                             int print_level)
+{
+   return( hypre_BiCGSTABSetPrintLevel( (void *) solver, print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -163,4 +185,15 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
    return( hypre_BiCGSTABGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BiCGSTABGetResidual
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BiCGSTABGetResidual( HYPRE_Solver  solver,
+                            void             **residual  )
+{
+   return( hypre_BiCGSTABGetResidual( (void *) solver, residual ) );
 }

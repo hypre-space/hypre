@@ -1,0 +1,556 @@
+<html><head><TITLE>Table of Contents</TITLE></head><BODY>
+
+<H1>Table of contents</H1>
+<H2>General</H2>
+<UL>
+<LI>
+<A HREF="index.html"><IT>hypre</IT> Reference Manual</A> <I>
+</I>
+<UL>
+<LI>
+<A HREF="MatricesandVectors.html">Matrices and Vectors</A> <I>
+</I>
+<UL>
+<LI>
+<A HREF="IJParCSRMatrix.html">IJParCSR Matrix</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="IJParCSRVector.html">IJParCSR Vector</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="MatrixandVectorBuildingInterfacesConceptualInterfaces.html">Matrix and Vector Building Interfaces (Conceptual Interfaces)</A> <I>
+</I>
+<UL>
+<LI>
+<A HREF="IJMatrixBuilder.html">IJ Matrix Builder</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="IJVectorBuilder.html">IJ Vector Builder</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="OperatorInterface.html">Operator Interface</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRSolvers.html">ParCSR Solvers</A> <I>Linear solvers for sparse matrix systems</I>
+<UL>
+<LI>
+<A HREF="ParCSRBoomerAMGSolver.html">ParCSR BoomerAMG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRDiagScaleSolver.html">ParCSRDiagScale Solver</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="PreconditionedSolvers.html">Preconditioned Solvers</A> <I>
+</I>
+<UL>
+<LI>
+<A HREF="GMRESPreconditionedSolver.html">GMRES Preconditioned Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="PCGPreconditionedSolver.html">PCG Preconditioned Solver</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="PreconditionedSolverInterface.html">PreconditionedSolver Interface</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SolverInterface.html">Solver Interface</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="VectorInterface.html">Vector Interface</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+</UL>
+<H2>Functions, Macros</H2>
+<UL>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.22">bHYPRE_BoomerAMG__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.23">bHYPRE_BoomerAMG__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.4">bHYPRE_BoomerAMG__create</A> <I>
+Constructor function for the class</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.16">bHYPRE_BoomerAMG_Apply</A> <I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.14">bHYPRE_BoomerAMG_GetDoubleValue</A> <I>
+Get the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.13">bHYPRE_BoomerAMG_GetIntValue</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.20">bHYPRE_BoomerAMG_GetNumIterations</A> <I>
+(Optional) Return the number of iterations taken</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.21">bHYPRE_BoomerAMG_GetRelResidualNorm</A> <I>
+(Optional) Return the norm of the relative residual</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.5">bHYPRE_BoomerAMG_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.11">bHYPRE_BoomerAMG_SetDoubleArray1Parameter</A> <I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.12">bHYPRE_BoomerAMG_SetDoubleArray2Parameter</A> <I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.7">bHYPRE_BoomerAMG_SetDoubleParameter</A> <I>
+Set the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.9">bHYPRE_BoomerAMG_SetIntArray1Parameter</A> <I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.10">bHYPRE_BoomerAMG_SetIntArray2Parameter</A> <I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.6">bHYPRE_BoomerAMG_SetIntParameter</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><A HREF="bHYPRE_BoomerAMG_SetLogging.html">bHYPRE_BoomerAMG_SetLogging</A> <I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.19">bHYPRE_BoomerAMG_SetMaxIterations</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.17">bHYPRE_BoomerAMG_SetOperator</A> <I>
+Set the operator for the linear system being solved</I>
+<LI><A HREF="bHYPRE_BoomerAMG_SetPrintLevel.html">bHYPRE_BoomerAMG_SetPrintLevel</A> <I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.8">bHYPRE_BoomerAMG_SetStringParameter</A> <I>
+Set the string parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.18">bHYPRE_BoomerAMG_SetTolerance</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.15">bHYPRE_BoomerAMG_Setup</A> <I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.23">bHYPRE_GMRES__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.24">bHYPRE_GMRES__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.4">bHYPRE_GMRES__create</A> <I>
+Constructor function for the class</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.16">bHYPRE_GMRES_Apply</A> <I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.14">bHYPRE_GMRES_GetDoubleValue</A> <I>
+Get the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.13">bHYPRE_GMRES_GetIntValue</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.20">bHYPRE_GMRES_GetNumIterations</A> <I>
+(Optional) Return the number of iterations taken</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.21">bHYPRE_GMRES_GetRelResidualNorm</A> <I>
+(Optional) Return the norm of the relative residual</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.5">bHYPRE_GMRES_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.11">bHYPRE_GMRES_SetDoubleArray1Parameter</A> <I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.12">bHYPRE_GMRES_SetDoubleArray2Parameter</A> <I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.7">bHYPRE_GMRES_SetDoubleParameter</A> <I>
+Set the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.9">bHYPRE_GMRES_SetIntArray1Parameter</A> <I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.10">bHYPRE_GMRES_SetIntArray2Parameter</A> <I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.6">bHYPRE_GMRES_SetIntParameter</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><A HREF="bHYPRE_GMRES_SetLogging.html">bHYPRE_GMRES_SetLogging</A> <I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.19">bHYPRE_GMRES_SetMaxIterations</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.17">bHYPRE_GMRES_SetOperator</A> <I>
+Set the operator for the linear system being solved</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.22">bHYPRE_GMRES_SetPreconditioner</A> <I>
+Set the preconditioner</I>
+<LI><A HREF="bHYPRE_GMRES_SetPrintLevel.html">bHYPRE_GMRES_SetPrintLevel</A> <I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.8">bHYPRE_GMRES_SetStringParameter</A> <I>
+Set the string parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.18">bHYPRE_GMRES_SetTolerance</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="GMRESPreconditionedSolver.html#DOC.8.2.15">bHYPRE_GMRES_Setup</A> <I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<LI><!2><A HREF="IJMatrixBuilder.html#DOC.1.1.11">bHYPRE_IJBuildMatrix__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="IJMatrixBuilder.html#DOC.1.1.12">bHYPRE_IJBuildMatrix__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_AddToValues.html">bHYPRE_IJBuildMatrix_AddToValues</A> <I>
+Adds to values for <TT>nrows</tt> of the matrix</I>
+<LI><!2><A HREF="IJMatrixBuilder.html#DOC.1.1.9">bHYPRE_IJBuildMatrix_GetLocalRange</A> <I>
+Gets range of rows owned by this processor and range of
+column partitioning for this processor</I>
+<LI><!2><A HREF="IJMatrixBuilder.html#DOC.1.1.10">bHYPRE_IJBuildMatrix_GetRowCounts</A> <I>
+Gets number of nonzeros elements for <TT>nrows</tt> rows
+specified in <TT>rows</tt> and returns them in <TT>ncols</tt>,
+which needs to be allocated by the user</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_GetValues.html">bHYPRE_IJBuildMatrix_GetValues</A> <I>
+Gets values for <TT>nrows</tt> rows or partial rows of the
+matrix</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_Print.html">bHYPRE_IJBuildMatrix_Print</A> <I>
+Print the matrix to file</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_Read.html">bHYPRE_IJBuildMatrix_Read</A> <I>
+Read the matrix from file</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_SetLocalRange.html">bHYPRE_IJBuildMatrix_SetLocalRange</A> <I>
+Set the local range for a matrix object</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_SetRowSizes.html">bHYPRE_IJBuildMatrix_SetRowSizes</A> <I>
+(Optional) Set the max number of nonzeros to expect in each
+row</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix_SetValues.html">bHYPRE_IJBuildMatrix_SetValues</A> <I>
+Sets values for <TT>nrows</tt> of the matrix</I>
+<LI><!2><A HREF="IJVectorBuilder.html#DOC.1.2.9">bHYPRE_IJBuildVector__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="IJVectorBuilder.html#DOC.1.2.10">bHYPRE_IJBuildVector__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><A HREF="bHYPRE_IJBuildVector_AddToValues.html">bHYPRE_IJBuildVector_AddToValues</A> <I>
+Adds to values in vector</I>
+<LI><!2><A HREF="IJVectorBuilder.html#DOC.1.2.8">bHYPRE_IJBuildVector_GetLocalRange</A> <I>
+Returns range of the part of the vector owned by this
+processor</I>
+<LI><A HREF="bHYPRE_IJBuildVector_GetValues.html">bHYPRE_IJBuildVector_GetValues</A> <I>
+Gets values in vector</I>
+<LI><A HREF="bHYPRE_IJBuildVector_Print.html">bHYPRE_IJBuildVector_Print</A> <I>
+Print the vector to file</I>
+<LI><A HREF="bHYPRE_IJBuildVector_Read.html">bHYPRE_IJBuildVector_Read</A> <I>
+Read the vector from file</I>
+<LI><A HREF="bHYPRE_IJBuildVector_SetLocalRange.html">bHYPRE_IJBuildVector_SetLocalRange</A> <I>
+Set the local range for a vector object</I>
+<LI><A HREF="bHYPRE_IJBuildVector_SetValues.html">bHYPRE_IJBuildVector_SetValues</A> <I>
+Sets values in vector</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.29">bHYPRE_IJParCSRMatrix__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.30">bHYPRE_IJParCSRMatrix__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.13">bHYPRE_IJParCSRMatrix__create</A> <I>
+Constructor function for the class</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_AddToValues.html">bHYPRE_IJParCSRMatrix_AddToValues</A> <I>
+Adds to values for <TT>nrows</tt> of the matrix</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.28">bHYPRE_IJParCSRMatrix_Apply</A> <I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_Assemble.html">bHYPRE_IJParCSRMatrix_Assemble</A> <I>
+Finalize the construction of an object before using, either
+for the first time or on subsequent uses</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.26">bHYPRE_IJParCSRMatrix_GetDoubleValue</A> <I>
+Get the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.25">bHYPRE_IJParCSRMatrix_GetIntValue</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.16">bHYPRE_IJParCSRMatrix_GetLocalRange</A> <I>
+Gets range of rows owned by this processor and range of
+column partitioning for this processor</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_GetObject.html">bHYPRE_IJParCSRMatrix_GetObject</A> <I>
+The problem definition interface is a <IT>builder</IT> that
+creates an object that contains the problem definition
+information, e</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_GetRow.html">bHYPRE_IJParCSRMatrix_GetRow</A> <I>
+The GetRow method will allocate space for its two output
+arrays on the first call</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.17">bHYPRE_IJParCSRMatrix_GetRowCounts</A> <I>
+Gets number of nonzeros elements for <TT>nrows</tt> rows
+specified in <TT>rows</tt> and returns them in <TT>ncols</tt>,
+which needs to be allocated by the user</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_GetValues.html">bHYPRE_IJParCSRMatrix_GetValues</A> <I>
+Gets values for <TT>nrows</tt> rows or partial rows of the
+matrix</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.15">bHYPRE_IJParCSRMatrix_Initialize</A> <I>
+Prepare an object for setting coefficient values, whether for
+the first time or subsequently</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_Print.html">bHYPRE_IJParCSRMatrix_Print</A> <I>
+Print the matrix to file</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_Read.html">bHYPRE_IJParCSRMatrix_Read</A> <I>
+Read the matrix from file</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.14">bHYPRE_IJParCSRMatrix_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_SetDiagOffdSizes.html">bHYPRE_IJParCSRMatrix_SetDiagOffdSizes</A> <I>
+(Optional) Set the max number of nonzeros to expect in each
+row of the diagonal and off-diagonal blocks</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.23">bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter</A> <I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.24">bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter</A> <I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.19">bHYPRE_IJParCSRMatrix_SetDoubleParameter</A> <I>
+Set the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.21">bHYPRE_IJParCSRMatrix_SetIntArray1Parameter</A> <I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.22">bHYPRE_IJParCSRMatrix_SetIntArray2Parameter</A> <I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.18">bHYPRE_IJParCSRMatrix_SetIntParameter</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_SetLocalRange.html">bHYPRE_IJParCSRMatrix_SetLocalRange</A> <I>
+Set the local range for a matrix object</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_SetRowSizes.html">bHYPRE_IJParCSRMatrix_SetRowSizes</A> <I>
+(Optional) Set the max number of nonzeros to expect in each
+row</I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.20">bHYPRE_IJParCSRMatrix_SetStringParameter</A> <I>
+Set the string parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="IJParCSRMatrix.html#DOC.4.1.27">bHYPRE_IJParCSRMatrix_Setup</A> <I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix_SetValues.html">bHYPRE_IJParCSRMatrix_SetValues</A> <I>
+Sets values for <TT>nrows</tt> of the matrix</I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.20">bHYPRE_IJParCSRVector__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.21">bHYPRE_IJParCSRVector__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.11">bHYPRE_IJParCSRVector__create</A> <I>
+Constructor function for the class</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_AddToValues.html">bHYPRE_IJParCSRVector_AddToValues</A> <I>
+Adds to values in vector</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_Assemble.html">bHYPRE_IJParCSRVector_Assemble</A> <I>
+Finalize the construction of an object before using, either
+for the first time or on subsequent uses</I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.16">bHYPRE_IJParCSRVector_Axpy</A> <I>
+Add <TT>a</tt>*<TT>x</tt> to <TT>self</tt></I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.12">bHYPRE_IJParCSRVector_Clear</A> <I>
+Set <TT>self</tt> to 0</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_Clone.html">bHYPRE_IJParCSRVector_Clone</A> <I>
+Create an <TT>x</tt> compatible with <TT>self</tt></I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.13">bHYPRE_IJParCSRVector_Copy</A> <I>
+Copy x into <TT>self</tt></I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.15">bHYPRE_IJParCSRVector_Dot</A> <I>
+Compute <TT>d</tt>, the inner-product of <TT>self</tt> and <TT>x</tt></I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.19">bHYPRE_IJParCSRVector_GetLocalRange</A> <I>
+Returns range of the part of the vector owned by this
+processor</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_GetObject.html">bHYPRE_IJParCSRVector_GetObject</A> <I>
+The problem definition interface is a <IT>builder</IT> that
+creates an object that contains the problem definition
+information, e</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_GetValues.html">bHYPRE_IJParCSRVector_GetValues</A> <I>
+Gets values in vector</I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.18">bHYPRE_IJParCSRVector_Initialize</A> <I>
+Prepare an object for setting coefficient values, whether for
+the first time or subsequently</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_Print.html">bHYPRE_IJParCSRVector_Print</A> <I>
+Print the vector to file</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_Read.html">bHYPRE_IJParCSRVector_Read</A> <I>
+Read the vector from file</I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.14">bHYPRE_IJParCSRVector_Scale</A> <I>
+Scale <TT>self</tt> by <TT>a</tt></I>
+<LI><!2><A HREF="IJParCSRVector.html#DOC.4.2.17">bHYPRE_IJParCSRVector_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_SetLocalRange.html">bHYPRE_IJParCSRVector_SetLocalRange</A> <I>
+Set the local range for a vector object</I>
+<LI><A HREF="bHYPRE_IJParCSRVector_SetValues.html">bHYPRE_IJParCSRVector_SetValues</A> <I>
+Sets values in vector</I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.14">bHYPRE_Operator__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.15">bHYPRE_Operator__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.13">bHYPRE_Operator_Apply</A> <I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.11">bHYPRE_Operator_GetDoubleValue</A> <I>
+Get the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.10">bHYPRE_Operator_GetIntValue</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.2">bHYPRE_Operator_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.8">bHYPRE_Operator_SetDoubleArray1Parameter</A> <I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.9">bHYPRE_Operator_SetDoubleArray2Parameter</A> <I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.4">bHYPRE_Operator_SetDoubleParameter</A> <I>
+Set the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.6">bHYPRE_Operator_SetIntArray1Parameter</A> <I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.7">bHYPRE_Operator_SetIntArray2Parameter</A> <I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.3">bHYPRE_Operator_SetIntParameter</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.5">bHYPRE_Operator_SetStringParameter</A> <I>
+Set the string parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="OperatorInterface.html#DOC.2.12">bHYPRE_Operator_Setup</A> <I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.22">bHYPRE_ParCSRDiagScale__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.23">bHYPRE_ParCSRDiagScale__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.4">bHYPRE_ParCSRDiagScale__create</A> <I>
+Constructor function for the class</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.16">bHYPRE_ParCSRDiagScale_Apply</A> <I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.14">bHYPRE_ParCSRDiagScale_GetDoubleValue</A> <I>
+Get the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.13">bHYPRE_ParCSRDiagScale_GetIntValue</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.20">bHYPRE_ParCSRDiagScale_GetNumIterations</A> <I>
+(Optional) Return the number of iterations taken</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.21">bHYPRE_ParCSRDiagScale_GetRelResidualNorm</A> <I>
+(Optional) Return the norm of the relative residual</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.5">bHYPRE_ParCSRDiagScale_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.11">bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter</A> <I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.12">bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter</A> <I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.7">bHYPRE_ParCSRDiagScale_SetDoubleParameter</A> <I>
+Set the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.9">bHYPRE_ParCSRDiagScale_SetIntArray1Parameter</A> <I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.10">bHYPRE_ParCSRDiagScale_SetIntArray2Parameter</A> <I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.6">bHYPRE_ParCSRDiagScale_SetIntParameter</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><A HREF="bHYPRE_ParCSRDiagScale_SetLogging.html">bHYPRE_ParCSRDiagScale_SetLogging</A> <I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.19">bHYPRE_ParCSRDiagScale_SetMaxIterations</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.17">bHYPRE_ParCSRDiagScale_SetOperator</A> <I>
+Set the operator for the linear system being solved</I>
+<LI><A HREF="bHYPRE_ParCSRDiagScale_SetPrintLevel.html">bHYPRE_ParCSRDiagScale_SetPrintLevel</A> <I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.8">bHYPRE_ParCSRDiagScale_SetStringParameter</A> <I>
+Set the string parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.18">bHYPRE_ParCSRDiagScale_SetTolerance</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="ParCSRDiagScaleSolver.html#DOC.6.1.15">bHYPRE_ParCSRDiagScale_Setup</A> <I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.23">bHYPRE_PCG__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.24">bHYPRE_PCG__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.4">bHYPRE_PCG__create</A> <I>
+Constructor function for the class</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.16">bHYPRE_PCG_Apply</A> <I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.14">bHYPRE_PCG_GetDoubleValue</A> <I>
+Get the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.13">bHYPRE_PCG_GetIntValue</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.20">bHYPRE_PCG_GetNumIterations</A> <I>
+(Optional) Return the number of iterations taken</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.21">bHYPRE_PCG_GetRelResidualNorm</A> <I>
+(Optional) Return the norm of the relative residual</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.5">bHYPRE_PCG_SetCommunicator</A> <I>
+Set the MPI Communicator</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.11">bHYPRE_PCG_SetDoubleArray1Parameter</A> <I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.12">bHYPRE_PCG_SetDoubleArray2Parameter</A> <I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.7">bHYPRE_PCG_SetDoubleParameter</A> <I>
+Set the double parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.9">bHYPRE_PCG_SetIntArray1Parameter</A> <I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.10">bHYPRE_PCG_SetIntArray2Parameter</A> <I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.6">bHYPRE_PCG_SetIntParameter</A> <I>
+Set the int parameter associated with <TT>name</tt></I>
+<LI><A HREF="bHYPRE_PCG_SetLogging.html">bHYPRE_PCG_SetLogging</A> <I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.19">bHYPRE_PCG_SetMaxIterations</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.17">bHYPRE_PCG_SetOperator</A> <I>
+Set the operator for the linear system being solved</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.22">bHYPRE_PCG_SetPreconditioner</A> <I>
+Set the preconditioner</I>
+<LI><A HREF="bHYPRE_PCG_SetPrintLevel.html">bHYPRE_PCG_SetPrintLevel</A> <I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.8">bHYPRE_PCG_SetStringParameter</A> <I>
+Set the string parameter associated with <TT>name</tt></I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.18">bHYPRE_PCG_SetTolerance</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="PCGPreconditionedSolver.html#DOC.8.1.15">bHYPRE_PCG_Setup</A> <I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<LI><!2><A HREF="PreconditionedSolverInterface.html#DOC.7.3">bHYPRE_PreconditionedSolver__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="PreconditionedSolverInterface.html#DOC.7.4">bHYPRE_PreconditionedSolver__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="PreconditionedSolverInterface.html#DOC.7.2">bHYPRE_PreconditionedSolver_SetPreconditioner</A> <I>
+Set the preconditioner</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.9">bHYPRE_Solver__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.10">bHYPRE_Solver__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.7">bHYPRE_Solver_GetNumIterations</A> <I>
+(Optional) Return the number of iterations taken</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.8">bHYPRE_Solver_GetRelResidualNorm</A> <I>
+(Optional) Return the norm of the relative residual</I>
+<LI><A HREF="bHYPRE_Solver_SetLogging.html">bHYPRE_Solver_SetLogging</A> <I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.6">bHYPRE_Solver_SetMaxIterations</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.4">bHYPRE_Solver_SetOperator</A> <I>
+Set the operator for the linear system being solved</I>
+<LI><A HREF="bHYPRE_Solver_SetPrintLevel.html">bHYPRE_Solver_SetPrintLevel</A> <I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
+<LI><!2><A HREF="SolverInterface.html#DOC.5.5">bHYPRE_Solver_SetTolerance</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.8">bHYPRE_Vector__cast</A> <I>
+Cast method for interface and class type conversions</I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.9">bHYPRE_Vector__cast2</A> <I>
+String cast method for interface and class type conversions</I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.7">bHYPRE_Vector_Axpy</A> <I>
+Add <TT>a</tt>*<TT>x</tt> to <TT>self</tt></I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.3">bHYPRE_Vector_Clear</A> <I>
+Set <TT>self</tt> to 0</I>
+<LI><A HREF="bHYPRE_Vector_Clone.html">bHYPRE_Vector_Clone</A> <I>
+Create an <TT>x</tt> compatible with <TT>self</tt></I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.4">bHYPRE_Vector_Copy</A> <I>
+Copy x into <TT>self</tt></I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.6">bHYPRE_Vector_Dot</A> <I>
+Compute <TT>d</tt>, the inner-product of <TT>self</tt> and <TT>x</tt></I>
+<LI><!2><A HREF="VectorInterface.html#DOC.3.5">bHYPRE_Vector_Scale</A> <I>
+Scale <TT>self</tt> by <TT>a</tt></I>
+</UL>
+<H2>Variables</H2>
+<UL>
+<LI><A HREF="bHYPRE_BoomerAMG__object.html">bHYPRE_BoomerAMG__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_GMRES__object.html">bHYPRE_GMRES__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_IJBuildMatrix__object.html">bHYPRE_IJBuildMatrix__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_IJBuildVector__object.html">bHYPRE_IJBuildVector__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_IJParCSRMatrix__object.html">bHYPRE_IJParCSRMatrix__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_IJParCSRVector__object.html">bHYPRE_IJParCSRVector__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_Operator__object.html">bHYPRE_Operator__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_ParCSRDiagScale__object.html">bHYPRE_ParCSRDiagScale__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_PCG__object.html">bHYPRE_PCG__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_PreconditionedSolver__object.html">bHYPRE_PreconditionedSolver__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_Solver__object.html">bHYPRE_Solver__object</A> <I>
+Symbol "bHYPRE</I>
+<LI><A HREF="bHYPRE_Vector__object.html">bHYPRE_Vector__object</A> <I>
+Symbol "bHYPRE</I>
+</UL>
+<I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

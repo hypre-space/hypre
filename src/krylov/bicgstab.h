@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -82,11 +82,8 @@ typedef struct
   int (*ScaleVector)( double alpha , void *x );
   int (*Axpy)( double alpha , void *x , void *y );
   int (*CommInfo)( void *A , int *my_id , int *num_procs );
-  int (*IdentitySetup)( void *vdata , void *A , void *b , void *x );
-  int (*Identity)( void *vdata , void *A , void *b , void *x );
-
-   int    (*precond)();
-   int    (*precond_setup)();
+  int (*precond_setup)();
+  int (*precond)();
 
 } hypre_BiCGSTABFunctions;
 
@@ -99,7 +96,9 @@ typedef struct
    int      min_iter;
    int      max_iter;
    int      stop_crit;
+   int      converged;
    double   tol;
+   double   cf_tol;
    double   rel_residual_norm;
 
    void  *A;
@@ -120,6 +119,7 @@ typedef struct
  
    /* additional log info (logged when `logging' > 0) */
    int      logging;
+   int      print_level;
    double  *norms;
    char    *log_file_name;
 
@@ -154,8 +154,8 @@ extern "C" {
       int (*ScaleVector)( double alpha , void *x ),
       int (*Axpy)( double alpha , void *x , void *y ),
       int (*CommInfo)( void *A , int *my_id , int *num_procs ),
-      int    (*precond)(),
-      int    (*precond_setup)()
+      int (*PrecondSetup) (void *vdata, void *A, void *b, void *x ),
+      int (*Precond)  ( void *vdata, void *A, void *b, void *x )
       );
 
 

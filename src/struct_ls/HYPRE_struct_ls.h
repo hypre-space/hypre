@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.7 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -15,7 +15,6 @@
 #ifndef HYPRE_STRUCT_LS_HEADER
 #define HYPRE_STRUCT_LS_HEADER
 
-#include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 #include "HYPRE_struct_mv.h"
 
@@ -203,6 +202,12 @@ int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  int                relax_type);
 
 /**
+ * (Optional) Set type of code used for coarse operator.
+ **/
+int HYPRE_StructPFMGSetRAPType(HYPRE_StructSolver solver,
+                               int                rap_type);
+
+/**
  * (Optional) Set number of pre-relaxation sweeps.
  **/
 int HYPRE_StructPFMGSetNumPreRelax(HYPRE_StructSolver solver,
@@ -231,6 +236,12 @@ int HYPRE_StructPFMGSetDxyz(HYPRE_StructSolver  solver,
  **/
 int HYPRE_StructPFMGSetLogging(HYPRE_StructSolver solver,
                                int                logging);
+
+/**
+ * (Optional) To allow printing to the screen .
+ **/
+int HYPRE_StructPFMGSetPrintLevel(HYPRE_StructSolver solver,
+                                  int                print_level);
 
 /**
  * Return the number of iterations taken.
@@ -334,6 +345,12 @@ int HYPRE_StructSMGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
 
 /**
+ * (Optional) To allow printing to the screen .
+ **/
+int HYPRE_StructSMGSetPrintLevel(HYPRE_StructSolver solver,
+                                  int                print_level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
@@ -420,6 +437,13 @@ int HYPRE_StructPCGSetPrecond(HYPRE_StructSolver         solver,
 int HYPRE_StructPCGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
 
+
+/**
+ * (Optional) Set the print level
+ **/
+int HYPRE_StructPCGSetPrintLevel(HYPRE_StructSolver solver,
+                              int                level);
+
 /**
  * Return the number of iterations taken.
  **/
@@ -431,6 +455,12 @@ int HYPRE_StructPCGGetNumIterations(HYPRE_StructSolver  solver,
  **/
 int HYPRE_StructPCGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 double             *norm);
+
+/**
+ * Return the residual.
+ **/
+int HYPRE_StructPCGGetResidual(HYPRE_StructSolver  solver,
+                              void  **residual);
 
 /**
  * Setup routine for diagonal preconditioning.
@@ -523,6 +553,14 @@ int
 HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
                              int                logging );
 
+
+/**
+ * (Optional) Set the print level
+ **/
+int
+HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver,
+                             int                level );
+
 /**
  * Return the number of iterations taken.
  **/
@@ -537,6 +575,113 @@ int
 HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                                double             *norm   );
 
+/**
+ * Return the residual.
+ **/
+int
+HYPRE_StructGMRESGetResidual( HYPRE_StructSolver  solver,
+                             void   **residual);
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Struct BiCGSTAB Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int
+HYPRE_StructBiCGSTABCreate( MPI_Comm comm, HYPRE_StructSolver *solver );
+
+
+/**
+ * Destroy a solver object.
+ **/
+int 
+HYPRE_StructBiCGSTABDestroy( HYPRE_StructSolver solver );
+
+
+/**
+ * set up
+ **/
+int 
+HYPRE_StructBiCGSTABSetup( HYPRE_StructSolver solver,
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * Solve the system.
+ **/
+int 
+HYPRE_StructBiCGSTABSolve( HYPRE_StructSolver solver,
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int
+HYPRE_StructBiCGSTABSetTol( HYPRE_StructSolver solver,
+                         double             tol    );
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int
+HYPRE_StructBiCGSTABSetMaxIter( HYPRE_StructSolver solver,
+                             int                max_iter );
+
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int
+HYPRE_StructBiCGSTABSetPrecond( HYPRE_StructSolver         solver,
+                           HYPRE_PtrToStructSolverFcn precond,
+                           HYPRE_PtrToStructSolverFcn precond_setup,
+                             HYPRE_StructSolver         precond_solver );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int
+HYPRE_StructBiCGSTABSetLogging( HYPRE_StructSolver solver,
+                             int                logging );
+
+/**
+ * (Optional) Set the print level
+ **/
+int
+HYPRE_StructBiCGSTABSetPrintLevel( HYPRE_StructSolver solver,
+                             int                level );
+/**
+ * Return the number of iterations taken.
+ **/
+int
+HYPRE_StructBiCGSTABGetNumIterations( HYPRE_StructSolver  solver,
+                                   int                *num_iterations );
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int
+HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                               double             *norm   );
+
+/**
+ * Return the residual.
+ **/
+int
+HYPRE_StructBiCGSTABGetResidual( HYPRE_StructSolver  solver,
+                                void  **residual);
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -592,6 +737,10 @@ int HYPRE_StructSparseMSGSetNumFineRelax(HYPRE_StructSolver solver,
 int HYPRE_StructSparseMSGSetLogging(HYPRE_StructSolver solver,
                                     int                logging);
 
+int HYPRE_StructSparseMSGSetPrintLevel(HYPRE_StructSolver solver,
+                                          int         print_level);
+
+
 int HYPRE_StructSparseMSGGetNumIterations(HYPRE_StructSolver  solver,
                                           int                *num_iterations);
 
@@ -635,8 +784,17 @@ int HYPRE_StructHybridSetPCGMaxIter(HYPRE_StructSolver solver,
 int HYPRE_StructHybridSetTwoNorm(HYPRE_StructSolver solver,
                                  int                two_norm);
 
+int HYPRE_StructHybridSetStopCrit(HYPRE_StructSolver solver,
+                                 int                stop_crit);
+
 int HYPRE_StructHybridSetRelChange(HYPRE_StructSolver solver,
                                    int                rel_change);
+
+int HYPRE_StructHybridSetSolverType(HYPRE_StructSolver solver,
+                                    int                solver_type);
+
+int HYPRE_StructHybridSetKDim(HYPRE_StructSolver solver,
+                              int k_dim);
 
 int HYPRE_StructHybridSetPrecond(HYPRE_StructSolver         solver,
                                  HYPRE_PtrToStructSolverFcn precond,
@@ -645,6 +803,9 @@ int HYPRE_StructHybridSetPrecond(HYPRE_StructSolver         solver,
 
 int HYPRE_StructHybridSetLogging(HYPRE_StructSolver solver,
                                  int                logging);
+
+int HYPRE_StructHybridSetPrintLevel(HYPRE_StructSolver solver,
+                                 int               print_level);
 
 int HYPRE_StructHybridGetNumIterations(HYPRE_StructSolver  solver,
                                        int                *num_its);

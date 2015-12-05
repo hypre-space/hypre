@@ -5,6 +5,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int dgemm_(char *transa, char *transb, integer *m, integer *
 	n, integer *k, doublereal *alpha, doublereal *a, integer *lda, 
@@ -20,9 +21,9 @@
     static logical nota, notb;
     static doublereal temp;
     static integer i, j, l;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer nrowa, nrowb;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
 
 
 /*  Purpose   
@@ -191,8 +192,8 @@
 #define B(I,J) b[(I)-1 + ((J)-1)* ( *ldb)]
 #define C(I,J) c[(I)-1 + ((J)-1)* ( *ldc)]
 
-    nota = lsame_(transa, "N");
-    notb = lsame_(transb, "N");
+    nota = hypre_lsame_(transa, "N");
+    notb = hypre_lsame_(transb, "N");
     if (nota) {
 	nrowa = *m;
     } else {
@@ -207,9 +208,9 @@
 /*     Test the input parameters. */
 
     info = 0;
-    if (! nota && ! lsame_(transa, "C") && ! lsame_(transa, "T")) {
+    if (! nota && ! hypre_lsame_(transa, "C") && ! hypre_lsame_(transa, "T")) {
 	info = 1;
-    } else if (! notb && ! lsame_(transb, "C") && ! lsame_(transb, 
+    } else if (! notb && ! hypre_lsame_(transb, "C") && ! hypre_lsame_(transb, 
 	    "T")) {
 	info = 2;
     } else if (*m < 0) {
@@ -226,13 +227,13 @@
 	info = 13;
     }
     if (info != 0) {
-	xerbla_("DGEMM ", &info);
+	hypre_xerbla_("DGEMM ", &info);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
-    if (*m == 0 || *n == 0 || (*alpha == 0. || *k == 0) && *beta == 1.) {
+    if (*m == 0 || *n == 0 || ((*alpha == 0. || *k == 0) && (*beta == 1.))) {
 	return 0;
     }
 

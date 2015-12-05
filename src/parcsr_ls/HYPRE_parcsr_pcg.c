@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -28,7 +28,8 @@ HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
       chance of name conflicts. */
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCreateVector,
+         hypre_CAlloc, hypre_ParKrylovFree, hypre_ParKrylovCommInfo,
+         hypre_ParKrylovCreateVector,
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
@@ -166,14 +167,27 @@ HYPRE_ParCSRPCGGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetPrintLevel
+ * an obsolete function; use HYPRE_PCG* functions instead
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRPCGSetPrintLevel( HYPRE_Solver solver,
+                              int level )
+{
+   return( HYPRE_PCGSetPrintLevel( solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetLogging
+ * an obsolete function; use HYPRE_PCG* functions instead
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_ParCSRPCGSetLogging( HYPRE_Solver solver,
-                           int                logging )
+                           int level )
 {
-   return( HYPRE_PCGSetLogging( solver, logging ) );
+   return( HYPRE_PCGSetLogging( solver, level ) );
 }
 
 /*--------------------------------------------------------------------------

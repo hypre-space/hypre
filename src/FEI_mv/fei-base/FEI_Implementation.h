@@ -1,19 +1,60 @@
 #ifndef _FEI_Implementation_h_
 #define _FEI_Implementation_h_
 
+class ESI_Broker;
+class Data;
+class LinearSystemCore;
+class SNL_FEI_Structure;
+class Filter;
+class CommUtils;
+
+#include "base/FEI_SNL.h"
+#include "base/fei_mpi.h"
+#include "base/feiArray.h"
+
 /**
 This is the (C++) user's point of interaction with the FEI implementation. The
 user will declare an instance of this class in their code, and call the public
 FEI functions on that instance. The functions implemented by this class are
 those in the abstract FEI declaration, plus possibly others. i.e., the functions
 provided by this class are a superset of those in the FEI specification.
+<p>
+This class takes, as a constructor argument, an ESI_Broker implementation which 
+may be either
+a "genuine" factory for ESI interface instances, or it may be a shell containing
+only an instance of a LinearSystemCore implementation or a FiniteElementData
+implementation. These are the abstract interfaces through which solver libraries
+may be coupled to this FEI implementation.<p>
+As of August 2001, the following solver implementations of these interfaces
+exist:<p>
+<ul>
+<li>LinearSystemCore:
+   <ul>
+   <li>Aztec
+   <li>HYPRE
+   <li>ISIS++
+   <li>PETSc
+   <li>Prometheus
+   <li>SPOOLES
+   </ul>
+<li>ESI_Broker (actual ESI implementations):
+   <ul>
+   <li>ISIS_ESI
+   <li>Trilinos
+   </ul>
+<li>FiniteElementData:
+   <ul>
+   <li>FETI
+   </ul>
+</ul>
+
  */
 
-class FEI_Implementation : public FEI {
+class FEI_Implementation : public FEI_SNL {
 
  public:
-  /** Constructor.
-      @param lsMgr an instance of an ESI_LSManager. (LSC_LSMgr can be used here,
+  /**  constructor.
+      @param broker an instance of an ESI_Broker. (LSC_Broker can be used here,
       it is a wrapper for the old LinearSystemCore.)
       @param comm MPI_Comm communicator
       @param masterRank The "master" mpi rank. Defaults to 0 if not supplied.
@@ -21,7 +62,7 @@ class FEI_Implementation : public FEI {
       will produce screen output if the parameter "outputLevel" is set to a
       value greater than 0 via a call to the parameters function.
   */
-   FEI_Implementation(ESI_LSManager* lsMgr, MPI_Comm comm,
+   FEI_Implementation(ESI_Broker* broker, MPI_Comm comm,
                       int masterRank=0);
 
    /** Destructor. */
@@ -58,6 +99,17 @@ class FEI_Implementation : public FEI {
    int initElem(GlobalID elemBlockID,
                 GlobalID elemID,
                 const GlobalID* elemConn);
+
+   int initSlaveVariable(GlobalID slaveNodeID, 
+			 int slaveFieldID,
+			 int offsetIntoSlaveField,
+			 int numMasterNodes,
+			 const GlobalID* masterNodeIDs,
+			 const int* masterFieldIDs,
+			 const double* weights,
+			 double rhsValue);
+
+   int deleteMultCRs();
 
    // identify sets of shared nodes
    int initSharedNodes(int numSharedNodes,
@@ -115,6 +167,7 @@ class FEI_Implementation : public FEI {
    // separately
    int resetMatrix(double s=0.0);
    int resetRHSVector(double s=0.0);
+   int resetInitialGuess(double s=0.0);
 
     int loadNodeBCs(int numNodes,
                     const GlobalID *nodeIDs,  
@@ -222,7 +275,12 @@ class FEI_Implementation : public FEI {
    int setRHSScalars(int numScalars,
                      const int* IDs,
                      const double* scalars);
-    
+
+   //indicate that the matrix/vectors can be finalized now. e.g., boundary-
+   //conditions enforced, etc., etc.
+
+   int loadComplete();
+
    //get residual norms
    int residualNorm(int whichNorm,
                     int numFields,
@@ -234,10 +292,7 @@ class FEI_Implementation : public FEI {
 
     // query iterations performed.
 
-   int iterations(int& itersTaken) const {
-      itersTaken = fei_[index_soln_fei_]->iterations();
-      return(0);
-   };
+   int iterations(int& itersTaken) const;
 
    int version(char*& versionString);
 
@@ -391,6 +446,10 @@ class FEI_Implementation : public FEI {
     int getNumBlockElemDOF(GlobalID blockID, int& DOFPerElem) const;
 
 
+    // return the parameters that have been set so far. The caller should
+    // NOT delete the paramStrings pointer.
+    int getParameters(int& numParams, char**& paramStrings);
+
     //And now a couple of non-FEI query functions that Sandia applications
     //need to augment the matrix-access functions. I (Alan Williams) will
     //argue to have these included in the FEI 2.1 specification update.
@@ -418,12 +477,43 @@ class FEI_Implementation : public FEI {
 		      int& numEqns,
 		      int* eqnNumbers);
 
+    /**Get the solution data for a particular field, on an arbitrary set of
+       nodes.
+       @param fieldID Input. field identifier for which solution data is being
+       requested.
+       @param numNodes Input. Length of the nodeIDs list.
+       @param nodeIDs Input. List specifying the nodes on which solution
+       data is being requested.
+       @param results Allocated by caller, but contents are output.
+       Solution data for the i-th node/element starts in position i*fieldSize,
+       where fieldSize is the number of scalar components that make up 
+       'fieldID'.
+       @return error-code 0 if successful
+    */
+    int getNodalFieldSolution(int fieldID,
+			      int numNodes,
+			      const GlobalID* nodeIDs,
+			      double* results);
+
+    int getNumLocalNodes(int& numNodes);
+
+    int getLocalNodeIDList(int& numNodes,
+			   GlobalID* nodeIDs,
+			   int lenNodeIDs);
+
+    int putNodalFieldData(int fieldID,
+			  int numNodes,
+			  const GlobalID* nodeIDs,
+			  const double* nodeData);
+
   //============================================================================
   private: //functions
 
+    void deleteIDs();
+    void deleteRHSScalars();
+
     int allocateInternalFEIs();
-    int allocateInternalFEIs(int numMatrices, int* matrixIDs,
-                              int* numRHSs, int** rhsIDs);
+
     void debugOut(const char* msg);
     void debugOut(const char* msg, int whichFEI);
 
@@ -440,16 +530,22 @@ class FEI_Implementation : public FEI {
   //============================================================================
   private: //member variables
 
-    ESI_LSManager* constructorLsMgr_;
-    ESI_LSManager** lsMgr_;
-    LinearSystemCore** linSysCore_;
+    ESI_Broker* broker_;
+    LinearSystemCore* linSysCore_;
+    feiArray<LinearSystemCore*> lscArray_;
     bool haveESI_;
-    BASE_FEI** fei_;
+    bool haveLinSysCore_;
+    bool haveFEData_;
+    SNL_FEI_Structure* problemStructure_;
+    Filter** filter_;
+
+    CommUtils* commUtils_;
 
     int numInternalFEIs_;
     bool internalFEIsAllocated_;
 
     feiArray<int> feiIDs_;
+    feiArray<int> matrixIDs_;
     feiArray<int> numRHSIDs_;
     int** rhsIDs_;
 
@@ -460,8 +556,8 @@ class FEI_Implementation : public FEI {
     double** rhsScalars_;
     bool rhsScalarsSet_;
 
-    int index_soln_fei_;
-    int index_current_fei_;
+    int index_soln_filter_;
+    int index_current_filter_;
     int index_current_rhs_row_;
 
     int solveType_;
@@ -471,12 +567,12 @@ class FEI_Implementation : public FEI {
 
     bool aggregateSystemFormed_;
     int newMatrixDataLoaded_;
-    bool linearSystemFinalized_;
 
     Data *soln_fei_matrix_;
     Data *soln_fei_vector_;
 
     MPI_Comm comm_;
+
     int masterRank_;
     int localRank_;
     int numProcs_;
@@ -487,7 +583,9 @@ class FEI_Implementation : public FEI {
     char* debugFileName_;
     int solveCounter_;
     int debugOutput_;
-    FILE *debugFile_;
+    ostream* dbgOStreamPtr_;
+    bool dbgFileOpened_;
+    ofstream* dbgFStreamPtr_;
 
     double initTime_, loadTime_, solveTime_, solnReturnTime_;
 

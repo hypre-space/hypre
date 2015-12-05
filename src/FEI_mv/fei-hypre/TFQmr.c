@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -102,7 +100,7 @@ void * hypre_TFQmrCreate( )
 int hypre_TFQmrDestroy( void *tfqmr_vdata )
 {
    hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (tfqmr_data)
    {
@@ -173,7 +171,7 @@ int hypre_TFQmrSetup( void *tfqmr_vdata, void *A, void *b, void *x         )
    if ((tfqmr_data -> matvec_data) == NULL)
       (tfqmr_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -218,18 +216,16 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int               logging       = (tfqmr_data -> logging);
    double           *norms         = (tfqmr_data -> norms);
-   char             *log_file_name = (tfqmr_data -> log_file_name);
    
-   int               j, m, ierr=0, my_id, num_procs, iter, flag;
+   int               ierr=0, my_id, num_procs, iter;
    double            eta, theta, tau, rhom1, rho, dtmp, r_norm, b_norm;
-   double            rnbnd, etam1, thetam1, c, epsmac = 1.e-16, epsilon; 
+   double            rnbnd, etam1, thetam1, c, epsilon; 
    double            sigma, alpha, beta;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (tfqmr_data -> norms);
-      log_file_name  = (tfqmr_data -> log_file_name);
    }
 
    /* initialize work arrays */

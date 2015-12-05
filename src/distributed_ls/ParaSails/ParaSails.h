@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -51,7 +51,7 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
   double thresh, int num_levels);
 void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A, 
   double thresh_global, double thresh_local, int num_levels);
-void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
+int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
 void ParaSailsApply(ParaSails *ps, double *u, double *v);
 void ParaSailsApplyTrans(ParaSails *ps, double *u, double *v);
 double ParaSailsStatsPattern(ParaSails *ps, Matrix *A);

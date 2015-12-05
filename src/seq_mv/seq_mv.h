@@ -18,7 +18,7 @@ extern "C" {
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -45,6 +45,10 @@ typedef struct
    int      num_cols;
    int      num_nonzeros;
 
+  /* for compressing rows in matrix multiplication  */
+   int     *rownnz;
+   int      num_rownnz;
+
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    int      owns_data;
 
@@ -60,6 +64,8 @@ typedef struct
 #define hypre_CSRMatrixNumRows(matrix)      ((matrix) -> num_rows)
 #define hypre_CSRMatrixNumCols(matrix)      ((matrix) -> num_cols)
 #define hypre_CSRMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
+#define hypre_CSRMatrixRownnz(matrix)       ((matrix) -> rownnz)
+#define hypre_CSRMatrixNumRownnz(matrix)    ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)     ((matrix) -> owns_data)
 
 
@@ -98,7 +104,7 @@ typedef struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -140,7 +146,7 @@ typedef struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -184,7 +190,7 @@ typedef struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -208,6 +214,16 @@ typedef struct
    /* Does the Vector create/destroy `data'? */
    int      owns_data;
 
+   /* For multivectors...*/
+   int   num_vectors;  /* the above "size" is size of one vector */
+   int   multivec_storage_method;
+   /* ...if 0, store colwise v0[0], v0[1], ..., v1[0], v1[1], ... v2[0]... */
+   /* ...if 1, store rowwise v0[0], v1[0], ..., v0[1], v1[1], ... */
+   /* With colwise storage, vj[i] = data[ j*size + i]
+      With rowwise storage, vj[i] = data[ j + num_vectors*i] */
+   int  vecstride, idxstride;
+   /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+
 } hypre_Vector;
 
 /*--------------------------------------------------------------------------
@@ -217,8 +233,35 @@ typedef struct
 #define hypre_VectorData(vector)      ((vector) -> data)
 #define hypre_VectorSize(vector)      ((vector) -> size)
 #define hypre_VectorOwnsData(vector)  ((vector) -> owns_data)
+#define hypre_VectorNumVectors(vector) ((vector) -> num_vectors)
+#define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
+#define hypre_VectorVectorStride(vector) ((vector) -> vecstride )
+#define hypre_VectorIndexStride(vector) ((vector) -> idxstride )
 
 #endif
+
+/* csr_matop.c */
+hypre_CSRMatrix *hypre_CSRMatrixAdd( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixMultiply( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
+hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A , double tol );
+int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , int data );
+
+/* csr_matrix.c */
+hypre_CSRMatrix *hypre_CSRMatrixCreate( int num_rows , int num_cols , int num_nonzeros );
+int hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix );
+int hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix );
+int hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix , int owns_data );
+int hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix );
+hypre_CSRMatrix *hypre_CSRMatrixRead( char *file_name );
+int hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix , char *file_name );
+int hypre_CSRMatrixCopy( hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_data );
+
+/* csr_matvec.c */
+int hypre_CSRMatrixMatvec( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
+int hypre_CSRMatrixMatvecT( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
+
+/* genpart.c */
+int hypre_GeneratePartitioning( int length , int num_procs , int **part_ptr );
 
 /* HYPRE_csr_matrix.c */
 HYPRE_CSRMatrix HYPRE_CSRMatrixCreate( int num_rows , int num_cols , int *row_sizes );
@@ -226,6 +269,7 @@ int HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix );
 int HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix );
 HYPRE_CSRMatrix HYPRE_CSRMatrixRead( char *file_name );
 void HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix matrix , char *file_name );
+int HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix , int *num_rows );
 
 /* HYPRE_mapped_matrix.c */
 HYPRE_MappedMatrix HYPRE_MappedMatrixCreate( void );
@@ -257,27 +301,6 @@ int HYPRE_VectorInitialize( HYPRE_Vector vector );
 int HYPRE_VectorPrint( HYPRE_Vector vector , char *file_name );
 HYPRE_Vector HYPRE_VectorRead( char *file_name );
 
-/* csr_matop.c */
-hypre_CSRMatrix *hypre_CSRMatrixAdd( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-hypre_CSRMatrix *hypre_CSRMatrixMultiply( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A , double tol );
-
-/* csr_matrix.c */
-hypre_CSRMatrix *hypre_CSRMatrixCreate( int num_rows , int num_cols , int num_nonzeros );
-int hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix );
-int hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix );
-int hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix , int owns_data );
-hypre_CSRMatrix *hypre_CSRMatrixRead( char *file_name );
-int hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix , char *file_name );
-int hypre_CSRMatrixCopy( hypre_CSRMatrix *A , hypre_CSRMatrix *B , int copy_data );
-
-/* csr_matvec.c */
-int hypre_CSRMatrixMatvec( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
-int hypre_CSRMatrixMatvecT( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
-
-/* genpart.c */
-int hypre_GeneratePartitioning( int length , int num_procs , int **part_ptr );
-
 /* mapped_matrix.c */
 hypre_MappedMatrix *hypre_MappedMatrixCreate( void );
 int hypre_MappedMatrixDestroy( hypre_MappedMatrix *matrix );
@@ -304,6 +327,7 @@ int hypre_MultiblockMatrixSetSubmatrix( hypre_MultiblockMatrix *matrix , int j ,
 
 /* vector.c */
 hypre_Vector *hypre_SeqVectorCreate( int size );
+hypre_Vector *hypre_SeqMultiVectorCreate( int size , int num_vectors );
 int hypre_SeqVectorDestroy( hypre_Vector *vector );
 int hypre_SeqVectorInitialize( hypre_Vector *vector );
 int hypre_SeqVectorSetDataOwner( hypre_Vector *vector , int owns_data );

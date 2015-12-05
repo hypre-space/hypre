@@ -4,13 +4,12 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 
 #ifndef HYPRE_SSTRUCT_MV_HEADER
 #define HYPRE_SSTRUCT_MV_HEADER
 
-#include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_struct_mv.h"
@@ -168,6 +167,13 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * nbor\_part}.  For example, triple (1, 2, 0) means that indexes 0,
  * 1, and 2 on part {\tt part} map to indexes 1, 2, and 0 on part {\tt
  * nbor\_part}, respectively.
+ *
+ * NOTE: All parts related to each other via this routine must have an
+ * identical list of variables and variable types.  For example, if
+ * part 0 has only two variables on it, a cell centered variable and a
+ * node centered variable, and we declare part 1 to be a neighbor of
+ * part 0, then part 1 must also have only two variables on it, and
+ * they must be of type cell and node.
  **/
 int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int                part,
@@ -203,6 +209,11 @@ int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
                                  int                part,
                                  int               *periodic);
+/**
+ * Setting ghost in the sgrids.
+ **/
+int HYPRE_SStructGridSetNumGhost(HYPRE_SStructGrid grid,
+                                   int             *num_ghost);
 
 /*@}*/
 
@@ -295,6 +306,15 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                 *to_index,
                                  int                  to_var);
 
+/**
+ * It is used before AddEntries and Assemble
+ *  to compute the right ranks in the graph.
+ *  Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
+ *  default) or {\tt HYPRE\_PARCSR}.  
+ * 
+ **/
+  int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
+                                       int                 type);
 /**
  * Finalize the construction of the graph before using.
  **/
@@ -444,17 +464,34 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
 int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
- * Define symmetry properties of the matrix.  By default, matrices are
- * assumed to be nonsymmetric.  Significant storage savings can be
- * made if the matrix is symmetric.
+ * Define symmetry properties for the stencil entries in the matrix.
+ * The boolean argument {\tt symmetric} is applied to stencil entries
+ * on part {\tt part} that couple variable {\tt var} to variable {\tt
+ * to\_var}.  A value of -1 may be used for {\tt part}, {\tt var}, or
+ * {\tt to\_var} to specify ``all''.  For example, if {\tt part} and
+ * {\tt to\_var} are set to -1, then the boolean is applied to stencil
+ * entries on all parts that couple variable {\tt var} to all other
+ * variables.
+ * 
+ * By default, matrices are assumed to be nonsymmetric.  Significant
+ * storage savings can be made if the matrix is symmetric.
  **/
-int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix  matrix,
-                                    int                  symmetric);
+int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix matrix,
+                                    int                 part,
+                                    int                 var,
+                                    int                 to_var,
+                                    int                 symmetric);
+
+/**
+ * Define symmetry properties for all non-stencil matrix entries.
+ **/
+int HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
+                                      int                 symmetric);
 
 /**
  * Set the storage type of the matrix object to be constructed.
  * Currently, {\tt type} can be either {\tt HYPRE\_SSTRUCT} (the
- * default) or {\tt HYPRE\_PARCSR}.
+ * default), {\tt HYPRE\_STRUCT}, or {\tt HYPRE\_PARCSR}.
  *
  * @see HYPRE_SStructMatrixGetObject
  **/

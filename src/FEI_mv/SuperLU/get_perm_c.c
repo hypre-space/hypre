@@ -6,8 +6,14 @@
  *
  */
 #include "supermatrix.h"
-#include "util.h"
+#include "superlu_util.h"
 #include "colamd.h"
+
+/* local prototypes */
+void get_colamd ( const int m , const int n , const int nnz , int *colptr , int *rowind , int *perm_c );
+void getata ( const int m , const int n , const int nz , int *colptr , int *rowind , int *atanz , int **ata_colptr , int **ata_rowind );
+void a_plus_at ( const int n , const int nz , int *colptr , int *rowind , int *bnz , int **b_colptr , int **b_rowind );
+void get_perm_c ( int ispec , SuperMatrix *A , int *perm_c );
 
 extern int  genmmd_(int *, int *, int *, int *, int *, int *, int *, 
 		    int *, int *, int *, int *, int *);
@@ -350,7 +356,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  * A       (input) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of the linear equations is A->nrow. Currently, the type of A 
- *         can be: Stype = NC; Dtype = _D; Mtype = GE. In the future,
+ *         can be: Stype = NC; Dtype = D_D; Mtype = GE. In the future,
  *         more general A can be handled.
  *
  * perm_c  (output) int*
@@ -373,12 +379,12 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
     switch ( ispec ) {
         case 0: /* Natural ordering */
 	      for (i = 0; i < n; ++i) perm_c[i] = i;
-	      printf("Use natural column ordering.\n");
+	      /* printf("Use natural column ordering.\n");*/
 	      return;
         case 1: /* Minimum degree ordering on A'*A */
 	      getata(m, n, Astore->nnz, Astore->colptr, Astore->rowind,
 		     &bnz, &b_colptr, &b_rowind);
-	      printf("Use minimum degree ordering on A'*A.\n");
+	      /*printf("Use minimum degree ordering on A'*A.\n");*/
 	      t = SuperLU_timer_() - t;
 	      /*printf("Form A'*A time = %8.3f\n", t);*/
 	      break;
@@ -386,14 +392,14 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
 	      if ( m != n ) ABORT("Matrix is not square");
 	      a_plus_at(n, Astore->nnz, Astore->colptr, Astore->rowind,
 			&bnz, &b_colptr, &b_rowind);
-	      printf("Use minimum degree ordering on A'+A.\n");
+	      /*printf("Use minimum degree ordering on A'+A.\n");*/
 	      t = SuperLU_timer_() - t;
 	      /*printf("Form A'+A time = %8.3f\n", t);*/
 	      break;
         case 3: /* Approximate minimum degree column ordering. */
 	      get_colamd(m, n, Astore->nnz, Astore->colptr, Astore->rowind,
 			 perm_c);
-	      printf(".. Use approximate minimum degree column ordering.\n");
+	      /*printf(".. Use approximate minimum degree column ordering.\n");*/
 	      return; 
         default:
 	      ABORT("Invalid ISPEC");

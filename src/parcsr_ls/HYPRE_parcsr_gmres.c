@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -171,6 +171,17 @@ HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver,
                              int logging)
 {
    return( HYPRE_GMRESSetLogging( solver, logging ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESSetPrintLevel( HYPRE_Solver solver,
+                             int print_level)
+{
+   return( HYPRE_GMRESSetPrintLevel( solver, print_level ) );
 }
 
 /*--------------------------------------------------------------------------

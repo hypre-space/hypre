@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -26,13 +24,26 @@
  *
  *****************************************************************************/
 
+extern void *hypre_TFQmrCreate();
+extern int hypre_TFQmrDestroy(void *);
+extern int hypre_TFQmrSetup(void *, void *, void *, void *);
+extern int hypre_TFQmrSolve(void *, void *, void *, void *);
+extern int hypre_TFQmrSetTol(void *, double);
+extern int hypre_TFQmrSetMaxIter(void *, int);
+extern int hypre_TFQmrSetStopCrit(void *, int);
+extern int hypre_TFQmrSetPrecond(void *, int (*precond)(),
+                                 int (*precond_setup)(), void *);
+extern int hypre_TFQmrSetLogging(void *, int);
+extern int hypre_TFQmrGetNumIterations(void *, int *);
+extern int hypre_TFQmrGetFinalRelativeResidualNorm(void *, double *);
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRTFQmrCreate
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSRTFQmrCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_TFQmrCreate( ) );
+   *solver = (HYPRE_Solver) hypre_TFQmrCreate( );
 
    return 0;
 }
@@ -72,7 +83,7 @@ int HYPRE_ParCSRTFQmrSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
  * HYPRE_ParCSRTFQmrSetTol
  *--------------------------------------------------------------------------*/
 
-int HYPRE_ParCSRTFQmrSetTol( HYPRE_Solver solver, double tol    )
+int HYPRE_ParCSRTFQmrSetTol( HYPRE_Solver solver, double tol )
 {
    return( hypre_TFQmrSetTol( (void *) solver, tol ) );
 }

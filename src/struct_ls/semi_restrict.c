@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -64,13 +64,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
 
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-
+   hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
    int                     ierr = 0;
@@ -82,23 +76,12 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_CreateComputeInfo(grid, stencil,
-                        &send_boxes, &recv_boxes,
-                        &send_processes, &recv_processes,
-                        &indt_boxes, &dept_boxes);
-
-   hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
-   hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
-   hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
-   hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-
-   hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                          stride, stride,
-                          send_processes, recv_processes,
-                          indt_boxes, dept_boxes,
-                          stride, grid,
-                          hypre_StructVectorDataSpace(r), 1,
-                          &compute_pkg);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_ComputeInfoProjectSend(compute_info, findex, stride);
+   hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
+   hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
+   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(r), 1,
+                          grid, &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the restrict data structure
@@ -151,7 +134,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    int                     Ri;
    int                     ri;
    int                     rci;
-                         
+   int                     constant_coefficient;
+
    double                 *Rp0, *Rp1;
    double                 *rp, *rp0, *rp1;
    double                 *rcp;
@@ -180,6 +164,10 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
    stencil       = hypre_StructMatrixStencil(R);
    stencil_shape = hypre_StructStencilShape(stencil);
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(R);
+   assert( constant_coefficient==0 || constant_coefficient==1 );
+   /* ... if A has constant_coefficient==2, R has constant_coefficient==0 */
+   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( r );
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -214,7 +202,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
       }
 
       fi = 0;
-      hypre_ForBoxArrayI(ci, cgrid_boxes)
+      hypre_ForBoxI(ci, cgrid_boxes)
          {
             while (fgrid_ids[fi] != cgrid_ids[ci])
             {
@@ -229,9 +217,18 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
             if (R_stored_as_transpose)
             {
-               Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
-                  hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
-               Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               if ( constant_coefficient )
+               {
+                  Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
+                     hypre_CCBoxOffsetDistance(R_dbox, stencil_shape[1]);
+                  Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               }
+               else
+               {
+                  Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
+                     hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
+                  Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               }
             }
             else
             {
@@ -251,18 +248,38 @@ hypre_SemiRestrict( void               *restrict_vdata,
                   hypre_StructMapFineToCoarse(start, cindex, stride, startc);
 
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop3Begin(loop_size,
-                                      R_dbox,  startc, stridec, Ri,
-                                      r_dbox,  start,  stride,  ri,
-                                      rc_dbox, startc, stridec, rci);
+
+                  if ( constant_coefficient )
+                  {
+                     Ri = hypre_CCBoxIndexRank( R_dbox, startc );
+
+                     hypre_BoxLoop2Begin(loop_size,
+                                         r_dbox,  start,  stride,  ri,
+                                         rc_dbox, startc, stridec, rci);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ri,rci
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, ri, rci)
+                        {
+                           rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                                Rp1[Ri] * rp1[ri]);
+                        }
+                     hypre_BoxLoop2End(ri, rci);
+                  }
+                  else
+                  {
+                     hypre_BoxLoop3Begin(loop_size,
+                                         R_dbox,  startc, stridec, Ri,
+                                         r_dbox,  start,  stride,  ri,
+                                         rc_dbox, startc, stridec, rci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ri,ri,rci
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
-                     {
-                        rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                             Rp1[Ri] * rp1[ri]);
-                     }
-                  hypre_BoxLoop3End(Ri, ri, rci);
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
+                        {
+                           rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                                Rp1[Ri] * rp1[ri]);
+                        }
+                     hypre_BoxLoop3End(Ri, ri, rci);
+                  }
                }
          }
    }

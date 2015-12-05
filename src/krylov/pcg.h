@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -53,6 +53,7 @@ typedef struct
 {
    char * (*CAlloc)        ( int count, int elt_size );
    int    (*Free)          ( char *ptr );
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
    int    (*DestroyVector) ( void *vector );
    void * (*MatvecCreate)  ( void *A, void *x );
@@ -73,27 +74,40 @@ typedef struct
  * The {\tt hypre\_PCGData} object ...
  **/
 
-/* rel_change!=0 means: if pass the other stopping criteria,
- also check the relative change in the solution x.
-   stop_crit!=0 means: absolute error tolerance rather than
- the usual relative error tolerance on the residual.  Never
- applies if rel_change!=0.
+/*
+ Summary of Parameters to Control Stopping Test:
+ - Standard (default) error tolerance: |delta-residual|/|right-hand-side|<tol
+ where the norm is an energy norm wrt preconditioner, |r|=sqrt(<Cr,r>).
+ - two_norm!=0 means: the norm is the L2 norm, |r|=sqrt(<r,r>)
+ - rel_change!=0 means: if pass the other stopping criteria, also check the
+ relative change in the solution x.
+ - stop_crit!=0 means: pure absolute error tolerance rather than a pure relative
+ error tolerance on the residual.  Never applies if rel_change!=0 or atolf!=0.
+ - atolf = absolute error tolerance factor to be used _together_ with the
+ relative error tolerance, |delta-residual| / ( atolf + |right-hand-side| ) < tol
+ - tol = relative error tolerance, as above
+ - cf_tol = convergence factor tolerance; if >0 used for special test
+ for slow convergence
 */
 
 typedef struct
 {
    double   tol;
+   double   atolf;
    double   cf_tol;
    int      max_iter;
    int      two_norm;
    int      rel_change;
    int      stop_crit;
+   int      converged;
 
    void    *A;
    void    *p;
    void    *s;
-   void    *r;
+   void    *r; /* ...contains the residual.  This is currently kept permanently.
+                  If that is ever changed, it still must be kept if logging>1 */
 
+   int      owns_matvec_data;  /* normally 1; if 0, don't delete it */
    void    *matvec_data;
    void    *precond_data;
 
@@ -101,13 +115,16 @@ typedef struct
 
    /* log info (always logged) */
    int      num_iterations;
+   double   rel_residual_norm;
 
-   /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   int     print_level; /* printing when print_level>0 */
+   int     logging;  /* extra computations for logging when logging>0 */
    double  *norms;
    double  *rel_norms;
 
 } hypre_PCGData;
+
+#define hypre_PCGDataOwnsMatvecData(pcgdata)  ((pcgdata) -> owns_matvec_data)
 
 #ifdef __cplusplus
 extern "C" {
@@ -131,6 +148,7 @@ hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
    char * (*CAlloc)        ( int count, int elt_size ),
    int    (*Free)          ( char *ptr ),
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
    int    (*DestroyVector) ( void *vector ),
    void * (*MatvecCreate)  ( void *A, void *x ),

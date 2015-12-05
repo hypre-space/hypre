@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -32,17 +32,24 @@
 
 int
 hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
-                          double             *measure_array )
+                          double             *measure_array ,
+                          int   seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
+   MPI_Comm         comm = hypre_ParCSRMatrixComm(S);
    int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
-   int              first_index = hypre_ParCSRMatrixFirstRowIndex(S);
-   int              i;
+   int              i, my_id;
    int              ierr = 0;
 
-   hypre_SeedRand(2747);
-   for (i = 0; i < first_index; i++)
-	hypre_Rand();
+   MPI_Comm_rank(comm,&my_id);
+   i = 2747+my_id;
+   if (seq_rand) i = 2747;
+   hypre_SeedRand(i);
+   if (seq_rand)
+   {
+      for (i = 0; i < hypre_ParCSRMatrixFirstRowIndex(S); i++)
+	hypre_Rand(); 
+   }
    for (i = 0; i < S_num_nodes; i++)
    {
       measure_array[i] += hypre_Rand();
@@ -91,7 +98,6 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
 
 int
 hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
-		      hypre_CSRMatrix    *S_ext,
                       double             *measure_array,
                       int                *graph_array,
                       int                 graph_array_size,
@@ -103,17 +109,11 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
    int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
    int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
-   /* double          *S_diag_data = hypre_CSRMatrixData(S_diag); */
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
    int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
    int             *S_offd_j;
-   /* double          *S_offd_data; */
-   int             *S_ext_i;
-   int             *S_ext_j;
-   /* double          *S_ext_data; */
 
    int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
-   int		    jc;
    int              i, j, ig, jS, jj;
                    
    int              ierr = 0;
@@ -126,10 +126,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    if (hypre_CSRMatrixNumCols(S_offd))
    {
 	S_offd_j = hypre_CSRMatrixJ(S_offd);
-	/* S_offd_data = hypre_CSRMatrixData(S_offd); */
-	S_ext_i = hypre_CSRMatrixI(S_ext);
-	S_ext_j = hypre_CSRMatrixJ(S_ext);
-	/* S_ext_data = hypre_CSRMatrixData(S_ext); */
    }
 
    for (ig = 0; ig < graph_array_size; ig++)
@@ -197,50 +193,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                }
             }
          }
-      }
-   }
-   for (ig = 0; ig < graph_array_offd_size; ig++)
-   {
-      i = graph_array_offd[ig];
-      if (measure_array[local_num_vars+i] > 1)
-      {
-         for (jS = S_ext_i[i]; jS < S_ext_i[i+1]; jS++)
-         {
-          j = S_ext_j[jS];
-          /* if (j < 0) j = -j-1; */
-          if (j >= 0)
-	  {
-            /* only consider valid graph edges */
-            /* if ( (measure_array[j] > 1) && (S_ext_data[jS]) ) */
-            if (measure_array[j] > 1) 
-            {
-               if (measure_array[i+local_num_vars] > measure_array[j])
-               {
-                  IS_marker[j] = 0;
-               }
-               else if (measure_array[j] > measure_array[i+local_num_vars])
-               {
-                  IS_marker_offd[i] = 0;
-               }
-            }
-	  }
-	  else
-	  {
-	     jc = -j-1+local_num_vars;
-            /* only consider valid graph edges */
-             if (measure_array[jc] > 1)
-             {
-                if (measure_array[i+local_num_vars] > measure_array[jc])
-                {
-                   IS_marker_offd[-j-1] = 0;
-                }
-                else if (measure_array[jc] > measure_array[i+local_num_vars])
-                {
-                   IS_marker_offd[i] = 0;
-                }
-             }
-	  }
-        }
       }
    }
             

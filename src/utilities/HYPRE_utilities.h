@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.3 $
+ * $Revision: 2.21 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -33,7 +33,7 @@ extern "C" {
  * Before a version of HYPRE goes out the door, increment the version
  * number and check in this file (for CVS to substitute the Date).
  */
-#define HYPRE_Version() "HYPRE 1.6.0 $Date: 2001/07/27 16:53:24 $ Compiled: " __DATE__ " " __TIME__
+#define HYPRE_Version() "PACKAGE_STRING  $Date: 2004/01/16 01:38:27 $ Compiled: " __DATE__ " " __TIME__
 
 #ifdef HYPRE_USE_PTHREADS
 #ifndef hypre_MAX_THREADS

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -44,13 +44,14 @@ hypre_SchwarzCreate()
 
    schwarz_data = hypre_CTAlloc(hypre_SchwarzData,1);
 
-   hypre_SchwarzSetVariant(schwarz_data, variant);
+   hypre_SchwarzSetVariant(schwarz_data, variant); 
    hypre_SchwarzSetDomainType(schwarz_data, domain_type);
    hypre_SchwarzSetOverlap(schwarz_data, overlap);
    hypre_SchwarzSetNumFunctions(schwarz_data, num_functions);
    hypre_SchwarzSetRelaxWeight(schwarz_data, relax_weight);
 
    hypre_SchwarzDataDomainStructure(schwarz_data) = NULL;
+   hypre_SchwarzDataABoundary(schwarz_data) = NULL;
    hypre_SchwarzDataScale(schwarz_data) = NULL;
    hypre_SchwarzDataVtemp(schwarz_data) = NULL;
    hypre_SchwarzDataDofFunc(schwarz_data) = NULL;
@@ -73,6 +74,8 @@ hypre_SchwarzDestroy( void *data )
    if (hypre_SchwarzDataDofFunc(schwarz_data))
       hypre_TFree (hypre_SchwarzDataDofFunc(schwarz_data));
    hypre_CSRMatrixDestroy(hypre_SchwarzDataDomainStructure(schwarz_data));
+   if (hypre_SchwarzDataVariant(schwarz_data) == 3);
+      hypre_CSRMatrixDestroy(hypre_SchwarzDataABoundary(schwarz_data));
    hypre_ParVectorDestroy(hypre_SchwarzDataVtemp(schwarz_data));
 
    hypre_TFree(schwarz_data);
@@ -90,6 +93,7 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    int *dof_func;
    double *scale;
    hypre_CSRMatrix *domain_structure;
+   hypre_CSRMatrix *A_boundary;
    hypre_ParVector *Vtemp;
 
    int variant = hypre_SchwarzDataVariant(schwarz_data);
@@ -107,16 +111,28 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    hypre_ParVectorInitialize(Vtemp);
    hypre_SchwarzDataVtemp(schwarz_data) = Vtemp;
 
-   if (variant)
+   if (variant > 1)
    {
       hypre_ParAMGCreateDomainDof(A,
 			     domain_type, overlap,
 			     num_functions, dof_func,
 			     &domain_structure);
 
-      hypre_ParGenerateScale(A, domain_structure, relax_weight,
-	&scale);
-      hypre_SchwarzDataScale(schwarz_data) = scale;
+      if (variant == 2)
+      {
+         hypre_ParGenerateScale(A, domain_structure, relax_weight,
+		&scale);
+         hypre_SchwarzDataScale(schwarz_data) = scale;
+      }
+      else
+      {
+         hypre_ParGenerateHybridScale(A, domain_structure, &A_boundary, &scale);
+         hypre_SchwarzDataScale(schwarz_data) = scale;
+         if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)))
+            hypre_SchwarzDataABoundary(schwarz_data) = A_boundary;
+         else
+            hypre_SchwarzDataABoundary(schwarz_data) = NULL;
+      }
    }
    else
    {
@@ -124,6 +140,13 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
 			     domain_type, overlap,
 			     num_functions, dof_func,
 			     &domain_structure);
+      if (variant == 1)
+      {
+         hypre_GenerateScale(domain_structure, 
+		hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A)),
+		relax_weight, &scale);
+         hypre_SchwarzDataScale(schwarz_data) = scale;
+      }
    }
 
    hypre_SchwarzDataDomainStructure(schwarz_data) = domain_structure;
@@ -145,18 +168,29 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
    int ierr = 0;
    hypre_CSRMatrix *domain_structure = 
 		hypre_SchwarzDataDomainStructure(schwarz_data);
+   hypre_CSRMatrix *A_boundary = hypre_SchwarzDataABoundary(schwarz_data);
    double *scale = hypre_SchwarzDataScale(schwarz_data);
    hypre_ParVector *Vtemp = hypre_SchwarzDataVtemp(schwarz_data);
    int variant = hypre_SchwarzDataVariant(schwarz_data);
+   double relax_wt = hypre_SchwarzDataRelaxWeight(schwarz_data);
 
-   if (variant)
+   if (variant == 2)
    {
       ierr = hypre_ParAdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp);
    }
-   else
+   else if (variant == 3)
+   {
+      ierr = hypre_ParMPSchwarzSolve(A, A_boundary, f, domain_structure, u,
+				relax_wt, scale, Vtemp); 
+   }
+   else if (variant == 1)
+   {
+      ierr = hypre_AdSchwarzSolve(A, f, domain_structure, scale, u, Vtemp);
+   }
+   else 
    {
       ierr = hypre_MPSchwarzSolve(A, hypre_ParVectorLocalVector(f), 
-				domain_structure, u,  
+				domain_structure, u, relax_wt, 
 				hypre_ParVectorLocalVector(Vtemp));
    }
       
@@ -240,6 +274,21 @@ hypre_SchwarzSetScale( void *data, double *scale)
    hypre_SchwarzData  *schwarz_data = data;
  
    hypre_SchwarzDataScale(schwarz_data) = scale;
+
+   return (ierr);
+}
+
+int
+hypre_SchwarzReScale( void *data, int size, double value)
+{
+   int ierr = 0;
+   int i;
+   double *scale;
+   hypre_SchwarzData  *schwarz_data = data;
+
+   scale = hypre_SchwarzDataScale(schwarz_data);
+   for (i=0; i < size; i++)
+      scale[i] *= value;
 
    return (ierr);
 }

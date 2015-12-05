@@ -1,73 +1,51 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1999   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.2 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
-
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-CINCLUDES= 
-
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS =\
  -I..\
- -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../struct_mv\
  -I$(srcdir)/../seq_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../parcsr_ls\
- ${CINCLUDES} ${CDEFS}
-
-RANLIB= ranlib
-
-MPILIBFLAGS =   
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
-
-LFLAGS =\
- -L.\
- -L../utilities\
- -L../struct_mv\
- -L../seq_mv\
- -L../parcsr_mv\
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ ${CINCLUDES}
 
 HEADERS =\
  aux_parcsr_matrix.h\
- HYPRE_IJ_mv.h \
- IJ_mv.h \
- IJ_matrix.h
+ aux_par_vector.h\
+ headers.h\
+ HYPRE_IJ_mv.h\
+ IJ_matrix.h\
+ IJ_mv.h\
+ IJ_vector.h
+
+EXTRA_FILES =\
+ IJMatrix_isis.c\
+ IJMatrix_petsc.c
 
 FILES =\
  aux_parcsr_matrix.c\
- IJMatrix_parcsr.c\
- IJVector_parcsr.c\
- IJMatrix.c\
- IJVector.c\
+ aux_par_vector.c\
+ F90_HYPRE_IJMatrix.c\
+ F90_HYPRE_IJVector.c\
+ F90_IJMatrix.c\
  HYPRE_IJMatrix.c\
  HYPRE_IJVector.c\
- F90_IJMatrix.c\
- F90_HYPRE_IJMatrix.c\
- F90_HYPRE_IJVector.c
+ IJMatrix.c\
+ IJMatrix_parcsr.c\
+ IJVector.c\
+ IJVector_parcsr.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -76,18 +54,19 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_IJ_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/IJ_mv.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/IJ_mv.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_IJ_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/IJ_mv.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
-	@rm -f driver
+distclean: clean
 
 ##################################################################
 # Rules
@@ -95,18 +74,7 @@ veryclean: clean
 
 libHYPRE_IJ_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-driver: driver.o libHYPRE_IJ_mv.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
-
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<

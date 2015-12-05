@@ -19,12 +19,12 @@
  * 1/13 AJC
  * - Modified code with macros to allow both 0 and 1-based indexing
  *
- * $Id: serilut.c,v 2.0 2000/12/14 18:20:20 falgout Exp $
+ * $Id: serilut.c,v 2.1 2004/03/05 21:24:37 treadway Exp $
  *
  */
 
-#include "./DistributedMatrixPilutSolver.h"
 #include "ilu.h"
+#include "DistributedMatrixPilutSolver.h"
 
 
 /*************************************************************************

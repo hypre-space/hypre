@@ -1,10 +1,10 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -34,7 +34,7 @@ typedef struct HYPRE_LSI_Poly_Struct
 }
 HYPRE_LSI_Poly;
 
-#define dabs(x) ((x > 0) ? (x) : -(x))
+#define habs(x) ((x > 0) ? (x) : -(x))
 
 /*--------------------------------------------------------------------------
  * HYPRE_LSI_PolyCreate - Return a polynomial preconditioner object "solver". 
@@ -156,8 +156,11 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    int            i, j, my_id, startRow, endRow, order;
    int            pos_diag, neg_diag;
    int            rowLeng, *colInd, *row_partition;
-   double         *coefs=NULL, rowsum, max_norm, *colVal, dtemp;
+   double         *coefs=NULL, rowsum, max_norm, *colVal;
    HYPRE_LSI_Poly *poly_ptr = (HYPRE_LSI_Poly *) solver;
+#ifndef HYPRE_SEQUENTIAL
+   double         dtemp;
+#endif
 
    /* ---------------------------------------------------------------- */
    /* initialize structure                                             */
@@ -191,7 +194,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       rowsum = 0.0;
       for (j = 0; j < rowLeng; j++)
       {
-         rowsum += dabs(colVal[j]);
+         rowsum += habs(colVal[j]);
          if ( colInd[j] == i && colVal[j] > 0.0 ) pos_diag++;
          if ( colInd[j] == i && colVal[j] < 0.0 ) neg_diag++;
       }

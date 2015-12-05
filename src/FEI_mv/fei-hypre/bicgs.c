@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -98,7 +96,7 @@ void * hypre_BiCGSCreate( )
 int hypre_BiCGSDestroy( void *bicgs_vdata )
 {
    hypre_BiCGSData *bicgs_data = bicgs_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (bicgs_data)
    {
@@ -163,7 +161,7 @@ int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
    if ((bicgs_data -> matvec_data) == NULL)
       (bicgs_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
  
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
  
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -206,17 +204,15 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int               logging       = (bicgs_data -> logging);
    double           *norms         = (bicgs_data -> norms);
-   char             *log_file_name = (bicgs_data -> log_file_name);
    
    int               ierr, my_id, num_procs, iter;
    double            rho1, rho2, sigma, alpha, dtmp, r_norm, b_norm;
-   double            beta, epsmac = 1.e-16, epsilon; 
+   double            beta, epsilon; 
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (bicgs_data -> norms);
-      log_file_name  = (bicgs_data -> log_file_name);
    }
 
    /* initialize work arrays */
@@ -287,9 +283,10 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
 
       dtmp = 1.0;
       hypre_ParKrylovAxpy(dtmp,q,u);
-      hypre_ParKrylovAxpy(alpha,u,x);
 
       precond(precond_data, A, u, t1);
+      hypre_ParKrylovAxpy(alpha,t1,x);
+
       hypre_ParKrylovMatvec(matvec_data,1.0,A,t1,0.0,t2);
 
       dtmp = - alpha;
@@ -303,8 +300,6 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
       if ( my_id == 0 && logging )
          printf(" BiCGS : iter %4d - res. norm = %e \n", iter, r_norm);
    }
-   precond(precond_data, A, x, t1);
-   hypre_ParKrylovCopyVector(t1,x);
 
    (bicgs_data -> num_iterations) = iter;
    if (b_norm > 0.0)

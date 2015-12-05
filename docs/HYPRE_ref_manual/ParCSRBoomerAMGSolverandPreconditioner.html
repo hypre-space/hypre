@@ -1,0 +1,245 @@
+<html><head><TITLE>ParCSR BoomerAMG Solver and Preconditioner</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  ParCSR BoomerAMG Solver and Preconditioner  </H2>
+<hr>
+<DL>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGCreate</B>(HYPRE_Solver *solver)
+ <DD><I>
+Create a solver object</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGDestroy</B>(HYPRE_Solver solver)
+ <DD><I>
+Destroy a solver object</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetup.html><B>HYPRE_BoomerAMGSetup</B></A> 
+ <DD><I>
+Set up the BoomerAMG solver or preconditioner</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSolve.html><B>HYPRE_BoomerAMGSolve</B></A> 
+ <DD><I>
+Solve the system or apply AMG as a preconditioner</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSolveT.html><B>HYPRE_BoomerAMGSolveT</B></A> 
+ <DD><I>
+Solve the transpose system <IMG BORDER=0 SRC=g000004.gif> or apply AMG as a preconditioner
+to the transpose system </I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetTol.html><B>HYPRE_BoomerAMGSetTol</B></A> 
+ <DD><I>
+(Optional) Set the convergence tolerance, if BoomerAMG is used
+as a solver</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetMaxIter.html><B>HYPRE_BoomerAMGSetMaxIter</B></A> 
+ <DD><I>
+(Optional) Sets maximum number of iterations, if BoomerAMG is used
+as a solver</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetMaxLevels.html><B>HYPRE_BoomerAMGSetMaxLevels</B></A> 
+ <DD><I>
+(Optional) Sets maximum number of multigrid levels</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetStrongThreshold.html><B>HYPRE_BoomerAMGSetStrongThreshold</B></A> 
+ <DD><I>
+(Optional) Sets AMG strength threshold</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetMaxRowSum.html><B>HYPRE_BoomerAMGSetMaxRowSum</B></A> 
+ <DD><I>
+(Optional) Sets a parameter to modify the definition of strength for
+diagonal dominant portions of the matrix</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetCoarsenType.html><B>HYPRE_BoomerAMGSetCoarsenType</B></A> 
+ <DD><I>
+(Optional) Defines which parallel coarsening algorithm is used</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetMeasureType</B>(HYPRE_Solver solver, int measure_type)
+ <DD><I>
+(Optional) Defines whether local or global measures are used</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetCycleType.html><B>HYPRE_BoomerAMGSetCycleType</B></A> 
+ <DD><I>
+(Optional) Defines the type of cycle</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetNumGridSweeps.html><B>HYPRE_BoomerAMGSetNumGridSweeps</B></A> 
+ <DD><I>
+(Optional) Defines the number of sweeps for the fine and coarse grid, 
+the up and down cycle</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetNumSweeps.html><B>HYPRE_BoomerAMGSetNumSweeps</B></A> 
+ <DD><I>
+(Optional) Sets the number of sweeps</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetCycleNumSweeps.html><B>HYPRE_BoomerAMGSetCycleNumSweeps</B></A> 
+ <DD><I>
+(Optional) Sets the number of sweeps at a specified cycle</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetGridRelaxType.html><B>HYPRE_BoomerAMGSetGridRelaxType</B></A> 
+ <DD><I>
+(Optional) Defines which smoother is used on the fine and coarse grid, 
+the up and down cycle</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetRelaxType.html><B>HYPRE_BoomerAMGSetRelaxType</B></A> 
+ <DD><I>
+(Optional) Defines the smoother to be used</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetCycleRelaxType.html><B>HYPRE_BoomerAMGSetCycleRelaxType</B></A> 
+ <DD><I>
+(Optional) Defines the smoother at a given cycle</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetRelaxOrder.html><B>HYPRE_BoomerAMGSetRelaxOrder</B></A> 
+ <DD><I>
+(Optional) Defines in which order the points are relaxed</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetGridRelaxPoints.html><B>HYPRE_BoomerAMGSetGridRelaxPoints</B></A> 
+ <DD><I>
+(Optional) Defines in which order the points are relaxed</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetRelaxWeight.html><B>HYPRE_BoomerAMGSetRelaxWeight</B></A> 
+ <DD><I>
+(Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetRelaxWt.html><B>HYPRE_BoomerAMGSetRelaxWt</B></A> 
+ <DD><I>
+(Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR 
+on all levels</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetLevelRelaxWt.html><B>HYPRE_BoomerAMGSetLevelRelaxWt</B></A> 
+ <DD><I>
+(Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
+on the user defined level</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetOmega.html><B>HYPRE_BoomerAMGSetOmega</B></A> 
+ <DD><I>
+(Optional) Defines the outer relaxation weight for hybrid SOR</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetOuterWt.html><B>HYPRE_BoomerAMGSetOuterWt</B></A> 
+ <DD><I>
+(Optional) Defines the outer relaxation weight for hybrid SOR and SSOR
+on all levels</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetLevelOuterWt.html><B>HYPRE_BoomerAMGSetLevelOuterWt</B></A> 
+ <DD><I>
+(Optional) Defines the outer relaxation weight for hybrid SOR or SSOR
+on the user defined level</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetDebugFlag</B>(HYPRE_Solver solver, int debug_flag)
+ <DD><I>
+(Optional)</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetNumIterations</B>(HYPRE_Solver solver, int *num_iterations)
+ <DD><I>
+Returns the number of iterations taken</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetFinalRelativeResidualNorm</B>(HYPRE_Solver solver, double *rel_resid_norm)
+ <DD><I>
+Returns the norm of the final relative residual</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetTruncFactor.html><B>HYPRE_BoomerAMGSetTruncFactor</B></A> 
+ <DD><I>
+(Optional) Defines a truncation factor for the interpolation</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetSCommPkgSwitch.html><B>HYPRE_BoomerAMGSetSCommPkgSwitch</B></A> 
+ <DD><I>
+(Optional) Defines the largest strength threshold for which 
+the strength matrix S uses the communication package of the operator A</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetSmoothType.html><B>HYPRE_BoomerAMGSetSmoothType</B></A> 
+ <DD><I>
+(Optional) Enables the use of more complex smoothers</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetSmoothNumLevels.html><B>HYPRE_BoomerAMGSetSmoothNumLevels</B></A> 
+ <DD><I>
+(Optional) Sets the number of levels for more complex smoothers</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetSmoothNumSweeps.html><B>HYPRE_BoomerAMGSetSmoothNumSweeps</B></A> 
+ <DD><I>
+(Optional) Sets the number of sweeps for more complex smoothers</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetPrintLevel</B>(HYPRE_Solver solver, int print_level)
+ <DD><I>
+(Optional) Requests automatic printing of solver performance and
+debugging data; default to 0 for no printing</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetLogging.html><B>HYPRE_BoomerAMGSetLogging</B></A> 
+ <DD><I>
+(Optional) Requests additional computations for diagnostic and similar
+data to be logged by the user</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetNumFunctions.html><B>HYPRE_BoomerAMGSetNumFunctions</B></A> 
+ <DD><I>
+(Optional) Sets the size of the system of PDEs, if using the systems version</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetNodal.html><B>HYPRE_BoomerAMGSetNodal</B></A> 
+ <DD><I>
+(Optional) Sets whether to use the nodal systems version</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetDofFunc.html><B>HYPRE_BoomerAMGSetDofFunc</B></A> 
+ <DD><I>
+(Optional) Sets the mapping that assigns the function to each variable, 
+if using the systems version</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetVariant.html><B>HYPRE_BoomerAMGSetVariant</B></A> 
+ <DD><I>
+(Optional) Defines which variant of the Schwarz method is used</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetOverlap.html><B>HYPRE_BoomerAMGSetOverlap</B></A> 
+ <DD><I>
+(Optional) Defines the overlap for the Schwarz method</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetDomainType.html><B>HYPRE_BoomerAMGSetDomainType</B></A> 
+ <DD><I>
+(Optional) Defines the type of domain used for the Schwarz method</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetSchwarzRlxWeight</B>(HYPRE_Solver solver, double schwarz_rlx_weight)
+ <DD><I>
+(Optional) Defines a smoothing parameter for the additive Schwarz method</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetSym.html><B>HYPRE_BoomerAMGSetSym</B></A> 
+ <DD><I>
+(Optional) Defines symmetry for ParaSAILS</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetLevel.html><B>HYPRE_BoomerAMGSetLevel</B></A> 
+ <DD><I>
+(Optional) Defines number of levels for ParaSAILS</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetThreshold.html><B>HYPRE_BoomerAMGSetThreshold</B></A> 
+ <DD><I>
+(Optional) Defines threshold for ParaSAILS</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetFilter.html><B>HYPRE_BoomerAMGSetFilter</B></A> 
+ <DD><I>
+(Optional) Defines filter for ParaSAILS</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetDropTol.html><B>HYPRE_BoomerAMGSetDropTol</B></A> 
+ <DD><I>
+(Optional) Defines drop tolerance for PILUT</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetMaxNzPerRow.html><B>HYPRE_BoomerAMGSetMaxNzPerRow</B></A> 
+ <DD><I>
+(Optional) Defines maximal number of nonzeros for PILUT</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetEuclidFile.html><B>HYPRE_BoomerAMGSetEuclidFile</B></A> 
+ <DD><I>
+(Optional) Defines name of an input file for Euclid parameters</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetGSMG.html><B>HYPRE_BoomerAMGSetGSMG</B></A> 
+ <DD><I>
+(Optional) Specifies the use of GSMG - geometrically smooth 
+coarsening and interpolation</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetNumSamples</B>(HYPRE_Solver solver, int num_samples)
+ <DD><I>
+(Optional) Defines the number of sample vectors used in GSMG
+or LS interpolation</I>
+</DL>
+<A NAME="DOC.DOCU">
+<BLOCKQUOTE>
+<P>Parallel unstructured algebraic multigrid solver and preconditioner
+</BLOCKQUOTE>
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

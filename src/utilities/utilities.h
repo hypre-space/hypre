@@ -1,6 +1,3 @@
-
-#include <HYPRE_config.h>
-
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
@@ -16,7 +13,7 @@ extern "C" {
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -49,7 +46,7 @@ extern "C" {
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -82,6 +79,7 @@ extern "C" {
 #define MPI_Aint            hypre_MPI_Aint             
 
 #define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
+#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -89,6 +87,7 @@ extern "C" {
 #define MPI_INT             hypre_MPI_INT              
 #define MPI_CHAR            hypre_MPI_CHAR             
 #define MPI_LONG            hypre_MPI_LONG             
+#define MPI_BYTE            hypre_MPI_BYTE             
 
 #define MPI_SUM             hypre_MPI_SUM              
 #define MPI_MIN             hypre_MPI_MIN              
@@ -98,6 +97,7 @@ extern "C" {
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
 #define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE        
+#define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 
 #define MPI_Init            hypre_MPI_Init             
 #define MPI_Finalize        hypre_MPI_Finalize         
@@ -111,6 +111,7 @@ extern "C" {
 #define MPI_Comm_size       hypre_MPI_Comm_size        
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
 #define MPI_Comm_free       hypre_MPI_Comm_free        
+#define MPI_Comm_split      hypre_MPI_Comm_split        
 #define MPI_Group_incl      hypre_MPI_Group_incl       
 #define MPI_Group_free      hypre_MPI_Group_free        
 #define MPI_Address         hypre_MPI_Address        
@@ -156,11 +157,12 @@ typedef int hypre_MPI_Group;
 typedef int hypre_MPI_Request;
 typedef int hypre_MPI_Datatype;
 
-typedef struct { int MPI_SOURCE; } hypre_MPI_Status;
+typedef struct { int MPI_SOURCE; int MPI_TAG; } hypre_MPI_Status;
 typedef int  hypre_MPI_Op;
 typedef int  hypre_MPI_Aint;
 
 #define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_NULL  -1
 
 #define  hypre_MPI_BOTTOM  0x0
 
@@ -168,6 +170,7 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_INT 1
 #define  hypre_MPI_CHAR 2
 #define  hypre_MPI_LONG 3
+#define  hypre_MPI_BYTE 4
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -177,6 +180,7 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
 #define  hypre_MPI_ANY_SOURCE    1
+#define  hypre_MPI_ANY_TAG       1
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -195,6 +199,7 @@ int hypre_MPI_Comm_size( hypre_MPI_Comm comm , int *size );
 int hypre_MPI_Comm_rank( hypre_MPI_Comm comm , int *rank );
 int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );
 int hypre_MPI_Comm_group( hypre_MPI_Comm comm , hypre_MPI_Group *group );
+int hypre_MPI_Comm_split( hypre_MPI_Comm comm, int n, int m, hypre_MPI_Comm * comms );
 int hypre_MPI_Group_incl( hypre_MPI_Group group , int n , int *ranks , hypre_MPI_Group *newgroup );
 int hypre_MPI_Group_free( hypre_MPI_Group *group );
 int hypre_MPI_Address( void *location , hypre_MPI_Aint *address );
@@ -243,7 +248,7 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -337,7 +342,7 @@ extern "C" {
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-/* memory.c */
+/* hypre_memory.c */
 int hypre_OutOfMemory( int size );
 char *hypre_MAlloc( int size );
 char *hypre_CAlloc( int count , int elt_size );
@@ -373,7 +378,7 @@ double hypre_Rand( void );
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -482,7 +487,7 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
 *********************************************************************EHEADER*/
 
 #ifndef hypre_THREADING_HEADER
@@ -563,7 +568,7 @@ extern int hypre_NumThreads;
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -693,7 +698,7 @@ int hypre_PrintTiming( const char *heading , MPI_Comm comm );
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.11 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -733,6 +738,61 @@ typedef hypre_ListElement  *hypre_LinkList;
 #endif
 
 #endif
+#ifndef hypre_EXCHANGE_DATA_HEADER
+#define hypre_EXCHANGE_DATA_HEADER
+
+#define hypre_BinaryTreeParentId(tree)      (tree->parent_id)
+#define hypre_BinaryTreeNumChild(tree)      (tree->num_child)
+#define hypre_BinaryTreeChildIds(tree)      (tree->child_id)
+#define hypre_BinaryTreeChildId(tree, i)    (tree->child_id[i])
+
+
+typedef struct
+{
+   int                   parent_id;
+   int                   num_child;
+   int		        *child_id;
+} hypre_BinaryTree;
+
+
+
+/* In the fill_response() function the user needs to set the recv__buf
+   and the response_message_size.  Memory of size send_response_storage has been
+   alllocated for the send_buf (in exchange_data) - if more is needed, then
+   realloc and adjust
+   the send_response_storage.  The realloc amount should be storage+overhead. 
+   If the response is an empty "confirmation" message, then set
+   response_message_size =0 (and do not modify the send_buf) */
+
+
+typedef struct
+{
+   int    (*fill_response)(void* recv_buf, int contact_size, 
+                           int contact_proc, void* response_obj, 
+                           MPI_Comm comm, void** response_buf, 
+                           int* response_message_size);
+   int     send_response_overhead; /*set by exchange data */
+   int     send_response_storage;  /*storage allocated for send_response_buf*/
+   void    *data1;                 /*data fields user may want to access in fill_response */
+   void    *data2;
+   
+} hypre_DataExchangeResponse;
+
+
+int hypre_CreateBinaryTree(int, int, hypre_BinaryTree*);
+int hypre_DestroyBinaryTree(hypre_BinaryTree*);
+
+
+int hypre_DataExchangeList(int num_contacts, 
+		     int *contact_proc_list, void *contact_send_buf, 
+		     int *contact_send_buf_starts, int contact_obj_size, 
+                     int response_obj_size,
+		     hypre_DataExchangeResponse *response_obj, int max_response_size, 
+                     int rnum, MPI_Comm comm,  void **p_response_recv_buf, 
+                     int **p_response_recv_buf_starts);
+
+
+#endif /* end of header */
 
 /* amg_linklist.c */
 void dispose_elt( hypre_LinkList element_ptr );
@@ -747,6 +807,19 @@ int hypre_BinarySearch( int *list , int value , int list_length );
 
 /* qsplit.c */
 int hypre_DoubleQuickSplit( double *values , int *indices , int list_length , int NumberKept );
+
+
+/* hypre_qsort.c */
+void swap( int *v , int i , int j );
+void swap2( int *v , double *w , int i , int j );
+void hypre_swap2i( int *v , int *w , int i , int j );
+void hypre_swap3i(int  *v, int  *w, int  *z, int  i, int  j );
+
+void qsort0( int *v , int left , int right );
+void qsort1( int *v , double *w , int left , int right );
+void hypre_qsort2i( int *v , int *w , int left , int right );
+void hypre_qsort2( int *v, double *w, int left, int right);
+void hypre_qsort3i( int *v, int*w, int*z, int left, int right);
 
 
 #ifdef __cplusplus

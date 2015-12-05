@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -24,7 +22,7 @@
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "HYPRE_MHMatrix.h"
 
-#ifdef MLPACK
+#ifdef HAVE_ML
 
 #include "ml_struct.h"
 #include "ml_aggregate.h"
@@ -55,8 +53,8 @@ typedef struct HYPRE_LSI_Schwarz_Struct
    int           **blk_indices;
 } HYPRE_LSI_Schwarz;
 
-extern int  HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
-                                       MPI_Comm, int *, MH_Context *);
+extern int  HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
+                                          MPI_Comm, int *, MH_Context *);
 extern int  HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,
                  MH_Matrix *Amat, int total_recv_leng, int *recv_lengths, 
                  int *ext_ja, double *ext_aa, int *map, int *map2, 
@@ -65,10 +63,12 @@ extern int  HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *,
                  int **recv_lengths, int **int_buf, double **dble_buf,
                  int **sindex_array, int **sindex_array2, int *offset);
 extern int  HYPRE_LSI_ILUTDecompose(HYPRE_LSI_Schwarz *sch_ptr);
-extern void HYPRE_LSI_Sort(int *, int, int *, double *);
+extern void qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
+extern int  MH_ExchBdry(double *, void *);
+extern int  HYPRE_LSI_Search(int *, int, int);
 
-#define dabs(x) ((x) > 0 ? (x) : -(x))
+#define habs(x) ((x) > 0 ? (x) : -(x))
 
 /*--------------------------------------------------------------------------
  * HYPRE_LSI_SchwarzCreate - Return a Schwarz preconditioner object "solver"
@@ -228,7 +228,7 @@ int HYPRE_LSI_SchwarzSetILUTFillin(HYPRE_Solver solver, double fillin)
 int HYPRE_LSI_SchwarzSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
                             HYPRE_ParVector b,   HYPRE_ParVector x )
 {
-   int               i, j, k, cnt, blk, index, max_blk_size, nrows;
+   int               i, j, cnt, blk, index, max_blk_size, nrows;
    int               ntimes, Nrows, extNrows, nblocks, *indptr, column;
    int               *aux_mat_ia, *aux_mat_ja, *mat_ia, *mat_ja, *idiag;
    double            *dbuffer, *aux_mat_aa, *solbuf, *xbuffer;
@@ -446,7 +446,7 @@ int HYPRE_LSI_SchwarzSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
 int HYPRE_LSI_SchwarzSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                            HYPRE_ParVector b,   HYPRE_ParVector x )
 {
-   int               i, j, offset, total_recv_leng, *recv_lengths=NULL;
+   int               i, offset, total_recv_leng, *recv_lengths=NULL;
    int               *int_buf=NULL, mypid, nprocs, overlap_flag=1,*parray;
    int               *map=NULL, *map2=NULL, *row_partition=NULL,*parray2;
    double            *dble_buf=NULL;
@@ -476,8 +476,8 @@ int HYPRE_LSI_SchwarzSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    hypre_TFree( row_partition );
    mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
    context->Amat = mh_mat;
-   HYPRE_ParCSRMLConstructMHMatrix(A_csr, mh_mat, comm,
-                                   context->partition,context); 
+   HYPRE_LSI_MLConstructMHMatrix(A_csr, mh_mat, comm,
+                                 context->partition,context); 
    sch_ptr->Nrows = mh_mat->Nrows;
    sch_ptr->mh_mat = mh_mat;
 
@@ -547,12 +547,12 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
            double *ext_aa, int *map, int *map2, int Noffset)
 {
    int               i, j, k, nnz, *mat_ia, *mat_ja;
-   int               **bmat_ia, **bmat_ja, output_level;
+   int               **bmat_ia, **bmat_ja;
    int               mypid, *blk_size, index, **blk_indices, **aux_bmat_ia;
    int               ncnt, rownum, offset, Nrows, extNrows, **aux_bmat_ja;
-   int               *tmp_blk_leng, *cols, blknum, *blkinfo, rowleng;
+   int               *tmp_blk_leng, *cols, rowleng;
    int               nblocks, col_ind, init_size, aux_nnz, max_blk_size;
-   int               *tmp_indices, cur_off_row, nrows, length;
+   int               *tmp_indices, cur_off_row, length;
    double            *mat_aa, *vals, **aux_bmat_aa, **bmat_aa;
 
    /* --------------------------------------------------------- */
@@ -564,7 +564,6 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
    extNrows       = Nrows + total_recv_leng;
    sch_ptr->Nrows = Nrows;
    sch_ptr->extNrows = extNrows;
-   output_level = sch_ptr->output_level;
 
    /* --------------------------------------------------------- */
    /* adjust the off-processor row data                         */
@@ -653,7 +652,7 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
                blk_indices[i][blk_size[i]++] = col_ind;
             }
          }
-         HYPRE_LSI_Sort(blk_indices[i], blk_size[i], NULL, NULL);
+         qsort0(blk_indices[i], 0, blk_size[i]-1);
          ncnt = 0;
          for ( j = 1; j < blk_size[i]; j++ )
             if ( blk_indices[i][j] != blk_indices[i][ncnt] )
@@ -880,7 +879,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
          vals = &(mat_aa[index]);
          rleng = mat_ia[i+1] - index;
          ddata = 0.0;
-         for ( j = 0; j < rleng; j++ ) ddata += dabs( vals[j] ); 
+         for ( j = 0; j < rleng; j++ ) ddata += habs( vals[j] ); 
          rowNorms[i] = ddata;
       }
       printflag2 = nrows / 10 + 1;
@@ -917,7 +916,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
          rel_tau = tau * rowNorms[i];
          for ( j = first; j < i; j++ )
          {
-            if ( dabs(dble_buf[j]) > rel_tau )
+            if ( habs(dble_buf[j]) > rel_tau )
             {
                ddata = dble_buf[j] / diagonal[j];
                for ( k = new_ia[j]; k < new_ia[j+1]; k++ )
@@ -950,7 +949,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
             index = track_array[j];
             if ( index < i )
             {
-               absval = dabs( dble_buf[index] );
+               absval = habs( dble_buf[index] );
                if ( absval > rel_tau )
                {
                   sortcols[sortcnt] = index;
@@ -983,7 +982,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
             }
          }
          diagonal[i] = dble_buf[i];
-         if ( dabs(diagonal[i]) < 1.0e-12 ) diagonal[i] = 1.0E-12;
+         if ( habs(diagonal[i]) < 1.0e-12 ) diagonal[i] = 1.0E-12;
          new_aa[nnz] = diagonal[i];
          new_ja[nnz++] = i;
          sortcnt = 0;
@@ -992,7 +991,7 @@ int HYPRE_LSI_ILUTDecompose( HYPRE_LSI_Schwarz *sch_ptr )
             index = track_array[j];
             if ( index > i )
             {
-               absval = dabs( dble_buf[index] );
+               absval = habs( dble_buf[index] );
                if ( absval > rel_tau )
                {
                   sortcols[sortcnt] = index;

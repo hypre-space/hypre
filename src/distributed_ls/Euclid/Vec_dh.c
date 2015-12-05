@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "Vec_dh.h"
 #include "Mem_dh.h"
 #include "SubdomainGraph_dh.h"
@@ -87,7 +88,11 @@ void Vec_dhSetRand(Vec_dh v)
 
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
 
+#ifdef WIN32
+  for (i=0; i<m; ++i) vals[i] = rand();
+#else
   for (i=0; i<m; ++i) vals[i] = random();
+#endif
 
   /* find largest value in vector, and scale vector,
    * so all values are in [0.0,1.0]

@@ -6,6 +6,8 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 /*
  * File name:	dlangs.c
@@ -13,7 +15,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 double dlangs(char *norm, SuperMatrix *A)
 {
@@ -67,14 +69,14 @@ double dlangs(char *norm, SuperMatrix *A)
     if ( MIN(A->nrow, A->ncol) == 0) {
 	value = 0.;
 	
-    } else if (lsame_(norm, "M")) {
+    } else if (superlu_lsame(norm, "M")) {
 	/* Find max(abs(A(i,j))). */
 	value = 0.;
 	for (j = 0; j < A->ncol; ++j)
 	    for (i = Astore->colptr[j]; i < Astore->colptr[j+1]; i++)
 		value = MAX( value, fabs( Aval[i]) );
 	
-    } else if (lsame_(norm, "O") || *(unsigned char *)norm == '1') {
+    } else if (superlu_lsame(norm, "O") || *(unsigned char *)norm == '1') {
 	/* Find norm1(A). */
 	value = 0.;
 	for (j = 0; j < A->ncol; ++j) {
@@ -84,7 +86,7 @@ double dlangs(char *norm, SuperMatrix *A)
 	    value = MAX(value,sum);
 	}
 	
-    } else if (lsame_(norm, "I")) {
+    } else if (superlu_lsame(norm, "I")) {
 	/* Find normI(A). */
 	if ( !(rwork = (double *) SUPERLU_MALLOC(A->nrow * sizeof(double))) )
 	    ABORT("SUPERLU_MALLOC fails for rwork.");
@@ -100,7 +102,7 @@ double dlangs(char *norm, SuperMatrix *A)
 	
 	SUPERLU_FREE (rwork);
 	
-    } else if (lsame_(norm, "F") || lsame_(norm, "E")) {
+    } else if (superlu_lsame(norm, "F") || superlu_lsame(norm, "E")) {
 	/* Find normF(A). */
 	ABORT("Not implemented.");
     } else

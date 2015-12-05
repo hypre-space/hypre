@@ -1,12 +1,10 @@
 
-#include <HYPRE_config.h>
+#include "utilities.h"
 
 #include "HYPRE_struct_mv.h"
 
 #ifndef hypre_STRUCT_MV_HEADER
 #define hypre_STRUCT_MV_HEADER
-
-#include "utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,7 +16,7 @@ extern "C" {
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -129,6 +127,16 @@ typedef struct hypre_BoxArrayArray_struct
 #define hypre_BoxIMin(box)     ((box) -> imin)
 #define hypre_BoxIMax(box)     ((box) -> imax)
 
+#define hypre_AddIndex(index1, index2, index3) \
+( hypre_IndexX(index3) = hypre_IndexX(index2) + hypre_IndexX(index1),\
+  hypre_IndexY(index3) = hypre_IndexY(index2) + hypre_IndexY(index1),\
+  hypre_IndexZ(index3) = hypre_IndexZ(index2) + hypre_IndexZ(index1) )
+
+#define hypre_SubtractIndex(index1, index2, index3) \
+( hypre_IndexX(index3) = hypre_IndexX(index1) - hypre_IndexX(index2),\
+  hypre_IndexY(index3) = hypre_IndexY(index1) - hypre_IndexY(index2),\
+  hypre_IndexZ(index3) = hypre_IndexZ(index1) - hypre_IndexZ(index2) )
+
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
@@ -146,12 +154,53 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
+#define hypre_BoxEqualP( box1, box2 ) (\
+ hypre_BoxIMinX(box1)==hypre_BoxIMinX(box2) &&\
+ hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box2) &&\
+ hypre_BoxIMinY(box1)==hypre_BoxIMinY(box2) &&\
+ hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box2) &&\
+ hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box2) &&\
+ hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box2) )
+
+#define hypre_IndexInBoxP( index, box ) (\
+ hypre_IndexX(index)>=hypre_BoxIMinX(box) &&\
+ hypre_IndexX(index)<=hypre_BoxIMaxX(box) &&\
+ hypre_IndexY(index)>=hypre_BoxIMinY(box) &&\
+ hypre_IndexY(index)<=hypre_BoxIMaxY(box) &&\
+ hypre_IndexZ(index)>=hypre_BoxIMinZ(box) &&\
+ hypre_IndexZ(index)<=hypre_BoxIMaxZ(box) )
+
+
+#define hypre_IndexDInBoxP( index, d, box ) (\
+ hypre_IndexD(index, d)>=hypre_BoxIMinD(box, d) &&\
+ hypre_IndexD(index, d)<=hypre_BoxIMaxD(box, d) )
+
 #define hypre_CopyBox(box1, box2) \
 ( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
   hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
 
 #define hypre_BoxVolume(box) \
 (hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
+
+#define hypre_BoxShiftPos(box, shift) \
+{\
+   hypre_BoxIMinX(box) += hypre_IndexX(shift);\
+   hypre_BoxIMinY(box) += hypre_IndexY(shift);\
+   hypre_BoxIMinZ(box) += hypre_IndexZ(shift);\
+   hypre_BoxIMaxX(box) += hypre_IndexX(shift);\
+   hypre_BoxIMaxY(box) += hypre_IndexY(shift);\
+   hypre_BoxIMaxZ(box) += hypre_IndexZ(shift);\
+}
+
+#define hypre_BoxShiftNeg(box, shift) \
+{\
+   hypre_BoxIMinX(box) -= hypre_IndexX(shift);\
+   hypre_BoxIMinY(box) -= hypre_IndexY(shift);\
+   hypre_BoxIMinZ(box) -= hypre_IndexZ(shift);\
+   hypre_BoxIMaxX(box) -= hypre_IndexX(shift);\
+   hypre_BoxIMaxY(box) -= hypre_IndexY(shift);\
+   hypre_BoxIMaxZ(box) -= hypre_IndexZ(shift);\
+}
 
 #define hypre_BoxIndexRank(box, index) \
 ((hypre_IndexX(index) - hypre_BoxIMinX(box)) + \
@@ -160,12 +209,20 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
     hypre_BoxSizeY(box))) * \
   hypre_BoxSizeX(box))
 
+/* The first hypre_CCBoxIndexRank is better style because it keeps
+   its similarity to the variable coefficient hypre_BoxIndexRank.
+   The second one sometimes avoids compiler warnings...*/
+#define hypre_CCBoxIndexRank(box, index) 0
+#define hypre_CCBoxIndexRank_noargs() 0
+
 #define hypre_BoxOffsetDistance(box, index) \
 (hypre_IndexX(index) + \
  (hypre_IndexY(index) + \
   (hypre_IndexZ(index) * \
    hypre_BoxSizeY(box))) * \
  hypre_BoxSizeX(box))
+
+#define hypre_CCBoxOffsetDistance(box, index) 0
   
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArray
@@ -271,6 +328,10 @@ if (hypre__num_blocks > 1)\
    }\
 }
 
+#define hypre_BoxLoopGetIndex( index, base, i, j, k )\
+ hypre_SetIndex( index, i+hypre_IndexX(base),\
+  j+hypre_IndexY(base), k+hypre_IndexZ(base) )
+
 /*-----------------------------------*/
 
 #define hypre_BoxLoop0Begin(loop_size)\
@@ -363,6 +424,83 @@ if (hypre__num_blocks > 1)\
    }\
    }\
 }
+
+/* incomplete BoxLoop2 macros leave out the inner loop so it can be hand-coded */
+#define hypre_BoxLoop2For_INC(i, j, k, i1, i2)\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
+      {
+
+#define hypre_BoxLoop2End_INC(i1, i2)\
+         i1 += hypre__sy1 - hypre__nx*hypre__sx1;\
+         i2 += hypre__sy2 - hypre__nx*hypre__sx2;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+   }\
+   }\
+}
+
+/* BoxLoop2 macros, but only for when all strides are equal.  To improve
+ runtime, only one index is computed in the innermost loop, the internal
+ index i.
+ Since only the internal index, i, is updated in the innermost loop, you
+ can't reference i1, i2 inside the innermost loop. To get the effect of i1, i2
+ you have to use a macro (see below) to do pointer aliasing.  It works because
+ you know that i has the same stride as i1, i2.
+ This macro set invokes the user-defined macro hypre_UserOutsideInnerLoop inside
+ the outer loops, just before the innermost loop.  The user can define this macro
+ for pointer aliasing.
+ It's safer to redefine hypre_UserOutsideInnerLoop to do nothing afterwards.
+ The Begin_OneStride macro isn't really  needed, the Begin macro does the same
+ thing, but without ensuring that the strides are the same.
+ */
+
+#define hypre_UserOutsideInnerLoop
+
+#define hypre_BoxLoop2Begin_OneStride(loop_size, stride1,\
+			    dbox1, start1, i1,\
+			    dbox2, start2, i2)\
+{\
+   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
+   hypre_BoxLoopDeclareS(dbox2, stride1, hypre__sx2, hypre__sy2, hypre__sz2);\
+   hypre_BoxLoopDeclareN(loop_size);
+
+#define hypre_BoxLoop2For_OneStride(i, j, k, i1, i2)\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
+      {\
+         hypre_UserOutsideInnerLoop;\
+         for ( i=0; i<hypre__nx*hypre__sx1; i+=hypre__sx1 )\
+         {
+
+#define hypre_BoxLoop2End_OneStride(i1, i2)\
+         }\
+         i1 += hypre__sy1;\
+         i2 += hypre__sy2;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+   }\
+   }\
+}
+
+
+
 
 /*-----------------------------------*/
 
@@ -472,7 +610,7 @@ if (hypre__num_blocks > 1)\
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -865,7 +1003,7 @@ int  kinc = (hypre_IndexZ(stride)*\
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -883,11 +1021,10 @@ int  kinc = (hypre_IndexZ(stride)*\
 typedef struct hypre_RankLink_struct
 {
    int                           rank;
+   int                           prank;
    struct hypre_RankLink_struct *next;
 
 } hypre_RankLink;
-
-typedef hypre_RankLink *hypre_RankLinkArray[3][3][3];
 
 /*--------------------------------------------------------------------------
  * hypre_BoxNeighbors:
@@ -897,12 +1034,17 @@ typedef struct hypre_BoxNeighbors_struct
 {
    hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
    int                 *procs;            /* procs for 'boxes' */
+   int                 *boxnums;          /* local boxnums for 'boxes' */
    int                 *ids;              /* ids for 'boxes' */
    int                  first_local;      /* first local box address */
    int                  num_local;        /* number of local boxes */
-   int                  num_periodic;     /* number of periodic boxes */
 
-   hypre_RankLinkArray *rank_links;      /* neighbors of local boxes */
+   hypre_Index          periodic;         /* directions of periodicity */
+   int                  id_period;        /* period used for box ids */
+   int                  num_periods;      /* number of box set periods */
+   hypre_Index         *pshifts;          /* shifts of periodicity */
+
+   hypre_RankLink     **rank_links;       /* neighbors of local boxes */
 
 } hypre_BoxNeighbors;
 
@@ -910,9 +1052,9 @@ typedef struct hypre_BoxNeighbors_struct
  * Accessor macros: hypre_RankLink
  *--------------------------------------------------------------------------*/
 
-#define hypre_RankLinkRank(link)      ((link) -> rank)
-#define hypre_RankLinkDistance(link)  ((link) -> distance)
-#define hypre_RankLinkNext(link)      ((link) -> next)
+#define hypre_RankLinkRank(link)  ((link) -> rank)
+#define hypre_RankLinkPRank(link) ((link) -> prank)
+#define hypre_RankLinkNext(link)  ((link) -> next)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxNeighbors
@@ -920,68 +1062,42 @@ typedef struct hypre_BoxNeighbors_struct
 
 #define hypre_BoxNeighborsBoxes(neighbors)       ((neighbors) -> boxes)
 #define hypre_BoxNeighborsProcs(neighbors)       ((neighbors) -> procs)
+#define hypre_BoxNeighborsBoxnums(neighbors)     ((neighbors) -> boxnums)
 #define hypre_BoxNeighborsIDs(neighbors)         ((neighbors) -> ids)
 #define hypre_BoxNeighborsFirstLocal(neighbors)  ((neighbors) -> first_local)
 #define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
-#define hypre_BoxNeighborsNumPeriodic(neighbors) ((neighbors) -> num_periodic)
+#define hypre_BoxNeighborsPeriodic(neighbors)    ((neighbors) -> periodic)
+#define hypre_BoxNeighborsIDPeriod(neighbors)    ((neighbors) -> id_period)
+#define hypre_BoxNeighborsNumPeriods(neighbors)  ((neighbors) -> num_periods)
+#define hypre_BoxNeighborsPShifts(neighbors)     ((neighbors) -> pshifts)
+#define hypre_BoxNeighborsPShift(neighbors, i)   ((neighbors) -> pshifts[i])
 #define hypre_BoxNeighborsRankLinks(neighbors)   ((neighbors) -> rank_links)
 
 #define hypre_BoxNeighborsNumBoxes(neighbors) \
 (hypre_BoxArraySize(hypre_BoxNeighborsBoxes(neighbors)))
-#define hypre_BoxNeighborsRankLink(neighbors, b, i, j, k) \
-(hypre_BoxNeighborsRankLinks(neighbors)[b][i+1][j+1][k+1])
+#define hypre_BoxNeighborsRankLink(neighbors, b) \
+(hypre_BoxNeighborsRankLinks(neighbors)[b])
 
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
  
-#define hypre_BeginBoxNeighborsLoop(n, neighbors, b, distance_index)\
+#define hypre_BeginBoxNeighborsLoop(n, neighbors, b)\
 {\
-   int             hypre__istart = 0;\
-   int             hypre__jstart = 0;\
-   int             hypre__kstart = 0;\
-   int             hypre__istop  = 0;\
-   int             hypre__jstop  = 0;\
-   int             hypre__kstop  = 0;\
    hypre_RankLink *hypre__rank_link;\
-   int             hypre__i, hypre__j, hypre__k;\
+   int             hypre__num_boxes;\
 \
-   hypre__i = hypre_IndexX(distance_index);\
-   if (hypre__i < 0)\
-      hypre__istart = -1;\
-   else if (hypre__i > 0)\
-      hypre__istop = 1;\
+   hypre__num_boxes = hypre_BoxNeighborsNumBoxes(neighbors) / \
+      hypre_BoxNeighborsNumPeriods(neighbors);\
 \
-   hypre__j = hypre_IndexY(distance_index);\
-   if (hypre__j < 0)\
-      hypre__jstart = -1;\
-   else if (hypre__j > 0)\
-      hypre__jstop = 1;\
-\
-   hypre__k = hypre_IndexZ(distance_index);\
-   if (hypre__k < 0)\
-      hypre__kstart = -1;\
-   else if (hypre__k > 0)\
-      hypre__kstop = 1;\
-\
-   for (hypre__k = hypre__kstart; hypre__k <= hypre__kstop; hypre__k++)\
+   hypre__rank_link = hypre_BoxNeighborsRankLink(neighbors, b);\
+   while (hypre__rank_link)\
    {\
-      for (hypre__j = hypre__jstart; hypre__j <= hypre__jstop; hypre__j++)\
-      {\
-         for (hypre__i = hypre__istart; hypre__i <= hypre__istop; hypre__i++)\
-         {\
-            hypre__rank_link = \
-               hypre_BoxNeighborsRankLink(neighbors, b,\
-                                          hypre__i, hypre__j, hypre__k);\
-            while (hypre__rank_link)\
-            {\
-               n = hypre_RankLinkRank(hypre__rank_link);
+      n = hypre_RankLinkRank(hypre__rank_link) +\
+          hypre_RankLinkPRank(hypre__rank_link)*hypre__num_boxes;
 
 #define hypre_EndBoxNeighborsLoop\
-               hypre__rank_link = hypre_RankLinkNext(hypre__rank_link);\
-            }\
-         }\
-      }\
+      hypre__rank_link = hypre_RankLinkNext(hypre__rank_link);\
    }\
 }
 
@@ -992,7 +1108,7 @@ typedef struct hypre_BoxNeighbors_struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -1028,6 +1144,12 @@ typedef struct hypre_StructGrid_struct
 
    int                  ref_count;
 
+ /* GEC0902 additions for ghost expansion of boxes */
+
+   int                 ghlocal_size;   /* Number of vars in box including ghosts */
+   int                 num_ghost[6];   /* ghost layer size for each box  */  
+
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -1045,11 +1167,16 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
+#define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
+#define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
 #define hypre_StructGridNumBoxes(grid) \
 (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
+
+#define hypre_StructGridIDPeriod(grid) \
+hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
 
 /*--------------------------------------------------------------------------
  * Looping macros:
@@ -1066,7 +1193,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -1113,27 +1240,41 @@ hypre_StructStencilShape(stencil)[i]
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 
 #ifndef hypre_COMMUNICATION_HEADER
 #define hypre_COMMUNICATION_HEADER
 
 /*--------------------------------------------------------------------------
- * hypre_CommTypeEntry:
+ * hypre_CommInfo:
  *--------------------------------------------------------------------------*/
 
-typedef struct hypre_CommTypeEntry_struct
+typedef struct hypre_CommInfo_struct
 {
-   hypre_Index  imin;             /* global imin for the data */
-   hypre_Index  imax;             /* global imin for the data */
-   int          offset;           /* offset for the data */
+   hypre_BoxArrayArray   *send_boxes;
+   hypre_BoxArrayArray   *recv_boxes;
+   hypre_Index            send_stride;
+   hypre_Index            recv_stride;
+   int                  **send_processes;
+   int                  **recv_processes;
+   int                  **send_rboxnums;
+   hypre_BoxArrayArray   *send_rboxes;
 
-   int          dim;              /* dimension of the communication */
-   int          length_array[4];
-   int          stride_array[4];
+} hypre_CommInfo;
 
-} hypre_CommTypeEntry;
+/*--------------------------------------------------------------------------
+ * hypre_CommEntryType:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_CommEntryType_struct
+{
+   int  offset;           /* offset for the data */
+   int  dim;              /* dimension of the communication */
+   int  length_array[4];
+   int  stride_array[4];
+
+} hypre_CommEntryType;
 
 /*--------------------------------------------------------------------------
  * hypre_CommType:
@@ -1141,8 +1282,15 @@ typedef struct hypre_CommTypeEntry_struct
 
 typedef struct hypre_CommType_struct
 {
-   hypre_CommTypeEntry  **comm_entries;
-   int                    num_entries;
+   int                   proc;
+   int                   bufsize;     /* message buffer size (in doubles) */
+   int                   num_entries;
+   hypre_CommEntryType  *entries;
+
+   int                  *loc_boxnums; /* entry local box numbers */
+   int                  *rem_boxnums; /* entry remote box numbers */
+   hypre_Box            *loc_boxes;   /* entry local boxes */
+   hypre_Box            *rem_boxes;   /* entry remote boxes */
 
 } hypre_CommType;
 
@@ -1153,23 +1301,27 @@ typedef struct hypre_CommType_struct
 
 typedef struct hypre_CommPkg_struct
 {
-   int                    num_values;
-   MPI_Comm               comm;
+   MPI_Comm          comm;
 
-   int                    num_sends;
-   int                    num_recvs;
-   int                   *send_procs;
-   int                   *recv_procs;
+   int               first_send; /* is this the first send? */
+   int               first_recv; /* is this the first recv? */
+                   
+   int               num_values;
+   hypre_Index       send_stride;
+   hypre_Index       recv_stride;
+   int               send_bufsize; /* total send buffer size (in doubles) */
+   int               recv_bufsize; /* total recv buffer size (in doubles) */
 
-   /* remote communication information */
-   hypre_CommType       **send_types;
-   hypre_CommType       **recv_types;
-   MPI_Datatype          *send_mpi_types;
-   MPI_Datatype          *recv_mpi_types;
+   int               num_sends;
+   int               num_recvs;
+   hypre_CommType   *send_types;
+   hypre_CommType   *recv_types;
 
-   /* local copy information */
-   hypre_CommType        *copy_from_type;
-   hypre_CommType        *copy_to_type;
+   hypre_CommType   *copy_from_type;
+   hypre_CommType   *copy_to_type;
+
+   int              *recv_data_offsets; /* offsets into recv data (by box) */
+   hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
 
 } hypre_CommPkg;
 
@@ -1187,59 +1339,78 @@ typedef struct hypre_CommHandle_struct
    MPI_Request    *requests;
    MPI_Status     *status;
 
-#if defined(HYPRE_COMM_SIMPLE)
    double        **send_buffers;
    double        **recv_buffers;
-   int            *send_sizes;
-   int            *recv_sizes;
-#endif
 
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------
- * Accessor macros: hypre_CommTypeEntry
+ * Accessor macros: hypre_CommInto
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommTypeEntryIMin(entry)          (entry -> imin)
-#define hypre_CommTypeEntryIMax(entry)          (entry -> imax)
-#define hypre_CommTypeEntryOffset(entry)        (entry -> offset)
-#define hypre_CommTypeEntryDim(entry)           (entry -> dim)
-#define hypre_CommTypeEntryLengthArray(entry)   (entry -> length_array)
-#define hypre_CommTypeEntryStrideArray(entry)   (entry -> stride_array)
+#define hypre_CommInfoSendBoxes(info)     (info -> send_boxes)
+#define hypre_CommInfoRecvBoxes(info)     (info -> recv_boxes)
+#define hypre_CommInfoSendStride(info)    (info -> send_stride)
+#define hypre_CommInfoRecvStride(info)    (info -> recv_stride)
+#define hypre_CommInfoSendProcesses(info) (info -> send_processes)
+#define hypre_CommInfoRecvProcesses(info) (info -> recv_processes)
+#define hypre_CommInfoSendRBoxnums(info)  (info -> send_rboxnums)
+#define hypre_CommInfoSendRBoxes(info)    (info -> send_rboxes)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_CommEntryType
+ *--------------------------------------------------------------------------*/
+ 
+#define hypre_CommEntryTypeOffset(entry)       (entry -> offset)
+#define hypre_CommEntryTypeDim(entry)          (entry -> dim)
+#define hypre_CommEntryTypeLengthArray(entry)  (entry -> length_array)
+#define hypre_CommEntryTypeStrideArray(entry)  (entry -> stride_array)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommTypeCommEntries(type)   (type -> comm_entries)
-#define hypre_CommTypeCommEntry(type, i)  (type -> comm_entries[i])
+#define hypre_CommTypeProc(type)          (type -> proc)
+#define hypre_CommTypeBufsize(type)       (type -> bufsize)
 #define hypre_CommTypeNumEntries(type)    (type -> num_entries)
+#define hypre_CommTypeEntries(type)       (type -> entries)
+#define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
+#define hypre_CommTypeLocBoxnums(type)    (type -> loc_boxnums)
+#define hypre_CommTypeLocBoxnum(type, i)  (type -> loc_boxnums[i])
+#define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
+#define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
+#define hypre_CommTypeLocBoxes(type)      (type -> loc_boxes)
+#define hypre_CommTypeLocBox(type, i)    &(type -> loc_boxes[i])
+#define hypre_CommTypeRemBoxes(type)      (type -> rem_boxes)
+#define hypre_CommTypeRemBox(type, i)    &(type -> rem_boxes[i])
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommPkg
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
+
+#define hypre_CommPkgFirstSend(comm_pkg)       (comm_pkg -> first_send)
+#define hypre_CommPkgFirstRecv(comm_pkg)       (comm_pkg -> first_recv)
+
+#define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
+#define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
+#define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)
+#define hypre_CommPkgSendBufsize(comm_pkg)     (comm_pkg -> send_bufsize)
+#define hypre_CommPkgRecvBufsize(comm_pkg)     (comm_pkg -> recv_bufsize)
                                                
 #define hypre_CommPkgNumSends(comm_pkg)        (comm_pkg -> num_sends)
 #define hypre_CommPkgNumRecvs(comm_pkg)        (comm_pkg -> num_recvs)
-#define hypre_CommPkgSendProcs(comm_pkg)       (comm_pkg -> send_procs)
-#define hypre_CommPkgSendProc(comm_pkg, i)     (comm_pkg -> send_procs[i])
-#define hypre_CommPkgRecvProcs(comm_pkg)       (comm_pkg -> recv_procs)
-#define hypre_CommPkgRecvProc(comm_pkg, i)     (comm_pkg -> recv_procs[i])
-
 #define hypre_CommPkgSendTypes(comm_pkg)       (comm_pkg -> send_types)
-#define hypre_CommPkgSendType(comm_pkg, i)     (comm_pkg -> send_types[i])
+#define hypre_CommPkgSendType(comm_pkg, i)    &(comm_pkg -> send_types[i])
 #define hypre_CommPkgRecvTypes(comm_pkg)       (comm_pkg -> recv_types)
-#define hypre_CommPkgRecvType(comm_pkg, i)     (comm_pkg -> recv_types[i])
-#define hypre_CommPkgSendMPITypes(comm_pkg)    (comm_pkg -> send_mpi_types)
-#define hypre_CommPkgSendMPIType(comm_pkg, i)  (comm_pkg -> send_mpi_types[i])
-#define hypre_CommPkgRecvMPITypes(comm_pkg)    (comm_pkg -> recv_mpi_types)
-#define hypre_CommPkgRecvMPIType(comm_pkg, i)  (comm_pkg -> recv_mpi_types[i])
+#define hypre_CommPkgRecvType(comm_pkg, i)    &(comm_pkg -> recv_types[i])
 
 #define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
+
+#define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
+#define hypre_CommPkgRecvDataSpace(comm_pkg)   (comm_pkg -> recv_data_space)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommHandle
@@ -1251,12 +1422,8 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleNumRequests(comm_handle) (comm_handle -> num_requests)
 #define hypre_CommHandleRequests(comm_handle)    (comm_handle -> requests)
 #define hypre_CommHandleStatus(comm_handle)      (comm_handle -> status)
-#if defined(HYPRE_COMM_SIMPLE)
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
-#define hypre_CommHandleSendSizes(comm_handle)   (comm_handle -> send_sizes)
-#define hypre_CommHandleRecvSizes(comm_handle)   (comm_handle -> recv_sizes)
-#endif
 
 #endif
 /*BHEADER**********************************************************************
@@ -1265,7 +1432,7 @@ typedef struct hypre_CommHandle_struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -1275,6 +1442,20 @@ typedef struct hypre_CommHandle_struct
 
 #ifndef hypre_COMPUTATION_HEADER
 #define hypre_COMPUTATION_HEADER
+
+/*--------------------------------------------------------------------------
+ * hypre_ComputeInfo:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_ComputeInfo_struct
+{
+   hypre_CommInfo        *comm_info;
+
+   hypre_BoxArrayArray   *indt_boxes;
+   hypre_BoxArrayArray   *dept_boxes;
+   hypre_Index            stride;
+
+} hypre_ComputeInfo;
 
 /*--------------------------------------------------------------------------
  * hypre_ComputePkg:
@@ -1294,6 +1475,15 @@ typedef struct hypre_ComputePkg_struct
    int                    num_values;
 
 } hypre_ComputePkg;
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_ComputeInfo
+ *--------------------------------------------------------------------------*/
+ 
+#define hypre_ComputeInfoCommInfo(info)     (info -> comm_info)
+#define hypre_ComputeInfoIndtBoxes(info)    (info -> indt_boxes)
+#define hypre_ComputeInfoDeptBoxes(info)    (info -> dept_boxes)
+#define hypre_ComputeInfoStride(info)       (info -> stride)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ComputePkg
@@ -1316,7 +1506,7 @@ typedef struct hypre_ComputePkg_struct
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -1326,6 +1516,8 @@ typedef struct hypre_ComputePkg_struct
 
 #ifndef hypre_STRUCT_MATRIX_HEADER
 #define hypre_STRUCT_MATRIX_HEADER
+
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_StructMatrix:
@@ -1350,6 +1542,10 @@ typedef struct hypre_StructMatrix_struct
                                           data_indices[b][s] is the starting
                                           index of matrix data corresponding
                                           to box b and stencil coefficient s */
+   int                   constant_coefficient;  /* normally 0; set to 1 for
+                                                   constant coefficient matrices
+                                                   or 2 for constant coefficient
+                                                   with variable diagonal */
                       
    int                   symmetric;    /* Is the matrix symmetric */
    int                  *symm_elements;/* Which elements are "symmetric" */
@@ -1377,6 +1573,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
+#define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
@@ -1394,6 +1591,10 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 (hypre_StructMatrixBoxData(matrix, b, s) + \
  hypre_BoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
+#define hypre_CCStructMatrixBoxDataValue(matrix, b, s, index) \
+(hypre_StructMatrixBoxData(matrix, b, s) + \
+ hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
+
 #endif
 /*BHEADER**********************************************************************
  * (c) 1997   The Regents of the University of California
@@ -1401,7 +1602,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.28 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -1467,12 +1668,91 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
 
 #endif
 
+/* box_algebra.c */
+int hypre_IntersectBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
+int hypre_SubtractBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box_array );
+int hypre_SubtractBoxArrays( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array );
+int hypre_SubtractBoxArraysExceptBoxes( hypre_BoxArray *box_array1 , hypre_BoxArray *box_array2 , hypre_BoxArray *tmp_box_array , hypre_Box *boxa , hypre_Box *boxb );
+int hypre_UnionBoxes( hypre_BoxArray *boxes );
+int hypre_MinUnionBoxes( hypre_BoxArray *boxes );
+
+/* box_alloc.c */
+int hypre_BoxInitializeMemory( const int at_a_time );
+int hypre_BoxFinalizeMemory( void );
+hypre_Box *hypre_BoxAlloc( void );
+int hypre_BoxFree( hypre_Box *box );
+
+/* box_boundary.c */
+int hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int thick );
+int hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int ds , int thick );
+int hypre_BoxBoundaryDNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int ds , int thick );
+int hypre_BoxBoundaryNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int *thickness );
+int hypre_BoxBoundaryG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
+int hypre_BoxBoundaryDG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundarym , hypre_BoxArray *boundaryp , int d );
+
+/* box.c */
+hypre_Box *hypre_BoxCreate( void );
+int hypre_BoxSetExtents( hypre_Box *box , hypre_Index imin , hypre_Index imax );
+hypre_BoxArray *hypre_BoxArrayCreate( int size );
+int hypre_BoxArraySetSize( hypre_BoxArray *box_array , int size );
+hypre_BoxArrayArray *hypre_BoxArrayArrayCreate( int size );
+int hypre_BoxDestroy( hypre_Box *box );
+int hypre_BoxArrayDestroy( hypre_BoxArray *box_array );
+int hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array );
+hypre_Box *hypre_BoxDuplicate( hypre_Box *box );
+hypre_BoxArray *hypre_BoxArrayDuplicate( hypre_BoxArray *box_array );
+hypre_BoxArrayArray *hypre_BoxArrayArrayDuplicate( hypre_BoxArrayArray *box_array_array );
+int hypre_AppendBox( hypre_Box *box , hypre_BoxArray *box_array );
+int hypre_DeleteBox( hypre_BoxArray *box_array , int index );
+int hypre_AppendBoxArray( hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 );
+int hypre_BoxGetSize( hypre_Box *box , hypre_Index size );
+int hypre_BoxGetStrideSize( hypre_Box *box , hypre_Index stride , hypre_Index size );
+int hypre_BoxGetStrideVolume( hypre_Box *box , hypre_Index stride , int *volume_ptr );
+int hypre_BoxExpand( hypre_Box *box , int *numexp );
+int hypre_DeleteMultipleBoxes( hypre_BoxArray *box_array , int *indices , int num );
+int hypre_MaxIndexPosition( hypre_Index index , int *position );
+int hypre_MinIndexPosition( hypre_Index index , int *position );
+int hypre_BoxExpandConstant( hypre_Box *box , int expand );
+
+/* box_neighbors.c */
+int hypre_RankLinkCreate( int rank , int prank , hypre_RankLink **rank_link_ptr );
+int hypre_RankLinkDestroy( hypre_RankLink *rank_link );
+int hypre_BoxNeighborsCreate( hypre_BoxArray *boxes , int *procs , int *ids , int first_local , int num_local , hypre_BoxNeighbors **neighbors_ptr );
+int hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , hypre_Index periodic , int max_distance , int prune );
+int hypre_BoxNeighborsDestroy( hypre_BoxNeighbors *neighbors );
+
+/* communication_info.c */
+int hypre_CommInfoCreate( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , int **send_procs , int **recv_procs , int **send_rboxnums , hypre_BoxArrayArray *send_rboxes , hypre_CommInfo **comm_info_ptr );
+int hypre_CommInfoProjectSend( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
+int hypre_CommInfoProjectRecv( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
+int hypre_CommInfoDestroy( hypre_CommInfo *comm_info );
+int hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_CommInfo **comm_info_ptr );
+int hypre_CreateCommInfoFromNumGhost( hypre_StructGrid *grid , int *num_ghost , hypre_CommInfo **comm_info_ptr );
+int hypre_CreateCommInfoFromGrids( hypre_StructGrid *from_grid , hypre_StructGrid *to_grid , hypre_CommInfo **comm_info_ptr );
+
+/* computation.c */
+int hypre_ComputeInfoCreate( hypre_CommInfo *comm_info , hypre_BoxArrayArray *indt_boxes , hypre_BoxArrayArray *dept_boxes , hypre_ComputeInfo **compute_info_ptr );
+int hypre_ComputeInfoProjectSend( hypre_ComputeInfo *compute_info , hypre_Index index , hypre_Index stride );
+int hypre_ComputeInfoProjectRecv( hypre_ComputeInfo *compute_info , hypre_Index index , hypre_Index stride );
+int hypre_ComputeInfoProjectComp( hypre_ComputeInfo *compute_info , hypre_Index index , hypre_Index stride );
+int hypre_ComputeInfoDestroy( hypre_ComputeInfo *compute_info );
+int hypre_CreateComputeInfo( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_ComputeInfo **compute_info_ptr );
+int hypre_ComputePkgCreate( hypre_ComputeInfo *compute_info , hypre_BoxArray *data_space , int num_values , hypre_StructGrid *grid , hypre_ComputePkg **compute_pkg_ptr );
+int hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg );
+int hypre_InitializeIndtComputations( hypre_ComputePkg *compute_pkg , double *data , hypre_CommHandle **comm_handle_ptr );
+int hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle );
+
+/* grow.c */
+hypre_BoxArray *hypre_GrowBoxByStencil( hypre_Box *box , hypre_StructStencil *stencil , int transpose );
+hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil( hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose );
+
 /* HYPRE_struct_grid.c */
 int HYPRE_StructGridCreate( MPI_Comm comm , int dim , HYPRE_StructGrid *grid );
 int HYPRE_StructGridDestroy( HYPRE_StructGrid grid );
 int HYPRE_StructGridSetExtents( HYPRE_StructGrid grid , int *ilower , int *iupper );
 int HYPRE_StructGridSetPeriodic( HYPRE_StructGrid grid , int *periodic );
 int HYPRE_StructGridAssemble( HYPRE_StructGrid grid );
+int HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid , int *num_ghost );
 
 /* HYPRE_struct_matrix.c */
 int HYPRE_StructMatrixCreate( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructStencil stencil , HYPRE_StructMatrix *matrix );
@@ -1480,12 +1760,16 @@ int HYPRE_StructMatrixDestroy( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixInitialize( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetValues( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixGetBoxValues( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAddToValues( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixAssemble( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetNumGhost( HYPRE_StructMatrix matrix , int *num_ghost );
 int HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid );
 int HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix , int symmetric );
+int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix , int nentries , int *entries );
 int HYPRE_StructMatrixPrint( const char *filename , HYPRE_StructMatrix matrix , int all );
 
 /* HYPRE_struct_stencil.c */
@@ -1511,81 +1795,6 @@ int HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector from_vector , HYPRE_
 int HYPRE_StructVectorMigrate( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
 int HYPRE_CommPkgDestroy( HYPRE_CommPkg comm_pkg );
 
-/* box.c */
-hypre_Box *hypre_BoxCreate( void );
-int hypre_BoxSetExtents( hypre_Box *box , hypre_Index imin , hypre_Index imax );
-hypre_BoxArray *hypre_BoxArrayCreate( int size );
-int hypre_BoxArraySetSize( hypre_BoxArray *box_array , int size );
-hypre_BoxArrayArray *hypre_BoxArrayArrayCreate( int size );
-int hypre_BoxDestroy( hypre_Box *box );
-int hypre_BoxArrayDestroy( hypre_BoxArray *box_array );
-int hypre_BoxArrayArrayDestroy( hypre_BoxArrayArray *box_array_array );
-hypre_Box *hypre_BoxDuplicate( hypre_Box *box );
-hypre_BoxArray *hypre_BoxArrayDuplicate( hypre_BoxArray *box_array );
-hypre_BoxArrayArray *hypre_BoxArrayArrayDuplicate( hypre_BoxArrayArray *box_array_array );
-int hypre_AppendBox( hypre_Box *box , hypre_BoxArray *box_array );
-int hypre_DeleteBox( hypre_BoxArray *box_array , int index );
-int hypre_AppendBoxArray( hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 );
-int hypre_BoxGetSize( hypre_Box *box , hypre_Index size );
-int hypre_BoxGetStrideSize( hypre_Box *box , hypre_Index stride , hypre_Index size );
-
-/* box_algebra.c */
-int hypre_IntersectBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
-int hypre_SubtractBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_BoxArray *box_array );
-int hypre_UnionBoxes( hypre_BoxArray *boxes );
-
-/* box_alloc.c */
-int hypre_BoxInitializeMemory( const int at_a_time );
-int hypre_BoxFinalizeMemory( void );
-hypre_Box *hypre_BoxAlloc( void );
-int hypre_BoxFree( hypre_Box *box );
-
-/* box_neighbors.c */
-int hypre_RankLinkCreate( int rank , hypre_RankLink **rank_link_ptr );
-int hypre_RankLinkDestroy( hypre_RankLink *rank_link );
-int hypre_BoxNeighborsCreate( hypre_BoxArray *boxes , int *procs , int *ids , int first_local , int num_local , int num_periodic , hypre_BoxNeighbors **neighbors_ptr );
-int hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , int max_distance , int prune );
-int hypre_BoxNeighborsDestroy( hypre_BoxNeighbors *neighbors );
-
-/* communication.c */
-hypre_CommPkg *hypre_CommPkgCreate( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int **send_processes , int **recv_processes , int num_values , MPI_Comm comm , hypre_Index periodic );
-int hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg );
-int hypre_InitializeCommunication( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
-int hypre_InitializeCommunication( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
-int hypre_FinalizeCommunication( hypre_CommHandle *comm_handle );
-int hypre_FinalizeCommunication( hypre_CommHandle *comm_handle );
-int hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data );
-hypre_CommType *hypre_CommTypeCreate( hypre_CommTypeEntry **comm_entries , int num_entries );
-int hypre_CommTypeDestroy( hypre_CommType *comm_type );
-hypre_CommTypeEntry *hypre_CommTypeEntryCreate( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset );
-int hypre_CommTypeEntryDestroy( hypre_CommTypeEntry *comm_entry );
-int hypre_CommPkgCreateInfo( hypre_BoxArrayArray *boxes , hypre_Index stride , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , hypre_Index periodic , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr );
-int hypre_CommTypeSort( hypre_CommType *comm_type , hypre_Index periodic );
-int hypre_CommPkgCommit( hypre_CommPkg *comm_pkg );
-int hypre_CommPkgUnCommit( hypre_CommPkg *comm_pkg );
-int hypre_CommTypeBuildMPI( int num_comms , int *comm_procs , hypre_CommType **comm_types , MPI_Datatype *comm_mpi_types );
-int hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type );
-int hypre_IModPeriod( int i , int period );
-int hypre_IModPeriodX( hypre_Index index , hypre_Index periodic );
-int hypre_IModPeriodY( hypre_Index index , hypre_Index periodic );
-int hypre_IModPeriodZ( hypre_Index index , hypre_Index periodic );
-
-/* communication_info.c */
-int hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
-int hypre_CreateCommInfoFromNumGhost( hypre_StructGrid *grid , int *num_ghost , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
-int hypre_CreateCommInfoFromGrids( hypre_StructGrid *from_grid , hypre_StructGrid *to_grid , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
-
-/* computation.c */
-int hypre_CreateComputeInfo( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_processes_ptr , int ***recv_processes_ptr , hypre_BoxArrayArray **indt_boxes_ptr , hypre_BoxArrayArray **dept_boxes_ptr );
-int hypre_ComputePkgCreate( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , hypre_Index send_stride , hypre_Index recv_stride , int **send_processes , int **recv_processes , hypre_BoxArrayArray *indt_boxes , hypre_BoxArrayArray *dept_boxes , hypre_Index stride , hypre_StructGrid *grid , hypre_BoxArray *data_space , int num_values , hypre_ComputePkg **compute_pkg_ptr );
-int hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg );
-int hypre_InitializeIndtComputations( hypre_ComputePkg *compute_pkg , double *data , hypre_CommHandle **comm_handle_ptr );
-int hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle );
-
-/* grow.c */
-hypre_BoxArray *hypre_GrowBoxByStencil( hypre_Box *box , hypre_StructStencil *stencil , int transpose );
-hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil( hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose );
-
 /* project.c */
 int hypre_ProjectBox( hypre_Box *box , hypre_Index index , hypre_Index stride );
 int hypre_ProjectBoxArray( hypre_BoxArray *box_array , hypre_Index index , hypre_Index stride );
@@ -1594,8 +1803,18 @@ int hypre_ProjectBoxArrayArray( hypre_BoxArrayArray *box_array_array , hypre_Ind
 /* struct_axpy.c */
 int hypre_StructAxpy( double alpha , hypre_StructVector *x , hypre_StructVector *y );
 
+/* struct_communication.c */
+int hypre_CommPkgCreate( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
+int hypre_CommTypeSetEntries( hypre_CommType *comm_type , int *boxnums , hypre_Box *boxes , hypre_Index stride , int num_values , hypre_BoxArray *data_space , int *data_offsets );
+int hypre_CommTypeSetEntry( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset , hypre_CommEntryType *comm_entry );
+int hypre_InitializeCommunication( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
+int hypre_FinalizeCommunication( hypre_CommHandle *comm_handle );
+int hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data );
+int hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg );
+
 /* struct_copy.c */
 int hypre_StructCopy( hypre_StructVector *x , hypre_StructVector *y );
+int hypre_StructPartialCopy( hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *array_boxes );
 
 /* struct_grid.c */
 int hypre_StructGridCreate( MPI_Comm comm , int dim , hypre_StructGrid **grid_ptr );
@@ -1605,19 +1824,23 @@ int hypre_StructGridSetHoodInfo( hypre_StructGrid *grid , int max_distance );
 int hypre_StructGridSetPeriodic( hypre_StructGrid *grid , hypre_Index periodic );
 int hypre_StructGridSetExtents( hypre_StructGrid *grid , hypre_Index ilower , hypre_Index iupper );
 int hypre_StructGridSetBoxes( hypre_StructGrid *grid , hypre_BoxArray *boxes );
-int hypre_StructGridSetHood( hypre_StructGrid *grid , hypre_BoxArray *hood_boxes , int *hood_procs , int *hood_ids , int first_local , int num_local , int num_periodic , hypre_Box *bounding_box );
+int hypre_StructGridSetHood( hypre_StructGrid *grid , hypre_BoxArray *hood_boxes , int *hood_procs , int *hood_ids , int first_local , int num_local , hypre_Box *bounding_box );
 int hypre_StructGridAssemble( hypre_StructGrid *grid );
 int hypre_GatherAllBoxes( MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr );
+int hypre_ComputeBoxnums( hypre_BoxArray *boxes , int *procs , int **boxnums_ptr );
 int hypre_StructGridPrint( FILE *file , hypre_StructGrid *grid );
 int hypre_StructGridRead( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
-int hypre_StructGridPeriodicAllBoxes( hypre_StructGrid *grid , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr , int *num_periodic_ptr );
+int hypre_StructGridSetNumGhost( hypre_StructGrid *grid , int *num_ghost );
 
 /* struct_innerprod.c */
 double hypre_StructInnerProd( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
 int hypre_PrintBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
+int hypre_PrintCCVDBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , int center_rank , int stencil_size , int *symm_elements , double *data );
+int hypre_PrintCCBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
 int hypre_ReadBoxArrayData( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int num_values , double *data );
+int hypre_ReadBoxArrayData_CC( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , int stencil_size , int real_stencil_size , int constant_coefficient , double *data );
 
 /* struct_matrix.c */
 double *hypre_StructMatrixExtractPointerByIndex( hypre_StructMatrix *matrix , int b , hypre_Index index );
@@ -1627,10 +1850,13 @@ int hypre_StructMatrixDestroy( hypre_StructMatrix *matrix );
 int hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix );
 int hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix , double *data );
 int hypre_StructMatrixInitialize( hypre_StructMatrix *matrix );
-int hypre_StructMatrixSetValues( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int add_to );
-int hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int add_to );
+int hypre_StructMatrixSetValues( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int hypre_StructMatrixSetConstantValues( hypre_StructMatrix *matrix , int num_stencil_indices , int *stencil_indices , double *values , int action );
 int hypre_StructMatrixAssemble( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost( hypre_StructMatrix *matrix , int *num_ghost );
+int hypre_StructMatrixSetConstantCoefficient( hypre_StructMatrix *matrix , int constant_coefficient );
+int hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix , int nentries , int *entries );
 int hypre_StructMatrixPrint( const char *filename , hypre_StructMatrix *matrix , int all );
 int hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead( MPI_Comm comm , const char *filename , int *num_ghost );
@@ -1642,8 +1868,14 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix , i
 void *hypre_StructMatvecCreate( void );
 int hypre_StructMatvecSetup( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 int hypre_StructMatvecCompute( void *matvec_vdata , double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y );
+int hypre_StructMatvecCC0( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
+int hypre_StructMatvecCC1( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
+int hypre_StructMatvecCC2( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
 int hypre_StructMatvecDestroy( void *matvec_vdata );
 int hypre_StructMatvec( double alpha , hypre_StructMatrix *A , hypre_StructVector *x , double beta , hypre_StructVector *y );
+
+/* struct_overlap_innerprod.c */
+double hypre_StructOverlapInnerProd( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_scale.c */
 int hypre_StructScale( double alpha , hypre_StructVector *y );
@@ -1669,12 +1901,15 @@ int hypre_StructVectorGetBoxValues( hypre_StructVector *vector , hypre_Box *valu
 int hypre_StructVectorSetNumGhost( hypre_StructVector *vector , int *num_ghost );
 int hypre_StructVectorAssemble( hypre_StructVector *vector );
 int hypre_StructVectorSetConstantValues( hypre_StructVector *vector , double values );
+int hypre_StructVectorSetFunctionValues( hypre_StructVector *vector , double (*fcn )());
 int hypre_StructVectorClearGhostValues( hypre_StructVector *vector );
+int hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector );
 int hypre_StructVectorClearAllValues( hypre_StructVector *vector );
 hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 int hypre_StructVectorMigrate( hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 int hypre_StructVectorPrint( const char *filename , hypre_StructVector *vector , int all );
 hypre_StructVector *hypre_StructVectorRead( MPI_Comm comm , const char *filename , int *num_ghost );
+int hypre_StructVectorMaxValue( hypre_StructVector *vector , double *max_value , int *max_index , hypre_Index max_xyz_index );
 
 
 #ifdef __cplusplus

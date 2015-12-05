@@ -1,52 +1,57 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
 # See the file COPYRIGHT for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.1 $
+# $Revision: 1.1 $
 #EHEADER***********************************************************************
 
-SHELL = /bin/sh
+include ../config/Makefile.config
 
-srcdir = .
-
-# These are directories that are not yet officially in HYPRE
-HYPRE_FEI_DIRS =\
+HYPRE_FEI_SUBDIRS =\
  SuperLU \
- fei-hypre
+ fei-hypre\
+ femli
 
 all: 
 	@ \
-	for i in ${HYPRE_FEI_DIRS}; \
+	for i in ${HYPRE_FEI_SUBDIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; make install); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
-	done;
+	done
 
-install: all
+install:
+	@ \
+	for i in ${HYPRE_FEI_SUBDIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i && $(MAKE) $@); \
+	  fi; \
+	done
 
 clean:
 	@ \
-	for i in ${HYPRE_FEI_DIRS}; \
+	for i in ${HYPRE_FEI_SUBDIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i; make clean); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
 
-veryclean:
+distclean:
 	@ \
-	for i in ${HYPRE_FEI_DIRS}; \
+	for i in ${HYPRE_FEI_SUBDIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i; make veryclean); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
-

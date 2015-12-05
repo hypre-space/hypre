@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -81,6 +81,17 @@ HYPRE_GMRESSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetConvergenceFactorTol( HYPRE_Solver solver,
+                         double             cf_tol    )
+{
+   return( hypre_GMRESSetConvergenceFactorTol( (void *) solver, cf_tol ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
@@ -152,14 +163,25 @@ HYPRE_GMRESGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESSetPrintLevel( HYPRE_Solver solver,
+                        int          level )
+{
+   return( hypre_GMRESSetPrintLevel( (void *) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESSetLogging
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_GMRESSetLogging( HYPRE_Solver solver,
-                             int logging)
+                     int          level )
 {
-   return( hypre_GMRESSetLogging( (void *) solver, logging ) );
+   return( hypre_GMRESSetLogging( (void *) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -183,3 +205,14 @@ HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return( hypre_GMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GMRESGetResidual
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_GMRESGetResidual( HYPRE_Solver solver, void **residual )
+{
+   /* returns a pointer to the residual vector */
+   return hypre_GMRESGetResidual( (void *) solver, residual );
+}
+

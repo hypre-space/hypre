@@ -6,9 +6,11 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 /* Constants */
 #define NO_MEMTYPE  4      /* 0: lusup;
@@ -183,7 +185,7 @@ dLUMemInit(char *refact, void *work, int lwork, int m, int n, int annz,
     expanders = (ExpHeader *) SUPERLU_MALLOC( NO_MEMTYPE * sizeof(ExpHeader) );
     if ( !expanders ) ABORT("SUPERLU_MALLOC fails for expanders");
     
-    if ( lsame_(refact, "N") ) {
+    if ( superlu_lsame(refact, "N") ) {
 	/* Guess for L\U factors */
 	nzumax = nzlumax = FILL * annz;
 	nzlmax = MAX(1, FILL/4.) * annz;

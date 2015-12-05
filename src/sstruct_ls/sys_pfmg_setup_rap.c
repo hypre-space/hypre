@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -12,7 +12,6 @@
  *****************************************************************************/
 
 #include "headers.h"
-#include "pfmg.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SysPFMGCreateRAPOp

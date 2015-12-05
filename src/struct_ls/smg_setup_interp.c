@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -105,14 +105,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    int                   compute_pkg_stencil_size = 1;
    int                   compute_pkg_stencil_dim = 1;
    hypre_ComputePkg     *compute_pkg;
+   hypre_ComputeInfo    *compute_info;
  
-   hypre_BoxArrayArray  *send_boxes;
-   hypre_BoxArrayArray  *recv_boxes;
-   int                 **send_processes;
-   int                 **recv_processes;
-   hypre_BoxArrayArray  *indt_boxes;
-   hypre_BoxArrayArray  *dept_boxes;
-                     
    hypre_CommHandle     *comm_handle;
                      
    hypre_BoxArrayArray  *compute_box_aa;
@@ -212,22 +206,12 @@ hypre_SMGSetupInterpOp( void               *relax_data,
        *-----------------------------------------------------*/
 
       hypre_CopyIndex(PT_stencil_shape[si], compute_pkg_stencil_shape[0]);
-      hypre_CreateComputeInfo(fgrid, compute_pkg_stencil,
-                              &send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              &indt_boxes, &dept_boxes);
- 
-      hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             indt_boxes, dept_boxes,
-                             stride, fgrid,
-                             hypre_StructVectorDataSpace(x), 1,
-                             &compute_pkg);
+      hypre_CreateComputeInfo(fgrid, compute_pkg_stencil, &compute_info);
+      hypre_ComputeInfoProjectSend(compute_info, findex, stride);
+      hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
+      hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
+      hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+                             fgrid, &compute_pkg);
 
       /*-----------------------------------------------------
        * Copy coefficients from x into P^T

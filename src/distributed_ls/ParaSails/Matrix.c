@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -92,7 +92,7 @@ Matrix *MatrixCreateLocal(int beg_row, int end_row)
 
     Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
 
-    mat->comm = NULL;
+    mat->comm = MPI_COMM_NULL;
 
     mat->beg_row = beg_row;
     mat->end_row = end_row;
@@ -633,8 +633,13 @@ static void SetupSends(Matrix *mat, int *inlist)
     mat->sendlen = 0;
     for (i=0; i<npes; i++)
         mat->sendlen += inlist[i];
-    mat->sendbuf = (double *) malloc(mat->sendlen * sizeof(double));
-    mat->sendind = (int *) malloc(mat->sendlen * sizeof(int));
+    mat->sendbuf = NULL;
+    mat->sendind = NULL;
+    if (mat->sendlen)
+    {
+        mat->sendbuf = (double *) malloc(mat->sendlen * sizeof(double));
+        mat->sendind = (int *) malloc(mat->sendlen * sizeof(int));
+    }
 
     j = 0;
     mat->num_send = 0;

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.7 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -37,6 +37,7 @@ extern "C" {
 #define MPI_Aint            hypre_MPI_Aint             
 
 #define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
+#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -44,6 +45,7 @@ extern "C" {
 #define MPI_INT             hypre_MPI_INT              
 #define MPI_CHAR            hypre_MPI_CHAR             
 #define MPI_LONG            hypre_MPI_LONG             
+#define MPI_BYTE            hypre_MPI_BYTE             
 
 #define MPI_SUM             hypre_MPI_SUM              
 #define MPI_MIN             hypre_MPI_MIN              
@@ -53,6 +55,7 @@ extern "C" {
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
 #define MPI_ANY_SOURCE      hypre_MPI_ANY_SOURCE        
+#define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 
 #define MPI_Init            hypre_MPI_Init             
 #define MPI_Finalize        hypre_MPI_Finalize         
@@ -66,6 +69,7 @@ extern "C" {
 #define MPI_Comm_size       hypre_MPI_Comm_size        
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
 #define MPI_Comm_free       hypre_MPI_Comm_free        
+#define MPI_Comm_split      hypre_MPI_Comm_split        
 #define MPI_Group_incl      hypre_MPI_Group_incl       
 #define MPI_Group_free      hypre_MPI_Group_free        
 #define MPI_Address         hypre_MPI_Address        
@@ -111,11 +115,12 @@ typedef int hypre_MPI_Group;
 typedef int hypre_MPI_Request;
 typedef int hypre_MPI_Datatype;
 
-typedef struct { int MPI_SOURCE; } hypre_MPI_Status;
+typedef struct { int MPI_SOURCE; int MPI_TAG; } hypre_MPI_Status;
 typedef int  hypre_MPI_Op;
 typedef int  hypre_MPI_Aint;
 
 #define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_NULL  -1
 
 #define  hypre_MPI_BOTTOM  0x0
 
@@ -123,6 +128,7 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_INT 1
 #define  hypre_MPI_CHAR 2
 #define  hypre_MPI_LONG 3
+#define  hypre_MPI_BYTE 4
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -132,6 +138,7 @@ typedef int  hypre_MPI_Aint;
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
 #define  hypre_MPI_ANY_SOURCE    1
+#define  hypre_MPI_ANY_TAG       1
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -150,6 +157,7 @@ int hypre_MPI_Comm_size( hypre_MPI_Comm comm , int *size );
 int hypre_MPI_Comm_rank( hypre_MPI_Comm comm , int *rank );
 int hypre_MPI_Comm_free( hypre_MPI_Comm *comm );
 int hypre_MPI_Comm_group( hypre_MPI_Comm comm , hypre_MPI_Group *group );
+int hypre_MPI_Comm_split( hypre_MPI_Comm comm, int n, int m, hypre_MPI_Comm * comms );
 int hypre_MPI_Group_incl( hypre_MPI_Group group , int n , int *ranks , hypre_MPI_Group *newgroup );
 int hypre_MPI_Group_free( hypre_MPI_Group *group );
 int hypre_MPI_Address( void *location , hypre_MPI_Aint *address );

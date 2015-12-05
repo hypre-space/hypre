@@ -1,5 +1,11 @@
+#include "dsp_defs.h"
 #include "supermatrix.h"
-#include "util.h"
+#include "superlu_util.h"
+
+/*************************************************************************
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
+ *************************************************************************/
 
 void
 sp_preorder(char *refact,  SuperMatrix *A, int *perm_c, 
@@ -32,7 +38,7 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
  * A       (input) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of the linear equations is A->nrow. Currently, the type of A can be:
- *         Stype = NC or NCP; Dtype = _D; Mtype = GE. In the future,
+ *         Stype = NC or NCP; Dtype = D_D; Mtype = GE. In the future,
  *         more general A can be handled.
  *
  * perm_c  (input/output) int*
@@ -91,7 +97,7 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
 	ACstore->colend[perm_c[i]] = Astore->colptr[i+1];
     }
 	
-    if ( lsame_(refact, "N") ) {
+    if ( superlu_lsame(refact, "N") ) {
 	
 	/* Compute the column elimination tree */
 	sp_coletree(ACstore->colbeg, ACstore->colend, ACstore->rowind,
@@ -141,7 +147,7 @@ sp_preorder(char *refact,  SuperMatrix *A, int *perm_c,
 
 }
 
-check_perm(char *what, int n, int *perm)
+int check_perm(char *what, int n, int *perm)
 {
     register int i;
     int          *marker;

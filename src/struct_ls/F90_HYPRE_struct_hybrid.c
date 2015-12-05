@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 #include "headers.h"
@@ -207,6 +207,20 @@ hypre_F90_IFACE(hypre_structhybridsetlogging, HYPRE_STRUCTHYBRIDSETLOGGING)( lon
          (int)                *logging    ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetprintlevel, HYPRE_STRUCTHYBRIDSETPRINTLEVEL)( long int *solver,
+                                               int      *print_level,
+                                               int      *ierr    )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetPrintLevel(
+         (HYPRE_StructSolver) *solver,
+         (int)                *print_level  ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_StructHybridGetNumIterations
  *--------------------------------------------------------------------------*/

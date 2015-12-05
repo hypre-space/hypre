@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -38,10 +38,12 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> dxyz)[1]        = 0.0;
    (pfmg_data -> dxyz)[2]        = 0.0;
    (pfmg_data -> relax_type)     = 1;       /* weighted Jacobi */
+   (pfmg_data -> rap_type)       = 0;       
    (pfmg_data -> num_pre_relax)  = 1;
    (pfmg_data -> num_post_relax) = 1;
    (pfmg_data -> skip_relax)     = 1;
    (pfmg_data -> logging)        = 0;
+   (pfmg_data -> print_level)    = 0;
 
    /* initialize */
    (pfmg_data -> num_levels) = -1;
@@ -73,7 +75,10 @@ hypre_PFMGDestroy( void *pfmg_vdata )
       {
          for (l = 0; l < (pfmg_data -> num_levels); l++)
          {
+            if (pfmg_data -> active_l[l])
+            {
             hypre_PFMGRelaxDestroy(pfmg_data -> relax_data_l[l]);
+            }
             hypre_StructMatvecDestroy(pfmg_data -> matvec_data_l[l]);
          }
          for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
@@ -154,6 +159,22 @@ hypre_PFMGSetMaxIter( void *pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGSetMaxLevels
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGSetMaxLevels( void *pfmg_vdata,
+                        int   max_levels  )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   (pfmg_data -> max_levels) = max_levels;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGSetRelChange
  *--------------------------------------------------------------------------*/
 
@@ -197,6 +218,22 @@ hypre_PFMGSetRelaxType( void *pfmg_vdata,
    int             ierr = 0;
  
    (pfmg_data -> relax_type) = relax_type;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PFMGSetRAPType
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGSetRAPType( void *pfmg_vdata,
+                      int   rap_type )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   (pfmg_data -> rap_type) = rap_type;
  
    return ierr;
 }
@@ -284,6 +321,22 @@ hypre_PFMGSetLogging( void *pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PFMGSetPrintLevel( void *pfmg_vdata,
+                         int   print_level)
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   (pfmg_data -> print_level) = print_level;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -312,19 +365,23 @@ hypre_PFMGPrintLogging( void *pfmg_vdata,
    int             i;
    int             num_iterations  = (pfmg_data -> num_iterations);
    int             logging   = (pfmg_data -> logging);
+   int          print_level  = (pfmg_data -> print_level);
    double         *norms     = (pfmg_data -> norms);
    double         *rel_norms = (pfmg_data -> rel_norms);
 
    if (myid == 0)
    {
-      if (logging > 0)
-      {
-         for (i = 0; i < num_iterations; i++)
-         {
-            printf("Residual norm[%d] = %e   ",i,norms[i]);
-            printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
-         }
-      }
+     if (print_level > 0)
+     {
+       if (logging > 0)
+       {
+          for (i = 0; i < num_iterations; i++)
+          {
+             printf("Residual norm[%d] = %e   ",i,norms[i]);
+             printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+          }
+       }
+     }
    }
   
    return ierr;

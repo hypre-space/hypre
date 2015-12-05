@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.7 $
  *********************************************************************EHEADER*/
 
 #include "headers.h"
@@ -50,9 +50,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    int	    numrows;
    int      num_levels; 
-   int      global_nonzeros;
    int      coarsen_type;
    int      measure_type;
+   double   global_nonzeros;
 
    double  *send_buff;
    double  *gather_buff;
@@ -84,12 +84,29 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    global_min_wt;
    double    global_max_wt;
 
-   int     *num_coeffs;
-   int     *num_variables;
-   int      total_variables;
+   double  *num_coeffs;
+   double  *num_variables;
+   double   total_variables; 
    double   operat_cmplxty;
    double   grid_cmplxty;
 
+   /* amg solve params */
+   int      max_iter;
+   int      cycle_type;    
+   int     *num_grid_sweeps;  
+   int     *grid_relax_type;   
+   int      relax_order;
+   int    **grid_relax_points; 
+   double  *relax_weight;
+   double  *omega;
+   double   tol;
+
+   int one = 1;
+   int minus_one = -1;
+   int zero = 0;
+   int smooth_type;
+   int smooth_num_levels;
+ 
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
@@ -98,7 +115,24 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
+   smooth_type = hypre_ParAMGDataSmoothType(amg_data);
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
 
+   /*----------------------------------------------------------
+    * Get the amg_data data
+    *----------------------------------------------------------*/
+
+   num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   max_iter   = hypre_ParAMGDataMaxIter(amg_data);
+   cycle_type = hypre_ParAMGDataCycleType(amg_data);    
+   num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);  
+   grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
+   grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+   relax_weight = hypre_ParAMGDataRelaxWeight(amg_data); 
+   relax_order = hypre_ParAMGDataRelaxOrder(amg_data); 
+   omega = hypre_ParAMGDataOmega(amg_data); 
+   tol = hypre_ParAMGDataTol(amg_data);
+ 
    send_buff     = hypre_CTAlloc(double, 6);
    gather_buff = hypre_CTAlloc(double,6*num_procs);    
  
@@ -142,6 +176,26 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	printf(" Coarsening Type = Falgout-CLJP \n");
       }
+      else if (abs(coarsen_type) == 8) 
+      {
+	printf(" Coarsening Type = PMIS \n");
+      }
+      else if (abs(coarsen_type) == 10) 
+      {
+	printf(" Coarsening Type = HMIS \n");
+      }
+      else if (abs(coarsen_type) == 11) 
+      {
+	printf(" Coarsening Type = Ruge 1st pass only \n");
+      }
+      else if (abs(coarsen_type) == 9) 
+      {
+	printf(" Coarsening Type = PMIS fixed random \n");
+      }
+      else if (abs(coarsen_type) == 7) 
+      {
+	printf(" Coarsening Type = CLJP, fixed random \n");
+      }
       if (coarsen_type > 0) 
       {
 	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
@@ -166,9 +220,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
-   num_coeffs = hypre_CTAlloc(int,num_levels);
+   num_coeffs = hypre_CTAlloc(double,num_levels);
 
-   num_variables = hypre_CTAlloc(int,num_levels);
+   num_variables = hypre_CTAlloc(double,num_levels);
 
    for (level = 0; level < num_levels; level++)
    { 
@@ -183,9 +237,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
        fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-       global_nonzeros = hypre_ParCSRMatrixNumNonzeros(A_array[level]);
+       global_nonzeros = (double) hypre_ParCSRMatrixNumNonzeros(A_array[level]);
        num_coeffs[level] = global_nonzeros;
-       num_variables[level] = fine_size;
+       num_variables[level] = (double) fine_size;
 
        sparse = global_nonzeros /((double) fine_size * (double) fine_size);
 
@@ -222,7 +276,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
            max_rowsum = hypre_max(rowsum, max_rowsum);
        }
   }
-       avg_entries = ((double) global_nonzeros) / ((double) fine_size);
+       avg_entries = global_nonzeros / ((double) fine_size);
 
        send_buff[0] = (double) min_entries;
        send_buff[1] = (double) max_entries;
@@ -250,7 +304,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
               global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          printf( "%2d %7d %8d  %0.3f  %4d %4d",
+          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
                     level, fine_size, global_nonzeros, sparse, global_min_e, 
                     global_max_e);
           printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
@@ -399,11 +453,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    operat_cmplxty = 0;
    for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
    {
-      operat_cmplxty += ((double) num_coeffs[j]) / ((double) num_coeffs[0]);
+      operat_cmplxty +=  num_coeffs[j] / num_coeffs[0];
       total_variables += num_variables[j];
    }
-   if (num_variables[0])
-      grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
+   if (num_variables[0] != 0)
+      grid_cmplxty = total_variables / num_variables[0];
  
    if (my_id == 0 )
    {
@@ -412,6 +466,88 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    }
 
    if (my_id == 0) printf("\n\n");
+
+   if (my_id == 0)
+   { 
+      printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
+      printf( "  Maximum number of cycles:         %d \n",max_iter);
+      printf( "  Stopping Tolerance:               %e \n",tol); 
+      printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      printf( "  Relaxation Parameters:\n");
+      printf( "   Visiting Grid:                     fine  down   up  coarse\n");
+      printf( "            Number of partial sweeps:%4d  %4d   %2d  %4d \n",
+              num_grid_sweeps[0],num_grid_sweeps[1],
+              num_grid_sweeps[2],num_grid_sweeps[3]);
+      printf( "   Type 0=Jac, 1=GS, 3=Hybrid 9=GE:  %4d  %4d   %2d  %4d \n",
+              grid_relax_type[0],grid_relax_type[1],
+              grid_relax_type[2],grid_relax_type[3]);
+      printf( "   Point types, partial sweeps (1=C, -1=F):\n");
+      printf( "                               Finest grid:");
+      if (grid_relax_points)
+      {
+         for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d", grid_relax_points[0][j]);
+         printf( "\n");
+         printf( "                  Pre-CG relaxation (down):");
+         for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d", grid_relax_points[1][j]);
+         printf( "\n");
+         printf( "                   Post-CG relaxation (up):");
+         for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d", grid_relax_points[2][j]);
+         printf( "\n");
+         printf( "                             Coarsest grid:");
+         for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", grid_relax_points[3][j]);
+         printf( "\n\n");
+      }
+      else if (relax_order == 1)
+      {
+         for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d  %2d", one, minus_one);
+         printf( "\n");
+         printf( "                  Pre-CG relaxation (down):");
+         for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d  %2d", one, minus_one);
+         printf( "\n");
+         printf( "                   Post-CG relaxation (up):");
+         for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d  %2d", minus_one, one);
+         printf( "\n");
+         printf( "                             Coarsest grid:");
+         for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", zero);
+         printf( "\n\n");
+      }
+      else 
+      {
+         for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d", zero);
+         printf( "\n");
+         printf( "                  Pre-CG relaxation (down):");
+         for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d", zero);
+         printf( "\n");
+         printf( "                   Post-CG relaxation (up):");
+         for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d", zero);
+         printf( "\n");
+         printf( "                             Coarsest grid:");
+         for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", zero);
+         printf( "\n\n");
+      }
+      if (smooth_type == 6)
+         for (j=0; j < smooth_num_levels; j++)
+            printf( " Schwarz Relaxation Weight %f level %d\n",
+			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
+      for (j=0; j < num_levels; j++)
+         if (relax_weight[j] != 1)
+	       printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+      for (j=0; j < num_levels; j++)
+         if (omega[j] != 1)
+               printf( " Outer relaxation weight %f level %d\n",omega[j],j);
+   }
 
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
@@ -442,13 +578,19 @@ void    *data;
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
+   int      relax_order;
    double  *relax_weight;
+   double  *omega;
    double   tol;
- 
+   int      smooth_type; 
+   int      smooth_num_levels; 
    /* amg output params */
-   int      amg_ioutdat;
+   int      amg_print_level;
  
    int      j;
+   int      one = 1;
+   int      minus_one = -1;
+   int      zero = 0;
  
  
    /*----------------------------------------------------------
@@ -461,16 +603,20 @@ void    *data;
    num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);  
    grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+   relax_order = hypre_ParAMGDataRelaxOrder(amg_data);
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data); 
+   omega = hypre_ParAMGDataOmega(amg_data); 
+   smooth_type = hypre_ParAMGDataSmoothType(amg_data); 
+   smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data); 
    tol = hypre_ParAMGDataTol(amg_data);
  
-   amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
+   amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
  
    /*----------------------------------------------------------
     * AMG info
     *----------------------------------------------------------*/
  
-   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+   if (amg_print_level == 1 || amg_print_level == 3)
    { 
       printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
       printf( "  Maximum number of cycles:         %d \n",max_iter);
@@ -479,36 +625,79 @@ void    *data;
       printf( "  Relaxation Parameters:\n");
       printf( "   Visiting Grid:                     fine  down   up  coarse\n");
       printf( "            Number of partial sweeps:%4d  %4d   %2d  %4d \n",
-              num_grid_sweeps[0],num_grid_sweeps[2],
+              num_grid_sweeps[0],num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
       printf( "   Type 0=Jac, 1=GS, 3=Hybrid 9=GE:  %4d  %4d   %2d  %4d \n",
-              grid_relax_type[0],grid_relax_type[2],
+              grid_relax_type[0],grid_relax_type[1],
               grid_relax_type[2],grid_relax_type[3]);
       printf( "   Point types, partial sweeps (1=C, -1=F):\n");
       printf( "                               Finest grid:");
-      for (j = 0; j < num_grid_sweeps[0]; j++)
-              printf("  %2d", grid_relax_points[0][j]);
-      printf( "\n");
-      printf( "                  Pre-CG relaxation (down):");
-      for (j = 0; j < num_grid_sweeps[1]; j++)
-              printf("  %2d", grid_relax_points[1][j]);
-      printf( "\n");
-      printf( "                   Post-CG relaxation (up):");
-      for (j = 0; j < num_grid_sweeps[2]; j++)
-              printf("  %2d", grid_relax_points[2][j]);
-      printf( "\n");
-      printf( "                             Coarsest grid:");
-      for (j = 0; j < num_grid_sweeps[3]; j++)
-              printf("  %2d", grid_relax_points[3][j]);
-      printf( "\n\n");
-      if(grid_relax_type[0] == 0 || grid_relax_type[1] == 0 ||
-         grid_relax_type[2] == 0 || grid_relax_type[3] == 0)
+      if (grid_relax_points)
       {
-         for (j=0; j < num_levels; j++)
-         printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);
+         for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d", grid_relax_points[0][j]);
+         printf( "\n");
+         printf( "                  Pre-CG relaxation (down):");
+         for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d", grid_relax_points[1][j]);
+         printf( "\n");
+         printf( "                   Post-CG relaxation (up):");
+         for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d", grid_relax_points[2][j]);
+         printf( "\n");
+         printf( "                             Coarsest grid:");
+         for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", grid_relax_points[3][j]);
+         printf( "\n\n");
       }
+      else if (relax_order == 1)
+      {
+         for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d  %2d", one, minus_one);
+         printf( "\n");
+         printf( "                  Pre-CG relaxation (down):");
+         for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d  %2d", one, minus_one);
+         printf( "\n");
+         printf( "                   Post-CG relaxation (up):");
+         for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d  %2d", minus_one, one);
+         printf( "\n");
+         printf( "                             Coarsest grid:");
+         for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", zero);
+         printf( "\n\n");
+      }
+      else 
+      {
+         for (j = 0; j < num_grid_sweeps[0]; j++)
+              printf("  %2d", zero);
+         printf( "\n");
+         printf( "                  Pre-CG relaxation (down):");
+         for (j = 0; j < num_grid_sweeps[1]; j++)
+              printf("  %2d", zero);
+         printf( "\n");
+         printf( "                   Post-CG relaxation (up):");
+         for (j = 0; j < num_grid_sweeps[2]; j++)
+              printf("  %2d", zero);
+         printf( "\n");
+         printf( "                             Coarsest grid:");
+         for (j = 0; j < num_grid_sweeps[3]; j++)
+              printf("  %2d", zero);
+         printf( "\n\n");
+      }
+      if (smooth_type == 6)
+         for (j=0; j < smooth_num_levels; j++)
+            printf( " Schwarz Relaxation Weight %f level %d\n",
+			hypre_ParAMGDataSchwarzRlxWeight(amg_data),j);
+      for (j=0; j < num_levels; j++)
+         if (relax_weight[j] != 1)
+	       printf( " Relaxation Weight %f level %d\n",relax_weight[j],j);
+      for (j=0; j < num_levels; j++)
+         if (omega[j] != 1)
+               printf( " Outer relaxation weight %f level %d\n",omega[j],j);
 
-      printf( " Output flag (ioutdat): %d \n", amg_ioutdat);
+      printf( " Output flag (print_level): %d \n", amg_print_level);
    }
  
    return 0;

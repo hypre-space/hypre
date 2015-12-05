@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 #include "headers.h"
@@ -190,6 +190,20 @@ hypre_F90_IFACE(hypre_structpcgsetlogging, HYPRE_STRUCTPCGSETLOGGING)( long int 
    *ierr = (int)
       ( HYPRE_StructPCGSetLogging( (HYPRE_StructSolver) *solver,
                                    (int)                *logging ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructPCGSetLogging
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structpcgsetprintlevel, HYPRE_STRUCTPCGSETPRINTLEVEL)( long int *solver,
+                                            int      *print_level,
+                                            int      *ierr    )
+{
+   *ierr = (int)
+      ( HYPRE_StructPCGSetPrintLevel( (HYPRE_StructSolver) *solver,
+                                   (int)                *print_level ) );
 }
 
 /*--------------------------------------------------------------------------

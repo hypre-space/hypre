@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -30,16 +30,18 @@ hypre_CSRMatrixCreate( int num_rows,
    hypre_CSRMatrixData(matrix) = NULL;
    hypre_CSRMatrixI(matrix)    = NULL;
    hypre_CSRMatrixJ(matrix)    = NULL;
+   hypre_CSRMatrixRownnz(matrix) = NULL;
    hypre_CSRMatrixNumRows(matrix) = num_rows;
    hypre_CSRMatrixNumCols(matrix) = num_cols;
    hypre_CSRMatrixNumNonzeros(matrix) = num_nonzeros;
 
    /* set defaults */
    hypre_CSRMatrixOwnsData(matrix) = 1;
+   hypre_CSRMatrixNumRownnz(matrix) = num_rows;
+
 
    return matrix;
 }
-
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
@@ -52,6 +54,8 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
    if (matrix)
    {
       hypre_TFree(hypre_CSRMatrixI(matrix));
+      if (hypre_CSRMatrixRownnz(matrix))
+         hypre_TFree(hypre_CSRMatrixRownnz(matrix));
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {
          hypre_TFree(hypre_CSRMatrixData(matrix));
@@ -72,14 +76,17 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
    int  num_rows     = hypre_CSRMatrixNumRows(matrix);
    int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
+/*   int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
 
    int  ierr=0;
 
-   if ( ! hypre_CSRMatrixData(matrix) )
+   if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
       hypre_CSRMatrixData(matrix) = hypre_CTAlloc(double, num_nonzeros);
    if ( ! hypre_CSRMatrixI(matrix) )
       hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(int, num_rows + 1);
-   if ( ! hypre_CSRMatrixJ(matrix) )
+/*   if ( ! hypre_CSRMatrixRownnz(matrix) )
+      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(int, num_rownnz);*/
+   if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
       hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(int, num_nonzeros);
 
    return ierr;
@@ -97,6 +104,52 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
 
    hypre_CSRMatrixOwnsData(matrix) = owns_data;
 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSetRownnz
+ *
+ * function to set the substructure rownnz and num_rowsnnz inside the CSRMatrix
+ * it needs the A_i substructure of CSRMatrix to find the nonzero rows.
+ * It runs after the create CSR and when A_i is known..It does not check for
+ * the existence of A_i or of the CSR matrix.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
+{
+   int    ierr=0;
+   int  num_rows = hypre_CSRMatrixNumRows(matrix);
+   int  *A_i = hypre_CSRMatrixI(matrix);
+   int  *Arownnz;
+
+   int i, adiag;
+   int irownnz=0;
+
+   for (i=0; i < num_rows; i++)
+   {
+      adiag = (A_i[i+1] - A_i[i]);
+      if(adiag > 0) irownnz++;
+   }
+
+   hypre_CSRMatrixNumRownnz(matrix) = irownnz;
+
+   if ((irownnz == 0) || (irownnz == num_rows))
+   {
+       hypre_CSRMatrixRownnz(matrix) = NULL;
+   }
+   else
+   {
+       Arownnz = hypre_CTAlloc(int, irownnz);
+       irownnz = 0;
+       for (i=0; i < num_rows; i++)
+       {
+          adiag = A_i[i+1]-A_i[i];
+          if(adiag > 0) Arownnz[irownnz++] = i;
+       }
+        hypre_CSRMatrixRownnz(matrix) = Arownnz;
+   }
    return ierr;
 }
 
@@ -217,7 +270,7 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
    {
       for (j = 0; j < matrix_i[num_rows]; j++)
       {
-         fprintf(fp, "%le\n", matrix_data[j]);
+         fprintf(fp, "%e\n", matrix_data[j]);
       }
    }
    else

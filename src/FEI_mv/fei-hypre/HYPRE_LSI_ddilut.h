@@ -1,10 +1,10 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2001   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -34,6 +34,8 @@ extern int HYPRE_LSI_DDIlutDestroy( HYPRE_Solver solver );
 extern int HYPRE_LSI_DDIlutSetFillin( HYPRE_Solver solver, double fillin);
 extern int HYPRE_LSI_DDIlutSetOutputLevel( HYPRE_Solver solver, int level);
 extern int HYPRE_LSI_DDIlutSetDropTolerance( HYPRE_Solver solver, double thresh);
+extern int HYPRE_LSI_DDIlutSetOverlap( HYPRE_Solver solver );
+extern int HYPRE_LSI_DDIlutSetReorder( HYPRE_Solver solver );
 extern int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                                   HYPRE_ParVector b,   HYPRE_ParVector x );
 extern int HYPRE_LSI_DDIlutSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,

@@ -6,6 +6,8 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 /*
   Copyright (c) 1994 by Xerox Corporation.  All rights reserved.
@@ -20,8 +22,19 @@
   the code was modified is included with the above copyright notice.
 */
 
+
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
+
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
+
+/* 
+ * Function prototypes 
+ */
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 
 /*
@@ -45,10 +58,12 @@ dsnode_bmod (
 #endif
     int            incx = 1, incy = 1;
     double         alpha = -1.0, beta = 1.0;
+#else
+    int            i, iptr; 
 #endif
 
     int            luptr, nsupc, nsupr, nrow;
-    int            isub, irow, i, iptr; 
+    int            isub, irow; 
     register int   ufirst, nextlu;
     int            *lsub, *xlsub;
     double         *lusup;
@@ -94,14 +109,14 @@ dsnode_bmod (
 	SGEMV( ftcs2, &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
 		&lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #else
-	dtrsv_( "L", "N", "U", &nsupc, &lusup[luptr], &nsupr, 
+	hypre_F90_NAME_BLAS(dtrsv,DTRSV)( "L", "N", "U", &nsupc, &lusup[luptr], &nsupr, 
 	      &lusup[ufirst], &incx );
-	dgemv_( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
+	hypre_F90_NAME_BLAS(dgemv,DGEMV)( "N", &nrow, &nsupc, &alpha, &lusup[luptr+nsupc], &nsupr, 
 		&lusup[ufirst], &incx, &beta, &lusup[ufirst+nsupc], &incy );
 #endif
 #else
-	dlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
-	dmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
+	sludlsolve ( nsupr, nsupc, &lusup[luptr], &lusup[ufirst] );
+	sludmatvec ( nsupr, nrow, nsupc, &lusup[luptr+nsupc], 
 			&lusup[ufirst], &tempv[0] );
 
         /* Scatter tempv[*] into lusup[*] */

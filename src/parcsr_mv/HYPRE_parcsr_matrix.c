@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -108,7 +108,7 @@ HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix  matrix,
    int ierr = 0;
 
    *M = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
-   *N = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
+   *N = hypre_ParCSRMatrixGlobalNumCols((hypre_ParCSRMatrix *) matrix);
 
    return( ierr );
 }

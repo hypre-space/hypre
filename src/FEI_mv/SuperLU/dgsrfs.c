@@ -6,6 +6,8 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file addressing issue regarding calls to
+ * blas/lapack functions (Dec 2003 at LLNL)
  */
 /*
  * File name:	dgsrfs.c
@@ -13,7 +15,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
@@ -46,17 +48,17 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
  *   A       (input) SuperMatrix*
  *           The original matrix A in the system, or the scaled A if
  *           equilibration was done. The type of A can be:
- *           Stype = NC, Dtype = _D, Mtype = GE.
+ *           Stype = NC, Dtype = D_D, Mtype = GE.
  *    
  *   L       (input) SuperMatrix*
  *	     The factor L from the factorization Pr*A*Pc=L*U. Use
  *           compressed row subscripts storage for supernodes, 
- *           i.e., L has types: Stype = SC, Dtype = _D, Mtype = TRLU.
+ *           i.e., L has types: Stype = SC, Dtype = D_D, Mtype = TRLU.
  * 
  *   U       (input) SuperMatrix*
  *           The factor U from the factorization Pr*A*Pc=L*U as computed by
  *           dgstrf(). Use column-wise storage scheme, 
- *           i.e., U has types: Stype = NC, Dtype = _D, Mtype = TRU.
+ *           i.e., U has types: Stype = NC, Dtype = D_D, Mtype = TRU.
  *
  *   perm_r  (input) int*, dimension (A->nrow)
  *           Row permutation vector, which defines the permutation matrix Pr;
@@ -86,12 +88,12 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
  *           If equed = 'N' or 'R', C is not accessed.
  *
  *   B       (input) SuperMatrix*
- *           B has types: Stype = DN, Dtype = _D, Mtype = GE.
+ *           B has types: Stype = DN, Dtype = D_D, Mtype = GE.
  *           The right hand side matrix B.
  *           if equed = 'R' or 'B', B is premultiplied by diag(R).
  *
  *   X       (input/output) SuperMatrix*
- *           X has types: Stype = DN, Dtype = _D, Mtype = GE.
+ *           X has types: Stype = DN, Dtype = D_D, Mtype = GE.
  *           On entry, the solution matrix X, as computed by dgstrs().
  *           On exit, the improved solution matrix X.
  *           if *equed = 'C' or 'B', X should be premultiplied by diag(C)
@@ -145,14 +147,14 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     double   *work;
     double   *rwork;
     int      *iwork;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
 #ifdef _CRAY
     extern int SCOPY(int *, double *, int *, double *, int *);
     extern int SSAXPY(int *, double *, double *, int *, double *, int *);
 #else
-    extern int dcopy_(int *, double *, int *, double *, int *);
-    extern int daxpy_(int *, double *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(dcopy,DCOPY)(int *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(daxpy,DAXPY)(int *, double *, double *, int *, double *, int *);
 #endif
 
     Astore = A->Store;
@@ -167,26 +169,27 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     
     /* Test the input parameters */
     *info = 0;
-    notran = lsame_(trans, "N");
-    if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C"))	*info = -1;
+    notran = superlu_lsame(trans, "N");
+    if ( !notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C"))	
+        *info = -1;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
-	      A->Stype != NC || A->Dtype != _D || A->Mtype != GE )
+	      A->Stype != NC || A->Dtype != D_D || A->Mtype != GE )
 	*info = -2;
     else if ( L->nrow != L->ncol || L->nrow < 0 ||
- 	      L->Stype != SC || L->Dtype != _D || L->Mtype != TRLU )
+ 	      L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU )
 	*info = -3;
     else if ( U->nrow != U->ncol || U->nrow < 0 ||
- 	      U->Stype != NC || U->Dtype != _D || U->Mtype != TRU )
+ 	      U->Stype != NC || U->Dtype != D_D || U->Mtype != TRU )
 	*info = -4;
     else if ( ldb < MAX(0, A->nrow) ||
- 	      B->Stype != DN || B->Dtype != _D || B->Mtype != GE )
+ 	      B->Stype != DN || B->Dtype != D_D || B->Mtype != GE )
         *info = -10;
     else if ( ldx < MAX(0, A->nrow) ||
- 	      X->Stype != DN || X->Dtype != _D || X->Mtype != GE )
+ 	      X->Stype != DN || X->Dtype != D_D || X->Mtype != GE )
 	*info = -11;
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgsrfs", &i);
+	superlu_xerbla("dgsrfs", &i);
 	return;
     }
 
@@ -199,8 +202,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 	return;
     }
 
-    rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-    colequ = lsame_(equed, "C") || lsame_(equed, "B");
+    rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+    colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
     
     /* Allocate working space */
     work = doubleMalloc(2*A->nrow);
@@ -217,8 +220,8 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 
     /* NZ = maximum number of nonzero elements in each row of A, plus 1 */
     nz     = A->ncol + 1;
-    eps    = dlamch_("Epsilon");
-    safmin = dlamch_("Safe minimum");
+    eps    = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Epsilon");
+    safmin = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
     safe1  = nz * safmin;
     safe2  = safe1 / eps;
 
@@ -260,7 +263,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 #ifdef _CRAY
 	    SCOPY(&A->nrow, Bptr, &ione, work, &ione);
 #else
-	    dcopy_(&A->nrow, Bptr, &ione, work, &ione);
+	    hypre_F90_NAME_BLAS(dcopy,DCOPY)(&A->nrow, Bptr, &ione, work, &ione);
 #endif
 	    sp_dgemv(trans, ndone, A, Xptr, ione, done, work, ione);
 
@@ -314,7 +317,7 @@ dgsrfs(char *trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
 		SAXPY(&A->nrow, &done, work, &ione,
 		       &Xmat[j*ldx], &ione);
 #else
-		daxpy_(&A->nrow, &done, work, &ione,
+		hypre_F90_NAME_BLAS(daxpy,DAXPY)(&A->nrow, &done, work, &ione,
 		       &Xmat[j*ldx], &ione);
 #endif
 		lstres = berr[j];

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -19,7 +19,7 @@
  * hypre_IJVector:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_IJVector_struct
 {
    MPI_Comm      comm;
 
@@ -28,6 +28,9 @@ typedef struct
    int           object_type;       /* Indicates the type of "local storage" */
 
    void         *object;            /* Structure for storing local portion */
+
+   void         *translator;        /* Structure for storing off processor
+				       information */
 
 } hypre_IJVector;
 
@@ -42,6 +45,8 @@ typedef struct
 #define hypre_IJVectorObjectType(vector)     ((vector) -> object_type)
 
 #define hypre_IJVectorObject(vector)         ((vector) -> object)
+
+#define hypre_IJVectorTranslator(vector)     ((vector) -> translator)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects

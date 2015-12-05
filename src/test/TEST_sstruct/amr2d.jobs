@@ -1,0 +1,21 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 2005   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 1.1 $
+#EHEADER***********************************************************************
+
+#=============================================================================
+#=============================================================================
+
+mpirun -np 1 sstruct -in sstruct.in.amr.2D -solver 18 -r 2 1 1 \
+ > amr2d.out.0
+mpirun -np 2 sstruct -in sstruct.in.amr.2D -solver 18 -P 2 1 1 \
+ > amr2d.out.1
+mpirun -np 1 sstruct -in sstruct.in.amr.2D -solver 20 -r 2 1 1 \
+ > amr2d.out.2
+mpirun -np 2 sstruct -in sstruct.in.amr.2D -solver 20 -P 2 1 1 \
+ > amr2d.out.3

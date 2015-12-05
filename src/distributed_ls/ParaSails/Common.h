@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -24,7 +24,6 @@
 #endif
 #else /* not HYPRE */
 #include "mpi.h"
-#define hypre_F90_NAME_BLAS(name,NAME) name##_
 #endif
 
 #ifndef _COMMON_H

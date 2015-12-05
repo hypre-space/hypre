@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.3 $
+ * $Revision: 2.17 $
  *********************************************************************EHEADER*/
 
 #ifndef hypre_ParAMG_DATA_HEADER
@@ -22,6 +22,7 @@ typedef struct
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   S_commpkg_switch;
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
@@ -35,14 +36,17 @@ typedef struct
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
+   int      relax_order;
    int      user_coarse_relax_type;   
    double  *relax_weight; 
+   double  *omega;
    double   tol;
 
    /* problem data */
    hypre_ParCSRMatrix  *A;
    int      num_variables;
    int      num_functions;
+   int      nodal;
    int      num_points;
    int     *dof_func;
    int     *dof_point;           
@@ -59,25 +63,45 @@ typedef struct
    int                **dof_point_array;
    int                **point_dof_map_array;
    int                  num_levels;
-   int                 *smooth_option;
+
+   /* data for more complex smoothers */
+   int                  smooth_num_levels;
+   int                  smooth_type;
    HYPRE_Solver        *smoother;
-   int			smooth_num_sweep;
+   int			smooth_num_sweeps;
    int                  variant;
    int                  overlap;
    int                  domain_type;
    double		schwarz_rlx_weight;
+   int			sym;
+   int			level;
+   int			max_nz_per_row;
+   double		threshold;
+   double		filter;
+   double		drop_tol;
+   char		       *euclidfile;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
    double            *Vtemp_local_data;
-   int                cycle_op_count;                                                   
+   int                cycle_op_count;
+   hypre_ParVector   *Rtemp;
+   hypre_ParVector   *Ptemp;
+   hypre_ParVector   *Ztemp;
+
+   /* fields used by GSMG and LS interpolation */
+   int                 gsmg;        /* nonzero indicates use of GSMG */
+   int                 num_samples; /* number of sample vectors */
+
    /* log info */
+   int      logging;
    int      num_iterations;
    double   rel_resid_norm;
+   hypre_ParVector *residual; /* available if logging>1 */
 
    /* output params */
-   int      ioutdat;
+   int      print_level;
    char     log_file_name[256];
    int      debug_flag;
 
@@ -95,6 +119,7 @@ typedef struct
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
+#define hypre_ParAMGDataSCommPkgSwitch(amg_data) ((amg_data)->S_commpkg_switch)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)
@@ -111,11 +136,14 @@ typedef struct
 #define hypre_ParAMGDataGridRelaxType(amg_data) ((amg_data)->grid_relax_type)
 #define hypre_ParAMGDataGridRelaxPoints(amg_data) \
 ((amg_data)->grid_relax_points)
+#define hypre_ParAMGDataRelaxOrder(amg_data) ((amg_data)->relax_order)
 #define hypre_ParAMGDataRelaxWeight(amg_data) ((amg_data)->relax_weight)
+#define hypre_ParAMGDataOmega(amg_data) ((amg_data)->omega)
 
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
+#define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNumPoints(amg_data) ((amg_data)->num_points)
 #define hypre_ParAMGDataDofFunc(amg_data) ((amg_data)->dof_func)
 #define hypre_ParAMGDataDofPoint(amg_data) ((amg_data)->dof_point)
@@ -133,27 +161,46 @@ typedef struct
 #define hypre_ParAMGDataPointDofMapArray(amg_data) \
 ((amg_data)->point_dof_map_array) 
 #define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)	
-#define hypre_ParAMGDataSmoothOption(amg_data) ((amg_data)->smooth_option)
+#define hypre_ParAMGDataSmoothType(amg_data) ((amg_data)->smooth_type)
+#define hypre_ParAMGDataSmoothNumLevels(amg_data) \
+((amg_data)->smooth_num_levels)
+#define hypre_ParAMGDataSmoothNumSweeps(amg_data) \
+((amg_data)->smooth_num_sweeps)	
 #define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
-#define hypre_ParAMGDataSmoothNumSweep(amg_data) ((amg_data)->smooth_num_sweep)	
 #define hypre_ParAMGDataVariant(amg_data) ((amg_data)->variant)	
 #define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->overlap)	
 #define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->domain_type)	
 #define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
 ((amg_data)->schwarz_rlx_weight)
+#define hypre_ParAMGDataSym(amg_data) ((amg_data)->sym)	
+#define hypre_ParAMGDataLevel(amg_data) ((amg_data)->level)	
+#define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->max_nz_per_row)
+#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->threshold)	
+#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->filter)	
+#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->drop_tol)	
+#define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)	
 
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)
 #define hypre_ParAMGDataVtempLocal(amg_data) ((amg_data)->Vtemp_local)
 #define hypre_ParAMGDataVtemplocalData(amg_data) ((amg_data)->Vtemp_local_data)
 #define hypre_ParAMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)
+#define hypre_ParAMGDataRtemp(amg_data) ((amg_data)->Rtemp)
+#define hypre_ParAMGDataPtemp(amg_data) ((amg_data)->Ptemp)
+#define hypre_ParAMGDataZtemp(amg_data) ((amg_data)->Ztemp)
+
+/* fields used by GSMG */
+#define hypre_ParAMGDataGSMG(amg_data) ((amg_data)->gsmg)
+#define hypre_ParAMGDataNumSamples(amg_data) ((amg_data)->num_samples)
 
 /* log info data */
+#define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
 #define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
+#define hypre_ParAMGDataResidual(amg_data) ((amg_data)->residual)
 
 /* output parameters */
-#define hypre_ParAMGDataIOutDat(amg_data) ((amg_data)->ioutdat)
+#define hypre_ParAMGDataPrintLevel(amg_data) ((amg_data)->print_level)
 #define hypre_ParAMGDataLogFileName(amg_data) ((amg_data)->log_file_name)
 #define hypre_ParAMGDataDebugFlag(amg_data)   ((amg_data)->debug_flag)
 

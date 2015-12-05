@@ -1,123 +1,74 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
-all: libHYPRE_DistributedMatrixPilutSolver.a
-
-install:all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
-
-MPI_INCLUDES = -I/usr/local/mpi/mpich/include
-MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
-MPI_LIBS     = -lmpi -lnsl -lsocket -lgen
-MPIRUN       = mpirun -np 4
-
-#PETSc; not used here, but used by objects called from here 
-PETSC_INCLUDES = -I${PETSC_DIR}/include
-# General
-HYPRE_INCLUDES = \
+C_COMPILE_FLAGS = \
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
- -I$(srcdir)/../../distributed_matrix
-
-INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES) $(PETSC_INCLUDES)
-LIBDIR   = $(MPI_LIBDIR)
-LIBS     = -L. -lHYPREpilut -lm $(MPI_LIBS) $(OTHER_LIBS)
-
-# Debugging via asserts
-#DEBUGFLAGS = -DHYPRE_DEBUG -DHYPRE_MEMORY_CHECK #-DNDEBUG #-DTIME
-#DEBUGFLAGS = -DHYPRE_MEMORY_CHECK #-DNDEBUG #-DTIME
-
-HYPREFILES =\
- HYPRE_DistributedMatrixPilutSolver.c
-
-LOCALFILES = debug.c comm.c parutil.c serilut.c parilut.c util.c qsort.c\
-       qsort_si.c trifactor.c ilut.c pblas1.c 
-
-FILES = $(HYPREFILES) $(LOCALFILES)
+ -I$(srcdir)/../../distributed_matrix\
+${CINCLUDES}
 
 HEADERS = \
-       DistributedMatrixPilutSolver.h const.h ilu.h macros.h struct.h
+ HYPRE_DistributedMatrixPilutSolver_protos.h\
+ HYPRE_DistributedMatrixPilutSolver_types.h\
+ DistributedMatrixPilutSolver.h\
+ const.h\
+ ilu.h\
+ internal_protos.h\
+ macros.h\
+ struct.h
+
+FILES =\
+ comm.c\
+ debug.c\
+ distributed_qsort.c\
+ distributed_qsort_si.c\
+ HYPRE_DistributedMatrixPilutSolver.c\
+ ilut.c\
+ parilut.c\
+ parutil.c\
+ pblas1.c\
+ serilut.c\
+ trifactor.c\
+ util.c
 
 OBJS = ${FILES:.c=.o}
 
-${OBJS}: ${HEADERS}
+##################################################################
+# Targets
+##################################################################
 
-CC =  mpicc
-CXX =  mpiCC
-F77 = mpif77
+all: libHYPRE_DistributedMatrixPilutSolver.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES= 
-CDEFS = 
+install: libHYPRE_DistributedMatrixPilutSolver.a
+	cp -f $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -f libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
-CFLAGS = \
- $(OPTIMIZATION)\
- $(INCLUDES)\
- $(DEBUGFLAGS)\
- ${C_COMPILE_FLAGS}\
- ${CINCLUDES} ${CDEFS}
+clean:
+	rm -f *.o lib*.a
 
-CXXFLAGS = \
-  \
- ${CXX_COMPILE_FLAGS}\
- -I../..\
- -I$(srcdir)\
- -I$(srcdir)/../..\
- -I$(srcdir)/../../utilities\
- ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG} ${CDEFS}
-
-RANLIB = ranlib
+distclean: clean
 
 ##################################################################
 # Main rules
 ##################################################################
 
-libHYPRE_DistributedMatrixPilutSolver.a: ${PROTOS} ${OBJS}
+libHYPRE_DistributedMatrixPilutSolver.a: ${OBJS}
 	@echo "Building $@ ... "
-	ar -rcu $@ ${OBJS}
-	ranlib $@
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
 
-##################################################################
-# Targets
-##################################################################
-clean:
-	@rm -f *.o *.dxx 
-
-veryclean: clean
-	@rm -f lib*.a
-
-
-##################################################################
-# Generic rules
-##################################################################
-
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-
-.cc.o:
-	${CXX} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-
-
+${OBJS}: ${HEADERS}

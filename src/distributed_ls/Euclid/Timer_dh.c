@@ -12,7 +12,11 @@ void Timer_dhCreate(Timer_dh *t)
   tmp->isRunning = false;
   tmp->begin_wall = 0.0;
   tmp->end_wall = 0.0;
+#ifdef WIN32
+  tmp->sc_clk_tck = CLOCKS_PER_SEC;
+#else
   tmp->sc_clk_tck = sysconf(_SC_CLK_TCK);
+#endif
 
 #if defined(EUCLID_TIMING)
   sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (int)tmp->sc_clk_tck);

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -16,7 +16,16 @@
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
-#if defined(HYPRE_RS6000)
+#ifdef WIN32
+#include "mkl.h"
+#endif
+
+#if defined(F77_FUNC_)
+/* F77_FUNC_ macro assumes underscores exist in name */
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) F77_FUNC_(name,NAME)
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) F77_FUNC_(name,NAME)
+
+#elif defined(HYPRE_RS6000)
 
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name
@@ -31,6 +40,20 @@
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##__
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name##__
 
+#elif defined(HYPRE_LINUX_CHAOS2)
+
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) name##_
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) name##_
+
+#elif defined(HYPRE_HPPA)
+
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) name
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) name
+
+#elif defined(WIN32)
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) NAME
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) NAME
+
 #else
 
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##_
@@ -41,10 +64,31 @@
 #define hypre_F90_IFACE(name,NAME) hypre_NAME_FORT_CALLING_C(name,NAME)
 #define hypre_F90_NAME(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
 
+#ifdef WIN32
+#define hypre_F90_NAME_BLAS(name,NAME) NAME
+#else
+
 #ifdef HYPRE_USING_HYPRE_BLAS
 #define hypre_F90_NAME_BLAS(name,NAME)  name##_
 #else
-#define hypre_F90_NAME_BLAS(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
+#if defined(F77_FUNC)
+/* F77_FUNC macro assumes NO underscores exist in name */
+#define hypre_F90_NAME_BLAS(name,NAME) F77_FUNC(name,NAME)
+#else
+#define hypre_F90_NAME_BLAS(name,NAME) hypre_NAME_C_CALLING_FORT(name,NAME)
+#endif
+#endif
+#endif
+
+#ifdef HYPRE_USING_HYPRE_LAPACK
+#define hypre_F90_NAME_LAPACK(name,NAME)  name##_
+#else
+#if defined(F77_FUNC)
+/* F77_FUNC macro assumes NO underscores exist in name */
+#define hypre_F90_NAME_LAPACK(name,NAME) F77_FUNC(name,NAME)
+#else
+#define hypre_F90_NAME_LAPACK(name,NAME) hypre_NAME_C_CALLING_FORT(name,NAME)
+#endif
 #endif
 
 #endif

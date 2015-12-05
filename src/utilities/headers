@@ -5,7 +5,7 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.4 $
 #EHEADER***********************************************************************
 
 INTERNAL_HEADER=utilities.h
@@ -15,9 +15,6 @@ INTERNAL_HEADER=utilities.h
 #===========================================================================
 
 cat > $INTERNAL_HEADER <<@
-
-#include <HYPRE_config.h>
-
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
@@ -37,7 +34,7 @@ cat general.h                  >> $INTERNAL_HEADER
 
 cat mpistubs.h                 >> $INTERNAL_HEADER
 
-cat memory.h                   >> $INTERNAL_HEADER
+cat hypre_memory.h             >> $INTERNAL_HEADER
 
 ./protos random.c              >> $INTERNAL_HEADER
 
@@ -49,11 +46,15 @@ cat timing.h                   >> $INTERNAL_HEADER
 
 cat amg_linklist.h             >> $INTERNAL_HEADER
 
+cat exchange_data.h            >> $INTERNAL_HEADER
+
 ./protos amg_linklist.c        >> $INTERNAL_HEADER
 		          
 ./protos binsearch.c           >> $INTERNAL_HEADER
 		          
 ./protos qsplit.c              >> $INTERNAL_HEADER
+		          
+./protos hypre_qsort.c         >> $INTERNAL_HEADER
 		          
 #===========================================================================
 # Include guards

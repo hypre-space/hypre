@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.6 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -13,6 +13,14 @@
  *****************************************************************************/
 
 #include "headers.h"
+
+#define DEBUG 0
+
+#if DEBUG
+char       filename[255];
+FILE      *file;
+int        my_rank;
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_StructGridCreate
@@ -24,6 +32,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
                         hypre_StructGrid **grid_ptr)
 {
    hypre_StructGrid    *grid;
+   int                 i;
 
    grid = hypre_TAlloc(hypre_StructGrid, 1);
 
@@ -38,6 +47,15 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridGlobalSize(grid)  = 0;
    hypre_SetIndex(hypre_StructGridPeriodic(grid), 0, 0, 0);
    hypre_StructGridRefCount(grid)     = 1;
+
+   /* additional defaults for the grid ghosts GEC0902  */
+   
+   hypre_StructGridGhlocalSize(grid)  = 0;
+
+   for (i = 0; i < 6; i++)
+   {
+     hypre_StructGridNumGhost(grid)[i] = 1;
+   }
 
    *grid_ptr = grid;
 
@@ -160,7 +178,6 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
                          int              *hood_ids,
                          int               first_local,
                          int               num_local,
-                         int               num_periodic,
                          hypre_Box        *bounding_box )
 {
    int                  ierr = 0;
@@ -186,7 +203,7 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
    hypre_StructGridIDs(grid)   = ids;
 
    hypre_BoxNeighborsCreate(hood_boxes, hood_procs, hood_ids,
-                            first_local, num_local, num_periodic, &neighbors);
+                            first_local, num_local, &neighbors);
    hypre_StructGridNeighbors(grid) = neighbors;
 
    hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
@@ -198,16 +215,12 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
 /*--------------------------------------------------------------------------
  * hypre_StructGridAssemble
  *
- * NOTE: Box ids are set here.  They are globally unique, and appear
- * in increasing order.
+ * NOTE: Box ids are set here for the non-periodic boxes.  They are
+ * globally unique, and appear in increasing order.  The periodic
+ * boxes are definedin BoxNeighborsAssemble.
  *
- * NOTE: Box procs are set here.  They appear in non-decreasing order.
- *
- * NOTE: The boxes in `all_boxes' appear as follows, for example:
- *
- *   proc:     0 0 0 0 1 1 2 2 2 2 ...
- *   ID:       0 1 2 3 4 5 6 7 8 9 ...
- *   periodic:     * *   *     * *
+ * NOTE: Box procs are set here.  They appear in non-decreasing order
+ * for the non-periodic boxes.
  *
  *--------------------------------------------------------------------------*/
 
@@ -223,6 +236,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_BoxNeighbors  *neighbors    = hypre_StructGridNeighbors(grid);
    int                  max_distance = hypre_StructGridMaxDistance(grid);
    hypre_Box           *bounding_box = hypre_StructGridBoundingBox(grid);
+   hypre_IndexRef       periodic     = hypre_StructGridPeriodic(grid);
 
    hypre_Box           *box;
    hypre_BoxArray      *all_boxes;
@@ -230,10 +244,13 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    int                 *all_ids;
    int                  first_local;
    int                  num_local;
-   int                  num_periodic;
    int                  size;
    int                  prune;
    int                  i, d, idmin, idmax;
+   /*  GEC  new declarations for the ghost size local  */
+   int                  *numghost;
+   int                   ghostsize;
+   hypre_Box            *ghostbox;
 
    prune = 1;
 
@@ -274,22 +291,8 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_StructGridGlobalSize(grid) = size;
    }
 
-   /* adjust periodicity values based on the bounding box */
-   for (d = 0; d < 3; d++)
-   {
-      if (hypre_IndexD(hypre_StructGridPeriodic(grid), d))
-      {
-         hypre_IndexD(hypre_StructGridPeriodic(grid), d) =
-            hypre_BoxSizeD(bounding_box, d);
-      }
-   }
-
    if (neighbors == NULL)
    {
-      /* modify all_boxes as required for periodicity */
-      hypre_StructGridPeriodicAllBoxes(grid, &all_boxes, &all_procs,
-                                       &first_local, &num_periodic);
-
       /* set all_ids */
       all_ids = hypre_TAlloc(int, hypre_BoxArraySize(all_boxes));
       hypre_ForBoxI(i, all_boxes)
@@ -300,8 +303,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       /* set neighbors */
       num_local = hypre_BoxArraySize(boxes);
       hypre_BoxNeighborsCreate(all_boxes, all_procs, all_ids,
-                               first_local, num_local, num_periodic,
-                               &neighbors);
+                               first_local, num_local, &neighbors);
       hypre_StructGridNeighbors(grid) = neighbors;
 
       /* set ids */
@@ -315,17 +317,83 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       prune = 1;
    }
 
-   hypre_BoxNeighborsAssemble(neighbors, max_distance, prune);
+   hypre_BoxNeighborsAssemble(neighbors, periodic, max_distance, prune);
 
    /* compute local size */
+  
    size = 0;
+   ghostsize = 0;
    hypre_ForBoxI(i, boxes)
       {
          box = hypre_BoxArrayBox(boxes, i);
-         size += hypre_BoxVolume(box);
+         size += hypre_BoxVolume(box);         
       }
+
    hypre_StructGridLocalSize(grid) = size;
 
+ /* GEC0902 expand the box to include the ghosts. Create, copy and expand
+  * the ghostbox and finally inserting into the ghlocalsize. As a reminder
+  * the boxes variable is the localboxes of the grid (owned by the processor)  
+  */
+
+   numghost = hypre_StructGridNumGhost(grid) ;
+   ghostsize = 0;
+   ghostbox = hypre_BoxCreate();
+   hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+
+         hypre_CopyBox(box, ghostbox);
+         hypre_BoxExpand(ghostbox, numghost);         
+
+	 /*        for (d = 0; d < 3; d++)
+	  * {
+	  *    hypre_BoxIminD(ghostbox, d) -= numghost[2*d];
+	  *    hypre_BoxImaxD(ghostbox, d) += numghost[2*d + 1];
+	  *  }                                           */
+
+        ghostsize += hypre_BoxVolume(ghostbox);        
+
+      }
+   
+   hypre_StructGridGhlocalSize(grid) = ghostsize;
+   hypre_BoxDestroy(ghostbox);
+
+#if DEBUG
+{
+   hypre_BoxNeighbors *neighbors;
+   int                *procs, *boxnums;
+   int                 num_neighbors, i;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+   sprintf(filename, "zgrid.%05d", my_rank);
+
+   if ((file = fopen(filename, "a")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", filename);
+      exit(1);
+   }
+
+   fprintf(file, "\n\n============================\n\n");
+
+   hypre_StructGridPrint(file, grid);
+
+   neighbors = hypre_StructGridNeighbors(grid);
+   num_neighbors = hypre_BoxArraySize(hypre_BoxNeighborsBoxes(neighbors));
+   procs   = hypre_BoxNeighborsProcs(neighbors);
+   boxnums = hypre_BoxNeighborsBoxnums(neighbors);
+   fprintf(file, "num_neighbors = %d\n", num_neighbors);
+   for (i = 0; i < num_neighbors; i++)
+   {
+      fprintf(file, "%d: (%d, %d)\n", i, procs[i], boxnums[i]);
+   }
+
+   fflush(file);
+   fclose(file);
+}
+#endif
+   
    return ierr;
 }
 
@@ -358,7 +426,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    int               *displs;
    int                recvbuf_size;
                      
-   int                i, p, b, ab, d;
+   int                i, p, b, d;
    int                ierr = 0;
 
    /*-----------------------------------------------------
@@ -407,36 +475,34 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    /* sort recvbuf by process rank? */
 
    /*-----------------------------------------------------
-    * Create all_boxes, all_procs, and first_local
+    * Create all_boxes, etc.
     *-----------------------------------------------------*/
 
    /* unpack recvbuf box info */
    all_boxes_size = recvbuf_size / 7;
-   all_boxes = hypre_BoxArrayCreate(all_boxes_size);
-   all_procs = hypre_TAlloc(int, all_boxes_size);
+   all_boxes   = hypre_BoxArrayCreate(all_boxes_size);
+   all_procs   = hypre_TAlloc(int, all_boxes_size);
    first_local = -1;
-   i  = 0;
-   p  = 0;
-   ab = 0;
+   i = 0;
+   b = 0;
    box = hypre_BoxCreate();
    while (i < recvbuf_size)
    {
-      all_procs[p] = recvbuf[i++];
+      all_procs[b] = recvbuf[i++];
       for (d = 0; d < 3; d++)
       {
          hypre_IndexD(imin, d) = recvbuf[i++];
          hypre_IndexD(imax, d) = recvbuf[i++];
       }
       hypre_BoxSetExtents(box, imin, imax);
-      hypre_CopyBox(box, hypre_BoxArrayBox(all_boxes, ab));
-      ab++;
+      hypre_CopyBox(box, hypre_BoxArrayBox(all_boxes, b));
 
-      if ((first_local < 0) && (all_procs[p] == my_rank))
+      if ((first_local < 0) && (all_procs[b] == my_rank))
       {
-         first_local = p;
+         first_local = b;
       }
 
-      p++;
+      b++;
    }
    hypre_BoxDestroy(box);
 
@@ -449,9 +515,55 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    hypre_SharedTFree(recvcounts);
    hypre_TFree(displs);
 
-   *all_boxes_ptr = all_boxes;
-   *all_procs_ptr = all_procs;
+   *all_boxes_ptr   = all_boxes;
+   *all_procs_ptr   = all_procs;
    *first_local_ptr = first_local;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ComputeBoxnums
+ *
+ * It is assumed that, for any process number in 'procs', all of that
+ * processes local boxes appear in the 'boxes' array.
+ *
+ * It is assumed that the boxes in 'boxes' are ordered by associated
+ * process number then by their local ordering on that process.
+ *
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeBoxnums(hypre_BoxArray *boxes,
+                     int            *procs,
+                     int           **boxnums_ptr)
+{
+   int                ierr = 0;
+
+   int               *boxnums;
+   int                num_boxes;
+   int                p, b, boxnum;
+
+   /*-----------------------------------------------------
+    *-----------------------------------------------------*/
+
+   num_boxes = hypre_BoxArraySize(boxes);
+   boxnums = hypre_TAlloc(int, num_boxes);
+
+   p = -1;
+   for(b = 0; b < num_boxes; b++)
+   {
+      /* start boxnum count at zero for each new process */
+      if (procs[b] != p)
+      {
+         boxnum = 0;
+         p = procs[b];
+      }
+      boxnums[b] = boxnum;
+      boxnum++;
+   }
+
+   *boxnums_ptr = boxnums;
 
    return ierr;
 }
@@ -537,140 +649,23 @@ hypre_StructGridRead( MPI_Comm           comm,
    return ierr;
 }
 
-/*--------------------------------------------------------------------------
- * hypre_StructGridPeriodicAllBoxes
- *--------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+ * GEC0902  hypre_StructGridSetNumGhost
+ *
+ * the purpose is to set num ghost in the structure grid. It is identical
+ * to the function that is used in the structure vector entity.
+ *-----------------------------------------------------------------------------*/
 
-int 
-hypre_StructGridPeriodicAllBoxes( hypre_StructGrid  *grid,
-                                  hypre_BoxArray   **all_boxes_ptr,
-                                  int              **all_procs_ptr,
-                                  int               *first_local_ptr,
-                                  int               *num_periodic_ptr )
+int
+hypre_StructGridSetNumGhost( hypre_StructGrid *grid, int  *num_ghost )
 {
-   int               ierr = 0;
+  int  ierr = 0;
+  int  i;
+  
+  for (i = 0; i < 6; i++)
+  {
+    hypre_StructGridNumGhost(grid)[i] = num_ghost[i];
+  }
 
-   int               new_num_periodic = 0;
-
-   int               px = hypre_IndexX(hypre_StructGridPeriodic(grid));
-   int               py = hypre_IndexY(hypre_StructGridPeriodic(grid));
-   int               pz = hypre_IndexZ(hypre_StructGridPeriodic(grid));
-
-   int               i_periodic = 0;
-   int               j_periodic = 0;
-   int               k_periodic = 0;
-      
-   if (px != 0)
-      i_periodic = 1;
-   if (py != 0)
-      j_periodic = 1;
-   if (pz != 0)
-      k_periodic = 1;
-
-   if( !(i_periodic == 0 && j_periodic == 0 && k_periodic == 0) )
-   {
-      hypre_BoxArray   *new_all_boxes;
-      int              *new_all_procs;
-      int               new_first_local;
-
-      hypre_BoxArray   *all_boxes   = *all_boxes_ptr;
-      int              *all_procs   = *all_procs_ptr;
-      int               first_local = *first_local_ptr;
-      int               num_local;
-      int               num_periodic;
-
-      hypre_Box        *box;
-      
-      int               num_all, new_num_all;
-      int               i, inew, ip, jp, kp;
-      int               first_i, first_inew;
-
-      num_all  = hypre_BoxArraySize(all_boxes);
-      new_num_all = num_all * ((1+2*i_periodic) *
-                               (1+2*j_periodic) *
-                               (1+2*k_periodic));
-
-      new_all_boxes = hypre_BoxArrayCreate(new_num_all);
-      new_all_procs = hypre_TAlloc(int, new_num_all);
-
-      /* add boxes required for periodicity */
-      i = 0;
-      inew = 0;
-      while (i < num_all)
-      {
-         first_i    = i;
-         first_inew = inew;
-
-         for (i = first_i; i < num_all; i++)
-         {
-            if (all_procs[i] != all_procs[first_i])
-            {
-               break;
-            }
-
-            hypre_CopyBox(hypre_BoxArrayBox(all_boxes, i),
-                          hypre_BoxArrayBox(new_all_boxes, inew));
-            new_all_procs[inew] = all_procs[i];
-
-            inew++;
-         }
-         num_local = i - first_i;
-
-         for (ip = -i_periodic; ip <= i_periodic; ip++)
-         {
-            for (jp = -j_periodic; jp <= j_periodic; jp++)
-            {
-               for (kp = -k_periodic; kp <= k_periodic; kp++)
-               {
-                  if( !(ip == 0 && jp == 0 && kp == 0) )
-                  {
-                     for (i = first_i; i < (first_i + num_local); i++)
-                     {
-                        box = hypre_BoxArrayBox(new_all_boxes, inew);
-                        hypre_CopyBox(hypre_BoxArrayBox(all_boxes, i), box);
-                        
-                        /* shift box */
-                        hypre_BoxIMinD(box, 0) =
-                           hypre_BoxIMinD(box, 0) + (ip * px);
-                        hypre_BoxIMinD(box, 1) =
-                           hypre_BoxIMinD(box, 1) + (jp * py);
-                        hypre_BoxIMinD(box, 2) =
-                           hypre_BoxIMinD(box, 2) + (kp * pz);
-                        hypre_BoxIMaxD(box, 0) =
-                           hypre_BoxIMaxD(box, 0) + (ip * px);
-                        hypre_BoxIMaxD(box, 1) =
-                           hypre_BoxIMaxD(box, 1) + (jp * py);
-                        hypre_BoxIMaxD(box, 2) =
-                           hypre_BoxIMaxD(box, 2) + (kp * pz);
-
-                        new_all_procs[inew] = all_procs[i];
-
-                        inew++;
-                     }
-                  }
-               }
-            }
-         }
-         num_periodic = inew - first_inew - num_local;
-
-         if (first_i == first_local)
-         {
-            new_first_local  = first_inew;
-            new_num_periodic = num_periodic;
-         }
-      }
-
-      hypre_BoxArraySetSize(new_all_boxes, inew);
-
-      hypre_BoxArrayDestroy(all_boxes);
-      hypre_TFree(all_procs);
-
-      *all_boxes_ptr   = new_all_boxes;
-      *all_procs_ptr   = new_all_procs;
-      *first_local_ptr = new_first_local;
-   }
-
-   *num_periodic_ptr = new_num_periodic;
-
-   return ierr;
+  return ierr;
 }

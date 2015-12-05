@@ -1,3 +1,15 @@
+#include "dsp_defs.h"
+
+/* ************************************************************************
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
+ * ***********************************************************************/
+
+extern int superlu_xerbla(char *srname, int *info);
+
+/* local prototype */
+int sp_ienv ( int ispec );
+
 /*
  * File name:		sp_ienv.c
  * History:             Modified from lapack routine ILAENV
@@ -54,7 +66,7 @@ sp_ienv(int ispec)
 
     /* Invalid value for ISPEC */
     i = 1;
-    xerbla_("sp_ienv", &i);
+    superlu_xerbla("sp_ienv ", &i);
     return 0;
 
 } /* sp_ienv_ */

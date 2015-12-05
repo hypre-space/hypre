@@ -1,0 +1,91 @@
+<html><head><TITLE>SStruct FAC Solver</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  SStruct FAC Solver  </H2>
+<hr>
+<DL>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACCreate</B>( MPI_Comm comm, <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> *solver )
+ <DD><I>
+Create a FAC solver object</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACDestroy2</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver )
+ <DD><I>
+Destroy a FAC solver object</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetup2</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> x)
+ <DD><I>
+Set up the FAC solver structure </I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSolve3</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> x)
+ <DD><I>
+Solve the system</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetPLevels</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int nparts, int *plevels)
+ <DD><I>
+Set up amr structure</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetPRefinements</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int nparts, int (*rfactors)[3] )
+ <DD><I>
+Set up amr refinement factors</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetMaxLevels</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_levels )
+ <DD><I>
+(Optional) Set max FAC levels</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetTol</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double tol)
+ <DD><I>
+(Optional) Set the convergence tolerance</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetMaxIter</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_iter)
+ <DD><I>
+(Optional) Set maximum number of iterations</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetRelChange</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int rel_change)
+ <DD><I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetZeroGuess</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+ <DD><I>
+(Optional) Use a zero initial guess</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetNonZeroGuess</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+ <DD><I>
+(Optional) Use a nonzero initial guess</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetRelaxType</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int relax_type)
+ <DD><I>
+(Optional) Set relaxation type</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetNumPreRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_pre_relax)
+ <DD><I>
+(Optional) Set number of pre-relaxation sweeps</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetNumPostRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_post_relax)
+ <DD><I>
+(Optional) Set number of post-relaxation sweeps</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetCoarseSolverType</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int csolver_type)
+ <DD><I>
+(Optional) Set coarsest solver type</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetLogging</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int logging)
+ <DD><I>
+(Optional) Set the amount of logging to do</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
+ <DD><I>
+Return the number of iterations taken</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACGetFinalRelativeResidualNorm</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double *norm)
+ <DD><I>
+Return the norm of the final relative residual</I>
+</DL>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

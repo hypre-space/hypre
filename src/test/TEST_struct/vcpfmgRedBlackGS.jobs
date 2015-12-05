@@ -1,0 +1,55 @@
+#=============================================================================
+# struct: Run PFMG RedBlack Gauss-Seidel tests. Nonsymmetric GS.
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 12 1  -d 2 -solver 1 -relax 3 -istart 1 2 0\
+ > vcpfmgRedBlackGS.out.0
+
+#=============================================================================
+# struct: Run PFMG parallel and blocking 
+#=============================================================================
+
+mpirun -np 3 ./struct -n 4 12 1 -P 3 1 1 -d 2 -solver 1 -relax 3 -istart 1 2 0\
+ > vcpfmgRedBlackGS.out.1
+mpirun -np 3 ./struct -n 4 4 1 -P 1 3 1 -b 3 1 1 -d 2 -solver 1 -relax 3 \
+-istart 1 2 0> vcpfmgRedBlackGS.out.2
+
+#=============================================================================
+# struct: Run PFMG 2d run as 3d
+#=============================================================================
+
+mpirun -np 4 ./struct -n 3 1 12 -P 4 1 1 -c 1 0 1 -solver 1 -relax 3 -istart 1 0 2\
+ > vcpfmgRedBlackGS.out.3
+mpirun -np 2 ./struct -n 1 12 6 -P 1 1 2 -c 0 1 1 -solver 1  -relax 3 -istart 0 1 2\
+ > vcpfmgRedBlackGS.out.4
+mpirun -np 3 ./struct -n 12 4 1 -P 1 3 1 -c 1 1 0 -solver 1 -relax 3 -istart 1 2 0\
+ > vcpfmgRedBlackGS.out.5
+
+
+#=============================================================================
+# struct: Run PFMG RedBlack Gauss-Seidel tests. Symmetric GS
+#=============================================================================
+
+mpirun -np 1 ./struct -n 12 12 1  -d 2 -solver 1 -relax 2 -istart 1 2 0\
+ > vcpfmgRedBlackGS.out.6
+
+#=============================================================================
+# struct: Run PFMG parallel and blocking
+#=============================================================================
+
+mpirun -np 3 ./struct -n 4 12 1 -P 3 1 1 -d 2 -solver 1 -relax 2 -istart 1 2 0\
+ > vcpfmgRedBlackGS.out.7
+mpirun -np 3 ./struct -n 4 4 1 -P 1 3 1 -b 3 1 1 -d 2 -solver 1 -relax 2 \
+-istart 1 2 0> vcpfmgRedBlackGS.out.8
+
+#=============================================================================
+# struct: Run PFMG 2d run as 3d
+#=============================================================================
+
+mpirun -np 4 ./struct -n 3 1 12 -P 4 1 1 -c 1 0 1 -solver 1 -relax 2 -istart 1 0 2\
+ > vcpfmgRedBlackGS.out.9
+mpirun -np 2 ./struct -n 1 12 6 -P 1 1 2 -c 0 1 1 -solver 1 -relax 2 -istart 0 1 2\
+ > vcpfmgRedBlackGS.out.10
+mpirun -np 3 ./struct -n 12 4 1 -P 1 3 1 -c 1 1 0 -solver 1 -relax 2 -istart 1 2 0\
+ > vcpfmgRedBlackGS.out.11
+

@@ -7,12 +7,12 @@
  * Started 11/28/95
  * George
  *
- * $Id: pblas1.c,v 2.0 2000/12/14 18:20:19 falgout Exp $
+ * $Id: pblas1.c,v 2.2 2004/03/05 21:24:37 treadway Exp $
  *
  */
 
 #include "ilu.h"
-#include "./DistributedMatrixPilutSolver.h"
+#include "DistributedMatrixPilutSolver.h"
 
 
 /*************************************************************************
@@ -91,7 +91,7 @@ int hypre_p_vprintf(DataDistType *ddist, double *x,
   for (pe=0; pe<npes; pe++) {
     if (mype == pe) {
       for (i=0; i<ddist->ddist_lnrows; i++)
-        printf("%d:%lf, ", ddist->ddist_rowdist[mype]+i, x[i]);
+        printf("%d:%f, ", ddist->ddist_rowdist[mype]+i, x[i]);
       if (pe == npes-1)
         printf("\n");
     }

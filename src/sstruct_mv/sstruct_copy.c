@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -30,6 +30,32 @@ hypre_SStructPCopy( hypre_SStructPVector *px,
    {
       hypre_StructCopy(hypre_SStructPVectorSVector(px, var),
                        hypre_SStructPVectorSVector(py, var));
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructPartialPCopy: Copy the components on only a subset of the
+ * pgrid. For each box of an sgrid, an array of subboxes are copied.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructPartialPCopy( hypre_SStructPVector *px,
+                           hypre_SStructPVector *py,
+                           hypre_BoxArrayArray **array_boxes )
+{
+   int ierr = 0;
+   int nvars = hypre_SStructPVectorNVars(px);
+   hypre_BoxArrayArray  *boxes;
+   int var;
+
+   for (var = 0; var < nvars; var++)
+   {
+      boxes= array_boxes[var];
+      hypre_StructPartialCopy(hypre_SStructPVectorSVector(px, var),
+                              hypre_SStructPVectorSVector(py, var),
+                              boxes);
    }
 
    return ierr;

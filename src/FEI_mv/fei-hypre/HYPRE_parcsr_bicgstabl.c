@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -26,13 +24,27 @@
  *
  *****************************************************************************/
 
+extern void *hypre_BiCGSTABLCreate();
+extern int  hypre_BiCGSTABLDestroy(void *);
+extern int  hypre_BiCGSTABLSetup(void *, void *, void *, void *);
+extern int  hypre_BiCGSTABLSolve(void *, void *, void *, void *);
+extern int  hypre_BiCGSTABLSetTol(void *, double);
+extern int  hypre_BiCGSTABLSetSize(void *, int);
+extern int  hypre_BiCGSTABLSetMaxIter(void *, int);
+extern int  hypre_BiCGSTABLSetStopCrit(void *, double);
+extern int  hypre_BiCGSTABLSetPrecond(void *, int (*precond)(),
+                               int (*precond_setup)(), void *);
+extern int  hypre_BiCGSTABLSetLogging(void *, int);
+extern int  hypre_BiCGSTABLGetNumIterations(void *,int *);
+extern int  hypre_BiCGSTABLGetFinalRelativeResidualNorm(void *, double *);
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABLCreate
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSRBiCGSTABLCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_BiCGSTABLCreate( ) );
+   *solver = (HYPRE_Solver) hypre_BiCGSTABLCreate( );
 
    return 0;
 }

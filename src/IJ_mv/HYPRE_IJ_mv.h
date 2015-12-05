@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 
 #ifndef HYPRE_IJ_MV_HEADER
@@ -91,7 +91,8 @@ int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
 int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
 /**
- * Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
+ * Sets values for {\tt nrows} rows or partial rows of the matrix.  
+ * The arrays {\tt ncols}
  * and {\tt rows} are of dimension {\tt nrows} and contain the number
  * of columns in each row and the row indices, respectively.  The
  * array {\tt cols} contains the column indices for each of the {\tt
@@ -111,7 +112,8 @@ int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
                             const double   *values);
 
 /**
- * Adds to values for {\tt nrows} of the matrix.  Usage details are
+ * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
+ * Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
  * values at the specified locations, or, if there was no value there
  * before, inserts a new one.
@@ -131,7 +133,18 @@ int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
 int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
 
 /**
- * Gets values for {\tt nrows} of the matrix.  Usage details are
+ * Gets number of nonzeros elements for {\tt nrows} rows specified in {\tt rows}
+ * and returns them in {\tt ncols}, which needs to be allocated by the
+ * user.
+ **/
+int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
+                               int             nrows,
+                               int            *rows,
+                               int            *ncols);
+
+/**
+ * Gets values for {\tt nrows} rows or partial rows of the matrix.  
+ * Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.
  **/
 int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
@@ -157,6 +170,16 @@ int HYPRE_IJMatrixSetObjectType(HYPRE_IJMatrix matrix,
  **/
 int HYPRE_IJMatrixGetObjectType(HYPRE_IJMatrix  matrix,
                                 int            *type);
+
+/**
+ * Gets range of rows owned by this processor and range
+ * of column partitioning for this processor.
+ **/
+int HYPRE_IJMatrixGetLocalRange(HYPRE_IJMatrix  matrix,
+                                int            *ilower,
+                                int            *iupper,
+                                int            *jlower,
+                                int            *jupper);
 
 /**
  * Get a reference to the constructed matrix object.
@@ -192,6 +215,17 @@ int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix  matrix,
 int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
                                    const int      *diag_sizes,
                                    const int      *offdiag_sizes);
+
+/**
+ * (Optional) Sets the maximum number of elements that are expected to be set
+ * (or added) on other processors from this processor
+ * This routine can significantly improve the efficiency of matrix
+ * construction, and should always be utilized if possible.
+ *
+ * Not collective.
+ **/
+int HYPRE_IJMatrixSetMaxOffProcElmts(HYPRE_IJMatrix  matrix,
+                                     int max_off_proc_elmts);
 
 /**
  * Read the matrix from file.  This is mainly for debugging purposes.
@@ -258,6 +292,17 @@ int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
 int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
 /**
+ * (Optional) Sets the maximum number of elements that are expected to be set
+ * (or added) on other processors from this processor
+ * This routine can significantly improve the efficiency of matrix
+ * construction, and should always be utilized if possible.
+ *
+ * Not collective.
+ **/
+int HYPRE_IJVectorSetMaxOffProcElmts(HYPRE_IJVector  vector,
+                                     int max_off_proc_elmts);
+
+/**
  * Sets values in vector.  The arrays {\tt values} and {\tt indices}
  * are of dimension {\tt nvalues} and contain the vector values to be
  * set and the corresponding global vector indices, respectively.
@@ -314,6 +359,13 @@ int HYPRE_IJVectorSetObjectType(HYPRE_IJVector vector,
  **/
 int HYPRE_IJVectorGetObjectType(HYPRE_IJVector  vector,
                                 int            *type);
+
+/**
+ * Returns range of the part of the vector owned by this processor.
+ **/
+int HYPRE_IJVectorGetLocalRange(HYPRE_IJVector  vector,
+                                int            *jlower,
+                                int            *jupper);
 
 /**
  * Get a reference to the constructed vector object.

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -94,4 +94,16 @@ int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
    return ( hypre_StructGridAssemble(grid) );
+}
+
+/*---------------------------------------------------------------------------
+ * GEC0902
+ * HYPRE_StructGridSetNumGhost
+ * to set the numghost array inside the struct_grid_struct using an internal
+ * function. This is just a wrapper.
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_StructGridSetNumGhost( HYPRE_StructGrid grid, int *num_ghost )
+{
+  return ( hypre_StructGridSetNumGhost(grid, num_ghost) );
 }

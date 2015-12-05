@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -112,6 +112,17 @@ HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPCGAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetPCGAbsoluteTolFactor( HYPRE_StructSolver solver,
+                                           double      pcg_atolf )
+{
+   return( hypre_HybridSetPCGAbsoluteTolFactor( (void *) solver, pcg_atolf ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetTwoNorm
  *--------------------------------------------------------------------------*/
 
@@ -123,6 +134,17 @@ HYPRE_StructHybridSetTwoNorm( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetStopCrit( HYPRE_StructSolver solver,
+                              int                stop_crit    )
+{
+   return( hypre_HybridSetStopCrit( (void *) solver, stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetRelChange
  *--------------------------------------------------------------------------*/
 
@@ -131,6 +153,28 @@ HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver,
                                 int                rel_change    )
 {
    return( hypre_HybridSetRelChange( (void *) solver, rel_change ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetSolverType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetSolverType( HYPRE_StructSolver solver,
+                                int                solver_type    )
+{
+   return( hypre_HybridSetSolverType( (void *) solver, solver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetKDim
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetKDim( HYPRE_StructSolver solver,
+                                int                k_dim    )
+{
+   return( hypre_HybridSetKDim( (void *) solver, k_dim ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -157,6 +201,17 @@ HYPRE_StructHybridSetLogging( HYPRE_StructSolver solver,
                               int                logging    )
 {
    return( hypre_HybridSetLogging( (void *) solver, logging ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetPrintLevel( HYPRE_StructSolver solver,
+                              int                print_level    )
+{
+   return( hypre_HybridSetPrintLevel( (void *) solver, print_level ) );
 }
 
 /*--------------------------------------------------------------------------

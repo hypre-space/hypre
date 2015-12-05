@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -63,6 +63,7 @@ typedef struct
    /* log info (always logged) */
    int                   num_iterations;
    int                   time_index;
+   int                   print_level;
 
    /* additional log info (logged when `logging' > 0) */
    int                   logging;

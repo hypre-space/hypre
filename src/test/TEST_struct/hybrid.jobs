@@ -1,0 +1,20 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 1.2 $
+#EHEADER***********************************************************************
+
+#=============================================================================
+# struct: Run Hybrid without the switch
+#=============================================================================
+
+mpirun -np 1 ./struct -P 1 1 1 -solver 20 > hybrid.out.0
+mpirun -np 1 ./struct -P 1 1 1 -solver 21 > hybrid.out.1
+mpirun -np 1 ./struct -P 1 1 1 -solver 25 > hybrid.out.2
+mpirun -np 1 ./struct -P 1 1 1 -solver 20 -solver_type 2 -cf 0.5 > hybrid.out.3
+mpirun -np 1 ./struct -P 1 1 1 -solver 21 -solver_type 2 -cf 0.5 > hybrid.out.4
+

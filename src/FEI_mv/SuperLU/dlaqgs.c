@@ -6,6 +6,8 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 /*
  * File name:	dlaqgs.c
@@ -13,7 +15,7 @@
  */
 #include <math.h>
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dlaqgs(SuperMatrix *A, double *r, double *c, 
@@ -34,7 +36,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     A       (input/output) SuperMatrix*
             On exit, the equilibrated matrix.  See EQUED for the form of 
             the equilibrated matrix. The type of A can be:
-	    Stype = NC; Dtype = _D; Mtype = GE.
+	    Stype = NC; Dtype = D_D; Mtype = GE.
 	    
     R       (input) double*, dimension (A->nrow)
             The row scale factors for A.
@@ -83,7 +85,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     double   *Aval;
     int i, j, irow;
     double large, small, cj;
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
 
 
     /* Quick return if possible */
@@ -96,7 +98,7 @@ dlaqgs(SuperMatrix *A, double *r, double *c,
     Aval = Astore->nzval;
     
     /* Initialize LARGE and SMALL. */
-    small = dlamch_("Safe minimum") / dlamch_("Precision");
+    small = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum") / hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Precision");
     large = 1. / small;
 
     if (rowcnd >= THRESH && amax >= small && amax <= large) {

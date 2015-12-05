@@ -5,6 +5,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 /* Subroutine */ int dgemv_(char *trans, integer *m, integer *n, doublereal *
 	alpha, doublereal *a, integer *lda, doublereal *x, integer *incx, 
@@ -18,9 +19,9 @@
     static integer info;
     static doublereal temp;
     static integer lenx, leny, i, j;
-    extern logical lsame_(char *, char *);
+    extern logical hypre_lsame_(char *, char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ int hypre_xerbla_(char *, integer *);
 
 
 /*  Purpose   
@@ -129,8 +130,8 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! lsame_(trans, "N") && ! lsame_(trans, "T") && ! 
-	    lsame_(trans, "C")) {
+    if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, "T") && ! 
+	    hypre_lsame_(trans, "C")) {
 	info = 1;
     } else if (*m < 0) {
 	info = 2;
@@ -144,13 +145,13 @@
 	info = 11;
     }
     if (info != 0) {
-	xerbla_("DGEMV ", &info);
+	hypre_xerbla_("DGEMV ", &info);
 	return 0;
     }
 
 /*     Quick return if possible. */
 
-    if (*m == 0 || *n == 0 || *alpha == 0. && *beta == 1.) {
+    if (*m == 0 || *n == 0 || ((*alpha == 0.) && (*beta == 1.))) {
 	return 0;
     }
 
@@ -158,7 +159,7 @@
   
        up the start points in  X  and  Y. */
 
-    if (lsame_(trans, "N")) {
+    if (hypre_lsame_(trans, "N")) {
 	lenx = *n;
 	leny = *m;
     } else {
@@ -214,7 +215,7 @@
     if (*alpha == 0.) {
 	return 0;
     }
-    if (lsame_(trans, "N")) {
+    if (hypre_lsame_(trans, "N")) {
 
 /*        Form  y := alpha*A*x + y. */
 

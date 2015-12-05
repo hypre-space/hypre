@@ -1,66 +1,42 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1997   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
- 
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-CINCLUDES= 
-CDEFS =
- 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS =\
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- ${CINCLUDES}\
- ${CDEFS}
+ ${CINCLUDES}
  
-RANLIB= ranlib
- 
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
- 
-LFLAGS =\
- -L.\
- -L../utilities\
- -lHYPRE_mv\
- -lHYPRE_utilities\
- ${LIBFLAGS} ${LDLIBFLAGS}
-
 
 HEADERS =\
- HYPRE_seq_mv.h\
- seq_mv.h\
  csr_matrix.h\
  headers.h\
+ HYPRE_seq_mv.h\
  mapped_matrix.h\
  multiblock_matrix.h\
+ seq_mv.h\
  vector.h
 
 FILES =\
- HYPRE_csr_matrix.c\
- HYPRE_mapped_matrix.c\
- HYPRE_multiblock_matrix.c\
- HYPRE_vector.c\
  csr_matop.c\
  csr_matrix.c\
  csr_matvec.c\
  genpart.c\
+ HYPRE_csr_matrix.c\
+ HYPRE_mapped_matrix.c\
+ HYPRE_multiblock_matrix.c\
+ HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c
@@ -72,17 +48,19 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
  
 all: libHYPRE_seq_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/seq_mv.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
  
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/seq_mv.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_seq_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/seq_mv.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
  
-veryclean: clean
-	@rm -f libHYPRE_seq_mv.a
+distclean: clean
  
 
 ##################################################################
@@ -91,15 +69,7 @@ veryclean: clean
 
 libHYPRE_seq_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

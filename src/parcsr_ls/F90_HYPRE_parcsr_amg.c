@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -262,7 +262,8 @@ hypre_F90_IFACE(hypre_boomeramgsettol, HYPRE_BOOMERAMGSETTOL)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetNumGridSweeps
+ * HYPRE_BoomerAMGSetNumSweeps
+ * DEPRECATED.  Use SetNumSweeps and SetCycleNumSweeps instead.
  *--------------------------------------------------------------------------*/
 
 void
@@ -273,6 +274,36 @@ hypre_F90_IFACE(hypre_boomeramgsetnumgridsweeps, HYPRE_BOOMERAMGSETNUMGRIDSWEEPS
    *ierr = (int) ( HYPRE_BoomerAMGSetNumGridSweeps(
                         (HYPRE_Solver) *solver,
                         (int *)        *((int **)(*num_grid_sweeps)) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNumSweeps
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetnumsweeps, HYPRE_BOOMERAMGSETNUMSWEEPS)( long int *solver,
+                                               int *num_sweeps,
+                                               int      *ierr             )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetNumSweeps(
+                        (HYPRE_Solver) *solver,
+                        (int)        *num_sweeps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCycleNumSweeps
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetcyclenumsweeps, HYPRE_BOOMERAMGSETCYCLENUMSWEEPS)( long int *solver,
+                                               int *num_sweeps,
+                                               int *k,
+                                               int      *ierr             )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetCycleNumSweeps(
+                        (HYPRE_Solver) *solver,
+                        (int)        *num_sweeps,
+                        (int)        *k ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -314,16 +345,17 @@ hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn,
                                                  long int *relax_weights,
                                                  int      *ierr               )
 {
-   hypre_TFree(*num_grid_sweeps);
-   hypre_TFree(*grid_relax_type);
-   hypre_TFree(*grid_relax_points);
-   hypre_TFree(*relax_weights);
+   hypre_TFree(num_grid_sweeps);
+   hypre_TFree(grid_relax_type);
+   hypre_TFree(grid_relax_points);
+   hypre_TFree(relax_weights);
 
    *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxType
+ * DEPRECATED.  Use SetRelaxType and SetCycleRelaxType instead.
  *--------------------------------------------------------------------------*/
 
 void
@@ -337,7 +369,38 @@ hypre_F90_IFACE(hypre_boomeramgsetgridrelaxtype, HYPRE_BOOMERAMGSETGRIDRELAXTYPE
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetRelaxType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetrelaxtype, HYPRE_BOOMERAMGSETRELAXTYPE)( long int *solver,
+                                               int   *relax_type,
+                                               int      *ierr   )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetRelaxType(
+                       (HYPRE_Solver) *solver,
+                       (int)        *relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCycleRelaxType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetcyclerelaxtype, HYPRE_BOOMERAMGSETCYCLERELAXTYPE)( long int *solver,
+                                               int   *relax_type,
+                                               int   *k,
+                                               int      *ierr   )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetCycleRelaxType(
+                       (HYPRE_Solver) *solver,
+                       (int)        *k,
+                       (int)        *relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxPoints
+ * DEPRECATED.  There is no alternative function.
  *--------------------------------------------------------------------------*/
 
 void
@@ -353,6 +416,7 @@ hypre_F90_IFACE(hypre_boomeramgsetgridrelaxpnts, HYPRE_BOOMERAMGSETGRIDRELAXPNTS
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRelaxWeight
+ * DEPRECATED.  Use SetRelaxWt and SetLevelRelaxWt instead.
  *--------------------------------------------------------------------------*/
 
 void
@@ -366,44 +430,59 @@ hypre_F90_IFACE(hypre_boomeramgsetrelaxweight, HYPRE_BOOMERAMGSETRELAXWEIGHT)( l
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetIOutDat
+ * HYPRE_BoomerAMGSetRelaxWt
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetioutdat, HYPRE_BOOMERAMGSETIOUTDAT)( long int *solver,
-                                         int      *ioutdat,
-                                         int      *ierr     )
-{
-   *ierr = (int) ( HYPRE_BoomerAMGSetIOutDat( (HYPRE_Solver) *solver,
-                                           (int)          *ioutdat ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogFileName
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_boomeramgsetlogfilename, HYPRE_BOOMERAMGSETLOGFILENAME)( long int *solver,
-                                             char     *log_file_name,
+hypre_F90_IFACE(hypre_boomeramgsetrelaxwt, HYPRE_BOOMERAMGSETRELAXWT)( long int *solver,
+                                             double *relax_weight,
                                              int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_BoomerAMGSetLogFileName( (HYPRE_Solver) *solver,
-                                               (char *)       log_file_name ) );
+   *ierr = (int) ( HYPRE_BoomerAMGSetRelaxWt(
+                       (HYPRE_Solver) *solver,
+                       (double)     *relax_weight ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogging
+ * HYPRE_BoomerAMGSetLevelRelaxWt
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetlogging, HYPRE_BOOMERAMGSETLOGGING)( long int *solver,
-                                         int      *ioutdat,
-                                         char     *log_file_name,
+hypre_F90_IFACE(hypre_boomeramgsetlevelrelaxwt, HYPRE_BOOMERAMGSETLEVELRELAXWT)( long int *solver,
+                                             double *relax_weight,
+                                             int    *level,
+                                             int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetLevelRelaxWt(
+                       (HYPRE_Solver) *solver,
+                       (double)     *relax_weight,
+                       (int)        *level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetprintlevel, HYPRE_BOOMERAMGSETPRINTLEVEL)( long int *solver,
+                                         int      *print_level,
                                          int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_BoomerAMGSetLogging( (HYPRE_Solver) *solver,
-                                           (int)          *ioutdat,
-                                           (char *)       log_file_name ) );
+   *ierr = (int) ( HYPRE_BoomerAMGSetPrintLevel( (HYPRE_Solver) *solver,
+                                           (int)          *print_level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetPrintFileName
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetprintfilename, HYPRE_BOOMERAMGSETPRINTFILENAME)( long int *solver,
+                                             char     *print_file_name,
+                                             int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetPrintFileName( (HYPRE_Solver) *solver,
+                                               (char *)       print_file_name ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -444,4 +523,18 @@ hypre_F90_IFACE(hypre_boomeramggetfinalreltvres, HYPRE_BOOMERAMGGETFINALRELTVRES
    *ierr = (int) ( HYPRE_BoomerAMGGetFinalRelativeResidualNorm(
                                 (HYPRE_Solver) *solver,
                                 (double *)      rel_resid_norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGGetFinalRelativeRes
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetgsmg, HYPRE_BOOMERAMGSETGSMG)( long int *solver,
+                                                  int      *gsmg,
+                                                  int      *ierr            )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGSetGSMG(
+                                (HYPRE_Solver) *solver,
+                                (int)          *gsmg ) );
 }

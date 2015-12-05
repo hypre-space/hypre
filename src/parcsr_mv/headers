@@ -5,7 +5,7 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.4 $
 #EHEADER***********************************************************************
 
 INTERNAL_HEADER=parcsr_mv.h
@@ -36,9 +36,12 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat communication.h           >> $INTERNAL_HEADER	
+cat par_csr_communication.h   >> $INTERNAL_HEADER	
 cat par_vector.h              >> $INTERNAL_HEADER	
 cat par_csr_matrix.h          >> $INTERNAL_HEADER	
+cat numbers.h                 >> $INTERNAL_HEADER	
+cat new_commpkg.h             >> $INTERNAL_HEADER
+###cat par_chord_matrix.h          >> $INTERNAL_HEADER	
 
 ../utilities/protos [!F]*.c                   >> $INTERNAL_HEADER
 

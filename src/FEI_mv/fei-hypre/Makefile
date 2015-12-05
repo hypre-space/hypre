@@ -1,42 +1,36 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1999   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.2 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES: .C .c .f .o
+### ************************************************************************
+### This is the template file for FEI_mv/fei-hypre.  When configure determines
+### whether or not the internal files are needed, the   variable
+### will be replaced with either a space to commetn symbol and the proper
+### Makefile will be generated.
+### ************************************************************************
 
-HYPRE_ARCH = solaris
+include ../../config/Makefile.config
 
-srcdir = .
+BASE_DIR = ${FEIINCLUDE}
+ BASE_DIR = $(srcdir)/../fei-base
 
-CC =  mpicc
-CXX =  mpiCC
-
-#SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
-#SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
-#MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
-#MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
-MLPACK_INCLUDE  = 
-MLPACK_LIB      =
 
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-CINCLUDES= 
-CXXINCLUDES= 
-#CDEFS = -DSUPERLU -DMLPACK
-#CXXDEFS = -DSUPERLU -DMLPACK
-CDEFS = -DBOOL_NOT_SUPPORTED
-CXXDEFS = -DBOOL_NOT_SUPPORTED
+CINCLUDES=${INCLUDES} ${MPIINCLUDE}
+CXXINCLUDES=${INCLUDES} ${MPIINCLUDE}
+CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED
+CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX
 
-CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
+C_COMPILE_FLAGS = \
+ ${CDEFS}\
  -I../..\
+ -I$(BASE_DIR)\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../IJ_mv\
@@ -49,12 +43,12 @@ CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
- ${MLPACK_INCLUDE}\
  ${CINCLUDES}
 
-MPILIBFLAGS =   
-CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
+CXX_COMPILE_FLAGS = \
+ ${CXXDEFS}\
  -I../..\
+ -I$(BASE_DIR)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
@@ -62,108 +56,135 @@ CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
  -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../distributed_matrix\
+ -I$(srcdir)/../../distributed_ls\
+ -I$(srcdir)/../femli\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
-MPILIBFLAGS =   
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
+HEADERS =\
+ cfei-hypre.h\
+ HYPRE_LinSysCore.h\
+ HYPRE_FEI_includes.h \
+ $(BASE_DIR)/base/Data.h  \
+ $(BASE_DIR)/base/Lookup.h  \
+ $(BASE_DIR)/base/LinearSystemCore.h \
+ $(BASE_DIR)/fei_defs.h\
+ LLNL_FEI_Impl.h\
+ LLNL_FEI_Fei.h\
+ LLNL_FEI_LSCore.h\
+ LLNL_FEI_Solver.h\
+ LLNL_FEI_Matrix.h\
+ FEI_HYPRE_Impl.h\
+ FEI_HYPRE_include.h\
+ HYPRE_Builder.h\
+ HYPRE_FEI_mv.h\
+ HYPRE_LSI_Dsuperlu.h\
+ HYPRE_LSI_UZAWA.h\
+ HYPRE_LSI_Uzawa_c.h\
+ HYPRE_LSI_blkprec.h\
+ HYPRE_LSI_block.h\
+ HYPRE_LSI_ddict.h\
+ HYPRE_LSI_ddilut.h\
+ HYPRE_LSI_mli.h\
+ HYPRE_LSI_poly.h\
+ HYPRE_LSI_schur.h\
+ HYPRE_LSI_schwarz.h\
+ HYPRE_MHMatrix.h\
+ HYPRE_SlideReduction.h\
+ HYPRE_parcsr_TFQmr.h\
+ HYPRE_parcsr_bicgs.h\
+ HYPRE_parcsr_bicgstabl.h\
+ HYPRE_parcsr_fgmres.h\
+ HYPRE_parcsr_lsicg.h\
+ HYPRE_parcsr_symqmr.h
 
-MPI_LIBS = -lpmpich -lmpich -lrpc -lgs -lpthread
+FILESC = \
+ HYPRE_LSI_Dsuperlu.c\
+ HYPRE_LSI_ddict.c\
+ HYPRE_LSI_ddilut.c\
+ HYPRE_LSI_ml.c\
+ HYPRE_LSI_poly.c\
+ HYPRE_LSI_schwarz.c\
+ HYPRE_parcsr_TFQmr.c\
+ HYPRE_parcsr_bicgs.c\
+ HYPRE_parcsr_bicgstabl.c\
+ HYPRE_parcsr_fgmres.c\
+ HYPRE_parcsr_lsicg.c\
+ HYPRE_parcsr_symqmr.c\
+ SymQMR.c\
+ TFQmr.c\
+ bicgs.c\
+ bicgstabl.c\
+ fgmres.c\
+ hypre_lsi_amge.c\
+ hypre_lsi_ddamg.c\
+ hypre_lsi_misc.c\
+ lsicg.c
 
-RANLIB = ranlib
+FILESCXX = \
+ FEI_HYPRE_Impl.cxx\
+ LLNL_FEI_Impl.cxx\
+ LLNL_FEI_Fei.cxx\
+ LLNL_FEI_LSCore.cxx\
+ LLNL_FEI_Solver.cxx\
+ LLNL_FEI_Matrix.cxx\
+ HYPRE_LSC_aux.cxx\
+ HYPRE_LSI_UZAWA.cxx\
+ HYPRE_LSI_blkprec.cxx\
+ HYPRE_LSI_mli.cxx\
+ HYPRE_LinSysCore.cxx\
+ HYPRE_SlideReduction.cxx\
+ cfei_hypre.cxx\
+ hypre_schur_reduce.cxx\
+ hypre_slide_reduce.cxx
 
-LFLAGS =\
- -L.\
- -L../../hypre/lib\
- ${SUPERLU_LIB} ${MLPACK_LIB}\
- -lHYPRE_FEI\
- -lHYPRE_FEI_BASE\
- -lHYPRE_parcsr_ls \
- -lHYPRE_ParaSails \
- -lHYPRE_FEI_isismv \
- -lHYPRE_IJ_mv \
- -lml \
- -lHYPRE_utilities \
- -lHYPRE_parcsr_mv \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_superlu \
- -lHYPRE_seq_mv \
- ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
- -ldxml -lm
-
-FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
-        hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
-        HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
-        HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
-        HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
-        TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c
-
-TEMP = ${FILES:.c=.o}
-OBJS = ${TEMP:.C=.o}
-
-FILESV12 = HYPRE_LinSysCore.C HYPRE_LSC_aux.C hypre_slide_reduce.C \
-           hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
-           HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c \
-           HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
-           HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
-           TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c
-
-TEMPV12 = ${FILESV12:.c=.o}
-OBJSV12 = ${TEMPV12:.C=.o}
-
-##################################################################
-# Main rules
-##################################################################
-
-all: libHYPRE_FEI.a
-
-lib: all
-
-install: all
-	@cp -f $(srcdir)/HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
-	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
-	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
-
-driver: driver.o libHYPRE_FEI.a
-	@echo  "Linking" $@ "... "
-	${CXX} -o $@ driver.o ${LFLAGS}
-
-libHYPRE_FEI.a: ${OBJS}
-	@echo  "Building $@ ... "
-	@ar -rcu libHYPRE_FEI.a ${OBJS}
-	${RANLIB} $@
-
-libHYPRE_FEI_V12.a: ${OBJSV12}
-	@echo  "Building $@ ... "
-	${CXX} -o $@ -c ${CXXFLAGS} -DFEI_V1.2 HYPRE_LinSysCore.C
-	@ar -rcu libHYPRE_FEI_V12.a ${OBJSV12}
-	${RANLIB} $@
+OBJSC = ${FILESC:.c=.o}
+OBJSCXX = ${FILESCXX:.cxx=.o}
+OBJS = ${OBJSC} ${OBJSCXX}
 
 ##################################################################
 # Targets
 ##################################################################
 
+all: libHYPRE_FEI.a
+	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_FEI.a $(HYPRE_BUILD_DIR)/lib/.
+	@echo  ""
+
+install: libHYPRE_FEI.a
+	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_FEI.a $(HYPRE_LIB_INSTALL)/.
+	@echo  ""
+
 clean:
-	@touch erase.tmp
-	@rm -rf erase.tmp *.o ti_files driver
+	rm -rf *.o lib*.a
 
-veryclean: clean
-	@touch erase.tmp
-	@rm -rf erase.tmp *.o *.a ti_files driver
-
+distclean: clean
 
 ##################################################################
-# Generic rules
+# Rules
 ##################################################################
+libHYPRE_FEI.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
 
-.C.o:
-	${CXX} -o $@ ${DEFINES} -c ${CXXFLAGS} $<
-
-.c.o:
-	${CC} -o $@ ${DEFINES} -c ${CFLAGS} $<
-
+${OBJS}: ${HEADERS}

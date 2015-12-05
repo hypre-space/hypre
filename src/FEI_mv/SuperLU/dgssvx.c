@@ -6,9 +6,11 @@
  * and Lawrence Berkeley National Lab.
  * November 15, 1997
  *
+ * Changes made to this file corresponding to calls to blas/lapack functions
+ * in Nov 2003 at LLNL
  */
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
 void
 dgssvx(char *fact, char *trans, char *refact,
@@ -150,7 +152,7 @@ dgssvx(char *fact, char *trans, char *refact,
  * A       (input/output) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of the linear equations is A->nrow. Currently, the type of A can be:
- *         Stype = NC or NR, Dtype = _D, Mtype = GE. In the future,
+ *         Stype = NC or NR, Dtype = D_D, Mtype = GE. In the future,
  *         more general A can be handled.
  *
  *         On entry, If fact = 'F' and equed is not 'N', then A must have
@@ -263,14 +265,14 @@ dgssvx(char *fact, char *trans, char *refact,
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
  *             Pr*transpose(A)*Pc=L*U   (if A->Stype = NR).
  *         Uses compressed row subscripts storage for supernodes, i.e.,
- *         L has types: Stype = SC, Dtype = _D, Mtype = TRLU.
+ *         L has types: Stype = SC, Dtype = D_D, Mtype = TRLU.
  *
  * U       (output) SuperMatrix*
  *	   The factor U from the factorization
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
  *             Pr*transpose(A)*Pc=L*U   (if A->Stype = NR).
  *         Uses column-wise storage scheme, i.e., U has types:
- *         Stype = NC, Dtype = _D, Mtype = TRU.
+ *         Stype = NC, Dtype = D_D, Mtype = TRU.
  *
  * work    (workspace/output) void*, size (lwork) (in bytes)
  *         User supplied workspace, should be large enough
@@ -289,7 +291,7 @@ dgssvx(char *fact, char *trans, char *refact,
  *         See argument 'mem_usage' for memory usage statistics.
  *
  * B       (input/output) SuperMatrix*
- *         B has types: Stype = DN, Dtype = _D, Mtype = GE.
+ *         B has types: Stype = DN, Dtype = D_D, Mtype = GE.
  *         On entry, the right hand side matrix.
  *         On exit,
  *            if equed = 'N', B is not modified; otherwise
@@ -305,7 +307,7 @@ dgssvx(char *fact, char *trans, char *refact,
  *                  overwritten by diag(R)*B.
  *
  * X       (output) SuperMatrix*
- *         X has types: Stype = DN, Dtype = _D, Mtype = GE. 
+ *         X has types: Stype = DN, Dtype = D_D, Mtype = GE. 
  *         If info = 0 or info = A->ncol+1, X contains the solution matrix
  *         to the original system of equations. Note that A and B are modified
  *         on exit if equed is not 'N', and the solution to the equilibrated
@@ -384,7 +386,7 @@ dgssvx(char *fact, char *trans, char *refact,
 
     /* External functions */
     extern double dlangs(char *, SuperMatrix *);
-    extern double dlamch_(char *);
+    extern double hypre_F90_NAME_BLAS(dlamch,DLAMCH)(char *);
 
     Bstore = B->Store;
     Xstore = X->Store;
@@ -400,29 +402,30 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 #endif
     
     *info = 0;
-    nofact = lsame_(fact, "N");
-    equil = lsame_(fact, "E");
-    notran = lsame_(trans, "N");
+    nofact = superlu_lsame(fact, "N");
+    equil = superlu_lsame(fact, "E");
+    notran = superlu_lsame(trans, "N");
     if (nofact || equil) {
 	*(unsigned char *)equed = 'N';
 	rowequ = FALSE;
 	colequ = FALSE;
     } else {
-	rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-	colequ = lsame_(equed, "C") || lsame_(equed, "B");
-	smlnum = dlamch_("Safe minimum");
+	rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+	colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
+	smlnum = hypre_F90_NAME_BLAS(dlamch,DLAMCH)("Safe minimum");
 	bignum = 1. / smlnum;
     }
 
     /* Test the input parameters */
-    if (!nofact && !equil && !lsame_(fact, "F")) *info = -1;
-    else if (!notran && !lsame_(trans, "T") && !lsame_(trans, "C")) *info = -2;
-    else if ( !(lsame_(refact,"Y") || lsame_(refact, "N")) ) *info = -3;
+    if (!nofact && !equil && !superlu_lsame(fact, "F")) *info = -1;
+    else if (!notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C")) 
+       *info = -2;
+    else if ( !(superlu_lsame(refact,"Y") || superlu_lsame(refact, "N")) ) *info = -3;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      (A->Stype != NC && A->Stype != NR) ||
-	      A->Dtype != _D || A->Mtype != GE )
+	      A->Dtype != D_D || A->Mtype != GE )
 	*info = -4;
-    else if (lsame_(fact, "F") && !(rowequ || colequ || lsame_(equed, "N")))
+    else if (superlu_lsame(fact, "F") && !(rowequ || colequ || superlu_lsame(equed, "N")))
 	*info = -9;
     else {
 	if (rowequ) {
@@ -452,18 +455,18 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	if (*info == 0) {
 	    if ( lwork < -1 ) *info = -15;
 	    else if ( B->ncol < 0 || Bstore->lda < MAX(0, A->nrow) ||
-		      B->Stype != DN || B->Dtype != _D || 
+		      B->Stype != DN || B->Dtype != D_D || 
 		      B->Mtype != GE )
 		*info = -16;
 	    else if ( X->ncol < 0 || Xstore->lda < MAX(0, A->nrow) ||
 		      B->ncol != X->ncol || X->Stype != DN ||
-		      X->Dtype != _D || X->Mtype != GE )
+		      X->Dtype != D_D || X->Mtype != GE )
 		*info = -17;
 	}
     }
     if (*info != 0) {
 	i = -(*info);
-	xerbla_("dgssvx", &i);
+	superlu_xerbla("dgssvx", &i);
 	return;
     }
     
@@ -512,8 +515,8 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	if ( info1 == 0 ) {
 	    /* Equilibrate matrix A. */
 	    dlaqgs(AA, R, C, rowcnd, colcnd, amax, equed);
-	    rowequ = lsame_(equed, "R") || lsame_(equed, "B");
-	    colequ = lsame_(equed, "C") || lsame_(equed, "B");
+	    rowequ = superlu_lsame(equed, "R") || superlu_lsame(equed, "B");
+	    colequ = superlu_lsame(equed, "C") || superlu_lsame(equed, "B");
 	}
 	utime[EQUIL] = SuperLU_timer_() - t0;
     }
@@ -610,7 +613,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     }
 
     /* Set INFO = A->ncol+1 if the matrix is singular to working precision. */
-    if ( *rcond < dlamch_("E") ) *info = A->ncol + 1;
+    if ( *rcond < hypre_F90_NAME_BLAS(dlamch,DLAMCH)("E") ) *info = A->ncol + 1;
 
     dQuerySpace(L, U, panel_size, mem_usage);
 
@@ -620,6 +623,6 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	SUPERLU_FREE(AA);
     }
 
-    PrintStat( &SuperLUStat );
+    /* PrintStat( &SuperLUStat );*/
     StatFree();
 }

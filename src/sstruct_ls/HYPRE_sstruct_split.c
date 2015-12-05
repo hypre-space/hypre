@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -237,6 +237,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructSMGSetNumPreRelax(sdata, 1);
                HYPRE_StructSMGSetNumPostRelax(sdata, 1);
                HYPRE_StructSMGSetLogging(sdata, 0);
+               HYPRE_StructSMGSetPrintLevel(sdata, 0);
                HYPRE_StructSMGSetup(sdata, sAH, syH, sxH);
                ssolve = HYPRE_StructSMGSolve;
                sdestroy = HYPRE_StructSMGDestroy;
@@ -250,6 +251,7 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructPFMGSetNumPreRelax(sdata, 1);
                HYPRE_StructPFMGSetNumPostRelax(sdata, 1);
                HYPRE_StructPFMGSetLogging(sdata, 0);
+               HYPRE_StructPFMGSetPrintLevel(sdata, 0);
                HYPRE_StructPFMGSetup(sdata, sAH, syH, sxH);
                ssolve = HYPRE_StructPFMGSolve;
                sdestroy = HYPRE_StructPFMGDestroy;

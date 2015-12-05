@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -17,7 +17,7 @@
 
 #ifdef HYPRE_MEMORY_DMALLOC
 
-#include "memory.h"
+#include "hypre_memory.h"
 #include <dmalloc.h>
 
 char dmalloc_logpath_memory[256];
@@ -130,6 +130,6 @@ hypre_FreeDML( char *ptr,
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty1;
 
 #endif

@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -26,13 +24,26 @@
  *
  *****************************************************************************/
 
+extern void * hypre_BiCGSCreate();
+extern int hypre_BiCGSDestroy(void *);
+extern int hypre_BiCGSSetup(void *, void *, void *, void *);
+extern int hypre_BiCGSSolve(void *, void *A, void *, void *);
+extern int hypre_BiCGSSetTol(void *, double);
+extern int hypre_BiCGSSetMaxIter(void *, int);
+extern int hypre_BiCGSSetStopCrit(void *, double);
+extern int hypre_BiCGSSetPrecond(void *, int (*precond)(),
+                                 int (*precond_setup)(), void *);
+extern int hypre_BiCGSSetLogging(void *, int);
+extern int hypre_BiCGSGetNumIterations(void *,int *);
+extern int hypre_BiCGSGetFinalRelativeResidualNorm(void *, double *);
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSCreate
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParCSRBiCGSCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_BiCGSCreate( ) );
+   *solver = (HYPRE_Solver) hypre_BiCGSCreate( );
 
    return 0;
 }

@@ -1,5 +1,11 @@
 
 typedef int shortint;
+/* local prototypes */
+int genmmd_ ( int *neqns , int *xadj , shortint *adjncy , shortint *invp , shortint *perm , int *delta , shortint *dhead , shortint *qsize , shortint *llist , shortint *marker , int *maxint , int *nofsub );
+int mmdint_ ( int *neqns , int *xadj , shortint *adjncy , shortint *dhead , shortint *dforw , shortint *dbakw , shortint *qsize , shortint *llist , shortint *marker );
+int mmdelm_ ( int *mdnode , int *xadj , shortint *adjncy , shortint *dhead , shortint *dforw , shortint *dbakw , shortint *qsize , shortint *llist , shortint *marker , int *maxint , int *tag );
+int mmdupd_ ( int *ehead , int *neqns , int *xadj , shortint *adjncy , int *delta , int *mdeg , shortint *dhead , shortint *dforw , shortint *dbakw , shortint *qsize , shortint *llist , shortint *marker , int *maxint , int *tag );
+int mmdnum_ ( int *neqns , shortint *perm , shortint *invp , shortint *qsize );
 
 /* *************************************************************** */
 /* *************************************************************** */

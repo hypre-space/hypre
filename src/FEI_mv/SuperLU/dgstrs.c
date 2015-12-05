@@ -18,18 +18,24 @@
   Permission to modify the code and to distribute modified code is
   granted, provided the above notices are retained, and a notice that
   the code was modified is included with the above copyright notice.
+
+  Changes made to this file corresponding to calls to blas/lapack functions
+  in Nov 2003 at LLNL
 */
 
 #include "dsp_defs.h"
-#include "util.h"
+#include "superlu_util.h"
 
+#ifndef HYPRE_USING_HYPRE_BLAS
+#define USE_VENDOR_BLAS
+#endif
 
 /* 
  * Function prototypes 
  */
-void dusolve(int, int, double*, double*);
-void dlsolve(int, int, double*, double*);
-void dmatvec(int, int, int, double*, double*, double*);
+void sludusolve(int, int, double*, double*);
+void sludlsolve(int, int, double*, double*);
+void sludmatvec(int, int, int, double*, double*, double*);
 
 
 void
@@ -58,12 +64,12 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
  * L       (input) SuperMatrix*
  *         The factor L from the factorization Pr*A*Pc=L*U as computed by
  *         dgstrf(). Use compressed row subscripts storage for supernodes,
- *         i.e., L has types: Stype = SC, Dtype = _D, Mtype = TRLU.
+ *         i.e., L has types: Stype = SC, Dtype = D_D, Mtype = TRLU.
  *
  * U       (input) SuperMatrix*
  *         The factor U from the factorization Pr*A*Pc=L*U as computed by
  *         dgstrf(). Use column-wise storage scheme, i.e., U has types:
- *         Stype = NC, Dtype = _D, Mtype = TRU.
+ *         Stype = NC, Dtype = D_D, Mtype = TRU.
  *
  * perm_r  (input) int*, dimension (L->nrow)
  *         Row permutation vector, which defines the permutation matrix Pr; 
@@ -75,7 +81,7 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
  *         in position j in A*Pc.
  *
  * B       (input/output) SuperMatrix*
- *         B has types: Stype = DN, Dtype = _D, Mtype = GE.
+ *         B has types: Stype = DN, Dtype = D_D, Mtype = GE.
  *         On entry, the right hand side matrix.
  *         On exit, the solution matrix if info = 0;
  *
@@ -113,20 +119,21 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
     Bstore = B->Store;
     ldb = Bstore->lda;
     nrhs = B->ncol;
-    notran = lsame_(trans, "N");
-    if ( !notran && !lsame_(trans, "T") && !lsame_(trans, "C") ) *info = -1;
+    notran = superlu_lsame(trans, "N");
+    if ( !notran && !superlu_lsame(trans, "T") && !superlu_lsame(trans, "C") ) 
+        *info = -1;
     else if ( L->nrow != L->ncol || L->nrow < 0 ||
-	      L->Stype != SC || L->Dtype != _D || L->Mtype != TRLU )
+	      L->Stype != SC || L->Dtype != D_D || L->Mtype != TRLU )
 	*info = -2;
     else if ( U->nrow != U->ncol || U->nrow < 0 ||
-	      U->Stype != NC || U->Dtype != _D || U->Mtype != TRU )
+	      U->Stype != NC || U->Dtype != D_D || U->Mtype != TRU )
 	*info = -3;
     else if ( ldb < MAX(0, L->nrow) ||
-	      B->Stype != DN || B->Dtype != _D || B->Mtype != GE )
+	      B->Stype != DN || B->Dtype != D_D || B->Mtype != GE )
 	*info = -6;
     if ( *info ) {
 	i = -(*info);
-	xerbla_("dgstrs", &i);
+	superlu_xerbla("dgstrs", &i);
 	return;
     }
 
@@ -186,10 +193,10 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 			&Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb, 
 			&beta, &work[0], &n );
 #else
-		dtrsm_("L", "L", "N", "U", &nsupc, &nrhs, &alpha,
+		hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "L", "N", "U", &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 		
-		dgemm_( "N", "N", &nrow, &nrhs, &nsupc, &alpha, 
+		hypre_F90_NAME_BLAS(dgemm,DGEMM)( "N", "N", &nrow, &nrhs, &nsupc, &alpha, 
 			&Lval[luptr+nsupc], &nsupr, &Bmat[fsupc], &ldb, 
 			&beta, &work[0], &n );
 #endif
@@ -207,8 +214,8 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 #else		
 		for (j = 0; j < nrhs; j++) {
 		    rhs_work = &Bmat[j*ldb];
-		    dlsolve (nsupr, nsupc, &Lval[luptr], &rhs_work[fsupc]);
-		    dmatvec (nsupr, nrow, nsupc, &Lval[luptr+nsupc],
+		    sludlsolve (nsupr, nsupc, &Lval[luptr], &rhs_work[fsupc]);
+		    sludmatvec (nsupr, nrow, nsupc, &Lval[luptr+nsupc],
 			    &rhs_work[fsupc], &work[0] );
 
 		    iptr = istart + nsupc;
@@ -255,12 +262,12 @@ dgstrs (char *trans, SuperMatrix *L, SuperMatrix *U,
 		STRSM( ftcs1, ftcs2, ftcs3, ftcs3, &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 #else
-		dtrsm_("L", "U", "N", "N", &nsupc, &nrhs, &alpha,
+		hypre_F90_NAME_BLAS(dtrsm,DTRSM)("L", "U", "N", "N", &nsupc, &nrhs, &alpha,
 		       &Lval[luptr], &nsupr, &Bmat[fsupc], &ldb);
 #endif
 #else		
 		for (j = 0; j < nrhs; j++)
-		    dusolve ( nsupr, nsupc, &Lval[luptr], &Bmat[fsupc+j*ldb] );
+		    sludusolve (nsupr, nsupc, &Lval[luptr], &Bmat[fsupc+j*ldb]);
 #endif		
 	    }
 

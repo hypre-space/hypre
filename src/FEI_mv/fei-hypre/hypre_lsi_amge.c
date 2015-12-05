@@ -1,10 +1,8 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 2000   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
- *
- * $Revision: 2.0 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -688,7 +686,7 @@ int HYPRE_LSI_AMGeWriteToFile()
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty4;
 
 #endif
 

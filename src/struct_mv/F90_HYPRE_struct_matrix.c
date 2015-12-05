@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -193,4 +193,20 @@ hypre_F90_IFACE(hypre_structmatrixsetsymmetric, HYPRE_STRUCTMATRIXSETSYMMETRIC)(
    *ierr = (int)
       ( HYPRE_StructMatrixSetSymmetric( (HYPRE_StructMatrix) *matrix,
                                         (int)                *symmetric ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixPrint
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structmatrixprint, HYPRE_STRUCTMATRIXPRINT)(
+   long int  *matrix,
+   int       *all,
+   int       *ierr )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixPrint("HYPRE_StructMatrix.out",
+                                (HYPRE_StructMatrix) *matrix,
+                                (int)                *all) );
 }

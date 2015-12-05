@@ -4,6 +4,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 doublereal dnrm2_(n, dx, incx)
 integer *n;

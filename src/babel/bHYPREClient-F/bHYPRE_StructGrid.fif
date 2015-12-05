@@ -1,0 +1,249 @@
+C       
+C       File:          bHYPRE_StructGrid_Impl.f
+C       Symbol:        bHYPRE.StructGrid-v1.0.0
+C       Symbol Type:   class
+C       Babel Version: 0.8.2
+C       SIDL Created:  20030401 14:47:46 PST
+C       Generated:     20030401 14:48:14 PST
+C       Description:   Client-side documentation text for bHYPRE.StructGrid
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.8.2
+C       source-line   = 1101
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.StructGrid" (version 1.0.0)
+C       
+C       Define a structured grid class.
+C       
+C       
+
+
+
+
+C       
+C       Create an instance of class bHYPRE.StructGrid
+C       
+
+        subroutine bHYPRE_StructGrid__create_f(retval)
+        implicit none
+C       out bHYPRE.StructGrid retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_StructGrid__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out bHYPRE.StructGrid retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_StructGrid__cast2_f(self, name, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_StructGrid_addRef_f(self)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_StructGrid_deleteRef_f(self)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_StructGrid_isSame_f(self, iobj, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in SIDL.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine bHYPRE_StructGrid_queryInt_f(self, name, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out SIDL.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>SIDL</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_StructGrid_isType_f(self, name, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine bHYPRE_StructGrid_getClassInfo_f(self, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       out SIDL.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Set the MPI Communicator.
+C       
+C       
+
+        subroutine bHYPRE_StructGrid_SetCommunicator_f(self, mpi_comm,
+     &     retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetDimension[]
+C       
+
+        subroutine bHYPRE_StructGrid_SetDimension_f(self, dim, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in int dim
+        integer*4 dim
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetExtents[]
+C       
+
+        subroutine bHYPRE_StructGrid_SetExtents_f(self, ilower, iupper,
+     &     retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in array<int,column-major> ilower
+        integer*8 ilower
+C       in array<int,column-major> iupper
+        integer*8 iupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetPeriodic[]
+C       
+
+        subroutine bHYPRE_StructGrid_SetPeriodic_f(self, periodic,
+     &     retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       in array<int,column-major> periodic
+        integer*8 periodic
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Assemble[]
+C       
+
+        subroutine bHYPRE_StructGrid_Assemble_f(self, retval)
+        implicit none
+C       in bHYPRE.StructGrid self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end

@@ -1,101 +1,198 @@
-# Generated automatically from Makefile.in by configure.
 # (c) 1997   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.2 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CDEFS = ${TIMERDEFS} -DHYPRE_TIMING
 
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-CINCLUDES= 
-CDEFS =  -DHYPRE_TIMING
-
-CFLAGS =\
+C_COMPILE_FLAGS =\
    -I..\
    -I$(srcdir)/..\
    -I$(srcdir)\
-   ${C_COMPILE_FLAGS}\
    ${CINCLUDES}\
    ${CDEFS}
 
-RANLIB = ranlib
+##################################################################
+# Lapack Header & Object Files
+##################################################################
+#LAPACK_HEADERS = hypre_lapack.h f2c.h
+#LAPACK_FILES = \
+#dbdsqr.o\
+#dgebd2.o\
+#dgebrd.o\
+#dgelq2.o\
+#dgelqf.o\
+#dgels.o\
+#dgeqr2.o\
+#dgeqrf.o\
+#dgesvd.o\
+#dlabad.o\
+#dlabrd.o\
+#dlacpy.o\
+#dlae2.o\
+#dlaev2.o\
+#dlamch.o\
+#dlange.o\
+#dlanst.o\
+#dlansy.o\
+#dlapy2.o\
+#dlarfb.o\
+#dlarf.o\
+#dlarfg.o\
+#dlarft.o\
+#dlartg.o\
+#dlas2.o\
+#dlascl.o\
+#dlaset.o\
+#dlasq1.o\
+#dlasq2.o\
+#dlasq3.o\
+#dlasq4.o\
+#dlasq5.o\
+#dlasq6.o\
+#dlasr.o\
+#dlasrt.o\
+#dlassq.o\
+#dlasv2.o\
+#dlatrd.o\
+#dorg2l.o\
+#dorg2r.o\
+#dorgbr.o\
+#dorgl2.o\
+#dorglq.o\
+#dorgql.o\
+#dorgqr.o\
+#dorgtr.o\
+#dorm2r.o\
+#dormbr.o\
+#dorml2.o\
+#dormlq.o\
+#dormqr.o\
+#dpotf2.o\
+#dpotrf.o\
+#dpotrs.o\
+#dsteqr.o\
+#dsterf.o\
+#dsyev.o\
+#dsygs2.o\
+#dsygst.o\
+#dsygv.o\
+#dsytd2.o\
+#dsytrd.o\
+#ieeeck.o\
+#ilaenv.o\
+#lapack_utils.o\
+#lsame.o\
+#xerbla.o
 
+##################################################################
+# Blas Header & Object Files
+##################################################################
+#BLAS_HEADERS = hypre_blas.h f2c.h
+#BLAS_FILES = \
+#blas_utils.o\
+#dasum.o\
+#daxpy.o\
+#dcopy.o\
+#ddot.o\
+#dgemm.o\
+#dgemv.o\
+#dger.o\
+#dnrm2.o\
+#drot.o\
+#dscal.o\
+#dswap.o\
+#dsymm.o\
+#dsymv.o\
+#dsyr2.o\
+#dsyr2k.o\
+#dsyrk.o\
+#dtrmm.o\
+#dtrmv.o\
+#dtrsm.o\
+#dtrsv.o\
+#idamax.o
+
+##################################################################
+# Utilities Header Files
+##################################################################
+HEADERS =\
+ amg_linklist.h\
+ exchange_data.h\
+ fortran.h\
+ general.h\
+ hypre_memory.h\
+ hypre_smp_forloop.h\
+ HYPRE_utilities.h\
+ mpistubs.h\
+ threading.h\
+ thread_mpistubs.h\
+ timing.h\
+ umalloc_local.h\
+ utilities.h
+
+##################################################################
+# Utilities Files
+##################################################################
+FILES =\
+ amg_linklist.c\
+ binsearch.c\
+ exchange_data.c\
+ hypre_memory.c\
+ hypre_qsort.c\
+ memory_dmalloc.c\
+ mpistubs.c\
+ qsplit.c\
+ random.c\
+ threading.c\
+ thread_mpistubs.c\
+ timer.c\
+ timing.c\
+ umalloc_local.c
+
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
 ##################################################################
 
-all: libHYPRE_utilities.a
+all: libHYPRE_utilities.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include/.
+	#cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include/.
+	#cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/utilities.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_utilities.a 
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)/.
+	#cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)/.
+	#cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
-	@rm -f *.prj
-	@rm -f *.kdd
+	rm -f *.o lib*.a ${BLAS_HEADERS} ${LAPACK_HEADERS} 
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
+distclean: clean
+	rm -r Makefile
+
 
 ##################################################################
-# Utilities rules
+# Rules
 ##################################################################
  
-UTILITIES_HEADERS =\
- memory.h\
- mpistubs.h\
- thread_mpistubs.h\
- threading.h\
- timing.h\
- umalloc_local.h\
- utilities.h\
- amg_linklist.h\
- HYPRE_utilities.h\
- fortran.h
-
-UTILITIES_FILES =\
- memory.c\
- memory_dmalloc.c\
- mpistubs.c\
- thread_mpistubs.c\
- threading.c\
- timer.c\
- timing.c\
- amg_linklist.c\
- binsearch.c\
- qsplit.c\
- umalloc_local.c\
- qsort.c\
- random.c
-
-UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
- 
-libHYPRE_utilities.a: ${UTILITIES_OBJS}
+libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${UTILITIES_OBJS}
+	${AR} $@ ${OBJS} ${LAPACK_FILES} ${BLAS_FILES}
 	${RANLIB} $@
 
-${UTILITIES_OBJS}: ${UTILITIES_HEADERS}
+${OBJS}: ${HEADERS}
 
 timer.o: timer.c
-	${CC} -D_POSIX_SOURCE -o $@ -c ${CFLAGS} $<
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-
+	${CC} -D_POSIX_SOURCE -o $@ -c ${C_FLAGS} $<

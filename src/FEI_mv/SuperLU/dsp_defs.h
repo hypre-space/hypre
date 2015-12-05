@@ -1,5 +1,3 @@
-
-
 /*
  * -- SuperLU routine (version 2.0) --
  * Univ. of California Berkeley, Xerox Palo Alto Research Center,
@@ -15,11 +13,14 @@
  * Purpose:             Sparse matrix types and function prototypes
  * History:
  */
-#ifdef _CRAY
+#include <HYPRE_utilities.h>
 #include <fortran.h>
+#ifdef _CRAY
 #include <string.h>
 #endif
+#if 0
 #include "Cnames.h"
+#endif
 #include "supermatrix.h"
 
 
@@ -247,6 +248,8 @@ extern void    check_tempv(int, double *);
 #ifdef __cplusplus
   }
 #endif
+
+#define __SUPERLU_REV_2_5_1
 
 #endif /* __SUPERLU_dSP_DEFS */
 

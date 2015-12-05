@@ -4,7 +4,7 @@
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.8 $
+# $Revision: 2.48 $
 #EHEADER***********************************************************************
 
 #=============================================================================
@@ -13,6 +13,183 @@
 # with the most recent release.
 #
 #=============================================================================
+
+Version 1.9.0b released, 2005/02/10.
+
+- NOTE: Soft links NOT changed until 2/17/05 due to vacation.
+
+- Added updated LOBPCG source code and test files.
+
+- Updated autotest scripts for current set of platforms.
+
+- Added a vector Laplace problem for testing systems AMG.
+
+- Added FAC to semi-struct
+
+
+Version 1.9.0a released, 2005/01/18.
+
+- NOTE: Link lines may need to be changed depending on configure options used.
+
+- The build system introduced in v1.8.3a was too difficult to maintain, so we
+  have reverted to a system similar to the previous one.  In particular, all of
+  the new automake and libtool stuff was removed.  In the new system, each
+  directory (except 'config') has ONLY a 'Makefile' (no more 'Makefile.in' or
+  'Makefile.am' files).  When the 'configure' script is run, the single file
+  'config/Makefile.config' is created.  This file is included in all Makefiles
+  in all sub-directories.  Shared libraries CANNOT be created with this system.
+
+- The makefile targets are now more inline with GNU standards.  To get details,
+  type 'make help'.
+
+- The makefile target 'nofei' has been removed and is now run by default.
+
+- The library files 'libHYPRE_blas.a' and 'libHYPRE_lapack.a' are no longer
+  created when 'configure' is run '--without-blas' and/or '--without-lapack'.
+  This created confusion before and really didn't make sense anyway.  These
+  options are now consistent with the '--without-MPI' option.  Also, there is
+  no longer any danger of name conflicts with external blas or lapack libraries
+  as was the case before.
+
+- Added new parallel coarsening schemes PMIS and HMIS with reduced complexities
+  as well as the option of using one pass of Ruge-Stueben only.
+
+- Added the capability to set values from any processor through the IJ matrix
+  and vector interfaces.
+
+- Added support to the PFMG solver for matrices with constant coefficients.
+
+************************
+
+Version 1.8.3a released, 2004/01/21.
+
+- The build system has been revamped to enable the building of shared
+  libraries (in addition to static libraries, as before).  The new
+  system more closely follows GNU standards, and will hopefully show
+  improved flexibility and platform support.  Users can build hypre
+  as before by typing 'configure' followed by 'make'.  A few makefile
+  target changes to note are:
+
+    * 'make clean' replaces 'make veryclean'
+    * 'make all' no longer builds the drivers in the 'test' directory.
+       If needed, build them from within the 'test' directory or
+       use the 'make test' target.
+
+  Technical notes: We are now using GNU automake-1.8.2 to support
+  Makefile.in generation; autoconf-2.59 to generate configure; and
+  libtool-1.5 to provide shared library support.  The GNU tools,
+  autoheader, libtoolize, and aclocal are also used.  These tools are
+  only used by hypre developers and are *not* needed to build hypre.
+
+- Separated the lapack and blas routines into two libraries.  Blas and
+  lapack support (whether to use the routines distributed with hypre or
+  use already installed libraries) is determined by configure, and can
+  be overridden with '--with-blas=<lib>' and '--with-lapack=<lib>'.
+  NOTE: This change affects your link line!
+
+- A new directory 'lib' contains a new Hypre library, 'libHYPRE.a' (and
+  'libHYPRE.so' if configured for shared libraries) which contain
+  all of the libHYPRE_*.a objects with in a single library.
+
+- Fixed the PFMG and SMG solvers to work in the case of pure Neumann
+  boundary conditions.
+
+Version 1.8.2b released, 2003/10/22.
+
+- Performance improvements for Struct solvers when there are many
+  boxes per processor in the grid.  For 125 boxes or more in 3D,
+  the speedup in the setup phases of PFMG and SMG can be significant
+  (we have seen as much as a factor of 30).
+- New non-Galerkin option in PFMG can improve convergence and memory
+  usage.  This option maintains either a 5-pt stencil in 2D or a 7-pt
+  stencil in 3D on all grid levels.
+- New non-symmetric red/black smoother in PFMG can improve
+  convergence on some problems.
+- New optimizations in the smoothers in PFMG lead to as much as 30%
+  faster times.
+- Added a new interpolation option to AMG that is useful for solving
+  hyperbolic equations.  It treats fine weak connections like fine
+  strong connections.
+
+Version 1.8.1b released, 2003/05/21.
+
+- Minor bug fixes and performance improvements.
+
+Version 1.8.0b released, 2003/04/08.
+
+- New Babelized HYPRE interface introduced.  Babel is a tool that
+  provides language interoperability.  HYPRE will eventually migrate
+  to using Babel exclusively.  See 'docs/babel_transition_info.txt' for
+  information on how to use the new interface.
+- PFMG: bug fix for red/black relaxation.
+- Eigenvalue solver LOBPCG has been added.  See 'docs/lobpcg_info.txt'
+  for documentation.
+
+Version 1.7.11a released, 2003/03/14.
+
+- BiCGSTAB has been added to struct and sstruct interface
+- added automatic determination of relaxation parameters for use with symmetric
+  smoothers in BoomerAMG
+
+Version 1.7.10b released, 2002/12/02.
+
+- New Hybrid solvers available for ParCSR and Struct.
+- IJ: Modified the 'GetValues' part of the matrix interface to make
+  it possible to get matrix values without knowing the nonzero
+  structure.  In particular, added a new option to IJMatrixGetValues,
+  and added new routines IJMatrixGetRowCounts, IJMatrixGetLocalRange,
+  and IJVectorGetLocalRange.
+- SStruct: Fixed a bug when connecting a part to itself with SetNeighborBox.
+- FEI: Added a few more smoothers and amg methods in mli, fixed a few memory 
+  leaks uncovered by running ale3d, added new aggregation coarsening for 
+  handling multiple materials.  For more details, see 
+  FEI_mv/fei-hypre/CHANGELOG.
+
+Version 1.7.9b released, 2002/10/18.
+
+- SStruct: Added an if around sorting and eliminating duplicate 
+  iUventries so that its only executed when there are at least 2 
+  such entries.
+
+Version 1.7.8b released, 2002/09/25.
+
+- SStruct: Changed the MatrixSetSymmetric interface (this was actually
+  not implemented before anyway).  The new interface allows much more
+  flexibility in controlling which parts of the matrix are symmetric.
+
+- PCG: Option to combine relative and absolute tolerance in convergence test.
+
+Version 1.7.7b released, 2002/08/08.
+
+- limited release SStruct optimizations testing
+- the krylov library has been renamed to HYPRE_krylov
+
+Version 1.7.6b released, 2002/03/27.
+
+- SStruct: Changed SetNeighborBox function to allow the case where the
+  NeighborBox does not even intersect the grid.  This functionality
+  is convenient in some application situations.
+- SStruct: Made additional changes to the SetNeighborBox function to
+  allow NeighborBox information to be redundantly declared by users.
+  This functionality is also convenient in some application situations.
+- SStruct: Optimized the implementation of MatrixSetBoxValues.
+
+Version 1.7.5b released, 2002/01/16.
+
+- SStruct: Modified SetNeighborBox boxes to reach off of the global grid.
+- krylov solvers (PCG, GMRES, BiCGSTAB and CGNR ) are the first
+  solvers to use the new definitions for logging, which are 
+  logging = 0: no printout,  no storing of norms or rel. res. norms 
+  logging = 1: no printout,  norms (and relative residual norms for PCG) 
+               are stored 
+  logging > 1: norms (and relative residual norms for PCG) are stored 
+               and printed out to standard output during each iteration 
+               step. 
+
+Version 1.7.0b released, 2001/11/12.
+
+- Bug fixes: SStruct interface under threads was producing incorrect
+  results. That is now fixed.
 
 Version 1.6.0 released, 2001/07/27.
 

@@ -1,10 +1,7 @@
 
 /*  Elimination tree computation and layout routines */
 
-#include <stdio.h>
-#include <malloc.h>
-#include <stdlib.h>
-#include "util.h"
+#include "superlu_util.h"
 
 /* 
  *  Implementation of disjoint set union routines.

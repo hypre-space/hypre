@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -20,6 +20,7 @@
 typedef struct
 {
    void                   *relax_data;
+   void                   *rb_relax_data;
    int                     relax_type;
 
 } hypre_PFMGRelaxData;
@@ -35,6 +36,7 @@ hypre_PFMGRelaxCreate( MPI_Comm  comm )
 
    pfmg_relax_data = hypre_CTAlloc(hypre_PFMGRelaxData, 1);
    (pfmg_relax_data -> relax_data) = hypre_PointRelaxCreate(comm);
+   (pfmg_relax_data -> rb_relax_data) = hypre_RedBlackGSCreate(comm);
    (pfmg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
 
    return (void *) pfmg_relax_data;
@@ -53,6 +55,7 @@ hypre_PFMGRelaxDestroy( void *pfmg_relax_vdata )
    if (pfmg_relax_data)
    {
       hypre_PointRelaxDestroy(pfmg_relax_data -> relax_data);
+      hypre_RedBlackGSDestroy(pfmg_relax_data -> rb_relax_data);
       hypre_TFree(pfmg_relax_data);
    }
 
@@ -70,9 +73,31 @@ hypre_PFMGRelax( void               *pfmg_relax_vdata,
                  hypre_StructVector *x                )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
-   int                  ierr = 0;
+   int          relax_type = (pfmg_relax_data -> relax_type);
+   int          constant_coefficient= hypre_StructMatrixConstantCoefficient(A);
+   int          ierr = 0;
 
-   ierr = hypre_PointRelax((pfmg_relax_data -> relax_data), A, b, x);
+   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( b );
+   switch(relax_type)
+   {
+      case 0:
+      case 1:
+         ierr = hypre_PointRelax((pfmg_relax_data -> relax_data), A, b, x);
+         break;
+      case 2:
+      case 3:
+         if (constant_coefficient)
+         {
+            ierr = hypre_RedBlackConstantCoefGS((pfmg_relax_data -> rb_relax_data), 
+                                                 A, b, x);
+         }
+         else
+         {
+            ierr = hypre_RedBlackGS((pfmg_relax_data -> rb_relax_data), A, b, x);
+         }
+          
+         break;
+   }
 
    return ierr;
 }
@@ -88,9 +113,22 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
                       hypre_StructVector *x                )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
+   int                  relax_type = (pfmg_relax_data -> relax_type);
    int                  ierr = 0;
 
-   ierr = hypre_PointRelaxSetup((pfmg_relax_data -> relax_data), A, b, x);
+   switch(relax_type)
+   {
+      case 0:
+      case 1:
+         ierr = hypre_PointRelaxSetup((pfmg_relax_data -> relax_data),
+                                      A, b, x);
+         break;
+      case 2:
+      case 3:
+         ierr = hypre_RedBlackGSSetup((pfmg_relax_data -> rb_relax_data),
+                                      A, b, x);
+         break;
+   }
 
    return ierr;
 }
@@ -129,28 +167,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
       break;
 
       case 2: /* Red-Black Gauss-Seidel */
-      {
-         hypre_Index  stride;
-         hypre_Index  indices[4];
-
-         hypre_PointRelaxSetNumPointsets(relax_data, 2);
-
-         hypre_SetIndex(stride, 2, 2, 2);
-
-         /* define red points (point set 0) */
-         hypre_SetIndex(indices[0], 1, 0, 0);
-         hypre_SetIndex(indices[1], 0, 1, 0);
-         hypre_SetIndex(indices[2], 0, 0, 1);
-         hypre_SetIndex(indices[3], 1, 1, 1);
-         hypre_PointRelaxSetPointset(relax_data, 0, 4, stride, indices);
-
-         /* define black points (point set 1) */
-         hypre_SetIndex(indices[0], 0, 0, 0);
-         hypre_SetIndex(indices[1], 1, 1, 0);
-         hypre_SetIndex(indices[2], 1, 0, 1);
-         hypre_SetIndex(indices[3], 0, 1, 1);
-         hypre_PointRelaxSetPointset(relax_data, 1, 4, stride, indices);
-      }
+      case 3: /* Red-Black Gauss-Seidel (non-symmetric) */
       break;
    }
 
@@ -165,7 +182,6 @@ int
 hypre_PFMGRelaxSetPreRelax( void  *pfmg_relax_vdata )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
-   void                *relax_data = (pfmg_relax_data -> relax_data);
    int                  relax_type = (pfmg_relax_data -> relax_type);
    int                  ierr = 0;
 
@@ -173,14 +189,15 @@ hypre_PFMGRelaxSetPreRelax( void  *pfmg_relax_vdata )
    {
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */
-      break;
+         break;
 
       case 2: /* Red-Black Gauss-Seidel */
-      {
-         hypre_PointRelaxSetPointsetRank(relax_data, 0, 0);
-         hypre_PointRelaxSetPointsetRank(relax_data, 1, 1);
-      }
-      break;
+         hypre_RedBlackGSSetStartRed((pfmg_relax_data -> rb_relax_data));
+         break;
+
+      case 3: /* Red-Black Gauss-Seidel (non-symmetric) */
+         hypre_RedBlackGSSetStartRed((pfmg_relax_data -> rb_relax_data));
+         break;
    }
 
    return ierr;
@@ -194,7 +211,6 @@ int
 hypre_PFMGRelaxSetPostRelax( void  *pfmg_relax_vdata )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
-   void                *relax_data = (pfmg_relax_data -> relax_data);
    int                  relax_type = (pfmg_relax_data -> relax_type);
    int                  ierr = 0;
 
@@ -202,14 +218,15 @@ hypre_PFMGRelaxSetPostRelax( void  *pfmg_relax_vdata )
    {
       case 1: /* Weighted Jacobi */
       case 0: /* Jacobi */
-      break;
+         break;
 
       case 2: /* Red-Black Gauss-Seidel */
-      {
-         hypre_PointRelaxSetPointsetRank(relax_data, 0, 1);
-         hypre_PointRelaxSetPointsetRank(relax_data, 1, 0);
-      }
-      break;
+         hypre_RedBlackGSSetStartBlack((pfmg_relax_data -> rb_relax_data));
+         break;
+
+      case 3: /* Red-Black Gauss-Seidel (non-symmetric) */
+         hypre_RedBlackGSSetStartRed((pfmg_relax_data -> rb_relax_data));
+         break;
    }
 
    return ierr;
@@ -227,6 +244,7 @@ hypre_PFMGRelaxSetTol( void   *pfmg_relax_vdata,
    int                  ierr = 0;
 
    ierr = hypre_PointRelaxSetTol((pfmg_relax_data -> relax_data), tol);
+   ierr = hypre_RedBlackGSSetTol((pfmg_relax_data -> rb_relax_data), tol);
 
    return ierr;
 }
@@ -244,6 +262,8 @@ hypre_PFMGRelaxSetMaxIter( void  *pfmg_relax_vdata,
 
    ierr = hypre_PointRelaxSetMaxIter((pfmg_relax_data -> relax_data),
                                      max_iter);
+   ierr = hypre_RedBlackGSSetMaxIter((pfmg_relax_data -> rb_relax_data),
+                                     max_iter);
 
    return ierr;
 }
@@ -260,6 +280,8 @@ hypre_PFMGRelaxSetZeroGuess( void  *pfmg_relax_vdata,
    int                  ierr = 0;
 
    ierr = hypre_PointRelaxSetZeroGuess((pfmg_relax_data -> relax_data),
+                                       zero_guess);
+   ierr = hypre_RedBlackGSSetZeroGuess((pfmg_relax_data -> rb_relax_data),
                                        zero_guess);
 
    return ierr;

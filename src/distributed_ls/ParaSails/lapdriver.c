@@ -262,7 +262,7 @@ hcstart();
 hcstop();
 */
         setup_time = time1-time0;
-        fflush(NULL);
+        fflush(stdout);
         MPI_Barrier(MPI_COMM_WORLD);
 
         /*****************

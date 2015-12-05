@@ -1,3 +1,11 @@
+/*BHEADER**********************************************************************
+ * (c) 2001   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ *********************************************************************EHEADER*/
+
 // *************************************************************************
 // This is the HYPRE implementation of LinearSystemCore.
 // *************************************************************************
@@ -5,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R3"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.6.2R1"
 
 // *************************************************************************
 // system libraries used
@@ -18,21 +26,25 @@
 #include <math.h>
 
 #ifdef NOFEI
-#define GlobalID int
-class Lookup
-{
-   int bogus;
-};
+#undef NOFEI
 #endif
+
+// *************************************************************************
+// FEI-specific include files
+// -------------------------------------------------------------------------
+
+#include "HYPRE_FEI_includes.h"
 
 // *************************************************************************
 // local enumerations and defines
 // -------------------------------------------------------------------------
 
-enum HYsolverID {HYPCG,HYGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,HYAMG,
-                 HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
-enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
-                 HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID};
+enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
+                 HYBICGS,HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYDSUPERLU,
+                 HYY12M,HYAMGE,HYHYBRID};
+enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
+                 HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
+                 HYUZAWA};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -48,6 +60,9 @@ enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
 #define HYFEI_SCHURREDUCE3          131072
 #define HYFEI_PRINTFEINFO           262144
 #define HYFEI_AMGDEBUG              524288
+#define HYFEI_STOPAFTERPRINT       1048576
+#define HYFEI_PRINTPARCSRMAT       2097152
+#define HYFEI_IMPOSENOBC           4194304
 
 // *************************************************************************
 // class definition
@@ -369,14 +384,71 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    void   loadConstraintNumbers(int length, int *list);
+   char  *getVersion();
+   void   beginCreateMapFromSoln();
+   void   endCreateMapFromSoln();
+   void   putIntoMappedMatrix(int row, int numValues, const double* values,
+                              const int* scatterIndices);
+   void   getFEDataObject(void **object) { (*object) = feData_; }
+
+   // ----------------------------------------------------------------------
+   // MLI-specific public functions
+   // ----------------------------------------------------------------------
+
+   void   FE_initFields(int nFields, int *fieldSizes, int *fieldIDs);
+   void   FE_initElemBlock(int nElems, int nNodesPerElem, int numNodeFields,
+                           int *nodeFieldIDs);
+   void   FE_initElemNodeList(int elemID, int nNodesPerElem, int *nodeIDs);
+   void   FE_initSharedNodes(int nShared, int *sharedIDs, int *sharedPLengs,
+                             int **sharedProcs);
+   void   FE_initComplete(); 
+   void   FE_loadElemMatrix(int elemID, int nNodes, int *elemNodeList, 
+                            int matDim, double **elemMat);
+
+ private: //functions
+
+   // ----------------------------------------------------------------------
+   // HYPRE specific private functions
+   // ----------------------------------------------------------------------
+
+   void   setupPCGPrecon();
+   void   setupLSICGPrecon();
+   void   setupGMRESPrecon();
+   void   setupFGMRESPrecon();
+   void   setupBiCGSTABPrecon();
+   void   setupBiCGSTABLPrecon();
+   void   setupTFQmrPrecon();
+   void   setupBiCGSPrecon();
+   void   setupSymQMRPrecon();
+   void   setupPreconBoomerAMG();
+   void   setupPreconParaSails();
+   void   setupPreconDDICT();
+   void   setupPreconDDILUT();
+   void   setupPreconPILUT();
+   void   setupPreconPoly();
+   void   setupPreconSchwarz();
+   void   setupPreconML();
+   void   setupPreconBlock();
+   void   setupPreconEuclid();
+   void   solveUsingBoomeramg(int&);
+   void   solveUsingSuperLU(int&);
+   void   solveUsingSuperLUX(int&);
+   void   solveUsingDSuperLU(int&);
+   void   solveUsingY12M(int&);
+   void   solveUsingAMGe(int&);
    void   buildSlideReducedSystem();
    void   buildSlideReducedSystem2();
    double buildSlideReducedSoln();
    double buildSlideReducedSoln2();
    void   buildSchurReducedSystem();
    void   buildSchurReducedSystem2();
-   int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
+   void   buildSlideReducedSystemPartA(int*,int*,int,int,int*,int*);
+   void   buildSlideReducedSystemPartB(int*,int*,int,int,int*,int*,
+                                       HYPRE_ParCSRMatrix *);
+   void   buildSlideReducedSystemPartC(int*,int*,int,int,int*,int*,
+                                       HYPRE_ParCSRMatrix);
    void   buildSchurReducedRHS();
+   void   buildSchurInitialGuess();
    double buildSchurReducedSoln();
    void   computeAConjProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
                                  HYPRE_ParVector b);
@@ -384,44 +456,16 @@ class HYPRE_LinSysCore
                                   HYPRE_ParVector b);
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
-   char  *getVersion();
-   void   beginCreateMapFromSoln();
-   void   endCreateMapFromSoln();
-   void   putIntoMappedMatrix(int row, int numValues, const double* values,
-                              const int* scatterIndices);
-   void   getFEGridObject(void **object) { (*object) = fegrid; }
-
- private:        //functions
+   int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
 
    // ----------------------------------------------------------------------
-   // functions for selecting solver/preconditioner
+   // private functions for selecting solver/preconditioner
    // ----------------------------------------------------------------------
 
-   void selectSolver(char* name);
-   void selectPreconditioner(char* name);
+   void   selectSolver(char* name);
+   void   selectPreconditioner(char* name);
 
-   // ----------------------------------------------------------------------
-   // HYPRE specific private functions
-   // ----------------------------------------------------------------------
-
-   void  setupPCGPrecon();
-   void  setupGMRESPrecon();
-   void  setupBiCGSTABPrecon();
-   void  setupBiCGSTABLPrecon();
-   void  setupTFQmrPrecon();
-   void  setupBiCGSPrecon();
-   void  solveUsingBoomeramg(int&);
-   void  solveUsingSuperLU(int&);
-   void  solveUsingSuperLUX(int&);
-   void  solveUsingY12M(int&);
-   void  solveUsingAMGe(int&);
-   void  buildSlideReducedSystemPartA(int*,int*,int,int,int*,int*);
-   void  buildSlideReducedSystemPartB(int*,int*,int,int,int*,int*,
-                                      HYPRE_ParCSRMatrix *);
-   void  buildSlideReducedSystemPartC(int*,int*,int,int,int*,int*,
-                                      HYPRE_ParCSRMatrix);
-
- private:        //variables
+ private: //variables
 
    // ----------------------------------------------------------------------
    // parallel communication information and output levels
@@ -431,9 +475,10 @@ class HYPRE_LinSysCore
    int             numProcs_;           // number of processors
    int             mypid_;              // my processor ID
    int             HYOutputLevel_;      // control print information
+   int             memOptimizerFlag_;   // turn on memory optimizer
 
    // ----------------------------------------------------------------------
-   // for storing information about how to load matrix directly
+   // for storing information about how to load matrix directly (bypass FEI)
    // ----------------------------------------------------------------------
 
    int             mapFromSolnFlag_;
@@ -447,7 +492,9 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    HYPRE_IJMatrix  HYA_;                // the system matrix
-   HYPRE_IJVector  HYb_;                // the current RHS 
+   HYPRE_IJMatrix  HYnormalA_;          // normalized system matrix
+   HYPRE_IJVector  HYb_;                // the current RHS
+   HYPRE_IJVector  HYnormalB_;          // normalized system rhs
    HYPRE_IJVector  *HYbs_;              // an array of RHSs
    HYPRE_IJVector  HYx_;                // the solution vector
    HYPRE_IJVector  HYr_;                // temporary vector for residual
@@ -459,6 +506,7 @@ class HYPRE_LinSysCore
    int             *rowLengths_;
    int             **colIndices_;
    double          **colValues_;
+   double          truncThresh_;
 
    // ----------------------------------------------------------------------
    // matrix and vectors for reduction
@@ -486,28 +534,36 @@ class HYPRE_LinSysCore
    int             currentRHS_;
    int             *rhsIDs_;
    int             numRHSs_;
+   int             nStored_;
+   int             *storedIndices_;
+   int             *auxStoredIndices_;
 
    // ----------------------------------------------------------------------
-   // various flags
+   // flags for matrix assembly, various reductions, and projections
    // ----------------------------------------------------------------------
 
    int             matrixVectorsCreated_;
    int             systemAssembled_;
    int             slideReduction_;
+   double          slideReductionMinNorm_;
+   int             slideReductionScaleMatrix_;
    int             schurReduction_;
    int             schurReductionCreated_;
    int             projectionScheme_;
    int             projectSize_;
    int             projectCurrSize_;
+   double          **projectionMatrix_; 
+   int             normalEqnFlag_;
 
    // ----------------------------------------------------------------------
-   // variables for slide reduction
+   // variables for slide and Schur reduction
    // ----------------------------------------------------------------------
 
    int             *selectedList_;
    int             *selectedListAux_;
    int             nConstraints_;
    int             *constrList_;
+   int             matrixPartition_;
 
    // ----------------------------------------------------------------------
    // variables for the selected solver and preconditioner
@@ -517,8 +573,8 @@ class HYPRE_LinSysCore
    HYPRE_Solver    HYSolver_;
    HYsolverID      HYSolverID_;
    int             gmresDim_;
+   int             fgmresUpdateTol_;
    int             maxIterations_;
-   int             finalResNorm_;
    double          tolerance_;
    int             normAbsRel_;
 
@@ -532,14 +588,27 @@ class HYPRE_LinSysCore
    // preconditioner specific variables
    // ----------------------------------------------------------------------
 
+   int             amgMaxLevels_;
    int             amgCoarsenType_;
    int             amgMaxIter_;
    int             amgMeasureType_;
    int             amgNumSweeps_[4];
    int             amgRelaxType_[4];
+   int             amgGridRlxType_;
    double          amgRelaxWeight_[25];
+   double          amgRelaxOmega_[25];
    double          amgStrongThreshold_;
    int             amgSystemSize_;
+   int             amgSmoothType_;
+   int             amgSmoothNumLevels_;
+   int             amgSmoothNumSweeps_;
+   int             amgCGSmoothNumSweeps_;
+   double          amgSchwarzRelaxWt_;
+   int             amgSchwarzVariant_;
+   int             amgSchwarzOverlap_;
+   int             amgSchwarzDomainType_;
+   int             amgUseGSMG_;
+   int             amgGSMGNSamples_;
    int             pilutFillin_;
    double          pilutDropTol_;
    int             pilutMaxNnzPerRow_;
@@ -558,10 +627,13 @@ class HYPRE_LinSysCore
    double          mlStrongThreshold_;
    int             mlCoarseSolver_;
    int             mlCoarsenScheme_;
+   int             mlNumPDEs_;
    int             superluOrdering_;
    char            superluScale_[1];
    double          ddilutFillin_;
    double          ddilutDropTol_;
+   int             ddilutOverlap_;
+   int             ddilutReorder_;
    double          ddictFillin_;
    double          ddictDropTol_;
    double          schwarzFillin_;
@@ -572,13 +644,22 @@ class HYPRE_LinSysCore
    char            **euclidargv_;
 
    // ----------------------------------------------------------------------
-   // map and others
+   // FEI and MLI variables
    // ----------------------------------------------------------------------
 
-   void            *fegrid;
+   void            *feData_;
+   int             haveFEData_;
    Lookup          *lookup_;
    int             haveLookup_;
-   double          **projectionMatrix_; 
+   int             MLI_NumNodes_;
+   int             MLI_FieldSize_;
+   int             *MLI_EqnNumbers_;
+   double          *MLI_NodalCoord_;
+   int             MLI_Hybrid_NSIncr_;
+   int             MLI_Hybrid_GSA_;
+   int             MLI_Hybrid_MaxIter_;
+   double          MLI_Hybrid_ConvRate_;
+   int             MLI_Hybrid_NTrials_;
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes

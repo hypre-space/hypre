@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -196,6 +196,20 @@ hypre_F90_IFACE(hypre_structsmgsetlogging, HYPRE_STRUCTSMGSETLOGGING)( long int 
    *ierr = (int)
       ( HYPRE_StructSMGSetLogging( (HYPRE_StructSolver) *solver,
                                    (int)                *logging) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structsmgsetprintlevel, HYPRE_STRUCTSMGSETPRINTLEVEL)( long int *solver,
+                                            int      *print_level,
+                                            int      *ierr    )
+{
+   *ierr = (int)
+      ( HYPRE_StructSMGSetPrintLevel( (HYPRE_StructSolver) *solver,
+                                   (int)                *print_level) );
 }
 
 /*--------------------------------------------------------------------------

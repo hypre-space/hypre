@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.3 $
+ * $Revision: 2.14 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -54,6 +54,18 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    info[2] = jlower;
    info[3] = jupper;
 
+   if (ilower > iupper+1)
+   {
+      ierr = -11;
+      printf("Warning! ilower larger than iupper+1!\n");
+   }
+
+   if (jlower > jupper+1)
+   {
+      ierr = -12;
+      printf("Warning! jlower larger than jupper+1!\n");
+   }
+
    /* Generate row- and column-partitioning through information exchange
       across all processors, check whether the matrix is square, and
       if the partitionings match. i.e. no overlaps or gaps,
@@ -69,13 +81,14 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       i4 = 4*i;
       if ( recv_buf[i4+1] != (recv_buf[i4+4]-1) )
       {
+         printf("Warning -- row partitioning does not line up! Partitioning incomplete!\n");
 	 ierr = -9;
 	 break;
       }
       else
 	 row_partitioning[i+1] = recv_buf[i4+4];
 	 
-      if (square && (recv_buf[i4]   != recv_buf[i4+2]) ||
+      if ((square && (recv_buf[i4]   != recv_buf[i4+2])) ||
                     (recv_buf[i4+1] != recv_buf[i4+3])  )
       {
          square = 0;
@@ -83,9 +96,11 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    }	
    i4 = (num_procs-1)*4;
    row_partitioning[num_procs] = recv_buf[i4+1]+1;
- 
-   if (square && ((recv_buf[i4] != recv_buf[i4+2]) ||
-                        (recv_buf[i4+1] != recv_buf[i4+3])))
+
+   if ((recv_buf[i4] != recv_buf[i4+2]) || (recv_buf[i4+1] != recv_buf[i4+3])) 
+      square = 0;
+
+   if (square)
       col_partitioning = row_partitioning;
    else
    {   
@@ -96,6 +111,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
          i4 = 4*i;
          if (recv_buf[i4+3] != recv_buf[i4+6]-1)
          {
+           printf("Warning -- col partitioning does not line up! Partitioning incomplete!\n");
    	   ierr = -10;
    	   break;
          }
@@ -152,7 +168,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
 
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
          ierr = hypre_IJMatrixDestroyParCSR( ijmatrix );
-      else
+      else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )
       {
          printf("Unrecognized object type -- HYPRE_IJMatrixDestroy\n");
          exit(1);
@@ -302,6 +318,40 @@ HYPRE_IJMatrixAssemble( HYPRE_IJMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetRowCounts
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixGetRowCounts( HYPRE_IJMatrix matrix, int nrows, 
+                         int *rows, int *ncols )
+{
+   int ierr = 0;
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetRowCounts\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      ierr = hypre_IJMatrixGetRowCountsPETSc( ijmatrix, nrows, rows, ncols );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      ierr = hypre_IJMatrixGetRowCountsISIS( ijmatrix, nrows, rows, ncols );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      ierr = hypre_IJMatrixGetRowCountsParCSR( ijmatrix, nrows, rows, ncols );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixGetRowCounts\n");
+      exit(1);
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixGetValues
  *--------------------------------------------------------------------------*/
 
@@ -374,6 +424,40 @@ HYPRE_IJMatrixGetObjectType( HYPRE_IJMatrix matrix, int *type )
    }
 
    *type = hypre_IJMatrixObjectType(ijmatrix);
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetLocalRange
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix, int *ilower, int *iupper,
+			int *jlower, int *jupper )
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+   MPI_Comm comm;
+   int *row_partitioning;
+   int *col_partitioning;
+   int my_id;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixGetObjectType\n");
+      exit(1);
+   }
+
+   comm = hypre_IJMatrixComm(ijmatrix);
+   row_partitioning = hypre_IJMatrixRowPartitioning(ijmatrix);
+   col_partitioning = hypre_IJMatrixColPartitioning(ijmatrix);
+
+   MPI_Comm_rank(comm, &my_id);
+
+   *ilower = row_partitioning[my_id];
+   *iupper = row_partitioning[my_id+1]-1;
+   *jlower = col_partitioning[my_id];
+   *jupper = col_partitioning[my_id+1]-1;
 
    return 0;
 }
@@ -480,31 +564,88 @@ HYPRE_IJMatrixSetDiagOffdSizes( HYPRE_IJMatrix matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetMaxOffProcElmts
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_IJMatrixSetMaxOffProcElmts( HYPRE_IJMatrix matrix, 
+				  int max_off_proc_elmts)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixSetMaxOffProcElmts\n");
+      exit(1);
+   }
+
+   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
+      return( hypre_IJMatrixSetMaxOffProcElmtsPETSc( ijmatrix , 
+			max_off_proc_elmts_set, max_off_proc_elmts_add ) );
+   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
+      return( hypre_IJMatrixSetMaxOffProcElmtsISIS( ijmatrix , 
+			max_off_proc_elmts_set, max_off_proc_elmts_add ) );
+   else */
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      return( hypre_IJMatrixSetMaxOffProcElmtsParCSR( ijmatrix , 
+			max_off_proc_elmts) );
+   else
+   {
+      printf("Unrecognized object type -- HYPRE_IJMatrixSetMaxOffProcElmts\n");
+      exit(1);
+   }
+
+   return -99;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixRead
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixRead( const char *filename, MPI_Comm comm, int type,
-		    HYPRE_IJMatrix *matrix)
+HYPRE_IJMatrixRead( const char     *filename,
+                    MPI_Comm        comm,
+                    int             type,
+		    HYPRE_IJMatrix *matrix_ptr )
 {
    int ierr = 0;
-   hypre_IJMatrix *ijmatrix;
+   HYPRE_IJMatrix  matrix;
+   int             ilower, iupper, jlower, jupper;
+   int             ncols, I, J;
+   double          value;
+   int             myid;
+   char            new_filename[255];
+   FILE           *file;
 
-   /* if ( type == HYPRE_PETSC )
-      ierr = hypre_IJMatrixReadPETSc( comm, filename, &ijmatrix );
-   else if ( type == HYPRE_ISIS )
-      ierr = hypre_IJMatrixReadISIS( comm, filename, &ijmatrix );
-   else */ if ( type == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixReadParCSR( comm, filename, &ijmatrix );
-   else 
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "r")) == NULL)
    {
-      printf("Unrecognized object type -- HYPRE_IJMatrixRead\n");
+      printf("Error: can't open input file %s\n", new_filename);
       exit(1);
    }
 
-   *matrix = (HYPRE_IJMatrix ) ijmatrix;
-   hypre_IJMatrixAssembleFlag(ijmatrix) = 1;
- 
+   fscanf(file, "%d %d %d %d", &ilower, &iupper, &jlower, &jupper);
+   ierr = HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &matrix);
+
+   ierr += HYPRE_IJMatrixSetObjectType(matrix, type);
+   ierr += HYPRE_IJMatrixInitialize(matrix);
+
+   ncols = 1;
+   while ( fscanf(file, "%d %d %le", &I, &J, &value) != EOF )
+   {
+      ierr += HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
+   }
+
+   ierr += HYPRE_IJMatrixAssemble(matrix);
+
+   fclose(file);
+
+   *matrix_ptr = matrix;
+
    return ierr;
 }
 
@@ -513,30 +654,85 @@ HYPRE_IJMatrixRead( const char *filename, MPI_Comm comm, int type,
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_IJMatrixPrint( HYPRE_IJMatrix matrix, const char *filename)
+HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
+                     const char     *filename )
 {
    int ierr = 0;
-   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+   MPI_Comm  comm = hypre_IJMatrixComm(matrix);
+   int      *row_partitioning;
+   int      *col_partitioning;
+   int       ilower, iupper, jlower, jupper;
+   int       i, j, ii;
+   int       ncols, *cols;
+   double   *values;
+   int       myid;
+   char      new_filename[255];
+   FILE     *file;
+   void     *object;
 
-   if (!ijmatrix)
+   if (!matrix)
    {
-      printf("Variable ijmatrix is NULL -- HYPRE_IJMatrixPrint\n");
+      printf("Variable matrix is NULL -- HYPRE_IJMatrixPrint\n");
       exit(1);
    }
 
-   /* if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PETSC )
-      ierr = hypre_IJMatrixPrintPETSc( ijmatrix , filename );
-   else if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_ISIS )
-      ierr = hypre_IJMatrixPrintISIS( ijmatrix , filename );
-   else */
-
-   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixPrintParCSR( ijmatrix , filename );
-   else
+   if ( (hypre_IJMatrixObjectType(matrix) != HYPRE_PARCSR) )
    {
       printf("Unrecognized object type -- HYPRE_IJMatrixPrint\n");
       exit(1);
    }
+
+   MPI_Comm_rank(comm, &myid);
+   
+   sprintf(new_filename,"%s.%05d", filename, myid);
+
+   if ((file = fopen(new_filename, "w")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", new_filename);
+      exit(1);
+   }
+
+   row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
+   col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+   ilower = row_partitioning[myid];
+   iupper = row_partitioning[myid+1] - 1;
+   jlower = col_partitioning[myid];
+   jupper = col_partitioning[myid+1] - 1;
+
+   fprintf(file, "%d %d %d %d\n", ilower, iupper, jlower, jupper);
+
+   ierr += HYPRE_IJMatrixGetObject(matrix, &object);
+
+   for (i = ilower; i <= iupper; i++)
+   {
+      if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
+      {
+         ii = i - row_partitioning[0];
+         ierr += HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) object,
+                                          ii, &ncols, &cols, &values);
+         for (j = 0; j < ncols; j++)
+         {
+            cols[j] += col_partitioning[0];
+         }
+      }
+
+      for (j = 0; j < ncols; j++)
+      {
+         fprintf(file, "%d %d %e\n", i, cols[j], values[j]);
+      }
+
+      if ( hypre_IJMatrixObjectType(matrix) == HYPRE_PARCSR )
+      {
+         for (j = 0; j < ncols; j++)
+         {
+            cols[j] -= col_partitioning[0];
+         }
+         ierr += HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) object,
+                                              ii, &ncols, &cols, &values);
+      }
+   }
+
+   fclose(file);
 
    return ierr;
 }

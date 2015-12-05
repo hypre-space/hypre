@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -14,6 +14,8 @@
 
 #ifndef hypre_PFMG_HEADER
 #define hypre_PFMG_HEADER
+
+#include <assert.h>
 
 /*--------------------------------------------------------------------------
  * hypre_PFMGData:
@@ -30,6 +32,7 @@ typedef struct
    int                   max_levels;  /* max_level <= 0 means no limit */
                       
    int                   relax_type;     /* type of relaxation to use */
+   int                   rap_type;       /* controls choice of RAP codes */
    int                   num_pre_relax;  /* number of pre relaxation sweeps */
    int                   num_post_relax; /* number of post relaxation sweeps */
    int                   skip_relax;     /* flag to allow skipping relaxation */
@@ -64,6 +67,7 @@ typedef struct
    int                   num_iterations;
    int                   time_index;
 
+   int                   print_level;
    /* additional log info (logged when `logging' > 0) */
    int                   logging;
    double               *norms;

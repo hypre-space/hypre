@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -40,6 +40,12 @@ typedef struct hypre_StructGrid_struct
 
    int                  ref_count;
 
+ /* GEC0902 additions for ghost expansion of boxes */
+
+   int                 ghlocal_size;   /* Number of vars in box including ghosts */
+   int                 num_ghost[6];   /* ghost layer size for each box  */  
+
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -57,11 +63,16 @@ typedef struct hypre_StructGrid_struct
 #define hypre_StructGridGlobalSize(grid)    ((grid) -> global_size)
 #define hypre_StructGridPeriodic(grid)      ((grid) -> periodic)
 #define hypre_StructGridRefCount(grid)      ((grid) -> ref_count)
+#define hypre_StructGridGhlocalSize(grid)   ((grid) -> ghlocal_size)
+#define hypre_StructGridNumGhost(grid)      ((grid) -> num_ghost)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))
 #define hypre_StructGridNumBoxes(grid) \
 (hypre_BoxArraySize(hypre_StructGridBoxes(grid)))
+
+#define hypre_StructGridIDPeriod(grid) \
+hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
 
 /*--------------------------------------------------------------------------
  * Looping macros:

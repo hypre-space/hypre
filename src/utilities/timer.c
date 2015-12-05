@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.6 $
  *********************************************************************EHEADER*/
 
 /*
@@ -19,7 +19,9 @@
  */
 
 #include <time.h>
+#ifndef WIN32
 #include <sys/times.h>
+#endif
 #ifdef TIMER_USE_MPI
 #include "mpi.h"
 #endif
@@ -29,26 +31,24 @@ double time_getWallclockSeconds(void)
 #ifdef TIMER_USE_MPI
    return(MPI_Wtime());
 #else
-
-#ifdef TIMER_NO_SYS
-   return(0.0);
+#ifdef WIN32
+   clock_t cl=clock();
+   return(((double) cl)/((double) CLOCKS_PER_SEC));
 #else
    struct tms usage;
    long wallclock = times(&usage);
-   return(((double) wallclock)/((double) CLK_TCK));
+   return(((double) wallclock)/((double) CLOCKS_PER_SEC));
 #endif
-
 #endif
 }
 
 double time_getCPUSeconds(void)
 {
-#ifdef TIMER_NO_SYS
-   return(0.0);
+#ifndef TIMER_NO_SYS
+   clock_t cpuclock = clock();
+   return(((double) (cpuclock))/((double) CLOCKS_PER_SEC));
 #else
-   struct tms usage;
-   (void) times(&usage);
-   return(((double) (usage.tms_utime+usage.tms_stime))/((double) CLK_TCK));
+   return(0.0);
 #endif
 }
 

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -64,13 +64,7 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
 
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-
+   hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
    int                     ierr = 0;
@@ -82,23 +76,12 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
    grid    = hypre_StructVectorGrid(r);
    stencil = hypre_StructMatrixStencil(R);
 
-   hypre_CreateComputeInfo(grid, stencil,
-                           &send_boxes, &recv_boxes,
-                           &send_processes, &recv_processes,
-                           &indt_boxes, &dept_boxes);
-
-   hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
-   hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
-   hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
-   hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-
-   hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                          stride, stride,
-                          send_processes, recv_processes,
-                          indt_boxes, dept_boxes,
-                          stride, grid,
-                          hypre_StructVectorDataSpace(r), 1,
-                          &compute_pkg);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_ComputeInfoProjectSend(compute_info, findex, stride);
+   hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
+   hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
+   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(r), 1,
+                          grid, &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the restrict data structure
@@ -215,7 +198,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
       }
 
       fi = 0;
-      hypre_ForBoxArrayI(ci, cgrid_boxes)
+      hypre_ForBoxI(ci, cgrid_boxes)
          {
             while (fgrid_ids[fi] != cgrid_ids[ci])
             {

@@ -112,13 +112,13 @@ int main(int argc, char *argv[])
 #if PARASAILS_EXT_PATTERN
                 printf("Enter parameters threshg, thresh, nlevels, "
 	            "filter, beta:\n");
-	        fflush(NULL);
+	        fflush(stdout);
                 scanf("%lf %lf %d %lf %lf", &threshg, &thresh, &nlevels, 
 		    &filter, &loadbal);
 #else
                 printf("Enter parameters thresh, nlevels, "
 	            "filter, beta:\n");
-	        fflush(NULL);
+	        fflush(stdout);
                 scanf("%lf %d %lf %lf", &thresh, &nlevels, 
 		    &filter, &loadbal);
 #endif
@@ -164,7 +164,12 @@ int main(int argc, char *argv[])
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
 
-        ParaSailsSetupValues(ps, A, filter);
+        err = ParaSailsSetupValues(ps, A, filter);
+        if (err != 0)
+	{
+            printf("ParaSailsSetupValues returned error.\n");
+	    goto cleanup;
+	}
 
         time1 = MPI_Wtime();
 	setup_time += (time1-time0);

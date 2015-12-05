@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -99,6 +99,14 @@ hypre_MPI_Comm_group( hypre_MPI_Comm   comm,
 }
 
 int
+hypre_MPI_Comm_split( hypre_MPI_Comm   comm,
+                      int n, int m,
+                      hypre_MPI_Comm * comms )
+{
+   return(0);
+}
+
+int
 hypre_MPI_Group_incl( hypre_MPI_Group  group,
                       int              n,
                       int             *ranks,
@@ -183,6 +191,12 @@ hypre_MPI_Allgather( void              *sendbuf,
          {
 	    crecvbuf[i] = csendbuf[i];
          }
+      } 
+      break;
+
+      case hypre_MPI_BYTE:
+      {
+         memcpy(recvbuf, sendbuf, sendcount);
       } 
       break;
    }
@@ -427,6 +441,12 @@ hypre_MPI_Allreduce( void              *sendbuf,
          crecvbuf[0] = csendbuf[0];
       } 
       break;
+
+      case hypre_MPI_BYTE:
+      {
+         memcpy(recvbuf, sendbuf, 1);
+      } 
+      break;
    }
 
    return 0;
@@ -504,6 +524,6 @@ hypre_MPI_Type_free( hypre_MPI_Datatype *datatype )
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty;
+int hypre_empty2;
 
 #endif

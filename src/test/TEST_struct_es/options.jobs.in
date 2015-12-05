@@ -1,0 +1,58 @@
+DRIVER="./struct_es"
+
+#echo Running $MPIRUN $DRIVER with $RUNPARM
+
+#=============================================================================
+# ij driver for eigenvalue solvers: (wihtout -lobpcg option runs ij) 
+# This script tests LOBPCG input options and defaults 
+#===========================================================================
+
+# All parameters by defauls
+#echo "all defaults"
+$MPIRUN $DRIVER  -lobpcg $RUNPARM > options.out.default 
+
+#echo "-solver none : no HYPRE preconditioner is used  (default -solver 10)"
+$MPIRUN $DRIVER  -lobpcg -solver none $RUNPARM  >  options.out.solver.none 
+
+# -itr <val>   : maximal number of LOBPCG iterations (default 100)
+#echo "default maximal number of iterations (100)"
+$MPIRUN $DRIVER  -lobpcg -n 15 15 16 -vrand 2 -solver 18 -seed 1 $RUNPARM > options.out.itr.100
+#echo "2 iterations maximum"
+$MPIRUN $DRIVER  -lobpcg -n 15 15 16 -vrand 2 -solver 18 -seed 1 -itr 2 $RUNPARM > options.out.itr.2
+
+#echo "-vrand 2 : compute 2 eigenpairs using random initial vectors (default 1)"
+$MPIRUN $DRIVER -lobpcg -vrand 2 $RUNPARM> options.out.vrand.2
+
+#echo "-seed 1  : use 1 as the seed for the pseudo-random number generator"
+#echo "           (default seed is based on the time of the run)"
+# The output files below should be identical, but different from options.out.default
+$MPIRUN $DRIVER -lobpcg -seed 1 $RUNPARM > options.out.seed
+$MPIRUN $DRIVER -lobpcg -seed 1 $RUNPARM > options.out.seed.repeat
+
+#echo "no orthonormality check"
+$MPIRUN $DRIVER  -lobpcg -seed 1           $RUNPARM > options.out.no_orthchk
+#echo "-orthchk : check eigenvectors for orthonormality"  
+$MPIRUN $DRIVER  -lobpcg -seed 1 -orthchk  $RUNPARM > options.out.orthchk
+
+# -verb <val> : verbosity level
+#echo "-verb 0  : no print"
+$MPIRUN $DRIVER  -lobpcg -seed 1 -verb 0 $RUNPARM > options.out.verb.0
+#echo "-verb 1  : print initial eigenvalues and residuals, iteration number, number of"
+#echo "           non-convergent eigenpairs and final eigenvalues and residuals (default)"
+$MPIRUN $DRIVER  -lobpcg -seed 1         $RUNPARM > options.out.verb.1
+#echo "-verb 2  : print eigenvalues and residuals on each iteration"
+$MPIRUN $DRIVER  -lobpcg -seed 1 -verb 2 $RUNPARM > options.out.verb.2
+
+# -pcgitr <val>: maximal number of inner PCG iterations for preconditioning (default 1);
+#echo "-pcgitr 0 : the preconditioner is applied directly"
+$MPIRUN $DRIVER  -lobpcg -seed 1 -pcgitr 0 $RUNPARM > options.out.pcgitr.0
+#echo "default number of inner iterations (1)"
+$MPIRUN $DRIVER  -lobpcg -seed 1           $RUNPARM > options.out.pcgitr.1
+#echo "-pcgitr 2 : two inner iterations"
+$MPIRUN $DRIVER  -lobpcg -seed 1 -pcgitr 2 $RUNPARM > options.out.pcgitr.2
+
+# -pcgtol <val> : residual tolerance for inner iterations (default 0.01)
+#echo "default residual tolerance for inner iterations (0.01)"
+$MPIRUN $DRIVER  -lobpcg -solver 18 -seed 1 -pcgitr 1000 $RUNPARM > options.out.pcgtol.01
+#echo "-pcgtol 0.05"
+$MPIRUN $DRIVER  -lobpcg -solver 18 -seed 1 -pcgitr 1000 -pcgtol 0.05 $RUNPARM > options.out.pcgtol.05

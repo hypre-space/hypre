@@ -5,6 +5,7 @@
 */
 
 #include "f2c.h"
+#include "hypre_blas.h"
 
 doublereal dasum_(integer *n, doublereal *dx, integer *incx)
 {

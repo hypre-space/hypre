@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -157,7 +157,7 @@ hypre_CGNRSetup(void *cgnr_vdata,
 
    (cgnr_data -> matvec_data) = (*(cgnr_functions->MatvecCreate))(A, x);
 
-   precond_setup(precond_data, A, b, x);
+   ierr = precond_setup(precond_data, A, b, x);
 
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -202,26 +202,51 @@ hypre_CGNRSolve(void *cgnr_vdata,
    double          alpha, beta;
    double          gamma, gamma_old;
    double          bi_prod, i_prod, eps;
+   double          ieee_check = 0.;
                 
-   int             i = 0, j;
+   int             i = 0;
    int             ierr = 0;
    int             my_id, num_procs;
    int             x_not_set = 1;
-   char		  *log_file_name;
-   FILE		  *fp;
+   /* char		  *log_file_name; */
 
    /*-----------------------------------------------------------------------
     * Start cgnr solve
     *-----------------------------------------------------------------------*/
    (*(cgnr_functions->CommInfo))(A,&my_id,&num_procs);
-   if (logging > 0)
+   if (logging > 1 && my_id == 0)
    {
-      log_file_name = (cgnr_data -> log_file_name);
-      fp = fopen(log_file_name,"w");
+/* not used yet      log_file_name = (cgnr_data -> log_file_name); */
+      printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
+      printf("-----    ------------    ---------  ------------ \n");
    }
+
 
    /* compute eps */
    bi_prod = (*(cgnr_functions->InnerProd))(b, b);
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (bi_prod != 0.) ieee_check = bi_prod/bi_prod; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (logging > 0)
+      {
+        printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+        printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
+        printf("User probably placed non-numerics in supplied b.\n");
+        printf("Returning error flag += 101.  Program not terminated.\n");
+        printf("ERROR detected by Hypre ...  END\n\n\n");
+      }
+      ierr += 101;
+      return ierr;
+   }
+
    if (stop_crit) 
       eps = tol*tol; /* absolute residual norm */
    else
@@ -248,6 +273,28 @@ hypre_CGNRSolve(void *cgnr_vdata,
    if (logging > 0)
    {
       norms[0] = sqrt((*(cgnr_functions->InnerProd))(r,r));
+
+      /* Since it is does not diminish performance, attempt to return an error flag
+         and notify users when they supply bad input. */
+      if (norms[0] != 0.) ieee_check = norms[0]/norms[0]; /* INF -> NaN conversion */
+      if (ieee_check != ieee_check)
+      {
+         /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+            for ieee_check self-equality works on all IEEE-compliant compilers/
+            machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+            by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+         if (logging > 0)
+         {
+           printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+           printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
+           printf("User probably placed non-numerics in supplied A or x_0.\n");
+           printf("Returning error flag += 101.  Program not terminated.\n");
+           printf("ERROR detected by Hypre ...  END\n\n\n");
+         }
+         ierr += 101;
+         return ierr;
+      }
    }
 
    /* t = C^T*A^T*r */
@@ -260,6 +307,28 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    /* gamma = <t,t> */
    gamma = (*(cgnr_functions->InnerProd))(t,t);
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (gamma != 0.) ieee_check = gamma/gamma; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (logging > 0)
+      {
+        printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+        printf("ERROR -- hypre_CGNRSolve: INFs and/or NaNs detected in input.\n");
+        printf("User probably placed non-numerics in supplied A or x_0.\n");
+        printf("Returning error flag += 101.  Program not terminated.\n");
+        printf("ERROR detected by Hypre ...  END\n\n\n");
+      }
+      ierr += 101;
+      return ierr;
+   }
 
    while ((i+1) <= max_iter)
    {
@@ -296,6 +365,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
       if (logging > 0)
       {
          norms[i]     = sqrt(i_prod);
+         if (logging > 1 && my_id == 0)
+         {
+            printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i]/ 
+		norms[i-1], norms[i]/bi_prod);
+         }
       }
 
       /* check for convergence */
@@ -342,16 +416,9 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    bi_prod = sqrt(bi_prod);
 
-   if (logging > 0 && my_id == 0)
+   if (logging > 1 && my_id == 0)
    {
-      fprintf(fp,"Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
-      fprintf(fp,"-----    ------------    ---------  ------------ \n");
-      for (j = 1; j <= i; j++)
-      {
-         fprintf(fp,"% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
-		norms[j-1], norms[j]/bi_prod);
-      }
-      fclose(fp);
+      printf("\n\n");
    }
 
    (cgnr_data -> num_iterations) = i;

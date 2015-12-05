@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -45,15 +45,114 @@ hypre_SStructGraphFindUVEntry( hypre_SStructGraph    *graph,
 
    hypre_SStructUVEntry **Uventries = hypre_SStructGraphUVEntries(graph);
    hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
+   int                   type       = hypre_SStructGraphObjectType(graph);
    hypre_BoxMapEntry     *map_entry;
    int                    rank;
 
    hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
-   hypre_SStructBoxMapEntryGetGlobalRank(map_entry, index, &rank);
-   rank -= hypre_SStructGridStartRank(grid);
+   hypre_SStructMapEntryGetGlobalRank(map_entry, index, &rank, type);
 
+   if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)
+   {
+    rank -= hypre_SStructGridGhstartRank(grid);
+   }
+   if (type == HYPRE_PARCSR)
+   {
+    rank -= hypre_SStructGridStartRank(grid);
+   }
+ 
    *Uventry_ptr = Uventries[rank];
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructGraphFindBoxEndpt
+ *
+ * Computes the local Uventries index for the endpt of a box. This index
+ * can be used to localize a search for Uventries of a box.
+ *      endpt= 0   start of boxes
+ *      endpt= 1   end of boxes
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructGraphFindBoxEndpt(hypre_SStructGraph    *graph,
+                               int                    part,
+                               int                    var,
+                               int                    proc,
+                               int                    endpt,
+                               int                    boxi)
+{
+   hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
+   int                    type      = hypre_SStructGraphObjectType(graph);
+   hypre_BoxMap          *map;
+   hypre_BoxMapEntry     *map_entry;
+   hypre_StructGrid      *sgrid;
+   hypre_Box             *box;
+   int                    rank;
+
+   map= hypre_SStructGridMap(grid, part, var);
+   hypre_BoxMapFindBoxProcEntry(map, boxi, proc, &map_entry);
+
+   sgrid= hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
+   box  = hypre_StructGridBox(sgrid, boxi);
+
+   /* get the global rank of the endpt corner of box boxi */
+   if (endpt < 1)
+   {
+       hypre_SStructMapEntryGetGlobalRank(map_entry, hypre_BoxIMin(box), &rank,
+                                          type);
+   }
+
+   else
+   {
+       hypre_SStructMapEntryGetGlobalRank(map_entry, hypre_BoxIMax(box), &rank,
+                                          type);
+   }
+
+   if (type == HYPRE_SSTRUCT || type ==  HYPRE_STRUCT)
+   {
+    rank -= hypre_SStructGridGhstartRank(grid);
+   }
+   if (type == HYPRE_PARCSR)
+   {
+    rank -= hypre_SStructGridStartRank(grid);
+   }
+
+   return rank;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructGraphFindSGridEndpts
+ *
+ * Computes the local Uventries index for the start or end of each box of
+ * a given sgrid.
+ *      endpt= 0   start of boxes
+ *      endpt= 1   end of boxes
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructGraphFindSGridEndpts(hypre_SStructGraph    *graph,
+                                  int                    part,
+                                  int                    var,
+                                  int                    proc,
+                                  int                    endpt,
+                                  int                   *endpts)
+{
+   hypre_SStructGrid     *grid      = hypre_SStructGraphGrid(graph);
+   hypre_StructGrid      *sgrid;
+   hypre_BoxArray        *boxes;
+   int                    i;
+
+   sgrid= hypre_SStructPGridSGrid(hypre_SStructGridPGrid(grid, part), var);
+   boxes= hypre_StructGridBoxes(sgrid);
+
+   /* get the endpts using hypre_SStructGraphFindBoxEndpt */
+   for (i= 0; i< hypre_BoxArraySize(boxes); i++)
+   {
+      endpts[i]= hypre_SStructGraphFindBoxEndpt(graph, part, var, proc, endpt, i);
+   }
+
+   return 0;
 }
 

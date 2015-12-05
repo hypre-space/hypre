@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.12 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -49,7 +49,7 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    hypre_CommPkg        **comm_pkgs;
    hypre_StructGrid      *sgrid;
    int                    var;
-
+ 
    pvector = hypre_TAlloc(hypre_SStructPVector, 1);
 
    hypre_SStructPVectorComm(pvector)  = comm;
@@ -57,6 +57,7 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    nvars = hypre_SStructPGridNVars(pgrid);
    hypre_SStructPVectorNVars(pvector) = nvars;
    svectors = hypre_TAlloc(hypre_StructVector *, nvars);
+
    for (var = 0; var < nvars; var++)
    {
       sgrid = hypre_SStructPGridSGrid(pgrid, var);
@@ -70,6 +71,9 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    }
    hypre_SStructPVectorCommPkgs(pvector) = comm_pkgs;
    hypre_SStructPVectorRefCount(pvector) = 1;
+
+   /* GEC inclusion of dataindices   */
+   hypre_SStructPVectorDataIndices(pvector) = NULL ;
 
    *pvector_ptr = pvector;
 
@@ -90,6 +94,10 @@ hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
    hypre_CommPkg      **comm_pkgs;
    int                  var;
 
+   /* GEC destroying dataindices and data in pvector   */
+
+   int                *dataindices;
+
    if (pvector)
    {
       hypre_SStructPVectorRefCount(pvector) --;
@@ -98,11 +106,14 @@ hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
          nvars     = hypre_SStructPVectorNVars(pvector);
          svectors = hypre_SStructPVectorSVectors(pvector);
          comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
+         dataindices = hypre_SStructPVectorDataIndices(pvector);
          for (var = 0; var < nvars; var++)
          {
             hypre_StructVectorDestroy(svectors[var]);
             hypre_CommPkgDestroy(comm_pkgs[var]);
          }
+           
+         hypre_TFree(dataindices);
          hypre_TFree(svectors);
          hypre_TFree(comm_pkgs);
          hypre_TFree(pvector);
@@ -189,20 +200,15 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
    hypre_StructVector   **svectors  = hypre_SStructPVectorSVectors(pvector);
    hypre_CommPkg        **comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
 
+   hypre_CommInfo        *comm_info;
+
    int                    ndim      = hypre_SStructPGridNDim(pgrid);
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
 
    hypre_Index            varoffset;
    int                    num_ghost[6];
    hypre_StructGrid      *sgrid;
-   hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
-   int                  **send_processes;
-   int                  **recv_processes;
-   hypre_Index            unit_stride;
    int                    var, d;
-
-   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    for (var = 0; var < nvars; var++)
    {
@@ -218,19 +224,13 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
             num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
          }
          
-         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost,
-                                          &send_boxes, &recv_boxes,
-                                          &send_processes, &recv_processes);
-         
+         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
          hypre_CommPkgDestroy(comm_pkgs[var]);
-         comm_pkgs[var] =
-            hypre_CommPkgCreate(send_boxes, recv_boxes,
-                                unit_stride, unit_stride,
-                                hypre_StructVectorDataSpace(svectors[var]),
-                                hypre_StructVectorDataSpace(svectors[var]),
-                                send_processes, recv_processes, 1,
-                                hypre_StructVectorComm(svectors[var]),
-                                hypre_StructGridPeriodic(sgrid));
+         hypre_CommPkgCreate(comm_info,
+                             hypre_StructVectorDataSpace(svectors[var]),
+                             hypre_StructVectorDataSpace(svectors[var]),
+                             1, hypre_StructVectorComm(svectors[var]),
+                             &comm_pkgs[var]);
       }
    }
 
@@ -414,12 +414,31 @@ hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector,
 /*--------------------------------------------------------------------------
  * hypre_SStructVectorConvert
  *
- * Copy values from vector to parvector
+ * Here the address of the parvector inside the semistructured vector
+ * is provided to the "outside". It assumes that the vector type
+ * is HYPRE_SSTRUCT
  *--------------------------------------------------------------------------*/
 
 int
 hypre_SStructVectorConvert( hypre_SStructVector  *vector,
                             hypre_ParVector     **parvector_ptr )
+{
+   int ierr = 0;
+
+  *parvector_ptr = hypre_SStructVectorParVector(vector);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructParVectorConvert
+ *
+ * Copy values from vector to parvector and provide the address
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
+                               hypre_ParVector     **parvector_ptr )
 {
    int ierr = 0;
 
@@ -434,6 +453,7 @@ hypre_SStructVectorConvert( hypre_SStructVector  *vector,
    double               *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
+   int                   bi;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
    hypre_Index           stride;
@@ -467,14 +487,20 @@ hypre_SStructVectorConvert( hypre_SStructVector  *vector,
                yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(box, loop_size);
-               hypre_BoxLoop1Begin(loop_size, y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+               hypre_BoxLoop2Begin(loop_size,
+                                   y_data_box, start, stride, yi,
+                                   box,        start, stride, bi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,bi
 #include "hypre_box_smp_forloop.h"
-               hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+               hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
                   {
-                     pardata[pari++] = yp[yi];
+                     pardata[pari+bi] = yp[yi];
                   }
-               hypre_BoxLoop1End(yi);
+               hypre_BoxLoop2End(yi, bi);
+               pari +=
+                  hypre_IndexX(loop_size)*
+                  hypre_IndexY(loop_size)*
+                  hypre_IndexZ(loop_size);
             }
       }
    }
@@ -486,12 +512,27 @@ hypre_SStructVectorConvert( hypre_SStructVector  *vector,
 
 /*--------------------------------------------------------------------------
  * hypre_SStructVectorRestore
+ * used for HYPRE_SSTRUCT type semi structured vectors.
+ * A dummy function to indicate that the struct vector part will be used.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_SStructVectorRestore( hypre_SStructVector *vector,
+                            hypre_ParVector     *parvector )
+{
+   int ierr = 0;
+   
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SStructVectorParRestore
  *
  * Copy values from parvector to vector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SStructVectorRestore( hypre_SStructVector *vector,
+hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                             hypre_ParVector     *parvector )
 {
    int ierr = 0;
@@ -506,6 +547,7 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
    double               *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
+   int                   bi;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
    hypre_Index           stride;
@@ -541,14 +583,20 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
                   yp = hypre_StructVectorBoxData(y, i);
 
                   hypre_BoxGetSize(box, loop_size);
-                  hypre_BoxLoop1Begin(loop_size, y_data_box, start, stride, yi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
+                  hypre_BoxLoop2Begin(loop_size,
+                                      y_data_box, start, stride, yi,
+                                      box,        start, stride, bi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,bi
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop1For(loopi, loopj, loopk, yi)
+                  hypre_BoxLoop2For(loopi, loopj, loopk, yi, bi)
                      {
-                        yp[yi] = pardata[pari++];
+                        yp[yi] = pardata[pari+bi];
                      }
-                  hypre_BoxLoop1End(yi);
+                  hypre_BoxLoop2End(yi, bi);
+                  pari +=
+                     hypre_IndexX(loop_size)*
+                     hypre_IndexY(loop_size)*
+                     hypre_IndexZ(loop_size);
                }
          }
       }
@@ -556,4 +604,82 @@ hypre_SStructVectorRestore( hypre_SStructVector *vector,
 
    return ierr;
 }
+/*------------------------------------------------------------------
+ *  GEC1002 shell initialization of a pvector 
+ *   if the pvector exists. This function will set the dataindices
+ *  and datasize of the pvector. Datasize is the sum of the sizes
+ *  of each svector and dataindices is defined as
+ *  dataindices[var]= aggregated initial size of the pvector[var]
+ *  When ucvars are present we need to modify adding nucvars.
+ *----------------------------------------------------------------*/   
+int 
+hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
+{
+  int   ierr=0;
+  int   nvars = hypre_SStructPVectorNVars(pvector);
+  int   var  ;
+  int   pdatasize;
+  int   svectdatasize;
+  int   *pdataindices;
+  int   nucvars = 0;
+
+  hypre_StructVector  *svector;
+
+  pdatasize = 0;
+  pdataindices = hypre_CTAlloc(int, nvars);
+
+  for (var =0; var < nvars; var++)
+  {
+     svector = hypre_SStructPVectorSVector(pvector, var);
+     hypre_StructVectorInitializeShell(svector);
+     pdataindices[var] = pdatasize ;
+     svectdatasize = hypre_StructVectorDataSize(svector); 
+     pdatasize += svectdatasize;    
+  }
+
+  /* GEC1002 assuming that the ucvars are located at the end, after the
+   * the size of the vars has been included we add the number of uvar 
+   * for this part                                                  */
+
+  hypre_SStructPVectorDataIndices(pvector) = pdataindices;
+  hypre_SStructPVectorDataSize(pvector) = pdatasize+nucvars ;
+
+  return ierr;
+}
+     
+/*------------------------------------------------------------------
+ *  GEC1002 shell initialization of a sstructvector
+ *  if the vector exists. This function will set the
+ *  dataindices and datasize of the vector. When ucvars
+ *  are present at the end of all the parts we need to modify adding pieces
+ *  for ucvars.
+ *----------------------------------------------------------------*/  
+int 
+hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
+{
+  int                      ierr = 0;
+  int                      part  ;
+  int                      datasize;
+  int                      pdatasize;
+  int                      nparts = hypre_SStructVectorNParts(vector); 
+  hypre_SStructPVector    *pvector;
+  int                     *dataindices;
+
+  datasize = 0;
+  dataindices = hypre_CTAlloc(int, nparts);
+  for (part = 0; part < nparts; part++)
+  {
+    pvector = hypre_SStructVectorPVector(vector, part) ;
+    hypre_SStructPVectorInitializeShell(pvector);
+    pdatasize = hypre_SStructPVectorDataSize(pvector);
+    dataindices[part] = datasize ;
+    datasize        += pdatasize ;  
+  } 
+  hypre_SStructVectorDataIndices(vector) = dataindices;
+  hypre_SStructVectorDataSize(vector) = datasize ;
+
+  return ierr;
+}   
+
+
 

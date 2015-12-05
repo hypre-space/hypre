@@ -1,4 +1,3 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1999   The Regents of the University of California
 #
@@ -8,51 +7,24 @@
 # $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES: .c .f .o
+include ../../config/Makefile.config
 
-srcdir = .
-
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES= 
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-CFLAGS = \
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix\
- ${CINCLUDES}\
- ${CDEFS}
-
-RANLIB = ranlib
-
-MPILIBFLAGS =    
-LIBFLAGS =   -lm
-LDLIBFLAGS =  
-BLASLIBFLAGS = -lHYPRE_blas
-
-LFLAGS =\
- -L.\
- -L../../blas\
- -L../../utilities\
- -L../../distributed_matrix\
- -lHYPRE_utilities\
- -lHYPRE_ParaSails\
- ${BLASLIBFLAGS}\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
+ ${CINCLUDES}
 
 HEADERS =\
  Common.h\
  ConjGrad.h\
  DiagScale.h\
- hypre_ParaSails.h\
  Hash.h\
+ hypre_ParaSails.h\
  LoadBal.h\
  Matrix.h\
  Mem.h\
@@ -67,8 +39,8 @@ FILES =\
  ConjGrad.c\
  DiagScale.c\
  FlexGmres.c\
- hypre_ParaSails.c\
  Hash.c\
+ hypre_ParaSails.c\
  LoadBal.c\
  Matrix.c\
  Mem.c\
@@ -86,26 +58,15 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_ParaSails.a 
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-driver: driver.o libHYPRE_ParaSails.a
-	@echo  "Linking" $@ "... "
-	${CC} -o $@ driver.o ${LFLAGS}
-
-convert: convert.o
-	${CC} -o $@ convert.o
-
-#install: all
-#	@cp -f $(srcdir)/hypre_*.h $$HYPRE_INSTALL_DIR/include/.
-#	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
-
-install: all
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_ParaSails.a 
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
+distclean: clean
 
 
 ##################################################################
@@ -114,21 +75,7 @@ veryclean: clean
 
 libHYPRE_ParaSails.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-
-

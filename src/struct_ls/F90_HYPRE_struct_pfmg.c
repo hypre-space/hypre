@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 
 #include "headers.h"
@@ -149,6 +149,20 @@ hypre_F90_IFACE(hypre_structpfmgsetrelaxtype, HYPRE_STRUCTPFMGSETRELAXTYPE)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetRAPType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structpfmgsetraptype, HYPRE_STRUCTPFMGSETRAPTYPE)( long int *solver,
+                                               int      *rap_type,
+                                               int      *ierr       )
+{
+   *ierr = (int)
+      ( HYPRE_StructPFMGSetRAPType( (HYPRE_StructSolver) *solver,
+                                      (int)              *rap_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructPFMGSetNumPreRelax
  *--------------------------------------------------------------------------*/
 
@@ -203,6 +217,20 @@ hypre_F90_IFACE(hypre_structpfmgsetlogging, HYPRE_STRUCTPFMGSETLOGGING)( long in
    *ierr = (int)
       ( HYPRE_StructPFMGSetLogging( (HYPRE_StructSolver) *solver,
                                     (int)                *logging ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructPFMGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structpfmgsetprintlevel, HYPRE_STRUCTPFMGSETPRINTLEVEL)( long int *solver,
+                                             int      *print_level,
+                                             int      *ierr    )
+{
+   *ierr = (int)
+      ( HYPRE_StructPFMGSetPrintLevel( (HYPRE_StructSolver) *solver,
+                                        (int)             *print_level ) );
 }
 
 /*--------------------------------------------------------------------------

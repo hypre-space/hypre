@@ -1,127 +1,65 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
-# (c) 1997   The Regents of the University of California
+# (c) 2000   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
+include ../config/Makefile.config
 
-.SUFFIXES: .cc .c .f .o
-
-srcdir = .
-
-all: lib
-
-install:all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/distributed_matrix.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
-
-#Headers
-HEADERS =\
- distributed_matrix.h
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-HYPREFILES =\
- HYPRE_distributed_matrix.c
-
-LOCALFILES =\
- distributed_matrix.c\
- distributed_matrix_PETSc.c\
- distributed_matrix_parcsr.c\
- distributed_matrix_ISIS.c
-
-#distributed_matrix_ISIS.cc
-
-FILES = $(HYPREFILES) $(LOCALFILES)
-
-
-OBJS = HYPRE_distributed_matrix.o \
- distributed_matrix.o\
- distributed_matrix_PETSc.o\
- distributed_matrix_parcsr.o\
- distributed_matrix_ISIS.o
-
-${OBJS}: ${HEADERS}
-
-CC =  mpicc
-CXX =  mpiCC
-F77 = mpif77
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES= 
-CDEFS = 
-
-CFLAGS = \
+C_COMPILE_FLAGS = \
  -I..\
- -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
- -I$(srcdir)/../distributed_matrix\
- -I$(srcdir)/../seq_mv\
  -I$(srcdir)/../parcsr_mv\
-  \
- ${C_COMPILE_FLAGS}\
- ${CINCLUDES} ${CDEFS}
+ -I$(srcdir)/../seq_mv\
+ ${CINCLUDES}
 
-CXXFLAGS = \
-  \
- ${CXX_COMPILE_FLAGS}\
- -I..\
- -I$(srcdir)\
- -I$(srcdir)/..\
- -I$(srcdir)/../utilities\
- ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG} ${CDEFS}
+EXTRA_HEADERS = internal_protos.h
 
-RANLIB = ranlib
+HEADERS =\
+ distributed_matrix.h\
+ HYPRE_distributed_matrix_mv.h\
+ HYPRE_distributed_matrix_protos.h\
+ HYPRE_distributed_matrix_types.h
 
+FILES =\
+ distributed_matrix.c\
+ HYPRE_distributed_matrix.c\
+ distributed_matrix_ISIS.c\
+ distributed_matrix_PETSc.c\
+ distributed_matrix_parcsr.c
 
-##################################################################
-# Main rules
-##################################################################
-
-driver: driver.o lib_HYPRE.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS}
-
-link:
-	rm driver
-	make driver
-
-lib: $(PROTOS) ${OBJS}
-	@echo  "Building $@ ... "
-	@echo  "Building ${OBJS} ... "
-	@ar -rcu libHYPRE_DistributedMatrix.a ${OBJS}
-	${RANLIB} libHYPRE_DistributedMatrix.a 
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
 ##################################################################
+
+all: libHYPRE_DistributedMatrix.a 
+	cp -fp $(srcdir)/distributed_matrix.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp lib*.a $(HYPRE_BUILD_DIR)/lib/.
+
+install: libHYPRE_DistributedMatrix.a 
+	cp -fp $(srcdir)/distributed_matrix.h $(HYPRE_INC_INSTALL)/.
+	cp -fp lib*.a $(HYPRE_LIB_INSTALL)/.
 clean:
-	@rm -f *.o *.dxx 
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f lib*.a
+distclean: clean
 
 
 ##################################################################
-# Generic rules
+# Rules
 ##################################################################
 
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
+libHYPRE_DistributedMatrix.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
 
-.cc.o:
-	${CXX} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-
-
-
+${OBJS}: ${HEADERS}

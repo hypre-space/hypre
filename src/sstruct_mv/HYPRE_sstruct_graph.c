@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.10 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -56,9 +56,11 @@ HYPRE_SStructGraphCreate( MPI_Comm             comm,
    hypre_SStructGraphNUVEntries(graph)  = 0;
    hypre_SStructGraphAUVEntries(graph)  = 0;
    hypre_SStructGraphIUVEntries(graph)  = NULL;
+
    hypre_SStructGraphUVEntries(graph)   = NULL;
    hypre_SStructGraphTotUEntries(graph) = 0;
    hypre_SStructGraphRefCount(graph)    = 1;
+   hypre_SStructGraphObjectType(graph) = HYPRE_SSTRUCT;
 
    *graph_ptr = graph;
 
@@ -79,6 +81,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
    hypre_SStructStencil ***stencils;
    int                     nUventries;
    int                    *iUventries;
+ 
    hypre_SStructUVEntry  **Uventries;
    hypre_SStructUVEntry   *Uventry;
    int                     nvars;
@@ -94,6 +97,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          stencils = hypre_SStructGraphStencils(graph);
          nUventries = hypre_SStructGraphNUVEntries(graph);
          iUventries = hypre_SStructGraphIUVEntries(graph);
+
          Uventries  = hypre_SStructGraphUVEntries(graph);
          HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
          for (part = 0; part < nparts; part++)
@@ -144,7 +148,8 @@ HYPRE_SStructGraphSetStencil( HYPRE_SStructGraph   graph,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGraphAddEntries
+ * HYPRE_SStructGraphAddEntries-
+ *   THIS IS FOR A NON-OVERLAPPING GRID GRAPH.
  *--------------------------------------------------------------------------*/
 
 int
@@ -163,6 +168,9 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
    int                    nUventries = hypre_SStructGraphNUVEntries(graph);
    int                    aUventries = hypre_SStructGraphAUVEntries(graph);
    int                   *iUventries = hypre_SStructGraphIUVEntries(graph);
+ 
+   int                    type       = hypre_SStructGraphObjectType(graph);
+                              
    hypre_SStructUVEntry **Uventries  = hypre_SStructGraphUVEntries(graph);
    hypre_SStructUVEntry  *Uventry;
    int                    nUentries;
@@ -170,16 +178,20 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
 
    hypre_BoxMapEntry     *map_entry;
    hypre_Index            cindex;
-   int                    rank, i;
+   int                    rank, i, startrank;
+   int                    box, to_box, to_proc;
 
    if (!nUventries)
    {
-      /* allocate space for non-stencil entries */
-      aUventries = hypre_SStructGridLocalSize(grid);
+      /* allocate space for non-stencil entries GEC1102
+       * the size equal to the ghost local size of grid */
+      aUventries = hypre_SStructGridGhlocalSize(grid);
       iUventries = hypre_TAlloc(int, aUventries);
+
       Uventries = hypre_CTAlloc(hypre_SStructUVEntry *, aUventries);
       hypre_SStructGraphAUVEntries(graph) = aUventries;
       hypre_SStructGraphIUVEntries(graph) = iUventries;
+
       hypre_SStructGraphUVEntries(graph)  = Uventries;
    }
    else if (nUventries >= aUventries)
@@ -189,13 +201,29 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
       iUventries = hypre_TReAlloc(iUventries, int, aUventries);
       hypre_SStructGraphAUVEntries(graph) = aUventries;
       hypre_SStructGraphIUVEntries(graph) = iUventries;
+
    }
 
    /* compute location (rank) for Uventry */
    hypre_CopyToCleanIndex(index, ndim, cindex);
    hypre_SStructGridFindMapEntry(grid, part, cindex, var, &map_entry);
-   hypre_SStructBoxMapEntryGetGlobalRank(map_entry, cindex, &rank);
-   rank -= hypre_SStructGridStartRank(grid);
+
+    /* GEC0203 getting the rank */ 
+   hypre_SStructMapEntryGetGlobalRank(map_entry, cindex, &rank, type);
+
+   /* GEC 0902 filling up the iUventries with local ghrank
+    * since HYPRE_SSTRUCT is chosen */
+
+   if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT) 
+   { 
+     startrank = hypre_SStructGridGhstartRank(grid);
+   }
+   if (type == HYPRE_PARCSR)
+   {
+     startrank = hypre_SStructGridStartRank(grid);
+   }
+    
+   rank -= startrank;
 
    iUventries[nUventries] = rank;
 
@@ -205,6 +233,8 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
       hypre_SStructUVEntryPart(Uventry) = part;
       hypre_CopyToCleanIndex(index, ndim, hypre_SStructUVEntryIndex(Uventry));
       hypre_SStructUVEntryVar(Uventry) = var;
+      hypre_SStructMapEntryGetBox(map_entry, &box);
+      hypre_SStructUVEntryBox(Uventry)= box;
       nUentries = 1;
       Uentries = hypre_TAlloc(hypre_SStructUEntry, nUentries);
    }
@@ -224,7 +254,14 @@ HYPRE_SStructGraphAddEntries( HYPRE_SStructGraph   graph,
                           hypre_SStructUVEntryToIndex(Uventry, i));
    hypre_SStructUVEntryToVar(Uventry, i) = to_var;
 
-   Uventries[rank] = Uventry;
+   hypre_CopyToCleanIndex(to_index, ndim, cindex);
+   hypre_SStructGridFindMapEntry(grid, to_part, cindex, to_var, &map_entry);
+   hypre_SStructMapEntryGetBox(map_entry, &to_box);
+   hypre_SStructUVEntryToBox(Uventry, i)= to_box;
+   hypre_SStructMapEntryGetProcess(map_entry, &to_proc);
+   hypre_SStructUVEntryToProc(Uventry, i)= to_proc;
+
+   Uventries[rank] = Uventry; /* GEC1102 where rank labels Uventries */
 
    hypre_SStructGraphNUVEntries(graph) ++;
    hypre_SStructGraphUVEntries(graph) = Uventries;
@@ -264,12 +301,18 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    int                   *iUventries  = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry **Uventries   = hypre_SStructGraphUVEntries(graph);
    int                    totUentries = hypre_SStructGraphTotUEntries(graph);
+
+   int                    type        = hypre_SStructGraphObjectType(graph);
+
+
    hypre_SStructUVEntry  *Uventry;
    hypre_SStructUEntry   *Uentry;
    int                    nUentries;
    int                    to_part;
    hypre_IndexRef         to_index;
    int                    to_var;
+   int                    to_box;
+   int                    to_proc;
    int                    proc, rank;
    hypre_BoxMapEntry     *map_entry;
 
@@ -281,7 +324,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    int                    t0loproc;
 
    /* type 1 communications used to get column data from other processes */
-   MPI_Request           *t1requests;
+   MPI_Request           *t1requests, tmprequest;
    MPI_Status            *t1statuses;
    int                  **t1sendbufs;
    int                  **t1recvbufs;
@@ -314,6 +357,26 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    MPI_Comm_rank(comm, &myproc);
 
    /*---------------------------------------------------------
+    * Sort the iUventries array and eliminate duplicates.
+    *---------------------------------------------------------*/
+
+   if (nUventries > 1)
+   {
+      qsort0(iUventries, 0, nUventries - 1);
+
+      j = 1;
+      for (i = 1; i < nUventries; i++)
+      {
+         if (iUventries[i] > iUventries[i-1])
+         {
+            iUventries[j] = iUventries[i];
+            j++;
+         }
+      }
+      nUventries = j;
+      hypre_SStructGraphNUVEntries(graph) = nUventries;
+   }
+   /*---------------------------------------------------------
     * Compute non-stencil column numbers (if possible), and
     * start building requests for needed off-process info.
     *---------------------------------------------------------*/
@@ -329,18 +392,33 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          to_part  = hypre_SStructUVEntryToPart(Uventry, j);
          to_index = hypre_SStructUVEntryToIndex(Uventry, j);
          to_var   = hypre_SStructUVEntryToVar(Uventry, j);
-         hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
+         /*
+           hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
                                        &map_entry);
+          */
+
+         /*---------------------------------------------------------
+          * used in future? The to_box corresponds to the first
+          * map_entry on the map_entry link list.
+          *---------------------------------------------------------*/
+         to_box   = hypre_SStructUVEntryToBox(Uventry, j);
+         to_proc  = hypre_SStructUVEntryToProc(Uventry, j);
+         hypre_SStructGridBoxProcFindMapEntry(grid, to_part, to_var, to_box,
+                                              to_proc, &map_entry);
          if (map_entry != NULL)
          {
             /* compute ranks locally */
-            hypre_SStructBoxMapEntryGetGlobalRank(map_entry, to_index, &rank);
-            hypre_SStructUVEntryRank(Uventry, j) = rank;
+
+           hypre_SStructMapEntryGetGlobalRank(map_entry, to_index, &rank, type);          
+           hypre_SStructUVEntryRank(Uventry, j) = rank;
+         
          }
          else
          {
+	   printf("off process computation\n");
+
             /* compute ranks off-process: start building type 1 requests */
-            hypre_SStructBoxMapEntryGetProcess(map_entry, &proc);
+            hypre_SStructMapEntryGetProcess(map_entry, &proc);
 
             /* initialize some things */
             if (t1totsize == 0)
@@ -376,6 +454,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    }
 
    /* set up remaining type 1 request info */
+ 
    if (t1ncomms > 0)
    {
       t1bufsizes    = hypre_TAlloc(int, t1ncomms);
@@ -398,27 +477,41 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       hypre_TFree(t1lists);
 
       t1sendbufs    = hypre_TAlloc(int *, t1ncomms);
-      t1sendbufs[0] = hypre_TAlloc(int, t1totsize*5);
+      t1sendbufs[0] = hypre_TAlloc(int, t1totsize*6);
       t1recvbufs    = hypre_TAlloc(int *, t1ncomms);
       t1recvbufs[0] = hypre_TAlloc(int, t1totsize);
+
       for (j = 0; j < t1totsize; j++)
       {
          Uentry = t1Uentries[0][j];
          to_part  = hypre_SStructUEntryToPart(Uentry);
          to_index = hypre_SStructUEntryToIndex(Uentry);
          to_var   = hypre_SStructUEntryToVar(Uentry);
-         t1sendbufs[0][5*j  ] = to_part;
-         t1sendbufs[0][5*j+1] = hypre_IndexD(to_index, 0);
-         t1sendbufs[0][5*j+2] = hypre_IndexD(to_index, 1);
-         t1sendbufs[0][5*j+3] = hypre_IndexD(to_index, 2);
-         t1sendbufs[0][5*j+4] = to_var;
+         to_box   = hypre_SStructUEntryToBox(Uentry);
+         t1sendbufs[0][6*j  ] = to_part;
+         t1sendbufs[0][6*j+1] = hypre_IndexD(to_index, 0);
+         t1sendbufs[0][6*j+2] = hypre_IndexD(to_index, 1);
+         t1sendbufs[0][6*j+3] = hypre_IndexD(to_index, 2);
+         t1sendbufs[0][6*j+4] = to_var;
+         t1sendbufs[0][6*j+5] = to_box;
       }
+
+      /* GEC1002 commenting this out to replace it by something else  
+       * since I think that a 6 is missing in sending buffer 
+       * 
+       * for (i = 1; i < t1ncomms; i++)
+       * {
+       *  t1sendbufs[i] = t1sendbufs[i-1] + t1bufsizes[i-1];
+       *  t1recvbufs[i] = t1sendbufs[i-1] + t1bufsizes[i-1];
+       *  t1Uentries[i] = t1Uentries[i-1] + t1bufsizes[i-1];
+       *	  }   */
+
       for (i = 1; i < t1ncomms; i++)
       {
-         t1sendbufs[i] = t1sendbufs[i-1] + t1bufsizes[i-1];
+         t1sendbufs[i] = t1sendbufs[i-1] + 6*t1bufsizes[i-1];
          t1recvbufs[i] = t1sendbufs[i-1] + t1bufsizes[i-1];
          t1Uentries[i] = t1Uentries[i-1] + t1bufsizes[i-1];
-      }
+      }  
    }
 
    /*---------------------------------------------------------
@@ -434,13 +527,15 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       /* post type 1 requests (note: tag=1 on send; tag=2 on receive) */
       for (i = 0; i < t1ncomms; i++)
       {
+
          MPI_Irecv(t1recvbufs[i], t1bufsizes[i], MPI_INT, t1bufprocs[i],
                    2, comm, &t1requests[i]);
       }
       for (i = 0; i < t1ncomms; i++)
       {
-         MPI_Send(t1sendbufs[i], t1bufsizes[i]*5, MPI_INT, t1bufprocs[i],
-                  1, comm);
+         /* Note: No need to check below that these have completed */
+         MPI_Isend(t1sendbufs[i], t1bufsizes[i]*6, MPI_INT, t1bufprocs[i],
+                   1, comm, &tmprequest);
       }
 
       t1complete = 0;
@@ -506,20 +601,23 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
          }
          MPI_Recv(t2commbuf, t2bufsize, MPI_INT, proc, 1, comm, &t2status);
 
-         t2bufsize /= 5;
+         t2bufsize /= 6;
          for (j = 0; j < t2bufsize; j++)
          {
-            to_part                   = t2commbuf[5*j];
-            hypre_IndexD(to_index, 0) = t2commbuf[5*j+1];
-            hypre_IndexD(to_index, 1) = t2commbuf[5*j+2];
-            hypre_IndexD(to_index, 2) = t2commbuf[5*j+3];
-            to_var                    = t2commbuf[5*j+4];
+            to_part                   = t2commbuf[6*j];
+            hypre_IndexD(to_index, 0) = t2commbuf[6*j+1];
+            hypre_IndexD(to_index, 1) = t2commbuf[6*j+2];
+            hypre_IndexD(to_index, 2) = t2commbuf[6*j+3];
+            to_var                    = t2commbuf[6*j+4];
+            to_box                    = t2commbuf[6*j+5]; /* future use? */
             hypre_SStructGridFindMapEntry(grid, to_part, to_index, to_var,
                                           &map_entry);
-            hypre_SStructBoxMapEntryGetGlobalRank(map_entry, to_index, &rank);
-            t2commbuf[j] = rank;
+
+            hypre_SStructMapEntryGetGlobalRank(map_entry, to_index, &rank, type);
+       
+            t2commbuf[j] = rank;     
          }
-         MPI_Send(t2commbuf, t2bufsize, MPI_INT, proc, 2, comm);
+	  MPI_Send(t2commbuf, t2bufsize, MPI_INT, proc, 2, comm);
 
          MPI_Iprobe(MPI_ANY_SOURCE, 1, comm, &t2flag, &t2status);
       }
@@ -564,7 +662,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       for (j = 0; j < t1totsize; j++)
       {
          Uentry = t1Uentries[0][j];
-         hypre_SStructUEntryRank(Uentry) = t1recvbufs[0][j];
+         hypre_SStructUEntryRank(Uentry) = t1recvbufs[0][j];       
       }
    }
 
@@ -592,4 +690,15 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
    }
 
    return ierr;
+}
+/*****************************************************************
+ *
+ *
+ *****************************************************************/
+int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
+                                    int                 type)
+{
+  int ierr = 0;
+  hypre_SStructGraphObjectType(graph) = type;
+  return ierr;
 }

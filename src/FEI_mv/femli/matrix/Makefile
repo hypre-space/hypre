@@ -1,0 +1,59 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 1.1 $
+#EHEADER***********************************************************************
+
+include ../../../config/Makefile.config
+
+CXX =  mpiCC
+
+CXX_COMPILE_FLAGS=-O2 
+CXXINCLUDES= 
+ 
+CXXFLAGS =\
+ ${CXX_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)/..\
+ -I../../../\
+ -I../../../utilities\
+ -I../../../parcsr_mv\
+ -I../../../parcsr_ls\
+ -I../../../krylov\
+ -I../../../IJ_mv\
+ -I../../../seq_mv\
+ ${CXXINCLUDES}
+
+HEADERS =\
+ mli_matrix.h\
+ mli_matrix_misc.h
+
+FILES =\
+ mli_matrix.cxx\
+ mli_matrix_mult.cxx\
+ mli_matrix_utils.cxx
+
+OBJS = ${FILES:.cxx=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: ${OBJS} 
+
+install: all
+
+clean:
+	@rm -f *.o
+
+distclean: clean
+
+
+##################################################################
+# Rules
+##################################################################
+
+${OBJS}: ${HEADERS}

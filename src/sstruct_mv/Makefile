@@ -1,26 +1,17 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.2 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-CINCLUDES= 
-
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
@@ -31,20 +22,24 @@ CFLAGS =\
  -I$(srcdir)/../IJ_mv\
  ${CINCLUDES}
 
-RANLIB= ranlib
-
 HEADERS =\
- HYPRE_sstruct_mv.h\
- sstruct_mv.h\
+ box_map.h\
  headers.h\
+ HYPRE_sstruct_mv.h\
  sstruct_graph.h\
  sstruct_grid.h\
  sstruct_matrix.h\
+ sstruct_mv.h\
  sstruct_stencil.h\
- sstruct_vector.h\
- box_map.h
+ sstruct_vector.h
 
 FILES =\
+ box_map.c\
+ F90_HYPRE_sstruct_graph.c\
+ F90_HYPRE_sstruct_grid.c\
+ F90_HYPRE_sstruct_matrix.c\
+ F90_HYPRE_sstruct_stencil.c\
+ F90_HYPRE_sstruct_vector.c\
  HYPRE_sstruct_graph.c\
  HYPRE_sstruct_grid.c\
  HYPRE_sstruct_matrix.c\
@@ -57,10 +52,10 @@ FILES =\
  sstruct_innerprod.c\
  sstruct_matrix.c\
  sstruct_matvec.c\
+ sstruct_overlap_innerprod.c\
  sstruct_scale.c\
  sstruct_stencil.c\
- sstruct_vector.c\
- box_map.c
+ sstruct_vector.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -69,19 +64,19 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_sstruct_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/sstruct_mv.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/sstruct_mv.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_sstruct_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/sstruct_mv.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
-	@rm -f *.prj
-	@rm -f *.kdd
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
+distclean: clean
 
 ##################################################################
 # Rules
@@ -89,15 +84,7 @@ veryclean: clean
 
 libHYPRE_sstruct_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

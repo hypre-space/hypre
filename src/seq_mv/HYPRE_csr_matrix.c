@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -81,4 +81,19 @@ HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix  matrix,
    hypre_CSRMatrixPrint( (hypre_CSRMatrix *) matrix,
                          file_name );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixGetNumRows
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, int *num_rows )
+{
+   hypre_CSRMatrix *csr_matrix = (hypre_CSRMatrix *) matrix;
+
+   *num_rows =  hypre_CSRMatrixNumRows( csr_matrix );
+
+   return 0;
+}
+
 

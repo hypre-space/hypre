@@ -18,7 +18,7 @@
   the code was modified is included with the above copyright notice.
 */
 
-#include "util.h"
+#include "superlu_util.h"
 
 void
 relax_snode (

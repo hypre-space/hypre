@@ -1,0 +1,29 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 1.1 $
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Check SetNeighborBox for periodic problems (2D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.periodic.2D -r 20 20 1 \
+-solver 11 > periodic.out.20
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.2D -r 20 10 1 -P 1 2 1 \
+-solver 11 > periodic.out.21
+
+#=============================================================================
+# Check SetNeighborBox for periodic problems (3D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.periodic -r 20 20 20 \
+-solver 11 > periodic.out.30
+mpirun -np 2 ./sstruct -in sstruct.in.periodic -r 20 20 10 -P 1 1 2 \
+-solver 11 > periodic.out.31
+
+

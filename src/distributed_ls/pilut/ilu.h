@@ -9,7 +9,7 @@
  * Started 9/27/95
  * George
  *
- * $Id: ilu.h,v 2.0 2000/12/14 18:20:18 falgout Exp $
+ * $Id: ilu.h,v 2.1 2004/03/05 21:24:37 treadway Exp $
  */
 
 #include <stdio.h>
@@ -22,9 +22,9 @@
 #include <assert.h>
 #include <signal.h>
 
-#include "./macros.h"
-#include "./struct.h"
-#include "./const.h"
+#include "macros.h"
+#include "struct.h"
+#include "const.h"
 
 
 #endif

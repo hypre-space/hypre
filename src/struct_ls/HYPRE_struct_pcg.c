@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.3 $
  *********************************************************************EHEADER*/
 
 #include "headers.h"
@@ -35,7 +35,9 @@ HYPRE_StructPCGCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
       chance of name conflicts. */
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_StructKrylovFree, hypre_StructKrylovCreateVector,
+         hypre_CAlloc, hypre_StructKrylovFree,
+         hypre_StructKrylovCommInfo,
+         hypre_StructKrylovCreateVector,
          hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
          hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
          hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
@@ -297,7 +299,30 @@ HYPRE_StructPCGSetLogging( HYPRE_StructSolver solver,
 {
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
+/*==========================================================================*/
+/*==========================================================================*/
+/** (Optional)  Currently, if parameter print_level is set to 0, no printing 
+is allowed.  If set to 1, printing takes place.
 
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param solver [IN/OUT]
+  solver structure
+@param logging [IN]
+  integer allowing printing to take place
+
+@see HYPRE_StructPCGSolve, HYPRE_StructPCGSetup */
+/*--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructPCGSetPrintLevel( HYPRE_StructSolver solver,
+                               int            print_level )
+{
+   return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
+}
 /*==========================================================================*/
 /*==========================================================================*/
 /** (Optional) Gets the number of iterations done in the solve.

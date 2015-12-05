@@ -4,13 +4,12 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 #ifndef HYPRE_STRUCT_MV_HEADER
 #define HYPRE_STRUCT_MV_HEADER
 
-#include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 
 #ifdef __cplusplus
@@ -81,6 +80,12 @@ int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
  **/
 int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
                                 int              *periodic);
+
+/**
+ * (Optional) Set the ghost layer in the grid object
+ **/
+int HYPRE_StructGridSetNumGhost(HYPRE_StructGrid  grid,
+                                int              *num_ghost);
 
 /*@}*/
 
@@ -174,6 +179,13 @@ int HYPRE_StructMatrixSetBoxValues(HYPRE_StructMatrix  matrix,
                                    int                *entries,
                                    double             *values);
 /**
+ * Set matrix coefficients which are constant over the grid.
+ **/
+int HYPRE_StructMatrixSetConstantValues(HYPRE_StructMatrix  matrix,
+                                   int                 nentries,
+                                   int                *entries,
+                                   double             *values);
+/**
  * Add to matrix coefficients index by index.
  **/
 int HYPRE_StructMatrixAddToValues(HYPRE_StructMatrix  matrix,
@@ -193,6 +205,14 @@ int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
                                      double             *values);
 
 /**
+ * Add to matrix coefficients which are constant over the grid.
+ **/
+int HYPRE_StructMatrixAddToConstantValues(HYPRE_StructMatrix  matrix,
+                                     int                 nentries,
+                                     int                *entries,
+                                     double             *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
@@ -204,6 +224,24 @@ int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
  **/
 int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
                                    int                 symmetric);
+
+/**
+ * Specifiy which stencil entries are constant over the grid.
+ * Presently supported:
+ * - no entries constant (this function need not be called)
+ * - all entries constant
+ * - all but the diagonal entry constant
+ **/
+int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
+                                          int                nentries,
+                                          int               *entries );
+
+/**
+ * (Optional) Set the ghost layer in the matrix 
+ **/
+int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
+                                  int                *num_ghost);
+
 
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
@@ -307,9 +345,6 @@ int HYPRE_StructVectorPrint(const char         *filename,
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/
-
-int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
-                                  int                *num_ghost);
 
 int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
                               HYPRE_StructGrid   *grid);

@@ -1,0 +1,75 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.2 $
+#EHEADER***********************************************************************
+
+###  This is the template file for the blas sub-directory.  When configure
+###  determines whether or not these files are needed, a macro will be
+###  automatically run to replace the ${BLASINTERNAL} variable with a comment
+###  symbol or a space and create the appropriate file named Makefile.
+###
+###
+###  If internal BLAS routines are needed, compile in this sub-directory 
+###  then copy the files to the utilities directory to be included in
+###  libHYPRE_utilities.a 
+###
+
+include ../config/Makefile.config
+
+
+${BLASINTERNAL}BLAS_HEADERS =  f2c.h  hypre_blas.h
+${BLASINTERNAL}BLAS_FILES = \
+${BLASINTERNAL}blas_utils.c\
+${BLASINTERNAL}dasum.c\
+${BLASINTERNAL}daxpy.c\
+${BLASINTERNAL}dcopy.c\
+${BLASINTERNAL}ddot.c\
+${BLASINTERNAL}dgemm.c\
+${BLASINTERNAL}dgemv.c\
+${BLASINTERNAL}dger.c\
+${BLASINTERNAL}dnrm2.c\
+${BLASINTERNAL}drot.c\
+${BLASINTERNAL}dscal.c\
+${BLASINTERNAL}dswap.c\
+${BLASINTERNAL}dsymm.c\
+${BLASINTERNAL}dsymv.c\
+${BLASINTERNAL}dsyr2.c\
+${BLASINTERNAL}dsyr2k.c\
+${BLASINTERNAL}dsyrk.c\
+${BLASINTERNAL}dtrmm.c\
+${BLASINTERNAL}dtrmv.c\
+${BLASINTERNAL}dtrsm.c\
+${BLASINTERNAL}dtrsv.c\
+${BLASINTERNAL}idamax.c
+
+OBJS = ${BLAS_FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: ${OBJS}
+	@\
+	${BLASINTERNAL}for file in ${OBJS}; \
+	${BLASINTERNAL}do \
+	${BLASINTERNAL}  (cp -fp $$file ../utilities); \
+	${BLASINTERNAL}done
+	${BLASINTERNAL}cp -fp ${BLAS_HEADERS} ../utilities
+
+install: all
+
+clean:
+	rm -f *.o
+
+distclean: clean
+	rm -f Makefile
+
+##################################################################
+# Rules
+##################################################################
+
+${OBJS}: ${BLAS_HEADERS}

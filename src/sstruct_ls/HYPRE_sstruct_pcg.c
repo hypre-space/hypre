@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -24,7 +24,7 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
 {
    hypre_PCGFunctions * pcg_functions =
       hypre_PCGFunctionsCreate(
-         hypre_CAlloc, hypre_SStructKrylovFree,
+         hypre_CAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovCreateVector,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
@@ -142,6 +142,17 @@ HYPRE_SStructPCGSetLogging( HYPRE_SStructSolver solver,
    return( HYPRE_PCGSetLogging( (HYPRE_Solver) solver, logging ) );
 }
 
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructPCGSetPrintLevel( HYPRE_SStructSolver solver,
+                            int                 level )
+{
+   return( HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, level ) );
+}
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -161,3 +172,75 @@ HYPRE_SStructPCGGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructPCGGetResidual( HYPRE_SStructSolver  solver,
+                              void              **residual )
+{
+   return( HYPRE_PCGGetResidual( (HYPRE_Solver) solver, residual ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructDiagScaleSetup( HYPRE_SStructSolver solver,
+                             HYPRE_SStructMatrix A,
+                             HYPRE_SStructVector y,
+                             HYPRE_SStructVector x      )
+{
+  
+   return( HYPRE_StructDiagScaleSetup( (HYPRE_StructSolver) solver,
+                                       (HYPRE_StructMatrix) A,
+                                       (HYPRE_StructVector) y,
+                                       (HYPRE_StructVector) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructDiagScale( HYPRE_SStructSolver solver,
+                        HYPRE_SStructMatrix A,
+                        HYPRE_SStructVector y,
+                        HYPRE_SStructVector x      )
+{
+   int ierr = 0;
+
+   int                      nparts= hypre_SStructMatrixNParts(A);
+
+   hypre_SStructPMatrix    *pA;
+   hypre_SStructPVector    *px;
+   hypre_SStructPVector    *py;
+   hypre_StructMatrix      *sA;
+   hypre_StructVector      *sx;
+   hypre_StructVector      *sy;
+
+   int part, vi;
+   int nvars;
+
+   for (part = 0; part < nparts; part++)
+   {
+      pA = hypre_SStructMatrixPMatrix(A, part);
+      px = hypre_SStructVectorPVector(x, part);
+      py = hypre_SStructVectorPVector(y, part);
+      nvars= hypre_SStructPMatrixNVars(pA);
+      for (vi = 0; vi < nvars; vi++)
+      {
+         sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
+         sx = hypre_SStructPVectorSVector(px, vi);
+         sy = hypre_SStructPVectorSVector(py, vi);
+         
+         HYPRE_StructDiagScale( (HYPRE_StructSolver) solver,
+                                (HYPRE_StructMatrix) sA,
+                                (HYPRE_StructVector) sy,
+                                (HYPRE_StructVector) sx );
+      }
+   }
+
+   return ierr;
+}
+
+
+

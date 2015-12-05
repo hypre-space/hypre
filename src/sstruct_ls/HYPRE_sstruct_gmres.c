@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.1 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -165,6 +165,17 @@ HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructGMRESSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructGMRESSetPrintLevel( HYPRE_SStructSolver solver,
+                              int                 level )
+{
+   return( HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SStructGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -184,4 +195,15 @@ HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 double              *norm )
 {
    return( HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructGMRESGetResidual
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver  solver,
+                                void              **residual )
+{
+   return( HYPRE_GMRESGetResidual( (HYPRE_Solver) solver, residual ) );
 }

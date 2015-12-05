@@ -1,0 +1,114 @@
+<html><head><TITLE>PCG Preconditioned Solver</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  PCG Preconditioned Solver  </H2>
+<hr>
+<DL>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG__object.html><B>bHYPRE_PCG__object</B></A> 
+ <DD><I>
+Symbol "bHYPRE</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>extern  C  bHYPRE_PCG  <B>bHYPRE_PCG__create</B>(void)
+ <DD><I>
+Constructor function for the class</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetCommunicator</B>( bHYPRE_PCG self, void* mpi_comm)
+ <DD><I>
+Set the MPI Communicator</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetIntParameter</B>( bHYPRE_PCG self, const char* name, int32_t value)
+ <DD><I>
+Set the int parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetDoubleParameter</B>( bHYPRE_PCG self, const char* name, double value)
+ <DD><I>
+Set the double parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetStringParameter</B>( bHYPRE_PCG self, const char* name, const char* value)
+ <DD><I>
+Set the string parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetIntArray1Parameter</B>( bHYPRE_PCG self, const char* name, struct SIDL_int__array* value)
+ <DD><I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetIntArray2Parameter</B>( bHYPRE_PCG self, const char* name, struct SIDL_int__array* value)
+ <DD><I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetDoubleArray1Parameter</B>( bHYPRE_PCG self, const char* name, struct SIDL_double__array* value)
+ <DD><I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetDoubleArray2Parameter</B>( bHYPRE_PCG self, const char* name, struct SIDL_double__array* value)
+ <DD><I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_GetIntValue</B>( bHYPRE_PCG self, const char* name, int32_t* value)
+ <DD><I>
+Set the int parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_GetDoubleValue</B>( bHYPRE_PCG self, const char* name, double* value)
+ <DD><I>
+Get the double parameter associated with <TT>name</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_Setup</B>( bHYPRE_PCG self, bHYPRE_Vector b, bHYPRE_Vector x)
+ <DD><I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_Apply</B>( bHYPRE_PCG self, bHYPRE_Vector b, bHYPRE_Vector* x)
+ <DD><I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetOperator</B>( bHYPRE_PCG self, bHYPRE_Operator A)
+ <DD><I>
+Set the operator for the linear system being solved</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetTolerance</B>( bHYPRE_PCG self, double tolerance)
+ <DD><I>
+(Optional) Set the convergence tolerance</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetMaxIterations</B>( bHYPRE_PCG self, int32_t max_iterations)
+ <DD><I>
+(Optional) Set maximum number of iterations</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetLogging.html><B>bHYPRE_PCG_SetLogging</B></A> 
+ <DD><I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetPrintLevel.html><B>bHYPRE_PCG_SetPrintLevel</B></A> 
+ <DD><I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_GetNumIterations</B>( bHYPRE_PCG self, int32_t* num_iterations)
+ <DD><I>
+(Optional) Return the number of iterations taken</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_GetRelResidualNorm</B>( bHYPRE_PCG self, double* norm)
+ <DD><I>
+(Optional) Return the norm of the relative residual</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_PCG_SetPreconditioner</B>( bHYPRE_PCG self, bHYPRE_Solver s)
+ <DD><I>
+Set the preconditioner</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_PCG  <B>bHYPRE_PCG__cast</B>( void* obj)
+ <DD><I>
+Cast method for interface and class type conversions</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>void*  <B>bHYPRE_PCG__cast2</B>( void* obj, const char* type)
+ <DD><I>
+String cast method for interface and class type conversions</I>
+</DL>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.8 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -64,13 +64,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
                        
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-                       
+   hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
    int                     ierr = 0;
@@ -82,23 +76,12 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
-   hypre_CreateComputeInfo(grid, stencil,
-                        &send_boxes, &recv_boxes,
-                        &send_processes, &recv_processes,
-                        &indt_boxes, &dept_boxes);
-
-   hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
-   hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
-   hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
-   hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-
-   hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                       stride, stride,
-                       send_processes, recv_processes,
-                       indt_boxes, dept_boxes,
-                       stride, grid,
-                       hypre_StructVectorDataSpace(e), 1,
-                       &compute_pkg);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
+   hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
+   hypre_ComputeInfoProjectComp(compute_info, findex, stride);
+   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(e), 1,
+                          grid, &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the interp data structure
@@ -153,6 +136,7 @@ hypre_SemiInterp( void               *interp_vdata,
    int                     Pi;
    int                     xci;
    int                     ei;
+   int                     constant_coefficient;
                          
    double                 *Pp0, *Pp1;
    double                 *xcp;
@@ -183,6 +167,10 @@ hypre_SemiInterp( void               *interp_vdata,
 
    stencil       = hypre_StructMatrixStencil(P);
    stencil_shape = hypre_StructStencilShape(stencil);
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(P);
+   assert( constant_coefficient==0 || constant_coefficient==1 );
+   /* ... constant_coefficient==2 for P shouldn't happen, see
+      hypre_PFMGCreateInterpOp in pfmg_setup_interp.c */
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -262,9 +250,18 @@ hypre_SemiInterp( void               *interp_vdata,
 
             if (P_stored_as_transpose)
             {
-               Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                  hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
+               if ( constant_coefficient )
+               {
+                  Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
+                  Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
+                     hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
+               }
+               else
+               {
+                  Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
+                  Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
+                     hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
+               }
             }
             else
             {
@@ -284,17 +281,34 @@ hypre_SemiInterp( void               *interp_vdata,
 
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                  hypre_BoxLoop2Begin(loop_size,
-                                      P_dbox, startc, stridec, Pi,
-                                      e_dbox, start, stride, ei);
+                  if ( constant_coefficient )
+                  {
+                     Pi = hypre_CCBoxIndexRank( P_dbox, startc );
+                     hypre_BoxLoop1Begin(loop_size,
+                                         e_dbox, start, stride, ei);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop1For(loopi, loopj, loopk, ei)
+                        {
+                           ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                                      Pp1[Pi] * ep1[ei]);
+                        }
+                     hypre_BoxLoop1End(ei);
+                  }
+                  else
+                  {
+                     hypre_BoxLoop2Begin(loop_size,
+                                         P_dbox, startc, stridec, Pi,
+                                         e_dbox, start, stride, ei);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
 #include "hypre_box_smp_forloop.h"
-                  hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
-                     {
-                        ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                                   Pp1[Pi] * ep1[ei]);
-                     }
-                  hypre_BoxLoop2End(Pi, ei);
+                     hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
+                        {
+                           ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                                      Pp1[Pi] * ep1[ei]);
+                        }
+                     hypre_BoxLoop2End(Pi, ei);
+                  }
                }
          }
    }

@@ -1,11 +1,20 @@
+/*BHEADER**********************************************************************
+ * (c) 2001   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ *********************************************************************EHEADER*/
+
+// *************************************************************************
+// Link to build an FEI_Implementation based on HYPRE
+// *************************************************************************
+
 #ifndef _HYPRE_Builder_h_
 #define _HYPRE_Builder_h_
 
-#include "Data.h"
-
 #include "utilities/utilities.h"
 
-#include "LinearSystemCore.h"
 #include "HYPRE.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"

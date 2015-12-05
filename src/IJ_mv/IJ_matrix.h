@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -19,7 +19,7 @@
  * hypre_IJMatrix:
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm    comm;
 

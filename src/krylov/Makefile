@@ -1,47 +1,39 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
-
-
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-F77_COMPILE_FLAGS= -O -silent 
-CINCLUDES= 
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
  
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
 
-RANLIB = ranlib
-
 HEADERS =\
- krylov.h
+ all_krylov.h\
+ bicgstab.h\
+ cgnr.h\
+ gmres.h\
+ krylov.h\
+ pcg.h
 
 FILES =\
  bicgstab.c\
  cgnr.c\
  gmres.c\
- pcg.c\
  HYPRE_bicgstab.c\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
- HYPRE_pcg.c
+ HYPRE_pcg.c\
+ pcg.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -49,37 +41,27 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libkrylov.a 
+all: libHYPRE_krylov.a 
+	cp -fp $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp lib*.a $(HYPRE_BUILD_DIR)/lib/.
 
 install: all
-	@cp -f $(srcdir)/krylov.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f lib*.a $$HYPRE_INSTALL_DIR/lib/.
-clean:
-	@rm -f *.o *.dxx 
-	@rm -f *.prj
-	@rm -f *.kdd
+	cp -fp $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)/.
+	cp -fp lib*.a $(HYPRE_LIB_INSTALL)/.
 
-veryclean: clean
-	@rm -f lib*.a
+clean:
+	rm -f *.o lib*.a
+
+distclean: clean
 
 
 ##################################################################
 # Rules
 ##################################################################
 
-libkrylov.a: ${OBJS}
+libHYPRE_krylov.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

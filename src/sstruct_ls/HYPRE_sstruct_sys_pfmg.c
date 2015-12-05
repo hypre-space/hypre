@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -185,6 +185,17 @@ HYPRE_SStructSysPFMGSetLogging( HYPRE_SStructSolver solver,
                                 int                logging )
 {
    return( hypre_SysPFMGSetLogging( (void *) solver, logging) );
+}
+
+/*--------------------------------------------------------------------------
+HYPRE_SStructSysPFMGSetPrintLevel
+*--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructSysPFMGSetPrintLevel( HYPRE_SStructSolver solver,
+                                int               print_level )
+{
+   return( hypre_SysPFMGSetPrintLevel( (void *) solver, print_level) );
 }
 
 /*--------------------------------------------------------------------------

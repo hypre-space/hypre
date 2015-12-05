@@ -1,77 +1,69 @@
-# Generated automatically from Makefile.in by configure.
 #BHEADER***********************************************************************
 # (c) 1997   The Regents of the University of California
 #
 # See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
 # notice, contact person, and disclaimer.
 #
-# $Revision: 2.0 $
+# $Revision: 2.1 $
 #EHEADER***********************************************************************
 
-.SUFFIXES:
-.SUFFIXES: .c .f .o
+include ../config/Makefile.config
 
-srcdir = .
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
-
-CC =  mpicc
-
-C_COMPILE_FLAGS= -O 
-CXX_COMPILE_FLAGS= -O 
-CINCLUDES= 
-
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
 
-RANLIB= ranlib
-
 HEADERS =\
  box.h\
  box_neighbors.h\
- communication.h\
+ box_pthreads.h\
  computation.h\
  headers.h\
+ hypre_box_smp_forloop.h\
+ HYPRE_struct_mv.h\
+ struct_communication.h\
  struct_grid.h\
  struct_matrix.h\
- struct_stencil.h\
- struct_vector.h\
  struct_mv.h\
- HYPRE_struct_mv.h
+ struct_stencil.h\
+ struct_vector.h
 
 FILES =\
- box.c\
  box_algebra.c\
  box_alloc.c\
+ box_boundary.c\
+ box.c\
  box_neighbors.c\
- communication.c\
  communication_info.c\
  computation.c\
+ F90_HYPRE_struct_grid.c\
+ F90_HYPRE_struct_matrix.c\
+ F90_HYPRE_struct_stencil.c\
+ F90_HYPRE_struct_vector.c\
  grow.c\
- project.c\
- struct_grid.c\
- struct_io.c\
- struct_axpy.c\
- struct_copy.c\
- struct_innerprod.c\
- struct_matrix.c\
- struct_matrix_mask.c\
- struct_matvec.c\
- struct_scale.c\
- struct_stencil.c\
- struct_vector.c\
  HYPRE_struct_grid.c\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\
  HYPRE_struct_vector.c\
- F90_HYPRE_struct_grid.c\
- F90_HYPRE_struct_matrix.c\
- F90_HYPRE_struct_stencil.c\
- F90_HYPRE_struct_vector.c
+ project.c\
+ struct_axpy.c\
+ struct_communication.c\
+ struct_copy.c\
+ struct_grid.c\
+ struct_innerprod.c\
+ struct_io.c\
+ struct_matrix.c\
+ struct_matrix_mask.c\
+ struct_matvec.c\
+ struct_overlap_innerprod.c\
+ struct_scale.c\
+ struct_stencil.c\
+ struct_vector.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -80,19 +72,19 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_struct_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/struct_mv.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
-install: all
-	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/struct_mv.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+install: libHYPRE_struct_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/struct_mv.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
 clean:
-	@rm -f *.o
-	@rm -f *.prj
-	@rm -f *.kdd
+	rm -f *.o lib*.a
 
-veryclean: clean
-	@rm -f libHYPRE_*.a
+distclean: clean
 
 ##################################################################
 # Rules
@@ -100,15 +92,7 @@ veryclean: clean
 
 libHYPRE_struct_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
+	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-##################################################################
-# Generic rules
-##################################################################
-
-.c.o:
-	${CC} -o $@ -c ${CFLAGS} $<
-

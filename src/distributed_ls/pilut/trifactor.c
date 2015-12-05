@@ -21,11 +21,11 @@
  * 7/11
  *  - cleaned up code a little. Added timer macros.
  *
- * $Id: trifactor.c,v 2.0 2000/12/14 18:20:20 falgout Exp $
+ * $Id: trifactor.c,v 2.1 2004/03/05 21:24:37 treadway Exp $
  */
 
-#include "./DistributedMatrixPilutSolver.h"
 #include "ilu.h"
+#include "DistributedMatrixPilutSolver.h"
 
 
 /*************************************************************************

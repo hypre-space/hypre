@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.4 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -169,13 +169,13 @@ hypre_F90_IFACE(hypre_ijmatrixsetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)(
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXSETOBJECTTYPE)(
+hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)(
                                                      long int *matrix,
                                                      int      *type,
                                                      int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixGetObjectType( (HYPRE_IJMatrix) *matrix,
-                                                (int *)          *type    ) );
+                                                (int *)           type    ) );
 }
 
 /*--------------------------------------------------------------------------

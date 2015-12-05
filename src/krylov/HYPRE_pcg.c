@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.9 $
  *********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -83,6 +83,28 @@ HYPRE_PCGSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGSetAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver,
+                               double abstolf )
+{
+   return( hypre_PCGSetAbsoluteTolFactor( (void *) solver, abstolf ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetConvergenceFactorTol
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver,
+                                  double cf_tol )
+{
+   return hypre_PCGSetConvergenceFactorTol( (void *) solver,
+                                            cf_tol   );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -155,13 +177,26 @@ HYPRE_PCGGetPrecond( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_PCGSetLogging
+ * sets both the print and log level, for backwards compatibility.
+ * Soon the SetPrintLevel call should be deleted.
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_PCGSetLogging( HYPRE_Solver solver,
-                     int                logging )
+                     int          level )
 {
-   return( hypre_PCGSetLogging( (void *) solver, logging ) );
+   return ( hypre_PCGSetLogging( (void *) solver, level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetPrintLevel( HYPRE_Solver solver,
+                        int          level )
+{
+   return( hypre_PCGSetPrintLevel( (void *) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -185,3 +220,14 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return( hypre_PCGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGGetResidual
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_PCGGetResidual( HYPRE_Solver solver, void **residual )
+{
+   /* returns a pointer to the residual vector */
+   return hypre_PCGGetResidual( (void *) solver, residual );
+}
+

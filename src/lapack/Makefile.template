@@ -1,0 +1,118 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 1.2 $
+#EHEADER***********************************************************************
+
+###  This is the template file for the lapack sub-directory.  When configure
+###  determines whether or not these files are needed, a macro will be 
+###  automatically run to replace the ${LAPACKINTERNAL} variable with a comment
+###  symbol or a space and create the appropriate file named Makefile.
+###
+###  If internal LAPACK routines are needed, compile in this sub-directory
+###  then copy the files to the utilities directory to be included in 
+###  libHYPRE_utilities.a 
+###
+
+include ../config/Makefile.config
+
+${LAPACKINTERNAL}LAPACK_HEADERS =  f2c.h hypre_lapack.h
+${LAPACKINTERNAL}LAPACK_FILES = \
+${LAPACKINTERNAL}dbdsqr.c\
+${LAPACKINTERNAL}dgebd2.c\
+${LAPACKINTERNAL}dgebrd.c\
+${LAPACKINTERNAL}dgelq2.c\
+${LAPACKINTERNAL}dgelqf.c\
+${LAPACKINTERNAL}dgels.c\
+${LAPACKINTERNAL}dgeqr2.c\
+${LAPACKINTERNAL}dgeqrf.c\
+${LAPACKINTERNAL}dgesvd.c\
+${LAPACKINTERNAL}dlabad.c\
+${LAPACKINTERNAL}dlabrd.c\
+${LAPACKINTERNAL}dlacpy.c\
+${LAPACKINTERNAL}dlae2.c\
+${LAPACKINTERNAL}dlaev2.c\
+${LAPACKINTERNAL}dlamch.c\
+${LAPACKINTERNAL}dlange.c\
+${LAPACKINTERNAL}dlanst.c\
+${LAPACKINTERNAL}dlansy.c\
+${LAPACKINTERNAL}dlapy2.c\
+${LAPACKINTERNAL}dlarfb.c\
+${LAPACKINTERNAL}dlarf.c\
+${LAPACKINTERNAL}dlarfg.c\
+${LAPACKINTERNAL}dlarft.c\
+${LAPACKINTERNAL}dlartg.c\
+${LAPACKINTERNAL}dlas2.c\
+${LAPACKINTERNAL}dlascl.c\
+${LAPACKINTERNAL}dlaset.c\
+${LAPACKINTERNAL}dlasq1.c\
+${LAPACKINTERNAL}dlasq2.c\
+${LAPACKINTERNAL}dlasq3.c\
+${LAPACKINTERNAL}dlasq4.c\
+${LAPACKINTERNAL}dlasq5.c\
+${LAPACKINTERNAL}dlasq6.c\
+${LAPACKINTERNAL}dlasr.c\
+${LAPACKINTERNAL}dlasrt.c\
+${LAPACKINTERNAL}dlassq.c\
+${LAPACKINTERNAL}dlasv2.c\
+${LAPACKINTERNAL}dlatrd.c\
+${LAPACKINTERNAL}dorg2l.c\
+${LAPACKINTERNAL}dorg2r.c\
+${LAPACKINTERNAL}dorgbr.c\
+${LAPACKINTERNAL}dorgl2.c\
+${LAPACKINTERNAL}dorglq.c\
+${LAPACKINTERNAL}dorgql.c\
+${LAPACKINTERNAL}dorgqr.c\
+${LAPACKINTERNAL}dorgtr.c\
+${LAPACKINTERNAL}dorm2r.c\
+${LAPACKINTERNAL}dormbr.c\
+${LAPACKINTERNAL}dorml2.c\
+${LAPACKINTERNAL}dormlq.c\
+${LAPACKINTERNAL}dormqr.c\
+${LAPACKINTERNAL}dpotf2.c\
+${LAPACKINTERNAL}dpotrf.c\
+${LAPACKINTERNAL}dpotrs.c\
+${LAPACKINTERNAL}dsteqr.c\
+${LAPACKINTERNAL}dsterf.c\
+${LAPACKINTERNAL}dsyev.c\
+${LAPACKINTERNAL}dsygs2.c\
+${LAPACKINTERNAL}dsygst.c\
+${LAPACKINTERNAL}dsygv.c\
+${LAPACKINTERNAL}dsytd2.c\
+${LAPACKINTERNAL}dsytrd.c\
+${LAPACKINTERNAL}ieeeck.c\
+${LAPACKINTERNAL}ilaenv.c\
+${LAPACKINTERNAL}lapack_utils.c\
+${LAPACKINTERNAL}lsame.c\
+${LAPACKINTERNAL}xerbla.c
+
+OBJS = ${LAPACK_FILES:.c=.o}
+
+#################################################################
+# Targets
+#################################################################
+
+all: ${OBJS}
+	@\
+	${LAPACKINTERNAL}for file in ${OBJS}; \
+	${LAPACKINTERNAL}do \
+	${LAPACKINTERNAL}  (cp -fp $$file ../utilities); \
+	${LAPACKINTERNAL}done
+	${LAPACKINTERNAL}cp -fp ${LAPACK_HEADERS} ../utilities
+
+install: all
+
+clean:
+	rm -f *.o
+
+distclean: clean
+	rm -f Makefile
+
+#################################################################
+# Rules
+#################################################################
+
+${OBJS}: ${LAPACK_HEADERS}

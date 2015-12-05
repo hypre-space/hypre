@@ -4,7 +4,7 @@
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
  *
- * $Revision: 2.0 $
+ * $Revision: 2.5 $
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -72,19 +72,12 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
-   hypre_Index             unit_stride;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
                        
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-                       
    hypre_BoxArray         *base_points;
+   hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
    /*----------------------------------------------------------
@@ -94,26 +87,13 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
-
    base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
 
-   hypre_CreateComputeInfo(grid, stencil,
-                        &send_boxes, &recv_boxes,
-                        &send_processes, &recv_processes,
-                        &indt_boxes, &dept_boxes);
-
-   hypre_ProjectBoxArrayArray(indt_boxes, base_index, base_stride);
-   hypre_ProjectBoxArrayArray(dept_boxes, base_index, base_stride);
-
-   hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                       unit_stride, unit_stride,
-                       send_processes, recv_processes,
-                       indt_boxes, dept_boxes,
-                       base_stride, grid,
-                       hypre_StructVectorDataSpace(x), 1,
-                       &compute_pkg);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_ComputeInfoProjectComp(compute_info, base_index, base_stride);
+   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+                          grid, &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the residual data structure

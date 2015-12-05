@@ -3,7 +3,7 @@
 
 #ifdef ISIS_AVAILABLE
 #include "iostream.h"
-#include "RowMatrix.h"  // ISIS++ header file
+#include "RowMatrix.h"  /* ISIS++ header file */
 #endif
 
 #include "./distributed_matrix.h"
@@ -95,8 +95,8 @@ hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
 #ifdef ISIS_AVAILABLE
    RowMatrix *mat = (RowMatrix *) hypre_DistributedMatrixLocalStorage(dm);
 
-   *start = mat->getMap().startRow() - 1;  // convert to 0-based
-   *end = mat->getMap().endRow(); // endRow actually returns 1 less
+   *start = mat->getMap().startRow() - 1;  /* convert to 0-based */
+   *end = mat->getMap().endRow(); /* endRow actually returns 1 less */
    
    cout << "LocalRangeISIS " << *start << "  " << *end << endl;
 #endif
@@ -108,7 +108,7 @@ hypre_GetDistributedMatrixLocalRangeISIS( hypre_DistributedMatrix *dm,
  *--------------------------------------------------------------------------*/
 
 /* semantics: buffers returned will be overwritten on next call to 
-// this get function */
+ this get function */
 
 int 
 hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
@@ -127,7 +127,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
    mat->getRow(row+1, temp, rowbuf->val, rowbuf->ind);
 
 #if 0
-   // add diagonal element if necessary
+   /* add diagonal element if necessary */
    {
        int *p;
        int found = 0;
@@ -141,13 +141,13 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
        if (!found)
        {
 	   rowbuf->ind[temp] = row+1;
-	   rowbuf->val[temp] = 1.; // pick a value
+	   rowbuf->val[temp] = 1.; /* pick a value */
 	   temp++;
        }
    }
 #endif
 
-   // set pointers to local buffers
+   /* set pointers to local buffers */
    if (col_ind != NULL)
    {
        int *p;
@@ -155,7 +155,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
        *size = temp;
        *col_ind = rowbuf->ind;
 
-       // need to convert to 0-based indexing for output
+       /* need to convert to 0-based indexing for output */
        for (i=0, p=*col_ind; i<temp; i++, p++)
 	   (*p)--;
    }
@@ -188,5 +188,5 @@ hypre_RestoreDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
 }
 
 #ifdef ISIS_AVAILABLE
-} // extern "C"
+} /* extern "C" */
 #endif
