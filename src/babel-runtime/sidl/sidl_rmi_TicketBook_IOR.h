@@ -3,7 +3,7 @@
  * Symbol:        sidl.rmi.TicketBook-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name: V1-14-0b $
+ * Release:       $Name:  $
  * Revision:      @(#) $Id: sidl_rmi_TicketBook_IOR.h,v 1.1 2006/08/29 23:26:43 painter Exp $
  * Description:   Intermediate Object Representation for sidl.rmi.TicketBook
  * 

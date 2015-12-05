@@ -3,7 +3,7 @@
  * Symbol:        sidl.BaseInterface-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name: V1-14-0b $
+ * Release:       $Name:  $
  * Revision:      @(#) $Id: sidl_BaseInterface_Module.c,v 1.5 2006/08/29 22:29:31 painter Exp $
  * Description:   implement a C extension type for a sidl extendable
  * 

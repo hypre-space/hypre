@@ -1,75 +1,78 @@
-<html><head><TITLE>Struct SMG Solver</TITLE></head>
-<body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  Struct SMG Solver  </H2>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> Struct SMG Solver</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">Struct SMG Solver</A></H2></H2>
+<HR>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGCreate</B>(MPI_Comm comm, <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> *solver)
- <DD><I>
-Create a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGCreate"></A>
+<A HREF=HYPRE_StructSMGCreate.html><B>HYPRE_StructSMGCreate</B></A><DD><I> Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGDestroy</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver)
- <DD><I>
-Destroy a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGDestroy"></A>
+<A HREF=HYPRE_StructSMGDestroy.html><B>HYPRE_StructSMGDestroy</B></A><DD><I> Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructSMGSetup.html><B>HYPRE_StructSMGSetup</B></A> 
- <DD><I>
-Prepare to solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetup"></A>
+<A HREF=HYPRE_StructSMGSetup.html><B>HYPRE_StructSMGSetup</B></A><DD><I> Prepare to solve the system.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
- <DD><I>
-Solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSolve"></A>
+<A HREF=HYPRE_StructSMGSolve.html><B>HYPRE_StructSMGSolve</B></A><DD><I> Solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetTol</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, double tol)
- <DD><I>
-(Optional) Set the convergence tolerance</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetTol"></A>
+<A HREF=HYPRE_StructSMGSetTol.html><B>HYPRE_StructSMGSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetMaxIter</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int max_iter)
- <DD><I>
-(Optional) Set maximum number of iterations</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetMaxIter"></A>
+<A HREF=HYPRE_StructSMGSetMaxIter.html><B>HYPRE_StructSMGSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetRelChange</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int rel_change)
- <DD><I>
-(Optional) Additionally require that the relative difference in
-successive iterates be small</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetRelChange"></A>
+<A HREF=HYPRE_StructSMGSetRelChange.html><B>HYPRE_StructSMGSetRelChange</B></A><DD><I> (Optional) Additionally require that the relative difference in successive iterates be small</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructSMGSetZeroGuess.html><B>HYPRE_StructSMGSetZeroGuess</B></A> 
- <DD><I>
-(Optional) Use a zero initial guess</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetZeroGuess"></A>
+<A HREF=HYPRE_StructSMGSetZeroGuess.html><B>HYPRE_StructSMGSetZeroGuess</B></A><DD><I> (Optional) Use a zero initial guess.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructSMGSetNonZeroGuess.html><B>HYPRE_StructSMGSetNonZeroGuess</B></A> 
- <DD><I>
-(Optional) Use a nonzero initial guess</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetNonZeroGuess"></A>
+<A HREF=HYPRE_StructSMGSetNonZeroGuess.html><B>HYPRE_StructSMGSetNonZeroGuess</B></A><DD><I> (Optional) Use a nonzero initial guess.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetNumPreRelax</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int num_pre_relax)
- <DD><I>
-(Optional) Set number of relaxation sweeps before coarse-grid correction</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetNumPreRelax"></A>
+<A HREF=HYPRE_StructSMGSetNumPreRelax.html><B>HYPRE_StructSMGSetNumPreRelax</B></A><DD><I> (Optional) Set number of relaxation sweeps before coarse-grid correction</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetNumPostRelax</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int num_post_relax)
- <DD><I>
-(Optional) Set number of relaxation sweeps after coarse-grid correction</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetNumPostRelax"></A>
+<A HREF=HYPRE_StructSMGSetNumPostRelax.html><B>HYPRE_StructSMGSetNumPostRelax</B></A><DD><I> (Optional) Set number of relaxation sweeps after coarse-grid correction</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetLogging</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int logging)
- <DD><I>
-(Optional) Set the amount of logging to do</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetLogging"></A>
+<A HREF=HYPRE_StructSMGSetLogging.html><B>HYPRE_StructSMGSetLogging</B></A><DD><I> (Optional) Set the amount of logging to do</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGSetPrintLevel</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int print_level)
- <DD><I>
-(Optional) Set the amount of printing to do to the screen</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGSetPrintLevel"></A>
+<A HREF=HYPRE_StructSMGSetPrintLevel.html><B>HYPRE_StructSMGSetPrintLevel</B></A><DD><I> (Optional) Set the amount of printing to do to the screen</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGGetNumIterations</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int *num_iterations)
- <DD><I>
-Return the number of iterations taken</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGGetNumIterations"></A>
+<A HREF=HYPRE_StructSMGGetNumIterations.html><B>HYPRE_StructSMGGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructSMGGetFinalRelativeResidualNorm</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, double *norm)
- <DD><I>
-Return the norm of the final relative residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructSMGGetFinalRelativeResidualNorm"></A>
+<A HREF=HYPRE_StructSMGGetFinalRelativeResidualNorm.html><B>HYPRE_StructSMGGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
 </DL>
-<A NAME="DOC.DOCU">
-<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
 <center>
 <img src="hypre_wiw.gif">
 </center>
-
-<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
-</BODY>

@@ -3,7 +3,7 @@ C       File:          sidl_Resolve.inc
 C       Symbol:        sidl.Resolve-v0.9.15
 C       Symbol Type:   enumeration
 C       Babel Version: 1.0.0
-C       Release:       $Name: V1-14-0b $
+C       Release:       $Name:  $
 C       Revision:      @(#) $Id: sidl_Resolve.inc,v 1.27 2006/09/14 21:51:52 painter Exp $
 C       Description:   Client-side glue code for sidl.Resolve
 C       

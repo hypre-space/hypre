@@ -3,7 +3,7 @@
  * Symbol:        sidl.BaseInterface-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name: V1-14-0b $
+ * Release:       $Name:  $
  * Revision:      @(#) $Id: sidl_BaseInterface_fStub.c,v 1.38 2006/09/14 21:51:51 painter Exp $
  * Description:   Client-side glue code for sidl.BaseInterface
  * 

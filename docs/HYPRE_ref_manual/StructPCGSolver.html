@@ -1,79 +1,82 @@
-<html><head><TITLE>Struct PCG Solver</TITLE></head>
-<body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  Struct PCG Solver  </H2>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> Struct PCG Solver</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">Struct PCG Solver</A></H2></H2>
+<HR>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGCreate</B>(MPI_Comm comm, <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> *solver)
- <DD><I>
-Create a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGCreate"></A>
+<A HREF=HYPRE_StructPCGCreate.html><B>HYPRE_StructPCGCreate</B></A><DD><I> Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGDestroy</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver)
- <DD><I>
-Destroy a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGDestroy"></A>
+<A HREF=HYPRE_StructPCGDestroy.html><B>HYPRE_StructPCGDestroy</B></A><DD><I> Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPCGSetup.html><B>HYPRE_StructPCGSetup</B></A> 
- <DD><I>
-Prepare to solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetup"></A>
+<A HREF=HYPRE_StructPCGSetup.html><B>HYPRE_StructPCGSetup</B></A><DD><I> Prepare to solve the system.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
- <DD><I>
-Solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSolve"></A>
+<A HREF=HYPRE_StructPCGSolve.html><B>HYPRE_StructPCGSolve</B></A><DD><I> Solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetTol</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, double tol)
- <DD><I>
-(Optional) Set the convergence tolerance</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetTol"></A>
+<A HREF=HYPRE_StructPCGSetTol.html><B>HYPRE_StructPCGSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetMaxIter</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int max_iter)
- <DD><I>
-(Optional) Set maximum number of iterations</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetMaxIter"></A>
+<A HREF=HYPRE_StructPCGSetMaxIter.html><B>HYPRE_StructPCGSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetTwoNorm</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int two_norm)
- <DD><I>
-(Optional) Use the two-norm in stopping criteria</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetTwoNorm"></A>
+<A HREF=HYPRE_StructPCGSetTwoNorm.html><B>HYPRE_StructPCGSetTwoNorm</B></A><DD><I> (Optional) Use the two-norm in stopping criteria</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetRelChange</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int rel_change)
- <DD><I>
-(Optional) Additionally require that the relative difference in
-successive iterates be small</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetRelChange"></A>
+<A HREF=HYPRE_StructPCGSetRelChange.html><B>HYPRE_StructPCGSetRelChange</B></A><DD><I> (Optional) Additionally require that the relative difference in successive iterates be small</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetPrecond</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, HYPRE_PtrToStructSolverFcn precond, HYPRE_PtrToStructSolverFcn precond_setup, <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> precond_solver)
- <DD><I>
-(Optional) Set the preconditioner to use</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetPrecond"></A>
+<A HREF=HYPRE_StructPCGSetPrecond.html><B>HYPRE_StructPCGSetPrecond</B></A><DD><I> (Optional) Set the preconditioner to use</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetLogging</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int logging)
- <DD><I>
-(Optional) Set the amount of logging to do</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetLogging"></A>
+<A HREF=HYPRE_StructPCGSetLogging.html><B>HYPRE_StructPCGSetLogging</B></A><DD><I> (Optional) Set the amount of logging to do</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetPrintLevel</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int level)
- <DD><I>
-(Optional) Set the amount of printing to do to the screen</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGSetPrintLevel"></A>
+<A HREF=HYPRE_StructPCGSetPrintLevel.html><B>HYPRE_StructPCGSetPrintLevel</B></A><DD><I> (Optional) Set the amount of printing to do to the screen</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGGetNumIterations</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int *num_iterations)
- <DD><I>
-Return the number of iterations taken</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGGetNumIterations"></A>
+<A HREF=HYPRE_StructPCGGetNumIterations.html><B>HYPRE_StructPCGGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGGetFinalRelativeResidualNorm</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, double *norm)
- <DD><I>
-Return the norm of the final relative residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGGetFinalRelativeResidualNorm"></A>
+<A HREF=HYPRE_StructPCGGetFinalRelativeResidualNorm.html><B>HYPRE_StructPCGGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGGetResidual</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, void **residual)
- <DD><I>
-Return the residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructPCGGetResidual"></A>
+<A HREF=HYPRE_StructPCGGetResidual.html><B>HYPRE_StructPCGGetResidual</B></A><DD><I> Return the residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructDiagScaleSetup</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> y, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
- <DD><I>
-Setup routine for diagonal preconditioning</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructDiagScaleSetup"></A>
+<A HREF=HYPRE_StructDiagScaleSetup.html><B>HYPRE_StructDiagScaleSetup</B></A><DD><I> Setup routine for diagonal preconditioning</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructDiagScale</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> HA, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> Hy, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> Hx)
- <DD><I>
-Solve routine for diagonal preconditioning</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructDiagScale"></A>
+<A HREF=HYPRE_StructDiagScale.html><B>HYPRE_StructDiagScale</B></A><DD><I> Solve routine for diagonal preconditioning</I>
 </DL>
-<A NAME="DOC.DOCU">
-<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
 <center>
 <img src="hypre_wiw.gif">
 </center>
-
-<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
-</BODY>

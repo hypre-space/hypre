@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.109 $
+ * $Revision: 2.112 $
  ***********************************************************************EHEADER*/
 
 
@@ -84,6 +84,20 @@ enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
 #define HYFEI_STOPAFTERPRINT       1048576
 #define HYFEI_PRINTPARCSRMAT       2097152
 #define HYFEI_IMPOSENOBC           4194304
+
+// *************************************************************************
+// substructure definition
+// -------------------------------------------------------------------------
+
+typedef struct 
+{
+   int    *EdgeNodeList_;
+   int    *NodeNumbers_;
+   int    numEdges_;
+   int    numLocalNodes_;
+   int    numNodes_;
+   double *NodalCoord_;
+} HYPRE_FEI_AMSData;
 
 // *************************************************************************
 // class definition
@@ -696,6 +710,7 @@ class HYPRE_LinSysCore
    int             MLI_Hybrid_MaxIter_;
    double          MLI_Hybrid_ConvRate_;
    int             MLI_Hybrid_NTrials_;
+   HYPRE_FEI_AMSData AMSData_;
 
    // ----------------------------------------------------------------------
    // ML Maxwell variables

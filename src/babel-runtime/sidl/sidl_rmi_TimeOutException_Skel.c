@@ -3,7 +3,7 @@
  * Symbol:        sidl.rmi.TimeOutException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name: V1-14-0b $
+ * Release:       $Name:  $
  * Revision:      @(#) $Id: sidl_rmi_TimeOutException_Skel.c,v 1.1 2006/08/29 23:31:44 painter Exp $
  * Description:   Server-side glue code for sidl.rmi.TimeOutException
  * 

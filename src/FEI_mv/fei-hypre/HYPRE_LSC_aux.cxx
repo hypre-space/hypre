@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.29 $
+ * $Revision: 2.31 $
  ***********************************************************************EHEADER*/
 
 
@@ -3482,7 +3482,6 @@ void HYPRE_LinSysCore::setupPreconAMS()
    int                maxit=100;    /* heuristics for now */
    double             tol=1.0e-6;   /* heuristics for now */
    int                cycle_type=1; /* V-cycle */
-   HYPRE_ParVector    parVecX, parVecY, parVecZ;
 
    /* Set AMS parameters */
    HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
@@ -3491,6 +3490,7 @@ void HYPRE_LinSysCore::setupPreconAMS()
    HYPRE_AMSSetCycleType(HYPrecon_, cycle_type);
    HYPRE_AMSSetPrintLevel(HYPrecon_, HYOutputLevel_);
 
+#if 0
    if (maxwellGEN_ != NULL)
       HYPRE_AMSSetDiscreteGradient(HYPrecon_, maxwellGEN_);
    else
@@ -3500,11 +3500,37 @@ void HYPRE_LinSysCore::setupPreconAMS()
    }
    if (amsX_ == NULL && amsY_ != NULL)
    {
+      HYPRE_ParVector parVecX, parVecY, parVecZ;
       HYPRE_IJVectorGetObject(amsX_, (void **) &parVecX);
       HYPRE_IJVectorGetObject(amsY_, (void **) &parVecY);
       HYPRE_IJVectorGetObject(amsZ_, (void **) &parVecZ);
       HYPRE_AMSSetCoordinateVectors(HYPrecon_,parVecX,parVecY,parVecZ);
    }
+#endif
+
+   // Call AMS to construct the discrete gradient matrix G
+   // and the nodal coordinate vectors
+   {
+      HYPRE_ParCSRMatrix A_csr;
+      HYPRE_ParVector    b_csr;
+      HYPRE_ParVector    x_csr;
+
+      HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+      HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+      HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
+
+      HYPRE_AMSFEISetup(HYPrecon_,
+			A_csr,
+			b_csr,
+			x_csr,
+			AMSData_.EdgeNodeList_,
+			AMSData_.NodeNumbers_,
+			AMSData_.numEdges_,
+			AMSData_.numLocalNodes_,
+			AMSData_.numNodes_,
+			AMSData_.NodalCoord_);
+   }
+
    // this is used to tell AMS that mass matrix has 0 coeff 
    // HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
 }

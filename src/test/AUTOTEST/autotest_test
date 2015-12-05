@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.152 $
+# $Revision: 1.153 $
 #EHEADER**********************************************************************
 
 #=============================================================================
@@ -205,9 +205,8 @@ mail_summary ()
 {
   echo "Autotest mailing error summary"
 
-  HYPRE_DEFAULT_EMAIL="hill66@llnl.gov"
-  HYPRE_ALL_EMAIL="hill66@llnl.gov\
-                   rfalgout@llnl.gov\
+  HYPRE_DEFAULT_EMAIL="rfalgout@llnl.gov"
+  HYPRE_ALL_EMAIL="rfalgout@llnl.gov\
                    abaker@llnl.gov\
                    painter1@llnl.gov\
                    lee123@llnl.gov\
@@ -630,7 +629,7 @@ confbuildtest ()
                    2>> ${Hdr}.${MessageStr}.all.err
       fi
 
-      if [ "${HYPRE_RUN_MACHINE}" = "tux149" ]
+      if [ "${HYPRE_RUN_MACHINE}" = "tux136" ]
       then
          if [ "$DEBUG_MODE" = "yes" ]
          then

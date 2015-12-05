@@ -21,34 +21,29 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.6 $
+# $Revision: 2.7 $
 #EHEADER**********************************************************************
-
 
 
 HYPRE
 
-The following document is the HYPRE home web page:
+The following is the HYPRE home web page:
 
     http://www.llnl.gov/casc/hypre/
 
-Legal stuff (copyright, disclaimer, licensing restrictions, etc.)  can
-be found in the file `COPYRIGHT_and_DISCLAIMER', and through the hypre
-software distribution page:
+Legal stuff (copyright, disclaimer, licensing restrictions, etc.) can be found
+in the file `COPYRIGHT_and_DISCLAIMER'.
 
-    http://www.llnl.gov/casc/hypre/download/hypre_agree.html
+To install HYPRE, please see the Users Manual or the file `INSTALL'.
 
-To install this package, please see the HYPRE Users Manual.
+The HYPRE Users Manual and Reference Manual can be found in the `docs' directory
+of this release, and also via the `Software' link on the HYPRE home page.
 
-The HYPRE Users Manual and Reference Manual are available via the
-`Software' link on the HYPRE home page.
+An overview of the HYPRE release history can be found in the file `CHANGELOG'.
 
-An overview of the differences between releases of hypre can be found
-in the file `CHANGELOG'.
+To subscribe to the mailing list "New Release Announcements (hypre-announce)",
+"New Beta Release Announcements (hypre-beta-announce)", use the `Mailing Lists'
+link on the HYPRE home page.
 
-To subscribe to the mailing list "New Release Announcements (hypre-
-announce)", "New Beta Release Announcements (hypre-beta-announce), or
-"Hypre Users (hypre-users)" use the `Mailing Lists' link on the HYPRE home page.
-
-We appreciate feedback from users of this package. Please submit
-comments, suggestions, and issue reports to hypre-support@llnl.gov/
+We appreciate feedback from users of this package.  Please submit comments,
+suggestions, and issue reports to hypre-support@llnl.gov.

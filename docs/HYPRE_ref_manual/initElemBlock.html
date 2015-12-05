@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>int initElemBlock</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>int <A HREF="#DOC.DOCU">initElemBlock</A></H2><H2>(int elemBlockID,  int numElements,<BR>&nbsp; int numNodesPerElement,<BR>&nbsp; int* numFieldsPerNode,  int** nodalFieldIDs,<BR>&nbsp; int numElemDOFFieldsPerElement,<BR>&nbsp; int* elemDOFFieldIDs,<BR>&nbsp; int interleaveStrategy)</H2><BLOCKQUOTE> The whole finite element mesh can be broken down into a number of element blocks.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>
+The whole finite element mesh can be broken down into a number of
+element blocks. The attributes for each element block are: an
+identifier, number of elements, number of nodes per elements, 
+the number of fields in each element node, etc.
+</BLOCKQUOTE>
+<DL><DT><DT><B>Parameters:</B><DD><B>elemblockID</B> -  - element block identifier
+<BR><B>numElements</B> -  - number of element in this block 
+<BR><B>numNodesPerElement</B> -  - number of nodes per element in this block 
+<BR><B>numFieldsPerNode</B> -  - number of fields for each node 
+<BR><B>nodalFieldIDs</B> -  - field identifiers for the nodal unknowns
+<BR><B>numElemDOFFieldsPerElement</B> -  - number of fields for the element
+<BR><B>elemDOFFieldIDs</B> -  - field identifier for the element unknowns
+<BR><B>interleaveStratety</B> -  - indicates how unknowns are ordered<BR><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<center>
+<img src="hypre_wiw.gif">
+</center>

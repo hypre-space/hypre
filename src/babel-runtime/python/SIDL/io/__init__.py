@@ -3,7 +3,7 @@
 # Symbol:        sidl.io-v0.9.15
 # Symbol Type:   package
 # Babel Version: 1.0.0
-# Release:       $Name: V1-14-0b $
+# Release:       $Name:  $
 # Revision:      @(#) $Id: __init__.py,v 1.4 2006/08/29 22:29:36 painter Exp $
 # Description:   package initialization code
 # 

@@ -1,58 +1,62 @@
-<html><head><TITLE>SStruct Split Solver</TITLE></head>
-<body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  SStruct Split Solver  </H2>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> SStruct Split Solver</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">SStruct Split Solver</A></H2></H2>
+<HR>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSplitCreate</B>(MPI_Comm comm, <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> *solver)
- <DD><I>
-Create a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitCreate"></A>
+<A HREF=HYPRE_SStructSplitCreate.html><B>HYPRE_SStructSplitCreate</B></A><DD><I> Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSplitDestroy.html><B>HYPRE_SStructSplitDestroy</B></A> 
- <DD><I>
-Destroy a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitDestroy"></A>
+<A HREF=HYPRE_SStructSplitDestroy.html><B>HYPRE_SStructSplitDestroy</B></A><DD><I> Destroy a solver object.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSplitSetup.html><B>HYPRE_SStructSplitSetup</B></A> 
- <DD><I>
-Prepare to solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSetup"></A>
+<A HREF=HYPRE_SStructSplitSetup.html><B>HYPRE_SStructSplitSetup</B></A><DD><I> Prepare to solve the system.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSplitSolve</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
- <DD><I>
-Solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSolve"></A>
+<A HREF=HYPRE_SStructSplitSolve.html><B>HYPRE_SStructSplitSolve</B></A><DD><I> Solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSplitSetTol</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double tol)
- <DD><I>
-(Optional) Set the convergence tolerance</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSetTol"></A>
+<A HREF=HYPRE_SStructSplitSetTol.html><B>HYPRE_SStructSplitSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSplitSetMaxIter</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_iter)
- <DD><I>
-(Optional) Set maximum number of iterations</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSetMaxIter"></A>
+<A HREF=HYPRE_SStructSplitSetMaxIter.html><B>HYPRE_SStructSplitSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSplitSetZeroGuess.html><B>HYPRE_SStructSplitSetZeroGuess</B></A> 
- <DD><I>
-(Optional) Use a zero initial guess</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSetZeroGuess"></A>
+<A HREF=HYPRE_SStructSplitSetZeroGuess.html><B>HYPRE_SStructSplitSetZeroGuess</B></A><DD><I> (Optional) Use a zero initial guess.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSplitSetNonZeroGuess.html><B>HYPRE_SStructSplitSetNonZeroGuess</B></A> 
- <DD><I>
-(Optional) Use a nonzero initial guess</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSetNonZeroGuess"></A>
+<A HREF=HYPRE_SStructSplitSetNonZeroGuess.html><B>HYPRE_SStructSplitSetNonZeroGuess</B></A><DD><I> (Optional) Use a nonzero initial guess.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSplitSetStructSolver.html><B>HYPRE_SStructSplitSetStructSolver</B></A> 
- <DD><I>
-(Optional) Set up the type of diagonal struct solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitSetStructSolver"></A>
+<A HREF=HYPRE_SStructSplitSetStructSolver.html><B>HYPRE_SStructSplitSetStructSolver</B></A><DD><I> (Optional) Set up the type of diagonal struct solver.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSplitGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
- <DD><I>
-Return the number of iterations taken</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitGetNumIterations"></A>
+<A HREF=HYPRE_SStructSplitGetNumIterations.html><B>HYPRE_SStructSplitGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSplitGetFinalRelativeResidualNorm</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double *norm)
- <DD><I>
-Return the norm of the final relative residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructSplitGetFinalRelativeResidualNorm"></A>
+<A HREF=HYPRE_SStructSplitGetFinalRelativeResidualNorm.html><B>HYPRE_SStructSplitGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
 </DL>
-<A NAME="DOC.DOCU">
-<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
 <center>
 <img src="hypre_wiw.gif">
 </center>
-
-<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
-</BODY>

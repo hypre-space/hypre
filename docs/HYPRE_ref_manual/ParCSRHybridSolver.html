@@ -1,186 +1,178 @@
-<html><head><TITLE>ParCSR Hybrid Solver</TITLE></head>
-<body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  ParCSR Hybrid Solver  </H2>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> ParCSR Hybrid Solver</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">ParCSR Hybrid Solver</A></H2></H2>
+<HR>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridCreate</B>( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *solver)
- <DD><I>
-Create solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridCreate"></A>
+<A HREF=HYPRE_ParCSRHybridCreate.html><B>HYPRE_ParCSRHybridCreate</B></A><DD><I> Create solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridDestroy</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver)
- <DD><I>
-Destroy solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridDestroy"></A>
+<A HREF=HYPRE_ParCSRHybridDestroy.html><B>HYPRE_ParCSRHybridDestroy</B></A><DD><I> Destroy solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetup</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
- <DD><I>
-Setup the hybrid solver
-</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetup"></A>
+<A HREF=HYPRE_ParCSRHybridSetup.html><B>HYPRE_ParCSRHybridSetup</B></A><DD><I> Setup the hybrid solver </I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSolve</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
- <DD><I>
-Solve linear system
-</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSolve"></A>
+<A HREF=HYPRE_ParCSRHybridSolve.html><B>HYPRE_ParCSRHybridSolve</B></A><DD><I> Solve linear system </I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetTol.html><B>HYPRE_ParCSRHybridSetTol</B></A> 
- <DD><I>
-Set the convergence tolerance for the Krylov solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetTol"></A>
+<A HREF=HYPRE_ParCSRHybridSetTol.html><B>HYPRE_ParCSRHybridSetTol</B></A><DD><I> Set the convergence tolerance for the Krylov solver.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetConvergenceTol</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double cf_tol)
- <DD><I>
-Set the desired convergence factor</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetConvergenceTol"></A>
+<A HREF=HYPRE_ParCSRHybridSetConvergenceTol.html><B>HYPRE_ParCSRHybridSetConvergenceTol</B></A><DD><I> Set the desired convergence factor</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetDSCGMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int dscg_max_its)
- <DD><I>
-Set the maximal number of iterations for the diagonally
-preconditioned solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetDSCGMaxIter"></A>
+<A HREF=HYPRE_ParCSRHybridSetDSCGMaxIter.html><B>HYPRE_ParCSRHybridSetDSCGMaxIter</B></A><DD><I> Set the maximal number of iterations for the diagonally preconditioned solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPCGMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int pcg_max_its)
- <DD><I>
-Set the maximal number of iterations for the AMG
-preconditioned solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetPCGMaxIter"></A>
+<A HREF=HYPRE_ParCSRHybridSetPCGMaxIter.html><B>HYPRE_ParCSRHybridSetPCGMaxIter</B></A><DD><I> Set the maximal number of iterations for the AMG preconditioned solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetSolverType.html><B>HYPRE_ParCSRHybridSetSolverType</B></A> 
- <DD><I>
-Set the desired solver type</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetSolverType"></A>
+<A HREF=HYPRE_ParCSRHybridSetSolverType.html><B>HYPRE_ParCSRHybridSetSolverType</B></A><DD><I> Set the desired solver type.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetKDim.html><B>HYPRE_ParCSRHybridSetKDim</B></A> 
- <DD><I>
-Set the Krylov dimension for restarted GMRES</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetKDim"></A>
+<A HREF=HYPRE_ParCSRHybridSetKDim.html><B>HYPRE_ParCSRHybridSetKDim</B></A><DD><I> Set the Krylov dimension for restarted GMRES.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetTwoNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int two_norm)
- <DD><I>
-Set the type of norm for PCG</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetTwoNorm"></A>
+<A HREF=HYPRE_ParCSRHybridSetTwoNorm.html><B>HYPRE_ParCSRHybridSetTwoNorm</B></A><DD><I> Set the type of norm for PCG</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetStopCrit</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int stop_crit)
- <DD><I>
-Set the choice of stopping criterion for PCG</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetStopCrit"></A>
+<A HREF=HYPRE_ParCSRHybridSetStopCrit.html><B>HYPRE_ParCSRHybridSetStopCrit</B></A><DD><I> Set the choice of stopping criterion for PCG</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_PtrToParSolverFcn precond, HYPRE_PtrToParSolverFcn precond_setup, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> precond_solver)
- <DD><I>
-Set preconditioner if wanting to use one that is not set up by
-the hybrid solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetPrecond"></A>
+<A HREF=HYPRE_ParCSRHybridSetPrecond.html><B>HYPRE_ParCSRHybridSetPrecond</B></A><DD><I> Set preconditioner if wanting to use one that is not set up by the hybrid solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetLogging</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int logging)
- <DD><I>
-Set logging parameter (default: 0, no logging)</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetLogging"></A>
+<A HREF=HYPRE_ParCSRHybridSetLogging.html><B>HYPRE_ParCSRHybridSetLogging</B></A><DD><I> Set logging parameter (default: 0, no logging)</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPrintLevel</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int print_level)
- <DD><I>
-Set print level (default: 0, no printing)</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetPrintLevel"></A>
+<A HREF=HYPRE_ParCSRHybridSetPrintLevel.html><B>HYPRE_ParCSRHybridSetPrintLevel</B></A><DD><I> Set print level (default: 0, no printing)</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetStrongThreshold.html><B>HYPRE_ParCSRHybridSetStrongThreshold</B></A> 
- <DD><I>
-(Optional) Sets AMG strength threshold</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetStrongThreshold"></A>
+<A HREF=HYPRE_ParCSRHybridSetStrongThreshold.html><B>HYPRE_ParCSRHybridSetStrongThreshold</B></A><DD><I> (Optional) Sets AMG strength threshold.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetMaxRowSum.html><B>HYPRE_ParCSRHybridSetMaxRowSum</B></A> 
- <DD><I>
-(Optional) Sets a parameter to modify the definition of strength for
-diagonal dominant portions of the matrix</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetMaxRowSum"></A>
+<A HREF=HYPRE_ParCSRHybridSetMaxRowSum.html><B>HYPRE_ParCSRHybridSetMaxRowSum</B></A><DD><I> (Optional) Sets a parameter to modify the definition of strength for diagonal dominant portions of the matrix.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetTruncFactor.html><B>HYPRE_ParCSRHybridSetTruncFactor</B></A> 
- <DD><I>
-(Optional) Defines a truncation factor for the interpolation</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetTruncFactor"></A>
+<A HREF=HYPRE_ParCSRHybridSetTruncFactor.html><B>HYPRE_ParCSRHybridSetTruncFactor</B></A><DD><I> (Optional) Defines a truncation factor for the interpolation.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetMaxLevels.html><B>HYPRE_ParCSRHybridSetMaxLevels</B></A> 
- <DD><I>
-(Optional) Defines the maximal number of levels used for AMG</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetMaxLevels"></A>
+<A HREF=HYPRE_ParCSRHybridSetMaxLevels.html><B>HYPRE_ParCSRHybridSetMaxLevels</B></A><DD><I> (Optional) Defines the maximal number of levels used for AMG.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetMeasureType</B>( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int measure_type )
- <DD><I>
-(Optional) Defines whether local or global measures are used</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetMeasureType"></A>
+<A HREF=HYPRE_ParCSRHybridSetMeasureType.html><B>HYPRE_ParCSRHybridSetMeasureType</B></A><DD><I> (Optional) Defines whether local or global measures are used</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetCoarsenType.html><B>HYPRE_ParCSRHybridSetCoarsenType</B></A> 
- <DD><I>
-(Optional) Defines which parallel coarsening algorithm is used</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetCoarsenType"></A>
+<A HREF=HYPRE_ParCSRHybridSetCoarsenType.html><B>HYPRE_ParCSRHybridSetCoarsenType</B></A><DD><I> (Optional) Defines which parallel coarsening algorithm is used.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetCycleType.html><B>HYPRE_ParCSRHybridSetCycleType</B></A> 
- <DD><I>
-(Optional) Defines the type of cycle</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetCycleType"></A>
+<A HREF=HYPRE_ParCSRHybridSetCycleType.html><B>HYPRE_ParCSRHybridSetCycleType</B></A><DD><I> (Optional) Defines the type of cycle.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetNumSweeps.html><B>HYPRE_ParCSRHybridSetNumSweeps</B></A> 
- <DD><I>
-(Optional) Sets the number of sweeps</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetNumSweeps"></A>
+<A HREF=HYPRE_ParCSRHybridSetNumSweeps.html><B>HYPRE_ParCSRHybridSetNumSweeps</B></A><DD><I> (Optional) Sets the number of sweeps.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetCycleNumSweeps.html><B>HYPRE_ParCSRHybridSetCycleNumSweeps</B></A> 
- <DD><I>
-(Optional) Sets the number of sweeps at a specified cycle</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetCycleNumSweeps"></A>
+<A HREF=HYPRE_ParCSRHybridSetCycleNumSweeps.html><B>HYPRE_ParCSRHybridSetCycleNumSweeps</B></A><DD><I> (Optional) Sets the number of sweeps at a specified cycle.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetRelaxType.html><B>HYPRE_ParCSRHybridSetRelaxType</B></A> 
- <DD><I>
-(Optional) Defines the smoother to be used</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetRelaxType"></A>
+<A HREF=HYPRE_ParCSRHybridSetRelaxType.html><B>HYPRE_ParCSRHybridSetRelaxType</B></A><DD><I> (Optional) Defines the smoother to be used.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetCycleRelaxType.html><B>HYPRE_ParCSRHybridSetCycleRelaxType</B></A> 
- <DD><I>
-(Optional) Defines the smoother at a given cycle</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetCycleRelaxType"></A>
+<A HREF=HYPRE_ParCSRHybridSetCycleRelaxType.html><B>HYPRE_ParCSRHybridSetCycleRelaxType</B></A><DD><I> (Optional) Defines the smoother at a given cycle.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetRelaxOrder.html><B>HYPRE_ParCSRHybridSetRelaxOrder</B></A> 
- <DD><I>
-(Optional) Defines in which order the points are relaxed</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetRelaxOrder"></A>
+<A HREF=HYPRE_ParCSRHybridSetRelaxOrder.html><B>HYPRE_ParCSRHybridSetRelaxOrder</B></A><DD><I> (Optional) Defines in which order the points are relaxed.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetRelaxWt.html><B>HYPRE_ParCSRHybridSetRelaxWt</B></A> 
- <DD><I>
-(Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
-on all levels</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetRelaxWt"></A>
+<A HREF=HYPRE_ParCSRHybridSetRelaxWt.html><B>HYPRE_ParCSRHybridSetRelaxWt</B></A><DD><I> (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR on all levels.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetLevelRelaxWt.html><B>HYPRE_ParCSRHybridSetLevelRelaxWt</B></A> 
- <DD><I>
-(Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR
-on the user defined level</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetLevelRelaxWt"></A>
+<A HREF=HYPRE_ParCSRHybridSetLevelRelaxWt.html><B>HYPRE_ParCSRHybridSetLevelRelaxWt</B></A><DD><I> (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR on the user defined level.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetOuterWt.html><B>HYPRE_ParCSRHybridSetOuterWt</B></A> 
- <DD><I>
-(Optional) Defines the outer relaxation weight for hybrid SOR and SSOR
-on all levels</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetOuterWt"></A>
+<A HREF=HYPRE_ParCSRHybridSetOuterWt.html><B>HYPRE_ParCSRHybridSetOuterWt</B></A><DD><I> (Optional) Defines the outer relaxation weight for hybrid SOR and SSOR on all levels.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetLevelOuterWt.html><B>HYPRE_ParCSRHybridSetLevelOuterWt</B></A> 
- <DD><I>
-(Optional) Defines the outer relaxation weight for hybrid SOR or SSOR
-on the user defined level</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetLevelOuterWt"></A>
+<A HREF=HYPRE_ParCSRHybridSetLevelOuterWt.html><B>HYPRE_ParCSRHybridSetLevelOuterWt</B></A><DD><I> (Optional) Defines the outer relaxation weight for hybrid SOR or SSOR on the user defined level.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetAggNumLevels.html><B>HYPRE_ParCSRHybridSetAggNumLevels</B></A> 
- <DD><I>
-(Optional) Defines the number of levels of aggressive coarsening,
-starting with the finest level</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetAggNumLevels"></A>
+<A HREF=HYPRE_ParCSRHybridSetAggNumLevels.html><B>HYPRE_ParCSRHybridSetAggNumLevels</B></A><DD><I> (Optional) Defines the number of levels of aggressive coarsening, starting with the finest level.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetNumPaths.html><B>HYPRE_ParCSRHybridSetNumPaths</B></A> 
- <DD><I>
-(Optional) Defines the degree of aggressive coarsening</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetNumPaths"></A>
+<A HREF=HYPRE_ParCSRHybridSetNumPaths.html><B>HYPRE_ParCSRHybridSetNumPaths</B></A><DD><I> (Optional) Defines the degree of aggressive coarsening.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetNumFunctions.html><B>HYPRE_ParCSRHybridSetNumFunctions</B></A> 
- <DD><I>
-(Optional) Sets the size of the system of PDEs, if using the systems version</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetNumFunctions"></A>
+<A HREF=HYPRE_ParCSRHybridSetNumFunctions.html><B>HYPRE_ParCSRHybridSetNumFunctions</B></A><DD><I> (Optional) Sets the size of the system of PDEs, if using the systems version.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetDofFunc.html><B>HYPRE_ParCSRHybridSetDofFunc</B></A> 
- <DD><I>
-(Optional) Sets the mapping that assigns the function to each variable,
-if using the systems version</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetDofFunc"></A>
+<A HREF=HYPRE_ParCSRHybridSetDofFunc.html><B>HYPRE_ParCSRHybridSetDofFunc</B></A><DD><I> (Optional) Sets the mapping that assigns the function to each variable, if using the systems version.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_ParCSRHybridSetNodal.html><B>HYPRE_ParCSRHybridSetNodal</B></A> 
- <DD><I>
-(Optional) Sets whether to use the nodal systems version</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridSetNodal"></A>
+<A HREF=HYPRE_ParCSRHybridSetNodal.html><B>HYPRE_ParCSRHybridSetNodal</B></A><DD><I> (Optional) Sets whether to use the nodal systems version.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_its)
- <DD><I>
-Retrieves the total number of iterations</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridGetNumIterations"></A>
+<A HREF=HYPRE_ParCSRHybridGetNumIterations.html><B>HYPRE_ParCSRHybridGetNumIterations</B></A><DD><I> Retrieves the total number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetDSCGNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *dscg_num_its)
- <DD><I>
-Retrieves the number of iterations used by the diagonally scaled solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridGetDSCGNumIterations"></A>
+<A HREF=HYPRE_ParCSRHybridGetDSCGNumIterations.html><B>HYPRE_ParCSRHybridGetDSCGNumIterations</B></A><DD><I> Retrieves the number of iterations used by the diagonally scaled solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetPCGNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *pcg_num_its)
- <DD><I>
-Retrieves the number of iterations used by the AMG preconditioned solver</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridGetPCGNumIterations"></A>
+<A HREF=HYPRE_ParCSRHybridGetPCGNumIterations.html><B>HYPRE_ParCSRHybridGetPCGNumIterations</B></A><DD><I> Retrieves the number of iterations used by the AMG preconditioned solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *norm)
- <DD><I>
-Retrieves the final relative residual norm</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_ParCSRHybridGetFinalRelativeResidualNorm"></A>
+<A HREF=HYPRE_ParCSRHybridGetFinalRelativeResidualNorm.html><B>HYPRE_ParCSRHybridGetFinalRelativeResidualNorm</B></A><DD><I> Retrieves the final relative residual norm</I>
 </DL>
-<A NAME="DOC.DOCU">
-<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
 <center>
 <img src="hypre_wiw.gif">
 </center>
-
-<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
-</BODY>

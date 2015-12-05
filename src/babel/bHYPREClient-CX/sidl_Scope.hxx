@@ -3,7 +3,7 @@
 // Symbol:        sidl.Scope-v0.9.15
 // Symbol Type:   enumeration
 // Babel Version: 1.0.0
-// Release:       $Name: V1-14-0b $
+// Release:       $Name:  $
 // Revision:      @(#) $Id: sidl_Scope.hxx,v 1.2 2006/09/14 21:52:15 painter Exp $
 // Description:   Client-side glue code for sidl.Scope
 // 

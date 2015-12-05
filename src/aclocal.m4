@@ -34,7 +34,7 @@ dnl # You should have received a copy of the GNU Lesser General Public License
 dnl # along with this program; if not, write to the Free Software Foundation,
 dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 dnl #
-dnl # $Revision: 2.80 $
+dnl # $Revision: 2.81 $
 dnl #EHEADER**********************************************************************
 
 dnl **********************************************************************
@@ -736,7 +736,7 @@ dnl *    return architecture and host name values
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.80 $
+ * $Revision: 2.81 $
  ***********************************************************************EHEADER*/
 
 
@@ -769,7 +769,7 @@ dnl to run it if it is not found.
 dnl
 dnl This macro requires autoconf 2.50 or later.
 dnl
-dnl @version $Id: aclocal.m4,v 2.80 2006/11/30 22:54:33 falgout Exp $
+dnl @version $Id: aclocal.m4,v 2.81 2006/12/12 02:09:07 falgout Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 dnl
 AC_DEFUN([HYPRE_FIND_BLAS],
@@ -892,7 +892,7 @@ AC_DEFUN([HYPRE_FIND_BLAS],
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.80 $
+ * $Revision: 2.81 $
  ***********************************************************************EHEADER*/
 
 
@@ -923,7 +923,7 @@ dnl ACTION-IF-FOUND is a list of shell commands to run if a LAPACK
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.
 dnl
-dnl @version $Id: aclocal.m4,v 2.80 2006/11/30 22:54:33 falgout Exp $
+dnl @version $Id: aclocal.m4,v 2.81 2006/12/12 02:09:07 falgout Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([HYPRE_FIND_LAPACK], 

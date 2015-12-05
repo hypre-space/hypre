@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE>int HYPRE_BoomerAMGSetInterpType</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>int <A HREF="#DOC.DOCU">HYPRE_BoomerAMGSetInterpType</A></H2><H2>(HYPRE_Solver solver,<BR>&nbsp; int interp_type)</H2><BLOCKQUOTE> (Optional) Defines which parallel interpolation operator is used.</BLOCKQUOTE>
+
+<A NAME="DOC.DOCU"></A>
+<HR>
+<H2>Documentation</H2>
+<BLOCKQUOTE>
+(Optional) Defines which parallel interpolation operator is used.
+There are the following options for interp_type: 
+
+<P><TABLE BORDER>
+<TR><TD> </TD></TR><TR><TD>
+0 </TD><TD>	classical modified interpolation </TD></TR><TR><TD>
+1 </TD><TD>	LS interpolation (for use with GSMG) </TD></TR><TR><TD>
+2 </TD><TD>	classical modified interpolation for hyperbolic PDEs </TD></TR><TR><TD>
+3 </TD><TD>	direct interpolation (with separation of weights) </TD></TR><TR><TD>
+4 </TD><TD>	multipass interpolation </TD></TR><TR><TD>
+5 </TD><TD>	multipass interpolation (with separation of weights) </TD></TR><TR><TD>
+6 </TD><TD>  extended classical modified interpolation </TD></TR><TR><TD>
+7 </TD><TD>  extended (if no common C neighbor) classical modified interpolation </TD></TR><TR><TD>
+8 </TD><TD>	standard interpolation </TD></TR><TR><TD>
+9 </TD><TD>	standard interpolation (with separation of weights) </TD></TR><TR><TD>
+10 </TD><TD>	classical block interpolation (for use with nodal systems version only) </TD></TR><TR><TD>
+11 </TD><TD>	classical block interpolation (for use with nodal systems version only) </TD></TR><TR><TD>
+</TD><TD>	with diagonalized diagonal blocks </TD></TR><TR><TD>
+12 </TD><TD>	FF interpolation </TD></TR><TR><TD>
+13 </TD><TD>	FF1 interpolation </TD></TR><TR><TD>
+</TD></TR><TR><TD>
+</TR></TABLE>
+
+<P>The default is 0. </BLOCKQUOTE>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<center>
+<img src="hypre_wiw.gif">
+</center>

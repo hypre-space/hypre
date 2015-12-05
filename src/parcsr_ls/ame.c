@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -564,12 +564,6 @@ void hypre_AMEMultiOperatorB(void *data, void* x, void* y)
  * Solve the eigensystem A u = lambda M u, G^t u = 0 using a subspace
  * version of LOBPCG (i.e. we iterate in the discr. div. free space).
  *--------------------------------------------------------------------------*/
-
-#include "fortran.h"
-
-int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, int *, double *, int *, int *);
-int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(int *, char *, char *, int *, double *, int *,
-                                       double *, int *, double *, double *, int *, int *);
 
 int hypre_AMESolve(void *esolver)
 {

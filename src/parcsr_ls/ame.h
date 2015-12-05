@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.2 $
  ***********************************************************************EHEADER*/
 
 
@@ -67,5 +67,11 @@ typedef struct
    hypre_ParVector *t1, *t2, *t3;
 
 } hypre_AMEData;
+
+#include "fortran.h"
+
+int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(int *, char *, char *, int *, double *, int *,
+                                       double *, int *, double *, double *, int *, int *);
 
 #endif

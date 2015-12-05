@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,7 +38,6 @@
    in the future, it needs to use the box manager instead of the neighbors 
    structure */
 
-#if 0
 
 /*--------------------------------------------------------------------------
  * hypre_StructOverlapInnerProd
@@ -71,8 +70,11 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
                    
    hypre_BoxArray      *boxes;
    hypre_Box           *boxi, *boxj, intersect_box;
-   hypre_BoxNeighbors  *neighbors= hypre_StructGridNeighbors(hypre_StructVectorGrid(y));
-   int                 *neighbors_procs= hypre_BoxNeighborsProcs(neighbors);
+
+   hypre_StructGrid    *grid= hypre_StructVectorGrid(y);
+   hypre_BoxManager    *boxman = hypre_StructGridBoxMan(grid);
+   hypre_BoxArray      *neighbor_boxes;
+   int                 *neighbors_procs= NULL;
    hypre_BoxArray      *selected_nboxes;
    hypre_BoxArray      *tmp_box_array, *tmp2_box_array;
 
@@ -192,7 +194,9 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
     * with the lowest processor id. Therefore, on this processor, we need 
     * to subtract only overlaps with boxes on processors with id < myid.
     *-----------------------------------------------------------------------*/
-   boxes= hypre_BoxNeighborsBoxes(neighbors);
+   neighbor_boxes = hypre_BoxArrayCreate(0);
+   hypre_BoxManGetAllEntriesBoxesProc(boxman, neighbor_boxes, neighbors_procs);
+   
    selected_nboxes= hypre_BoxArrayCreate(0);
 
    /* extract only boxes on processors with ids < myid. */
@@ -200,9 +204,10 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    {
       if (neighbors_procs[i] < myid)
       {
-         hypre_AppendBox(hypre_BoxArrayBox(boxes, i), selected_nboxes);
+         hypre_AppendBox(hypre_BoxArrayBox(neighbor_boxes, i), selected_nboxes);
       }
    }
+   hypre_BoxArrayDestroy(neighbor_boxes);
 
    boxes= hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    overlap_boxes= hypre_BoxArrayCreate(0);
@@ -311,5 +316,3 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    return final_innerprod_result;
 }
 
-
-#endif

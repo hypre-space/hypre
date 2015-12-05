@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,17 +38,17 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-double ddot_(int *, double *, int *, double *, int *);
-int dcopy_(int *, double *, int *, double *, int *);
-int dscal_(int *, double *, double *, int *);
-int daxpy_(int *, double *, double *, int *, double *, int *);
+double hypre_F90_NAME_BLAS(ddot, DDOT)(int *, double *, int *, double *, int *);
+int hypre_F90_NAME_BLAS(dcopy, DCOPY)(int *, double *, int *, double *, int *);
+int hypre_F90_NAME_BLAS(dscal, DSCAL)(int *, double *, double *, int *);
+int hypre_F90_NAME_BLAS(daxpy, DAXPY)(int *, double *, double *, int *, double *, int *);
 
 static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 {
     double local_result, result;
 
     int one = 1;
-    local_result = ddot_(&n, x, &one, y, &one);
+    local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
 
     MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
 
@@ -58,19 +58,19 @@ static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 static void CopyVector(int n, double *x, double *y)
 {
     int one = 1;
-    dcopy_(&n, x, &one, y, &one);
+    hypre_F90_NAME_BLAS(dcopy, DCOPY)(&n, x, &one, y, &one);
 }
 
 static void ScaleVector(int n, double alpha, double *x)
 {
     int one = 1;
-    dscal_(&n, &alpha, x, &one);
+    hypre_F90_NAME_BLAS(dscal, DSCAL)(&n, &alpha, x, &one);
 }
 
 static void Axpy(int n, double alpha, double *x, double *y)
 {
     int one = 1;
-    daxpy_(&n, &alpha, x, &one, y, &one);
+    hypre_F90_NAME_BLAS(daxpy, DAXPY)(&n, &alpha, x, &one, y, &one);
 }
 
 

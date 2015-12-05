@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -2020,6 +2020,180 @@ int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
    }
 
    *G_ptr = G;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSFEISetup
+ *
+ * Construct an AMS solver object based on the following data:
+ *
+ *    A              - the edge element stiffness matrix
+ *    num_vert       - number of vertices (nodes) in the processor
+ *    num_local_vert - number of vertices owned by the processor
+ *    vert_numbers   - global indexes of the vertices in the processor
+ *    vert_coords    - coordinates of the vertices in the processor
+ *    num_edges      - number of edges owned by the processor
+ *    edge_vertex    - the vertices of the edges owned by the processor,
+ *                     vertices are in global numbering, and edge orientation
+ *                     is always from the first to the second vertex.
+ *
+ * Here we distinguish between vertices that belong to elements in the
+ * current processor, and the subset of these vertices that is owned by
+ * the processor.
+ *
+ * This function is written specifically for input from the FEI and should
+ * be called before hypre_AMSSetup().
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSFEISetup(void *solver,
+                      hypre_ParCSRMatrix *A,
+                      hypre_ParVector *b,
+                      hypre_ParVector *x,
+                      int num_vert,
+                      int num_local_vert,
+                      int *vert_number,
+                      double *vert_coord,
+                      int num_edges,
+                      int *edge_vertex)
+{
+   hypre_AMSData *ams_data = solver;
+
+   int i, j;
+
+   hypre_ParCSRMatrix *G;
+   hypre_ParVector *x_coord, *y_coord, *z_coord;
+   double *x_data, *y_data, *z_data;
+
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   int *vert_part, num_global_vert;
+   int vert_start, vert_end;
+
+   /* Find the processor partitioning of the vertices */
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vert_part = hypre_TAlloc(int,2);
+   MPI_Scan(&num_local_vert, &vert_part[1], 1, MPI_INT, MPI_SUM, comm);
+   vert_part[0] = vert_part[1] - num_local_vert;
+   MPI_Allreduce(&num_local_vert, &num_global_vert, 1, MPI_INT, MPI_SUM, comm);
+#else
+   int num_procs;
+   MPI_Comm_size(comm, &num_procs);
+   vert_part = hypre_TAlloc(int,num_procs+1);
+   MPI_Allgather(&num_local_vert, 1, MPI_INT, &vert_part[1], 1, MPI_INT, comm);
+   vert_part[0] = 0;
+   for (i = 0; i < num_procs; i++)
+      vert_part[i+1] += vert_part[i];
+   num_global_vert = vert_part[num_procs];
+#endif
+
+   /* Construct hypre parallel vectors for the vertex coordinates */
+   x_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
+   hypre_ParVectorInitialize(x_coord);
+   hypre_ParVectorOwnsData(x_coord) = 1;
+   hypre_ParVectorOwnsPartitioning(x_coord) = 0;
+   x_data = hypre_VectorData(hypre_ParVectorLocalVector(x_coord));
+
+   y_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
+   hypre_ParVectorInitialize(y_coord);
+   hypre_ParVectorOwnsData(y_coord) = 1;
+   hypre_ParVectorOwnsPartitioning(y_coord) = 0;
+   y_data = hypre_VectorData(hypre_ParVectorLocalVector(y_coord));
+
+   z_coord = hypre_ParVectorCreate(comm, num_global_vert, vert_part);
+   hypre_ParVectorInitialize(z_coord);
+   hypre_ParVectorOwnsData(z_coord) = 1;
+   hypre_ParVectorOwnsPartitioning(z_coord) = 0;
+   z_data = hypre_VectorData(hypre_ParVectorLocalVector(z_coord));
+
+   vert_start = hypre_ParVectorFirstIndex(x_coord);
+   vert_end   = hypre_ParVectorLastIndex(x_coord);
+
+   /* Save coordinates of locally owned vertices */
+   for (i = 0; i < num_vert; i++)
+   {
+      if (vert_number[i] >= vert_start && vert_number[i] <= vert_end)
+      {
+         j = vert_number[i] - vert_start;
+         x_data[j] = vert_coord[3*i];
+         y_data[j] = vert_coord[3*i+1];
+         z_data[j] = vert_coord[3*i+2];
+      }
+   }
+
+   /* Construct the local part of G based on edge_vertex */
+   {
+      /* int num_edges = hypre_ParCSRMatrixNumRows(A); */
+      int *I = hypre_CTAlloc(int, num_edges+1);
+      double *data = hypre_CTAlloc(double, 2*num_edges);
+      hypre_CSRMatrix *local = hypre_CSRMatrixCreate (num_edges,
+                                                      num_global_vert,
+                                                      2*num_edges);
+
+      for (i = 0; i <= num_edges; i++)
+         I[i] = 2*i;
+
+      /* Assume that the edge orientation is based on the vertex indexes */
+      for (i = 0; i < 2*num_edges; i+=2)
+      {
+         data[i]   =  1.0;
+         data[i+1] = -1.0;
+      }
+
+      hypre_CSRMatrixI(local) = I;
+      hypre_CSRMatrixJ(local) = edge_vertex;
+      hypre_CSRMatrixData(local) = data;
+
+      hypre_CSRMatrixRownnz(local) = NULL;
+      hypre_CSRMatrixOwnsData(local) = 1;
+      hypre_CSRMatrixNumRownnz(local) = num_edges;
+
+      G = hypre_ParCSRMatrixCreate(comm,
+                                   hypre_ParCSRMatrixGlobalNumRows(A),
+                                   num_global_vert,
+                                   hypre_ParCSRMatrixRowStarts(A),
+                                   vert_part,
+                                   0, 0, 0);
+      hypre_ParCSRMatrixOwnsRowStarts(G) = 0;
+      hypre_ParCSRMatrixOwnsColStarts(G) = 1;
+
+      GenerateDiagAndOffd(local, G, vert_start, vert_end);
+
+      hypre_CSRMatrixJ(local) = NULL;
+      hypre_CSRMatrixDestroy(local);
+   }
+
+   ams_data -> G = G;
+
+   ams_data -> x = x_coord;
+   ams_data -> y = y_coord;
+   ams_data -> z = z_coord;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSFEIDestroy
+ *
+ * Free the additional memory allocated in hypre_AMSFEISetup().
+ *
+ * This function is written specifically for input from the FEI and should
+ * be called before hypre_AMSDestroy().
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSFEIDestroy(void *solver)
+{
+   hypre_AMSData *ams_data = solver;
+
+   if (ams_data -> G)
+      hypre_ParCSRMatrixDestroy(ams_data -> G);
+
+   if (ams_data -> x)
+      hypre_ParVectorDestroy(ams_data -> x);
+   if (ams_data -> y)
+      hypre_ParVectorDestroy(ams_data -> y);
+   if (ams_data -> z)
+      hypre_ParVectorDestroy(ams_data -> z);
 
    return hypre_error_flag;
 }

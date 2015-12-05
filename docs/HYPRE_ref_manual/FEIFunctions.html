@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> FEI Functions </TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">FEI Functions </A></H2></H2>
+<HR>
+<DL>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="LLNL_FEI_Impl"></A>
+<A HREF=LLNL_FEI_Impl.html><B>LLNL_FEI_Impl</B></A><DD><I> Finite element interface constructor: this function creates an instantiation of the HYPRE fei class.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="~LLNL_FEI_Impl"></A>
+<A HREF=LLNL_FEI_Impl.2.html><B>~LLNL_FEI_Impl</B></A><DD><I> Finite element interface destructor: this function destroys the object as well as its internal memory allocations.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="parameters"></A>
+<A HREF=parameters.html><B>parameters</B></A><DD><I> The parameter function is the single most important function to pass solver information (which solver, which preconditioner, tolerance, other solver parameters) to HYPRE.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="initFields"></A>
+<A HREF=initFields.html><B>initFields</B></A><DD><I> Each node or element variable has one or more fields.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="initElemBlock"></A>
+<A HREF=initElemBlock.html><B>initElemBlock</B></A><DD><I> The whole finite element mesh can be broken down into a number of element blocks.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="initElem"></A>
+<A HREF=initElem.html><B>initElem</B></A><DD><I> This function initializes element connectivity (that is, the node identifiers associated with the current element) given an element  block identifier and the element identifier with the element block.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="initSharedNodes"></A>
+<A HREF=initSharedNodes.html><B>initSharedNodes</B></A><DD><I> This function initializes the nodes that are shared between the current processor and its neighbors.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="initCRMult"></A>
+<A HREF=initCRMult.html><B>initCRMult</B></A><DD><I> This function initializes the Lagrange multiplier constraints </I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="initComplete"></A>
+<A HREF=initComplete.html><B>initComplete</B></A><DD><I> This function signals to the FEI that the initialization step has been completed.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="resetSystem"></A>
+<A HREF=resetSystem.html><B>resetSystem</B></A><DD><I> This function resets the global matrix to be of the same sparsity pattern as before but with every entry set to s.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="resetMatrix"></A>
+<A HREF=resetMatrix.html><B>resetMatrix</B></A><DD><I> This function resets the global matrix to be of the same sparsity pattern as before but with every entry set to s.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="resetRHSVector"></A>
+<A HREF=resetRHSVector.html><B>resetRHSVector</B></A><DD><I> This function resets the right hand side vector to s.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="resetInitialGuess"></A>
+<A HREF=resetInitialGuess.html><B>resetInitialGuess</B></A><DD><I> This function resets the solution vector to s.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="loadNodeBCs"></A>
+<A HREF=loadNodeBCs.html><B>loadNodeBCs</B></A><DD><I> This function loads the nodal boundary conditions.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="sumInElem"></A>
+<A HREF=sumInElem.html><B>sumInElem</B></A><DD><I> This function adds the element contribution to the global stiffness matrix and also the element load to the right hand side vector </I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="sumInElemMatrix"></A>
+<A HREF=sumInElemMatrix.html><B>sumInElemMatrix</B></A><DD><I> This function differs from the sumInElem function in that the right hand load vector is not passed.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="sumInElemRHS"></A>
+<A HREF=sumInElemRHS.html><B>sumInElemRHS</B></A><DD><I> This function adds the element load to the right hand side vector </I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="loadComplete"></A>
+<A HREF=loadComplete.html><B>loadComplete</B></A><DD><I> This function signals to the FEI that the loading phase has been completed.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="getNumBlockActNodes"></A>
+<A HREF=getNumBlockActNodes.html><B>getNumBlockActNodes</B></A><DD><I> This function returns the number of nodes given the element block.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="getNumBlockActEqns"></A>
+<A HREF=getNumBlockActEqns.html><B>getNumBlockActEqns</B></A><DD><I> This function returns the number of unknowns given the element block.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="getBlockNodeIDList"></A>
+<A HREF=getBlockNodeIDList.html><B>getBlockNodeIDList</B></A><DD><I> This function returns the node identifiers given the element block.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="getBlockNodeSolution"></A>
+<A HREF=getBlockNodeSolution.html><B>getBlockNodeSolution</B></A><DD><I> This function returns the nodal solutions given the element block number.</I>
+<DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="loadCRMult"></A>
+<A HREF=loadCRMult.html><B>loadCRMult</B></A><DD><I> This function loads the Lagrange multiplier constraints </I>
+</DL>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<center>
+<img src="hypre_wiw.gif">
+</center>

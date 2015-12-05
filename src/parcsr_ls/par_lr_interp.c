@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -121,7 +121,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Variables to keep count of interpolatory points */
   int              jj_counter, jj_counter_offd;
   int              jj_begin_row, jj_end_row;
-  int              jj_begin_row_offd, jj_end_row_offd;
+  int              jj_begin_row_offd = 0;
+  int              jj_end_row_offd = 0;
   int              coarse_counter, coarse_counter_offd;
   int             *ihat, *ihat_offd = NULL; 
   int             *ipnt, *ipnt_offd = NULL; 
@@ -1166,7 +1167,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Variables to keep count of interpolatory points */
   int              jj_counter, jj_counter_offd;
   int              jj_begin_row, jj_end_row;
-  int              jj_begin_row_offd, jj_end_row_offd;
+  int              jj_begin_row_offd = 0;
+  int              jj_end_row_offd = 0;
   int              coarse_counter, coarse_counter_offd;
     
   /* Interpolation weight variables */
@@ -1995,7 +1997,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Variables to keep count of interpolatory points */
   int              jj_counter, jj_counter_offd;
   int              jj_begin_row, jj_end_row;
-  int              jj_begin_row_offd, jj_end_row_offd;
+  int              jj_begin_row_offd = 0;
+  int              jj_end_row_offd = 0;
   int              coarse_counter, coarse_counter_offd;
     
   /* Interpolation weight variables */
@@ -3050,7 +3053,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Variables to keep count of interpolatory points */
   int              jj_counter, jj_counter_offd;
   int              jj_begin_row, jj_end_row;
-  int              jj_begin_row_offd, jj_end_row_offd;
+  int              jj_begin_row_offd = 0;
+  int              jj_end_row_offd = 0;
   int              coarse_counter, coarse_counter_offd;
     
   /* Interpolation weight variables */
@@ -3436,6 +3440,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
+   jj_begin_row_offd = 0;
    for (i = 0; i < n_fine; i++)
    {
      jj_begin_row = jj_counter;        
@@ -4040,7 +4045,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
   /* Variables to keep count of interpolatory points */
   int              jj_counter, jj_counter_offd;
   int              jj_begin_row, jj_end_row;
-  int              jj_begin_row_offd, jj_end_row_offd;
+  int              jj_begin_row_offd = 0;
+  int              jj_end_row_offd = 0;
   int              coarse_counter, coarse_counter_offd;
     
   /* Interpolation weight variables */
@@ -4429,6 +4435,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
    /*-----------------------------------------------------------------------
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
+   jj_begin_row_offd = 0;
    for (i = 0; i < n_fine; i++)
    {
      jj_begin_row = jj_counter;        

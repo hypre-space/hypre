@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.19 $
+ * $Revision: 2.20 $
  ***********************************************************************EHEADER*/
 
 
@@ -308,7 +308,15 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       }
       else if (interp_type == 7) 
       {
+	printf(" Interpolation = extended interpolation (if no common C point)\n");
+      }
+      else if (interp_type == 12) 
+      {
 	printf(" Interpolation = F-F interpolation\n");
+      }
+      else if (interp_type == 13) 
+      {
+	printf(" Interpolation = F-F1 interpolation\n");
       }
       else if (interp_type == 8) 
       {
@@ -322,7 +330,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	printf(" Interpolation = block classical interpolation for nodal systems AMG\n");
       }
-      else if (interp_type == 10) 
+      else if (interp_type == 11) 
       {
 	printf(" Interpolation = block classical interpolation with diagonal blocks\n");
 	printf("                 for nodal systems AMG\n");

@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.3 $
+# $Revision: 2.4 $
 #EHEADER**********************************************************************
 
 
@@ -52,7 +52,7 @@ DATE=`grep "PACKAGE_DATE " $VFILE|cut -d\  -f 3|sed 's/"//g'`
 TIME=`grep "PACKAGE_TIME " $VFILE|cut -d\  -f 3|sed 's/"//g'`
 
 # this is the no-option print line
-VPRINT=`echo hypre Version $NUMBER Date: $DATE $TIME`
+VPRINT=`echo hypre Version $NUMBER Date: $DATE`
 
 # this defines the print lines for the various options
 case $1 in

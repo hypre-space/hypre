@@ -1,87 +1,90 @@
-<html><head><TITLE>GMRES Solver</TITLE></head>
-<body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  GMRES Solver  </H2>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> GMRES Solver</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">GMRES Solver</A></H2></H2>
+<HR>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_GMRESSetup.html><B>HYPRE_GMRESSetup</B></A> 
- <DD><I>
-Prepare to solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetup"></A>
+<A HREF=HYPRE_GMRESSetup.html><B>HYPRE_GMRESSetup</B></A><DD><I> Prepare to solve the system.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSolve</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.2">HYPRE_Matrix</A> A, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.3">HYPRE_Vector</A> b, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.3">HYPRE_Vector</A> x)
- <DD><I>
-Solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSolve"></A>
+<A HREF=HYPRE_GMRESSolve.html><B>HYPRE_GMRESSolve</B></A><DD><I> Solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetTol</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double tol)
- <DD><I>
-(Optional) Set the convergence tolerance</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetTol"></A>
+<A HREF=HYPRE_GMRESSetTol.html><B>HYPRE_GMRESSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int max_iter)
- <DD><I>
-(Optional) Set maximum number of iterations</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetMaxIter"></A>
+<A HREF=HYPRE_GMRESSetMaxIter.html><B>HYPRE_GMRESSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetKDim</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int k_dim)
- <DD><I>
-(Optional) Set the maximum size of the Krylov space</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetKDim"></A>
+<A HREF=HYPRE_GMRESSetKDim.html><B>HYPRE_GMRESSetKDim</B></A><DD><I> (Optional) Set the maximum size of the Krylov space</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetRelChange</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int rel_change)
- <DD><I>
-(Optional) Additionally require that the relative difference in
-successive iterates be small</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetRelChange"></A>
+<A HREF=HYPRE_GMRESSetRelChange.html><B>HYPRE_GMRESSetRelChange</B></A><DD><I> (Optional) Additionally require that the relative difference in successive iterates be small</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> precond_solver)
- <DD><I>
-(Optional) Set the preconditioner to use</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetPrecond"></A>
+<A HREF=HYPRE_GMRESSetPrecond.html><B>HYPRE_GMRESSetPrecond</B></A><DD><I> (Optional) Set the preconditioner to use</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetLogging</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int logging)
- <DD><I>
-(Optional) Set the amount of logging to do</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetLogging"></A>
+<A HREF=HYPRE_GMRESSetLogging.html><B>HYPRE_GMRESSetLogging</B></A><DD><I> (Optional) Set the amount of logging to do</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESSetPrintLevel</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int level)
- <DD><I>
-(Optional) Set the amount of printing to do to the screen</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESSetPrintLevel"></A>
+<A HREF=HYPRE_GMRESSetPrintLevel.html><B>HYPRE_GMRESSetPrintLevel</B></A><DD><I> (Optional) Set the amount of printing to do to the screen</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_iterations)
- <DD><I>
-Return the number of iterations taken</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetNumIterations"></A>
+<A HREF=HYPRE_GMRESGetNumIterations.html><B>HYPRE_GMRESGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *norm)
- <DD><I>
-Return the norm of the final relative residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetFinalRelativeResidualNorm"></A>
+<A HREF=HYPRE_GMRESGetFinalRelativeResidualNorm.html><B>HYPRE_GMRESGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetResidual</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, void **residual)
- <DD><I>
-Return the residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetResidual"></A>
+<A HREF=HYPRE_GMRESGetResidual.html><B>HYPRE_GMRESGetResidual</B></A><DD><I> Return the residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetTol</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *tol)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *max_iter)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetKDim</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *k_dim)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetRelChange</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *rel_change)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *precond_data_ptr)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetLogging</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *level)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetPrintLevel</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *level)
- <DD><I></I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_GMRESGetConverged</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *converged)
- <DD><I></I>
-</DL>
-<A NAME="DOC.DOCU">
-<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetTol"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetTol</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetMaxIter"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetMaxIter</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetKDim"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetKDim</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetRelChange"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetRelChange</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetPrecond"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetPrecond</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetLogging"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetLogging</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetPrintLevel"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetPrintLevel</B></A><DT>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_GMRESGetConverged"></A>
+<A HREF=GMRESSolver.html><B>HYPRE_GMRESGetConverged</B></A></DL>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
 <center>
 <img src="hypre_wiw.gif">
 </center>
-
-<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
-</BODY>

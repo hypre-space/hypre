@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -59,7 +59,7 @@ extern "C" {
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -671,7 +671,7 @@ if (hypre__num_blocks > 1)\
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1083,7 +1083,7 @@ int  kinc = (hypre_IndexZ(stride)*\
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1207,7 +1207,7 @@ typedef struct hypre_BoxNeighbors_struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1494,7 +1494,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1604,7 +1604,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1670,7 +1670,7 @@ hypre_StructStencilShape(stencil)[i]
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1883,7 +1883,7 @@ typedef struct hypre_CommHandle_struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -1976,7 +1976,7 @@ typedef struct hypre_ComputePkg_struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -2098,7 +2098,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -2249,6 +2249,7 @@ int hypre_BoxManAddEntry ( hypre_BoxManager *manager , hypre_Index imin , hypre_
 int hypre_BoxManGetEntry ( hypre_BoxManager *manager , int proc , int id , hypre_BoxManEntry **entry_ptr );
 int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , int *num_entries , hypre_BoxManEntry **entries );
 int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
+int hypre_BoxManGetAllEntriesBoxesProc ( hypre_BoxManager *manager , hypre_BoxArray *boxes, int *procs );
 int hypre_BoxManGatherEntries ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManAssemble ( hypre_BoxManager *manager );
 int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower , hypre_Index iupper , hypre_BoxManEntry ***entries_ptr , int *nentries_ptr );

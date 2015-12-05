@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.26 $
+# $Revision: 1.27 $
 #EHEADER**********************************************************************
 
 
@@ -50,7 +50,7 @@ HYPRE_LINK_DIR = @HYPRE_LINKDIR@
 HYPRE_RELEASE_VERSION = @HYPRE_RELEASEVERSION@
 HYPRE_RELEASE_DATE = @HYPRE_RELEASEDATE@
 HYPRE_RELEASE_TIME = @HYPRE_RELEASETIME@
-HYPRE_RELEASE_DATETIME = @HYPRE_RELEASEDATE@ @HYPRE_RELEASETIME@
+HYPRE_RELEASE_DATETIME = @HYPRE_RELEASEDATE@
 
 HYPRE_INSTALL_DIR = @HYPRE_INSTALLDIR@
 HYPRE_LIB_INSTALL = @HYPRE_LIBINSTALL@

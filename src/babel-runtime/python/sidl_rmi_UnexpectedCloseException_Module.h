@@ -3,7 +3,7 @@
  * Symbol:        sidl.rmi.UnexpectedCloseException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name: V1-14-0b $
+ * Release:       $Name:  $
  * Revision:      @(#) $Id: sidl_rmi_UnexpectedCloseException_Module.h,v 1.1 2006/08/29 23:39:47 painter Exp $
  * Description:   expose a constructor for the Python wrapper
  * 

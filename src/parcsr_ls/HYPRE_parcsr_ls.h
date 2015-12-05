@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.68 $
+ * $Revision: 2.70 $
  ***********************************************************************EHEADER*/
 
 
@@ -477,7 +477,7 @@ int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
 int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                   double       S_commpkg_switch);
 
-/*
+/**
  * (Optional) Defines which parallel interpolation operator is used.
  * There are the following options for interp\_type: 
 * 
@@ -505,13 +505,13 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
 int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                  int          interp_type);
 
-/*
+/**
  * (Optional)
  **/
 int HYPRE_BoomerAMGSetMinIter(HYPRE_Solver solver,
                               int          min_iter);
 
-/*
+/**
  * (Optional) This routine will be eliminated in the future.
  **/
 int HYPRE_BoomerAMGInitGridRelaxation(int    **num_grid_sweeps_ptr,
@@ -568,6 +568,7 @@ int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
 
 /**
  * (Optional) Requests automatic printing of setup and solve information.
+ *
  * \begin{tabular}{|c|l|} \hline
  * 0 & no printout (default) \\
  * 1 & print setup information \\
@@ -575,6 +576,7 @@ int HYPRE_BoomerAMGSetPrintFileName(HYPRE_Solver  solver,
  * 3 & print both setup and solve information \\
  * \hline
  * \end{tabular}
+ *
  * Note, that if one desires to print information and uses BoomerAMG as a 
  * preconditioner, suggested print$\_$level is 1 to avoid excessive output,
  * and use print$\_$level of solver for solve phase information.
@@ -833,8 +835,8 @@ int HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
  *
  * @param solver [IN] Preconditioner object for which to set symmetry parameter.
  * @param sym [IN] Value of the symmetry parameter:
- * \begin{tabular}{|c|l|} \hline
- * value & meaning \\ \hline
+ * \begin{tabular}{|c|l|} \hline 
+ * value & meaning \\ \hline 
  * 0 & nonsymmetric and/or indefinite problem, and nonsymmetric preconditioner\\
  * 1 & SPD problem, and SPD (factored) preconditioner \\
  * 2 & nonsymmetric, definite problem, and SPD (factored) preconditioner \\

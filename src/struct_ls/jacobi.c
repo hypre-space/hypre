@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -61,6 +61,7 @@ hypre_JacobiCreate( MPI_Comm  comm )
    hypre_SetIndex(stride, 1, 1, 1);
    hypre_SetIndex(indices[0], 0, 0, 0);
    hypre_PointRelaxSetPointset(relax_data, 0, 1, stride, indices);
+   hypre_PointRelaxSetTol(relax_data,1.0e-6);
    (jacobi_data -> relax_data) = relax_data;
 
    return (void *) jacobi_data;
@@ -254,3 +255,15 @@ hypre_JacobiSetTempVec( void               *jacobi_vdata,
    return ierr;
 }
 
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int hypre_JacobiGetFinalRelativeResidualNorm( void * jacobi_vdata, double * norm )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   void *relax_data = jacobi_data -> relax_data;
+
+   return hypre_PointRelaxGetFinalRelativeResidualNorm( relax_data, norm);
+}

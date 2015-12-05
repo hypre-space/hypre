@@ -21,7 +21,7 @@ dnl # You should have received a copy of the GNU Lesser General Public License
 dnl # along with this program; if not, write to the Free Software Foundation,
 dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 dnl #
-dnl # $Revision: 1.62 $
+dnl # $Revision: 1.64 $
 dnl #EHEADER**********************************************************************
 
 dnl *********************************************************************
@@ -53,15 +53,15 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [1.14.0b])
-m4_define([HYPRE_DATE], [2006/11/30])
-m4_define([HYPRE_TIME], [14:48:32])
-m4_define([HYPRE_DATETIME], [HYPRE_DATE HYPRE_TIME])
+m4_define([HYPRE_VERSION], [2.0.0])
+m4_define([HYPRE_DATE], [2006/12/15])
+m4_define([HYPRE_TIME], [00:00:00])
+m4_define([HYPRE_DATETIME], [HYPRE_DATE])
 m4_define([HYPRE_BUGS], [hypre-support@llnl.gov])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.62 2006/11/30 22:54:36 falgout Exp $)
+AC_REVISION($Id: configure.in,v 1.64 2006/12/12 02:09:11 falgout Exp $)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
@@ -107,7 +107,7 @@ AC_DEFINE([HYPRE_PACKAGE_STRING], ["HYPRE_NAME"], [Package name])
 AC_DEFINE([HYPRE_PACKAGE_TARNAME], ["HYPRE_NAME"], [Package name])
 AC_DEFINE([HYPRE_PACKAGE_BUGREPORT], ["HYPRE_BUGS"], [Bug reports])
 
-HYPRE_PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
+HYPRE_PACKAGE_DATETIME="HYPRE_DATE"
 AC_SUBST([HYPRE_PACKAGE_DATETIME])
 
 HYPRE_TOP_SRCDIR="HYPRE_TOP_SRC_DIR"
@@ -1027,12 +1027,12 @@ if test "$casc_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="HYPRE_TOP_SRC_DIR/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre femli"
-   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.*o"
-   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.*o"
+   HYPRE_FEI_HYPRE_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/fei-hypre/*.o"
+   HYPRE_FEI_FEMLI_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/femli/lib/*.o"
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.*o"
+      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi

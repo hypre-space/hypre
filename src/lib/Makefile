@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.24 $
+# $Revision: 1.26 $
 #EHEADER**********************************************************************
 
 
@@ -52,24 +52,24 @@ STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 
 UTILFILES = \
- ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/random.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/threading.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/timer.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/timing.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.*o\
- ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.*o
+ ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/random.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/threading.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timer.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timing.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.o
 
-FILES1 = \
+FILES_HYPRE = \
 $(SUPERLUFILES)\
 $(FEIHYPREFILES)\
 $(FEMLIFILES)\
@@ -79,9 +79,7 @@ $(PARASAILSFILES)\
 $(PILUTFILES)\
 $(DISTMATRIXFILES)\
 $(KRYLOVFILES)\
-$(MATMATFILES)
-
-FILES2 = \
+$(MATMATFILES)\
 $(MULTIVECFILES)\
 $(PARCSRLSFILES)\
 $(PARCSRMVFILES)\
@@ -134,24 +132,58 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE.a: ${FILES1} ${FILES2}
+libHYPRE.a: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
-	cp -fp ${FILES1} .
-	cp -fp ${FILES2} .
-	${AR} $@ *.o
+	${AR} $@ $(SUPERLUFILES)
+	${AR} $@ $(FEIHYPREFILES)
+	${AR} $@ $(FEMLIFILES)
+	${AR} $@ $(IJMVFILES)
+	${AR} $@ $(EUCLIDFILES)
+	${AR} $@ $(PARASAILSFILES)
+	${AR} $@ $(PILUTFILES)
+	${AR} $@ $(DISTMATRIXFILES)
+	${AR} $@ $(KRYLOVFILES)
+	${AR} $@ $(MATMATFILES)
+	${AR} $@ $(MULTIVECFILES)
+	${AR} $@ $(PARCSRLSFILES)
+	${AR} $@ $(PARCSRMVFILES)
+	${AR} $@ $(PARCSRBLOCKMVFILES)
+	${AR} $@ $(SEQMVFILES)
+	${AR} $@ $(SSTRUCTLSFILES)
+	${AR} $@ $(SSTRUCTMVFILES)
+	${AR} $@ $(STRUCTLSFILES)
+	${AR} $@ $(STRUCTMVFILES)
+	${AR} $@ $(UTILITIESFILES)
 	${RANLIB} $@
 
-libHYPRE.so: ${FILES1} ${FILES2}
+libHYPRE.so: ${FILES_HYPRE}
 	@echo  "Building libHYPRE ... "
-	cp -fp ${FILES1} .
-	cp -fp ${FILES2} .
-	${BUILD_CC_SHARED} -o $@ *.o
+	${BUILD_CC_SHARED} -o $@ ${FILES_HYPRE}
 
 libHYPRE_LSI.a: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
-	${AR} $@ ${FILES_LSI}
+	${AR} $@ $(FEIHYPREFILES)
+	${AR} $@ $(FEMLIFILES)
+	${AR} $@ $(IJMVFILES)
+	${AR} $@ $(EUCLIDFILES)
+	${AR} $@ $(PARASAILSFILES)
+	${AR} $@ $(PILUTFILES)
+	${AR} $@ $(DISTMATRIXFILES)
+	${AR} $@ $(KRYLOVFILES)
+	${AR} $@ $(MATMATFILES)
+	${AR} $@ $(MULTIVECFILES)
+	${AR} $@ $(PARCSRLSFILES)
+	${AR} $@ $(PARCSRMVFILES)
+	${AR} $@ $(PARCSRBLOCKMVFILES)
+	${AR} $@ $(SEQMVFILES)
+	${AR} $@ $(SSTRUCTLSFILES)
+	${AR} $@ $(SSTRUCTMVFILES)
+	${AR} $@ $(STRUCTLSFILES)
+	${AR} $@ $(STRUCTMVFILES)
+	${AR} $@ $(UTILFILES)
 	${RANLIB} $@
 
 libHYPRE_LSI.so: ${FILES_LSI}
 	@echo  "Building libHYPRE_LSI ... "
 	${BUILD_CC_SHARED} -o $@ ${FILES_LSI}
+

@@ -1,62 +1,66 @@
-<html><head><TITLE>SStruct BiCGSTAB Solver</TITLE></head>
-<body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  SStruct BiCGSTAB Solver  </H2>
-<hr>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<HTML>
+<HEAD>
+   <TITLE> SStruct BiCGSTAB Solver</TITLE>
+   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2> <A HREF="#DOC.DOCU">SStruct BiCGSTAB Solver</A></H2></H2>
+<HR>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABCreate</B>(MPI_Comm comm, <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> *solver)
- <DD><I>
-Create a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABCreate"></A>
+<A HREF=HYPRE_SStructBiCGSTABCreate.html><B>HYPRE_SStructBiCGSTABCreate</B></A><DD><I> Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructBiCGSTABDestroy.html><B>HYPRE_SStructBiCGSTABDestroy</B></A> 
- <DD><I>
-Destroy a solver object</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABDestroy"></A>
+<A HREF=HYPRE_SStructBiCGSTABDestroy.html><B>HYPRE_SStructBiCGSTABDestroy</B></A><DD><I> Destroy a solver object.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructBiCGSTABSetup.html><B>HYPRE_SStructBiCGSTABSetup</B></A> 
- <DD><I>
-Prepare to solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSetup"></A>
+<A HREF=HYPRE_SStructBiCGSTABSetup.html><B>HYPRE_SStructBiCGSTABSetup</B></A><DD><I> Prepare to solve the system.</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABSolve</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
- <DD><I>
-Solve the system</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSolve"></A>
+<A HREF=HYPRE_SStructBiCGSTABSolve.html><B>HYPRE_SStructBiCGSTABSolve</B></A><DD><I> Solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABSetTol</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double tol)
- <DD><I>
-(Optional) Set the convergence tolerance</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSetTol"></A>
+<A HREF=HYPRE_SStructBiCGSTABSetTol.html><B>HYPRE_SStructBiCGSTABSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABSetMaxIter</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_iter)
- <DD><I>
-(Optional) Set maximum number of iterations</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSetMaxIter"></A>
+<A HREF=HYPRE_SStructBiCGSTABSetMaxIter.html><B>HYPRE_SStructBiCGSTABSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABSetPrecond</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver)
- <DD><I>
-(Optional) Set the preconditioner to use</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSetPrecond"></A>
+<A HREF=HYPRE_SStructBiCGSTABSetPrecond.html><B>HYPRE_SStructBiCGSTABSetPrecond</B></A><DD><I> (Optional) Set the preconditioner to use</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABSetLogging</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int logging)
- <DD><I>
-(Optional) Set the amount of logging to do</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSetLogging"></A>
+<A HREF=HYPRE_SStructBiCGSTABSetLogging.html><B>HYPRE_SStructBiCGSTABSetLogging</B></A><DD><I> (Optional) Set the amount of logging to do</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABSetPrintLevel</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int level)
- <DD><I>
-(Optional) Set the amount of printing to do to the screen</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABSetPrintLevel"></A>
+<A HREF=HYPRE_SStructBiCGSTABSetPrintLevel.html><B>HYPRE_SStructBiCGSTABSetPrintLevel</B></A><DD><I> (Optional) Set the amount of printing to do to the screen</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
- <DD><I>
-Return the number of iterations taken</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABGetNumIterations"></A>
+<A HREF=HYPRE_SStructBiCGSTABGetNumIterations.html><B>HYPRE_SStructBiCGSTABGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double *norm)
- <DD><I>
-Return the norm of the final relative residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm"></A>
+<A HREF=HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm.html><B>HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructBiCGSTABGetResidual</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, void **residual)
- <DD><I>
-Return the residual</I>
+
+<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructBiCGSTABGetResidual"></A>
+<A HREF=HYPRE_SStructBiCGSTABGetResidual.html><B>HYPRE_SStructBiCGSTABGetResidual</B></A><DD><I> Return the residual</I>
 </DL>
-<A NAME="DOC.DOCU">
-<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<A NAME="DOC.DOCU"></A>
+<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
 <center>
 <img src="hypre_wiw.gif">
 </center>
-
-<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
-</BODY>

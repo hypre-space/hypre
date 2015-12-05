@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,6 +30,7 @@
 #define MACROS_H
 
 #include "../../utilities/general.h"
+#include "../../utilities/fortran.h"
 
 /*
  * macros.h
@@ -95,13 +96,13 @@
 #else
 #ifdef MACHINE_IS_SOLARIS
 #ifdef USE_SHORT
-#define SNRM2 snrm2_
-#define SDOT sdot_
-#define SCOPY scopy_
+#define SNRM2 hypre_F90_NAME_BLAS(snrm2, SNRM2)
+#define SDOT hypre_F90_NAME_BLAS(sdot, SDOT)
+#define SCOPY hypre_F90_NAME_BLAS(scopy, SCOPY)
 #else
-#define SNRM2 dnrm2_
-#define SDOT ddot_
-#define SCOPY dcopy_
+#define SNRM2 hypre_F90_NAME_BLAS(dnrm2, DNRM2)
+#define SDOT hypre_F90_NAME_BLAS(ddot, DDOT)
+#define SCOPY hypre_F90_NAME_BLAS(dcopy, DCOPY)
 #endif
 #else
 #ifdef USE_SHORT
