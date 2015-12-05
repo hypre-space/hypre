@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -56,6 +55,7 @@ extern "C" {
 #define MPI_CHAR            hypre_MPI_CHAR             
 #define MPI_LONG            hypre_MPI_LONG             
 #define MPI_BYTE            hypre_MPI_BYTE             
+#define MPI_C_DOUBLE_COMPLEX hypre_MPI_COMPLEX
 
 #define MPI_SUM             hypre_MPI_SUM              
 #define MPI_MIN             hypre_MPI_MIN              
@@ -91,7 +91,9 @@ extern "C" {
 #define MPI_Allgather       hypre_MPI_Allgather        
 #define MPI_Allgatherv      hypre_MPI_Allgatherv       
 #define MPI_Gather          hypre_MPI_Gather       
+#define MPI_Gatherv          hypre_MPI_Gatherv       
 #define MPI_Scatter         hypre_MPI_Scatter       
+#define MPI_Scatterv         hypre_MPI_Scatterv       
 #define MPI_Bcast           hypre_MPI_Bcast            
 #define MPI_Send            hypre_MPI_Send             
 #define MPI_Recv            hypre_MPI_Recv             
@@ -147,6 +149,8 @@ typedef HYPRE_Int  hypre_MPI_Aint;
 #define  hypre_MPI_CHAR 2
 #define  hypre_MPI_LONG 3
 #define  hypre_MPI_BYTE 4
+#define  hypre_MPI_REAL 5
+#define  hypre_MPI_COMPLEX 6
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -176,11 +180,16 @@ typedef MPI_Aint     hypre_MPI_Aint;
 #define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
 #define  hypre_MPI_BOTTOM     MPI_BOTTOM
 
-#define  hypre_MPI_DOUBLE MPI_DOUBLE
+#define  hypre_MPI_DOUBLE  MPI_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */
-#define  hypre_MPI_CHAR   MPI_CHAR
-#define  hypre_MPI_LONG   MPI_LONG
-#define  hypre_MPI_BYTE   MPI_BYTE
+#define  hypre_MPI_INT     HYPRE_MPI_INT
+#define  hypre_MPI_CHAR    MPI_CHAR
+#define  hypre_MPI_LONG    MPI_LONG
+#define  hypre_MPI_BYTE    MPI_BYTE
+/* HYPRE_MPI_REAL is defined in HYPRE_utilities.h */
+#define  hypre_MPI_REAL    HYPRE_MPI_REAL
+/* HYPRE_MPI_COMPLEX is defined in HYPRE_utilities.h */
+#define  hypre_MPI_COMPLEX HYPRE_MPI_COMPLEX
 
 #define  hypre_MPI_SUM MPI_SUM
 #define  hypre_MPI_MIN MPI_MIN
@@ -210,8 +219,8 @@ typedef MPI_Aint     hypre_MPI_Aint;
 HYPRE_Int hypre_MPI_Init( hypre_int *argc , char ***argv );
 HYPRE_Int hypre_MPI_Finalize( void );
 HYPRE_Int hypre_MPI_Abort( hypre_MPI_Comm comm , HYPRE_Int errorcode );
-double hypre_MPI_Wtime( void );
-double hypre_MPI_Wtick( void );
+HYPRE_Real hypre_MPI_Wtime( void );
+HYPRE_Real hypre_MPI_Wtick( void );
 HYPRE_Int hypre_MPI_Barrier( hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Comm_create( hypre_MPI_Comm comm , hypre_MPI_Group group , hypre_MPI_Comm *newcomm );
 HYPRE_Int hypre_MPI_Comm_dup( hypre_MPI_Comm comm , hypre_MPI_Comm *newcomm );
@@ -229,7 +238,9 @@ HYPRE_Int hypre_MPI_Alltoall( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Da
 HYPRE_Int hypre_MPI_Allgather( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Allgatherv( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , hypre_MPI_Datatype recvtype , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Gather( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Gatherv( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int *recvcounts , HYPRE_Int *displs , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Scatter( void *sendbuf , HYPRE_Int sendcount , hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
+HYPRE_Int hypre_MPI_Scatterv( void *sendbuf , HYPRE_Int *sendcounts , HYPRE_Int *displs, hypre_MPI_Datatype sendtype , void *recvbuf , HYPRE_Int recvcount , hypre_MPI_Datatype recvtype , HYPRE_Int root , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Bcast( void *buffer , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int root , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Send( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int dest , HYPRE_Int tag , hypre_MPI_Comm comm );
 HYPRE_Int hypre_MPI_Recv( void *buf , HYPRE_Int count , hypre_MPI_Datatype datatype , HYPRE_Int source , HYPRE_Int tag , hypre_MPI_Comm comm , hypre_MPI_Status *status );

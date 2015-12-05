@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -18,8 +18,8 @@
 /*--------------------------------------------------------------------------
  * This is the main solve routine for the Schaffer multigrid method.
  * This solver works for 1D, 2D, or 3D linear systems.  The dimension
- * is determined by the hypre_StructStencilDim argument of the matrix
- * stencil.  The hypre_StructGridDim argument of the matrix grid is
+ * is determined by the hypre_StructStencilNDim argument of the matrix
+ * stencil.  The hypre_StructGridNDim argument of the matrix grid is
  * allowed to be larger than the dimension of the solver, and in fact,
  * this feature is used in the smaller-dimensional solves required
  * in the relaxation method for both the 2D and 3D algorithms.  This
@@ -56,7 +56,7 @@ hypre_SMGSolve( void               *smg_vdata,
 
    hypre_SMGData        *smg_data = smg_vdata;
 
-   double                tol             = (smg_data -> tol);
+   HYPRE_Real            tol             = (smg_data -> tol);
    HYPRE_Int             max_iter        = (smg_data -> max_iter);
    HYPRE_Int             rel_change      = (smg_data -> rel_change);
    HYPRE_Int             zero_guess      = (smg_data -> zero_guess);
@@ -77,11 +77,11 @@ hypre_SMGSolve( void               *smg_vdata,
    void                **restrict_data_l = (smg_data -> restrict_data_l);
    void                **interp_data_l   = (smg_data -> interp_data_l);
    HYPRE_Int             logging         = (smg_data -> logging);
-   double               *norms           = (smg_data -> norms);
-   double               *rel_norms       = (smg_data -> rel_norms);
+   HYPRE_Real           *norms           = (smg_data -> norms);
+   HYPRE_Real           *rel_norms       = (smg_data -> rel_norms);
 
-   double                b_dot_b = 0, r_dot_r, eps = 0;
-   double                e_dot_e = 0, x_dot_x = 1;
+   HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
+   HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
                     
    HYPRE_Int             i, l;
                     
@@ -198,7 +198,7 @@ hypre_SMGSolve( void               *smg_vdata,
          /* restrict fine grid residual */
          hypre_SemiRestrict(restrict_data_l[0], R_l[0], r_l[0], b_l[1]);
 #if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_xdown.%02d", 0);
             hypre_StructVectorPrint(filename, x_l[0], 0);
@@ -224,7 +224,7 @@ hypre_SMGSolve( void               *smg_vdata,
             /* restrict residual */
             hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-            if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+            if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
                hypre_sprintf(filename, "zout_xdown.%02d", l);
                hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -243,7 +243,7 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_xbottom.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -260,7 +260,7 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+            if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
                hypre_sprintf(filename, "zout_eup.%02d", l);
                hypre_StructVectorPrint(filename, e_l[l], 0);
@@ -280,7 +280,7 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SemiInterp(interp_data_l[0], PT_l[0], x_l[1], e_l[0]);
          hypre_SMGAxpy(1.0, e_l[0], x_l[0], base_index, base_stride);
 #if DEBUG
-         if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
+         if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {
             hypre_sprintf(filename, "zout_eup.%02d", 0);
             hypre_StructVectorPrint(filename, e_l[0], 0);

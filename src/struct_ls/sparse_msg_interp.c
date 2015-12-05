@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -136,9 +136,9 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    HYPRE_Int               xci;
    HYPRE_Int               ei;
                          
-   double                 *Pp0, *Pp1;
-   double                 *xcp;
-   double                 *ep, *ep0, *ep1;
+   HYPRE_Real             *Pp0, *Pp1;
+   HYPRE_Real             *xcp;
+   HYPRE_Real             *ep, *ep0, *ep1;
                        
    hypre_Index             loop_size;
    hypre_Index             start;
@@ -166,7 +166,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    stencil       = hypre_StructMatrixStencil(P);
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*-----------------------------------------------------------------------
     * Compute e at coarse points (injection)
@@ -199,7 +199,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
-      hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox,  start,  stride,  ei,
                           xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
@@ -259,7 +259,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-            hypre_BoxLoop2Begin(hypre_StructMatrixDim(P), loop_size,
+            hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                 P_dbox, startP, strideP, Pi,
                                 e_dbox, start,  stride,  ei);
 #ifdef HYPRE_USING_OPENMP

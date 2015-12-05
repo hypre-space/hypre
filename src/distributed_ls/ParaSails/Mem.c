@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -144,7 +144,7 @@ void MemStat(Mem *m, FILE *stream, char *msg)
     hypre_fprintf(stream, "bytes_alloc: %ld\n", m->bytes_alloc);
     if (m->bytes_alloc != 0)
         hypre_fprintf(stream, "efficiency : %f\n", m->total_bytes / 
-	    (double) m->bytes_alloc);
+	    (HYPRE_Real) m->bytes_alloc);
     hypre_fprintf(stream, "*********************\n");
     fflush(stream);
 }

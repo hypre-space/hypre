@@ -226,18 +226,12 @@ processors, it may not know which processor owns the data it needs.
 Therefore, processors must determine their communication partners, or
 neighbors.
 
-The straightforward approach to determining neighbors involves
-constructing a global partition of the data which requires $O(P)$ data
-storage. This storage requirement (as well the costs of many of the
-associated algorithms that access the storage) is not scalable for
-machines such as BlueGene/L with tens of thousands of processors. The
-problem of determining inter-processor communication (in the absence
-of a global description of the data) in a scalable manner is addressed
-in \cite{assumedpartition06}. When using \hypre{} on many thousands of
-processors, compiling the library with the ``no global partition''
-option as detailed in Section \ref{config_options} improves
-scalability as shown in
-\cite{assumedpartition06}.  Note that this optimization is only
-recommended when using at least several thousand of processors and is
-most beneficial when using tens of thousands of processors.
+The straightforward approach to determining neighbors involves constructing a
+global partition of the data.  This approach, however, requires $O(P)$ storage
+and computations and is not scalable for machines with tens of thousands of
+processors.  The {\em assumed partition} algorithm was developed to address this
+problem \cite{assumedpartition06}.  It is used by default in \hypre{} and is
+recommended in general.  For modest numbers of processors (less than a hundred
+or so), a global partition may produce slightly faster results and can be turned
+on by compiling the library as detailed in Section~\ref{config_options}.
 

@@ -73,7 +73,7 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     doublereal d__1;
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
 	    integer *);

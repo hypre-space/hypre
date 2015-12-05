@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -33,9 +33,9 @@ HYPRE_Int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                              HYPRE_Int                 relax_type,
                              HYPRE_Int                 relax_order,
                              HYPRE_Int                 cycle_type,
-                             double              relax_weight,
-                             double              omega,
-                             double             *l1_norms,
+                             HYPRE_Real          relax_weight,
+                             HYPRE_Real          omega,
+                             HYPRE_Real         *l1_norms,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp,
                              hypre_ParVector    *Ztemp )

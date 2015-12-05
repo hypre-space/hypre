@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.21 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER
 
@@ -26,6 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ typedef struct
    /* Does the CSRMatrix create/destroy `data', `i', `j'? */
    HYPRE_Int      owns_data;
 
-   double  *data;
+   HYPRE_Complex  *data;
 
    /* for compressing rows in matrix multiplication  */
    HYPRE_Int     *rownnz;
@@ -105,7 +105,6 @@ typedef struct
 
 #endif
 
-
 /******************************************************************************
  *
  * Header info for Mapped Matrix data structures
@@ -139,6 +138,7 @@ typedef struct
          (hypre_MappedMatrixColMap(matrix)(j,hypre_MappedMatrixMapData(matrix)))
 
 #endif
+
 
 /******************************************************************************
  *
@@ -176,6 +176,7 @@ typedef struct
 
 #endif
 
+
 /******************************************************************************
  *
  * Header info for Vector data structure
@@ -191,7 +192,7 @@ typedef struct
 
 typedef struct
 {
-   double  *data;
+   HYPRE_Complex  *data;
    HYPRE_Int      size;
 
    /* Does the Vector create/destroy `data'? */
@@ -226,10 +227,10 @@ typedef struct
 /* csr_matop.c */
 hypre_CSRMatrix *hypre_CSRMatrixAdd ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiply ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
-hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros ( hypre_CSRMatrix *A , double tol );
+hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros ( hypre_CSRMatrix *A , HYPRE_Real tol );
 HYPRE_Int hypre_CSRMatrixTranspose ( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , HYPRE_Int data );
 HYPRE_Int hypre_CSRMatrixReorder ( hypre_CSRMatrix *A );
-double hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
+HYPRE_Complex hypre_CSRMatrixSumElts ( hypre_CSRMatrix *A );
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate ( HYPRE_Int num_rows , HYPRE_Int num_cols , HYPRE_Int num_nonzeros );
@@ -245,9 +246,9 @@ hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
 
 /* csr_matvec.c */
-HYPRE_Int hypre_CSRMatrixMatvec ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
-HYPRE_Int hypre_CSRMatrixMatvecT ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y );
-HYPRE_Int hypre_CSRMatrixMatvec_FF ( double alpha , hypre_CSRMatrix *A , hypre_Vector *x , double beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
+HYPRE_Int hypre_CSRMatrixMatvec ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
+HYPRE_Int hypre_CSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
+HYPRE_Int hypre_CSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
 
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_Int length , HYPRE_Int num_procs , HYPRE_Int **part_ptr );
@@ -323,15 +324,15 @@ HYPRE_Int hypre_SeqVectorInitialize ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorSetDataOwner ( hypre_Vector *vector , HYPRE_Int owns_data );
 hypre_Vector *hypre_SeqVectorRead ( char *file_name );
 HYPRE_Int hypre_SeqVectorPrint ( hypre_Vector *vector , char *file_name );
-HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v , double value );
+HYPRE_Int hypre_SeqVectorSetConstantValues ( hypre_Vector *v , HYPRE_Complex value );
 HYPRE_Int hypre_SeqVectorSetRandomValues ( hypre_Vector *v , HYPRE_Int seed );
 HYPRE_Int hypre_SeqVectorCopy ( hypre_Vector *x , hypre_Vector *y );
 hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
-HYPRE_Int hypre_SeqVectorScale ( double alpha , hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorAxpy ( double alpha , hypre_Vector *x , hypre_Vector *y );
-double hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
-double hypre_VectorSumElts ( hypre_Vector *vector );
+HYPRE_Int hypre_SeqVectorScale ( HYPRE_Complex alpha , hypre_Vector *y );
+HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
+HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
+HYPRE_Complex hypre_VectorSumElts ( hypre_Vector *vector );
 
 #ifdef __cplusplus
 }

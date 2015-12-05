@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef FACTOR_DH
@@ -40,13 +40,13 @@ struct _factor_dh {
   /* used for PILU solves (Apply) */
   HYPRE_Int          num_recvLo, num_recvHi;
   HYPRE_Int          num_sendLo, num_sendHi;  /* used in destructor */
-  double       *work_y_lo;  /* recv values from lower nabors; also used as
+  HYPRE_Real   *work_y_lo;  /* recv values from lower nabors; also used as
                                work vector when solving Ly=b for y.
                             */
-  double       *work_x_hi;  /* recv values from higher nabors; also used as
+  HYPRE_Real   *work_x_hi;  /* recv values from higher nabors; also used as
                                work vector when solving Ux=y for x.
                             */
-  double       *sendbufLo, *sendbufHi;
+  HYPRE_Real   *sendbufLo, *sendbufHi;
   HYPRE_Int          *sendindLo, *sendindHi;
   HYPRE_Int          sendlenLo, sendlenHi;
   bool         solveIsSetup;
@@ -66,7 +66,7 @@ extern void Factor_dhDestroy(Factor_dh mat);
 extern void Factor_dhTranspose(Factor_dh matIN, Factor_dh *matOUT);
 
 extern void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
-                          double rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *F);
+                          HYPRE_Real rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *F);
 
 extern void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional);
   /* ensures fill, cval, and aval arrays can accomodate
@@ -77,13 +77,13 @@ extern void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additiona
 extern void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg);
 
 
-extern void Factor_dhSolve(double *rhs, double *lhs, Euclid_dh ctx);
-extern void Factor_dhSolveSeq(double *rhs, double *lhs, Euclid_dh ctx);
+extern void Factor_dhSolve(HYPRE_Real *rhs, HYPRE_Real *lhs, Euclid_dh ctx);
+extern void Factor_dhSolveSeq(HYPRE_Real *rhs, HYPRE_Real *lhs, Euclid_dh ctx);
 
   /* functions for monitoring stability */
-extern double Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx);
-extern double Factor_dhMaxValue(Factor_dh mat);
-extern double Factor_dhMaxPivotInverse(Factor_dh mat);
+extern HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx);
+extern HYPRE_Real Factor_dhMaxValue(Factor_dh mat);
+extern HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat);
 
 extern HYPRE_Int Factor_dhReadNz(Factor_dh mat);
 extern void Factor_dhPrintTriples(Factor_dh mat, char *filename);

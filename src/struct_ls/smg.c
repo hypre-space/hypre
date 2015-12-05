@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -36,8 +36,8 @@ hypre_SMGCreate( MPI_Comm  comm )
    (smg_data -> num_pre_relax)  = 1;
    (smg_data -> num_post_relax) = 1;
    (smg_data -> cdir) = 2;
-   hypre_SetIndex((smg_data -> base_index), 0, 0, 0);
-   hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex3((smg_data -> base_index), 0, 0, 0);
+   hypre_SetIndex3((smg_data -> base_stride), 1, 1, 1);
    (smg_data -> logging) = 0;
    (smg_data -> print_level) = 0;
 
@@ -158,7 +158,7 @@ hypre_SMGGetMemoryUse( void *smg_vdata,
 
 HYPRE_Int
 hypre_SMGSetTol( void   *smg_vdata,
-                 double  tol       )
+                 HYPRE_Real  tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
  
@@ -169,7 +169,7 @@ hypre_SMGSetTol( void   *smg_vdata,
 
 HYPRE_Int
 hypre_SMGGetTol( void   *smg_vdata,
-                 double *tol       )
+                 HYPRE_Real *tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
  
@@ -402,8 +402,8 @@ hypre_SMGPrintLogging( void *smg_vdata,
    HYPRE_Int    num_iterations  = (smg_data -> num_iterations);
    HYPRE_Int    logging   = (smg_data -> logging);
    HYPRE_Int    print_level  = (smg_data -> print_level);
-   double      *norms     = (smg_data -> norms);
-   double      *rel_norms = (smg_data -> rel_norms);
+   HYPRE_Real  *norms     = (smg_data -> norms);
+   HYPRE_Real  *rel_norms = (smg_data -> rel_norms);
 
    
    if (myid == 0)
@@ -429,14 +429,14 @@ hypre_SMGPrintLogging( void *smg_vdata,
 
 HYPRE_Int
 hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
-                                       double *relative_residual_norm )
+                                       HYPRE_Real *relative_residual_norm )
 {
    hypre_SMGData *smg_data = smg_vdata;
 
    HYPRE_Int      max_iter        = (smg_data -> max_iter);
    HYPRE_Int      num_iterations  = (smg_data -> num_iterations);
    HYPRE_Int      logging         = (smg_data -> logging);
-   double        *rel_norms       = (smg_data -> rel_norms);
+   HYPRE_Real    *rel_norms       = (smg_data -> rel_norms);
 
    if (logging > 0)
    {
@@ -458,14 +458,14 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
 
 HYPRE_Int
 hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
-                                        double              values,
+                                        HYPRE_Real          values,
                                         hypre_BoxArray     *box_array,
                                         hypre_Index         stride    )
 {
    hypre_Box          *v_data_box;
 
    HYPRE_Int           vi;
-   double             *vp;
+   HYPRE_Real         *vp;
 
    hypre_Box          *box;
    hypre_Index         loop_size;
@@ -488,7 +488,7 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 
       hypre_BoxGetStrideSize(box, stride, loop_size);
 
-      hypre_BoxLoop1Begin(hypre_StructVectorDim(vector), loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi) HYPRE_SMP_SCHEDULE

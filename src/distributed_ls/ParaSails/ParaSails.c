@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -40,11 +40,11 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, 
-  double *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *,
-  double *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, 
+  HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *,
+  HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 #endif
 
 #if 0 /* no longer need this since using 'memset' now */
@@ -315,7 +315,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
 {
     HYPRE_Int sendbacksize, j;
     HYPRE_Int len, *ind, *indbuf, *indbufp;
-    double *val, *valbuf, *valbufp;
+    HYPRE_Real *val, *valbuf, *valbufp;
     HYPRE_Int temp;
 
     /* Determine the size of the integer message we need to send back */
@@ -329,7 +329,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
 
     /* Reply buffers - will be freed by caller */
     indbuf = (HYPRE_Int *)    MemAlloc(mem, sendbacksize * sizeof(HYPRE_Int));
-    valbuf = (double *) MemAlloc(mem, sendbacksize * sizeof(double));
+    valbuf = (HYPRE_Real *) MemAlloc(mem, sendbacksize * sizeof(HYPRE_Real));
 
     /* Pointers used to construct reply messages */
     indbufp = indbuf;
@@ -352,7 +352,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
         *indbufp++ = len;
         /* memcpy(indbufp, ind, sizeof(HYPRE_Int)*len); */
         NumberingLocalToGlobal(numb, len, ind, indbufp);
-        memcpy(valbufp, val, sizeof(double)*len);
+        memcpy(valbufp, val, sizeof(HYPRE_Real)*len);
         indbufp += len;
         valbufp += len;
     }
@@ -380,7 +380,7 @@ static void ReceiveReplyStoredRows(MPI_Comm comm, Numbering *numb,
     hypre_MPI_Status status;
     HYPRE_Int source, count;
     HYPRE_Int len, *ind, num_rows, *row_nums, j;
-    double *val;
+    HYPRE_Real *val;
 
     /* Don't know the size of reply, so use probe and get count */
     hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, ROW_REPI_TAG, comm, &status);
@@ -701,7 +701,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 {
     RowPatt *patt;
     HYPRE_Int row, len, *ind;
-    double *val;
+    HYPRE_Real *val;
 
     HYPRE_Int num_requests;
     HYPRE_Int source;
@@ -803,7 +803,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
  *--------------------------------------------------------------------------*/
 
 static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_rows,
-  HYPRE_Int num_levels, Numbering *numb, Matrix *M, double *costp)
+  HYPRE_Int num_levels, Numbering *numb, Matrix *M, HYPRE_Real *costp)
 {
     HYPRE_Int row, len, *ind, level, lenprev, *indprev;
     HYPRE_Int i, j;
@@ -857,7 +857,7 @@ static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_r
         MatrixSetRow(M, row+M->beg_row, len, ind, NULL);
 
         nnz += len;
-        (*costp) += (double) len*len*len;
+        (*costp) += (HYPRE_Real) len*len*len;
     }
 
 #if 0
@@ -883,7 +883,7 @@ static void ConstructPatternForEachRow(HYPRE_Int symmetric, PrunedRows *pruned_r
 
 static void ConstructPatternForEachRowExt(HYPRE_Int symmetric, 
   PrunedRows *pruned_rows_global, PrunedRows *pruned_rows_local, 
-  HYPRE_Int num_levels, Numbering *numb, Matrix *M, double *costp)
+  HYPRE_Int num_levels, Numbering *numb, Matrix *M, HYPRE_Real *costp)
 {
     HYPRE_Int row, len, *ind, level, lenprev, *indprev;
     HYPRE_Int i, j;
@@ -982,7 +982,7 @@ static void ConstructPatternForEachRowExt(HYPRE_Int symmetric,
         MatrixSetRow(M, row+M->beg_row, len, ind, NULL);
 
         nnz += len;
-        (*costp) += (double) len*len*len;
+        (*costp) += (HYPRE_Real) len*len*len;
     }
 
 #if 0
@@ -1007,16 +1007,16 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 {
     HYPRE_Int *marker;
     HYPRE_Int row, maxlen, len, *ind;
-    double *val;
+    HYPRE_Real *val;
 
-    double *ahat, *ahatp;
+    HYPRE_Real *ahat, *ahatp;
     HYPRE_Int i, j, len2, *ind2, loc;
-    double *val2, temp;
-    double time0, time1, timet = 0.0, timea = 0.0;
+    HYPRE_Real *val2, temp;
+    HYPRE_Real time0, time1, timet = 0.0, timea = 0.0;
 
-    double ahatcost = 0.0;
+    HYPRE_Real ahatcost = 0.0;
 
-    double error = 0;
+    HYPRE_Real error = 0;
 
 #ifndef ESSL
     char uplo = 'L';
@@ -1039,9 +1039,9 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     }
 
 #ifdef ESSL
-    ahat = (double *) malloc(maxlen*(maxlen+1)/2 * sizeof(double));
+    ahat = (HYPRE_Real *) malloc(maxlen*(maxlen+1)/2 * sizeof(HYPRE_Real));
 #else
-    ahat = (double *) malloc(maxlen*maxlen * sizeof(double));
+    ahat = (HYPRE_Real *) malloc(maxlen*maxlen * sizeof(HYPRE_Real));
 #endif
 
     /* Compute values for row "row" of approximate inverse */
@@ -1056,11 +1056,11 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 
         /* Initialize ahat to zero */
 #ifdef ESSL
-/*        bzero((char *) ahat, len*(len+1)/2 * sizeof(double));*/
-        memset(ahat, 0, len*(len+1)/2 * sizeof(double));
+/*        bzero((char *) ahat, len*(len+1)/2 * sizeof(HYPRE_Real));*/
+        memset(ahat, 0, len*(len+1)/2 * sizeof(HYPRE_Real));
 #else
-/*        bzero((char *) ahat, len*len * sizeof(double));*/
-        memset(ahat, 0, len*len * sizeof(double));
+/*        bzero((char *) ahat, len*len * sizeof(HYPRE_Real));*/
+        memset(ahat, 0, len*len * sizeof(HYPRE_Real));
 #endif
 
         time0 = hypre_MPI_Wtime();
@@ -1119,11 +1119,11 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 
         time1 = hypre_MPI_Wtime();
         timea += (time1-time0);
-        ahatcost += (double) (len*len2);
+        ahatcost += (HYPRE_Real) (len*len2);
 
         /* Set the right-hand side */
-/*        bzero((char *) val, len*sizeof(double));*/
-        memset(val, 0, len*sizeof(double));
+/*        bzero((char *) val, len*sizeof(HYPRE_Real));*/
+        memset(val, 0, len*sizeof(HYPRE_Real));
         NumberingGlobalToLocal(numb, 1, &row, &loc);
         loc = marker[loc];
         assert(loc != -1);
@@ -1201,16 +1201,16 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
   HYPRE_Int local_beg_row, Numbering *numb)
 {
     HYPRE_Int *marker;
-    double *ahat, *ahatp, *bhat;
-    double *work;
+    HYPRE_Real *ahat, *ahatp, *bhat;
+    HYPRE_Real *work;
     HYPRE_Int ahat_size = 10000, bhat_size = 1000, work_size = 2000*64;
 
     HYPRE_Int row, len, *ind;
-    double *val;
+    HYPRE_Real *val;
 
     HYPRE_Int i, j, len2, *ind2, loc;
-    double *val2;
-    double time0, time1, timet = 0.0, timea = 0.0;
+    HYPRE_Real *val2;
+    HYPRE_Real time0, time1, timet = 0.0, timea = 0.0;
 
     HYPRE_Int npat;
     HYPRE_Int pattsize = 1000;
@@ -1232,9 +1232,9 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     for (i=0; i<numb->num_ind; i++)
         marker[i] = -1;
 
-    bhat = (double *) malloc(bhat_size * sizeof(double));
-    ahat = (double *) malloc(ahat_size * sizeof(double));
-    work = (double *) calloc(work_size,  sizeof(double));
+    bhat = (HYPRE_Real *) malloc(bhat_size * sizeof(HYPRE_Real));
+    ahat = (HYPRE_Real *) malloc(ahat_size * sizeof(HYPRE_Real));
+    work = (HYPRE_Real *) calloc(work_size,  sizeof(HYPRE_Real));
 
     /* Compute values for row "row" of approximate inverse */
     for (row=local_beg_row; row<=mat->end_row; row++)
@@ -1278,12 +1278,12 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         {
             free(ahat);
             ahat_size = len*npat;
-            ahat = (double *) malloc(ahat_size * sizeof(double));
+            ahat = (HYPRE_Real *) malloc(ahat_size * sizeof(HYPRE_Real));
         }
 
         /* Initialize ahat to zero */
-/*        bzero((char *) ahat, len*npat * sizeof(double));*/
-        memset(ahat, 0, len*npat * sizeof(double));
+/*        bzero((char *) ahat, len*npat * sizeof(HYPRE_Real));*/
+        memset(ahat, 0, len*npat * sizeof(HYPRE_Real));
 
         /* Form ahat matrix, entries correspond to indices in "ind" only */
         ahatp = ahat;
@@ -1307,12 +1307,12 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         {
             free(bhat);
             bhat_size = npat;
-            bhat = (double *) malloc(bhat_size * sizeof(double));
+            bhat = (HYPRE_Real *) malloc(bhat_size * sizeof(HYPRE_Real));
         }
 
         /* Set the right-hand side, bhat */
-/*        bzero((char *) bhat, npat*sizeof(double));*/
-        memset(bhat, 0, npat*sizeof(double));
+/*        bzero((char *) bhat, npat*sizeof(HYPRE_Real));*/
+        memset(bhat, 0, npat*sizeof(HYPRE_Real));
         NumberingGlobalToLocal(numb, 1, &row, &loc);
         loc = marker[loc];
         assert(loc != -1);
@@ -1379,19 +1379,19 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
  * threshold is selected on the diagonally scaled matrix.
  *--------------------------------------------------------------------------*/
 
-static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
-  double param)
+static HYPRE_Real SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
+  HYPRE_Real param)
 {
     HYPRE_Int row, len, *ind, i, npes;
-    double *val;
-    double localsum = 0.0, sum;
-    double temp;
+    HYPRE_Real *val;
+    HYPRE_Real localsum = 0.0, sum;
+    HYPRE_Real temp;
 
     /* Buffer for storing the values in each row when computing the
        i-th smallest element - buffer will grow if necessary */
-    double *buffer;
+    HYPRE_Real *buffer;
     HYPRE_Int buflen = 10;
-    buffer = (double *) malloc(buflen * sizeof(double));
+    buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
 
     for (row=0; row<=A->end_row - A->beg_row; row++)
     {
@@ -1401,7 +1401,7 @@ static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
         {
             free(buffer);
             buflen = len;
-            buffer = (double *) malloc(buflen * sizeof(double));
+            buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
         }
 
         /* Copy the scaled absolute values into a work buffer */
@@ -1433,19 +1433,19 @@ static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
  * Assumes matrix is in local indexing.
  *--------------------------------------------------------------------------*/
 
-static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
-  double param, HYPRE_Int symmetric)
+static HYPRE_Real SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
+  HYPRE_Real param, HYPRE_Int symmetric)
 {
     HYPRE_Int row, len, *ind, i, npes;
-    double *val;
-    double localsum = 0.0, sum;
-    double temp = 1.0;
+    HYPRE_Real *val;
+    HYPRE_Real localsum = 0.0, sum;
+    HYPRE_Real temp = 1.0;
 
     /* Buffer for storing the values in each row when computing the
        i-th smallest element - buffer will grow if necessary */
-    double *buffer;
+    HYPRE_Real *buffer;
     HYPRE_Int buflen = 10;
-    buffer = (double *) malloc(buflen * sizeof(double));
+    buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -1455,7 +1455,7 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
         {
             free(buffer);
             buflen = len;
-            buffer = (double *) malloc(buflen * sizeof(double));
+            buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
         }
 
         if (symmetric == 0)
@@ -1493,12 +1493,12 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
  *--------------------------------------------------------------------------*/
 
 static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
-  double filter, HYPRE_Int symmetric, double *newcostp)
+  HYPRE_Real filter, HYPRE_Int symmetric, HYPRE_Real *newcostp)
 {
     HYPRE_Int i, j;
     HYPRE_Int row, len, *ind;
-    double *val, temp = 1.0;
-    double cost = 0.0;
+    HYPRE_Real *val, temp = 1.0;
+    HYPRE_Real cost = 0.0;
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -1521,7 +1521,7 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
 
         MatrixSetRow(F, row+F->beg_row, j, ind, val);
 
-        cost += (double) j*j*j;
+        cost += (HYPRE_Real) j*j*j;
     }
 
     *newcostp = cost;
@@ -1534,12 +1534,12 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
 static void Rescale(Matrix *M, StoredRows *stored_rows, HYPRE_Int num_ind)
 {
     HYPRE_Int len, *ind, len2, *ind2;
-    double *val, *val2, *w;
+    HYPRE_Real *val, *val2, *w;
     HYPRE_Int row, j, i;
-    double accum, prod;
+    HYPRE_Real accum, prod;
 
     /* Allocate full-length workspace */
-    w = (double *) calloc(num_ind, sizeof(double));
+    w = (HYPRE_Real *) calloc(num_ind, sizeof(HYPRE_Real));
 
     /* Loop over rows */
     for (row=0; row<=M->end_row - M->beg_row; row++)
@@ -1658,11 +1658,11 @@ void ParaSailsDestroy(ParaSails *ps)
  *--------------------------------------------------------------------------*/
 
 void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
-  double thresh, HYPRE_Int num_levels)
+  HYPRE_Real thresh, HYPRE_Int num_levels)
 {
     DiagScale  *diag_scale;
     PrunedRows *pruned_rows;
-    double time0, time1;
+    HYPRE_Real time0, time1;
 
     time0 = hypre_MPI_Wtime();
 
@@ -1700,12 +1700,12 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
  *--------------------------------------------------------------------------*/
 
 void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
-  double thresh_global, double thresh_local, HYPRE_Int num_levels)
+  HYPRE_Real thresh_global, HYPRE_Real thresh_local, HYPRE_Int num_levels)
 {
     DiagScale  *diag_scale;
     PrunedRows *pruned_rows_global;
     PrunedRows *pruned_rows_local;
-    double time0, time1;
+    HYPRE_Real time0, time1;
 
     time0 = hypre_MPI_Wtime();
 
@@ -1752,14 +1752,14 @@ void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
  * "A", for which a preconditioner is constructed.
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
+HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, HYPRE_Real filter)
 {
     LoadBal    *load_bal;
     StoredRows *stored_rows;
     HYPRE_Int row, len, *ind;
-    double *val;
+    HYPRE_Real *val;
     HYPRE_Int i;
-    double time0, time1;
+    HYPRE_Real time0, time1;
     MPI_Comm comm = ps->comm;
     HYPRE_Int error = 0, error_sum;
 
@@ -1908,7 +1908,7 @@ HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
  * vector.
  *--------------------------------------------------------------------------*/
 
-void ParaSailsApply(ParaSails *ps, double *u, double *v)
+void ParaSailsApply(ParaSails *ps, HYPRE_Real *u, HYPRE_Real *v)
 {
     if (ps->symmetric)
     {
@@ -1933,7 +1933,7 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
  * vector.
  *--------------------------------------------------------------------------*/
 
-void ParaSailsApplyTrans(ParaSails *ps, double *u, double *v)
+void ParaSailsApplyTrans(ParaSails *ps, HYPRE_Real *u, HYPRE_Real *v)
 {
     if (ps->symmetric)
     {
@@ -1952,12 +1952,12 @@ void ParaSailsApplyTrans(ParaSails *ps, double *u, double *v)
  * cost is too high.
  *--------------------------------------------------------------------------*/
 
-double ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
+HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
 {
     HYPRE_Int mype, npes;
     HYPRE_Int n, nnzm, nnza;
     MPI_Comm comm = ps->comm;
-    double max_pattern_time, max_cost, ave_cost;
+    HYPRE_Real max_pattern_time, max_cost, ave_cost;
 
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
@@ -1974,7 +1974,7 @@ double ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
 	1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
     hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
     hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
-    ave_cost = ave_cost / (double) npes;
+    ave_cost = ave_cost / (HYPRE_Real) npes;
 
     if (mype)
 	return ave_cost;
@@ -1987,7 +1987,7 @@ double ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
     hypre_printf("thresh                : %f\n", ps->thresh);
     hypre_printf("num_levels            : %d\n", ps->num_levels);
     hypre_printf("Max cost (average)    : %7.1e (%7.1e)\n", max_cost, ave_cost);
-    hypre_printf("Nnz (ratio)           : %d (%5.2f)\n", nnzm, nnzm/(double)nnza);
+    hypre_printf("Nnz (ratio)           : %d (%5.2f)\n", nnzm, nnzm/(HYPRE_Real)nnza);
     hypre_printf("Max setup pattern time: %8.1f\n", max_pattern_time);
     hypre_printf("*************************************************\n");
     fflush(stdout);
@@ -2004,8 +2004,8 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
     HYPRE_Int mype, npes;
     HYPRE_Int n, nnzm, nnza;
     MPI_Comm comm = ps->comm;
-    double max_values_time;
-    double temp, *setup_times = NULL;
+    HYPRE_Real max_values_time;
+    HYPRE_Real temp, *setup_times = NULL;
     HYPRE_Int i;
 
     hypre_MPI_Comm_rank(comm, &mype);
@@ -2023,7 +2023,7 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
 	1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
 
     if (!mype)
-        setup_times = (double *) malloc(npes * sizeof(double));
+        setup_times = (HYPRE_Real *) malloc(npes * sizeof(HYPRE_Real));
 
     temp = ps->setup_pattern_time + ps->setup_values_time;
     hypre_MPI_Gather(&temp, 1, hypre_MPI_DOUBLE, setup_times, 1, hypre_MPI_DOUBLE, 0, comm);
@@ -2034,7 +2034,7 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
     hypre_printf("** ParaSails Setup Values Statistics ************\n");
     hypre_printf("filter                : %f\n", ps->filter);
     hypre_printf("loadbal               : %f\n", ps->loadbal_beta);
-    hypre_printf("Final Nnz (ratio)     : %d (%5.2f)\n", nnzm, nnzm/(double)nnza);
+    hypre_printf("Final Nnz (ratio)     : %d (%5.2f)\n", nnzm, nnzm/(HYPRE_Real)nnza);
     hypre_printf("Max setup values time : %8.1f\n", max_values_time);
     hypre_printf("*************************************************\n");
     hypre_printf("Setup (pattern and values) times:\n");
@@ -2045,7 +2045,7 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
         hypre_printf("%3d: %8.1f\n", i, setup_times[i]);
         temp += setup_times[i];
     }
-    hypre_printf("ave: %8.1f\n", temp / (double) npes);
+    hypre_printf("ave: %8.1f\n", temp / (HYPRE_Real) npes);
     hypre_printf("*************************************************\n");
 
     free(setup_times);

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -34,7 +34,7 @@
  *   replication.
  *--------------------------------------------------------------------------*/
 
-typedef HYPRE_Int  hypre_Index[3];
+typedef HYPRE_Int  hypre_Index[HYPRE_MAXDIM];
 typedef HYPRE_Int *hypre_IndexRef;
 
 /*--------------------------------------------------------------------------
@@ -45,12 +45,14 @@ typedef struct hypre_Box_struct
 {
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
+   HYPRE_Int   ndim;           /* number of dimensions */
 
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
  * hypre_BoxArray:
  *   An array of boxes.
+ *   Since size can be zero, need to store ndim separately.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_BoxArray_struct
@@ -58,6 +60,7 @@ typedef struct hypre_BoxArray_struct
    hypre_Box  *boxes;         /* Array of boxes */
    HYPRE_Int   size;          /* Size of box array */
    HYPRE_Int   alloc_size;    /* Size of currently alloced space */
+   HYPRE_Int   ndim;          /* number of dimensions */
 
 } hypre_BoxArray;
 
@@ -66,15 +69,16 @@ typedef struct hypre_BoxArray_struct
 /*--------------------------------------------------------------------------
  * hypre_BoxArrayArray:
  *   An array of box arrays.
+ *   Since size can be zero, need to store ndim separately.
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_BoxArrayArray_struct
 {
    hypre_BoxArray  **box_arrays;    /* Array of pointers to box arrays */
    HYPRE_Int         size;          /* Size of box array array */
+   HYPRE_Int         ndim;          /* number of dimensions */
 
 } hypre_BoxArrayArray;
-
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Index
@@ -82,6 +86,7 @@ typedef struct hypre_BoxArrayArray_struct
 
 #define hypre_IndexD(index, d)  (index[d])
 
+/* Avoid using these macros */
 #define hypre_IndexX(index)     hypre_IndexD(index, 0)
 #define hypre_IndexY(index)     hypre_IndexD(index, 1)
 #define hypre_IndexZ(index)     hypre_IndexD(index, 2)
@@ -90,38 +95,14 @@ typedef struct hypre_BoxArrayArray_struct
  * Member functions: hypre_Index
  *--------------------------------------------------------------------------*/
 
-#define hypre_SetIndex(index, ix, iy, iz) \
-( hypre_IndexX(index) = ix,\
-  hypre_IndexY(index) = iy,\
-  hypre_IndexZ(index) = iz )
+/*----- Avoid using these Index macros -----*/
 
-#define hypre_ClearIndex(index)  hypre_SetIndex(index, 0, 0, 0)
+#define hypre_SetIndex3(index, ix, iy, iz) \
+( hypre_IndexD(index, 0) = ix,\
+  hypre_IndexD(index, 1) = iy,\
+  hypre_IndexD(index, 2) = iz )
 
-#define hypre_IndexZero(index)\
-   (hypre_IndexX(index) == 0 &&  hypre_IndexY(index) == 0 \
-    && hypre_IndexZ(index) == 0)
-
-#define hypre_IndexGTESize(index, size) \
-(hypre_IndexX(index) >= size &&  hypre_IndexY(index) >= size \
-    && hypre_IndexZ(index) >= size)
-
-#define hypre_CopyIndex(index1, index2) \
-( hypre_IndexX(index2) = hypre_IndexX(index1),\
-  hypre_IndexY(index2) = hypre_IndexY(index1),\
-  hypre_IndexZ(index2) = hypre_IndexZ(index1) )
-
-#define hypre_CopyToCleanIndex(in_index, ndim, out_index) \
-{\
-   HYPRE_Int d;\
-   for (d = 0; d < ndim; d++)\
-   {\
-      hypre_IndexD(out_index, d) = hypre_IndexD(in_index, d);\
-   }\
-   for (d = ndim; d < 3; d++)\
-   {\
-      hypre_IndexD(out_index, d) = 0;\
-   }\
-}
+#define hypre_ClearIndex(index)  hypre_SetIndex(index, 0)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_Box
@@ -129,104 +110,29 @@ typedef struct hypre_BoxArrayArray_struct
 
 #define hypre_BoxIMin(box)     ((box) -> imin)
 #define hypre_BoxIMax(box)     ((box) -> imax)
-
-#define hypre_AddIndex(index1, index2, index3) \
-( hypre_IndexX(index3) = hypre_IndexX(index2) + hypre_IndexX(index1),\
-  hypre_IndexY(index3) = hypre_IndexY(index2) + hypre_IndexY(index1),\
-  hypre_IndexZ(index3) = hypre_IndexZ(index2) + hypre_IndexZ(index1) )
-
-#define hypre_SubtractIndex(index1, index2, index3) \
-( hypre_IndexX(index3) = hypre_IndexX(index1) - hypre_IndexX(index2),\
-  hypre_IndexY(index3) = hypre_IndexY(index1) - hypre_IndexY(index2),\
-  hypre_IndexZ(index3) = hypre_IndexZ(index1) - hypre_IndexZ(index2) )
+#define hypre_BoxNDim(box)     ((box) -> ndim)
 
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
 hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 
-#define hypre_BoxIMinX(box)    hypre_BoxIMinD(box, 0)
-#define hypre_BoxIMinY(box)    hypre_BoxIMinD(box, 1)
-#define hypre_BoxIMinZ(box)    hypre_BoxIMinD(box, 2)
+#define hypre_IndexDInBox(index, d, box) \
+( hypre_IndexD(index, d) >= hypre_BoxIMinD(box, d) && \
+  hypre_IndexD(index, d) <= hypre_BoxIMaxD(box, d) )
 
-#define hypre_BoxIMaxX(box)    hypre_BoxIMaxD(box, 0)
-#define hypre_BoxIMaxY(box)    hypre_BoxIMaxD(box, 1)
-#define hypre_BoxIMaxZ(box)    hypre_BoxIMaxD(box, 2)
+/* The first hypre_CCBoxIndexRank is better style because it is similar to
+   hypre_BoxIndexRank.  The second one sometimes avoids compiler warnings. */
+#define hypre_CCBoxIndexRank(box, index) 0
+#define hypre_CCBoxIndexRank_noargs() 0
+#define hypre_CCBoxOffsetDistance(box, index) 0
+  
+/*----- Avoid using these Box macros -----*/
 
 #define hypre_BoxSizeX(box)    hypre_BoxSizeD(box, 0)
 #define hypre_BoxSizeY(box)    hypre_BoxSizeD(box, 1)
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
-#define hypre_BoxEqualP( box1, box2 ) (\
- hypre_BoxIMinX(box1)==hypre_BoxIMinX(box2) &&\
- hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box2) &&\
- hypre_BoxIMinY(box1)==hypre_BoxIMinY(box2) &&\
- hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box2) &&\
- hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box2) &&\
- hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box2) )
-
-#define hypre_IndexInBoxP( index, box ) (\
- hypre_IndexX(index)>=hypre_BoxIMinX(box) &&\
- hypre_IndexX(index)<=hypre_BoxIMaxX(box) &&\
- hypre_IndexY(index)>=hypre_BoxIMinY(box) &&\
- hypre_IndexY(index)<=hypre_BoxIMaxY(box) &&\
- hypre_IndexZ(index)>=hypre_BoxIMinZ(box) &&\
- hypre_IndexZ(index)<=hypre_BoxIMaxZ(box) )
-
-
-#define hypre_IndexDInBoxP( index, d, box ) (\
- hypre_IndexD(index, d)>=hypre_BoxIMinD(box, d) &&\
- hypre_IndexD(index, d)<=hypre_BoxIMaxD(box, d) )
-
-#define hypre_CopyBox(box1, box2) \
-( hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2)),\
-  hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2)) )
-
-#define hypre_BoxVolume(box) \
-(hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
-
-#define hypre_BoxShiftPos(box, shift) \
-{\
-   hypre_BoxIMinX(box) += hypre_IndexX(shift);\
-   hypre_BoxIMinY(box) += hypre_IndexY(shift);\
-   hypre_BoxIMinZ(box) += hypre_IndexZ(shift);\
-   hypre_BoxIMaxX(box) += hypre_IndexX(shift);\
-   hypre_BoxIMaxY(box) += hypre_IndexY(shift);\
-   hypre_BoxIMaxZ(box) += hypre_IndexZ(shift);\
-}
-
-#define hypre_BoxShiftNeg(box, shift) \
-{\
-   hypre_BoxIMinX(box) -= hypre_IndexX(shift);\
-   hypre_BoxIMinY(box) -= hypre_IndexY(shift);\
-   hypre_BoxIMinZ(box) -= hypre_IndexZ(shift);\
-   hypre_BoxIMaxX(box) -= hypre_IndexX(shift);\
-   hypre_BoxIMaxY(box) -= hypre_IndexY(shift);\
-   hypre_BoxIMaxZ(box) -= hypre_IndexZ(shift);\
-}
-
-#define hypre_BoxIndexRank(box, index) \
-((hypre_IndexX(index) - hypre_BoxIMinX(box)) + \
- ((hypre_IndexY(index) - hypre_BoxIMinY(box)) + \
-   ((hypre_IndexZ(index) - hypre_BoxIMinZ(box)) * \
-    hypre_BoxSizeY(box))) * \
-  hypre_BoxSizeX(box))
-
-/* The first hypre_CCBoxIndexRank is better style because it keeps
-   its similarity to the variable coefficient hypre_BoxIndexRank.
-   The second one sometimes avoids compiler warnings...*/
-#define hypre_CCBoxIndexRank(box, index) 0
-#define hypre_CCBoxIndexRank_noargs() 0
-
-#define hypre_BoxOffsetDistance(box, index) \
-(hypre_IndexX(index) + \
- (hypre_IndexY(index) + \
-  (hypre_IndexZ(index) * \
-   hypre_BoxSizeY(box))) * \
- hypre_BoxSizeX(box))
-
-#define hypre_CCBoxOffsetDistance(box, index) 0
-  
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArray
  *--------------------------------------------------------------------------*/
@@ -235,6 +141,7 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxArrayBox(box_array, i)    &((box_array) -> boxes[(i)])
 #define hypre_BoxArraySize(box_array)      ((box_array) -> size)
 #define hypre_BoxArrayAllocSize(box_array) ((box_array) -> alloc_size)
+#define hypre_BoxArrayNDim(box_array)      ((box_array) -> ndim)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_BoxArrayArray
@@ -246,6 +153,8 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 ((box_array_array) -> box_arrays[(i)])
 #define hypre_BoxArrayArraySize(box_array_array) \
 ((box_array_array) -> size)
+#define hypre_BoxArrayArrayNDim(box_array_array) \
+((box_array_array) -> ndim)
 
 /*--------------------------------------------------------------------------
  * Looping macros:
@@ -259,11 +168,9 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
- *
- * NOTE: PThreads version of BoxLoop looping macros are in `box_pthreads.h'.
  *--------------------------------------------------------------------------*/
 
-#ifndef HYPRE_USE_PTHREADS
+#if 0 /* set to 0 to use the new box loops */
 
 #define HYPRE_BOX_PRIVATE hypre__nx,hypre__ny,hypre__nz,hypre__i,hypre__j,hypre__k
 
@@ -544,7 +451,30 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 
 /*-----------------------------------*/
 
-#endif  /* ifndef HYPRE_USE_PTHREADS */
+#else
+
+#define HYPRE_BOX_PRIVATE        ZYPRE_BOX_PRIVATE
+
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+#define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
+#define hypre_BoxLoopBlock       zypre_BoxLoopBlock
+#define hypre_BoxLoop0Begin      zypre_BoxLoop0Begin
+#define hypre_BoxLoop0For        zypre_BoxLoop0For
+#define hypre_BoxLoop0End        zypre_BoxLoop0End
+#define hypre_BoxLoop1Begin      zypre_BoxLoop1Begin
+#define hypre_BoxLoop1For        zypre_BoxLoop1For
+#define hypre_BoxLoop1End        zypre_BoxLoop1End
+#define hypre_BoxLoop2Begin      zypre_BoxLoop2Begin
+#define hypre_BoxLoop2For        zypre_BoxLoop2For
+#define hypre_BoxLoop2End        zypre_BoxLoop2End
+#define hypre_BoxLoop3Begin      zypre_BoxLoop3Begin
+#define hypre_BoxLoop3For        zypre_BoxLoop3For
+#define hypre_BoxLoop3End        zypre_BoxLoop3End
+#define hypre_BoxLoop4Begin      zypre_BoxLoop4Begin
+#define hypre_BoxLoop4For        zypre_BoxLoop4For
+#define hypre_BoxLoop4End        zypre_BoxLoop4End
+
+#endif /* end if 1 */
 
 #endif
 
@@ -557,121 +487,118 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 #ifndef hypre_ZBOX_HEADER
 #define hypre_ZBOX_HEADER
 
+#define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
+
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
 #define zypre_BoxLoopDeclare() \
-HYPRE_Int  hypre__i[HYPRE_MAXDIM+1];\
-HYPRE_Int  hypre__n[HYPRE_MAXDIM+1];\
-HYPRE_Int  hypre__m[HYPRE_MAXDIM];\
-HYPRE_Int  hypre__d, hypre__ndim;\
-HYPRE_Int  hypre__dir, hypre__max;\
-HYPRE_Int  hypre__div, hypre__mod;\
+HYPRE_Int  hypre__tot, hypre__div, hypre__mod;\
 HYPRE_Int  hypre__block, hypre__num_blocks;\
-HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN
+HYPRE_Int  hypre__d, hypre__ndim;\
+HYPRE_Int  hypre__I, hypre__J, hypre__IN, hypre__JN;\
+HYPRE_Int  hypre__i[HYPRE_MAXDIM+1], hypre__n[HYPRE_MAXDIM+1]
 
 #define zypre_BoxLoopDeclareK(k) \
-HYPRE_Int  hypre__sk[k][HYPRE_MAXDIM];\
-HYPRE_Int  hypre__ikstart[k], hypre__ikinc[k][HYPRE_MAXDIM+1], hypre__i0inc[k]
+HYPRE_Int  hypre__ikstart##k, hypre__i0inc##k;\
+HYPRE_Int  hypre__sk##k[HYPRE_MAXDIM], hypre__ikinc##k[HYPRE_MAXDIM+1]
 
 #define zypre_BoxLoopInit(ndim, loop_size) \
 hypre__ndim = ndim;\
-for (hypre__d = 0; hypre__d < hypre__ndim; hypre__d++)\
-{\
-   hypre__n[hypre__d] = hypre__m[hypre__d] = loop_size[hypre__d];\
-}\
-hypre__dir = 0;\
-hypre__max = hypre__n[0];\
+hypre__n[0] = loop_size[0];\
+hypre__tot = 1;\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   if (hypre__n[hypre__d] > hypre__max)\
-   {\
-      hypre__dir = hypre__d;\
-      hypre__max = hypre__n[hypre__d];\
-   }\
+   hypre__n[hypre__d] = loop_size[hypre__d];\
+   hypre__tot *= hypre__n[hypre__d];\
 }\
+hypre__n[hypre__ndim] = 2;\
 hypre__num_blocks = hypre_NumThreads();\
-if (hypre__max < hypre__num_blocks)\
+if (hypre__tot < hypre__num_blocks)\
 {\
-   hypre__num_blocks = hypre__max;\
+   hypre__num_blocks = hypre__tot;\
 }\
 if (hypre__num_blocks > 0)\
 {\
-   hypre__div = hypre__max / hypre__num_blocks;\
-   hypre__mod = hypre__max % hypre__num_blocks;\
+   hypre__div = hypre__tot / hypre__num_blocks;\
+   hypre__mod = hypre__tot % hypre__num_blocks;\
 }
 
 #define zypre_BoxLoopInitK(k, dboxk, startk, stridek, ik) \
-hypre__sk[k][0] = 1;\
+hypre__sk##k[0] = stridek[0];\
+hypre__ikinc##k[0] = 0;\
+ik = hypre_BoxSizeD(dboxk, 0); /* temporarily use ik */\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   hypre__sk[k][hypre__d] =\
-      hypre__sk[k][hypre__d-1]*hypre_BoxSizeD(dboxk, hypre__d-1);\
+   hypre__sk##k[hypre__d] = ik*stridek[hypre__d];\
+   hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
+      hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
+   ik *= hypre_BoxSizeD(dboxk, hypre__d);\
 }\
-for (hypre__d = 0; hypre__d < hypre__ndim; hypre__d++)\
-{\
-   hypre__sk[k][hypre__d] = hypre__sk[k][hypre__d]*stridek[hypre__d];\
-}\
-hypre__ikstart[k] = hypre_BoxIndexRank(dboxk, startk)
+hypre__i0inc##k = hypre__sk##k[0];\
+hypre__ikinc##k[hypre__ndim] = 0;\
+hypre__ikstart##k = hypre_BoxIndexRank(dboxk, startk)
 
 #define zypre_BoxLoopSet() \
-for (hypre__d = 0; hypre__d < hypre__ndim; hypre__d++)\
+hypre__IN = hypre__n[0];\
+if (hypre__num_blocks > 1)/* in case user sets num_blocks to 1 */\
 {\
-   hypre__n[hypre__d] = hypre__m[hypre__d];\
+   hypre__JN = hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
+   hypre__J = hypre__block * hypre__div + hypre_min(hypre__mod, hypre__block);\
+   for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+   {\
+      hypre__i[hypre__d] = hypre__J % hypre__n[hypre__d];\
+      hypre__J /= hypre__n[hypre__d];\
+   }\
 }\
-if (hypre__num_blocks > 1)\
+else\
 {\
-   hypre__i[hypre__dir] =\
-      hypre__block * hypre__div + hypre_min(hypre__mod, hypre__block);\
-   hypre__n[hypre__dir] =\
-      hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
-}
+   hypre__JN = hypre__tot;\
+   for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+   {\
+      hypre__i[hypre__d] = 0;\
+   }\
+}\
+hypre__i[hypre__ndim] = 0
 
 #define zypre_BoxLoopSetK(k, ik) \
-ik = hypre__ikstart[k];\
-if (hypre__num_blocks > 1)\
-{\
-   ik += hypre__i[hypre__dir]*hypre__sk[k][hypre__dir];\
-}\
-hypre__ikinc[k][0] = hypre__sk[k][0];\
-hypre__i0inc[k] = hypre__ikinc[k][0];\
-if (hypre__ndim > 1)\
-{\
-   hypre__ikinc[k][1] = hypre__sk[k][1] - hypre__n[0]*hypre__sk[k][0];\
-}\
-for (hypre__d = 2; hypre__d < hypre__ndim; hypre__d++)\
-{\
-   hypre__ikinc[k][hypre__d] = hypre__ikinc[k][hypre__d-1] +\
-      hypre__sk[k][hypre__d] - hypre__n[hypre__d-1]*hypre__sk[k][hypre__d-1];\
-}\
-hypre__ikinc[k][hypre__ndim] = 0
-
-#define zypre_BoxLoopSetLoop() \
-hypre__IN = hypre__n[0];\
-hypre__JN = 1;\
+ik = hypre__ikstart##k;\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
-   hypre__JN *= hypre__n[hypre__d];\
-   hypre__i[hypre__d] = 0;\
-   hypre__n[hypre__d] -= 2; /* this produces a simpler comparison below */\
-}\
-hypre__i[hypre__ndim] = 0;\
-hypre__n[hypre__ndim] = 0
+   ik += hypre__i[hypre__d]*hypre__sk##k[hypre__d];\
+}
 
-#define zypre_BoxLoopIncLoop() \
-for (hypre__d = 1; hypre__i[hypre__d] > hypre__n[hypre__d]; hypre__d++)\
+#define zypre_BoxLoopInc1() \
+hypre__d = 1;\
+while ((hypre__i[hypre__d]+2) > hypre__n[hypre__d])\
 {\
-   hypre__i[hypre__d] = 0;\
-}\
-hypre__i[hypre__d]++
+   hypre__d++;\
+}
 
+#define zypre_BoxLoopInc2() \
+hypre__i[hypre__d]++;\
+while (hypre__d > 1)\
+{\
+   hypre__d--;\
+   hypre__i[hypre__d] = 0;\
+}
+
+/* This returns the loop index (of type hypre_Index) for the current iteration,
+ * where the numbering starts at 0.  It works even when threading is turned on,
+ * as long as 'index' is declared to be private. */
 #define zypre_BoxLoopGetIndex(index) \
 index[0] = hypre__I;\
 for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 {\
    index[hypre__d] = hypre__i[hypre__d];\
 }
+
+/* Use this before the For macros below to force only one block */
+#define zypre_BoxLoopSetOneBlock() hypre__num_blocks = 1
+
+/* Use this to get the block iteration inside a BoxLoop */
+#define zypre_BoxLoopBlock() hypre__block
 
 /*-----------------------------------*/
 
@@ -684,7 +611,6 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
-      zypre_BoxLoopSetLoop();\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
       {\
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
@@ -692,7 +618,8 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 
 #define zypre_BoxLoop0End()\
          }\
-         zypre_BoxLoopIncLoop();\
+         zypre_BoxLoopInc1();\
+         zypre_BoxLoopInc2();\
       }\
    }\
 }
@@ -705,24 +632,24 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopInit(ndim, loop_size);\
-   zypre_BoxLoopInitK(0, dbox1, start1, stride1, i1);
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);
 
 #define zypre_BoxLoop1For(i1)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
-      zypre_BoxLoopSetK(0, i1);\
-      zypre_BoxLoopSetLoop();\
+      zypre_BoxLoopSetK(1, i1);\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
       {\
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
 #define zypre_BoxLoop1End(i1)\
-            i1 += hypre__i0inc[0];\
+            i1 += hypre__i0inc1;\
          }\
-         zypre_BoxLoopIncLoop();\
-         i1 += hypre__ikinc[0][hypre__d];\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         zypre_BoxLoopInc2();\
       }\
    }\
 }
@@ -734,30 +661,31 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
                             dbox2, start2, stride2, i2)\
 {\
    zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\
    zypre_BoxLoopInit(ndim, loop_size);\
-   zypre_BoxLoopInitK(0, dbox1, start1, stride1, i1);\
-   zypre_BoxLoopInitK(1, dbox2, start2, stride2, i2);
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);
 
 #define zypre_BoxLoop2For(i1, i2)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
-      zypre_BoxLoopSetK(0, i1);\
-      zypre_BoxLoopSetK(1, i2);\
-      zypre_BoxLoopSetLoop();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
       {\
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
 #define zypre_BoxLoop2End(i1, i2)\
-            i1 += hypre__i0inc[0];\
-            i2 += hypre__i0inc[1];\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
          }\
-         zypre_BoxLoopIncLoop();\
-         i1 += hypre__ikinc[0][hypre__d];\
-         i2 += hypre__ikinc[1][hypre__d];\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         zypre_BoxLoopInc2();\
       }\
    }\
 }
@@ -770,37 +698,36 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
                             dbox3, start3, stride3, i3)\
 {\
    zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
    zypre_BoxLoopDeclareK(3);\
    zypre_BoxLoopInit(ndim, loop_size);\
-   zypre_BoxLoopInitK(0, dbox1, start1, stride1, i1);\
-   zypre_BoxLoopInitK(1, dbox2, start2, stride2, i2);\
-   zypre_BoxLoopInitK(2, dbox3, start3, stride3, i3);
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);
 
 #define zypre_BoxLoop3For(i1, i2, i3)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
-      zypre_BoxLoopSetK(0, i1);\
-      zypre_BoxLoopSetK(1, i2);\
-      zypre_BoxLoopSetK(2, i3);\
-      zypre_BoxLoopSetLoop();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      zypre_BoxLoopSetK(3, i3);\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
       {\
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
 #define zypre_BoxLoop3End(i1, i2, i3)\
-            i1 += hypre__i0inc[0];\
-            i2 += hypre__i0inc[1];\
-            i3 += hypre__i0inc[2];\
-/*            i1 ++;*/\
-/*            i2 ++;*/\
-/*            i3 ++;*/\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+            i3 += hypre__i0inc3;\
          }\
-         zypre_BoxLoopIncLoop();\
-         i1 += hypre__ikinc[0][hypre__d];\
-         i2 += hypre__ikinc[1][hypre__d];\
-         i3 += hypre__ikinc[2][hypre__d];\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         i3 += hypre__ikinc3[hypre__d];\
+         zypre_BoxLoopInc2();\
       }\
    }\
 }
@@ -814,38 +741,41 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
                             dbox4, start4, stride4, i4)\
 {\
    zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
+   zypre_BoxLoopDeclareK(3);\
    zypre_BoxLoopDeclareK(4);\
    zypre_BoxLoopInit(ndim, loop_size);\
-   zypre_BoxLoopInitK(0, dbox1, start1, stride1, i1);\
-   zypre_BoxLoopInitK(1, dbox2, start2, stride2, i2);\
-   zypre_BoxLoopInitK(2, dbox3, start3, stride3, i3);\
-   zypre_BoxLoopInitK(3, dbox4, start4, stride4, i4);
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);\
+   zypre_BoxLoopInitK(4, dbox4, start4, stride4, i4);
 
 #define zypre_BoxLoop4For(i1, i2, i3, i4)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
-      zypre_BoxLoopSetK(0, i1);\
-      zypre_BoxLoopSetK(1, i2);\
-      zypre_BoxLoopSetK(2, i3);\
-      zypre_BoxLoopSetK(3, i4);\
-      zypre_BoxLoopSetLoop();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      zypre_BoxLoopSetK(3, i3);\
+      zypre_BoxLoopSetK(4, i4);\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
       {\
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
 #define zypre_BoxLoop4End(i1, i2, i3, i4)\
-            i1 += hypre__i0inc[0];\
-            i2 += hypre__i0inc[1];\
-            i3 += hypre__i0inc[2];\
-            i4 += hypre__i0inc[3];\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+            i3 += hypre__i0inc3;\
+            i4 += hypre__i0inc4;\
          }\
-         zypre_BoxLoopIncLoop();\
-         i1 += hypre__ikinc[0][hypre__d];\
-         i2 += hypre__ikinc[1][hypre__d];\
-         i3 += hypre__ikinc[2][hypre__d];\
-         i4 += hypre__ikinc[3][hypre__d];\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         i3 += hypre__ikinc3[hypre__d];\
+         i4 += hypre__ikinc4[hypre__d];\
+         zypre_BoxLoopInc2();\
       }\
    }\
 }
@@ -857,9 +787,11 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 
 
 
-#if 0
+/*--------------------------------------------------------------------------
+ * NOTES - Keep these for reference here and elsewhere in the code
+ *--------------------------------------------------------------------------*/
 
-/*- NOTES ------------------------------*/
+#if 0
 
 #define hypre_BoxLoop2Begin(loop_size,
                             dbox1, start1, stride1, i1,
@@ -903,9 +835,9 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    }
 }
 
-/*-----------------------------------*/
-
-/* Idea 2 */
+/*----------------------------------------
+ * Idea 2: Simple version of Idea 3 below
+ *----------------------------------------*/
 
 N = 1;
 for (d = 0; d < ndim; d++)
@@ -929,9 +861,9 @@ for (I = 0; I < N; I++)
    i2 += s2[d]; /* The lengths of i, n, and s must be (ndim+1) */
 }
 
-/*-----------------------------------*/
-
-/* Idea 3 */
+/*----------------------------------------
+ * Idea 3: Approach used in the box loops
+ *----------------------------------------*/
 
 N = 1;
 for (d = 1; d < ndim; d++)

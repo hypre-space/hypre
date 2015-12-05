@@ -1,6 +1,5 @@
-
-#ifndef _cfei_H_
-#define _cfei_H_
+#ifndef _cfei_h_
+#define _cfei_h_
 
 /*--------------------------------------------------------------------*/
 /*    Copyright 2005 Sandia Corporation.                              */
@@ -15,11 +14,13 @@
    of the Finite Element Interface to Linear Solvers (FEI).
 
    For explanations of parameters and semantics, see the C++ FEI.h header, or
-   doxygen output created there-from. With the exception of create/destroy
-   functions, all FEI functions in this header mirror those in the C++ header
-   but have 'FEI_' pre-pended to the name, and have 'CFEI* cfei' as the first
-   argument, and arguments which are references in C++ (e.g., an output int)
-   are pointers in this C interface.
+   doxygen output created there-from.
+   With the exception of added create/destroy functions, all FEI functions
+   in this header mirror those in the C++ header except as follows:
+   - 'FEI_' is pre-pended to function names
+   - 'CFEI* cfei' is the first argument for every function
+   -  arguments which are references in C++ (e.g., an output int) are
+      pointers in this C interface.
 
    NOTE: ALL functions return an error code which is 0 if successful,
          non-zero if un-successful.
@@ -30,29 +31,7 @@
    possible further information (solver-specific/solver-dependent).
 ------------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------
-   First, we define a "Linear System Core" struct. This is the object that
-   handles all solver-library-specific functionality like sumIntoMatrix,
-   launchSolver, etc., etc. The pointer 'lsc_' needs to hold an instance
-   of an object which implements the C++ interface defined in
-   LinearSystemCore.h. Naturally, an implementation-specific 
-   function will be required to create one of these.
-
-   e.g., Aztec_LinSysCore_create(LinSysCore** lsc, MPI_Comm comm);
-
-   This function would be found in ../support-Trilinos/cfei_aztec.h, in the case
-   of an Aztec implementation.
-------------------------------------------------------------------------------*/
-
-#ifndef CFEI_LinSysCore_DEFINED
-#define CFEI_LinSysCore_DEFINED
-
-struct LinSysCore_struct {
-   void* lsc_;
-};
-typedef struct LinSysCore_struct LinSysCore;
-
-#endif /* CFEI_LinSysCore_DEFINED */
+#include "fei_LinSysCore_struct.h"
 
 
 /*------------------------------------------------------------------------------
@@ -73,9 +52,8 @@ typedef struct CFEI_struct CFEI;
 
 /* include fei_defs.h for the #defines of parameters such as FEI_LOCAL_TIMES,
   FEI_NODE_MAJOR, etc. */
-#include <fei_defs.h>
-#include <base/snl_fei_version.h>
-#include <base/fei_mpi.h>
+#include "fei_defs.h"
+#include "fei_mpi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -198,9 +176,8 @@ int FEI_loadNodeBCs(CFEI* cfei,
                     int numNodes,
                     GlobalID *BCNodes,
                     int fieldID,
-                    double **alpha,
-                    double **beta,
-                    double **gamma);
+                    int* offsetsIntoField,
+                    double* prescribed_values);
 
 int FEI_loadElemBCs( CFEI* cfei,
                      int numElems,
@@ -454,35 +431,6 @@ int FEI_getNumBlockElements(CFEI* cfei,
 int FEI_getNumBlockElemDOF(CFEI* cfei,
                            GlobalID blockID,
                            int* DOFPerElem);
-
-int FEI_initSubstructure( CFEI* cfei, int substructureID,
-                                 int numIDs, int* IDTypes,
-                                 GlobalID* IDs);
-
-int FEI_getSubstructureSize( CFEI* cfei, int substructureID,
-                                        int* numIDs );
-
-int FEI_getSubstructureIDList(CFEI* cfei, int substructureID,
-			      int numIDs, int* IDTypes,
-                                         GlobalID* IDs );
-
-int FEI_getSubstructureFieldSolution(CFEI* cfei, int substructureID,
-                                         int fieldID,
-                                         int numIDs, int* IDTypes, 
-                                         GlobalID *IDs, 
-                                         double *results);
-
-int FEI_putSubstructureFieldSolution(CFEI* cfei, int substructureID, 
-                                         int fieldID, 
-                                         int numIDs, int* IDTypes, 
-                                         GlobalID *IDs, 
-                                         double *estimates);
-
-int FEI_putSubstructureFieldData(CFEI* cfei, int substructureID, 
-                                        int fieldID, 
-                                        int numIDs, int* IDTypes,
-                                        GlobalID *IDs, 
-                                        double *data);
 
 #ifdef __cplusplus
 }

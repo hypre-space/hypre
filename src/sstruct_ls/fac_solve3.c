@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -56,9 +56,9 @@ hypre_FACSolve3( void                 *fac_vdata,
    HYPRE_Int                num_post_smooth    =(fac_data-> num_post_smooth);
    HYPRE_Int                csolver_type       =(fac_data-> csolver_type);
    HYPRE_Int                logging            =(fac_data-> logging);
-   double                  *norms              =(fac_data-> norms);
-   double                  *rel_norms          =(fac_data-> rel_norms);
-   double                   tol                =(fac_data-> tol);
+   HYPRE_Real              *norms              =(fac_data-> norms);
+   HYPRE_Real              *rel_norms          =(fac_data-> rel_norms);
+   HYPRE_Real               tol                =(fac_data-> tol);
 
    HYPRE_Int                part_crse= 0;
    HYPRE_Int                part_fine= 1;
@@ -70,8 +70,8 @@ hypre_FACSolve3( void                 *fac_vdata,
    hypre_ParVector         *parx;
    hypre_ParVector         *pary;
 
-   double                   b_dot_b = 0, r_dot_r, eps = 0;
-   double                   e_dot_e = 0, e_dot_e_l, x_dot_x = 1;
+   HYPRE_Real               b_dot_b = 0, r_dot_r, eps = 0;
+   HYPRE_Real               e_dot_e = 0, e_dot_e_l, x_dot_x = 1;
                     
    HYPRE_Int                level, i;
    HYPRE_Int                ierr = 0;

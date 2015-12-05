@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -90,13 +90,13 @@ hypre_F90_IFACE(hypre_structbicgstabsolve, HYPRE_STRUCTBICGSTABSOLVE)
 void
 hypre_F90_IFACE(hypre_structbicgstabsettol, HYPRE_STRUCTBICGSTABSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructBiCGSTABSetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (tol) ) );
+           hypre_F90_PassReal (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -243,11 +243,11 @@ hypre_F90_IFACE(hypre_structbicgstabgetresidual, HYPRE_STRUCTBICGSTABGETRESIDUAL
 void
 hypre_F90_IFACE(hypre_structbicgstabgetfinalrel, HYPRE_STRUCTBICGSTABGETFINALREL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (norm) ) );
+           hypre_F90_PassRealRef (norm) ) );
 }

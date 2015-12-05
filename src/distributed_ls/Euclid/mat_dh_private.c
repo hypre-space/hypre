@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -40,18 +40,18 @@ void mat_partition_private(Mat_dh A, HYPRE_Int blocks, HYPRE_Int *o2n_row, HYPRE
 
 
 static void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, 
-                                           HYPRE_Int *I, HYPRE_Int *J, double *A, 
-                                           HYPRE_Int *rp, HYPRE_Int *cval, double *aval);
+                                           HYPRE_Int *I, HYPRE_Int *J, HYPRE_Real *A, 
+                                           HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval);
 
 #if 0
 #undef __FUNC__
 #define __FUNC__ "mat_dh_print_graph_private"
 void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
-                    double *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
+                    HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
 {
   START_FUNC_DH
   HYPRE_Int i, j, row, col;
-  double val;
+  HYPRE_Real val;
   bool private_n2o = false;
   bool private_hash = false;
 
@@ -113,7 +113,7 @@ void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, H
 #undef __FUNC__
 #define __FUNC__ "mat_dh_print_graph_private"
 void mat_dh_print_graph_private(HYPRE_Int m, HYPRE_Int beg_row, HYPRE_Int *rp, HYPRE_Int *cval, 
-                    double *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
+                    HYPRE_Real *aval, HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, FILE* fp)
 {
   START_FUNC_DH
   HYPRE_Int i, j, row, col;
@@ -225,7 +225,7 @@ void invert_perm(HYPRE_Int m, HYPRE_Int *pIN, HYPRE_Int *pOUT)
 /* only implemented for a single cpu! */
 #undef __FUNC__
 #define __FUNC__ "mat_dh_print_csr_private"
-void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, FILE* fp)
+void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, FILE* fp)
 {
   START_FUNC_DH
   HYPRE_Int i, nz = rp[m];
@@ -253,12 +253,12 @@ void mat_dh_print_csr_private(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval, doubl
 #undef __FUNC__
 #define __FUNC__ "mat_dh_read_csr_private"
 void mat_dh_read_csr_private(HYPRE_Int *mOUT, HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, 
-                                            double **avalOUT, FILE* fp)
+                                            HYPRE_Real **avalOUT, FILE* fp)
 {
   START_FUNC_DH
   HYPRE_Int i, m, nz, items;
   HYPRE_Int *rp, *cval;
-  double *aval;
+  HYPRE_Real *aval;
 
   /* read header line */
   items = hypre_fscanf(fp,"%d %d",&m, &nz);
@@ -271,7 +271,7 @@ void mat_dh_read_csr_private(HYPRE_Int *mOUT, HYPRE_Int **rpOUT, HYPRE_Int **cva
   *mOUT = m;
   rp = *rpOUT = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   cval = *cvalOUT = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = *avalOUT = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  aval = *avalOUT = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* read rp[] block */
   for (i=0; i<=m; ++i) {
@@ -308,13 +308,13 @@ void mat_dh_read_csr_private(HYPRE_Int *mOUT, HYPRE_Int **rpOUT, HYPRE_Int **cva
 #undef __FUNC__
 #define __FUNC__ "mat_dh_read_triples_private"
 void mat_dh_read_triples_private(HYPRE_Int ignore, HYPRE_Int *mOUT, HYPRE_Int **rpOUT, 
-                                   HYPRE_Int **cvalOUT, double **avalOUT, FILE* fp)
+                                   HYPRE_Int **cvalOUT, HYPRE_Real **avalOUT, FILE* fp)
 {
   START_FUNC_DH
   HYPRE_Int m, n, nz, items, i, j;
   HYPRE_Int idx = 0;
   HYPRE_Int *cval, *rp, *I, *J;
-  double *aval, *A, v;
+  HYPRE_Real *aval, *A, v;
   char junk[MAX_JUNK];
   fpos_t fpos;
 
@@ -375,11 +375,11 @@ if (feof(fp)) hypre_printf("trouble!");
   /* allocate storage */
   rp = *rpOUT = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   cval = *cvalOUT = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = *avalOUT = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  aval = *avalOUT = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   I = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   J = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  A = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  A = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* read <row, col, value> triples into arrays */
   while (!feof(fp)) {
@@ -423,8 +423,8 @@ if (feof(fp)) hypre_printf("trouble!");
 
 #undef __FUNC__
 #define __FUNC__ "convert_triples_to_scr_private"
-void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, HYPRE_Int *I, HYPRE_Int *J, double *A, 
-                                      HYPRE_Int *rp, HYPRE_Int *cval, double *aval)
+void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, HYPRE_Int *I, HYPRE_Int *J, HYPRE_Real *A, 
+                                      HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval)
 {
   START_FUNC_DH
   HYPRE_Int i;
@@ -450,7 +450,7 @@ void convert_triples_to_scr_private(HYPRE_Int m, HYPRE_Int nz, HYPRE_Int *I, HYP
   for (i=0; i<nz; ++i) {
     HYPRE_Int row = I[i];
     HYPRE_Int col = J[i];
-    double val = A[i];
+    HYPRE_Real val = A[i];
     HYPRE_Int idx = rowCounts[row];
     rowCounts[row] += 1;
 
@@ -558,7 +558,7 @@ void fix_diags_private(Mat_dh A)
 {
   START_FUNC_DH
   HYPRE_Int i, j, m = A->m, *rp = A->rp, *cval = A->cval;
-  double *aval = A->aval;
+  HYPRE_Real *aval = A->aval;
   bool insertDiags = false;
 
   /* verify that all diagonals are present */
@@ -585,7 +585,7 @@ void fix_diags_private(Mat_dh A)
 
   /* set value of all diags to largest absolute value in each row */
   for (i=0; i<m; ++i) {
-    double sum = 0;
+    HYPRE_Real sum = 0;
     for (j=rp[i]; j<rp[i+1]; ++j) {
       sum = MAX(sum, fabs(aval[j]));
     }
@@ -607,13 +607,13 @@ void insert_missing_diags_private(Mat_dh A)
   START_FUNC_DH
   HYPRE_Int *RP = A->rp, *CVAL = A->cval, m = A->m;
   HYPRE_Int *rp, *cval;
-  double *AVAL = A->aval, *aval;
+  HYPRE_Real *AVAL = A->aval, *aval;
   HYPRE_Int i, j, nz = RP[m]+m;
   HYPRE_Int idx = 0;
 
   rp = A->rp = (HYPRE_Int *)MALLOC_DH((1+m)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   cval = A->cval = (HYPRE_Int *)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = A->aval = (double *)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  aval = A->aval = (HYPRE_Real *)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   rp[0] = 0;
 
   for (i=0; i<m; ++i) {
@@ -844,15 +844,15 @@ HYPRE_Int isTriangular(HYPRE_Int m, HYPRE_Int *rp, HYPRE_Int *cval)
 
 static void mat_dh_transpose_reuse_private_private(
                               bool allocateMem, HYPRE_Int m, 
-                              HYPRE_Int *rpIN, HYPRE_Int *cvalIN, double *avalIN,
-                              HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, double **avalOUT);
+                              HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
+                              HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, HYPRE_Real **avalOUT);
 
 
 #undef __FUNC__
 #define __FUNC__ "mat_dh_transpose_reuse_private"
 void mat_dh_transpose_reuse_private(HYPRE_Int m, 
-                              HYPRE_Int *rpIN, HYPRE_Int *cvalIN, double *avalIN,
-                              HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, double *avalOUT)
+                              HYPRE_Int *rpIN, HYPRE_Int *cvalIN, HYPRE_Real *avalIN,
+                              HYPRE_Int *rpOUT, HYPRE_Int *cvalOUT, HYPRE_Real *avalOUT)
 {
   START_FUNC_DH
   mat_dh_transpose_reuse_private_private(false, m, rpIN, cvalIN, avalIN,
@@ -865,7 +865,7 @@ void mat_dh_transpose_reuse_private(HYPRE_Int m,
 #define __FUNC__ "mat_dh_transpose_private"
 void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *RP, HYPRE_Int **rpOUT,
                               HYPRE_Int *CVAL, HYPRE_Int **cvalOUT,
-                              double *AVAL, double **avalOUT)
+                              HYPRE_Real *AVAL, HYPRE_Real **avalOUT)
 {
   START_FUNC_DH
   mat_dh_transpose_reuse_private_private(true, m, RP, CVAL, AVAL, 
@@ -876,19 +876,19 @@ void mat_dh_transpose_private(HYPRE_Int m, HYPRE_Int *RP, HYPRE_Int **rpOUT,
 #undef __FUNC__
 #define __FUNC__ "mat_dh_transpose_private_private"
 void mat_dh_transpose_reuse_private_private(bool allocateMem, HYPRE_Int m, 
-                              HYPRE_Int *RP, HYPRE_Int *CVAL, double *AVAL,
-                              HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, double **avalOUT)
+                              HYPRE_Int *RP, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
+                              HYPRE_Int **rpOUT, HYPRE_Int **cvalOUT, HYPRE_Real **avalOUT)
 {
   START_FUNC_DH
   HYPRE_Int *rp, *cval, *tmp;
   HYPRE_Int i, j, nz = RP[m];
-  double *aval;
+  HYPRE_Real *aval;
 
   if (allocateMem) {
     rp = *rpOUT = (HYPRE_Int *)MALLOC_DH((1+m)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     cval = *cvalOUT = (HYPRE_Int *)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     if (avalOUT != NULL) {
-      aval = *avalOUT = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+      aval = *avalOUT = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
     }
   } else {
     rp = *rpOUT;
@@ -1068,7 +1068,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
   /* root sends each processor its portion of the matrix */
   if (myid_dh == 0) {
     HYPRE_Int *cval = C->cval, *rp = C->rp;
-    double *aval = C->aval;
+    HYPRE_Real *aval = C->aval;
     send_req = (hypre_MPI_Request*)MALLOC_DH(2*m*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
     send_status = (hypre_MPI_Status*)MALLOC_DH(2*m*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) {
@@ -1089,7 +1089,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
   /* all processors receive their local rows */
   { HYPRE_Int *cval = B->cval;
     HYPRE_Int *rp = B->rp;
-    double *aval = B->aval;
+    HYPRE_Real *aval = B->aval;
     m = B->m;
 
     rcv_req = (hypre_MPI_Request*)MALLOC_DH(2*m*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
@@ -1181,7 +1181,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
   /* root sends each processor its portion of the matrix */
   if (myid_dh == 0) {
     HYPRE_Int *cval = A->cval, *rp = A->rp;
-    double *aval = A->aval;
+    HYPRE_Real *aval = A->aval;
     send_req = (hypre_MPI_Request*)MALLOC_DH(2*m*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
     send_status = (hypre_MPI_Status*)MALLOC_DH(2*m*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) {
@@ -1202,7 +1202,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
   /* all processors receive their local rows */
   { HYPRE_Int *cval = B->cval;
     HYPRE_Int *rp = B->rp;
-    double *aval = B->aval;
+    HYPRE_Real *aval = B->aval;
     m = B->m;
 
     rcv_req = (hypre_MPI_Request*)MALLOC_DH(2*m*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
@@ -1285,7 +1285,7 @@ void mat_par_read_allocate_private(Mat_dh *Aout, HYPRE_Int n, HYPRE_Int *rowLeng
 
   /* allocate storage for column indices and values arrays */
   A->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  A->aval = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  A->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   END_FUNC_DH
 }
 
@@ -1328,11 +1328,11 @@ void mat_partition_private(Mat_dh A, HYPRE_Int blocks, HYPRE_Int *o2n_row, HYPRE
 /* may produce incorrect result if input is not triangular! */
 #undef __FUNC__
 #define __FUNC__ "make_full_private"
-void make_full_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, double **avalIN)
+void make_full_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, HYPRE_Real **avalIN)
 {
   START_FUNC_DH
   HYPRE_Int i, j, *rpNew, *cvalNew, *rp = *rpIN, *cval = *cvalIN;
-  double *avalNew, *aval = *avalIN;
+  HYPRE_Real *avalNew, *aval = *avalIN;
   HYPRE_Int nz, *rowCounts = NULL;
 
   /* count the number of nonzeros in each row */
@@ -1356,11 +1356,11 @@ void make_full_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, double
   nz = rpNew[m];
 
   cvalNew = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  avalNew = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  avalNew = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) {
     for (j=rp[i]; j<rp[i+1]; ++j) {
       HYPRE_Int col = cval[j];
-      double val  = aval[j];
+      HYPRE_Real val  = aval[j];
 
       cvalNew[rowCounts[i]] = col;
       avalNew[rowCounts[i]] = val;
@@ -1385,15 +1385,15 @@ void make_full_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, double
 
 #undef __FUNC__
 #define __FUNC__ "make_symmetric_private"
-void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, double **avalIN)
+void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, HYPRE_Real **avalIN)
 {
   START_FUNC_DH
   HYPRE_Int i, j, *rpNew, *cvalNew, *rp = *rpIN, *cval = *cvalIN;
-  double *avalNew, *aval = *avalIN;
+  HYPRE_Real *avalNew, *aval = *avalIN;
   HYPRE_Int nz, *rowCounts = NULL;
   HYPRE_Int *rpTrans, *cvalTrans;
   HYPRE_Int *work;
-  double *avalTrans;
+  HYPRE_Real *avalTrans;
   HYPRE_Int nzCount = 0, transCount = 0;
 
   mat_dh_transpose_private(m, rp, &rpTrans,
@@ -1443,7 +1443,7 @@ void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, d
     hypre_printf("original nz= %i\n", rp[m]);
     hypre_printf("zeros added= %i\n", transCount);
     hypre_printf("ratio of added zeros to nonzeros = %0.2f (assumes all original entries were nonzero!)\n", 
-                 (double)transCount/(double)(nzCount) );
+                 (HYPRE_Real)transCount/(HYPRE_Real)(nzCount) );
   }
 
   /* prefix sum to form row pointers for full representation */
@@ -1455,13 +1455,13 @@ void make_symmetric_private(HYPRE_Int m, HYPRE_Int **rpIN, HYPRE_Int **cvalIN, d
   /* form full representation */
   nz = rpNew[m];
   cvalNew = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  avalNew = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  avalNew = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) work[i] = -1;
 
   for (i=0; i<m; ++i) {
     for (j=rp[i]; j<rp[i+1]; ++j) {
       HYPRE_Int col = cval[j];
-      double val  = aval[j];
+      HYPRE_Real val  = aval[j];
       work[col] = i;
       cvalNew[rowCounts[i]] = col;
       avalNew[rowCounts[i]] = val;
@@ -1503,8 +1503,8 @@ void profileMat(Mat_dh A)
   HYPRE_Int type;
   HYPRE_Int m;
   HYPRE_Int i, j;
-  HYPRE_Int *work1;
-  double *work2;
+  HYPRE_Int *work1=NULL;
+  HYPRE_Real *work2;
   bool isStructurallySymmetric = true;
   bool isNumericallySymmetric = true;
   bool is_Triangular = false;
@@ -1536,7 +1536,7 @@ void profileMat(Mat_dh A)
 
         /* row has an explicit diagonal element */
         if (col == i) {          
-          double val = A->aval[j];
+          HYPRE_Real val = A->aval[j];
           flag = false;
           if (val == 0.0) ++z_diag;
           break;
@@ -1583,20 +1583,20 @@ void profileMat(Mat_dh A)
   /* check for structural and numerical symmetry */
 
   work1 = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  work2 = (double*)MALLOC_DH(m*sizeof(double)); CHECK_V_ERROR;
+  work2 = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) work1[i] = -1;
   for (i=0; i<m; ++i) work2[i] = 0.0;
 
   for (i=0; i<m; ++i) {
     for (j=A->rp[i]; j<A->rp[i+1]; ++j) {
       HYPRE_Int col = A->cval[j];
-      double val = A->aval[j];
+      HYPRE_Real val = A->aval[j];
       work1[col] = i;
       work2[col] = val;
     }
     for (j=B->rp[i]; j<B->rp[i+1]; ++j) {
       HYPRE_Int col = B->cval[j];
-      double val = B->aval[j];
+      HYPRE_Real val = B->aval[j];
 
       if (work1[col] != i) {
         isStructurallySymmetric = false;

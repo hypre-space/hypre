@@ -23,7 +23,7 @@ static integer c__11 = 11;
     doublereal d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
 
     /* Local variables */
     static logical ieee;

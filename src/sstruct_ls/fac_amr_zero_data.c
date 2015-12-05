@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -53,9 +53,12 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
 
    HYPRE_Int              part, ci, rem, i, j, intersect_size;
 
-   double                *values1;
+   HYPRE_Real            *values1;
  
    HYPRE_Int              ierr = 0;
+
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
 
    levels        = hypre_CTAlloc(HYPRE_Int, npart);
    refine_factors= hypre_CTAlloc(hypre_Index, npart);
@@ -134,7 +137,7 @@ hypre_ZeroAMRVectorData(hypre_SStructVector  *b,
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                   values1= hypre_CTAlloc(double, intersect_size);
+                   values1= hypre_CTAlloc(HYPRE_Real, intersect_size);
 
                    HYPRE_SStructVectorSetBoxValues(b, levels[level-1], 
                                                    hypre_BoxIMin(&intersect_box),
@@ -195,9 +198,12 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
 
    HYPRE_Int              ci, i, j, rem, intersect_size, rank;
 
-   double                *values1, *values2;
+   HYPRE_Real            *values1, *values2;
  
    HYPRE_Int              ierr = 0;
+
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
 
    p_cgrid= hypre_SStructGridPGrid(grid, part_crse);
    nvars  = hypre_SStructPGridNVars(p_cgrid);
@@ -261,8 +267,8 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
                 /*------------------------------------------------------------
                  * Coarse underlying box found. Now zero off.
                  *------------------------------------------------------------*/
-                 values1= hypre_CTAlloc(double, intersect_size);
-                 values2= hypre_TAlloc(double, intersect_size);
+                 values1= hypre_CTAlloc(HYPRE_Real, intersect_size);
+                 values2= hypre_TAlloc(HYPRE_Real, intersect_size);
                  for (j= 0; j< intersect_size; j++)
                  {
                      values2[j]= 1.0;

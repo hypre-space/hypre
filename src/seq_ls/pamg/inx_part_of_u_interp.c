@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "headers.h"
@@ -77,10 +77,10 @@ hypre_InexactPartitionOfUnityInterpolation
 
  HYPRE_Int    *i_dof_dof,
  HYPRE_Int    *j_dof_dof,
- double *a_dof_dof,
+ HYPRE_Real *a_dof_dof,
 
 
- double *unit_vector,
+ HYPRE_Real *unit_vector,
 
 
  HYPRE_Int *i_domain_dof,
@@ -97,24 +97,24 @@ hypre_InexactPartitionOfUnityInterpolation
   HYPRE_Int ind = 1;
   HYPRE_Int nu, nu_max = 1;
 
-  double  eps = 1.e-24;
+  HYPRE_Real  eps = 1.e-24;
   HYPRE_Int max_iter = 1000;
   HYPRE_Int iter;
-  double delta0, delta_old, delta, alpha, tau, beta;
-  double aux, diag;
+  HYPRE_Real delta0, delta_old, delta, alpha, tau, beta;
+  HYPRE_Real aux, diag;
 
-  double *P_t_coeff;
+  HYPRE_Real *P_t_coeff;
   hypre_CSRMatrix *P_t, *P;
 
-  double *x,*r,*d,*g,*h;
-  double *row_sum;
+  HYPRE_Real *x,*r,*d,*g,*h;
+  HYPRE_Real *row_sum;
 
 
   HYPRE_Int *i_global_to_local;
   HYPRE_Int local_dof_counter;
 
 
-  double *diag_dof_dof;
+  HYPRE_Real *diag_dof_dof;
   /* ------------------------------------------------------------------
 
      domain_dof relation should satisfy the following property:
@@ -141,13 +141,13 @@ hypre_InexactPartitionOfUnityInterpolation
   hypre_printf("\n---------------------- num_domains: %d, nnz: %d;\n", 
 	 num_domains, i_domain_dof[num_domains]);
 
-  x = hypre_CTAlloc(double, num_dofs);
-  d = hypre_CTAlloc(double, num_dofs);
-  g = hypre_CTAlloc(double, num_dofs);
-  r = hypre_CTAlloc(double, num_dofs);
+  x = hypre_CTAlloc(HYPRE_Real, num_dofs);
+  d = hypre_CTAlloc(HYPRE_Real, num_dofs);
+  g = hypre_CTAlloc(HYPRE_Real, num_dofs);
+  r = hypre_CTAlloc(HYPRE_Real, num_dofs);
 
-  h = hypre_CTAlloc(double, local_dof_counter);
-  diag_dof_dof = hypre_CTAlloc(double, i_dof_dof[num_dofs]);
+  h = hypre_CTAlloc(HYPRE_Real, local_dof_counter);
+  diag_dof_dof = hypre_CTAlloc(HYPRE_Real, i_dof_dof[num_dofs]);
   for (i=0; i<num_dofs; i++)
     for (j=i_dof_dof[i]; j<i_dof_dof[i+1]; j++)
       if (i!=j_dof_dof[j])
@@ -365,7 +365,7 @@ end_cg:
 
   /* ith column of P is T_i x; ----------------------------------- */
 
-  P_t_coeff = hypre_CTAlloc(double, i_domain_dof[num_domains]);
+  P_t_coeff = hypre_CTAlloc(HYPRE_Real, i_domain_dof[num_domains]);
 
   for (i=0; i < num_domains; i++)
     {
@@ -449,7 +449,7 @@ end_cg:
   hypre_CSRMatrixI(P_t) = i_domain_dof;
   hypre_CSRMatrixJ(P_t) = j_domain_dof;
 
-  row_sum = hypre_CTAlloc(double, num_dofs);
+  row_sum = hypre_CTAlloc(HYPRE_Real, num_dofs);
   for (i=0; i < num_dofs; i++)
     row_sum[i] = 0.e0;
   for (i=0; i < num_domains; i++)
@@ -482,9 +482,9 @@ end_cg:
 }
 /* computes: x = T *v; -------------------------------------------- */
 HYPRE_Int
-compute_sym_GS_T_action(double *x,
-			double *v,
-			double *w,
+compute_sym_GS_T_action(HYPRE_Real *x,
+			HYPRE_Real *v,
+			HYPRE_Real *w,
 
 			HYPRE_Int *i_domain_dof,
 			HYPRE_Int *j_domain_dof,
@@ -493,7 +493,7 @@ compute_sym_GS_T_action(double *x,
 
 			HYPRE_Int    *i_dof_dof,
 			HYPRE_Int    *j_dof_dof,
-			double *a_dof_dof,
+			HYPRE_Real *a_dof_dof,
 
 			HYPRE_Int *i_global_to_local,
 
@@ -504,7 +504,7 @@ compute_sym_GS_T_action(double *x,
   HYPRE_Int i,j,k;
   HYPRE_Int nu;
 
-  double aux, diag;
+  HYPRE_Real aux, diag;
 
 
   /* one sym_GS based loop: ------------------------------------------- */
@@ -585,8 +585,8 @@ compute_sym_GS_T_action(double *x,
 }
 /* computes: x = \sum A_i *v; -------------------------------------------- */
 HYPRE_Int
-compute_sum_A_i_action(double *w,
-		       double *v,
+compute_sum_A_i_action(HYPRE_Real *w,
+		       HYPRE_Real *v,
 		       
 		       HYPRE_Int *i_domain_dof,
 		       HYPRE_Int *j_domain_dof,
@@ -594,7 +594,7 @@ compute_sum_A_i_action(double *w,
 
 		       HYPRE_Int    *i_dof_dof,
 		       HYPRE_Int    *j_dof_dof,
-		       double *a_dof_dof,
+		       HYPRE_Real *a_dof_dof,
 
 		       HYPRE_Int *i_global_to_local,
 

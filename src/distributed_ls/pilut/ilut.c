@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * Started 11/29/95
  * George
  *
- * $Id: ilut.c,v 2.6 2010/12/20 19:27:34 falgout Exp $
+ * $Id$
  */
 
 #include <math.h>
@@ -31,12 +31,12 @@
 * This function is the entry point of the hypre_ILUT factorization
 **************************************************************************/
 HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu, 
-          HYPRE_Int maxnz, double tol, hypre_PilutSolverGlobals *globals )
+          HYPRE_Int maxnz, HYPRE_Real tol, hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int i, ierr;
   ReduceMatType rmat;
   HYPRE_Int dummy_row_ptr[2], size;
-  double *values;
+  HYPRE_Real *values;
 
 #ifdef HYPRE_DEBUG
   hypre_printf("hypre_ILUT, maxnz = %d\n ", maxnz);
@@ -156,10 +156,10 @@ HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, Factor
 * This function computes the 2 norms of the rows and adds them into the 
 * nrm2s array ... Changed to "Add" by AJC, Dec 22 1997.
 **************************************************************************/
-void hypre_ComputeAdd2Nrms(HYPRE_Int num_rows, HYPRE_Int *rowptr, double *values, double *nrm2s)
+void hypre_ComputeAdd2Nrms(HYPRE_Int num_rows, HYPRE_Int *rowptr, HYPRE_Real *values, HYPRE_Real *nrm2s)
 {
   HYPRE_Int i, j, n;
-  double sum;
+  HYPRE_Real sum;
 
   for (i=0; i<num_rows; i++) {
     n = rowptr[i+1]-rowptr[i];

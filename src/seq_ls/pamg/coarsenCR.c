@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -108,8 +108,8 @@
  **************************************************************/
 HYPRE_Int
 hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
-                  double              strength_threshold,
-                  double	      relax_weight,
+                  HYPRE_Real          strength_threshold,
+                  HYPRE_Real	      relax_weight,
                   HYPRE_Int		      relax_type,
                   HYPRE_Int		      num_relax_steps,
                   HYPRE_Int               **CF_marker_ptr,
@@ -120,7 +120,7 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
    HYPRE_Int             *CF_marker;
    HYPRE_Int              coarse_size;
 
-   double          *measure_array;
+   HYPRE_Real      *measure_array;
    hypre_Vector    *measure_vector;
    hypre_Vector    *zero_vector;
    hypre_Vector    *tmp_vector;

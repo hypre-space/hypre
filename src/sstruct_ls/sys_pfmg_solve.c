@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -30,7 +30,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    hypre_SStructPVector *b;
    hypre_SStructPVector *x;
 
-   double                tol             = (sys_pfmg_data -> tol);
+   HYPRE_Real            tol             = (sys_pfmg_data -> tol);
    HYPRE_Int             max_iter        = (sys_pfmg_data -> max_iter);
    HYPRE_Int             rel_change      = (sys_pfmg_data -> rel_change);
    HYPRE_Int             zero_guess      = (sys_pfmg_data -> zero_guess);
@@ -49,12 +49,12 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    void                **restrict_data_l = (sys_pfmg_data -> restrict_data_l);
    void                **interp_data_l   = (sys_pfmg_data -> interp_data_l);
    HYPRE_Int             logging         = (sys_pfmg_data -> logging);
-   double               *norms           = (sys_pfmg_data -> norms);
-   double               *rel_norms       = (sys_pfmg_data -> rel_norms);
+   HYPRE_Real           *norms           = (sys_pfmg_data -> norms);
+   HYPRE_Real           *rel_norms       = (sys_pfmg_data -> rel_norms);
    HYPRE_Int            *active_l        = (sys_pfmg_data -> active_l);
 
-   double                b_dot_b, r_dot_r, eps = 0;
-   double                e_dot_e = 0, x_dot_x = 1;
+   HYPRE_Real            b_dot_b, r_dot_r, eps = 0;
+   HYPRE_Real            e_dot_e = 0, x_dot_x = 1;
                     
    HYPRE_Int             i, l;
                     

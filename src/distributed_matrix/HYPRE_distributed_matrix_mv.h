@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -45,7 +45,7 @@ HYPRE_Int HYPRE_DistributedMatrixGetDims (HYPRE_DistributedMatrix matrix , HYPRE
 HYPRE_Int HYPRE_DistributedMatrixSetDims (HYPRE_DistributedMatrix matrix , HYPRE_Int M , HYPRE_Int N );
 HYPRE_Int HYPRE_DistributedMatrixPrint (HYPRE_DistributedMatrix matrix );
 HYPRE_Int HYPRE_DistributedMatrixGetLocalRange (HYPRE_DistributedMatrix matrix , HYPRE_Int *row_start , HYPRE_Int *row_end, HYPRE_Int *col_start, HYPRE_Int *col_end );
-HYPRE_Int HYPRE_DistributedMatrixGetRow (HYPRE_DistributedMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , double **values );
-HYPRE_Int HYPRE_DistributedMatrixRestoreRow (HYPRE_DistributedMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , double **values );
+HYPRE_Int HYPRE_DistributedMatrixGetRow (HYPRE_DistributedMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , HYPRE_Real **values );
+HYPRE_Int HYPRE_DistributedMatrixRestoreRow (HYPRE_DistributedMatrix matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind , HYPRE_Real **values );
 
 #endif

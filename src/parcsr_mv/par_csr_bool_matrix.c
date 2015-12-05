@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -770,7 +770,7 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
    HYPRE_Int          *local_num_rows;
 
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int          *local_num_nonzeros;
+   HYPRE_Int          *local_num_nonzeros=NULL;
    HYPRE_Int          num_nonzeros;
   
    HYPRE_Int          *a_i;

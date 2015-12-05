@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*****************************************************************************
@@ -21,7 +21,7 @@
 #define hypre_BCSR_MATRIX_DENSE_BLOCK_HEADER
 
 typedef struct {
-  double* data;
+  HYPRE_Real* data;
   HYPRE_Int num_rows;
   HYPRE_Int num_cols;
 } hypre_BCSRMatrixDenseBlock;
@@ -43,11 +43,11 @@ hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A);
 
 HYPRE_Int
 hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
-				   double* data);
+				   HYPRE_Real* data);
 
 HYPRE_Int
 hypre_BCSRMatrixDenseBlockGetData(hypre_BCSRMatrixDenseBlock* A,
-				   double* data);
+				   HYPRE_Real* data);
 
 hypre_BCSRMatrixDenseBlock*
 hypre_BCSRMatrixDenseBlockCopy(hypre_BCSRMatrixDenseBlock* A);
@@ -79,14 +79,14 @@ HYPRE_Int
 hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A);
 
 HYPRE_Int
-hypre_BCSRMatrixBlockMatvec(double alpha, hypre_BCSRMatrixDenseBlock* A,
-			    double* x_data, double beta, double* y_data);
+hypre_BCSRMatrixBlockMatvec(HYPRE_Real alpha, hypre_BCSRMatrixDenseBlock* A,
+			    HYPRE_Real* x_data, HYPRE_Real beta, HYPRE_Real* y_data);
 
 HYPRE_Int
-hypre_BCSRMatrixBlockMatvecT(double alpha, hypre_BCSRMatrixDenseBlock* A,
-			     double* x_data, double beta, double* y_data);
+hypre_BCSRMatrixBlockMatvecT(HYPRE_Real alpha, hypre_BCSRMatrixDenseBlock* A,
+			     HYPRE_Real* x_data, HYPRE_Real beta, HYPRE_Real* y_data);
 
-double
+HYPRE_Real
 hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
 			       const char* norm);
 

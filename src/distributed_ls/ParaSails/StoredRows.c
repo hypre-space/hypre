@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -55,7 +55,7 @@ StoredRows *StoredRowsCreate(Matrix *mat, HYPRE_Int size)
 
     p->len = (HYPRE_Int *)     calloc(size,  sizeof(HYPRE_Int));
     p->ind = (HYPRE_Int **)    malloc(size * sizeof(HYPRE_Int *));
-    p->val = (double **) malloc(size * sizeof(double *));
+    p->val = (HYPRE_Real **) malloc(size * sizeof(HYPRE_Real *));
 
     p->count = 0;
 
@@ -90,9 +90,9 @@ HYPRE_Int *StoredRowsAllocInd(StoredRows *p, HYPRE_Int len)
  * stored rows object "p".  The values may span several rows.
  *--------------------------------------------------------------------------*/
 
-double *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len)
+HYPRE_Real *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len)
 {
-    return (double *) MemAlloc(p->mem, len*sizeof(double));
+    return (HYPRE_Real *) MemAlloc(p->mem, len*sizeof(HYPRE_Real));
 }
 
 /*--------------------------------------------------------------------------
@@ -101,7 +101,7 @@ double *StoredRowsAllocVal(StoredRows *p, HYPRE_Int len)
  * this interface; the local stored rows are put using the create function.
  *--------------------------------------------------------------------------*/
 
-void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, double *val)
+void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Real *val)
 {
     HYPRE_Int i = index - p->num_loc;
 
@@ -117,7 +117,7 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 #endif
         p->len = (HYPRE_Int *)     realloc(p->len, newsize * sizeof(HYPRE_Int));
         p->ind = (HYPRE_Int **)    realloc(p->ind, newsize * sizeof(HYPRE_Int *));
-        p->val = (double **) realloc(p->val, newsize * sizeof(double *));
+        p->val = (HYPRE_Real **) realloc(p->val, newsize * sizeof(HYPRE_Real *));
 
 	/* set lengths to zero */
         for (j=p->size; j<newsize; j++)
@@ -142,7 +142,7 @@ void StoredRowsPut(StoredRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
  *--------------------------------------------------------------------------*/
 
 void StoredRowsGet(StoredRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp, 
-  double **valp)
+  HYPRE_Real **valp)
 {
     if (index < p->num_loc)
     {

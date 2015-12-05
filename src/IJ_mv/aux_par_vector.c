@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
-
 
 /******************************************************************************
  *
@@ -58,9 +54,9 @@ hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
    if (vector)
    {
       if (hypre_AuxParVectorOffProcI(vector))
-      	    hypre_TFree(hypre_AuxParVectorOffProcI(vector));
+         hypre_TFree(hypre_AuxParVectorOffProcI(vector));
       if (hypre_AuxParVectorOffProcData(vector))
-      	    hypre_TFree(hypre_AuxParVectorOffProcData(vector));
+         hypre_TFree(hypre_AuxParVectorOffProcData(vector));
       hypre_TFree(vector);
    }
 
@@ -80,9 +76,9 @@ hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
    if (max_off_proc_elmts > 0)
    {
       hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(HYPRE_Int,
-		max_off_proc_elmts);
-      hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(double,
-		max_off_proc_elmts);
+                                                         max_off_proc_elmts);
+      hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(HYPRE_Complex,
+                                                            max_off_proc_elmts);
    }
 
    return 0;
@@ -94,7 +90,7 @@ hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
 
 HYPRE_Int 
 hypre_AuxParVectorSetMaxOffPRocElmts( hypre_AuxParVector *vector,
-					    HYPRE_Int max_off_proc_elmts )
+                                      HYPRE_Int max_off_proc_elmts )
 {
    HYPRE_Int ierr = 0;
    hypre_AuxParVectorMaxOffProcElmts(vector) = max_off_proc_elmts;

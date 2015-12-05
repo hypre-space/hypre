@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -109,7 +109,7 @@ HYPRE_ParCSRPilutSolve( HYPRE_Solver solver,
                    HYPRE_ParVector b,
                    HYPRE_ParVector x      )
 {
-   double *rhs, *soln;
+   HYPRE_Real *rhs, *soln;
 
    rhs = hypre_VectorData( hypre_ParVectorLocalVector( (hypre_ParVector *)b ) );
    soln = hypre_VectorData( hypre_ParVectorLocalVector( (hypre_ParVector *)x ) );
@@ -142,7 +142,7 @@ HYPRE_ParCSRPilutSetMaxIter( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRPilutSetDropTolerance( HYPRE_Solver solver,
-                    double       tol    )
+                    HYPRE_Real   tol    )
 {
    HYPRE_DistributedMatrixPilutSolverSetDropTolerance(
       (HYPRE_DistributedMatrixPilutSolver) solver, tol );

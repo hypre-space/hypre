@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -18,17 +18,17 @@
 /* #include "TimeLog_dh.h" */
 /* #include "SubdomainGraph_dh.h" */
 
-static void scale_rhs_private(Euclid_dh ctx, double *rhs);
-static void permute_vec_n2o_private(Euclid_dh ctx, double *xIN, double *xOUT);
-static void permute_vec_o2n_private(Euclid_dh ctx, double *xIN, double *xOUT);
+static void scale_rhs_private(Euclid_dh ctx, HYPRE_Real *rhs);
+static void permute_vec_n2o_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT);
+static void permute_vec_o2n_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT);
 
 #undef __FUNC__ 
 #define __FUNC__ "Euclid_dhApply"
-void Euclid_dhApply(Euclid_dh ctx, double *rhs, double *lhs)
+void Euclid_dhApply(Euclid_dh ctx, HYPRE_Real *rhs, HYPRE_Real *lhs)
 {
   START_FUNC_DH
-  double *rhs_, *lhs_;
-  double t1, t2;
+  HYPRE_Real *rhs_, *lhs_;
+  HYPRE_Real t1, t2;
 
   t1 = hypre_MPI_Wtime();
 
@@ -117,7 +117,7 @@ END_OF_FUNCTION: ;
 
 #undef __FUNC__ 
 #define __FUNC__ "scale_rhs_private"
-void scale_rhs_private(Euclid_dh ctx, double *rhs)
+void scale_rhs_private(Euclid_dh ctx, HYPRE_Real *rhs)
 {
   START_FUNC_DH
   HYPRE_Int i, m = ctx->m;
@@ -136,7 +136,7 @@ void scale_rhs_private(Euclid_dh ctx, double *rhs)
 
 #undef __FUNC__ 
 #define __FUNC__ "permute_vec_o2n_private"
-void permute_vec_o2n_private(Euclid_dh ctx, double *xIN, double *xOUT)
+void permute_vec_o2n_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT)
 {
   START_FUNC_DH
   HYPRE_Int i, m = ctx->m;
@@ -148,7 +148,7 @@ void permute_vec_o2n_private(Euclid_dh ctx, double *xIN, double *xOUT)
 
 #undef __FUNC__ 
 #define __FUNC__ "permute_vec_n2o_private"
-void permute_vec_n2o_private(Euclid_dh ctx, double *xIN, double *xOUT)
+void permute_vec_n2o_private(Euclid_dh ctx, HYPRE_Real *xIN, HYPRE_Real *xOUT)
 {
   START_FUNC_DH
   HYPRE_Int i, m = ctx->m;

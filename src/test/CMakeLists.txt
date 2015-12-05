@@ -51,9 +51,6 @@ endif ()
 add_executable (ij ij.c)
 target_link_libraries (ij ${HYPRE_LIBS})
  
-add_executable (ij_mv ij_mv.c)
-target_link_libraries (ij_mv ${HYPRE_LIBS})
- 
 add_executable (new_ij new_ij.c)
 target_link_libraries (new_ij ${HYPRE_LIBS})
  
@@ -65,4 +62,13 @@ target_link_libraries (struct ${HYPRE_LIBS})
  
 add_executable (ams_driver ams_driver.c)
 target_link_libraries (ams_driver ${HYPRE_LIBS})
+ 
+add_executable (maxwell_unscaled maxwell_unscaled.c)
+target_link_libraries (maxwell_unscaled ${HYPRE_LIBS})
+ 
+add_executable (sstruct_fac sstruct_fac.c)
+target_link_libraries (sstruct_fac ${HYPRE_LIBS})
+ 
+add_executable (ij_mv ij_mv.c)
+target_link_libraries (ij_mv ${HYPRE_LIBS})
  

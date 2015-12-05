@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef hypre_COMMUNICATION_HEADER
 #define hypre_COMMUNICATION_HEADER
@@ -29,6 +26,7 @@
 
 typedef struct hypre_CommInfo_struct
 {
+   HYPRE_Int              ndim;
    hypre_BoxArrayArray   *send_boxes;
    hypre_Index            send_stride;
    HYPRE_Int            **send_processes;
@@ -58,11 +56,11 @@ typedef struct hypre_CommInfo_struct
 
 typedef struct hypre_CommEntryType_struct
 {
-   HYPRE_Int  offset;           /* offset for the data */
-   HYPRE_Int  dim;              /* dimension of the communication */
-   HYPRE_Int  length_array[3];  /* 4th dimension has length 'num_values' */
-   HYPRE_Int  stride_array[4];
-   HYPRE_Int *order;            /* order of 4th dimension values */
+   HYPRE_Int  offset;                       /* offset for the data */
+   HYPRE_Int  dim;                          /* dimension of the communication */
+   HYPRE_Int  length_array[HYPRE_MAXDIM];   /* last dim has length num_values */
+   HYPRE_Int  stride_array[HYPRE_MAXDIM+1];
+   HYPRE_Int *order;                        /* order of last dim values */
 
 } hypre_CommEntryType;
 
@@ -94,6 +92,7 @@ typedef struct hypre_CommPkg_struct
 
    HYPRE_Int         first_comm; /* is this the first communication? */
                    
+   HYPRE_Int         ndim;
    HYPRE_Int         num_values;
    hypre_Index       send_stride;
    hypre_Index       recv_stride;
@@ -132,15 +131,15 @@ typedef struct hypre_CommPkg_struct
 typedef struct hypre_CommHandle_struct
 {
    hypre_CommPkg  *comm_pkg;
-   double         *send_data;
-   double         *recv_data;
+   HYPRE_Complex  *send_data;
+   HYPRE_Complex  *recv_data;
 
    HYPRE_Int       num_requests;
    hypre_MPI_Request    *requests;
    hypre_MPI_Status     *status;
 
-   double        **send_buffers;
-   double        **recv_buffers;
+   HYPRE_Complex **send_buffers;
+   HYPRE_Complex **recv_buffers;
 
    /* set = 0, add = 1 */
    HYPRE_Int       action;
@@ -151,6 +150,7 @@ typedef struct hypre_CommHandle_struct
  * Accessor macros: hypre_CommInto
  *--------------------------------------------------------------------------*/
  
+#define hypre_CommInfoNDim(info)           (info -> ndim)
 #define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
 #define hypre_CommInfoSendStride(info)     (info -> send_stride)
 #define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
@@ -204,6 +204,7 @@ typedef struct hypre_CommHandle_struct
 
 #define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
 
+#define hypre_CommPkgNDim(comm_pkg)            (comm_pkg -> ndim)
 #define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
 #define hypre_CommPkgRecvStride(comm_pkg)      (comm_pkg -> recv_stride)

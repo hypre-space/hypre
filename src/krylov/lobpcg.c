@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -29,11 +29,11 @@
 
 static HYPRE_Int
 lobpcg_chol( utilities_FortranMatrix* a, 
-        HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *lda, HYPRE_Int *info) )
+        HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info) )
 {
 
   HYPRE_Int lda, n;
-  double* aval;
+  HYPRE_Real* aval;
   char uplo;
   HYPRE_Int ierr;
 
@@ -53,16 +53,16 @@ utilities_FortranMatrix* mtxA,
 utilities_FortranMatrix* mtxB,
 utilities_FortranMatrix* eigVal,
 HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
-        n, double *a, HYPRE_Int *lda, double *b, HYPRE_Int *ldb,
-        double *w, double *work, HYPRE_Int *lwork, HYPRE_Int *info)
+        n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
+        HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info)
 ){
 
   HYPRE_Int n, lda, ldb, itype, lwork, info;
   char jobz, uplo;
-  double* work;
-  double* a;
-  double* b;
-  double* lmd;
+  HYPRE_Real* work;
+  HYPRE_Real* a;
+  HYPRE_Real* b;
+  HYPRE_Real* lmd;
 
   itype = 1;
   jobz = 'V';
@@ -77,7 +77,7 @@ HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
   ldb = utilities_FortranMatrixGlobalHeight( mtxB );
   lwork = 10*n;
 
-  work = (double*)calloc( lwork, sizeof(double) );
+  work = (HYPRE_Real*)calloc( lwork, sizeof(HYPRE_Real) );
 
   (*dsygv)( &itype, &jobz, &uplo, &n, 
 				       a, &lda, b, &ldb,
@@ -121,7 +121,7 @@ lobpcg_MultiVectorImplicitQR(
 mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 utilities_FortranMatrix* r,
 mv_MultiVectorPtr z,
-HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *lda, HYPRE_Int *info)
+HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info)
 
 ){
 
@@ -146,7 +146,7 @@ HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *lda, HYPRE_
 }
 
 static void
-lobpcg_sqrtVector( HYPRE_Int n, HYPRE_Int* mask, double* v ) {
+lobpcg_sqrtVector( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Real* v ) {
 
   HYPRE_Int i;
 
@@ -164,8 +164,8 @@ HYPRE_Int* activeMask
 ){
   HYPRE_Int i, n;
   HYPRE_Int notConverged;
-  double atol;
-  double rtol;
+  HYPRE_Real atol;
+  HYPRE_Real rtol;
 
   n = utilities_FortranMatrixHeight( resNorms );
 
@@ -212,26 +212,26 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 
 /* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
 ze> is the width of multivector "blockVectorX" */
-              double * lambda_values,
+              HYPRE_Real * lambda_values,
 
 /* eigenvalues history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matrix s
 tored
 in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see next
 argument; If you don't need eigenvalues history, provide NULL in this entry */
-              double * lambdaHistory_values,
+              HYPRE_Real * lambdaHistory_values,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
               HYPRE_Int lambdaHistory_gh,
 
 /* residual norms; argument should point to array of <blocksize> doubles */
-              double * residualNorms_values,
+              HYPRE_Real * residualNorms_values,
 
 /* residual norms history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matri
 x
 stored in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see
 next
 argument If you don't need residual norms history, provide NULL in this entry */
-              double * residualNormsHistory_values ,
+              HYPRE_Real * residualNormsHistory_values ,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
               HYPRE_Int residualNormsHistory_gh

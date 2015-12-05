@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_sstruct_ls.h"
 
@@ -28,7 +25,8 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
 {
    hypre_SStructSendInfoData *sendinfo_data;
 
-   MPI_Comm                   comm= hypre_SStructVectorComm(fgrid);
+   MPI_Comm                   comm = hypre_StructGridComm(fgrid);
+   HYPRE_Int                  ndim = hypre_StructGridNDim(fgrid);
 
    hypre_BoxArray            *grid_boxes;
    hypre_Box                 *grid_box, cbox;
@@ -48,6 +46,9 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
    HYPRE_Int                  cnt;
    HYPRE_Int                  i, j;
 
+   hypre_BoxInit(&cbox, ndim);
+   hypre_BoxInit(&boxman_entry_box, ndim);
+
    hypre_ClearIndex(index); 
    hypre_MPI_Comm_rank(comm, &myproc);
 
@@ -62,10 +63,10 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
     *   through the boxes of grid and find the processors that own a chunk
     *   of it.
     *------------------------------------------------------------------------*/
-   intersect_box = hypre_CTAlloc(hypre_Box, 1);
+   intersect_box = hypre_BoxCreate(ndim);
    grid_boxes   = hypre_StructGridBoxes(fgrid);
 
-   send_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
+   send_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
    send_processes= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
    send_remote_boxnums= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
 
@@ -122,7 +123,7 @@ hypre_SStructSendInfo( hypre_StructGrid      *fgrid,
       hypre_TFree(boxman_entries);
    }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
-   hypre_TFree(intersect_box);
+   hypre_BoxDestroy(intersect_box);
 
    (sendinfo_data -> size)               = hypre_BoxArraySize(grid_boxes);
    (sendinfo_data -> send_boxes)         = send_boxes;

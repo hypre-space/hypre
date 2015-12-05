@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.16 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -21,21 +18,20 @@
 
 #include "_hypre_parcsr_block_mv.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_ParCSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRBlockMatrix *
-hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
-				HYPRE_Int block_size,
-				HYPRE_Int global_num_rows,
-				HYPRE_Int global_num_cols,
-				HYPRE_Int *row_starts,
-				HYPRE_Int *col_starts,
-				HYPRE_Int num_cols_offd,
-				HYPRE_Int num_nonzeros_diag,
-				HYPRE_Int num_nonzeros_offd)
+hypre_ParCSRBlockMatrixCreate( MPI_Comm comm,
+                               HYPRE_Int block_size,
+                               HYPRE_Int global_num_rows,
+                               HYPRE_Int global_num_cols,
+                               HYPRE_Int *row_starts,
+                               HYPRE_Int *col_starts,
+                               HYPRE_Int num_cols_offd,
+                               HYPRE_Int num_nonzeros_diag,
+                               HYPRE_Int num_nonzeros_offd )
 {
    hypre_ParCSRBlockMatrix  *matrix;
    HYPRE_Int  num_procs, my_id;
@@ -52,7 +48,7 @@ hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
 #ifdef HYPRE_NO_GLOBAL_PARTITION  
       hypre_GenerateLocalPartitioning(global_num_rows, num_procs, my_id, &row_starts);
 #else
-        hypre_GeneratePartitioning(global_num_rows,num_procs,&row_starts);
+      hypre_GeneratePartitioning(global_num_rows,num_procs,&row_starts);
 #endif
    }
 
@@ -60,14 +56,14 @@ hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
    {
       if (global_num_rows == global_num_cols)
       {
-        col_starts = row_starts;
+         col_starts = row_starts;
       }
       else
       {
 #ifdef HYPRE_NO_GLOBAL_PARTITION   
-      hypre_GenerateLocalPartitioning(global_num_cols, num_procs, my_id, &col_starts);
+         hypre_GenerateLocalPartitioning(global_num_cols, num_procs, my_id, &col_starts);
 #else
-        hypre_GeneratePartitioning(global_num_cols,num_procs,&col_starts);
+         hypre_GeneratePartitioning(global_num_cols,num_procs,&col_starts);
 #endif
       }
    }
@@ -86,9 +82,9 @@ hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
 #endif
    hypre_ParCSRBlockMatrixComm(matrix) = comm;
    hypre_ParCSRBlockMatrixDiag(matrix) = hypre_CSRBlockMatrixCreate(block_size,
-                             local_num_rows,local_num_cols,num_nonzeros_diag);
+                                                                    local_num_rows,local_num_cols,num_nonzeros_diag);
    hypre_ParCSRBlockMatrixOffd(matrix) = hypre_CSRBlockMatrixCreate(block_size,
-                             local_num_rows, num_cols_offd, num_nonzeros_offd);
+                                                                    local_num_rows, num_cols_offd, num_nonzeros_offd);
    hypre_ParCSRBlockMatrixBlockSize(matrix) = block_size;
    hypre_ParCSRBlockMatrixGlobalNumRows(matrix) = global_num_rows;
    hypre_ParCSRBlockMatrixGlobalNumCols(matrix) = global_num_cols;
@@ -119,7 +115,7 @@ hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
    hypre_ParCSRBlockMatrixOwnsRowStarts(matrix) = 1;
    hypre_ParCSRBlockMatrixOwnsColStarts(matrix) = 1;
    if (row_starts == col_starts)
-        hypre_ParCSRBlockMatrixOwnsColStarts(matrix) = 0;
+      hypre_ParCSRBlockMatrixOwnsColStarts(matrix) = 0;
 
    return matrix;
 }
@@ -136,19 +132,19 @@ hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix )
    {
       if ( hypre_ParCSRBlockMatrixOwnsData(matrix) )
       {
-	hypre_CSRBlockMatrixDestroy(hypre_ParCSRBlockMatrixDiag(matrix));
-	hypre_CSRBlockMatrixDestroy(hypre_ParCSRBlockMatrixOffd(matrix));
-	if (hypre_ParCSRBlockMatrixColMapOffd(matrix))
-	  hypre_TFree(hypre_ParCSRBlockMatrixColMapOffd(matrix));
-	if (hypre_ParCSRBlockMatrixCommPkg(matrix))
-	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkg(matrix));
-	if (hypre_ParCSRBlockMatrixCommPkgT(matrix))
-	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkgT(matrix));
+         hypre_CSRBlockMatrixDestroy(hypre_ParCSRBlockMatrixDiag(matrix));
+         hypre_CSRBlockMatrixDestroy(hypre_ParCSRBlockMatrixOffd(matrix));
+         if (hypre_ParCSRBlockMatrixColMapOffd(matrix))
+            hypre_TFree(hypre_ParCSRBlockMatrixColMapOffd(matrix));
+         if (hypre_ParCSRBlockMatrixCommPkg(matrix))
+            hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkg(matrix));
+         if (hypre_ParCSRBlockMatrixCommPkgT(matrix))
+            hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkgT(matrix));
       }
       if ( hypre_ParCSRBlockMatrixOwnsRowStarts(matrix) )
-              hypre_TFree(hypre_ParCSRBlockMatrixRowStarts(matrix));
+         hypre_TFree(hypre_ParCSRBlockMatrixRowStarts(matrix));
       if ( hypre_ParCSRBlockMatrixOwnsColStarts(matrix) )
-              hypre_TFree(hypre_ParCSRBlockMatrixColStarts(matrix));
+         hypre_TFree(hypre_ParCSRBlockMatrixColStarts(matrix));
 
       if (hypre_ParCSRBlockMatrixAssumedPartition(matrix))
          hypre_ParCSRBlockMatrixDestroyAssumedPartition(matrix);
@@ -172,7 +168,7 @@ hypre_ParCSRBlockMatrixInitialize( hypre_ParCSRBlockMatrix *matrix )
    hypre_CSRBlockMatrixInitialize(hypre_ParCSRBlockMatrixDiag(matrix));
    hypre_CSRBlockMatrixInitialize(hypre_ParCSRBlockMatrixOffd(matrix));
    hypre_ParCSRBlockMatrixColMapOffd(matrix) = hypre_CTAlloc(HYPRE_Int,
-            hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(matrix)));
+                                                             hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(matrix)));
 
    return ierr;
 }
@@ -196,7 +192,7 @@ hypre_ParCSRBlockMatrixSetNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
 
    local_num_nonzeros = diag_i[local_num_rows] + offd_i[local_num_rows];
    hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, HYPRE_MPI_INT,
-        hypre_MPI_SUM, comm);
+                       hypre_MPI_SUM, comm);
    hypre_ParCSRBlockMatrixNumNonzeros(matrix) = total_num_nonzeros;
 
    return ierr;
@@ -215,21 +211,17 @@ hypre_ParCSRBlockMatrixSetDNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
    hypre_CSRBlockMatrix *offd = hypre_ParCSRBlockMatrixOffd(matrix);
    HYPRE_Int *offd_i = hypre_CSRBlockMatrixI(offd);
    HYPRE_Int local_num_rows = hypre_CSRBlockMatrixNumRows(diag);
-   double total_num_nonzeros;
-   double local_num_nonzeros;
+   HYPRE_Real total_num_nonzeros;
+   HYPRE_Real local_num_nonzeros;
    HYPRE_Int ierr = 0;
 
-   local_num_nonzeros = (double) diag_i[local_num_rows] + (double) offd_i[local_num_rows];
-   hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, hypre_MPI_DOUBLE,
-        hypre_MPI_SUM, comm);
+   local_num_nonzeros = (HYPRE_Real) diag_i[local_num_rows] + (HYPRE_Real) offd_i[local_num_rows];
+   hypre_MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1,
+                       HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
    hypre_ParCSRBlockMatrixDNumNonzeros(matrix) = total_num_nonzeros;
 
    return ierr;
 }
-
-
-
-
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRBlockMatrixSetDataOwner
@@ -237,7 +229,7 @@ hypre_ParCSRBlockMatrixSetDNumNonzeros( hypre_ParCSRBlockMatrix *matrix)
 
 HYPRE_Int 
 hypre_ParCSRBlockMatrixSetDataOwner( hypre_ParCSRBlockMatrix *matrix,
-				     HYPRE_Int              owns_data )
+                                     HYPRE_Int              owns_data )
 {
    HYPRE_Int    ierr=0;
 
@@ -252,7 +244,7 @@ hypre_ParCSRBlockMatrixSetDataOwner( hypre_ParCSRBlockMatrix *matrix,
 
 HYPRE_Int 
 hypre_ParCSRBlockMatrixSetRowStartsOwner( hypre_ParCSRBlockMatrix *matrix,
-					  HYPRE_Int owns_row_starts )
+                                          HYPRE_Int owns_row_starts )
 {
    HYPRE_Int    ierr=0;
 
@@ -267,7 +259,7 @@ hypre_ParCSRBlockMatrixSetRowStartsOwner( hypre_ParCSRBlockMatrix *matrix,
 
 HYPRE_Int 
 hypre_ParCSRBlockMatrixSetColStartsOwner( hypre_ParCSRBlockMatrix *matrix,
-					  HYPRE_Int owns_col_starts )
+                                          HYPRE_Int owns_col_starts )
 {
    HYPRE_Int    ierr=0;
 
@@ -299,7 +291,7 @@ hypre_ParCSRBlockMatrixCompress( hypre_ParCSRBlockMatrix *matrix )
    HYPRE_Int i;
 
    matrix_C = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
-      row_starts,col_starts,num_cols_offd,num_nonzeros_diag,num_nonzeros_offd);
+                                       row_starts,col_starts,num_cols_offd,num_nonzeros_diag,num_nonzeros_offd);
    hypre_ParCSRMatrixInitialize(matrix_C);
 
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix_C));
@@ -308,8 +300,8 @@ hypre_ParCSRBlockMatrixCompress( hypre_ParCSRBlockMatrix *matrix )
    hypre_ParCSRMatrixOffd(matrix_C) = hypre_CSRBlockMatrixCompress(offd);
 
    for(i = 0; i < num_cols_offd; i++)
-     hypre_ParCSRMatrixColMapOffd(matrix_C)[i] = 
-                         hypre_ParCSRBlockMatrixColMapOffd(matrix)[i];
+      hypre_ParCSRMatrixColMapOffd(matrix_C)[i] = 
+         hypre_ParCSRBlockMatrixColMapOffd(matrix)[i];
    return matrix_C;
 }
 
@@ -366,47 +358,47 @@ hypre_ParCSRBlockMatrixConvertToParCSRMatrix(hypre_ParCSRBlockMatrix *matrix)
 #endif
 
    matrix_C = hypre_ParCSRMatrixCreate(comm, global_num_rows*block_size, 
-                   global_num_cols*block_size, matrix_C_row_starts, 
-                   matrix_C_col_starts, num_cols_offd*block_size, 
-                   num_nonzeros_diag*block_size*block_size, 
-                   num_nonzeros_offd*block_size*block_size);
+                                       global_num_cols*block_size, matrix_C_row_starts, 
+                                       matrix_C_col_starts, num_cols_offd*block_size, 
+                                       num_nonzeros_diag*block_size*block_size, 
+                                       num_nonzeros_offd*block_size*block_size);
    hypre_ParCSRMatrixInitialize(matrix_C);
 
    /* DIAG */
    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix_C));
    hypre_ParCSRMatrixDiag(matrix_C) = 
-                        hypre_CSRBlockMatrixConvertToCSRMatrix(diag);
+      hypre_CSRBlockMatrixConvertToCSRMatrix(diag);
 
    /* AB - added to delete zeros */
    diag_nozeros = hypre_CSRMatrixDeleteZeros( 
-       hypre_ParCSRMatrixDiag(matrix_C), 1e-14);
-    if(diag_nozeros) 
-    {
-       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix_C));
-       hypre_ParCSRMatrixDiag(matrix_C) = diag_nozeros;
-    }
+      hypre_ParCSRMatrixDiag(matrix_C), 1e-14);
+   if(diag_nozeros) 
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix_C));
+      hypre_ParCSRMatrixDiag(matrix_C) = diag_nozeros;
+   }
 
-    /* OFF-DIAG */
-    hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix_C));
-    hypre_ParCSRMatrixOffd(matrix_C) = 
-       hypre_CSRBlockMatrixConvertToCSRMatrix(offd);
+   /* OFF-DIAG */
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix_C));
+   hypre_ParCSRMatrixOffd(matrix_C) = 
+      hypre_CSRBlockMatrixConvertToCSRMatrix(offd);
 
-    /* AB - added to delete zeros - this just deletes from data and j arrays */
-    offd_nozeros = hypre_CSRMatrixDeleteZeros( 
-       hypre_ParCSRMatrixOffd(matrix_C), 1e-14);
-    if(offd_nozeros) 
-    {
-       hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix_C));
-       hypre_ParCSRMatrixOffd(matrix_C) = offd_nozeros;
-       removed = 1;
+   /* AB - added to delete zeros - this just deletes from data and j arrays */
+   offd_nozeros = hypre_CSRMatrixDeleteZeros( 
+      hypre_ParCSRMatrixOffd(matrix_C), 1e-14);
+   if(offd_nozeros) 
+   {
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix_C));
+      hypre_ParCSRMatrixOffd(matrix_C) = offd_nozeros;
+      removed = 1;
        
-    }
+   }
 
-    /* now convert the col_map_offd */
+   /* now convert the col_map_offd */
    for (i = 0; i < num_cols_offd; i++)
       for (j = 0; j < block_size; j++)
          hypre_ParCSRMatrixColMapOffd(matrix_C)[i*block_size + j] = 
-              hypre_ParCSRBlockMatrixColMapOffd(matrix)[i]*block_size + j;
+            hypre_ParCSRBlockMatrixColMapOffd(matrix)[i]*block_size + j;
  
    /* if we deleted zeros, then it is possible that col_map_offd can be
       compressed as well - this requires some amount of work that could be skipped... */
@@ -469,7 +461,7 @@ hypre_ParCSRBlockMatrixConvertToParCSRMatrix(hypre_ParCSRBlockMatrix *matrix)
    /* we will not copy the comm package */  
    hypre_ParCSRMatrixCommPkg(matrix_C) = NULL;
 
-  return matrix_C;
+   return matrix_C;
 }
 
 /*--------------------------------------------------------------------------
@@ -499,7 +491,7 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    
    HYPRE_Int *offd_i        = hypre_CSRMatrixI(offd);
    HYPRE_Int *offd_j        = hypre_CSRMatrixJ(offd);
-   double * offd_data = hypre_CSRMatrixData(offd);
+   HYPRE_Complex * offd_data = hypre_CSRMatrixData(offd);
 
    hypre_ParCSRBlockMatrix *matrix_C;
    HYPRE_Int *matrix_C_row_starts;
@@ -508,13 +500,11 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    hypre_CSRBlockMatrix *matrix_C_offd;
 
    HYPRE_Int *matrix_C_offd_i=NULL, *matrix_C_offd_j = NULL;
-   double *matrix_C_offd_data = NULL;
+   HYPRE_Complex *matrix_C_offd_data = NULL;
    
    HYPRE_Int num_procs, i, j, k, k_map, count, index, start_index, pos, row;
-
    
    hypre_MPI_Comm_size(comm,&num_procs);
-
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    matrix_C_row_starts = hypre_CTAlloc(HYPRE_Int, 2);
@@ -534,20 +524,15 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    }
 #endif
 
-
    /************* create the diagonal part ************/
    matrix_C_diag = hypre_CSRBlockMatrixConvertFromCSRMatrix(diag, 
-                   matrix_C_block_size);
-
-
+                                                            matrix_C_block_size);
  
    /*******  the offd part *******************/
 
-
-   /* can't use the same function for the offd part - because this 
-      isn't square and the offd j entries aren't global
-      numbering (have to consider the offd map) - need to look at col_map_offd first */
-   
+   /* can't use the same function for the offd part - because this isn't square
+      and the offd j entries aren't global numbering (have to consider the offd
+      map) - need to look at col_map_offd first */
 
    /* figure out the new number of offd columns (num rows is same as diag) */
    num_cols_offd = hypre_CSRMatrixNumCols(offd);
@@ -580,8 +565,8 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
       count = 1;
       j = 1;
        
-      /* fill in the col_map_off_d - these are global numbers.  Then we need to map these
-         to j entries (these have local numbers) */
+      /* fill in the col_map_off_d - these are global numbers.  Then we need to
+         map these to j entries (these have local numbers) */
       for (i=1; i < num_cols_offd; i++)
       {
          if (map_to_node[i] > map_to_node[i-1])
@@ -591,13 +576,11 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
          col_in_j_map[j++] = count - 1;
       }
       
-   
       /* now figure the nonzeros */   
       matrix_C_num_nonzeros_offd = 0;
       counter = hypre_CTAlloc(HYPRE_Int, matrix_C_num_cols_offd);
       for (i=0; i < matrix_C_num_cols_offd; i++)
          counter[i] = -1;
-
 
       for (i=0; i < num_nodes; i++) /* for each block row */
       {
@@ -605,17 +588,18 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
          for (j=0; j < matrix_C_block_size; j++)
          {
             row = i*matrix_C_block_size+j;
-	    for (k=offd_i[row]; k < offd_i[row+1]; k++) /* go through single row */
-	    {
-	       k_map = col_in_j_map[offd_j[k]]; /*nodal col - see if this has 
-                                                        been in this block row (i) already*/
+            for (k=offd_i[row]; k < offd_i[row+1]; k++) /* go through single row */
+            {
+               k_map = col_in_j_map[offd_j[k]]; /*nodal col - see if this has
+                                                  been in this block row (i)
+                                                  already*/
                
-	       if (counter[k_map] < i) /* not yet counted for this nodal row */
-	       {
-	          counter[k_map] = i;
-	          matrix_C_num_nonzeros_offd++;
-	       }
-	    }
+               if (counter[k_map] < i) /* not yet counted for this nodal row */
+               {
+                  counter[k_map] = i;
+                  matrix_C_num_nonzeros_offd++;
+               }
+            }
          }
       }
       /* fill in final i entry */
@@ -623,7 +607,8 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    }
 
    /* create offd matrix */
-   matrix_C_offd = hypre_CSRBlockMatrixCreate(matrix_C_block_size, num_nodes, matrix_C_num_cols_offd,	
+   matrix_C_offd = hypre_CSRBlockMatrixCreate(matrix_C_block_size, num_nodes,
+                                              matrix_C_num_cols_offd,   
                                               matrix_C_num_nonzeros_offd);
 
    /* assign i */
@@ -633,16 +618,16 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    /* create (and allocate j and data) */
    if (matrix_C_num_nonzeros_offd)
    {
-      matrix_C_offd_j = hypre_CTAlloc(HYPRE_Int, matrix_C_num_nonzeros_offd);	
-      matrix_C_offd_data = hypre_CTAlloc(double, 
-                                         matrix_C_num_nonzeros_offd*matrix_C_block_size*
-                                         matrix_C_block_size);	
+      matrix_C_offd_j = hypre_CTAlloc(HYPRE_Int, matrix_C_num_nonzeros_offd);   
+      matrix_C_offd_data =
+         hypre_CTAlloc(HYPRE_Complex,
+                       matrix_C_num_nonzeros_offd*matrix_C_block_size*
+                       matrix_C_block_size);  
       hypre_CSRBlockMatrixJ(matrix_C_offd) = matrix_C_offd_j;
       hypre_CSRMatrixData(matrix_C_offd) = matrix_C_offd_data;
    
       for (i=0; i < matrix_C_num_cols_offd; i++)
          counter[i] = -1;
-
 
       index = 0; /*keep track of entry in matrix_C_offd_j*/
       start_index = 0;
@@ -652,12 +637,12 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
          for (j=0; j < matrix_C_block_size; j++) /* for each row in block */
          {
             row = i*matrix_C_block_size+j;
-	    for (k=offd_i[row]; k < offd_i[row+1]; k++) /* go through single row's cols */
-	    {
-	       k_map = col_in_j_map[offd_j[k]]; /*nodal col  for off_d */
-	       if (counter[k_map] < start_index) /* not yet counted for this nodal row */
-	       {
-	          counter[k_map] = index;
+            for (k=offd_i[row]; k < offd_i[row+1]; k++) /* go through single row's cols */
+            {
+               k_map = col_in_j_map[offd_j[k]]; /*nodal col  for off_d */
+               if (counter[k_map] < start_index) /* not yet counted for this nodal row */
+               {
+                  counter[k_map] = index;
                   matrix_C_offd_j[index] = k_map;
                   /*copy the data: which position (corresponds to j array) + which row + which col */                
                   pos =  (index * matrix_C_block_size * matrix_C_block_size) + (j * matrix_C_block_size) + 
@@ -673,20 +658,19 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
                      col_map_offd[offd_j[k]]%matrix_C_block_size;
                   matrix_C_offd_data[pos] = offd_data[k];
                }
-	    }
+            }
          }
          start_index = index; /* first index for current nodal row */
       }
    }
 
-
    /* *********create the new matrix  *************/
    matrix_C = hypre_ParCSRBlockMatrixCreate(comm, matrix_C_block_size, 
-                    global_num_rows/matrix_C_block_size, 
-                    global_num_cols/matrix_C_block_size, matrix_C_row_starts, 
-                    matrix_C_col_starts, matrix_C_num_cols_offd, 
-                    hypre_CSRBlockMatrixNumNonzeros(matrix_C_diag), 
-                    matrix_C_num_nonzeros_offd);
+                                            global_num_rows/matrix_C_block_size, 
+                                            global_num_cols/matrix_C_block_size, matrix_C_row_starts, 
+                                            matrix_C_col_starts, matrix_C_num_cols_offd, 
+                                            hypre_CSRBlockMatrixNumNonzeros(matrix_C_diag), 
+                                            matrix_C_num_nonzeros_offd);
 
    /* use the diag and off diag matrices we have already created */
    hypre_CSRBlockMatrixDestroy(hypre_ParCSRMatrixDiag(matrix_C));
@@ -696,21 +680,14 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
 
    hypre_ParCSRMatrixColMapOffd(matrix_C) = matrix_C_col_map_offd;
 
-
-  /* *********don't bother to copy the comm_pkg *************/
-  
+   /* *********don't bother to copy the comm_pkg *************/
    
    hypre_ParCSRBlockMatrixCommPkg(matrix_C) = NULL;
-
-
-
-
  
-/* CLEAN UP !!!! */
+   /* CLEAN UP !!!! */
    hypre_TFree(map_to_node);
    hypre_TFree(col_in_j_map);
    hypre_TFree(counter);
-   
 
    return matrix_C;
 }
@@ -740,7 +717,7 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 
    MPI_Comm   comm;
 
-   hypre_ParCSRCommPkg	 *comm_pkg;
+   hypre_ParCSRCommPkg   *comm_pkg;
    hypre_IJAssumedPart   *apart;
    
    /*-----------------------------------------------------------
@@ -769,7 +746,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 
    apart = hypre_ParCSRBlockMatrixAssumedPartition(A);
 
-
    /*-----------------------------------------------------------
     * get commpkg info information 
     *----------------------------------------------------------*/
@@ -780,8 +756,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
                                 &num_recvs, &recv_procs, &recv_vec_starts,
                                 &num_sends, &send_procs, &send_map_starts, 
                                 &send_map_elmts, apart);
-
-
 
    if (!num_recvs)
    {
@@ -796,38 +770,37 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
       send_map_elmts = NULL;
    }
 
-
 #else
 
-   hypre_ParCSRCommPkg	*comm_pkg;
+   hypre_ParCSRCommPkg  *comm_pkg;
    
    MPI_Comm             comm = hypre_ParCSRBlockMatrixComm(A);
 
-   HYPRE_Int			num_sends;
-   HYPRE_Int			*send_procs;
-   HYPRE_Int			*send_map_starts;
-   HYPRE_Int			*send_map_elmts;
-   HYPRE_Int			num_recvs;
-   HYPRE_Int			*recv_procs;
-   HYPRE_Int			*recv_vec_starts;
+   HYPRE_Int                    num_sends;
+   HYPRE_Int                    *send_procs;
+   HYPRE_Int                    *send_map_starts;
+   HYPRE_Int                    *send_map_elmts;
+   HYPRE_Int                    num_recvs;
+   HYPRE_Int                    *recv_procs;
+   HYPRE_Int                    *recv_vec_starts;
    
    HYPRE_Int  *col_map_offd = hypre_ParCSRBlockMatrixColMapOffd(A);
    HYPRE_Int  first_col_diag = hypre_ParCSRBlockMatrixFirstColDiag(A);
    HYPRE_Int  *col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-   HYPRE_Int	num_cols_diag = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixDiag(A));
-   HYPRE_Int	num_cols_offd = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
+   HYPRE_Int    num_cols_diag = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixDiag(A));
+   HYPRE_Int    num_cols_offd = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
 
    hypre_MatvecCommPkgCreate_core(comm, col_map_offd, first_col_diag, 
-         col_starts, num_cols_diag, num_cols_offd, first_col_diag, 
-         col_map_offd, 1, &num_recvs, &recv_procs, &recv_vec_starts,
-         &num_sends, &send_procs, &send_map_starts, &send_map_elmts);
+                                  col_starts, num_cols_diag, num_cols_offd, first_col_diag, 
+                                  col_map_offd, 1, &num_recvs, &recv_procs, &recv_vec_starts,
+                                  &num_sends, &send_procs, &send_map_starts, &send_map_elmts);
 
 #endif
 
-  /*-----------------------------------------------------------
-   * setup commpkg
-   *----------------------------------------------------------*/
+   /*-----------------------------------------------------------
+    * setup commpkg
+    *----------------------------------------------------------*/
 
    comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
 
@@ -843,9 +816,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
 
    hypre_ParCSRBlockMatrixCommPkg(A) = comm_pkg;
-   
-
-
 
    return hypre_error_flag;
 }
@@ -879,17 +849,17 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    HYPRE_Int *diag_i = hypre_CSRBlockMatrixI(diag);
    HYPRE_Int *diag_j = hypre_CSRBlockMatrixJ(diag);
-   double *diag_data = hypre_CSRBlockMatrixData(diag);
+   HYPRE_Complex *diag_data = hypre_CSRBlockMatrixData(diag);
 
    hypre_CSRBlockMatrix *offd = hypre_ParCSRBlockMatrixOffd(B);
 
    HYPRE_Int *offd_i = hypre_CSRBlockMatrixI(offd);
    HYPRE_Int *offd_j = hypre_CSRBlockMatrixJ(offd);
-   double *offd_data = hypre_CSRBlockMatrixData(offd);
+   HYPRE_Complex *offd_data = hypre_CSRBlockMatrixData(offd);
 
    HYPRE_Int *B_int_i;
    HYPRE_Int *B_int_j;
-   double *B_int_data;
+   HYPRE_Complex *B_int_data;
 
    HYPRE_Int num_cols_B, num_nonzeros;
    HYPRE_Int num_rows_B_ext;
@@ -899,7 +869,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    HYPRE_Int *B_ext_i;
    HYPRE_Int *B_ext_j;
-   double *B_ext_data;
+   HYPRE_Complex *B_ext_data;
  
    HYPRE_Int *jdata_recv_vec_starts;
    HYPRE_Int *jdata_send_map_starts;
@@ -930,7 +900,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
       {
          jrow = send_map_elmts[j];
          B_int_i[++j_cnt] = offd_i[jrow+1] - offd_i[jrow]
-	                    + diag_i[jrow+1] - diag_i[jrow];
+            + diag_i[jrow+1] - diag_i[jrow];
          num_nonzeros += B_int_i[j_cnt];
       }
    }
@@ -939,10 +909,10 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
  * initialize communication 
  *--------------------------------------------------------------------------*/
    comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,
-		&B_int_i[1],&B_ext_i[1]);
+                                              &B_int_i[1],&B_ext_i[1]);
 
    B_int_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-   if (data) B_int_data = hypre_CTAlloc(double, num_nonzeros*bnnz);
+   if (data) B_int_data = hypre_CTAlloc(HYPRE_Complex, num_nonzeros*bnnz);
 
    jdata_send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
    jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
@@ -951,33 +921,33 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
    counter = 0;
    for (i=0; i < num_sends; i++)
    {
-	num_nonzeros = counter;
-	for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-	{
-	    jrow = send_map_elmts[j];
-	    for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++) 
-	    {
-		B_int_j[counter] = diag_j[k]+first_col_diag;
-		if (data) {
-		  for(l = 0; l < bnnz; l++) 
-		    B_int_data[counter*bnnz+ l] = diag_data[k*bnnz+ l];
-		}
-		counter++;
-  	    }
-	    for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++) 
-	    {
-		B_int_j[counter] = col_map_offd[offd_j[k]];
-		if (data) {
-		  for(l = 0; l < bnnz; l++)
-		     B_int_data[counter*bnnz+ l] = 
-                                         offd_data[k*bnnz+ l];
-		}
-		counter++;
-  	    }
-	}
-	num_nonzeros = counter - num_nonzeros;
-	start_index += num_nonzeros;
-        jdata_send_map_starts[i+1] = start_index;
+      num_nonzeros = counter;
+      for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+      {
+         jrow = send_map_elmts[j];
+         for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++) 
+         {
+            B_int_j[counter] = diag_j[k]+first_col_diag;
+            if (data) {
+               for(l = 0; l < bnnz; l++) 
+                  B_int_data[counter*bnnz+ l] = diag_data[k*bnnz+ l];
+            }
+            counter++;
+         }
+         for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++) 
+         {
+            B_int_j[counter] = col_map_offd[offd_j[k]];
+            if (data) {
+               for(l = 0; l < bnnz; l++)
+                  B_int_data[counter*bnnz+ l] = 
+                     offd_data[k*bnnz+ l];
+            }
+            counter++;
+         }
+      }
+      num_nonzeros = counter - num_nonzeros;
+      start_index += num_nonzeros;
+      jdata_send_map_starts[i+1] = start_index;
    }
 
    tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
@@ -998,21 +968,21 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
  *--------------------------------------------------------------------------*/
 
    for (i=0; i < num_recvs; i++)
-	for (j = recv_vec_starts[i]; j < recv_vec_starts[i+1]; j++)
-		B_ext_i[j+1] += B_ext_i[j];
+      for (j = recv_vec_starts[i]; j < recv_vec_starts[i+1]; j++)
+         B_ext_i[j+1] += B_ext_i[j];
 
    num_nonzeros = B_ext_i[num_rows_B_ext];
 
    B_ext = hypre_CSRBlockMatrixCreate(block_size, num_rows_B_ext, num_cols_B, 
                                       num_nonzeros);
    B_ext_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-   if (data) B_ext_data = hypre_CTAlloc(double, num_nonzeros*bnnz);
+   if (data) B_ext_data = hypre_CTAlloc(HYPRE_Complex, num_nonzeros*bnnz);
 
    for (i=0; i < num_recvs; i++)
    {
-	start_index = B_ext_i[recv_vec_starts[i]];
-	num_nonzeros = B_ext_i[recv_vec_starts[i+1]]-start_index;
-	jdata_recv_vec_starts[i+1] = B_ext_i[recv_vec_starts[i+1]];
+      start_index = B_ext_i[recv_vec_starts[i]];
+      num_nonzeros = B_ext_i[recv_vec_starts[i+1]]-start_index;
+      jdata_recv_vec_starts[i+1] = B_ext_i[recv_vec_starts[i+1]];
    }
 
    hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
@@ -1024,7 +994,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
    if (data)
    {
       comm_handle = hypre_ParCSRBlockCommHandleCreate(1, bnnz,tmp_comm_pkg,
-                                     B_int_data, B_ext_data);
+                                                      B_int_data, B_ext_data);
       hypre_ParCSRBlockCommHandleDestroy(comm_handle);
       comm_handle = NULL;
    }
@@ -1055,7 +1025,7 @@ hypre_ParVectorCreateFromBlock(  MPI_Comm comm,
    HYPRE_Int num_procs, my_id, i;
    HYPRE_Int global_size;
    HYPRE_Int *new_partitioning; /* need to create a new partitioning - son't want to write over
-                         what is passed in */
+                                   what is passed in */
    
 
 
@@ -1098,13 +1068,13 @@ hypre_ParVectorCreateFromBlock(  MPI_Comm comm,
    hypre_ParVectorLastIndex(vector) = new_partitioning[1]-1;
    hypre_ParVectorPartitioning(vector) = new_partitioning;
    hypre_ParVectorLocalVector(vector) = 
-		hypre_SeqVectorCreate(new_partitioning[1]-new_partitioning[0]);
+      hypre_SeqVectorCreate(new_partitioning[1]-new_partitioning[0]);
 #else
    hypre_ParVectorFirstIndex(vector) = new_partitioning[my_id];
    hypre_ParVectorLastIndex(vector) = new_partitioning[my_id+1] -1;
    hypre_ParVectorPartitioning(vector) = new_partitioning;
    hypre_ParVectorLocalVector(vector) = 
-		hypre_SeqVectorCreate(new_partitioning[my_id+1]-new_partitioning[my_id]);
+      hypre_SeqVectorCreate(new_partitioning[my_id+1]-new_partitioning[my_id]);
 #endif
 
    /* set defaults */

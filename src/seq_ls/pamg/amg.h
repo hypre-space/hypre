@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -26,9 +26,9 @@ typedef struct
 
    /* setup params */
    HYPRE_Int      max_levels;
-   double   strong_threshold;
-   double   A_trunc_factor;
-   double   P_trunc_factor;
+   HYPRE_Real   strong_threshold;
+   HYPRE_Real   A_trunc_factor;
+   HYPRE_Real   P_trunc_factor;
    HYPRE_Int      A_max_elmts;
    HYPRE_Int      P_max_elmts;
    HYPRE_Int      coarsen_type;
@@ -46,8 +46,8 @@ typedef struct
    HYPRE_Int     *num_grid_sweeps;  
    HYPRE_Int     *grid_relax_type;   
    HYPRE_Int    **grid_relax_points; 
-   double  *relax_weight;
-   double   tol;
+   HYPRE_Real  *relax_weight;
+   HYPRE_Real   tol;
    /* problem data */
    hypre_CSRMatrix  *A;
    HYPRE_Int      num_variables;
@@ -73,12 +73,12 @@ typedef struct
    HYPRE_Int      	    *num_domains;
    HYPRE_Int     	   **i_domain_dof;
    HYPRE_Int     	   **j_domain_dof;
-   double  	   **domain_matrixinverse;
+   HYPRE_Real  	   **domain_matrixinverse;
    HYPRE_Int		     mode;
 
    /* data generated in the solve phase */
    hypre_Vector   *Vtemp;
-   double   *vtmp;
+   HYPRE_Real   *vtmp;
    HYPRE_Int       cycle_op_count;                                                   
 
    /* output params */

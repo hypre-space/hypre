@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -15,10 +15,6 @@
  * Functions for scanning and printing "box-dimensioned" data.
  *
  *****************************************************************************/
-
-#ifdef HYPRE_USE_PTHREADS
-#undef HYPRE_USE_PTHREADS
-#endif
 
 #include "_hypre_struct_mv.h"
 
@@ -31,7 +27,8 @@ hypre_PrintBoxArrayData( FILE            *file,
                          hypre_BoxArray  *box_array,
                          hypre_BoxArray  *data_space,
                          HYPRE_Int        num_values,
-                         double          *data       )
+                         HYPRE_Int        dim,
+                         HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -44,13 +41,14 @@ hypre_PrintBoxArrayData( FILE            *file,
    hypre_Index      stride;
    hypre_Index      index;
                    
-   HYPRE_Int        i, j;
+   HYPRE_Int        i, j, d;
+   HYPRE_Complex    value;
 
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
 
    hypre_ForBoxI(i, box_array)
    {
@@ -62,20 +60,28 @@ hypre_PrintBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(3, loop_size,
+      hypre_BoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
       hypre_BoxLoop1For(datai)
       {
+         /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
          hypre_BoxLoopGetIndex(index);
          for (j = 0; j < num_values; j++)
          {
-            hypre_fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
-                          i,
-                          hypre_IndexX(start) + hypre_IndexX(index),
-                          hypre_IndexY(start) + hypre_IndexY(index),
-                          hypre_IndexZ(start) + hypre_IndexZ(index),
-                          j,
-                          data[datai + j*data_box_volume]);
+            hypre_fprintf(file, "%d: (%d",
+                          i, hypre_IndexD(start, 0) + hypre_IndexD(index, 0));
+            for (d = 1; d < dim; d++)
+            {
+               hypre_fprintf(file, ", %d",
+                             hypre_IndexD(start, d) + hypre_IndexD(index, d));
+            }
+            value = data[datai + j*data_box_volume];
+#ifdef HYPRE_COMPLEX
+            hypre_fprintf(file, "; %d) %.14e , %.14e\n",
+                          j, hypre_creal(value), hypre_cimag(value));
+#else
+            hypre_fprintf(file, "; %d) %.14e\n", j, value);
+#endif
          }
       }
       hypre_BoxLoop1End(datai);
@@ -100,7 +106,8 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
                              HYPRE_Int        center_rank,
                              HYPRE_Int        stencil_size,
                              HYPRE_Int       *symm_elements,
-                             double          *data       )
+                             HYPRE_Int        dim,
+                             HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -112,21 +119,27 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
    hypre_Index      stride;
    hypre_Index      index;
                    
-   HYPRE_Int        i, j;
+   HYPRE_Int        i, j, d;
+   HYPRE_Complex    value;
 
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
 
    /* First is the constant, off-diagonal, part of the matrix: */
    for (  j=0; j<stencil_size; ++j )
    {
       if (symm_elements[j] < 0 && j!=center_rank )
       {
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf( file, "*: (*, *, *; %d) %.14e , %.14e\n",
+                        j, hypre_creal(data[0]), hypre_cimag(data[0]));
+#else
          hypre_fprintf( file, "*: (*, *, *; %d) %.14e\n",
                         j, data[0] );
+#endif
       }
       ++data;
    }
@@ -143,18 +156,26 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(3, loop_size,
+      hypre_BoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
       hypre_BoxLoop1For(datai)
       {
+         /* Print line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
          hypre_BoxLoopGetIndex(index);
-         hypre_fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
-                       i,
-                       hypre_IndexX(start) + hypre_IndexX(index),
-                       hypre_IndexY(start) + hypre_IndexY(index),
-                       hypre_IndexZ(start) + hypre_IndexZ(index),
-                       center_rank,
-                       data[datai]);
+         hypre_fprintf(file, "%d: (%d",
+                       i, hypre_IndexD(start, 0) + hypre_IndexD(index, 0));
+         for (d = 1; d < dim; d++)
+         {
+            hypre_fprintf(file, ", %d",
+                          hypre_IndexD(start, d) + hypre_IndexD(index, d));
+         }
+         value = data[datai];
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(file, "; %d) %.14e , %.14e\n",
+                       center_rank, hypre_creal(value), hypre_cimag(value));
+#else
+         hypre_fprintf(file, "; %d) %.14e\n", center_rank, value);
+#endif
       }
       hypre_BoxLoop1End(datai);
       data += data_box_volume;
@@ -173,7 +194,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
                            hypre_BoxArray  *box_array,
                            hypre_BoxArray  *data_space,
                            HYPRE_Int        num_values,
-                           double          *data       )
+                           HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
                    
@@ -182,6 +203,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
    hypre_IndexRef   start;
                    
    HYPRE_Int        i, j;
+   HYPRE_Complex    value;
 
    /*----------------------------------------
     * Print data
@@ -197,8 +219,13 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
       for (j = 0; j < num_values; j++)
       {
-         hypre_fprintf( file, "*: (*, *, *; %d) %.14e\n",
-                        j, data[datai + j] );
+         value = data[datai + j];
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(file, "*: (*, *, *; %d) %.14e , %.14e\n",
+                       j, hypre_creal(value), hypre_cimag(value));
+#else
+         hypre_fprintf(file, "*: (*, *, *; %d) %.14e\n", j, value);
+#endif
       }
 
       data += num_values;
@@ -216,7 +243,8 @@ hypre_ReadBoxArrayData( FILE            *file,
                         hypre_BoxArray  *box_array,
                         hypre_BoxArray  *data_space,
                         HYPRE_Int        num_values,
-                        double          *data       )
+                        HYPRE_Int        dim,
+                        HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -228,13 +256,13 @@ hypre_ReadBoxArrayData( FILE            *file,
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   HYPRE_Int        i, j, idummy;
+   HYPRE_Int        i, j, d, idummy;
 
    /*----------------------------------------
     * Read data
     *----------------------------------------*/
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
 
    hypre_ForBoxI(i, box_array)
    {
@@ -246,19 +274,20 @@ hypre_ReadBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(3, loop_size,
+      hypre_BoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
       hypre_BoxLoop1For(datai)
       {
+         /* Read lines of the form: "%d: (%d, %d, %d; %d) %le\n" */
          for (j = 0; j < num_values; j++)
          {
-            hypre_fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
-                         &idummy,
-                         &idummy,
-                         &idummy,
-                         &idummy,
-                         &idummy,
-                         &data[datai + j*data_box_volume]);
+            hypre_fscanf(file, "%d: (%d", &idummy, &idummy);
+            for (d = 1; d < dim; d++)
+            {
+               hypre_fscanf(file, ", %d", &idummy);
+            }
+            hypre_fscanf(file, "; %d) %le\n",
+                         &idummy, &data[datai + j*data_box_volume]);
          }
       }
       hypre_BoxLoop1End(datai);
@@ -280,7 +309,8 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
                            HYPRE_Int        stencil_size,
                            HYPRE_Int        real_stencil_size,
                            HYPRE_Int        constant_coefficient,
-                           double          *data       )
+                           HYPRE_Int        dim,
+                           HYPRE_Complex   *data       )
 {
    hypre_Box       *box;
    hypre_Box       *data_box;
@@ -292,7 +322,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
-   HYPRE_Int        i, j, idummy;
+   HYPRE_Int        i, j, d, idummy;
 
    /*----------------------------------------
     * Read data
@@ -301,7 +331,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
    if ( constant_coefficient==1 ) constant_stencil_size = stencil_size;
    if ( constant_coefficient==2 ) constant_stencil_size = stencil_size - 1;
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
 
    hypre_ForBoxI(i, box_array)
    {
@@ -318,9 +348,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
          excluding ones which are redundant due to symmetry.*/
       for (j=0; j <constant_stencil_size; j++)
       {
-         hypre_fscanf(file, "*: (*, *, *; %d) %le\n",
-                      &idummy,
-                      &data[j]);
+         hypre_fscanf(file, "*: (*, *, *; %d) %le\n", &idummy, &data[j]);
       }
 
       /* Next entries, if any, will be for a variable diagonal: */
@@ -328,17 +356,17 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
 
       if ( constant_coefficient==2 )
       {
-         hypre_BoxLoop1Begin(3, loop_size,
+         hypre_BoxLoop1Begin(dim, loop_size,
                              data_box, start, stride, datai);
          hypre_BoxLoop1For(datai)
          {
-            hypre_fscanf(file, "%d: (%d, %d, %d; %d) %le\n",
-                         &idummy,
-                         &idummy,
-                         &idummy,
-                         &idummy,
-                         &idummy,
-                         &data[datai]);
+            /* Read line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
+            hypre_fscanf(file, "%d: (%d", &idummy, &idummy);
+            for (d = 1; d < dim; d++)
+            {
+               hypre_fscanf(file, ", %d", &idummy);
+            }
+            hypre_fscanf(file, "; %d) %le\n", &idummy, &data[datai]);
          }
          hypre_BoxLoop1End(datai);
          data += data_box_volume;

@@ -41,7 +41,7 @@
        If it looks like we're on a Cray, take the square root of   
        SMALL and LARGE to avoid overflow and underflow problems. */
     /* Builtin functions */
-    double d_lg10(doublereal *), sqrt(doublereal);
+    HYPRE_Real d_lg10(doublereal *), sqrt(doublereal);
 
 
     if (d_lg10(large) > 2e3) {

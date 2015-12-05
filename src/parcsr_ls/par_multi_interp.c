@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.20 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -28,7 +28,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                    HYPRE_Int                  num_functions,
                    HYPRE_Int                 *dof_func,
                    HYPRE_Int                  debug_flag,
-                   double               trunc_factor,
+                   HYPRE_Real           trunc_factor,
                    HYPRE_Int		 	P_max_elmts,
                    HYPRE_Int                  weight_option,
                    HYPRE_Int                 *col_offd_S_to_A,
@@ -40,12 +40,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_ParCSRCommPkg    *tmp_comm_pkg;
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-   double          *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);
    HYPRE_Int             *A_diag_j = hypre_CSRMatrixJ(A_diag);
 
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   double          *A_offd_data = NULL;
+   HYPRE_Real      *A_offd_data = NULL;
    HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
    HYPRE_Int             *A_offd_j = NULL;
    HYPRE_Int		   *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
@@ -65,13 +65,13 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    hypre_ParCSRMatrix *P;
    hypre_CSRMatrix *P_diag;
-   double          *P_diag_data;
+   HYPRE_Real      *P_diag_data;
    HYPRE_Int             *P_diag_i; /*at first counter of nonzero cols for each row,
 				finally will be pointer to start of row */
    HYPRE_Int             *P_diag_j;
 
    hypre_CSRMatrix *P_offd;
-   double          *P_offd_data = NULL;
+   HYPRE_Real      *P_offd_data = NULL;
    HYPRE_Int             *P_offd_i; /*at first counter of nonzero cols for each row,
 				finally will be pointer to start of row */
    HYPRE_Int             *P_offd_j = NULL;
@@ -140,15 +140,15 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    HYPRE_Int             *assigned = NULL;
    HYPRE_Int             *assigned_offd = NULL;
 
-   double          *Pext_send_data = NULL;
-   double          *Pext_data = NULL;
+   HYPRE_Real      *Pext_send_data = NULL;
+   HYPRE_Real      *Pext_data = NULL;
 
-   double           sum_C, sum_N;
-   double           sum_C_pos, sum_C_neg;
-   double           sum_N_pos, sum_N_neg;
-   double           diagonal;
-   double           alfa = 1.0;
-   double           beta = 1.0;
+   HYPRE_Real       sum_C, sum_N;
+   HYPRE_Real       sum_C_pos, sum_C_neg;
+   HYPRE_Real       sum_N_pos, sum_N_neg;
+   HYPRE_Real       diagonal;
+   HYPRE_Real       alfa = 1.0;
+   HYPRE_Real       beta = 1.0;
    HYPRE_Int              j_start;
    HYPRE_Int              j_end;
 
@@ -186,7 +186,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    HYPRE_Int * cnt_nz_per_thread;
    HYPRE_Int * cnt_nz_offd_per_thread;
    
-   /* double     wall_time;  
+   /* HYPRE_Real wall_time;  
    wall_time = hypre_MPI_Wtime(); */ 
 
    /* Initialize threading variables */
@@ -1137,13 +1137,13 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_TFree(max_num_threads);
    
    P_diag_j = hypre_CTAlloc(HYPRE_Int,total_nz);
-   P_diag_data = hypre_CTAlloc(double,total_nz);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real,total_nz);
 
    
    if (total_nz_offd)
    {
       P_offd_j = hypre_CTAlloc(HYPRE_Int,total_nz_offd);
-      P_offd_data = hypre_CTAlloc(double,total_nz_offd);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real,total_nz_offd);
    }
 
    for (i=0; i < n_fine; i++)
@@ -1307,7 +1307,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             if (Pext_send_size > old_Pext_send_size)
             {
                hypre_TFree(Pext_send_data);
-               Pext_send_data = hypre_CTAlloc(double, Pext_send_size);
+               Pext_send_data = hypre_CTAlloc(HYPRE_Real, Pext_send_size);
             }
             old_Pext_send_size = Pext_send_size;
 
@@ -1343,7 +1343,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             if (Pext_recv_size > old_Pext_recv_size)
             {
                hypre_TFree(Pext_data);
-               Pext_data = hypre_CTAlloc(double, Pext_recv_size);
+               Pext_data = hypre_CTAlloc(HYPRE_Real, Pext_recv_size);
             }
             old_Pext_recv_size = Pext_recv_size;
 
@@ -1671,7 +1671,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             if (Pext_send_size > old_Pext_send_size)
             {
                hypre_TFree(Pext_send_data);
-               Pext_send_data = hypre_CTAlloc(double, Pext_send_size);
+               Pext_send_data = hypre_CTAlloc(HYPRE_Real, Pext_send_size);
             }
             old_Pext_send_size = Pext_send_size;
 
@@ -1711,7 +1711,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             if (Pext_recv_size > old_Pext_recv_size)
             {
                hypre_TFree(Pext_data);
-               Pext_data = hypre_CTAlloc(double, Pext_recv_size);
+               Pext_data = hypre_CTAlloc(HYPRE_Real, Pext_recv_size);
             }
             old_Pext_recv_size = Pext_recv_size;
 

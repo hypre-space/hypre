@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -20,7 +20,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Box          *v_data_box;
                     
    HYPRE_Int           vi;
-   double             *vp;
+   HYPRE_Real         *vp;
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -36,7 +36,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
    srand( seed );
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex3(unit_stride, 1, 1, 1);
  
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    hypre_ForBoxI(i, boxes)
@@ -50,7 +50,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
  
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(hypre_StructVectorDim(vector), loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE

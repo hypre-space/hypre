@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.2 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #define PDEGREE 1
@@ -1486,7 +1486,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
    double *tPDiagA, *ADDiagA, *AD2DiagA, omega=2.0/3.0, dtemp;
    char   paramString[100];
    HYPRE_IJMatrix     IJInvD, IJP;
-   hypre_ParCSRMatrix *hypreA, *hypreAff, *hypreInvD, *hypreP, *hypreAD;
+   hypre_ParCSRMatrix *hypreA, *hypreAff, *hypreInvD, *hypreP=NULL, *hypreAD;
    hypre_ParCSRMatrix *hypreAD2, *hypreAfc, *hypreTmp;
    hypre_CSRMatrix    *ADiag, *DDiag, *tPDiag, *ADDiag, *AD2Diag;
    MLI_Function       *funcPtr;

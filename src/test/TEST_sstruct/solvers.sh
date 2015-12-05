@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.13 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -64,8 +64,8 @@ do
   tail -3 $i
   echo "# Output file: $i.1"
   tail -13 $i.1 | head -3
-  echo "# Output file: $i.5"
-  tail -21 $i.5 | head -11
+  echo "# Output file: $i.4"
+  tail -19 $i.4 | head -9
 done >> ${TNAME}.out
 
 # Make sure that the output files are reasonable

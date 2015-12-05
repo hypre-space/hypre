@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -38,7 +38,7 @@
       ii = (ij%2);                              \
       jj = (ij-ii)/2;                           \
       kk = (rank-2*jj-ii)/4;                    \
-      hypre_SetIndex(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);      \
    }
 
 /*--------------------------------------------------------------------------
@@ -150,6 +150,9 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    HYPRE_Int                   i, cnt1, cnt2;
    HYPRE_Int                   fi, ci;
 
+   hypre_BoxInit(&box, ndim);
+   hypre_BoxInit(&scaled_box, ndim);
+
    hypre_MPI_Comm_rank(comm, &myproc);
    hypre_ClearIndex(zero_index);
 
@@ -216,14 +219,14 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
       index[i]= rfactors[i]-1;
    }
 
-   tmp_boxarray = hypre_BoxArrayCreate(0);
+   tmp_boxarray = hypre_BoxArrayCreate(0, ndim);
    for (vars= 0; vars< nvars; vars++)
    {
       boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
                                           part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
-      identity_arrayboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
+      identity_arrayboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
 
       hypre_ForBoxI(ci, boxarray)
       { 
@@ -241,7 +244,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                                &nboxman_entries);
 
          /* all send and coarsened fboxes on this processor are collected */
-         intersect_boxes= hypre_BoxArrayCreate(0);
+         intersect_boxes= hypre_BoxArrayCreate(0, ndim);
          for (i= 0; i< nboxman_entries; i++)
          {
             hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
@@ -292,11 +295,11 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
       boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
                                           part_crse, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
-      fullwgt_sendboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
-      fullwgt_ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
+      fullwgt_sendboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
+      fullwgt_ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       own_cboxnums[vars]     = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
 
-      send_boxes[vars]         = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
+      send_boxes[vars]         = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       send_processes[vars]     = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
       send_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
 
@@ -387,7 +390,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                                           part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       
-      recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
+      recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray), ndim);
       recv_processes[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
       recv_remote_boxnums[vars]= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(boxarray));
 
@@ -519,9 +522,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    HYPRE_Int               xci;
    HYPRE_Int               xfi;
 
-   double               ***xfp;
-   double               ***xcp;
-   double               ***xcp_temp;
+   HYPRE_Real           ***xfp;
+   HYPRE_Real           ***xcp;
+   HYPRE_Real           ***xcp_temp;
 
    hypre_Index             loop_size, lindex;
    hypre_Index             start, fbox_size, node_offset;
@@ -538,8 +541,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    HYPRE_Int               imax, jmax, kmax;
    HYPRE_Int               icell, jcell, kcell, ijkcell;
 
-   double                 *sum;
-   double                  scaling;
+   HYPRE_Real             *sum;
+   HYPRE_Real              scaling;
 
    HYPRE_Int               part_crse= 0;
    HYPRE_Int               part_fine= 1;
@@ -583,7 +586,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    {
       num_coarse_cells*= 2;
    }
-   sum= hypre_CTAlloc(double, num_coarse_cells);
+   sum= hypre_CTAlloc(HYPRE_Real, num_coarse_cells);
 
    /*--------------------------------------------------------------------------
     * Scaling for averaging restriction.
@@ -621,27 +624,27 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
     *-----------------------------------------------------------------------*/
    if (ndim > 1)
    {
-      xcp_temp= hypre_TAlloc(double **, (ndim-1));
-      xcp     = hypre_TAlloc(double **, (ndim-1));
+      xcp_temp= hypre_TAlloc(HYPRE_Real **, (ndim-1));
+      xcp     = hypre_TAlloc(HYPRE_Real **, (ndim-1));
       for (k= 0; k< (ndim-1); k++)
       {
-         xcp_temp[k]= hypre_TAlloc(double *, 2);
-         xcp[k]     = hypre_TAlloc(double *, 2);
+         xcp_temp[k]= hypre_TAlloc(HYPRE_Real *, 2);
+         xcp[k]     = hypre_TAlloc(HYPRE_Real *, 2);
       }
    }
-   else /* 1d does not really require these double ptrs */
+   else /* 1d does not really require these HYPRE_Real ptrs */
    {
-      xcp_temp   = hypre_TAlloc(double **, 1);
-      xcp        = hypre_TAlloc(double **, 1);
-      xcp_temp[0]= hypre_TAlloc(double *, 1);
-      xcp[0]     = hypre_TAlloc(double *, 1);
+      xcp_temp   = hypre_TAlloc(HYPRE_Real **, 1);
+      xcp        = hypre_TAlloc(HYPRE_Real **, 1);
+      xcp_temp[0]= hypre_TAlloc(HYPRE_Real *, 1);
+      xcp[0]     = hypre_TAlloc(HYPRE_Real *, 1);
    }
 
    /* memory allocation of xfp is okay for all dimensions */
-   xfp= hypre_TAlloc(double **, rfactors[2]);
+   xfp= hypre_TAlloc(HYPRE_Real **, rfactors[2]);
    for (k= 0; k< rfactors[2]; k++)
    {
-      xfp[k]= hypre_TAlloc(double *, rfactors[1]);
+      xfp[k]= hypre_TAlloc(HYPRE_Real *, rfactors[1]);
    }
 
    for (var= 0; var< nvars; var++)
@@ -667,7 +670,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
          {
             for (j=0; j< rfactors[1]; j++)
             {
-               hypre_SetIndex(temp_index1, 0, j, k);
+               hypre_SetIndex3(temp_index1, 0, j, k);
                xfp[k][j]= hypre_StructVectorBoxData(xf_var, fi) +
                   hypre_BoxOffsetDistance(xf_dbox, temp_index1);
             }
@@ -686,7 +689,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             {
                for (j=0; j< 2; j++)
                {
-                  hypre_SetIndex(temp_index1, 0, j, k);
+                  hypre_SetIndex3(temp_index1, 0, j, k);
                   xcp_temp[k][j]= hypre_StructVectorBoxData(xc_temp, fi) +
                      hypre_BoxOffsetDistance(xc_temp_dbox, temp_index1);
                }
@@ -722,7 +725,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             node_offset[i]= rfactors[i]-(start[i]%rfactors[i])-1;
          }
 
-         hypre_SetIndex(temp_index2, 0, 0, 0);
+         hypre_SetIndex3(temp_index2, 0, 0, 0);
          hypre_StructMapFineToCoarse(start, temp_index2, rfactors, startc);
 
          hypre_BoxGetSize(fgrid_box, temp_index1);

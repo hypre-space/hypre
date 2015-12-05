@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.4 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -48,13 +48,13 @@ extern void hypre_F90_NAME(fhypre_ijmatrixsetdiagoffdsizes, FHYPRE_IJMATRIXSETDI
         hypre_F90_NAME(fhypre_ijmatrixsetvalues, FHYPRE_IJMATRIXSETVALUES)
 extern void hypre_F90_NAME(fhypre_ijmatrixsetvalues, FHYPRE_IJMATRIXSETVALUES)
                       (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, const HYPRE_Int *, const HYPRE_Int *,
-                       const double *);
+                       const HYPRE_Real *);
 
 #define HYPRE_IJMatrixAddToValues \
         hypre_F90_NAME(fhypre_ijmatrixaddtovalues, FHYPRE_IJMATRIXADDTOVALUES)
 extern void hypre_F90_NAME(fhypre_ijmatrixaddtovalues, FHYPRE_IJMATRIXADDTOVALUES)
                       (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, const HYPRE_Int *, const HYPRE_Int *,
-                       const double *);
+                       const HYPRE_Real *);
 
 #define HYPRE_IJMatrixSetObjectType \
         hypre_F90_NAME(fhypre_ijmatrixsetobjecttype, FHYPRE_IJMATRIXSETOBJECTTYPE)
@@ -108,12 +108,12 @@ extern void hypre_F90_NAME(fhypre_ijvectorinitialize, FHYPRE_IJVECTORINITIALIZE)
 #define HYPRE_IJVectorSetValues \
         hypre_F90_NAME(fhypre_ijvectorsetvalues, FHYPRE_IJVECTORSETVALUES)
 extern void hypre_F90_NAME(fhypre_ijvectorsetvalues, FHYPRE_IJVECTORSETVALUES)
-                      (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, double *);
+                      (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *);
 
 #define HYPRE_IJVectorAddToValues \
         hypre_F90_NAME(fhypre_ijvectoraddtovalues, FHYPRE_IJVECTORADDTOVALUES)
 extern void hypre_F90_NAME(fhypre_ijvectoraddtovalues, FHYPRE_IJVECTORADDTOVALUES)
-                      (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, double *);
+                      (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *);
 
 #define HYPRE_IJVectorAssemble \
         hypre_F90_NAME(fhypre_ijvectorassemble, FHYPRE_IJVECTORASSEMBLE)
@@ -123,7 +123,7 @@ extern void hypre_F90_NAME(fhypre_ijvectorassemble, FHYPRE_IJVECTORASSEMBLE)
 #define HYPRE_IJVectorGetValues \
         hypre_F90_NAME(fhypre_ijvectorgetvalues, FHYPRE_IJVECTORGETVALUES)
 extern void hypre_F90_NAME(fhypre_ijvectorgetvalues, FHYPRE_IJVECTORGETVALUES)
-                      (hypre_F90_Obj *, const HYPRE_Int *, const HYPRE_Int *, double *);
+                      (hypre_F90_Obj *, const HYPRE_Int *, const HYPRE_Int *, HYPRE_Real *);
 
 #define HYPRE_IJVectorSetObjectType \
         hypre_F90_NAME(fhypre_ijvectorsetobjecttype, FHYPRE_IJVECTORSETOBJECTTYPE)

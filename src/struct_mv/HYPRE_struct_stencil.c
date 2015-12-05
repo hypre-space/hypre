@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -49,8 +49,8 @@ HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
    HYPRE_Int     d;
  
    shape = hypre_StructStencilShape(stencil);
-   hypre_ClearIndex(shape[element_index]);
-   for (d = 0; d < hypre_StructStencilDim(stencil); d++)
+   hypre_SetIndex(shape[element_index], 0);
+   for (d = 0; d < hypre_StructStencilNDim(stencil); d++)
    {
       hypre_IndexD(shape[element_index], d) = offset[d];
    }

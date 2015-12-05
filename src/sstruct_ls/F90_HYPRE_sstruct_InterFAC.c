@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -56,7 +56,7 @@ hypre_F90_IFACE(hypre_sstructfacdestroy2, HYPRE_SSTRUCTFACDESTROY2)
 void
 hypre_F90_IFACE(hypre_sstructfacamrrap, HYPRE_SSTRUCTFACAMRRAP)
    (hypre_F90_Obj *A,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Obj *facA,
     hypre_F90_Int *ierr)
 {
@@ -114,13 +114,13 @@ hypre_F90_IFACE(hypre_sstructfacsolve3, HYPRE_SSTRUCTFACSOLVE3)
 void
 hypre_F90_IFACE(hypre_sstructfacsettol, HYPRE_SSTRUCTFACSETTOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_SStructFACSetTol(
            hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-           hypre_F90_PassDbl (tol) ));
+           hypre_F90_PassReal (tol) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -150,7 +150,7 @@ hypre_F90_IFACE(hypre_sstructfaczerocfsten, HYPRE_SSTRUCTFACZEROCFSTEN)
    (hypre_F90_Obj *A,
     hypre_F90_Obj *grid,
     hypre_F90_Int *part,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -158,7 +158,7 @@ hypre_F90_IFACE(hypre_sstructfaczerocfsten, HYPRE_SSTRUCTFACZEROCFSTEN)
            hypre_F90_PassObj (HYPRE_SStructMatrix, A),
            hypre_F90_PassObj (HYPRE_SStructGrid, grid),
            hypre_F90_PassInt (part),
-           rfactors[3] ));
+           rfactors[HYPRE_MAXDIM] ));
 }
 
 /*--------------------------------------------------------------------------
@@ -187,14 +187,14 @@ void
 hypre_F90_IFACE(hypre_sstructfaczeroamrmatrixdata, HYPRE_SSTRUCTFACZEROAMRMATRIXDATA)
    (hypre_F90_Obj *A,
     hypre_F90_Int *part_crse,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_SStructFACZeroAMRMatrixData(
            hypre_F90_PassObj (HYPRE_SStructMatrix, A),
            hypre_F90_PassInt (part_crse),
-           rfactors[3] ));
+           rfactors[HYPRE_MAXDIM] ));
 }
 
 /*--------------------------------------------------------------------------
@@ -205,7 +205,7 @@ void
 hypre_F90_IFACE(hypre_sstructfaczeroamrvectordata, HYPRE_SSTRUCTFACZEROAMRVECTORDATA)
    (hypre_F90_Obj *b,
     hypre_F90_IntArray *plevels,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -224,7 +224,7 @@ void
 hypre_F90_IFACE(hypre_sstructfacsetprefinements, HYPRE_SSTRUCTFACSETPREFINEMENTS)
    (hypre_F90_Obj *solver,
     hypre_F90_Int *nparts,
-    HYPRE_Int (*rfactors)[3],
+    HYPRE_Int (*rfactors)[HYPRE_MAXDIM],
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -332,12 +332,12 @@ hypre_F90_IFACE(hypre_sstructfacsetrelaxtype, HYPRE_SSTRUCTFACSETRELAXTYPE)
 void
 hypre_F90_IFACE(hypre_sstructfacsetjacobiweigh, HYPRE_SSTRUCTFACSETJACOBIWEIGH)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *weight,
+    hypre_F90_Real *weight,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructFACSetJacobiWeight( hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-                                        hypre_F90_PassDbl (weight) ) );
+                                        hypre_F90_PassReal (weight) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -426,11 +426,11 @@ hypre_F90_IFACE(hypre_sstructfacgetnumiteration, HYPRE_SSTRUCTFACGETNUMITERATION
 void
 hypre_F90_IFACE(hypre_sstructfacgetfinalrelativ, HYPRE_SSTRUCTFACGETFINALRELATIV)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *norm,
+    hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) 
       ( HYPRE_SStructFACGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-           hypre_F90_PassDblRef (norm) ));
+           hypre_F90_PassRealRef (norm) ));
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.49 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -139,7 +139,7 @@ typedef struct
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
    HYPRE_Int             *graph_entries;
-   double                *graph_values;
+   HYPRE_Real            *graph_values;
    HYPRE_Int             *graph_boxsizes;
 
    /* MatrixSetValues */
@@ -149,7 +149,7 @@ typedef struct
    Index                 *matset_strides;
    HYPRE_Int             *matset_vars;
    HYPRE_Int             *matset_entries;
-   double                *matset_values;
+   HYPRE_Real            *matset_values;
 
    /* MatrixAddToValues */
    HYPRE_Int              matadd_nboxes;
@@ -158,7 +158,7 @@ typedef struct
    HYPRE_Int             *matadd_vars;
    HYPRE_Int             *matadd_nentries;
    HYPRE_Int            **matadd_entries;
-   double               **matadd_values;
+   HYPRE_Real           **matadd_values;
 
    /* FEMMatrixAddToValues */
    HYPRE_Int              fem_matadd_nboxes;
@@ -168,20 +168,20 @@ typedef struct
    HYPRE_Int            **fem_matadd_rows;
    HYPRE_Int             *fem_matadd_ncols;
    HYPRE_Int            **fem_matadd_cols;
-   double               **fem_matadd_values;
+   HYPRE_Real           **fem_matadd_values;
 
    /* RhsAddToValues */
    HYPRE_Int              rhsadd_nboxes;
    ProblemIndex          *rhsadd_ilowers;
    ProblemIndex          *rhsadd_iuppers;
    HYPRE_Int             *rhsadd_vars;
-   double                *rhsadd_values;
+   HYPRE_Real            *rhsadd_values;
 
    /* FEMRhsAddToValues */
    HYPRE_Int              fem_rhsadd_nboxes;
    ProblemIndex          *fem_rhsadd_ilowers;
    ProblemIndex          *fem_rhsadd_iuppers;
-   double               **fem_rhsadd_values;
+   HYPRE_Real           **fem_rhsadd_values;
 
    Index                  periodic;
 
@@ -198,23 +198,23 @@ typedef struct
    HYPRE_Int       *stencil_sizes;
    Index          **stencil_offsets;
    HYPRE_Int      **stencil_vars;
-   double         **stencil_values;
+   HYPRE_Real     **stencil_values;
 
    HYPRE_Int        rhs_true;
-   double           rhs_value;
+   HYPRE_Real       rhs_value;
 
    HYPRE_Int        fem_nvars;
    Index           *fem_offsets;
    HYPRE_Int       *fem_vars;
-   double         **fem_values_full;
+   HYPRE_Real     **fem_values_full;
    HYPRE_Int      **fem_ivalues_full;
    HYPRE_Int       *fem_ordering; /* same info as vars/offsets */
    HYPRE_Int        fem_nsparse;  /* number of nonzeros in values_full */
    HYPRE_Int       *fem_sparsity; /* nonzeros in values_full */
-   double          *fem_values;   /* nonzero values in values_full */
+   HYPRE_Real      *fem_values;   /* nonzero values in values_full */
 
    HYPRE_Int        fem_rhs_true;
-   double          *fem_rhs_values;
+   HYPRE_Real      *fem_rhs_values;
 
    HYPRE_Int        symmetric_num;
    HYPRE_Int       *symmetric_parts;
@@ -312,7 +312,7 @@ HYPRE_Int
 SScanDblArray( char   *sdata_ptr,
                char  **sdata_ptr_ptr,
                HYPRE_Int     size,
-               double *array )
+               HYPRE_Real *array )
 {
    HYPRE_Int i;
                                                                                                                            
@@ -663,7 +663,7 @@ ReadData( char         *filename,
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int, data.nstencils);
             data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
             data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *, data.nstencils);
-            data.stencil_values  = hypre_CTAlloc(double *, data.nstencils);
+            data.stencil_values  = hypre_CTAlloc(HYPRE_Real *, data.nstencils);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.nstencils, data.stencil_sizes);
             for (s = 0; s < data.nstencils; s++)
@@ -673,7 +673,7 @@ ReadData( char         *filename,
                data.stencil_vars[s] =
                   hypre_CTAlloc(HYPRE_Int, data.stencil_sizes[s]);
                data.stencil_values[s] =
-                  hypre_CTAlloc(double, data.stencil_sizes[s]);
+                  hypre_CTAlloc(HYPRE_Real, data.stencil_sizes[s]);
             }
          }
          else if ( strcmp(key, "StencilSetEntry:") == 0 )
@@ -707,10 +707,10 @@ ReadData( char         *filename,
             data.fem_nvars = strtol(sdata_ptr, &sdata_ptr, 10);
             data.fem_offsets = hypre_CTAlloc(Index, data.fem_nvars);
             data.fem_vars = hypre_CTAlloc(HYPRE_Int, data.fem_nvars);
-            data.fem_values_full = hypre_CTAlloc(double *, data.fem_nvars);
+            data.fem_values_full = hypre_CTAlloc(HYPRE_Real *, data.fem_nvars);
             for (i = 0; i < data.fem_nvars; i++)
             {
-               data.fem_values_full[i] = hypre_CTAlloc(double, data.fem_nvars);
+               data.fem_values_full[i] = hypre_CTAlloc(HYPRE_Real, data.fem_nvars);
             }
          }
          else if ( strcmp(key, "FEMStencilSetRow:") == 0 )
@@ -731,7 +731,7 @@ ReadData( char         *filename,
             if (data.fem_rhs_true == 0)
             {
                data.fem_rhs_true = 1;
-               data.fem_rhs_values = hypre_CTAlloc(double, data.fem_nvars);
+               data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars);
             }
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_rhs_values);
@@ -781,7 +781,7 @@ ReadData( char         *filename,
                pdata.graph_entries =
                   hypre_TReAlloc(pdata.graph_entries, HYPRE_Int, size);
                pdata.graph_values =
-                  hypre_TReAlloc(pdata.graph_values, double, size);
+                  hypre_TReAlloc(pdata.graph_values, HYPRE_Real, size);
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes, HYPRE_Int, size);
             }
@@ -886,7 +886,7 @@ ReadData( char         *filename,
                pdata.matset_entries =
                   hypre_TReAlloc(pdata.matset_entries, HYPRE_Int, size);
                pdata.matset_values =
-                  hypre_TReAlloc(pdata.matset_values, double, size);
+                  hypre_TReAlloc(pdata.matset_values, HYPRE_Real, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matset_ilowers[pdata.matset_nboxes]);
@@ -925,7 +925,7 @@ ReadData( char         *filename,
                pdata.matadd_entries=
                   hypre_TReAlloc(pdata.matadd_entries, HYPRE_Int *, size);
                pdata.matadd_values=
-                  hypre_TReAlloc(pdata.matadd_values, double *, size);
+                  hypre_TReAlloc(pdata.matadd_values, HYPRE_Real *, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matadd_ilowers[pdata.matadd_nboxes]);
@@ -940,9 +940,9 @@ ReadData( char         *filename,
             SScanIntArray(sdata_ptr, &sdata_ptr, i,
                           (HYPRE_Int*) pdata.matadd_entries[pdata.matadd_nboxes]);
             pdata.matadd_values[pdata.matadd_nboxes] =
-               hypre_TAlloc(double, i);
+               hypre_TAlloc(HYPRE_Real, i);
             SScanDblArray(sdata_ptr, &sdata_ptr, i,
-                          (double *) pdata.matadd_values[pdata.matadd_nboxes]);
+                          (HYPRE_Real *) pdata.matadd_values[pdata.matadd_nboxes]);
             pdata.matadd_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -966,7 +966,7 @@ ReadData( char         *filename,
                pdata.fem_matadd_cols=
                   hypre_TReAlloc(pdata.fem_matadd_cols, HYPRE_Int *, size);
                pdata.fem_matadd_values=
-                  hypre_TReAlloc(pdata.fem_matadd_values, double *, size);
+                  hypre_TReAlloc(pdata.fem_matadd_values, HYPRE_Real *, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_matadd_ilowers[pdata.fem_matadd_nboxes]);
@@ -983,9 +983,9 @@ ReadData( char         *filename,
             SScanIntArray(sdata_ptr, &sdata_ptr, j,
                           (HYPRE_Int*) pdata.fem_matadd_cols[pdata.fem_matadd_nboxes]);
             pdata.fem_matadd_values[pdata.fem_matadd_nboxes] =
-               hypre_TAlloc(double, i*j);
+               hypre_TAlloc(HYPRE_Real, i*j);
             SScanDblArray(sdata_ptr, &sdata_ptr, i*j,
-                          (double *) pdata.fem_matadd_values[pdata.fem_matadd_nboxes]);
+                          (HYPRE_Real *) pdata.fem_matadd_values[pdata.fem_matadd_nboxes]);
             pdata.fem_matadd_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -1003,7 +1003,7 @@ ReadData( char         *filename,
                pdata.rhsadd_vars=
                   hypre_TReAlloc(pdata.rhsadd_vars, HYPRE_Int, size);
                pdata.rhsadd_values=
-                  hypre_TReAlloc(pdata.rhsadd_values, double, size);
+                  hypre_TReAlloc(pdata.rhsadd_values, HYPRE_Real, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.rhsadd_ilowers[pdata.rhsadd_nboxes]);
@@ -1028,16 +1028,16 @@ ReadData( char         *filename,
                pdata.fem_rhsadd_iuppers=
                   hypre_TReAlloc(pdata.fem_rhsadd_iuppers, ProblemIndex, size);
                pdata.fem_rhsadd_values=
-                  hypre_TReAlloc(pdata.fem_rhsadd_values, double *, size);
+                  hypre_TReAlloc(pdata.fem_rhsadd_values, HYPRE_Real *, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_rhsadd_ilowers[pdata.fem_rhsadd_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_rhsadd_iuppers[pdata.fem_rhsadd_nboxes]);
             pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes] =
-               hypre_TAlloc(double, data.fem_nvars);
+               hypre_TAlloc(HYPRE_Real, data.fem_nvars);
             SScanDblArray(sdata_ptr, &sdata_ptr, data.fem_nvars,
-                          (double *) pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes]);
+                          (HYPRE_Real *) pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes]);
             pdata.fem_rhsadd_nboxes++;
             data.pdata[part] = pdata;
          }
@@ -1083,7 +1083,7 @@ ReadData( char         *filename,
       data.fem_ivalues_full = hypre_CTAlloc(HYPRE_Int *, data.fem_nvars);
       data.fem_ordering = hypre_CTAlloc(HYPRE_Int, (1+data.ndim)*data.fem_nvars);
       data.fem_sparsity = hypre_CTAlloc(HYPRE_Int, 2*data.fem_nvars*data.fem_nvars);
-      data.fem_values   = hypre_CTAlloc(double, data.fem_nvars*data.fem_nvars);
+      data.fem_values   = hypre_CTAlloc(HYPRE_Real, data.fem_nvars*data.fem_nvars);
 
       for (i = 0; i < data.fem_nvars; i++)
       {
@@ -1177,7 +1177,7 @@ DistributeData( ProblemData   global_data,
    HYPRE_Int        pool, part, box, b, p, q, r, i, d;
    HYPRE_Int        dmap, sign, size;
    HYPRE_Int       *iptr;
-   double          *dptr;
+   HYPRE_Real      *dptr;
    Index            m, mmap, n;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
 
@@ -2104,10 +2104,10 @@ DestroyData( ProblemData   data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-SetCosineVector(   double  scale,
+SetCosineVector(   HYPRE_Real  scale,
                    Index   ilower,
                    Index   iupper,
-                   double *values)
+                   HYPRE_Real *values)
 {
    HYPRE_Int    i, j, k;
    HYPRE_Int    count = 0;
@@ -2299,7 +2299,7 @@ main( hypre_int argc,
    HYPRE_Int             solver_id, object_type;
    HYPRE_Int             print_system;
    HYPRE_Int             cosine;
-   double                scale;
+   HYPRE_Real            scale;
                         
    HYPRE_SStructGrid     grid, G_grid;
    HYPRE_SStructStencil *stencils, *G_stencils;
@@ -2324,10 +2324,10 @@ main( hypre_int argc,
 
    Index                 ilower, iupper;
    Index                 index, to_index;
-   double               *values;
+   HYPRE_Real           *values;
 
    HYPRE_Int             num_iterations;
-   double                final_res_norm;
+   HYPRE_Real            final_res_norm;
                          
    HYPRE_Int             num_procs, myid;
    HYPRE_Int             time_index;
@@ -2337,12 +2337,12 @@ main( hypre_int argc,
    HYPRE_Int             sym;
    HYPRE_Int             rap;
    HYPRE_Int             relax;
-   double                jacobi_weight;
+   HYPRE_Real            jacobi_weight;
    HYPRE_Int             usr_jacobi_weight;
    HYPRE_Int             jump;
    HYPRE_Int             solver_type;
 
-   double                cf_tol;
+   HYPRE_Real            cf_tol;
 
    HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
    HYPRE_Int             row, col;
@@ -2362,17 +2362,17 @@ main( hypre_int argc,
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
-   double tol = 1e-6;
-   double pcgTol = 1e-2;
-   double nonOrthF;
+   HYPRE_Real tol = 1e-6;
+   HYPRE_Real pcgTol = 1e-2;
+   HYPRE_Real nonOrthF;
 
    FILE* filePtr;
 
    mv_MultiVectorPtr eigenvectors = NULL;
    mv_MultiVectorPtr constrains = NULL;
-   double* eigenvalues = NULL;
+   HYPRE_Real* eigenvalues = NULL;
 
-   double* residuals;
+   HYPRE_Real* residuals;
    utilities_FortranMatrix* residualNorms;
    utilities_FortranMatrix* residualNormsHistory;
    utilities_FortranMatrix* eigenvaluesHistory;
@@ -2874,8 +2874,13 @@ main( hypre_int argc,
                      k = index[i] - pdata.graph_ilowers[box][i];
                      k /= pdata.graph_strides[box][i];
                      k *= pdata.graph_index_signs[box][i];
+#if 0 /* the following does not work with some Intel compilers with -O2 */
                      to_index[j] = pdata.graph_to_ilowers[box][j] +
                         k * pdata.graph_to_strides[box][j];
+#else
+                     to_index[j] = pdata.graph_to_ilowers[box][j];
+                     to_index[j] += k * pdata.graph_to_strides[box][j];
+#endif
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
                                                pdata.graph_vars[box],
@@ -2894,7 +2899,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(double, hypre_max(data.max_boxsize, data.fem_nsparse));
+   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse));
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3351,7 +3356,7 @@ main( hypre_int argc,
       HYPRE_Int offsets[3][2][3] = { {{0,0,0}, {-1,0,0}},
                                      {{0,0,0}, {0,-1,0}},
                                      {{0,0,0}, {0,0,-1}} };
-      double stencil_values[2] = {1.0, -1.0};
+      HYPRE_Real stencil_values[2] = {1.0, -1.0};
 
       /* Set up the domain grid */
 
@@ -3855,7 +3860,7 @@ main( hypre_int argc,
          eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                               blockSize, 
                                                               x );
-         eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+         eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
        
          if ( lobpcgSeed )
             mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -4025,7 +4030,7 @@ main( hypre_int argc,
          eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                               blockSize, 
                                                               x );
-         eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+         eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
        
          if ( lobpcgSeed )
             mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -5060,14 +5065,7 @@ main( hypre_int argc,
       else if (solver_id == 218)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif
          HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -5341,14 +5339,7 @@ main( hypre_int argc,
       else if (solver_id == 238)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -5494,14 +5485,7 @@ main( hypre_int argc,
       else if (solver_id == 248)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -5569,7 +5553,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
 
       /* print out with shared data replicated */
-      values = hypre_TAlloc(double, data.max_boxsize);
+      values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
       for (part = 0; part < data.nparts; part++)
       {
          pdata = data.pdata[part];

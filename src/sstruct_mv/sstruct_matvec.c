@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -96,10 +93,10 @@ hypre_SStructPMatvecSetup( void                 *pmatvec_vdata,
 
 HYPRE_Int
 hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
-                             double                alpha,
+                             HYPRE_Complex         alpha,
                              hypre_SStructPMatrix *pA,
                              hypre_SStructPVector *px,
-                             double                beta,
+                             HYPRE_Complex         beta,
                              hypre_SStructPVector *py )
 {
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
@@ -185,10 +182,10 @@ hypre_SStructPMatvecDestroy( void *pmatvec_vdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructPMatvec( double                alpha,
+hypre_SStructPMatvec( HYPRE_Complex         alpha,
                       hypre_SStructPMatrix *pA,
                       hypre_SStructPVector *px,
-                      double                beta,
+                      HYPRE_Complex         beta,
                       hypre_SStructPVector *py )
 {
    void *pmatvec_data;
@@ -268,10 +265,10 @@ hypre_SStructMatvecSetup( void                *matvec_vdata,
 
 HYPRE_Int
 hypre_SStructMatvecCompute( void                *matvec_vdata,
-                            double               alpha,
+                            HYPRE_Complex        alpha,
                             hypre_SStructMatrix *A,
                             hypre_SStructVector *x,
-                            double               beta,
+                            HYPRE_Complex        beta,
                             hypre_SStructVector *y )
 {
    hypre_SStructMatvecData  *matvec_data  = matvec_vdata;
@@ -310,7 +307,7 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
          hypre_SStructPMatvecCompute(pdata, alpha, pA, px, beta, py);
       }
 
-      if ( (x_object_type == HYPRE_SSTRUCT) )
+      if (x_object_type == HYPRE_SSTRUCT)
       {
 
          /* do U-matrix computations */
@@ -384,10 +381,10 @@ hypre_SStructMatvecDestroy( void *matvec_vdata )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructMatvec( double               alpha,
+hypre_SStructMatvec( HYPRE_Complex        alpha,
                      hypre_SStructMatrix *A,
                      hypre_SStructVector *x,
-                     double               beta,
+                     HYPRE_Complex        beta,
                      hypre_SStructVector *y )
 {
    void *matvec_data;

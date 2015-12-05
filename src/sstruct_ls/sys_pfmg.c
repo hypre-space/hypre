@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -125,7 +125,7 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
 
 HYPRE_Int
 hypre_SysPFMGSetTol( void   *sys_pfmg_vdata,
-                     double  tol       )
+                     HYPRE_Real  tol       )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
  
@@ -194,7 +194,7 @@ hypre_SysPFMGSetRelaxType( void *sys_pfmg_vdata,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
-                              double weight )
+                              HYPRE_Real weight )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
                                                                                                                                      
@@ -251,7 +251,7 @@ hypre_SysPFMGSetSkipRelax( void *sys_pfmg_vdata,
 
 HYPRE_Int
 hypre_SysPFMGSetDxyz( void   *sys_pfmg_vdata,
-                      double *dxyz       )
+                      HYPRE_Real *dxyz       )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
 
@@ -316,8 +316,8 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
    HYPRE_Int          num_iterations  = (sys_pfmg_data -> num_iterations);
    HYPRE_Int          logging   = (sys_pfmg_data -> logging);
    HYPRE_Int          print_level   = (sys_pfmg_data -> print_level);
-   double            *norms     = (sys_pfmg_data -> norms);
-   double            *rel_norms = (sys_pfmg_data -> rel_norms);
+   HYPRE_Real        *norms     = (sys_pfmg_data -> norms);
+   HYPRE_Real        *rel_norms = (sys_pfmg_data -> rel_norms);
 
    if (myid == 0)
    {
@@ -342,14 +342,14 @@ hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
 
 HYPRE_Int
 hypre_SysPFMGGetFinalRelativeResidualNorm( void   *sys_pfmg_vdata,
-                                           double *relative_residual_norm )
+                                           HYPRE_Real *relative_residual_norm )
 {
    hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
 
    HYPRE_Int          max_iter        = (sys_pfmg_data -> max_iter);
    HYPRE_Int          num_iterations  = (sys_pfmg_data -> num_iterations);
    HYPRE_Int          logging         = (sys_pfmg_data -> logging);
-   double            *rel_norms       = (sys_pfmg_data -> rel_norms);
+   HYPRE_Real        *rel_norms       = (sys_pfmg_data -> rel_norms);
             
    if (logging > 0)
    {

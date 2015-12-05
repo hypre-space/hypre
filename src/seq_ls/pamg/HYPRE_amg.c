@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -92,7 +92,7 @@ HYPRE_AMGSetMaxLevels( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
-                             double       strong_threshold  )
+                             HYPRE_Real   strong_threshold  )
 {
    return( hypre_AMGSetStrongThreshold( (void *) solver, strong_threshold ) );
 }
@@ -114,7 +114,7 @@ HYPRE_AMGSetMode( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_AMGSetATruncFactor( HYPRE_Solver solver,
-                          double       A_trunc_factor)
+                          HYPRE_Real   A_trunc_factor)
 {
    return( hypre_AMGSetATruncFactor( (void *) solver, A_trunc_factor ) );
 }
@@ -136,7 +136,7 @@ HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver,
-                          double       P_trunc_factor)
+                          HYPRE_Real   P_trunc_factor)
 {
    return( hypre_AMGSetPTruncFactor( (void *) solver, P_trunc_factor ) );
 }
@@ -246,7 +246,7 @@ HYPRE_AMGSetCycleType( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_AMGSetTol( HYPRE_Solver solver,
-                 double       tol    )
+                 HYPRE_Real   tol    )
 {
    return( hypre_AMGSetTol( (void *) solver, tol ) );
 }
@@ -301,7 +301,7 @@ HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver   solver,
 
 HYPRE_Int
 HYPRE_AMGSetRelaxWeight( HYPRE_Solver   solver,
-                         double        *relax_weight  )
+                         HYPRE_Real    *relax_weight  )
 {
    return( hypre_AMGSetRelaxWeight( (void *) solver, relax_weight ) );
 }

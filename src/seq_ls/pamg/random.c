@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -64,11 +64,11 @@ void  hypre_SeedRand( HYPRE_Int seed )
  * Computes the next pseudo-random number in the sequence using the global
  * variable Seed.
  *
- * @return a double containing the next number in the sequence divided by
+ * @return a HYPRE_Real containing the next number in the sequence divided by
  * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
 
-double  hypre_Rand()
+HYPRE_Real  hypre_Rand()
 {
    HYPRE_Int  low, high, test;
 
@@ -84,5 +84,5 @@ double  hypre_Rand()
       Seed = test + m;
    }
 
-   return ((double)(Seed) / m);
+   return ((HYPRE_Real)(Seed) / m);
 }

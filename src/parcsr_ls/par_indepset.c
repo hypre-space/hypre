@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -39,7 +39,7 @@
 
 HYPRE_Int
 hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
-                          double             *measure_array ,
+                          HYPRE_Real         *measure_array ,
                           HYPRE_Int   seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
@@ -105,7 +105,7 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
 
 HYPRE_Int
 hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
-                      double             *measure_array,
+                      HYPRE_Real         *measure_array,
                       HYPRE_Int                *graph_array,
                       HYPRE_Int                 graph_array_size,
                       HYPRE_Int                *graph_array_offd,

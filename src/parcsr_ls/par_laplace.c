@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -31,7 +31,7 @@ GenerateLaplacian( MPI_Comm comm,
                    HYPRE_Int      p,
                    HYPRE_Int      q,
                    HYPRE_Int      r,
-                   double  *value )
+                   HYPRE_Real  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -39,11 +39,11 @@ GenerateLaplacian( MPI_Comm comm,
 
    HYPRE_Int    *diag_i;
    HYPRE_Int    *diag_j;
-   double *diag_data;
+   HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
-   HYPRE_Int    *offd_j;
-   double *offd_data;
+   HYPRE_Int    *offd_j = NULL;
+   HYPRE_Real *offd_data = NULL;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;
@@ -195,12 +195,12 @@ GenerateLaplacian( MPI_Comm comm,
    }
 
    diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
       offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
    }
 
    row_index = 0;
@@ -417,8 +417,8 @@ GenerateSysLaplacian( MPI_Comm comm,
                       HYPRE_Int      q,
                       HYPRE_Int      r,
                       HYPRE_Int      num_fun,
-                      double  *mtrx,
-                      double  *value )
+                      HYPRE_Real  *mtrx,
+                      HYPRE_Real  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -426,11 +426,11 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    HYPRE_Int    *diag_i;
    HYPRE_Int    *diag_j;
-   double *diag_data;
+   HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j;
-   double *offd_data;
+   HYPRE_Real *offd_data;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;
@@ -455,7 +455,7 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    HYPRE_Int num_procs, my_id;
    HYPRE_Int P_busy, Q_busy, R_busy;
-   double val;
+   HYPRE_Real val;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -594,12 +594,12 @@ GenerateSysLaplacian( MPI_Comm comm,
    }
 
    diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
       offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
    }
 
    row_index = 0;
@@ -922,8 +922,8 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
                       HYPRE_Int      q,
                       HYPRE_Int      r,
                       HYPRE_Int      num_fun,
-                      double  *mtrx,
-                      double  *value )
+                      HYPRE_Real  *mtrx,
+                      HYPRE_Real  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
@@ -931,11 +931,11 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 
    HYPRE_Int    *diag_i;
    HYPRE_Int    *diag_j;
-   double *diag_data;
+   HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j;
-   double *offd_data;
+   HYPRE_Real *offd_data;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;
@@ -960,7 +960,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 
    HYPRE_Int num_procs, my_id;
    HYPRE_Int P_busy, Q_busy, R_busy;
-   double val;
+   HYPRE_Real val;
 
   /* for indexing in values */
    HYPRE_Int sz = num_fun*num_fun;
@@ -1102,12 +1102,12 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
    }
 
    diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
       offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
    }
 
    row_index = 0;

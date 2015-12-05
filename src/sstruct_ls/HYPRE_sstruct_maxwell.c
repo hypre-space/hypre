@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -130,7 +130,7 @@ HYPRE_SStructMaxwellSetRfactors( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SStructMaxwellSetTol( HYPRE_SStructSolver solver,
-                            double              tol    )
+                            HYPRE_Real          tol    )
 {
    return( hypre_MaxwellSetTol( (void *) solver, tol ) );
 }
@@ -230,7 +230,7 @@ HYPRE_SStructMaxwellGetNumIterations( HYPRE_SStructSolver  solver,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SStructMaxwellGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                                  double              *norm   )
+                                                  HYPRE_Real          *norm   )
 {
    return( hypre_MaxwellGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

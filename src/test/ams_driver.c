@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*
@@ -21,6 +21,7 @@
 
 /* hypre/AMS prototypes */
 #include "_hypre_parcsr_ls.h"
+#include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
 
 void CheckIfFileExists(char *file)
@@ -35,6 +36,70 @@ void CheckIfFileExists(char *file)
    fclose(test);
 }
 
+void AMSDriverMatrixRead(char *file, HYPRE_ParCSRMatrix *A)
+{
+   FILE *test;
+   char file0[100];
+   sprintf(file0,"%s.D.0",file);
+   if (!(test = fopen(file0,"r")))
+   {
+      sprintf(file0,"%s.00000",file);
+      if (!(test = fopen(file0,"r")))
+      {
+         hypre_MPI_Finalize();
+         hypre_printf("Can't find the input file \"%s\"\n",file);
+         exit(1);
+      }
+      else /* Read in IJ format*/
+      {
+         HYPRE_IJMatrix ij_A;
+         void *object;
+         HYPRE_IJMatrixRead(file, hypre_MPI_COMM_WORLD, HYPRE_PARCSR, &ij_A);
+         HYPRE_IJMatrixGetObject(ij_A, &object);
+         *A = (HYPRE_ParCSRMatrix) object;
+         hypre_IJMatrixObject((hypre_IJMatrix *)ij_A) = NULL;
+         HYPRE_IJMatrixDestroy(ij_A);
+      }
+   }
+   else /* Read in ParCSR format*/
+   {
+      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, file, A);
+   }
+   fclose(test);
+}
+
+void AMSDriverVectorRead(char *file, HYPRE_ParVector *x)
+{
+   FILE *test;
+   char file0[100];
+   sprintf(file0,"%s.0",file);
+   if (!(test = fopen(file0,"r")))
+   {
+      sprintf(file0,"%s.00000",file);
+      if (!(test = fopen(file0,"r")))
+      {
+         hypre_MPI_Finalize();
+         hypre_printf("Can't find the input file \"%s\"\n",file);
+         exit(1);
+      }
+      else /* Read in IJ format*/
+      {
+         HYPRE_IJVector ij_x;
+         void *object;
+         HYPRE_IJVectorRead(file, hypre_MPI_COMM_WORLD, HYPRE_PARCSR, &ij_x);
+         HYPRE_IJVectorGetObject(ij_x, &object);
+         *x = (HYPRE_ParVector) object;
+         hypre_IJVectorObject((hypre_IJVector *)ij_x) = NULL;
+         HYPRE_IJVectorDestroy(ij_x);
+      }
+   }
+   else /* Read in ParCSR format*/
+   {
+      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, file, x);
+   }
+   fclose(test);
+}
+
 hypre_int main (hypre_int argc, char *argv[])
 {
    HYPRE_Int num_procs, myid;
@@ -42,11 +107,11 @@ hypre_int main (hypre_int argc, char *argv[])
 
    HYPRE_Int solver_id;
    HYPRE_Int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
-   double rlx_weight, rlx_omega;
+   HYPRE_Real rlx_weight, rlx_omega;
    HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
    HYPRE_Int h1_method, singular_problem, coordinates;
-   double tol, theta;
-   double rtol;
+   HYPRE_Real tol, theta;
+   HYPRE_Real rtol;
    HYPRE_Int rr;
    HYPRE_Int zero_cond;
    HYPRE_Int blockSize;
@@ -74,7 +139,7 @@ hypre_int main (hypre_int argc, char *argv[])
    singular_problem = 0;
    rlx_type = 2; rlx_sweeps = 1;
    rlx_weight = 1.0; rlx_omega = 1.0;
-   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 6;       /* HMIS-1 */
+   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 8;       /* HMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 0; amg_rlx_type = 3; */ /* HMIS-0 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
@@ -269,53 +334,39 @@ hypre_int main (hypre_int argc, char *argv[])
       }
    }
 
-   CheckIfFileExists("aFEM.A.D.0");
-   CheckIfFileExists("aFEM.x0.0");
-   CheckIfFileExists("aFEM.b.0");
-   CheckIfFileExists("aFEM.G.D.0");
-
-   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.A", &A);
-   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.x0", &x0);
-   HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.b", &b);
-   HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.G", &G);
+   AMSDriverMatrixRead("mfem.A", &A);
+   AMSDriverVectorRead("mfem.x0", &x0);
+   AMSDriverVectorRead("mfem.b", &b);
+   AMSDriverMatrixRead("mfem.G", &G);
 
    /* Vectors Gx, Gy and Gz */
    if (!coordinates)
    {
-      CheckIfFileExists("aFEM.Gx.0");
-      CheckIfFileExists("aFEM.Gy.0");
-      CheckIfFileExists("aFEM.Gz.0");
-      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.Gx", &Gx);
-      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.Gy", &Gy);
+      AMSDriverVectorRead("mfem.Gx", &Gx);
+      AMSDriverVectorRead("mfem.Gy", &Gy);
       if (dim == 3)
-         HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.Gz", &Gz);
+         AMSDriverVectorRead("mfem.Gz", &Gz);
    }
 
    /* Vectors x, y and z */
    if (coordinates)
    {
-      CheckIfFileExists("aFEM.x.0");
-      CheckIfFileExists("aFEM.y.0");
-      CheckIfFileExists("aFEM.z.0");
-      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.x", &x);
-      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.y", &y);
+      AMSDriverVectorRead("mfem.x", &x);
+      AMSDriverVectorRead("mfem.y", &y);
       if (dim == 3)
-         HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.z", &z);
+         AMSDriverVectorRead("mfem.z", &z);
    }
 
    /* Poisson matrices */
    if (h1_method)
    {
-      CheckIfFileExists("aFEM.Aalpha.D.0");
-      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
-      CheckIfFileExists("aFEM.Abeta.D.0");
-      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
+      AMSDriverMatrixRead("mfem.Aalpha", &Aalpha);
+      AMSDriverMatrixRead("mfem.Abeta", &Abeta);
    }
 
    if (zero_cond)
    {
-      CheckIfFileExists("aFEM.inodes.0");
-      HYPRE_ParVectorRead(hypre_MPI_COMM_WORLD, "aFEM.inodes", &interior_nodes);
+      AMSDriverVectorRead("mfem.inodes", &interior_nodes);
    }
 
    if (!myid)
@@ -328,7 +379,7 @@ hypre_int main (hypre_int argc, char *argv[])
    if (solver_id == 0)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Start timing */
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
@@ -453,7 +504,7 @@ hypre_int main (hypre_int argc, char *argv[])
    else if (solver_id == 1 || solver_id == 3 || solver_id == 4)
    {
       HYPRE_Int num_iterations;
-      double final_res_norm;
+      HYPRE_Real final_res_norm;
 
       /* Start timing */
       if (solver_id == 1)
@@ -601,8 +652,7 @@ hypre_int main (hypre_int argc, char *argv[])
 
    if (solver_id == 5)
    {
-      CheckIfFileExists("aFEM.M.D.0");
-      HYPRE_ParCSRMatrixRead(hypre_MPI_COMM_WORLD, "aFEM.M", &M);
+      AMSDriverMatrixRead("mfem.M", &M);
 
       time_index = hypre_InitializeTiming("AME Setup");
       hypre_BeginTiming(time_index);

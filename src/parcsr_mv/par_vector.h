@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -28,7 +28,11 @@
  * hypre_ParVector
  *--------------------------------------------------------------------------*/
 
-typedef struct
+#ifndef HYPRE_PAR_VECTOR_STRUCT
+#define HYPRE_PAR_VECTOR_STRUCT
+#endif
+
+typedef struct hypre_ParVector_struct
 {
    MPI_Comm	 comm;
 

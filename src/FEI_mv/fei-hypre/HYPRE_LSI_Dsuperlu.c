@@ -1,31 +1,14 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2007, Lawrence Livermore National Security, LLC.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -195,8 +178,11 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       options->PrintStat         = YES;
    */
    sluPtr->options_.Fact = DOFACT;
-   sluPtr->options_.Equil = NO;
-   sluPtr->options_.IterRefine = DOUBLE;
+   sluPtr->options_.Equil = YES;
+   sluPtr->options_.IterRefine = SLU_DOUBLE;
+   sluPtr->options_.ColPerm = MMD_AT_PLUS_A;
+   sluPtr->options_.DiagPivotThresh = 1.0;
+   sluPtr->options_.ReplaceTinyPivot = NO;
    if (sluPtr->outputLevel_ < 2) sluPtr->options_.PrintStat = NO;
    ScalePermstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_,
                        &(sluPtr->ScalePermstruct_));

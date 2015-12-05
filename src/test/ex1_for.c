@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.4 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*
@@ -54,7 +54,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
         HYPRE_Int one = 1;
         HYPRE_Int two = 2;
         HYPRE_Int five = 5;
-     double tol = 1.e-6;
+     HYPRE_Real tol = 1.e-6;
 #else
    HYPRE_StructGrid     grid;
    HYPRE_StructStencil  stencil;
@@ -164,7 +164,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                                   defined above */
          HYPRE_Int nentries = 5;
          HYPRE_Int nvalues  = 30; /* 6 grid points, each with 5 stencil entries */
-         double values[30];
+         HYPRE_Real values[30];
 
          /* We have 6 grid points, each with 5 stencil entries */
          for (i = 0; i < nvalues; i += nentries)
@@ -188,7 +188,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_Int stencil_indices[5] = {0,1,2,3,4};
          HYPRE_Int nentries = 5;
          HYPRE_Int nvalues  = 60; /* 12 grid points, each with 5 stencil entries */
-         double values[60];
+         HYPRE_Real values[60];
 
          for (i = 0; i < nvalues; i += nentries)
          {
@@ -209,7 +209,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Set the coefficients reaching outside of the boundary to 0 */
       if (myid == 0)
       {
-         double values[3];
+         HYPRE_Real values[3];
          for (i = 0; i < 3; i++)
             values[i] = 0.0;
          {
@@ -251,7 +251,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       }
       else if (myid == 1)
       {
-         double values[4];
+         HYPRE_Real values[4];
          for (i = 0; i < 4; i++)
             values[i] = 0.0;
          {
@@ -339,7 +339,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       if (myid == 0)
       {
          HYPRE_Int ilower[2]={-3,1}, iupper[2]={-1,2};
-         double values[6]; /* 6 grid points */
+         HYPRE_Real values[6]; /* 6 grid points */
 
          for (i = 0; i < 6; i ++)
             values[i] = 1.0;
@@ -360,7 +360,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else if (myid == 1)
       {
          HYPRE_Int ilower[2]={0,1}, iupper[2]={2,4};
-         double values[12]; /* 12 grid points */
+         HYPRE_Real values[12]; /* 12 grid points */
 
          for (i = 0; i < 12; i ++)
             values[i] = 1.0;

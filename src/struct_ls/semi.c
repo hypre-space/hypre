@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -66,7 +66,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    }
 
    /* set num_ghost */
-   dim = hypre_StructGridDim(grid);
+   dim = hypre_StructGridNDim(grid);
    for (j = 0; j < dim; j++)
    {
       num_ghost[2*j]   = 1;
@@ -93,11 +93,11 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
       {
          case 0:
             box_aa = hypre_CommInfoSendBoxes(comm_info);
-            hypre_SetIndex(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
+            hypre_SetIndex3(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
             break;
          case 1:
             box_aa = hypre_CommInfoRecvBoxes(comm_info);
-            hypre_SetIndex(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
+            hypre_SetIndex3(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
             break;
          case 2:
             box_aa = hypre_CommInfoSendRBoxes(comm_info);

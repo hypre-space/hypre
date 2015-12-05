@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -82,7 +82,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)
      hypre_F90_IntArray *ncols,
      hypre_F90_IntArray *rows,
      hypre_F90_IntArray *cols,
-     hypre_F90_DblArray *values,
+     hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
@@ -92,7 +92,7 @@ hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)
            hypre_F90_PassIntArray (ncols),
            hypre_F90_PassIntArray (rows),
            hypre_F90_PassIntArray (cols),
-           hypre_F90_PassDblArray (values)  ) );
+           hypre_F90_PassComplexArray (values)  ) );
 
 }
 
@@ -107,7 +107,7 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)
      hypre_F90_IntArray *ncols,
      hypre_F90_IntArray *rows,
      hypre_F90_IntArray *cols,
-     hypre_F90_DblArray *values,
+     hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
@@ -117,7 +117,7 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)
            hypre_F90_PassIntArray (ncols),
            hypre_F90_PassIntArray (rows),
            hypre_F90_PassIntArray (cols),
-           hypre_F90_PassDblArray (values)  ) );
+           hypre_F90_PassComplexArray (values)  ) );
 
 }
 
@@ -166,7 +166,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
      hypre_F90_IntArray *ncols,
      hypre_F90_IntArray *rows,
      hypre_F90_IntArray *cols,
-     hypre_F90_DblArray *values,
+     hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
@@ -176,7 +176,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
            hypre_F90_PassIntArray (ncols),
            hypre_F90_PassIntArray (rows),
            hypre_F90_PassIntArray (cols),
-           hypre_F90_PassDblArray (values)  ) );
+           hypre_F90_PassComplexArray (values)  ) );
 
 }
 

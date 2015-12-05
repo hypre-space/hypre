@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -75,7 +75,7 @@ HYPRE_StructLGMRESSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructLGMRESSetTol( HYPRE_StructSolver solver,
-                          double             tol    )
+                          HYPRE_Real         tol    )
 {
    return( HYPRE_LGMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -83,7 +83,7 @@ HYPRE_StructLGMRESSetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructLGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
-                                  double             tol    )
+                                  HYPRE_Real         tol    )
 {
    return( HYPRE_LGMRESSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -162,7 +162,7 @@ HYPRE_StructLGMRESGetNumIterations( HYPRE_StructSolver  solver,
 
 HYPRE_Int
 HYPRE_StructLGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                                double             *norm   )
+                                                HYPRE_Real         *norm   )
 {
    return( HYPRE_LGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver) solver,
                                                      norm ) );

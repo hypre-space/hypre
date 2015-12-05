@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include <assert.h>
 #include <math.h>
@@ -191,7 +188,7 @@ hypre_TempMultiVectorCopy( void* src, void* dest ) {
 }
 
 void 
-hypre_TempMultiVectorAxpy( double a, void* x_, void* y_ ) { 
+hypre_TempMultiVectorAxpy( HYPRE_Complex a, void* x_, void* y_ ) { 
 	
   HYPRE_Int i, mx, my;
   void** px;
@@ -225,11 +222,11 @@ hypre_TempMultiVectorAxpy( double a, void* x_, void* y_ ) {
 void 
 hypre_TempMultiVectorByMultiVector( void* x_, void* y_,
 				     HYPRE_Int xyGHeight, HYPRE_Int xyHeight, 
-				     HYPRE_Int xyWidth, double* xyVal ) { 
+				     HYPRE_Int xyWidth, HYPRE_Complex* xyVal ) { 
 /* xy = x'*y */	
 
   HYPRE_Int ix, iy, mx, my, jxy;
-  double* p;
+  HYPRE_Complex* p;
   void** px;
   void** py;
   hypre_TempMultiVector* xData;
@@ -267,7 +264,7 @@ hypre_TempMultiVectorByMultiVector( void* x_, void* y_,
 
 void 
 hypre_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
-					 HYPRE_Int* mask, HYPRE_Int n, double* diag ) {
+					 HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag ) {
 /* diag = diag(x'*y) */	
 
   HYPRE_Int i, mx, my, m;
@@ -309,12 +306,12 @@ hypre_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
 void 
 hypre_TempMultiVectorByMatrix( void* x_, 
 			       HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-			       HYPRE_Int rWidth, double* rVal,
+			       HYPRE_Int rWidth, HYPRE_Complex* rVal,
 			       void* y_ ) {
 
   HYPRE_Int i, j, jump;
   HYPRE_Int mx, my;
-  double* p;
+  HYPRE_Complex* p;
   void** px;
   void** py;
   hypre_TempMultiVector* xData;
@@ -352,12 +349,12 @@ hypre_TempMultiVectorByMatrix( void* x_,
 void 
 hypre_TempMultiVectorXapy( void* x_, 
 			   HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-			   HYPRE_Int rWidth, double* rVal,
+			   HYPRE_Int rWidth, HYPRE_Complex* rVal,
 			   void* y_ ) {
 
   HYPRE_Int i, j, jump;
   HYPRE_Int mx, my;
-  double* p;
+  HYPRE_Complex* p;
   void** px;
   void** py;
   hypre_TempMultiVector* xData;
@@ -393,7 +390,7 @@ hypre_TempMultiVectorXapy( void* x_,
 
 void 
 hypre_TempMultiVectorByDiagonal( void* x_, 
-				 HYPRE_Int* mask, HYPRE_Int n, double* diag,
+				 HYPRE_Int* mask, HYPRE_Int n, HYPRE_Complex* diag,
 				 void* y_ ) {
 
   HYPRE_Int j;

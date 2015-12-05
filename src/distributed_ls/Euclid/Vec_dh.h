@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef VEC_DH_H
@@ -17,7 +17,7 @@
 
 struct _vec_dh {
   HYPRE_Int n;
-  double *vals;
+  HYPRE_Real *vals;
 };
 
 extern void Vec_dhCreate(Vec_dh *v);
@@ -37,7 +37,7 @@ extern void Vec_dhCopy(Vec_dh x, Vec_dh y);
          * or Vec_dhCreate and Vec_dhInit.
          */
 
-extern void Vec_dhSet(Vec_dh v, double value);
+extern void Vec_dhSet(Vec_dh v, HYPRE_Real value);
 extern void Vec_dhSetRand(Vec_dh v);
 
 extern void Vec_dhRead(Vec_dh *v, HYPRE_Int ignore, char *filename);

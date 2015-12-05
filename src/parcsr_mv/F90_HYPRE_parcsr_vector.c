@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -145,13 +145,13 @@ hypre_F90_IFACE(hypre_parvectorprint, HYPRE_PARVECTORPRINT)
 void
 hypre_F90_IFACE(hypre_parvectorsetconstantvalue, HYPRE_PARVECTORSETCONSTANTVALUE)
    ( hypre_F90_Obj *vector,
-     hypre_F90_Dbl *value,
+     hypre_F90_Complex *value,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParVectorSetConstantValues(
            hypre_F90_PassObj (HYPRE_ParVector, vector),
-           hypre_F90_PassDbl (value)) );
+           hypre_F90_PassComplex (value)) );
 }
 
 /*--------------------------------------------------------------------------
@@ -208,13 +208,13 @@ hypre_F90_IFACE(hypre_parvectorcloneshallow, HYPRE_PARVECTORCLONESHALLOW)
 
 void
 hypre_F90_IFACE(hypre_parvectorscale, HYPRE_PARVECTORSCALE)
-   ( hypre_F90_Dbl *value,
+   ( hypre_F90_Complex *value,
      hypre_F90_Obj *x,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParVectorScale(
-           hypre_F90_PassDbl (value),
+           hypre_F90_PassComplex (value),
            hypre_F90_PassObj (HYPRE_ParVector, x) ) );
 }
 
@@ -224,14 +224,14 @@ hypre_F90_IFACE(hypre_parvectorscale, HYPRE_PARVECTORSCALE)
 
 void
 hypre_F90_IFACE(hypre_parvectoraxpy, HYPRE_PARVECTORAXPY)
-   ( hypre_F90_Dbl *value,
+   ( hypre_F90_Complex *value,
      hypre_F90_Obj *x,
      hypre_F90_Obj *y,
      hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParVectorAxpy(
-           hypre_F90_PassDbl (value),
+           hypre_F90_PassComplex (value),
            hypre_F90_PassObj (HYPRE_ParVector, x),
            hypre_F90_PassObj (HYPRE_ParVector, y) ) );
 }
@@ -244,12 +244,12 @@ void
 hypre_F90_IFACE(hypre_parvectorinnerprod, HYPRE_PARVECTORINNERPROD)
    (hypre_F90_Obj *x,
     hypre_F90_Obj *y,
-    hypre_F90_Dbl *prod,
+    hypre_F90_Complex *prod,
     hypre_F90_Int *ierr    )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParVectorInnerProd(
            hypre_F90_PassObj (HYPRE_ParVector, x),
            hypre_F90_PassObj (HYPRE_ParVector, y),
-           hypre_F90_PassDblRef (prod) ) );
+           hypre_F90_PassRealRef (prod) ) );
 }

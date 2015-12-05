@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -24,7 +24,7 @@ typedef struct
    MPI_Comm                comm;
                        
    HYPRE_Int               memory_use;
-   double                  tol;
+   HYPRE_Real              tol;
    HYPRE_Int               max_iter;
    HYPRE_Int               zero_guess;
                          
@@ -94,8 +94,8 @@ hypre_SMGRelaxCreate( MPI_Comm  comm )
    (relax_data -> pre_space_ranks)    = NULL;
    (relax_data -> reg_space_ranks)    = hypre_TAlloc(HYPRE_Int, 1);
    (relax_data -> reg_space_ranks[0]) = 0;
-   hypre_SetIndex((relax_data -> base_index), 0, 0, 0);
-   hypre_SetIndex((relax_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex3((relax_data -> base_index), 0, 0, 0);
+   hypre_SetIndex3((relax_data -> base_stride), 1, 1, 1);
    (relax_data -> A)                  = NULL;
    (relax_data -> b)                  = NULL;
    (relax_data -> x)                  = NULL;
@@ -226,7 +226,7 @@ hypre_SMGRelax( void               *relax_vdata,
 
    hypre_IndexRef        base_stride;
    hypre_BoxArray       *base_box_a;
-   double                zero = 0.0;
+   HYPRE_Real            zero = 0.0;
 
    HYPRE_Int             max_iter;
    HYPRE_Int             num_spaces;
@@ -343,7 +343,7 @@ hypre_SMGRelaxSetup( void               *relax_vdata,
    HYPRE_Int            stencil_dim;
    HYPRE_Int            a_sol_test;
 
-   stencil_dim = hypre_StructStencilDim(hypre_StructMatrixStencil(A));
+   stencil_dim = hypre_StructStencilNDim(hypre_StructMatrixStencil(A));
    (relax_data -> stencil_dim) = stencil_dim;
    hypre_StructMatrixDestroy(relax_data -> A);
    hypre_StructVectorDestroy(relax_data -> b);
@@ -447,7 +447,7 @@ hypre_SMGRelaxSetupARem( void               *relax_vdata,
    hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);     
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
-   HYPRE_Int             stencil_dim   = hypre_StructStencilDim(stencil);
+   HYPRE_Int             stencil_dim   = hypre_StructStencilNDim(stencil);
                        
    hypre_StructMatrix   *A_rem;
    void                **residual_data;
@@ -529,7 +529,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
    hypre_StructStencil  *stencil       = hypre_StructMatrixStencil(A);     
    hypre_Index          *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int             stencil_size  = hypre_StructStencilSize(stencil); 
-   HYPRE_Int             stencil_dim   = hypre_StructStencilDim(stencil);
+   HYPRE_Int             stencil_dim   = hypre_StructStencilNDim(stencil);
                        
    hypre_StructMatrix   *A_sol;
    void                **solve_data;
@@ -566,7 +566,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
       }
    }
    A_sol = hypre_StructMatrixCreateMask(A, num_stencil_indices, stencil_indices);
-   hypre_StructStencilDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
+   hypre_StructStencilNDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
    hypre_TFree(stencil_indices);
 
    /* Set up solve_data */
@@ -642,7 +642,7 @@ hypre_SMGRelaxSetMemoryUse( void *relax_vdata,
 
 HYPRE_Int
 hypre_SMGRelaxSetTol( void   *relax_vdata,
-                      double  tol         )
+                      HYPRE_Real  tol         )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
 
@@ -881,7 +881,7 @@ hypre_SMGRelaxSetNewMatrixStencil( void                *relax_vdata,
 
    hypre_Index        *stencil_shape = hypre_StructStencilShape(diff_stencil);
    HYPRE_Int           stencil_size  = hypre_StructStencilSize(diff_stencil); 
-   HYPRE_Int           stencil_dim   = hypre_StructStencilDim(diff_stencil);
+   HYPRE_Int           stencil_dim   = hypre_StructStencilNDim(diff_stencil);
                          
    HYPRE_Int           i;
                      

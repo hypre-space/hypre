@@ -92,13 +92,10 @@ Some of the commonly used options include:
                                         the libraries defined in the environment 
                                         variable LD_LIBRARY_PATH. 
    --with-print-errors            Print HYPRE errors
-   --with-no-global-partition     Do NOT store a global partition of the data
-                                  NOTE: this option reduces storage and improves
-                                        performance when using many thousands of
-                                        processors (not recommended for < 1000 
-                                        processors).
-
-
+   --enable-global-partition      Store a global partition of the data
+                                  NOTE: this option may produce faster code on
+                                        small numbers of processors (< 100), but
+                                        is not recommended in general.
 \end{verbatim}
 
 The user can mix and match the configure options and variable settings to meet
@@ -225,6 +222,10 @@ with a description of all errors in a given error flag, use
 \begin{display} \begin{verbatim}
 HYPRE_DescribeError(int hypre_ierr, char *descr);
 \end{verbatim} \end{display}
+The global error flag can be cleared manually by calling
+\code{HYPRE\_ClearAllErrors()}, which will essentially ignore all previous
+\hypre{} errors. To only clear a specific error code, the user can call
+\code{HYPRE\_ClearError(HYPRE\_ERROR\_CODE)}.
 Finally, if \hypre{} was configured with \code{--with-print-errors}, additional
 error information will be printed to the standard error during execution.
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -32,22 +32,22 @@ typedef struct
 {
    MPI_Comm              comm;
                       
-   double                tol;
+   HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
                       
    HYPRE_Int             relax_type;     /* type of relaxation to use */
-   double                jacobi_weight;  /* weighted jacobi weight */
+   HYPRE_Real            jacobi_weight;  /* weighted jacobi weight */
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
 
    HYPRE_Int             rap_type;       /* controls choice of RAP codes */
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
    HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
    HYPRE_Int             skip_relax;     /* flag to allow skipping relaxation */
-   double                relax_weight;
-   double                dxyz[3];     /* parameters used to determine cdir */
+   HYPRE_Real            relax_weight;
+   HYPRE_Real            dxyz[3];     /* parameters used to determine cdir */
 
    HYPRE_Int             num_levels;
                       
@@ -57,7 +57,7 @@ typedef struct
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
                     
-   double               *data;
+   HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;
@@ -81,8 +81,8 @@ typedef struct
    HYPRE_Int             print_level;
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
-   double               *norms;
-   double               *rel_norms;
+   HYPRE_Real           *norms;
+   HYPRE_Real           *rel_norms;
 
 } hypre_PFMGData;
 

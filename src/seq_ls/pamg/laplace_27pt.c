@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -27,13 +27,13 @@ hypre_GenerateLaplacian27pt(HYPRE_Int      nx,
                             HYPRE_Int      P,
                             HYPRE_Int      Q,
                             HYPRE_Int      R,
-                            double  *value )
+                            HYPRE_Real  *value )
 {
    hypre_CSRMatrix *A;
 
    HYPRE_Int    *A_i;
    HYPRE_Int    *A_j;
-   double *A_data;
+   HYPRE_Real *A_data;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;
@@ -664,7 +664,7 @@ hypre_GenerateLaplacian27pt(HYPRE_Int      nx,
    }
 
    A_j = hypre_CTAlloc(HYPRE_Int, A_i[grid_size]);
-   A_data = hypre_CTAlloc(double, A_i[grid_size]);
+   A_data = hypre_CTAlloc(HYPRE_Real, A_i[grid_size]);
 
    row_index = 0;
    cnt = 0;

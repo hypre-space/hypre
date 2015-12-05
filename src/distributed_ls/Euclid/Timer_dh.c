@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -80,40 +80,40 @@ void Timer_dhStop(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadWall"
-double Timer_dhReadWall(Timer_dh t)
+HYPRE_Real Timer_dhReadWall(Timer_dh t)
 {
   START_FUNC_DH
-  double retval = 0.0;
+  HYPRE_Real retval = 0.0;
   hypre_longint sc_clk_tck = t->sc_clk_tck;
   if (t->isRunning) t->end_wall = times(&(t->end_cpu));
-  retval = (double)(t->end_wall - t->begin_wall) / (double)sc_clk_tck;
+  retval = (HYPRE_Real)(t->end_wall - t->begin_wall) / (HYPRE_Real)sc_clk_tck;
   END_FUNC_VAL(retval)
 }
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadCPU"
-double Timer_dhReadCPU(Timer_dh t)
+HYPRE_Real Timer_dhReadCPU(Timer_dh t)
 {
   START_FUNC_DH
-  double retval;
+  HYPRE_Real retval;
   hypre_longint sc_clk_tck = t->sc_clk_tck;
   if (t->isRunning) t->end_wall = times(&(t->end_cpu));
-  retval = (double)(t->end_cpu.tms_utime - t->begin_cpu.tms_utime
+  retval = (HYPRE_Real)(t->end_cpu.tms_utime - t->begin_cpu.tms_utime
           + t->end_cpu.tms_stime -  t->begin_cpu.tms_stime
           + t->end_cpu.tms_cutime - t->begin_cpu.tms_cutime
           + t->end_cpu.tms_cstime -  t->begin_cpu.tms_cstime)
-                      /(double)sc_clk_tck;
+                      /(HYPRE_Real)sc_clk_tck;
   END_FUNC_VAL(retval)
 }
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadUsage"
-double Timer_dhReadUsage(Timer_dh t)
+HYPRE_Real Timer_dhReadUsage(Timer_dh t)
 {
   START_FUNC_DH
-  double cpu = Timer_dhReadCPU(t);
-  double wall = Timer_dhReadWall(t);
-  double retval = 100.0*cpu/wall; 
+  HYPRE_Real cpu = Timer_dhReadCPU(t);
+  HYPRE_Real wall = Timer_dhReadWall(t);
+  HYPRE_Real retval = 100.0*cpu/wall; 
   END_FUNC_VAL(retval);
 }
 
@@ -146,10 +146,10 @@ void Timer_dhStop(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadWall"
-double Timer_dhReadWall(Timer_dh t)
+HYPRE_Real Timer_dhReadWall(Timer_dh t)
 {
   START_FUNC_DH
-  double retval;
+  HYPRE_Real retval;
   if (t->isRunning) t->end_wall = hypre_MPI_Wtime();
   retval = t->end_wall - t->begin_wall;
   END_FUNC_VAL(retval)
@@ -157,7 +157,7 @@ double Timer_dhReadWall(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadCPU"
-double Timer_dhReadCPU(Timer_dh t)
+HYPRE_Real Timer_dhReadCPU(Timer_dh t)
 {
   START_FUNC_DH
   END_FUNC_VAL(-1.0)
@@ -165,7 +165,7 @@ double Timer_dhReadCPU(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadUsage"
-double Timer_dhReadUsage(Timer_dh t)
+HYPRE_Real Timer_dhReadUsage(Timer_dh t)
 {
   START_FUNC_DH
   END_FUNC_VAL(-1.0);
@@ -196,7 +196,7 @@ void Timer_dhStop(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadWall"
-double Timer_dhReadWall(Timer_dh t)
+HYPRE_Real Timer_dhReadWall(Timer_dh t)
 {
   START_FUNC_DH
   END_FUNC_VAL(-1.0)
@@ -204,7 +204,7 @@ double Timer_dhReadWall(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadCPU"
-double Timer_dhReadCPU(Timer_dh t)
+HYPRE_Real Timer_dhReadCPU(Timer_dh t)
 {
   START_FUNC_DH
   END_FUNC_VAL(-1.0)
@@ -212,7 +212,7 @@ double Timer_dhReadCPU(Timer_dh t)
 
 #undef __FUNC__
 #define __FUNC__ "Timer_dhReadUsage"
-double Timer_dhReadUsage(Timer_dh t)
+HYPRE_Real Timer_dhReadUsage(Timer_dh t)
 {
   START_FUNC_DH
   END_FUNC_VAL(-1.0);

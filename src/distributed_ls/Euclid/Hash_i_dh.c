@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -21,7 +21,7 @@ static void rehash_private(Hash_i_dh h);
 
 
 /*--------------------------------------------------------------
- * hash functions (double hashing is used)
+ * hash functions (HYPRE_Real hashing is used)
  *--------------------------------------------------------------*/
 #define HASH_1(k,size,idxOut)    \
          {  *idxOut = k % size;  }
@@ -81,7 +81,7 @@ void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int sizeIN)
   /*
      determine initial hash table size.  If this is too small,
      it will be dynamically enlarged as needed by Hash_i_dhInsert()
-     See "double hashing," p. 255, "Algorithms," Cormen, et. al.
+     See "HYPRE_Real hashing," p. 255, "Algorithms," Cormen, et. al.
    */
   while (size < sizeIN) size *= 2;  /* want table size to be a power of 2: */
   /* rule-of-thumb: ensure there's at least 10% padding */

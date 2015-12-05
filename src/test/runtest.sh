@@ -52,18 +52,6 @@ function usage
 function MpirunString
 {
    case $HOST in
-      alc*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
-      peng*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
-      thun*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
-      vert*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
       *bgl*) shift
          BatchMode=1
          MY_NUM_TASKS=$1  
@@ -97,19 +85,13 @@ function MpirunString
          RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
          RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
          ;;
-      hera*) shift
+      rzzeus*|rzmerl*|ansel*|aztec*|cab*|sierra*|vulcan*) shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
             RunString="srun -p pdebug -c $NumThreads -n$*"
          else
             RunString="srun -p pdebug -n$*"
          fi
-         ;;
-      *zeus*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
-      atla*) shift
-         RunString="srun -p pdebug -n$*"
          ;;
       tux*) BatchMode=0
          if [ $NumThreads -gt 0 ] ; then
@@ -518,9 +500,9 @@ do
                TestDirNames="$TestDirNames $DirPart"
                case $DirPart in
                   TEST_examples)
-                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
+#                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
                      cd ../examples
-                     for file in $ExampleFiles
+                     for file in ex*
                      do
                         if [ -x $file ]
                         then

@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_parcsr_mv.h"
  
@@ -36,14 +33,14 @@ main( HYPRE_Int   argc,
 
    HYPRE_Int          vecstride_x, idxstride_x, vecstride_y, idxstride_y;
    HYPRE_Int          num_procs, my_id;
-   HYPRE_Int		local_size;
+   HYPRE_Int            local_size;
    HYPRE_Int          num_vectors;
-   HYPRE_Int		global_num_rows, global_num_cols;
-   HYPRE_Int		first_index;
-   HYPRE_Int 		i, j, ierr=0;
-   double 	*data, *data2;
-   HYPRE_Int 		*row_starts, *col_starts;
-   char		file_name[80];
+   HYPRE_Int            global_num_rows, global_num_cols;
+   HYPRE_Int            first_index;
+   HYPRE_Int            i, j, ierr=0;
+   HYPRE_Complex        *data, *data2;
+   HYPRE_Int            *row_starts, *col_starts;
+   char         file_name[80];
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
@@ -54,13 +51,13 @@ main( HYPRE_Int   argc,
  
    if (my_id == 0) 
    {
-	matrix = hypre_CSRMatrixRead("input");
-   	hypre_printf(" read input\n");
+        matrix = hypre_CSRMatrixRead("input");
+        hypre_printf(" read input\n");
    }
    row_starts = NULL;
    col_starts = NULL; 
    par_matrix = hypre_CSRMatrixToParCSRMatrix(hypre_MPI_COMM_WORLD, matrix, 
-		row_starts, col_starts);
+                row_starts, col_starts);
    hypre_printf(" converted\n");
 
    matrix1 = hypre_ParCSRMatrixToCSRMatrixAll(par_matrix);

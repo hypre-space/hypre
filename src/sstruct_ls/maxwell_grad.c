@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -74,7 +74,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_Int             *inode, *jedge;
    HYPRE_Int              nrows, nnodes, *nflag, *eflag, *ncols;
-   double                *vals;
+   HYPRE_Real            *vals;
 
    hypre_Index            index;
    hypre_Index            loop_size, start, lindex;
@@ -98,7 +98,10 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_Int              start_rank1, start_rank2, rank;
 
    HYPRE_Int              myproc;
-   HYPRE_Int              ierr;
+   HYPRE_Int              ierr=0;
+
+   hypre_BoxInit(&layer, ndim);
+   hypre_BoxInit(&interior_box, ndim);
 
    hypre_MPI_Comm_rank(comm, &myproc);
 
@@ -258,8 +261,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             box= hypre_BoxArrayBox(boxes, j);
             /* make slightly bigger to handle any shared nodes */
             hypre_CopyBox(box, &layer);
-            hypre_AddIndex(hypre_BoxIMin(&layer), shift, hypre_BoxIMin(&layer));
-            hypre_SubtractIndex(hypre_BoxIMax(&layer), shift, hypre_BoxIMax(&layer));
+            hypre_AddIndexes(hypre_BoxIMin(&layer), shift, 3, hypre_BoxIMin(&layer));
+            hypre_SubtractIndexes(hypre_BoxIMax(&layer), shift, 3, hypre_BoxIMax(&layer));
             nrows+= hypre_BoxVolume(&layer);
          }
       }
@@ -272,8 +275,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          box= hypre_BoxArrayBox(boxes, j);
          /* make slightly bigger to handle any shared nodes */
          hypre_CopyBox(box, &layer);
-         hypre_AddIndex(hypre_BoxIMin(&layer), shift, hypre_BoxIMin(&layer));
-         hypre_SubtractIndex(hypre_BoxIMax(&layer), shift, hypre_BoxIMax(&layer));
+         hypre_AddIndexes(hypre_BoxIMin(&layer), shift, 3, hypre_BoxIMin(&layer));
+         hypre_SubtractIndexes(hypre_BoxIMax(&layer), shift, 3, hypre_BoxIMax(&layer));
          nnodes+= hypre_BoxVolume(&layer);
       }
    }
@@ -312,7 +315,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          hypre_BoxManGetEntry(boxman, myproc, j, &entry);
          i= hypre_BoxVolume(box);
 
-         tmp_box_array1= hypre_BoxArrayCreate(0);
+         tmp_box_array1= hypre_BoxArrayCreate(0, ndim);
          ierr         += hypre_BoxBoundaryG(box, var_grid, tmp_box_array1);
 
          for (m= 0; m< hypre_BoxArraySize(tmp_box_array1); m++)
@@ -334,8 +337,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                hypre_BoxLoop0For()
                {
                   hypre_BoxLoopGetIndex(lindex);
-                  hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                  hypre_AddIndex(index, start, index);
+                  hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                  hypre_AddIndexes(index, start, 3, index);
 
                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                         &rank, matrix_type);
@@ -419,8 +422,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
             for (d= 0; d< ndirection; d++)
             {
-               tmp_box_array1= hypre_BoxArrayCreate(0);
-               tmp_box_array2= hypre_BoxArrayCreate(0);
+               tmp_box_array1= hypre_BoxArrayCreate(0, ndim);
+               tmp_box_array2= hypre_BoxArrayCreate(0, ndim);
                ierr+= hypre_BoxBoundaryDG(box, var_grid, tmp_box_array1,
                                           tmp_box_array2, direction[d]);
              
@@ -443,8 +446,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxLoop0For()
                      {
                         hypre_BoxLoopGetIndex(lindex);
-                        hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                        hypre_AddIndex(index, start, index);
+                        hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                        hypre_AddIndexes(index, start, 3, index);
 
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                               &rank, matrix_type);
@@ -475,8 +478,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxLoop0For()
                      {
                         hypre_BoxLoopGetIndex(lindex);
-                        hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                        hypre_AddIndex(index, start, index);
+                        hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                        hypre_AddIndexes(index, start, 3, index);
 
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                               &rank, matrix_type);
@@ -502,7 +505,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    /* each row can have at most two columns */
    k= 2*nrows;
    jedge= hypre_CTAlloc(HYPRE_Int, k);
-   vals = hypre_TAlloc(double, k);
+   vals = hypre_TAlloc(HYPRE_Real, k);
    for (i= 0; i< k; i++)
    {
       vals[i]=-1.0;
@@ -521,31 +524,31 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       {
          case 2:
          {
-            hypre_SetIndex(offsets[i], 0, 1, 0);
+            hypre_SetIndex3(offsets[i], 0, 1, 0);
             break;
          }
 
          case 3:
          {
-            hypre_SetIndex(offsets[i], 1, 0, 0);
+            hypre_SetIndex3(offsets[i], 1, 0, 0);
             break;
          }
 
          case 5:
          {
-            hypre_SetIndex(offsets[i], 1, 0, 0);
+            hypre_SetIndex3(offsets[i], 1, 0, 0);
             break;
          }
 
          case 6:
          {
-            hypre_SetIndex(offsets[i], 0, 1, 0);
+            hypre_SetIndex3(offsets[i], 0, 1, 0);
             break;
          }
 
          case 7:
          {
-            hypre_SetIndex(offsets[i], 0, 0, 1);
+            hypre_SetIndex3(offsets[i], 0, 0, 1);
             break;
          }
       }   /*  switch(j) */
@@ -584,16 +587,16 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
             /* shrink the cell_box to get the interior cell_box. All
                edges in the interior box should be on this proc. */ 
-            hypre_SubtractIndex(hypre_BoxIMin(&interior_box), shift, 
-                                hypre_BoxIMin(&interior_box));
+            hypre_SubtractIndexes(hypre_BoxIMin(&interior_box), shift, 3,
+                                  hypre_BoxIMin(&interior_box));
 
-            hypre_AddIndex(hypre_BoxIMax(&interior_box), shift, 
-                           hypre_BoxIMax(&interior_box));
+            hypre_AddIndexes(hypre_BoxIMax(&interior_box), shift, 3,
+                             hypre_BoxIMax(&interior_box));
 
             /* offset this to the variable interior box */
             hypre_CopyBox(&interior_box, &layer);
-            hypre_SubtractIndex(hypre_BoxIMin(&layer), varoffsets[n], 
-                                hypre_BoxIMin(&layer));
+            hypre_SubtractIndexes(hypre_BoxIMin(&layer), varoffsets[n], 3,
+                                  hypre_BoxIMin(&layer));
 
             hypre_BoxGetSize(&layer, loop_size);
             hypre_CopyIndex(hypre_BoxIMin(&layer), start);
@@ -612,8 +615,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             hypre_BoxLoop0For()
             {
                hypre_BoxLoopGetIndex(lindex);
-               hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-               hypre_AddIndex(index, start, index);
+               hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+               hypre_AddIndexes(index, start, 3, index);
 
                /* edge ijk connected to nodes ijk & ijk-offsets. Interior edges
                   and so no boundary edges to consider. */ 
@@ -629,7 +632,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                vals[i] = 1.0; /* change only this connection */
                i++;
 
-               hypre_SubtractIndex(index, offsets[n], index);
+               hypre_SubtractIndexes(index, offsets[n], 3, index);
                hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
                                                 &entry);
                hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, matrix_type);
@@ -681,8 +684,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   hypre_BoxLoop0For()
                   {
                      hypre_BoxLoopGetIndex(lindex);
-                     hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                     hypre_AddIndex(index, start, index);
+                     hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                     hypre_AddIndexes(index, start, 3, index);
 
                      /* edge ijk connects to nodes ijk & ijk+offsets. */
                      hypre_SStructGridFindBoxManEntry(edge_grid, part, index, n,
@@ -726,7 +729,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                         }
 
                         /* ijk+offsets */
-                        hypre_SubtractIndex(index, offsets[n], index);
+                        hypre_SubtractIndexes(index, offsets[n], 3, index);
                         hypre_SStructGridFindBoxManEntry(node_grid, part, index, 0,
                                                          &entry);
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index, &m, 
@@ -769,7 +772,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_IJMatrixSetValues(T_grad, nrows, ncols,
                            (const HYPRE_Int*) inode, (const HYPRE_Int*) jedge,
-                           (const double*) vals);
+                           (const HYPRE_Real*) vals);
    HYPRE_IJMatrixAssemble(T_grad);
 
    hypre_TFree(eflag);

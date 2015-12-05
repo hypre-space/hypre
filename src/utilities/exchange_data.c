@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /* see exchange_data.README for additional information */
@@ -202,7 +202,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  
                    
    /* pre-allocate the max space for responding to contacts */
-   overhead = ceil((double) sizeof(HYPRE_Int)/response_obj_size); /*for appending an integer*/
+   overhead = ceil((HYPRE_Real) sizeof(HYPRE_Int)/response_obj_size); /*for appending an integer*/
    
    max_response_total_bytes = (max_response_size+overhead)*response_obj_size;
 
@@ -373,8 +373,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
             hypre_MPI_Isend(post_array[post_array_size], size,
                             hypre_MPI_BYTE, proc, post_tag, 
-                            hypre_MPI_COMM_WORLD,
-                            /*comm,*/
+                            /*hypre_MPI_COMM_WORLD, */
+                            comm,
                             &post_send_requests[post_array_size]); 
 
             post_array_size++;

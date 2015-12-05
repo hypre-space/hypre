@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -30,15 +30,15 @@ hypre_CSRMatrix **RAP_ptr;
 {
    hypre_CSRMatrix    *RAP;
    
-   double          *A_data;
+   HYPRE_Real      *A_data;
    HYPRE_Int             *A_i;
    HYPRE_Int             *A_j;
 
-   double          *P_data;
+   HYPRE_Real      *P_data;
    HYPRE_Int             *P_i;
    HYPRE_Int             *P_j;
 
-   double          *RAP_data;
+   HYPRE_Real      *RAP_data;
    HYPRE_Int             *RAP_i;
    HYPRE_Int             *RAP_j;
 
@@ -46,7 +46,7 @@ hypre_CSRMatrix **RAP_ptr;
    
    hypre_CSRMatrix    *R;
    
-   double          *R_data;
+   HYPRE_Real      *R_data;
    HYPRE_Int             *R_i;
    HYPRE_Int             *R_j;
 
@@ -64,11 +64,11 @@ hypre_CSRMatrix **RAP_ptr;
    HYPRE_Int              jj_row_begining;
    HYPRE_Int              start_indexing = 0; /* start indexing for RAP_data at 0 */
 
-   double           r_entry;
-   double           r_a_product;
-   double           r_a_p_product;
+   HYPRE_Real       r_entry;
+   HYPRE_Real       r_a_product;
+   HYPRE_Real       r_a_p_product;
    
-   double           zero = 0.0;
+   HYPRE_Real       zero = 0.0;
    
    /*-----------------------------------------------------------------------
     *  Copy RT into R so that we have row-wise access to restriction.
@@ -206,7 +206,7 @@ hypre_CSRMatrix **RAP_ptr;
     *-----------------------------------------------------------------------*/
 
    RAP_size = jj_counter;
-   RAP_data = hypre_CTAlloc(double, RAP_size);
+   RAP_data = hypre_CTAlloc(HYPRE_Real, RAP_size);
    RAP_j    = hypre_CTAlloc(HYPRE_Int, RAP_size);
 
    /*-----------------------------------------------------------------------

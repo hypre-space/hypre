@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -31,7 +31,7 @@ hypre_SeqVectorZeroBCValues(hypre_Vector *v,
                             HYPRE_Int    *rows,
                             HYPRE_Int     nrows)
 {
-   double  *vector_data = hypre_VectorData(v);
+   HYPRE_Real  *vector_data = hypre_VectorData(v);
    HYPRE_Int      i;
    HYPRE_Int      ierr  = 0;
 

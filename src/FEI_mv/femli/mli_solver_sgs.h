@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef __MLI_SOLVER_SGS_H__

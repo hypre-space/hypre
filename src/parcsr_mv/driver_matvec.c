@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_parcsr_mv.h"
  
@@ -40,7 +37,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int		global_num_cols;
    HYPRE_Int		first_index;
    HYPRE_Int 		i, ierr=0;
-   double 	*data, *data2;
+   HYPRE_Complex 	*data, *data2;
    HYPRE_Int 		*row_starts, *col_starts;
    char		file_name[80];
    /* Initialize MPI */

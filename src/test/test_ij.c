@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -94,9 +94,9 @@ main( HYPRE_Int   argc,
    HYPRE_Int                 dscg_num_its; 
    HYPRE_Int                 pcg_max_its; 
    HYPRE_Int                 dscg_max_its; 
-   double              cf_tol = 0.9;
-   double              norm;
-   double              final_res_norm;
+   HYPRE_Real          cf_tol = 0.9;
+   HYPRE_Real          norm;
+   HYPRE_Real          final_res_norm;
    void               *object;
 
    HYPRE_IJMatrix      ij_A; 
@@ -128,11 +128,11 @@ main( HYPRE_Int   argc,
    HYPRE_Int first_local_col, last_local_col, local_num_cols;
    HYPRE_Int local_num_vars;
    HYPRE_Int variant, overlap, domain_type;
-   double schwarz_rlx_weight;
-   double *values;
+   HYPRE_Real schwarz_rlx_weight;
+   HYPRE_Real *values;
 
-   const double dt_inf = 1.e40;
-   double dt = dt_inf;
+   const HYPRE_Real dt_inf = 1.e40;
+   HYPRE_Real dt = dt_inf;
 
    HYPRE_Int      print_system = 0;
 
@@ -151,8 +151,8 @@ main( HYPRE_Int   argc,
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 1;
-   double pcgTol = 1e-2;
-   double nonOrthF;
+   HYPRE_Real pcgTol = 1e-2;
+   HYPRE_Real nonOrthF;
    
    FILE* filePtr;
 
@@ -160,9 +160,9 @@ main( HYPRE_Int   argc,
    mv_MultiVectorPtr constraints = NULL;
    mv_MultiVectorPtr workspace = NULL;
 
-   double* eigenvalues = NULL;
+   HYPRE_Real* eigenvalues = NULL;
 
-   double* residuals;
+   HYPRE_Real* residuals;
    utilities_FortranMatrix* residualNorms;
    utilities_FortranMatrix* residualNormsHistory;
    utilities_FortranMatrix* eigenvaluesHistory;
@@ -761,8 +761,8 @@ main( HYPRE_Int   argc,
    num_grid_sweeps   = hypre_CTAlloc(HYPRE_Int,4);
    grid_relax_type   = hypre_CTAlloc(HYPRE_Int,4);
    grid_relax_points = hypre_CTAlloc(HYPRE_Int *,4);
-   relax_weight      = hypre_CTAlloc(double, max_levels);
-   omega      = hypre_CTAlloc(double, max_levels);
+   relax_weight      = hypre_CTAlloc(HYPRE_Real, max_levels);
+   omega      = hypre_CTAlloc(HYPRE_Real, max_levels);
 
    for (i=0; i < max_levels; i++)
    {
@@ -1391,7 +1391,7 @@ main( HYPRE_Int   argc,
 
          ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
                                           (const HYPRE_Int *) col_inds,
-                                          (const double *) values );
+                                          (const HYPRE_Real *) values );
 
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
@@ -1429,7 +1429,7 @@ main( HYPRE_Int   argc,
 
          ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
                                           (const HYPRE_Int *) col_inds,
-                                          (const double *) values );
+                                          (const HYPRE_Real *) values );
 
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
@@ -1468,7 +1468,7 @@ main( HYPRE_Int   argc,
 
          ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
                                           (const HYPRE_Int *) col_inds,
-                                          (const double *) values );
+                                          (const HYPRE_Real *) values );
 
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
@@ -1515,7 +1515,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1547,7 +1547,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
-      values = hypre_CTAlloc(double, local_num_rows);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows);
       for (i = 0; i < local_num_rows; i++)
          values[i] = 1.0;
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
@@ -1561,7 +1561,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1600,7 +1600,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1622,7 +1622,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 1.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1641,7 +1641,7 @@ main( HYPRE_Int   argc,
       HYPRE_ParCSRMatrixMatvec(1.,parcsr_A,x,0.,b);
 
 /* Initial guess */
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1660,7 +1660,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
-      values = hypre_CTAlloc(double, local_num_rows);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows);
       for (i = 0; i < local_num_rows; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
@@ -1674,7 +1674,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 1.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1708,7 +1708,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_x);
 
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1739,7 +1739,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
-      values = hypre_CTAlloc(double, local_num_rows);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows);
       for (i = 0; i < local_num_rows; i++)
          values[i] = 1.;
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
@@ -1755,7 +1755,7 @@ main( HYPRE_Int   argc,
 
 /* For backward Euler the previous backward Euler iterate (assumed
    0 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1776,7 +1776,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_row, last_local_row, &ij_b);
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
-      values = hypre_CTAlloc(double, local_num_rows);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows);
 
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_rows; i++)
@@ -1795,7 +1795,7 @@ main( HYPRE_Int   argc,
 
 /* For backward Euler the previous backward Euler iterate (assumed
    0 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
@@ -1817,7 +1817,7 @@ main( HYPRE_Int   argc,
       HYPRE_IJVectorSetObjectType(ij_b, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(ij_b);
 
-      values = hypre_CTAlloc(double, local_num_rows);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_rows);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_rows; i++)
          values[i] = hypre_Rand()/dt;
@@ -1834,7 +1834,7 @@ main( HYPRE_Int   argc,
 
 /* For backward Euler the previous backward Euler iterate (assumed
    random in 0 - 1 here) is usually used as the initial guess */
-      values = hypre_CTAlloc(double, local_num_cols);
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_cols; i++)
          values[i] = hypre_Rand();
@@ -2324,7 +2324,7 @@ main( HYPRE_Int   argc,
 
 	     ierr += HYPRE_IJMatrixSetValues( ij_B, 1, &size, &i,
 					      (const HYPRE_Int *) col_inds,
-					      (const double *) values );
+					      (const HYPRE_Real *) values );
 
 	     ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, i, &size,
 						   &col_inds, &values );
@@ -2362,7 +2362,7 @@ main( HYPRE_Int   argc,
 
 	       ierr += HYPRE_IJMatrixSetValues( ij_B, 1, &size, &i,
 						(const HYPRE_Int *) col_inds,
-						(const double *) values );
+						(const HYPRE_Real *) values );
 
 	       ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_B, i, &size,
 						     &col_inds, &values );
@@ -2637,7 +2637,7 @@ main( HYPRE_Int   argc,
 	 hypre_assert( constraints != NULL );
        }	
 
-       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+       eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
 	
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
@@ -3003,7 +3003,7 @@ main( HYPRE_Int   argc,
 	 hypre_assert( constraints != NULL );
        }	
 
-       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+       eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
 	
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
@@ -3782,13 +3782,13 @@ BuildParLaplacian( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -3881,7 +3881,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -3928,15 +3928,15 @@ BuildParDifConv( HYPRE_Int                  argc,
 {
    HYPRE_Int                 nx, ny, nz;
    HYPRE_Int                 P, Q, R;
-   double              cx, cy, cz;
-   double              ax, ay, az;
-   double              hinx,hiny,hinz;
+   HYPRE_Real          cx, cy, cz;
+   HYPRE_Real          ax, ay, az;
+   HYPRE_Real          hinx,hiny,hinz;
 
    HYPRE_ParCSRMatrix  A;
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -4046,7 +4046,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 7);
+   values = hypre_CTAlloc(HYPRE_Real, 7);
 
    values[1] = -cx/(hinx*hinx);
    values[2] = -cy/(hiny*hiny);
@@ -4372,7 +4372,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -4448,7 +4448,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[1] = -1.;
 
@@ -4493,7 +4493,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -4574,7 +4574,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 2);
+   values = hypre_CTAlloc(HYPRE_Real, 2);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
@@ -4604,7 +4604,7 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 {
 
    HYPRE_Int                 nx, ny, nz;
-   double              cx, cy, cz;
+   HYPRE_Real          cx, cy, cz;
 
    HYPRE_Int                 P, Q, R;
 
@@ -4612,7 +4612,7 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
 
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 p, q, r;
-   double             *values;
+   HYPRE_Real         *values;
 
    HYPRE_Int arg_index;
 
@@ -4681,7 +4681,7 @@ BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr )
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(double, 4);
+   values = hypre_CTAlloc(HYPRE_Real, 4);
 
    values[1] = -cx;
    values[2] = -cy;

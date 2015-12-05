@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.25 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -265,6 +265,8 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
  * internal implementation reasons.
  *--------------------------------------------------------------------------*/
 
+/* ONLY3D */
+
 HYPRE_Int
 HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
                                  HYPRE_Int          part,
@@ -339,7 +341,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
    {
       block = &ordering[(1+ndim)*i];
       fem_vars[i] = block[0];
-      hypre_ClearIndex(fem_offsets[i]);
+      hypre_SetIndex(fem_offsets[i], 0);
       for (d = 0; d < ndim; d++)
       {
          /* modify the user offsets to contain only 0's and -1's */
@@ -406,8 +408,9 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    box = hypre_SStructNeighborBox(neighbor);
    hypre_CopyToCleanIndex(ilower, ndim, cilower);
    hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+   hypre_BoxInit(box, ndim);
    hypre_BoxSetExtents(box, cilower, ciupper);
-   hypre_ClearIndex(nbor_offset);
+   hypre_SetIndex(nbor_offset, 0);
 
    hypre_SStructNeighborPart(neighbor) = nbor_part;
 
@@ -434,7 +437,7 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
          hypre_IndexD(ilower_mapped, dd) = hypre_IndexD(nbor_iupper, dd);
       }
    }
-   for (d = ndim; d < 3; d++)
+   for (d = ndim; d < ndim; d++)
    {
       hypre_IndexD(coord, d) = d;
       hypre_IndexD(dir, d) = 1;
@@ -471,7 +474,7 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
    hypre_Index              cilower;
    hypre_Index              ciupper;
    hypre_IndexRef           coord, dir, ilower_mapped;
-   HYPRE_Int                offset_mapped[3];
+   HYPRE_Int                offset_mapped[HYPRE_MAXDIM];
    HYPRE_Int                memchunk = 10;
    HYPRE_Int                d, dd, tdir;
 
@@ -491,6 +494,7 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
    box = hypre_SStructNeighborBox(neighbor);
    hypre_CopyToCleanIndex(ilower, ndim, cilower);
    hypre_CopyToCleanIndex(iupper, ndim, ciupper);
+   hypre_BoxInit(box, ndim);
    hypre_BoxSetExtents(box, cilower, ciupper);
    hypre_CopyToCleanIndex(offset, ndim, nbor_offset);
 
@@ -525,7 +529,7 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
          hypre_IndexD(ilower_mapped, dd) -= offset_mapped[dd];
       }
    }
-   for (d = ndim; d < 3; d++)
+   for (d = ndim; d < HYPRE_MAXDIM; d++)
    {
       hypre_IndexD(coord, d) = d;
       hypre_IndexD(dir, d) = 1;
@@ -713,7 +717,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
             hypre_CopyIndex(hypre_SStructNeighborDir(neighbor), dir);
             hypre_SStructCellBoxToVarBox(box, nbor_offset, varoffset, &valid);
             /* it's important to change ilower */
-            for (d = 0; d < 3; d++)
+            for (d = 0; d < ndim; d++)
             {
                /* Compare the imin of the neighbor cell box ('i') to its imin
                 * value after being converted to a variable box ('IMin(box,d)').

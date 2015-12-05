@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
-
 
 /******************************************************************************
  *
@@ -44,7 +40,6 @@
  * hypre_CGNRData and hypre_CGNRFunctions
  *--------------------------------------------------------------------------*/
 
-
 /**
  * @name CGNR structs
  *
@@ -58,23 +53,25 @@
 
 typedef struct
 {
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id, HYPRE_Int   *num_procs );
-   void * (*CreateVector)  ( void *vector );
+   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
+                                   HYPRE_Int   *num_procs );
+   void *       (*CreateVector)  ( void *vector );
    HYPRE_Int    (*DestroyVector) ( void *vector );
-   void * (*MatvecCreate)  ( void *A, void *x );
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
-                             void *x, double beta, void *y );
-   HYPRE_Int    (*MatvecT)       ( void *matvec_data, double alpha, void *A,
-                             void *x, double beta, void *y );
+   void *       (*MatvecCreate)  ( void *A, void *x );
+   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                   void *x, HYPRE_Complex beta, void *y );
+   HYPRE_Int    (*MatvecT)       ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                   void *x, HYPRE_Complex beta, void *y );
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
-   double (*InnerProd)     ( void *x, void *y );
+   HYPRE_Real   (*InnerProd)     ( void *x, void *y );
    HYPRE_Int    (*CopyVector)    ( void *x, void *y );
    HYPRE_Int    (*ClearVector)   ( void *x );
-   HYPRE_Int    (*ScaleVector)   ( double alpha, void *x );
-   HYPRE_Int    (*Axpy)          ( double alpha, void *x, void *y );
+   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
+   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
    HYPRE_Int    (*precond_setup) ( void *vdata, void *A, void *b, void *x );
    HYPRE_Int    (*precond)       ( void *vdata, void *A, void *b, void *x );
-   HYPRE_Int    (*precondT)       ( void *vdata, void *A, void *b, void *x );
+   HYPRE_Int    (*precondT)      ( void *vdata, void *A, void *b, void *x );
+
 } hypre_CGNRFunctions;
 
 /**
@@ -83,8 +80,8 @@ typedef struct
 
 typedef struct
 {
-   double   tol;
-   double   rel_residual_norm;
+   HYPRE_Real   tol;
+   HYPRE_Real   rel_residual_norm;
    HYPRE_Int      min_iter;
    HYPRE_Int      max_iter;
    HYPRE_Int      stop_crit;
@@ -105,16 +102,14 @@ typedef struct
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int      logging;
-   double  *norms;
+   HYPRE_Real  *norms;
    char    *log_file_name;
 
 } hypre_CGNRData;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /**
  * @name generic CGNR Solver
@@ -123,7 +118,6 @@ extern "C" {
  **/
 /*@{*/
 
-
 /**
  * Description...
  *
@@ -131,23 +125,24 @@ extern "C" {
  **/
 hypre_CGNRFunctions *
 hypre_CGNRFunctionsCreate(
-   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id, HYPRE_Int   *num_procs ),
-   void * (*CreateVector)  ( void *vector ),
+   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
+                                   HYPRE_Int   *num_procs ),
+   void *       (*CreateVector)  ( void *vector ),
    HYPRE_Int    (*DestroyVector) ( void *vector ),
-   void * (*MatvecCreate)  ( void *A, void *x ),
-   HYPRE_Int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
-                             void *x, double beta, void *y ),
-   HYPRE_Int    (*MatvecT)        ( void *matvec_data, double alpha, void *A,
-                             void *x, double beta, void *y ),
+   void *       (*MatvecCreate)  ( void *A, void *x ),
+   HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                   void *x, HYPRE_Complex beta, void *y ),
+   HYPRE_Int    (*MatvecT)       ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                   void *x, HYPRE_Complex beta, void *y ),
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   double (*InnerProd)     ( void *x, void *y ),
+   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
    HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
    HYPRE_Int    (*ClearVector)   ( void *x ),
-   HYPRE_Int    (*ScaleVector)   ( double alpha, void *x ),
-   HYPRE_Int    (*Axpy)          ( double alpha, void *x, void *y ),
+   HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
+   HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
-   HYPRE_Int    (*PrecondT)       ( void *vdata, void *A, void *b, void *x )
+   HYPRE_Int    (*PrecondT)      ( void *vdata, void *A, void *b, void *x )
    );
 
 /**

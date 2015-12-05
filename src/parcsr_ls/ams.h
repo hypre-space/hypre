@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -77,26 +77,27 @@ typedef struct
 
    /* Solver options */
    HYPRE_Int maxit;
-   double tol;
+   HYPRE_Real tol;
    HYPRE_Int cycle_type;
    HYPRE_Int print_level;
 
    /* Smoothing options for A */
    HYPRE_Int A_relax_type;
    HYPRE_Int A_relax_times;
-   double *A_l1_norms;
-   double A_relax_weight;
-   double A_omega;
-   double A_max_eig_est;
-   double A_min_eig_est;
+   HYPRE_Real *A_l1_norms;
+   HYPRE_Real A_relax_weight;
+   HYPRE_Real A_omega;
+   HYPRE_Real A_max_eig_est;
+   HYPRE_Real A_min_eig_est;
    HYPRE_Int A_cheby_order;
-   double  A_cheby_fraction;
+   HYPRE_Real  A_cheby_fraction;
 
    /* AMG options for B_G */
    HYPRE_Int B_G_coarsen_type;
    HYPRE_Int B_G_agg_levels;
    HYPRE_Int B_G_relax_type;
-   double B_G_theta;
+   HYPRE_Int B_G_coarse_relax_type;
+   HYPRE_Real B_G_theta;
    HYPRE_Int B_G_interp_type;
    HYPRE_Int B_G_Pmax;
 
@@ -104,7 +105,8 @@ typedef struct
    HYPRE_Int B_Pi_coarsen_type;
    HYPRE_Int B_Pi_agg_levels;
    HYPRE_Int B_Pi_relax_type;
-   double B_Pi_theta;
+   HYPRE_Int B_Pi_coarse_relax_type;
+   HYPRE_Real B_Pi_theta;
    HYPRE_Int B_Pi_interp_type;
    HYPRE_Int B_Pi_Pmax;
 
@@ -113,7 +115,7 @@ typedef struct
 
    /* Output log info */
    HYPRE_Int num_iterations;
-   double rel_resid_norm;
+   HYPRE_Real rel_resid_norm;
 
 } hypre_AMSData;
 

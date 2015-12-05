@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -122,7 +122,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       HYPRE_Int num_idof, *idof0, *idof;
       HYPRE_Int num_bdof, *bdof;
 
-      double *boolean_data;
+      HYPRE_Real *boolean_data;
 
       /* Determine the coarse DOFs */
       hypre_ParCSRMatrixGetRow (ELEM_DOF, k, &num_DOF, &DOF0, &boolean_data);
@@ -185,10 +185,10 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       {
          HYPRE_Int *I = hypre_CSRMatrixI(A);
          HYPRE_Int *J = hypre_CSRMatrixJ(A);
-         double *data = hypre_CSRMatrixData(A);
+         HYPRE_Real *data = hypre_CSRMatrixData(A);
 
          HYPRE_Int *tmp_J;
-         double *tmp_data;
+         HYPRE_Real *tmp_data;
 
          I[0] = 0;
          for (j = 0; j < num_idof; j++)
@@ -197,7 +197,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             if (getrow_ierr <0)
                hypre_printf("getrow Aee off proc[%d] = \n",myproc);
             memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-            memcpy(data, tmp_data, I[j+1]*sizeof(double));
+            memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
             J+= I[j+1];
             data+= I[j+1];
             hypre_ParCSRMatrixRestoreRow (Aee, idof[j], &I[j+1], &tmp_J, &tmp_data);
@@ -212,11 +212,11 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       {
          HYPRE_Int *I = hypre_CSRMatrixI(P);
          HYPRE_Int *J = hypre_CSRMatrixJ(P);
-         double *data = hypre_CSRMatrixData(P);
+         HYPRE_Real *data = hypre_CSRMatrixData(P);
          HYPRE_Int     m;
 
          HYPRE_Int *tmp_J;
-         double *tmp_data;
+         HYPRE_Real *tmp_data;
      
          I[0] = 0;
          for (j = 0; j < num_idof; j++)
@@ -225,7 +225,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             if (getrow_ierr >= 0)
             {
                memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(double));
+               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
                J+= I[j+1];
                data+= I[j+1];
                hypre_ParCSRMatrixRestoreRow (dof_DOF, idof[j], &I[j+1], &tmp_J, &tmp_data);
@@ -251,7 +251,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
                memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(double));
+               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
                J+= I[j+1];
                data+= I[j+1];
                I[j+1] += I[j];
@@ -264,7 +264,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             if (getrow_ierr >= 0)
             {
                memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(double));
+               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
                J+= I[j+1];
                data+= I[j+1];
                hypre_ParCSRMatrixRestoreRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
@@ -291,7 +291,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
                memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(double));
+               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
                J+= I[j+1];
                data+= I[j+1];
                I[j+1] += I[j];
@@ -360,18 +360,18 @@ HYPRE_Int hypre_HarmonicExtension (hypre_CSRMatrix *A,
    HYPRE_Int ierr = 0;
 
    HYPRE_Int i, j, k, l, m;
-   double factor;
+   HYPRE_Real factor;
 
    HYPRE_Int *IA = hypre_CSRMatrixI(A);
    HYPRE_Int *JA = hypre_CSRMatrixJ(A);
-   double *dataA = hypre_CSRMatrixData(A);
+   HYPRE_Real *dataA = hypre_CSRMatrixData(A);
 
    HYPRE_Int *IP = hypre_CSRMatrixI(P);
    HYPRE_Int *JP = hypre_CSRMatrixJ(P);
-   double *dataP = hypre_CSRMatrixData(P);
+   HYPRE_Real *dataP = hypre_CSRMatrixData(P);
 
-   double * Aii = hypre_CTAlloc(double, num_idof*num_idof);
-   double * Pi = hypre_CTAlloc(double, num_idof*num_DOF);
+   HYPRE_Real * Aii = hypre_CTAlloc(HYPRE_Real, num_idof*num_idof);
+   HYPRE_Real * Pi = hypre_CTAlloc(HYPRE_Real, num_idof*num_DOF);
 
    /* Loop over the rows of A */
    for (i = 0; i < num_idof; i++)

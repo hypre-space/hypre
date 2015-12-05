@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.30 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -158,12 +158,13 @@ HYPRE_Int
 hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
                                hypre_Index           index,
                                HYPRE_Int             var,
-                               double               *value,
+                               HYPRE_Complex        *value,
                                HYPRE_Int             action )
 {
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
+   HYPRE_Int           ndim = hypre_StructVectorNDim(svector);
    hypre_BoxArray     *grid_boxes;
-   hypre_Box          *box;
+   hypre_Box          *box, *grow_box;
    HYPRE_Int           i;
 
    /* set values inside the grid */
@@ -182,12 +183,7 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
       hypre_ForBoxI(i, grid_boxes)
       {
          box = hypre_BoxArrayBox(grid_boxes, i);
-         if ((hypre_IndexX(index) >= hypre_BoxIMinX(box)) &&
-             (hypre_IndexX(index) <= hypre_BoxIMaxX(box)) &&
-             (hypre_IndexY(index) >= hypre_BoxIMinY(box)) &&
-             (hypre_IndexY(index) <= hypre_BoxIMaxY(box)) &&
-             (hypre_IndexZ(index) >= hypre_BoxIMinZ(box)) &&
-             (hypre_IndexZ(index) <= hypre_BoxIMaxZ(box))   )
+         if (hypre_IndexInBox(index, box))
          {
             done = 1;
             break;
@@ -196,28 +192,21 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
 
       if (!done)
       {
-         hypre_SStructVariableGetOffset(hypre_SStructPGridVarType(pgrid, var),
-                                        hypre_SStructPGridNDim(pgrid), varoffset);
+         grow_box = hypre_BoxCreate(ndim);
+         hypre_SStructVariableGetOffset(
+            hypre_SStructPGridVarType(pgrid, var), ndim, varoffset);
          hypre_ForBoxI(i, grid_boxes)
          {
             box = hypre_BoxArrayBox(grid_boxes, i);
-            if ((hypre_IndexX(index) >=
-                 hypre_BoxIMinX(box) - hypre_IndexX(varoffset)) &&
-                (hypre_IndexX(index) <=
-                 hypre_BoxIMaxX(box) + hypre_IndexX(varoffset)) &&
-                (hypre_IndexY(index) >=
-                 hypre_BoxIMinY(box) - hypre_IndexY(varoffset)) &&
-                (hypre_IndexY(index) <=
-                 hypre_BoxIMaxY(box) + hypre_IndexY(varoffset)) &&
-                (hypre_IndexZ(index) >=
-                 hypre_BoxIMinZ(box) - hypre_IndexZ(varoffset)) &&
-                (hypre_IndexZ(index) <=
-                 hypre_BoxIMaxZ(box) + hypre_IndexZ(varoffset))   )
+            hypre_CopyBox(box, grow_box);
+            hypre_BoxGrowByIndex(grow_box, varoffset);
+            if (hypre_IndexInBox(index, grow_box))
             {
                hypre_StructVectorSetValues(svector, index, value, action, i, 1);
                break;
             }
          }
+         hypre_BoxDestroy(grow_box);
       }
    }
    else
@@ -228,12 +217,7 @@ hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
       hypre_ForBoxI(i, grid_boxes)
       {
          box = hypre_BoxArrayBox(grid_boxes, i);
-         if ((hypre_IndexX(index) < hypre_BoxIMinX(box)) ||
-             (hypre_IndexX(index) > hypre_BoxIMaxX(box)) ||
-             (hypre_IndexY(index) < hypre_BoxIMinY(box)) ||
-             (hypre_IndexY(index) > hypre_BoxIMaxY(box)) ||
-             (hypre_IndexZ(index) < hypre_BoxIMinZ(box)) ||
-             (hypre_IndexZ(index) > hypre_BoxIMaxZ(box))   )
+         if (!hypre_IndexInBox(index, box))
          {
             hypre_StructVectorClearValues(svector, index, i, 1);
          }
@@ -254,16 +238,17 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
                                   hypre_Index           ilower,
                                   hypre_Index           iupper,
                                   HYPRE_Int             var,
-                                  double               *values,
+                                  HYPRE_Complex        *values,
                                   HYPRE_Int             action )
 {
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
+   HYPRE_Int           ndim = hypre_StructVectorNDim(svector);
    hypre_BoxArray     *grid_boxes;
    hypre_Box          *box;
    hypre_Box          *value_box;
    HYPRE_Int           i, j;
 
-   box = hypre_BoxCreate();
+   box = hypre_BoxCreate(ndim);
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));
    hypre_CopyIndex(iupper, hypre_BoxIMax(box));
    value_box = box;
@@ -280,13 +265,13 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
       hypre_BoxArray      *left_boxes, *done_boxes, *temp_boxes;
       hypre_Box           *left_box, *done_box, *int_box;
 
-      hypre_SStructVariableGetOffset(hypre_SStructPGridVarType(pgrid, var),
-                                     hypre_SStructPGridNDim(pgrid), varoffset);
+      hypre_SStructVariableGetOffset(
+         hypre_SStructPGridVarType(pgrid, var), ndim, varoffset);
       grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
 
-      left_boxes = hypre_BoxArrayCreate(1);
-      done_boxes = hypre_BoxArrayCreate(2);
-      temp_boxes = hypre_BoxArrayCreate(0);
+      left_boxes = hypre_BoxArrayCreate(1, ndim);
+      done_boxes = hypre_BoxArrayCreate(2, ndim);
+      temp_boxes = hypre_BoxArrayCreate(0, ndim);
 
       /* done_box always points to the first box in done_boxes */
       done_box = hypre_BoxArrayBox(done_boxes, 0);
@@ -303,12 +288,7 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
          hypre_SubtractBoxArrays(left_boxes, done_boxes, temp_boxes);
          hypre_BoxArraySetSize(done_boxes, 1);
          hypre_CopyBox(hypre_BoxArrayBox(grid_boxes, i), done_box);
-         hypre_BoxIMinX(done_box) -= hypre_IndexX(varoffset);
-         hypre_BoxIMinY(done_box) -= hypre_IndexY(varoffset);
-         hypre_BoxIMinZ(done_box) -= hypre_IndexZ(varoffset);
-         hypre_BoxIMaxX(done_box) += hypre_IndexX(varoffset);
-         hypre_BoxIMaxY(done_box) += hypre_IndexY(varoffset);
-         hypre_BoxIMaxZ(done_box) += hypre_IndexZ(varoffset);
+         hypre_BoxGrowByIndex(done_box, varoffset);
          hypre_ForBoxI(j, left_boxes)
          {
             left_box = hypre_BoxArrayBox(left_boxes, j);
@@ -329,7 +309,7 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
       hypre_Box       *grid_box, *diff_box;
 
       grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
-      diff_boxes = hypre_BoxArrayCreate(0);
+      diff_boxes = hypre_BoxArrayCreate(0, ndim);
 
       hypre_ForBoxI(i, grid_boxes)
       {
@@ -370,7 +350,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
 
    hypre_Index            varoffset;
-   HYPRE_Int              num_ghost[6];
+   HYPRE_Int              num_ghost[2*HYPRE_MAXDIM];
    hypre_StructGrid      *sgrid;
    HYPRE_Int              var, d;
 
@@ -380,7 +360,7 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
       return hypre_error_flag;
    }
 
-   for (d = ndim; d < 3; d++)
+   for (d = ndim; d < ndim; d++)
    {
       num_ghost[2*d] = num_ghost[2*d+1] = 0;
    }
@@ -480,7 +460,7 @@ HYPRE_Int
 hypre_SStructPVectorGetValues( hypre_SStructPVector *pvector,
                                hypre_Index           index,
                                HYPRE_Int             var,
-                               double               *value )
+                               HYPRE_Complex        *value )
 {
    hypre_SStructPGrid *pgrid     = hypre_SStructPVectorPGrid(pvector);
    hypre_StructVector *svector   = hypre_SStructPVectorSVector(pvector, var);
@@ -505,7 +485,7 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
                                   hypre_Index           ilower,
                                   hypre_Index           iupper,
                                   HYPRE_Int             var,
-                                  double               *values )
+                                  HYPRE_Complex        *values )
 {
    hypre_SStructPGrid *pgrid     = hypre_SStructPVectorPGrid(pvector);
    hypre_StructVector *svector   = hypre_SStructPVectorSVector(pvector, var);
@@ -514,7 +494,7 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
    hypre_BoxArray     *tboxarray;
    hypre_Box          *box;
 
-   box = hypre_BoxCreate();
+   box = hypre_BoxCreate(hypre_StructVectorNDim(svector));
    hypre_CopyIndex(ilower, hypre_BoxIMin(box));
    hypre_CopyIndex(iupper, hypre_BoxIMax(box));
    /* temporarily swap out sgrid boxes in order to get boundary data */
@@ -532,7 +512,7 @@ hypre_SStructPVectorGetBoxValues( hypre_SStructPVector *pvector,
 
 HYPRE_Int 
 hypre_SStructPVectorSetConstantValues( hypre_SStructPVector *pvector,
-                                       double                value )
+                                       HYPRE_Complex         value )
 {
    HYPRE_Int           nvars = hypre_SStructPVectorNVars(pvector);
    hypre_StructVector *svector;
@@ -593,7 +573,7 @@ hypre_SStructVectorRef( hypre_SStructVector  *vector,
 
 HYPRE_Int 
 hypre_SStructVectorSetConstantValues( hypre_SStructVector *vector,
-                                      double               value )
+                                      HYPRE_Complex        value )
 {
    HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
@@ -618,7 +598,7 @@ HYPRE_Int
 hypre_SStructVectorConvert( hypre_SStructVector  *vector,
                             hypre_ParVector     **parvector_ptr )
 {
-  *parvector_ptr = hypre_SStructVectorParVector(vector);
+   *parvector_ptr = hypre_SStructVectorParVector(vector);
 
    return hypre_error_flag;
 }
@@ -632,14 +612,14 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                hypre_ParVector     **parvector_ptr )
 {
    hypre_ParVector      *parvector;
-   double               *pardata;
+   HYPRE_Complex        *pardata;
    HYPRE_Int             pari;
 
    hypre_SStructPVector *pvector;
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
    HYPRE_Int             yi;
-   double               *yp;
+   HYPRE_Complex        *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
    HYPRE_Int             bi;
@@ -650,7 +630,7 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
 
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
 
    parvector = hypre_SStructVectorParVector(vector);
    pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
@@ -666,31 +646,28 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
 
          boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
          hypre_ForBoxI(i, boxes)
-            {
-               box   = hypre_BoxArrayBox(boxes, i);
-               start = hypre_BoxIMin(box);
+         {
+            box   = hypre_BoxArrayBox(boxes, i);
+            start = hypre_BoxIMin(box);
 
-               y_data_box =
-                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-               yp = hypre_StructVectorBoxData(y, i);
+            y_data_box =
+               hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+            yp = hypre_StructVectorBoxData(y, i);
 
-               hypre_BoxGetSize(box, loop_size);
-               hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
-                                   y_data_box, start, stride, yi,
-                                   box,        start, stride, bi);
+            hypre_BoxGetSize(box, loop_size);
+            hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
+                                y_data_box, start, stride, yi,
+                                box,        start, stride, bi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,bi) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(yi, bi)
-                  {
-                     pardata[pari+bi] = yp[yi];
-                  }
-               hypre_BoxLoop2End(yi, bi);
-               pari +=
-                  hypre_IndexX(loop_size)*
-                  hypre_IndexY(loop_size)*
-                  hypre_IndexZ(loop_size);
+            hypre_BoxLoop2For(yi, bi)
+            {
+               pardata[pari+bi] = yp[yi];
             }
+            hypre_BoxLoop2End(yi, bi);
+            pari += hypre_BoxVolume(box);
+         }
       }
    }
 
@@ -719,14 +696,14 @@ HYPRE_Int
 hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                hypre_ParVector     *parvector )
 {
-   double               *pardata;
+   HYPRE_Complex        *pardata;
    HYPRE_Int             pari;
 
    hypre_SStructPVector *pvector;
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
    HYPRE_Int             yi;
-   double               *yp;
+   HYPRE_Complex        *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
    HYPRE_Int             bi;
@@ -739,7 +716,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 
    if (parvector != NULL)
    {
-      hypre_SetIndex(stride, 1, 1, 1);
+      hypre_SetIndex(stride, 1);
 
       parvector = hypre_SStructVectorParVector(vector);
       pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
@@ -755,31 +732,28 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 
             boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
             hypre_ForBoxI(i, boxes)
-               {
-                  box   = hypre_BoxArrayBox(boxes, i);
-                  start = hypre_BoxIMin(box);
+            {
+               box   = hypre_BoxArrayBox(boxes, i);
+               start = hypre_BoxIMin(box);
 
-                  y_data_box =
-                     hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-                  yp = hypre_StructVectorBoxData(y, i);
+               y_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+               yp = hypre_StructVectorBoxData(y, i);
 
-                  hypre_BoxGetSize(box, loop_size);
-                  hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
-                                      y_data_box, start, stride, yi,
-                                      box,        start, stride, bi);
+               hypre_BoxGetSize(box, loop_size);
+               hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
+                                   y_data_box, start, stride, yi,
+                                   box,        start, stride, bi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,bi) HYPRE_SMP_SCHEDULE
 #endif
-                  hypre_BoxLoop2For(yi, bi)
-                     {
-                        yp[yi] = pardata[pari+bi];
-                     }
-                  hypre_BoxLoop2End(yi, bi);
-                  pari +=
-                     hypre_IndexX(loop_size)*
-                     hypre_IndexY(loop_size)*
-                     hypre_IndexZ(loop_size);
+               hypre_BoxLoop2For(yi, bi)
+               {
+                  yp[yi] = pardata[pari+bi];
                }
+               hypre_BoxLoop2End(yi, bi);
+               pari += hypre_BoxVolume(box);
+            }
          }
       }
    }

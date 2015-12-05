@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.59 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -65,15 +65,15 @@ BABELLIBFLAGS =\
 ##################################################################
 
 HYPRE_DRIVERS =\
- zboxloop.c\
  ij.c\
- ij_mv.c\
  new_ij.c\
  sstruct.c\
- sstruct_fac.c\
  struct.c\
+ ams_driver.c\
  maxwell_unscaled.c\
- ams_driver.c
+ sstruct_fac.c\
+ ij_mv.c\
+ zboxloop.c
 
 HYPRE_BABEL_DRIVERS =\
  struct_b.c\

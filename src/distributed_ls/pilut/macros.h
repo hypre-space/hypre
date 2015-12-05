@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -39,7 +39,7 @@
  *
  * 12/10
  *  - added MACHINE_IS macro
- *  - added double precision prototypes to Fortran BLAS
+ *  - added HYPRE_Real precision prototypes to Fortran BLAS
  *
  * 1/13
  *  - added two macros to deal with 0 vs 1-based indexing
@@ -69,7 +69,7 @@
 #define MAX_NPES   256   /* Maximum # of supported processors */
 
 /* Macros for names of Fortran BLAS routines */
-/* AJC: added double precision prototypes using MACHINE_IS_ */
+/* AJC: added HYPRE_Real precision prototypes using MACHINE_IS_ */
 #ifdef MACHINE_IS_CRAY
 #ifdef USE_SHORT
 #define SNRM2 SNRM2
@@ -112,14 +112,14 @@
 # define cleartimer(tmr) (tmr = 0)
 # define starttimer(tmr) (tmr -= rtclock())
 # define stoptimer(tmr)  (tmr += rtclock())
-# define gettimer(tmr)   ((double) tmr*_secpertick)
+# define gettimer(tmr)   ((HYPRE_Real) tmr*_secpertick)
   typedef hypre_longint timer ;
 #else
 # define cleartimer(tmr) (tmr = 0.0)
 # define starttimer(tmr) (tmr -= hypre_MPI_Wtime())
 # define stoptimer(tmr)  (tmr += hypre_MPI_Wtime())
 # define gettimer(tmr)   (tmr)
-  typedef double timer ;
+  typedef HYPRE_Real timer ;
 #endif
 
 /* This random seed maybe should be dynamic? That produces

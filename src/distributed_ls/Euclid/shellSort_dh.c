@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -41,11 +41,11 @@ void shellSort_int(const HYPRE_Int n, HYPRE_Int *x)
 
 #undef __FUNC__
 #define __FUNC__ "shellSort_float"
-void shellSort_float(const HYPRE_Int n, double *x)
+void shellSort_float(const HYPRE_Int n, HYPRE_Real *x)
 {
   START_FUNC_DH
   HYPRE_Int m, max, j, k;
-  double itemp;
+  HYPRE_Real itemp;
 
   m = n/2;
   while (m > 0) {

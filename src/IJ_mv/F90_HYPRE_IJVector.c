@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -76,7 +76,7 @@ hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *num_values,
      hypre_F90_IntArray *indices,
-     hypre_F90_DblArray *values,
+     hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr        )
 {
    *ierr = (hypre_F90_Int)
@@ -84,7 +84,7 @@ hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (num_values),
            hypre_F90_PassIntArray (indices),
-           hypre_F90_PassDblArray (values)      ) );
+           hypre_F90_PassComplexArray (values)      ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -96,7 +96,7 @@ hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *num_values,
      hypre_F90_IntArray *indices,
-     hypre_F90_DblArray *values,
+     hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr        )
 {
    *ierr = (hypre_F90_Int)
@@ -104,7 +104,7 @@ hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (num_values),
            hypre_F90_PassIntArray (indices),
-           hypre_F90_PassDblArray (values)      ) );
+           hypre_F90_PassComplexArray (values)      ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -130,7 +130,7 @@ hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)
    ( hypre_F90_Obj *vector,
      hypre_F90_Int *num_values,
      hypre_F90_IntArray *indices,
-     hypre_F90_DblArray *values,
+     hypre_F90_ComplexArray *values,
      hypre_F90_Int *ierr        )
 {
    *ierr = (hypre_F90_Int)
@@ -138,7 +138,7 @@ hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)
            hypre_F90_PassObj (HYPRE_IJVector, vector),
            hypre_F90_PassInt (num_values),
            hypre_F90_PassIntArray (indices),
-           hypre_F90_PassDblArray (values)      ) );
+           hypre_F90_PassComplexArray (values)      ) );
 }
 
 /*--------------------------------------------------------------------------

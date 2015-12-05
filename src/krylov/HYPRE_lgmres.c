@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.3 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -106,14 +106,14 @@ HYPRE_LGMRESGetAugDim( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_LGMRESSetTol( HYPRE_Solver solver,
-                         double             tol    )
+                         HYPRE_Real         tol    )
 {
    return( hypre_LGMRESSetTol( (void *) solver, tol ) );
 }
 
 HYPRE_Int
 HYPRE_LGMRESGetTol( HYPRE_Solver solver,
-                         double           * tol    )
+                         HYPRE_Real       * tol    )
 {
    return( hypre_LGMRESGetTol( (void *) solver, tol ) );
 }
@@ -123,14 +123,14 @@ HYPRE_LGMRESGetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_LGMRESSetAbsoluteTol( HYPRE_Solver solver,
-                         double             a_tol    )
+                         HYPRE_Real         a_tol    )
 {
    return( hypre_LGMRESSetAbsoluteTol( (void *) solver, a_tol ) );
 }
 
 HYPRE_Int
 HYPRE_LGMRESGetAbsoluteTol( HYPRE_Solver solver,
-                         double           * a_tol    )
+                         HYPRE_Real       * a_tol    )
 {
    return( hypre_LGMRESGetAbsoluteTol( (void *) solver, a_tol ) );
 }
@@ -141,14 +141,14 @@ HYPRE_LGMRESGetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_LGMRESSetConvergenceFactorTol( HYPRE_Solver solver,
-                         double             cf_tol    )
+                         HYPRE_Real         cf_tol    )
 {
    return( hypre_LGMRESSetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
 
 HYPRE_Int
 HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver,
-                         double           * cf_tol    )
+                         HYPRE_Real       * cf_tol    )
 {
    return( hypre_LGMRESGetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
@@ -282,7 +282,7 @@ HYPRE_LGMRESGetConverged( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                               HYPRE_Real         *norm   )
 {
    return( hypre_LGMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

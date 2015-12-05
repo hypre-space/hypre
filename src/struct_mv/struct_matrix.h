@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -36,7 +36,7 @@ typedef struct hypre_StructMatrix_struct
 
    hypre_BoxArray       *data_space;
 
-   double               *data;         /* Pointer to matrix data */
+   HYPRE_Complex        *data;         /* Pointer to matrix data */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of matrix data */
    HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
@@ -51,7 +51,8 @@ typedef struct hypre_StructMatrix_struct
                       
    HYPRE_Int             symmetric;    /* Is the matrix symmetric */
    HYPRE_Int            *symm_elements;/* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
+                                                     * direction */
                       
    HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
 
@@ -83,8 +84,8 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
-#define hypre_StructMatrixDim(matrix) \
-hypre_StructGridDim(hypre_StructMatrixGrid(matrix))
+#define hypre_StructMatrixNDim(matrix) \
+hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 
 #define hypre_StructMatrixBox(matrix, b) \
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)

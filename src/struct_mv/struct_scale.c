@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -23,13 +23,13 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructScale( double              alpha,
+hypre_StructScale( HYPRE_Complex       alpha,
                    hypre_StructVector *y     )
 {
    hypre_Box       *y_data_box;
                    
    HYPRE_Int        yi;
-   double          *yp;
+   HYPRE_Complex   *yp;
                    
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
@@ -39,7 +39,7 @@ hypre_StructScale( double              alpha,
                    
    HYPRE_Int        i;
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
@@ -52,7 +52,7 @@ hypre_StructScale( double              alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(hypre_StructVectorDim(y), loop_size,
+      hypre_BoxLoop1Begin(hypre_StructVectorNDim(y), loop_size,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE

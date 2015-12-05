@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /* f2c.h  --  Standard Fortran to C header file */
@@ -44,7 +44,7 @@ typedef HYPRE_ULongInt uinteger;
 typedef char *address;
 typedef short int shortint;
 typedef float real;
-typedef double doublereal;
+typedef HYPRE_Real doublereal;
 typedef struct { real r, i; } complex;
 typedef struct { doublereal r, i; } doublecomplex;
 typedef HYPRE_LongInt logical;
@@ -234,7 +234,7 @@ typedef /* Subroutine */ HYPRE_Int (*S_fp)();
 /* E_fp is for real functions when -R is not specified */
 typedef VOID C_f;	/* complex function */
 typedef VOID H_f;	/* character function */
-typedef VOID Z_f;	/* double complex function */
+typedef VOID Z_f;	/* HYPRE_Real complex function */
 typedef doublereal E_f;	/* real function with -R not specified */
 
 /* undef any lower-case symbols that your C compiler predefines, e.g.: */

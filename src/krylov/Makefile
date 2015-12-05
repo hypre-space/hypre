@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.21 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -60,16 +60,16 @@ SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
-#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
-#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
+#	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*

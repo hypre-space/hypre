@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -31,7 +31,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector       *u_edge;
 
    HYPRE_Int              max_iter     = maxwell_data-> max_iter;
-   double                 tol          = maxwell_data-> tol;
+   HYPRE_Real             tol          = maxwell_data-> tol;
    HYPRE_Int              rel_change   = maxwell_data-> rel_change;
    HYPRE_Int              zero_guess   = maxwell_data-> zero_guess;
    HYPRE_Int              npre_relax   = maxwell_data-> num_pre_relax;
@@ -47,8 +47,8 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector      **nVtemp_l     = maxwell_data-> nVtemp_l;
    hypre_ParVector      **nVtemp2_l    = maxwell_data-> nVtemp2_l;
    HYPRE_Int            **nCF_marker_l = maxwell_data-> nCF_marker_l;
-   double                *nrelax_weight= maxwell_data-> nrelax_weight;
-   double                *nomega       = maxwell_data-> nomega;
+   HYPRE_Real            *nrelax_weight= maxwell_data-> nrelax_weight;
+   HYPRE_Real            *nomega       = maxwell_data-> nomega;
    HYPRE_Int              nrelax_type  = maxwell_data-> nrelax_type;
    HYPRE_Int              node_numlevs = maxwell_data-> node_numlevels;
 
@@ -68,8 +68,8 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector      **eVtemp_l     = maxwell_data-> eVtemp_l;
    hypre_ParVector      **eVtemp2_l    = maxwell_data-> eVtemp2_l;
    HYPRE_Int            **eCF_marker_l = maxwell_data-> eCF_marker_l;
-   double                *erelax_weight= maxwell_data-> erelax_weight;
-   double                *eomega       = maxwell_data-> eomega;
+   HYPRE_Real            *erelax_weight= maxwell_data-> erelax_weight;
+   HYPRE_Real            *eomega       = maxwell_data-> eomega;
    HYPRE_Int              erelax_type  = maxwell_data-> erelax_type;
    HYPRE_Int              edge_numlevs = maxwell_data-> edge_numlevels;
 
@@ -77,14 +77,14 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    HYPRE_Int             *BdryRanksCnts_l= maxwell_data-> BdryRanksCnts_l;
 
    HYPRE_Int              logging     = maxwell_data-> logging;
-   double                *norms       = maxwell_data-> norms;
-   double                *rel_norms   = maxwell_data-> rel_norms;
+   HYPRE_Real            *norms       = maxwell_data-> norms;
+   HYPRE_Real            *rel_norms   = maxwell_data-> rel_norms;
 
    HYPRE_Int              Solve_err_flag;
    HYPRE_Int              relax_local, cycle_param;
 
-   double                 b_dot_b = 0, r_dot_r, eps = 0;
-   double                 e_dot_e = 0, x_dot_x = 1;
+   HYPRE_Real             b_dot_b = 0, r_dot_r, eps = 0;
+   HYPRE_Real             e_dot_e = 0, x_dot_x = 1;
 
    HYPRE_Int              i, j;
    HYPRE_Int              level;

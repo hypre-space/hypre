@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -24,31 +21,31 @@
  * adds two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- 	 in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+         in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
  *--------------------------------------------------------------------------*/
 
 hypre_CSRBlockMatrix *
 hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
-   double     *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
-   hypre_CSRMatrix *C;
-   double     *C_data;
-   HYPRE_Int	      *C_i;
+   hypre_CSRMatrix  *C;
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
 
    HYPRE_Int         block_size  = hypre_CSRBlockMatrixBlockSize(A); 
    HYPRE_Int         block_sizeB = hypre_CSRBlockMatrixBlockSize(B); 
    HYPRE_Int         ia, ib, ic, ii, jcol, num_nonzeros, bnnz;
-   HYPRE_Int	       pos;
+   HYPRE_Int           pos;
    HYPRE_Int         *marker;
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
@@ -121,7 +118,7 @@ hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
             marker[jcol] = pos;
             pos++;
          }
-	 else 
+         else 
          {
             for (ii = 0; ii < bnnz; ii++)
                C_data[marker[jcol]*bnnz+ii] = B_data[ib*bnnz+ii];
@@ -130,40 +127,40 @@ hypre_CSRBlockMatrixAdd(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
    }
    hypre_TFree(marker);
    return C;
-}	
+}       
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMultiply
  * multiplies two CSR Matrices A and B and returns a CSR Matrix C;
  * Note: The routine does not check for 0-elements which might be generated
  *       through cancellation of elements in A and B or already contained
- 	 in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
+         in A and B. To remove those, use hypre_CSRMatrixDeleteZeros 
  *--------------------------------------------------------------------------*/
 
 hypre_CSRBlockMatrix *
 hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    HYPRE_Int         ncols_A  = hypre_CSRMatrixNumCols(A);
    HYPRE_Int         block_size  = hypre_CSRBlockMatrixBlockSize(A); 
-   double     *B_data   = hypre_CSRMatrixData(B);
+   HYPRE_Complex    *B_data   = hypre_CSRMatrixData(B);
    HYPRE_Int        *B_i      = hypre_CSRMatrixI(B);
    HYPRE_Int        *B_j      = hypre_CSRMatrixJ(B);
    HYPRE_Int         nrows_B  = hypre_CSRMatrixNumRows(B);
    HYPRE_Int         ncols_B  = hypre_CSRMatrixNumCols(B);
    HYPRE_Int         block_sizeB = hypre_CSRBlockMatrixBlockSize(B); 
-   hypre_CSRMatrix *C;
-   double     *C_data;
-   HYPRE_Int	      *C_i;
+   hypre_CSRMatrix  *C;
+   HYPRE_Complex    *C_data;
+   HYPRE_Int        *C_i;
    HYPRE_Int        *C_j;
 
    HYPRE_Int         ia, ib, ic, ja, jb, num_nonzeros=0, bnnz;
-   HYPRE_Int	       row_start, counter;
-   double      *a_entries, *b_entries, *c_entries, dzero=0.0, done=1.0;
-   HYPRE_Int         *B_marker;
+   HYPRE_Int         row_start, counter;
+   HYPRE_Complex    *a_entries, *b_entries, *c_entries, dzero=0.0, done=1.0;
+   HYPRE_Int        *B_marker;
 
    if (ncols_A != nrows_B)
    {
@@ -240,5 +237,5 @@ hypre_CSRBlockMatrixMultiply(hypre_CSRBlockMatrix *A, hypre_CSRBlockMatrix *B)
    }
    hypre_TFree(B_marker);
    return C;
-}	
+}       
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -352,7 +352,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    double   *ADiagA, one=1.0, *rData, *srdiag;
    MPI_Comm comm;
    hypre_CSRMatrix *ADiag;
-   hypre_ParVector *rVec, *zVec, *pVec, *apVec;
+   hypre_ParVector *rVec=NULL, *zVec, *pVec, *apVec;
 
    double   *pData, *apData;
 
@@ -1225,7 +1225,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    double   rnorm, *alphaArray, *rnormArray, **Tmat;
    double   one=1.0, *rData;
    MPI_Comm comm;
-   hypre_ParVector *rVec, *zVec, *pVec, *apVec;
+   hypre_ParVector *rVec=NULL, *zVec, *pVec, *apVec;
    double *lanczos, *lanczos_p, *Umat, *ptr, *Uptr, *curr_le_vector;
    double rVecNorm;
 

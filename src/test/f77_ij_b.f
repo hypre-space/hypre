@@ -7,7 +7,7 @@ c HYPRE is free software; you can redistribute it and/or modify it under the
 c terms of the GNU Lesser General Public License (as published by the Free
 c Software Foundation) version 2.1 dated February 1999.
 c
-c $Revision: 1.27 $
+c $Revision$
 cEHEADER**********************************************************************
 c
 c

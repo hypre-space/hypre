@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -42,10 +42,10 @@ hypre_AMGSetupStats( void *amg_vdata )
    /* Local variables */
 
    HYPRE_Int      *A_i;
-   double   *A_data;
+   HYPRE_Real   *A_data;
 
    HYPRE_Int      *P_i;
-   double   *P_data;
+   HYPRE_Real   *P_data;
 
    HYPRE_Int       level;
    HYPRE_Int       i,j;
@@ -55,17 +55,17 @@ hypre_AMGSetupStats( void *amg_vdata )
    HYPRE_Int       total_entries;
    HYPRE_Int       min_entries;
    HYPRE_Int       max_entries;
-   double    avg_entries;
-   double    rowsum;
-   double    min_rowsum;
-   double    max_rowsum;
-   double    sparse;
-   double    min_weight;
-   double    max_weight;
-   double    op_complxty=0;
-   double    grid_complxty=0;
-   double    num_nz0;
-   double    num_var0;
+   HYPRE_Real    avg_entries;
+   HYPRE_Real    rowsum;
+   HYPRE_Real    min_rowsum;
+   HYPRE_Real    max_rowsum;
+   HYPRE_Real    sparse;
+   HYPRE_Real    min_weight;
+   HYPRE_Real    max_weight;
+   HYPRE_Real    op_complxty=0;
+   HYPRE_Real    grid_complxty=0;
+   HYPRE_Real    num_nz0;
+   HYPRE_Real    num_var0;
 
    A_array = hypre_AMGDataAArray(amg_data);
    P_array = hypre_AMGDataPArray(amg_data);
@@ -92,8 +92,8 @@ hypre_AMGSetupStats( void *amg_vdata )
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
-   num_var0 = (double) hypre_CSRMatrixNumRows(A_array[0]);
-   num_nz0 = (double) hypre_CSRMatrixNumNonzeros(A_array[0]);
+   num_var0 = (HYPRE_Real) hypre_CSRMatrixNumRows(A_array[0]);
+   num_nz0 = (HYPRE_Real) hypre_CSRMatrixNumNonzeros(A_array[0]);
  
    for (level = 0; level < num_levels; level++)
    {
@@ -102,9 +102,9 @@ hypre_AMGSetupStats( void *amg_vdata )
 
        fine_size = hypre_CSRMatrixNumRows(A_array[level]);
        num_nonzeros = hypre_CSRMatrixNumNonzeros(A_array[level]);
-       sparse = num_nonzeros /((double) fine_size * (double) fine_size);
-       op_complxty += ((double)num_nonzeros/num_nz0);
-       grid_complxty += ((double)fine_size/num_var0);
+       sparse = num_nonzeros /((HYPRE_Real) fine_size * (HYPRE_Real) fine_size);
+       op_complxty += ((HYPRE_Real)num_nonzeros/num_nz0);
+       grid_complxty += ((HYPRE_Real)fine_size/num_var0);
 
        min_entries = A_i[1]-A_i[0];
        max_entries = 0;
@@ -132,7 +132,7 @@ hypre_AMGSetupStats( void *amg_vdata )
            max_rowsum = hypre_max(rowsum, max_rowsum);
        }
 
-       avg_entries = ((double) total_entries) / ((double) fine_size);
+       avg_entries = ((HYPRE_Real) total_entries) / ((HYPRE_Real) fine_size);
 
        hypre_printf( "%2d %5d %7d  %0.3f  %3d %3d",
                  level, fine_size, num_nonzeros, sparse, min_entries, 
@@ -233,7 +233,7 @@ void    *data;
    HYPRE_Int     *num_grid_sweeps;  
    HYPRE_Int     *grid_relax_type;   
    HYPRE_Int    **grid_relax_points; 
-   double   tol;
+   HYPRE_Real   tol;
  
    /* amg output params */
    HYPRE_Int      amg_ioutdat;

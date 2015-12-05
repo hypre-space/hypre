@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -56,9 +56,9 @@ HYPRE_StructGridSetExtents( HYPRE_StructGrid  grid,
 
    HYPRE_Int    d;
 
-   hypre_ClearIndex(new_ilower);
-   hypre_ClearIndex(new_iupper);
-   for (d = 0; d < hypre_StructGridDim((hypre_StructGrid *) grid); d++)
+   hypre_SetIndex(new_ilower, 0);
+   hypre_SetIndex(new_iupper, 0);
+   for (d = 0; d < hypre_StructGridNDim((hypre_StructGrid *) grid); d++)
    {
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
@@ -79,8 +79,8 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
 
    HYPRE_Int    d;
 
-   hypre_ClearIndex(new_periodic);
-   for (d = 0; d < hypre_StructGridDim(grid); d++)
+   hypre_SetIndex(new_periodic, 0);
+   for (d = 0; d < hypre_StructGridNDim(grid); d++)
    {
       hypre_IndexD(new_periodic, d) = periodic[d];
    }

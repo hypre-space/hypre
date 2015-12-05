@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -308,7 +308,7 @@ void rcv_external_rows_private(ExternalRows_dh er)
   HYPRE_Int i, loCount = er->sg->loCount, *loNabors = er->sg->loNabors;
   HYPRE_Int nabor, nz = 0, offset = 0;
   HYPRE_Int *extRowCval = er->cvalExt, *extRowFill = er->fillExt;
-  double *extRowAval = er->avalExt;
+  HYPRE_Real *extRowAval = er->avalExt;
 
   /* start receives of external rows */
   nz = 0;
@@ -496,7 +496,7 @@ void send_external_rows_private(ExternalRows_dh er)
   /* allocate buffers to hold upper triangular portion of boundary rows */
   cvalSend = er->cvalSend = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   fillSend = er->fillSend = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  avalSend = er->avalSend = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  avalSend = er->avalSend = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* copy upper triangular portion of boundary rows HYPRE_Int send buffers */
   offset = 0;
@@ -505,7 +505,7 @@ void send_external_rows_private(ExternalRows_dh er)
 
     memcpy(cvalSend+offset, cval+diag[i], tmp*sizeof(HYPRE_Int));
     memcpy(fillSend+offset, fill+diag[i], tmp*sizeof(HYPRE_Int));
-    memcpy(avalSend+offset, aval+diag[i], tmp*sizeof(double));
+    memcpy(avalSend+offset, aval+diag[i], tmp*sizeof(HYPRE_Real));
     offset += tmp;
   }
 

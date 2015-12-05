@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -182,10 +182,10 @@ hypre_SStructKrylovMatvecCreate( void   *A,
 
 HYPRE_Int
 hypre_SStructKrylovMatvec( void   *matvec_data,
-                           double  alpha,
+                           HYPRE_Complex  alpha,
                            void   *A,
                            void   *x,
-                           double  beta,
+                           HYPRE_Complex  beta,
                            void   *y )
 {
    return ( hypre_SStructMatvec( alpha,
@@ -207,11 +207,11 @@ hypre_SStructKrylovMatvecDestroy( void *matvec_data )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-double
+HYPRE_Real
 hypre_SStructKrylovInnerProd( void *x, 
                               void *y )
 {
-   double result;
+   HYPRE_Real result;
 
    hypre_SStructInnerProd( (hypre_SStructVector *) x,
                            (hypre_SStructVector *) y, &result );
@@ -245,7 +245,7 @@ hypre_SStructKrylovClearVector( void *x )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructKrylovScaleVector( double  alpha,
+hypre_SStructKrylovScaleVector( HYPRE_Complex  alpha,
                                 void   *x )
 {
    return ( hypre_SStructScale( alpha, (hypre_SStructVector *) x ) );
@@ -255,7 +255,7 @@ hypre_SStructKrylovScaleVector( double  alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SStructKrylovAxpy( double alpha,
+hypre_SStructKrylovAxpy( HYPRE_Complex alpha,
                          void   *x,
                          void   *y )
 {

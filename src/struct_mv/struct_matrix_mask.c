@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -39,6 +39,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
                               HYPRE_Int           num_stencil_indices,
                               HYPRE_Int          *stencil_indices     )
 {
+   HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
    hypre_StructMatrix   *mask;
 
    hypre_StructStencil  *stencil;
@@ -75,7 +76,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
                       mask_stencil_shape[i]);
    }
    hypre_StructMatrixStencil(mask) =
-      hypre_StructStencilCreate(hypre_StructStencilDim(stencil),
+      hypre_StructStencilCreate(hypre_StructStencilNDim(stencil),
                                 mask_stencil_size,
                                 mask_stencil_shape);
 
@@ -109,7 +110,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
          hypre_StructMatrixSymmElements(matrix)[i];
    }
 
-   for (i = 0; i < 6; i++)
+   for (i = 0; i < 2*ndim; i++)
    {
       hypre_StructMatrixNumGhost(mask)[i] =
          hypre_StructMatrixNumGhost(matrix)[i];

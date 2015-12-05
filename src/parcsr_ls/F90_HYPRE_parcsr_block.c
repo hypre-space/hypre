@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -108,12 +108,12 @@ hypre_F90_IFACE(hypre_blocktridiagsetindexset, HYPRE_BLOCKTRIDIAGSETINDEXSET)
 void
 hypre_F90_IFACE(hypre_blocktridiagsetamgstrengt, HYPRE_BLOCKTRIDIAGSETAMGSTRENGT)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *thresh,
+    hypre_F90_Real *thresh,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetAMGStrengthThreshold(
       hypre_F90_PassObj (HYPRE_Solver, solver),
-      hypre_F90_PassDbl (thresh));
+      hypre_F90_PassReal (thresh));
 }
 
 /*--------------------------------------------------------------------------

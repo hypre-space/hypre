@@ -30,7 +30,6 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 
-
 int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm);
 
@@ -45,7 +44,7 @@ int main (int argc, char *argv[])
    HYPRE_Int local_size, extra;
 
    int solver_id;
-   int print_solution, print_system;
+   int print_system;
 
    double h, h2;
 
@@ -66,7 +65,6 @@ int main (int argc, char *argv[])
    /* Default problem parameters */
    n = 33;
    solver_id = 0;
-   print_solution  = 0;
    print_system = 0;
 
 
@@ -87,18 +85,11 @@ int main (int argc, char *argv[])
             arg_index++;
             solver_id = atoi(argv[arg_index++]);
          }
-         else if ( strcmp(argv[arg_index], "-print_solution") == 0 )
-         {
-            arg_index++;
-            print_solution = 1;
-         }
          else if ( strcmp(argv[arg_index], "-print_system") == 0 )
          {
             arg_index++;
             print_system = 1;
          }
-
-
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
             print_usage = 1;
@@ -122,7 +113,6 @@ int main (int argc, char *argv[])
          printf("                        8  - ParaSails-PCG\n");
          printf("                        50 - PCG\n");
          printf("                        61 - AMG-FlexGMRES\n");
-         printf("  -print_solution     : print the solution vector\n");
          printf("  -print_system       : print the matrix and rhs\n");
          printf("\n");
       }
@@ -544,10 +534,6 @@ int main (int argc, char *argv[])
    {
       if (myid ==0) printf("Invalid solver id specified.\n");
    }
-
-   /* Print the solution */
-   if (print_solution)
-      HYPRE_IJVectorPrint(x, "ij.out.x");
 
    /* Clean up */
    HYPRE_IJMatrixDestroy(A);

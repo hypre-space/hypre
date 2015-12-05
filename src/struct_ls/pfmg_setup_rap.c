@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -37,7 +37,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                        HYPRE_Int           cdir,
                        HYPRE_Int           rap_type    )
 {
-   hypre_StructMatrix    *RAP;
+   hypre_StructMatrix    *RAP=NULL;
    hypre_StructStencil   *stencil;
    HYPRE_Int              P_stored_as_transpose = 0;
    HYPRE_Int              constant_coefficient;
@@ -46,7 +46,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
 
    if (rap_type == 0)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             RAP = hypre_PFMG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
@@ -60,7 +60,7 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
 
    else if (rap_type == 1)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             RAP =  hypre_PFMGCreateCoarseOp5(R ,A, P, coarse_grid, cdir);
@@ -126,7 +126,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    if (rap_type == 0)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             /*--------------------------------------------------------------------
@@ -161,7 +161,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    else if (rap_type == 1)
    {
-      switch (hypre_StructStencilDim(stencil)) 
+      switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
             hypre_PFMGBuildCoarseOp5(A, P, R, cdir, cindex, cstride, Ac);

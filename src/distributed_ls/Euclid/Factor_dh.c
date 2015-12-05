@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -313,7 +313,7 @@ void Factor_dhPrintTriples(Factor_dh mat, char *filename)
 #undef __FUNC__
 #define __FUNC__ "setup_receives_private"
 static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *end_rows, 
-                                  double *recvBuf, hypre_MPI_Request *req,
+                                  HYPRE_Real *recvBuf, hypre_MPI_Request *req,
                                   HYPRE_Int *reqind, HYPRE_Int reqlen, 
                                   HYPRE_Int *outlist, bool debug)
 {
@@ -382,7 +382,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
   hypre_MPI_Status  *statuses = mat->status;
   bool        isHigher;
   HYPRE_Int         *rcvBuf;
-  double      *sendBuf;
+  HYPRE_Real  *sendBuf;
   HYPRE_Int         myidNEW = o2n_subdomain[myid_dh];
   HYPRE_Int         count;
 
@@ -401,8 +401,8 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
 
   mat->sendlenLo = sendlenLo;
   mat->sendlenHi = sendlenHi;
-  mat->sendbufLo = (double *)MALLOC_DH(sendlenLo * sizeof(double)); CHECK_V_ERROR;
-  mat->sendbufHi = (double *)MALLOC_DH(sendlenHi * sizeof(double)); CHECK_V_ERROR;
+  mat->sendbufLo = (HYPRE_Real *)MALLOC_DH(sendlenLo * sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->sendbufHi = (HYPRE_Real *)MALLOC_DH(sendlenHi * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   mat->sendindLo = (HYPRE_Int *)MALLOC_DH(sendlenLo * sizeof(HYPRE_Int)); CHECK_V_ERROR;
   mat->sendindHi = (HYPRE_Int *)MALLOC_DH(sendlenHi * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
@@ -488,7 +488,7 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
   HYPRE_Int *beg_rows = sg->beg_rowP, *row_count = sg->row_count, *end_rows;
   Mat_dh matFake;
   bool debug = false;
-  double *recvBuf;
+  HYPRE_Real *recvBuf;
 
   if (mat->debug && logFile != NULL) debug = true;
 
@@ -514,8 +514,8 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
 
   /* Allocate recvbuf; recvbuf has numlocal entries saved for local part of x */
   i = m+numb->num_ext;
-  mat->work_y_lo = (double*)MALLOC_DH(i*sizeof(double)); CHECK_V_ERROR;
-  mat->work_x_hi = (double*)MALLOC_DH(i*sizeof(double)); CHECK_V_ERROR;
+  mat->work_y_lo = (HYPRE_Real*)MALLOC_DH(i*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  mat->work_x_hi = (HYPRE_Real*)MALLOC_DH(i*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   if (debug) {
     hypre_fprintf(logFile, "FACT num_extLo= %i  num_extHi= %i\n", numb->num_extLo, numb->num_extHi);
   }
@@ -581,19 +581,19 @@ void Factor_dhSolveSetup(Factor_dh mat, SubdomainGraph_dh sg)
    the other solves located in Euclid_apply.c.
 */
 static void forward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, 
-                            HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Int *diag, double *aval, 
-                            double *rhs, double *work_y, bool debug);
+                            HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Int *diag, HYPRE_Real *aval, 
+                            HYPRE_Real *rhs, HYPRE_Real *work_y, bool debug);
 
 static void backward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, 
-                       HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Int *diag, double *aval, 
-                       double *work_y, double *work_x, bool debug);
+                       HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Int *diag, HYPRE_Real *aval, 
+                       HYPRE_Real *work_y, HYPRE_Real *work_x, bool debug);
 
 static HYPRE_Int beg_rowG;
 
 
 #undef __FUNC__
 #define __FUNC__ "Factor_dhSolve"
-void Factor_dhSolve(double *rhs, double *lhs, Euclid_dh ctx)
+void Factor_dhSolve(HYPRE_Real *rhs, HYPRE_Real *lhs, Euclid_dh ctx)
 {
   START_FUNC_DH
   Factor_dh mat = ctx->F;
@@ -602,12 +602,12 @@ void Factor_dhSolve(double *rhs, double *lhs, Euclid_dh ctx)
   HYPRE_Int    offsetLo = mat->numbSolve->num_extLo;
   HYPRE_Int    offsetHi = mat->numbSolve->num_extHi;
   HYPRE_Int    *rp = mat->rp, *cval = mat->cval, *diag = mat->diag;
-  double *aval = mat->aval;
+  HYPRE_Real *aval = mat->aval;
   HYPRE_Int    *sendindLo = mat->sendindLo, *sendindHi = mat->sendindHi;
   HYPRE_Int    sendlenLo = mat->sendlenLo, sendlenHi = mat->sendlenHi;
-  double *sendbufLo = mat->sendbufLo, *sendbufHi = mat->sendbufHi; 
-  double *work_y = mat->work_y_lo;
-  double *work_x = mat->work_x_hi;
+  HYPRE_Real *sendbufLo = mat->sendbufLo, *sendbufHi = mat->sendbufHi; 
+  HYPRE_Real *work_y = mat->work_y_lo;
+  HYPRE_Real *work_x = mat->work_x_hi;
   bool debug = false;
 
   if (mat->debug && logFile != NULL) debug = true;
@@ -744,7 +744,7 @@ for (i=0; i<m+offsetLo+offsetHi; ++i) {
   }
 
   /* copy solution from work vector lhs vector */
-  memcpy(lhs, work_x, m*sizeof(double));
+  memcpy(lhs, work_x, m*sizeof(HYPRE_Real));
 
   if (debug) {
     hypre_fprintf(logFile, "\nFACT solution: ");
@@ -770,8 +770,8 @@ for (i=0; i<m+offsetLo+offsetHi; ++i) {
 #undef __FUNC__
 #define __FUNC__ "forward_solve_private"
 void forward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int *rp, 
-                           HYPRE_Int *cval, HYPRE_Int *diag, double *aval, 
-                           double *rhs, double *work_y, bool debug)
+                           HYPRE_Int *cval, HYPRE_Int *diag, HYPRE_Real *aval, 
+                           HYPRE_Real *rhs, HYPRE_Real *work_y, bool debug)
 {
   START_FUNC_DH
   HYPRE_Int i, j, idx;
@@ -796,8 +796,8 @@ void forward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int 
   for (i=from; i<to; ++i) {
     HYPRE_Int     len  = diag[i] - rp[i];
     HYPRE_Int     *col = cval + rp[i];
-    double  *val  = aval + rp[i];
-    double  sum = rhs[i];
+    HYPRE_Real  *val  = aval + rp[i];
+    HYPRE_Real  sum = rhs[i];
 
     hypre_fprintf(logFile, "FACT   solving for work_y[%i] (global)\n", i+1+beg_rowG);
     hypre_fprintf(logFile, "FACT        sum = %g\n", sum);
@@ -819,8 +819,8 @@ void forward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int 
   for (i=from; i<to; ++i) {
     HYPRE_Int     len  = diag[i] - rp[i];
     HYPRE_Int     *col = cval + rp[i];
-    double  *val  = aval + rp[i];
-    double  sum = rhs[i];
+    HYPRE_Real  *val  = aval + rp[i];
+    HYPRE_Real  sum = rhs[i];
 
     for (j=0; j<len; ++j) {
       idx = col[j];
@@ -835,8 +835,8 @@ void forward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int 
 #undef __FUNC__
 #define __FUNC__ "backward_solve_private"
 void backward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int *rp, 
-                            HYPRE_Int *cval, HYPRE_Int *diag, double *aval, 
-                            double *work_y, double *work_x, bool debug)
+                            HYPRE_Int *cval, HYPRE_Int *diag, HYPRE_Real *aval, 
+                            HYPRE_Real *work_y, HYPRE_Real *work_x, bool debug)
 {
   START_FUNC_DH
   HYPRE_Int i, j, idx;
@@ -847,8 +847,8 @@ void backward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int
   for (i=from-1; i>=to; --i) {
     HYPRE_Int     len = rp[i+1] - diag[i] - 1;
     HYPRE_Int     *col = cval + diag[i] + 1;
-    double  *val  = aval + diag[i] + 1;
-    double  sum = work_y[i];
+    HYPRE_Real  *val  = aval + diag[i] + 1;
+    HYPRE_Real  sum = work_y[i];
     hypre_fprintf(logFile, "FACT   solving for work_x[%i]\n", i+1+beg_rowG);
 
     for (j=0; j<len; ++j) {
@@ -866,8 +866,8 @@ void backward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int
   for (i=from-1; i>=to; --i) {
     HYPRE_Int     len = rp[i+1] - diag[i] - 1;
     HYPRE_Int     *col = cval + diag[i] + 1;
-    double  *val  = aval + diag[i] + 1;
-    double  sum = work_y[i];
+    HYPRE_Real  *val  = aval + diag[i] + 1;
+    HYPRE_Real  sum = work_y[i];
 
     for (j=0; j<len; ++j) {
       idx = col[j];
@@ -882,7 +882,7 @@ void backward_solve_private(HYPRE_Int m, HYPRE_Int from, HYPRE_Int to, HYPRE_Int
 #undef __FUNC__
 #define __FUNC__ "Factor_dhInit"
 void Factor_dhInit(void *A, bool fillFlag, bool avalFlag,
-                          double rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *Fout)
+                          HYPRE_Real rho, HYPRE_Int id, HYPRE_Int beg_rowP, Factor_dh *Fout)
 {
   START_FUNC_DH
   HYPRE_Int m, n, beg_row, alloc;
@@ -969,7 +969,7 @@ void Factor_dhTranspose(Factor_dh A, Factor_dh *Bout)
 /* this could be done using OpenMP, but I took it out for now */
 #undef __FUNC__
 #define __FUNC__ "Factor_dhSolveSeq"
-void Factor_dhSolveSeq(double *rhs, double *lhs, Euclid_dh ctx)
+void Factor_dhSolveSeq(HYPRE_Real *rhs, HYPRE_Real *lhs, Euclid_dh ctx)
 {
   START_FUNC_DH
   Factor_dh F = ctx->F;
@@ -1095,13 +1095,13 @@ void unadjust_bj_private(Factor_dh mat)
 
 #undef __FUNC__
 #define __FUNC__ "Factor_dhMaxPivotInverse"
-double Factor_dhMaxPivotInverse(Factor_dh mat)
+HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat)
 {
   START_FUNC_DH
   HYPRE_Int i, m = mat->m, *diags = mat->diag;
   REAL_DH *aval = mat->aval;
-  double minGlobal = 0.0, min = aval[diags[0]];
-  double retval;
+  HYPRE_Real minGlobal = 0.0, min = aval[diags[0]];
+  HYPRE_Real retval;
 
   for (i=0; i<m; ++i) min = MIN(min, fabs(aval[diags[i]]));
   if (np_dh == 1) {
@@ -1120,10 +1120,10 @@ double Factor_dhMaxPivotInverse(Factor_dh mat)
 
 #undef __FUNC__
 #define __FUNC__ "Factor_dhMaxValue"
-double Factor_dhMaxValue(Factor_dh mat)
+HYPRE_Real Factor_dhMaxValue(Factor_dh mat)
 {
   START_FUNC_DH
-  double maxGlobal = 0.0, max = 0.0;
+  HYPRE_Real maxGlobal = 0.0, max = 0.0;
   HYPRE_Int i, nz = mat->rp[mat->m];
   REAL_DH *aval = mat->aval;
 
@@ -1142,11 +1142,11 @@ double Factor_dhMaxValue(Factor_dh mat)
 
 #undef __FUNC__
 #define __FUNC__ "Factor_dhCondEst"
-double Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
+HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
 {
   START_FUNC_DH
-  double max = 0.0, maxGlobal = 0.0;
-  double *x;
+  HYPRE_Real max = 0.0, maxGlobal = 0.0;
+  HYPRE_Real *x;
   HYPRE_Int i, m = mat->m;
   Vec_dh lhs, rhs;
 

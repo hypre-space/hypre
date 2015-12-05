@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <stdio.h>
@@ -559,7 +559,7 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
 {
    int    i;
-   double *weights;
+   double *weights=NULL;
    char   param1[200], param2[200];
 
    sscanf(paramString, "%s", param1);

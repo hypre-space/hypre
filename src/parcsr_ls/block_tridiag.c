@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -130,7 +130,7 @@ HYPRE_Int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    HYPRE_Int                i, j, *index_set1, print_level, nsweeps, relax_type;
    HYPRE_Int                nrows, nrows1, nrows2, start1, start2, *index_set2;
    HYPRE_Int                count, ierr;
-   double             threshold;
+   HYPRE_Real         threshold;
    hypre_ParCSRMatrix **submatrices;
    HYPRE_Solver       precon1;
    HYPRE_Solver       precon2;
@@ -242,7 +242,7 @@ HYPRE_Int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
                             hypre_ParVector *b, hypre_ParVector *x) 
 {
    HYPRE_Int                i, ind, nrows1, nrows2, *index_set1, *index_set2;
-   double             *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
+   HYPRE_Real         *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
    HYPRE_ParCSRMatrix A21, A11, A22;
    hypre_ParVector    *F1, *U1, *F2, *U2;
    HYPRE_Solver       precon1, precon2;
@@ -319,7 +319,7 @@ HYPRE_Int hypre_BlockTridiagSetIndexSet(void *data, HYPRE_Int n, HYPRE_Int *inds
  * Routines to set the strength threshold for AMG
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, double thresh)
+HYPRE_Int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, HYPRE_Real thresh)
 {
    hypre_BlockTridiagData *b_data = data;
    b_data->threshold = thresh;

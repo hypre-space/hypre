@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * Started 8/28/94
  * George
  *
- * $Id: parutil.c,v 2.7 2010/12/20 19:27:34 falgout Exp $
+ * $Id$
  *
  */
 
@@ -107,16 +107,16 @@ HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival, char *msg)
 /*************************************************************************
 * The following function allocates an array of floats
 **************************************************************************/
-double *hypre_fp_malloc(HYPRE_Int n, char *msg)
+HYPRE_Real *hypre_fp_malloc(HYPRE_Int n, char *msg)
 {
-  double *ptr;
+  HYPRE_Real *ptr;
 
   if (n == 0)
     return NULL;
 
-  ptr = (double *)malloc(sizeof(double)*n);
+  ptr = (HYPRE_Real *)malloc(sizeof(HYPRE_Real)*n);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(double));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
   }
 
   return ptr;
@@ -127,17 +127,17 @@ double *hypre_fp_malloc(HYPRE_Int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of floats and initializes
 **************************************************************************/
-double *hypre_fp_malloc_init(HYPRE_Int n, double ival, char *msg)
+HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival, char *msg)
 {
-  double *ptr;
+  HYPRE_Real *ptr;
   HYPRE_Int i;
 
   if (n == 0)
     return NULL;
 
-  ptr = (double *)malloc(sizeof(double)*n);
+  ptr = (HYPRE_Real *)malloc(sizeof(HYPRE_Real)*n);
   if (ptr == NULL) {
-    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(double));
+    hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
   }
 
   for (i=0; i<n; i++)
@@ -210,11 +210,11 @@ void hypre_memcpy_idx( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 }
 
 /*************************************************************************
-* The following function copies a floating point (double) array.
+* The following function copies a floating point (HYPRE_Real) array.
 * Note this assumes BLAS 1 routine SCOPY. An alternative would be memcpy.
 * There is a noticeable difference between this and just a for loop.
 **************************************************************************/
-void hypre_memcpy_fp( double *dest, const double *src, size_t n )
+void hypre_memcpy_fp( HYPRE_Real *dest, const HYPRE_Real *src, size_t n )
 {
   HYPRE_Int i;
 

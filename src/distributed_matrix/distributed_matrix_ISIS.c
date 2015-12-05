@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -29,7 +29,7 @@ extern "C" {
 typedef struct
 {
     HYPRE_Int *ind;
-    double *val;
+    HYPRE_Real *val;
 } 
 RowBuf;
 #endif
@@ -58,7 +58,7 @@ hypre_InitializeDistributedMatrixISIS(hypre_DistributedMatrix *dm)
 
    RowBuf *rowbuf = new RowBuf;
    rowbuf->ind = new HYPRE_Int[num_cols];
-   rowbuf->val = new double[num_cols];
+   rowbuf->val = new HYPRE_Real[num_cols];
 
    dm->auxiliary_data = (void *) rowbuf;
 #endif
@@ -130,7 +130,7 @@ hypre_GetDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
 #ifdef ISIS_AVAILABLE
    RowMatrix *mat = (RowMatrix *) hypre_DistributedMatrixLocalStorage(dm);
@@ -195,7 +195,7 @@ hypre_RestoreDistributedMatrixRowISIS( hypre_DistributedMatrix *dm,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
   /* does nothing, since we use local buffers */
 

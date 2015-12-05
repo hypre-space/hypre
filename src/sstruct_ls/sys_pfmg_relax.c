@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -19,7 +19,7 @@ typedef struct
 {
    void                   *relax_data;
    HYPRE_Int               relax_type;
-   double                  jacobi_weight;
+   HYPRE_Real              jacobi_weight;
 
 } hypre_SysPFMGRelaxData;
 
@@ -83,7 +83,7 @@ hypre_SysPFMGRelaxSetup( void                 *sys_pfmg_relax_vdata,
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
    void                   *relax_data    = (sys_pfmg_relax_data -> relax_data);
    HYPRE_Int               relax_type    = (sys_pfmg_relax_data -> relax_type);
-   double                  jacobi_weight = (sys_pfmg_relax_data -> jacobi_weight);
+   HYPRE_Real              jacobi_weight = (sys_pfmg_relax_data -> jacobi_weight);
 
    if (relax_type == 1)
    {
@@ -117,8 +117,8 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
          hypre_NodeRelaxSetWeight(relax_data, 1.0);
          hypre_NodeRelaxSetNumNodesets(relax_data, 1);
 
-         hypre_SetIndex(stride, 1, 1, 1);
-         hypre_SetIndex(indices[0], 0, 0, 0);
+         hypre_SetIndex3(stride, 1, 1, 1);
+         hypre_SetIndex3(indices[0], 0, 0, 0);
          hypre_NodeRelaxSetNodeset(relax_data, 0, 1, stride, indices);
       }
       break;
@@ -130,20 +130,20 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
 
          hypre_NodeRelaxSetNumNodesets(relax_data, 2);
 
-         hypre_SetIndex(stride, 2, 2, 2);
+         hypre_SetIndex3(stride, 2, 2, 2);
 
          /* define red points (point set 0) */
-         hypre_SetIndex(indices[0], 1, 0, 0);
-         hypre_SetIndex(indices[1], 0, 1, 0);
-         hypre_SetIndex(indices[2], 0, 0, 1);
-         hypre_SetIndex(indices[3], 1, 1, 1);
+         hypre_SetIndex3(indices[0], 1, 0, 0);
+         hypre_SetIndex3(indices[1], 0, 1, 0);
+         hypre_SetIndex3(indices[2], 0, 0, 1);
+         hypre_SetIndex3(indices[3], 1, 1, 1);
          hypre_NodeRelaxSetNodeset(relax_data, 0, 4, stride, indices);
 
          /* define black points (point set 1) */
-         hypre_SetIndex(indices[0], 0, 0, 0);
-         hypre_SetIndex(indices[1], 1, 1, 0);
-         hypre_SetIndex(indices[2], 1, 0, 1);
-         hypre_SetIndex(indices[3], 0, 1, 1);
+         hypre_SetIndex3(indices[0], 0, 0, 0);
+         hypre_SetIndex3(indices[1], 1, 1, 0);
+         hypre_SetIndex3(indices[2], 1, 0, 1);
+         hypre_SetIndex3(indices[3], 0, 1, 1);
          hypre_NodeRelaxSetNodeset(relax_data, 1, 4, stride, indices);
       }
       break;
@@ -157,7 +157,7 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
 
 HYPRE_Int
 hypre_SysPFMGRelaxSetJacobiWeight(void  *sys_pfmg_relax_vdata,
-                                  double weight)
+                                  HYPRE_Real weight)
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
                                                                                                                                      
@@ -225,7 +225,7 @@ hypre_SysPFMGRelaxSetPostRelax( void  *sys_pfmg_relax_vdata )
 
 HYPRE_Int
 hypre_SysPFMGRelaxSetTol( void   *sys_pfmg_relax_vdata,
-                          double  tol              )
+                          HYPRE_Real  tol              )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
 

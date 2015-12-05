@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -198,7 +198,7 @@ bool Parser_dhReadInt(Parser_dh p, char* in, HYPRE_Int* out)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhReadDouble"
-bool Parser_dhReadDouble(Parser_dh p, char* in, double *out)
+bool Parser_dhReadDouble(Parser_dh p, char* in, HYPRE_Real *out)
 {
   START_FUNC_DH_2
   bool optionExists = false;

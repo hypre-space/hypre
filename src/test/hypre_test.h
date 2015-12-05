@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -86,17 +86,17 @@ HYPRE_Int     *num_grid_sweeps;
 HYPRE_Int     *grid_relax_type;   
 HYPRE_Int    **grid_relax_points;
 
-double   tol = 1.e-8;
-double   pc_tol = 0.;
-double   drop_tol = -1.;
-double   max_row_sum = 1.;
-double   schwarz_rlx_weight = 1.;
-double   sai_threshold = 0.1;
-double   sai_filter = 0.1;
+HYPRE_Real   tol = 1.e-8;
+HYPRE_Real   pc_tol = 0.;
+HYPRE_Real   drop_tol = -1.;
+HYPRE_Real   max_row_sum = 1.;
+HYPRE_Real   schwarz_rlx_weight = 1.;
+HYPRE_Real   sai_threshold = 0.1;
+HYPRE_Real   sai_filter = 0.1;
 
-double   strong_threshold;
-double   trunc_factor;
-double  *relax_weight; 
-double  *omega;
+HYPRE_Real   strong_threshold;
+HYPRE_Real   trunc_factor;
+HYPRE_Real  *relax_weight; 
+HYPRE_Real  *omega;
 
 #endif

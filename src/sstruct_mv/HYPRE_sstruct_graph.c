@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.27 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -387,7 +387,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
     *  are local, which is generally how they should be used).
     *---------------------------------------------------------*/
 
-   new_box = hypre_BoxCreate();
+   new_box = hypre_BoxCreate(ndim);
    
    /* if any processor has added entries, then all need to participate */
 
@@ -417,11 +417,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             
             hypre_BoxManCreate(hypre_BoxManNEntries(orig_boxman), 
                                hypre_BoxManEntryInfoSize(orig_boxman), 
-                               hypre_StructGridDim(sgrid), bbox,
+                               hypre_StructGridNDim(sgrid), bbox,
                                hypre_StructGridComm(sgrid),
                                &new_managers[part][var]);
             /* create gather box with flipped bounding box extents */
-            new_gboxes[part][var] = hypre_BoxCreate();
+            new_gboxes[part][var] = hypre_BoxCreate(ndim);
             hypre_BoxSetExtents(new_gboxes[part][var],
                                 hypre_BoxIMax(bbox), hypre_BoxIMin(bbox));
 
@@ -462,7 +462,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             new_gbox = new_gboxes[part][var];
             bbox =  hypre_BoxManBoundingBox(new_boxman);
             
-            if (hypre_IndexInBoxP(index,bbox) != 0)
+            if (hypre_IndexInBox(index, bbox) != 0)
             {
                /* compute new gather box extents based on index */
                for (d = 0; d < ndim; d++)
@@ -744,7 +744,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             jv = fem_vars[j];
 
             /* shift off-diagonal offset by diagonal */
-            for (d = 0; d < 3; d++)
+            for (d = 0; d < ndim; d++)
             {
                offset[d] = fem_offsets[j][d] - fem_offsets[i][d];
             }
@@ -753,10 +753,8 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             for (entry = 0; entry < stencil_sizes[iv]; entry++)
             {
                /* if offset is already in the stencil, break */
-               if ( (offset[0] == stencil_offsets[iv][entry][0]) &&
-                    (offset[1] == stencil_offsets[iv][entry][1]) &&
-                    (offset[2] == stencil_offsets[iv][entry][2]) &&
-                    (jv == stencil_vars[iv][entry]) )
+               if ( hypre_IndexesEqual(offset, stencil_offsets[iv][entry], ndim)
+                    && (jv == stencil_vars[iv][entry]) )
                {
                   break;
                }
@@ -764,10 +762,11 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
             /* if this is a new stencil offset, add it to the stencil */
             if (entry == stencil_sizes[iv])
             {
-               stencil_offsets[iv][entry][0] = offset[0];
-               stencil_offsets[iv][entry][1] = offset[1];
-               stencil_offsets[iv][entry][2] = offset[2];
-               stencil_vars[iv][entry]       = jv;
+               for (d = 0; d < ndim; d++)
+               {
+                  stencil_offsets[iv][entry][d] = offset[d];
+               }
+               stencil_vars[iv][entry] = jv;
                stencil_sizes[iv]++;
             }
             

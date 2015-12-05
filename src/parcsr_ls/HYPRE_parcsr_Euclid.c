@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.20 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "./HYPRE_parcsr_ls.h"
@@ -91,7 +91,8 @@
 #undef __FUNC__
 #define __FUNC__ "HYPRE_EuclidCreate"
 HYPRE_Int 
-HYPRE_EuclidCreate( MPI_Comm comm, HYPRE_Solver *solver )
+HYPRE_EuclidCreate( MPI_Comm comm,
+                    HYPRE_Solver *solver )
 {
   START_FUNC_DH
   Euclid_dh eu; 
@@ -241,9 +242,9 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
 #define __FUNC__ "HYPRE_EuclidSetup"
 HYPRE_Int 
 HYPRE_EuclidSetup( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector b,
-                         HYPRE_ParVector x   )
+                   HYPRE_ParCSRMatrix A,
+                   HYPRE_ParVector b,
+                   HYPRE_ParVector x   )
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
@@ -287,13 +288,13 @@ for testing!
 #define __FUNC__ "HYPRE_EuclidSolve"
 HYPRE_Int 
 HYPRE_EuclidSolve( HYPRE_Solver solver,
-                         HYPRE_ParCSRMatrix A,
-                         HYPRE_ParVector bb,
-                         HYPRE_ParVector xx  )
+                   HYPRE_ParCSRMatrix A,
+                   HYPRE_ParVector bb,
+                   HYPRE_ParVector xx  )
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
-  double *b, *x;
+  HYPRE_Real *b, *x;
 
   x = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) bb));
   b = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) xx));
@@ -310,8 +311,8 @@ HYPRE_EuclidSolve( HYPRE_Solver solver,
 #define __FUNC__ "HYPRE_EuclidSetParams"
 HYPRE_Int
 HYPRE_EuclidSetParams(HYPRE_Solver solver, 
-                            HYPRE_Int argc,
-                            char *argv[] )
+                      HYPRE_Int argc,
+                      char *argv[] )
 {
   START_FUNC_DH
   Parser_dhInit(parser_dh, argc, argv); HYPRE_EUCLID_ERRCHKA;
@@ -330,7 +331,7 @@ HYPRE_EuclidSetParams(HYPRE_Solver solver,
 #define __FUNC__ "HYPRE_EuclidSetParamsFromFile"
 HYPRE_Int
 HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver, 
-                                    char *filename )
+                              char *filename )
 {
   START_FUNC_DH
   Parser_dhUpdateFromFile(parser_dh, filename); HYPRE_EUCLID_ERRCHKA;
@@ -339,7 +340,7 @@ HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetLevel(HYPRE_Solver solver, 
-				HYPRE_Int level)
+                     HYPRE_Int level)
 {
   char str_level[8];
   START_FUNC_DH
@@ -350,7 +351,7 @@ HYPRE_EuclidSetLevel(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetBJ(HYPRE_Solver solver, 
-				HYPRE_Int bj)
+                  HYPRE_Int bj)
 {
   char str_bj[8];
   START_FUNC_DH
@@ -361,7 +362,7 @@ HYPRE_EuclidSetBJ(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetStats(HYPRE_Solver solver, 
-				HYPRE_Int eu_stats)
+                     HYPRE_Int eu_stats)
 {
   char str_eu_stats[8];
   START_FUNC_DH
@@ -372,7 +373,7 @@ HYPRE_EuclidSetStats(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetMem(HYPRE_Solver solver, 
-				HYPRE_Int eu_mem)
+                   HYPRE_Int eu_mem)
 {
   char str_eu_mem[8];
   START_FUNC_DH
@@ -382,19 +383,8 @@ HYPRE_EuclidSetMem(HYPRE_Solver solver,
 }
 
 HYPRE_Int
-HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
-				double ilut)
-{
-  char str_ilut[256];
-  START_FUNC_DH
-  hypre_sprintf(str_ilut,"%f",ilut);
-  Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
-  END_FUNC_VAL(0)
-}
-
-HYPRE_Int
 HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
-				double sparse_A)
+                       HYPRE_Real sparse_A)
 {
   char str_sparse_A[256];
   START_FUNC_DH
@@ -406,7 +396,7 @@ HYPRE_EuclidSetSparseA(HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_EuclidSetRowScale(HYPRE_Solver solver, 
-				HYPRE_Int row_scale)
+                        HYPRE_Int row_scale)
 {
   char str_row_scale[8];
   START_FUNC_DH
@@ -415,3 +405,15 @@ HYPRE_EuclidSetRowScale(HYPRE_Solver solver,
   HYPRE_EUCLID_ERRCHKA;
   END_FUNC_VAL(0)
 }
+
+HYPRE_Int
+HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
+                    HYPRE_Real ilut)
+{
+  char str_ilut[256];
+  START_FUNC_DH
+  hypre_sprintf(str_ilut,"%f",ilut);
+  Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.3 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -89,14 +89,14 @@ HYPRE_FlexGMRESGetKDim( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_FlexGMRESSetTol( HYPRE_Solver solver,
-                         double             tol    )
+                         HYPRE_Real         tol    )
 {
    return( hypre_FlexGMRESSetTol( (void *) solver, tol ) );
 }
 
 HYPRE_Int
 HYPRE_FlexGMRESGetTol( HYPRE_Solver solver,
-                         double           * tol    )
+                         HYPRE_Real       * tol    )
 {
    return( hypre_FlexGMRESGetTol( (void *) solver, tol ) );
 }
@@ -106,14 +106,14 @@ HYPRE_FlexGMRESGetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_FlexGMRESSetAbsoluteTol( HYPRE_Solver solver,
-                         double             a_tol    )
+                         HYPRE_Real         a_tol    )
 {
    return( hypre_FlexGMRESSetAbsoluteTol( (void *) solver, a_tol ) );
 }
 
 HYPRE_Int
 HYPRE_FlexGMRESGetAbsoluteTol( HYPRE_Solver solver,
-                         double           * a_tol    )
+                         HYPRE_Real       * a_tol    )
 {
    return( hypre_FlexGMRESGetAbsoluteTol( (void *) solver, a_tol ) );
 }
@@ -124,14 +124,14 @@ HYPRE_FlexGMRESGetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_FlexGMRESSetConvergenceFactorTol( HYPRE_Solver solver,
-                         double             cf_tol    )
+                         HYPRE_Real         cf_tol    )
 {
    return( hypre_FlexGMRESSetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
 
 HYPRE_Int
 HYPRE_FlexGMRESGetConvergenceFactorTol( HYPRE_Solver solver,
-                         double           * cf_tol    )
+                         HYPRE_Real       * cf_tol    )
 {
    return( hypre_FlexGMRESGetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
@@ -265,7 +265,7 @@ HYPRE_FlexGMRESGetConverged( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_FlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                               double             *norm   )
+                                               HYPRE_Real         *norm   )
 {
    return( hypre_FlexGMRESGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
@@ -286,7 +286,7 @@ HYPRE_Int HYPRE_FlexGMRESGetResidual( HYPRE_Solver solver, void **residual )
  
 
 HYPRE_Int HYPRE_FlexGMRESSetModifyPC( HYPRE_Solver  solver,
-                                HYPRE_Int (*modify_pc)(HYPRE_Solver, HYPRE_Int, double) )
+                                HYPRE_Int (*modify_pc)(HYPRE_Solver, HYPRE_Int, HYPRE_Real) )
 
 {
    return hypre_FlexGMRESSetModifyPC( (void *) solver, modify_pc);

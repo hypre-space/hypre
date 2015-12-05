@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_parcsr_ls.h"
@@ -144,7 +144,7 @@ HYPRE_SchwarzSetNonSymm( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver  solver,
-                             double relax_weight)
+                             HYPRE_Real relax_weight)
 {
    return( hypre_SchwarzSetRelaxWeight((void *) solver,relax_weight));
 }

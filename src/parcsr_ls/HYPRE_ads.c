@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.3 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -144,7 +144,7 @@ HYPRE_Int HYPRE_ADSSetMaxIter(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_ADSSetTol(HYPRE_Solver solver,
-                          double tol)
+                          HYPRE_Real tol)
 {
    return hypre_ADSSetTol((void *) solver, tol);
 }
@@ -176,8 +176,8 @@ HYPRE_Int HYPRE_ADSSetPrintLevel(HYPRE_Solver solver,
 HYPRE_Int HYPRE_ADSSetSmoothingOptions(HYPRE_Solver solver,
                                        HYPRE_Int relax_type,
                                        HYPRE_Int relax_times,
-                                       double relax_weight,
-                                       double omega)
+                                       HYPRE_Real relax_weight,
+                                       HYPRE_Real omega)
 {
    return hypre_ADSSetSmoothingOptions((void *) solver,
                                        relax_type,
@@ -208,7 +208,7 @@ HYPRE_Int HYPRE_ADSSetAMSOptions(HYPRE_Solver solver,
                                  HYPRE_Int coarsen_type,
                                  HYPRE_Int agg_levels,
                                  HYPRE_Int relax_type,
-                                 double strength_threshold,
+                                 HYPRE_Real strength_threshold,
                                  HYPRE_Int interp_type,
                                  HYPRE_Int Pmax)
 {
@@ -230,7 +230,7 @@ HYPRE_Int HYPRE_ADSSetAMGOptions(HYPRE_Solver solver,
                                  HYPRE_Int coarsen_type,
                                  HYPRE_Int agg_levels,
                                  HYPRE_Int relax_type,
-                                 double strength_threshold,
+                                 HYPRE_Real strength_threshold,
                                  HYPRE_Int interp_type,
                                  HYPRE_Int Pmax)
 {
@@ -259,7 +259,7 @@ HYPRE_Int HYPRE_ADSGetNumIterations(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_ADSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
-                                                double *rel_resid_norm)
+                                                HYPRE_Real *rel_resid_norm)
 {
    return hypre_ADSGetFinalRelativeResidualNorm((void *) solver,
                                                 rel_resid_norm);

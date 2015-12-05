@@ -642,37 +642,30 @@
 <a name="line635">635</a>                                     <font color="#2040a0">pi</font><font color="4444FF">*</font><font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">n</font>, <font color="#2040a0">pj</font><font color="4444FF">*</font><font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">n</font>, <font color="#2040a0">myid</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line636">636</a> 
 <a name="line637">637</a>          <font color="#444444">/* Additional visualization data */</font>
-<a name="line638">638</a>          <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line639">639</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line640">640</a>             <font color="#2040a0">sprintf</font><font color="4444FF">(</font><font color="#2040a0">filename</font>, <font color="#008000">&quot;%s&quot;</font>, <font color="#008000">&quot;vis/ex16.data&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line641">641</a>             <font color="#2040a0">file</font> <font color="4444FF">=</font> <font color="#2040a0">fopen</font><font color="4444FF">(</font><font color="#2040a0">filename</font>, <font color="#008000">&quot;w&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line642">642</a>             <font color="#2040a0">fprintf</font><font color="4444FF">(</font><font color="#2040a0">file</font>, <font color="#008000">&quot;np %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line643">643</a>             <font color="#2040a0">fflush</font><font color="4444FF">(</font><font color="#2040a0">file</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line644">644</a>             <font color="#2040a0">fclose</font><font color="4444FF">(</font><font color="#2040a0">file</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line645">645</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line646">646</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line647">647</a> 
-<a name="line648">648</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line649">649</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line650">650</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line651">651</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line652">652</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %g<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line653">653</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line654">654</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line655">655</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line638">638</a>          <font color="#2040a0">GLVis_PrintData</font><font color="4444FF">(</font><font color="#008000">&quot;vis/ex16.data&quot;</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line639">639</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line640">640</a> 
+<a name="line641">641</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line642">642</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line643">643</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line644">644</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line645">645</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %g<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line646">646</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line647">647</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line648">648</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line649">649</a> 
+<a name="line650">650</a>    <font color="#444444">/* Free memory */</font>
+<a name="line651">651</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line652">652</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line653">653</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line654">654</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line655">655</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line656">656</a> 
-<a name="line657">657</a>    <font color="#444444">/* Free memory */</font>
-<a name="line658">658</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line659">659</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line660">660</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line661">661</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line662">662</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line663">663</a> 
-<a name="line664">664</a>    <font color="#444444">/* Finalize MPI */</font>
-<a name="line665">665</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line666">666</a> 
-<a name="line667">667</a>    <strong>return</strong> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line668">668</a> <font color="4444FF"><strong>}</strong></font>
+<a name="line657">657</a>    <font color="#444444">/* Finalize MPI */</font>
+<a name="line658">658</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line659">659</a> 
+<a name="line660">660</a>    <strong>return</strong> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line661">661</a> <font color="4444FF"><strong>}</strong></font>
 
 </pre>
 <hr>

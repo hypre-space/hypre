@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -67,7 +67,7 @@ HYPRE_StructHybridSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetTol( HYPRE_StructSolver solver,
-                          double             tol    )
+                          HYPRE_Real         tol    )
 {
    return( hypre_HybridSetTol( (void *) solver, tol ) );
 }
@@ -77,7 +77,7 @@ HYPRE_StructHybridSetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetConvergenceTol( HYPRE_StructSolver solver,
-                                     double             cf_tol    )
+                                     HYPRE_Real         cf_tol    )
 {
    return( hypre_HybridSetConvergenceTol( (void *) solver, cf_tol ) );
 }
@@ -107,7 +107,7 @@ HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridSetPCGAbsoluteTolFactor( HYPRE_StructSolver solver,
-                                           double      pcg_atolf )
+                                           HYPRE_Real  pcg_atolf )
 {
    return( hypre_HybridSetPCGAbsoluteTolFactor( (void *) solver, pcg_atolf ) );
 }
@@ -231,7 +231,7 @@ HYPRE_StructHybridGetPCGNumIterations( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructHybridGetFinalRelativeResidualNorm( HYPRE_StructSolver solver,
-                                                double            *norm    )
+                                                HYPRE_Real        *norm    )
 {
    return( hypre_HybridGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

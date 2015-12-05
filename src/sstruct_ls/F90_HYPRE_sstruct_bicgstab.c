@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -96,13 +96,13 @@ hypre_F90_IFACE(hypre_sstructbicgstabsolve, HYPRE_SSTRUCTBICGSTABSOLVE)
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsettol, HYPRE_SSTRUCTBICGSTABSETTOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructBiCGSTABSetTol(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDbl (tol) ));
+          hypre_F90_PassReal (tol) ));
 }
 /*--------------------------------------------------------------------------
  * HYPRE_SStructBiCGSTABSetAnsoluteTol
@@ -111,13 +111,13 @@ hypre_F90_IFACE(hypre_sstructbicgstabsettol, HYPRE_SSTRUCTBICGSTABSETTOL)
 void
 hypre_F90_IFACE(hypre_sstructbicgstabsetabsolutetol, HYPRE_SSTRUCTBICGSTABSETABSOLUTETOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructBiCGSTABSetAbsoluteTol(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDbl (tol) ));
+          hypre_F90_PassReal (tol) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -283,13 +283,13 @@ hypre_F90_IFACE(hypre_sstructbicgstabgetnumiter, HYPRE_SSTRUCTBICGSTABGETNUMITER
 void
 hypre_F90_IFACE(hypre_sstructbicgstabgetfinalre, HYPRE_SSTRUCTBICGSTABGETFINALRE)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *norm,
+    hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          hypre_F90_PassDblRef (norm) ));
+          hypre_F90_PassRealRef (norm) ));
 }
 
 /*--------------------------------------------------------------------------

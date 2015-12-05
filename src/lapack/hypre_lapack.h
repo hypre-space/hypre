@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.18 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -284,10 +284,10 @@ integer ieeeck_ ( integer *ispec , real *zero , real *one );
 integer ilaenv_ ( integer *ispec , char *name__ , char *opts , integer *n1 , integer *n2 , integer *n3 , integer *n4 , ftnlen name_len , ftnlen opts_len );
 
 /* lapack_utils.c */
-double d_lg10 ( doublereal *x );
-double d_sign ( doublereal *a , doublereal *b );
-double pow_di ( doublereal *ap , integer *bp );
-double pow_dd ( doublereal *ap , doublereal *bp );
+HYPRE_Real d_lg10 ( doublereal *x );
+HYPRE_Real d_sign ( doublereal *a , doublereal *b );
+HYPRE_Real pow_di ( doublereal *ap , integer *bp );
+HYPRE_Real pow_dd ( doublereal *ap , doublereal *bp );
 HYPRE_Int s_cat ( char *lp , char *rpp [], ftnlen rnp [], ftnlen *np , ftnlen ll );
 
 /* lsame.c */

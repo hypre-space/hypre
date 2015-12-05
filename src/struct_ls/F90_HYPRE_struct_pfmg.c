@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -90,25 +90,25 @@ hypre_F90_IFACE(hypre_structpfmgsolve, HYPRE_STRUCTPFMGSOLVE)
 void
 hypre_F90_IFACE(hypre_structpfmgsettol, HYPRE_STRUCTPFMGSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructPFMGSetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (tol)    ) );
+           hypre_F90_PassReal (tol)    ) );
 }
 
 void
 hypre_F90_IFACE(hypre_structpfmggettol, HYPRE_STRUCTPFMGGETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructPFMGGetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (tol)    ) );
+           hypre_F90_PassRealRef (tol)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -269,13 +269,13 @@ hypre_F90_IFACE(hypre_structpfmggetrelaxtype, HYPRE_STRUCTPFMGGETRELAXTYPE)
 void
 hypre_F90_IFACE(hypre_structpfmgsetjacobiweigh, HYPRE_STRUCTPFMGSETJACOBIWEIGH)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *weight,
+    hypre_F90_Real *weight,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_StructPFMGSetJacobiWeight(
           hypre_F90_PassObj (HYPRE_StructSolver, solver),
-          hypre_F90_PassDbl (weight) ) );
+          hypre_F90_PassReal (weight) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -397,13 +397,13 @@ hypre_F90_IFACE(hypre_structpfmggetskiprelax, HYPRE_STRUCTPFMGGETSKIPRELAX)
 void
 hypre_F90_IFACE(hypre_structpfmgsetdxyz, HYPRE_STRUCTPFMGSETDXYZ)
    ( hypre_F90_Obj *solver,
-     hypre_F90_DblArray *dxyz,
+     hypre_F90_RealArray *dxyz,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructPFMGSetDxyz(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblArray (dxyz)   ) );
+           hypre_F90_PassRealArray (dxyz)   ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -485,11 +485,11 @@ hypre_F90_IFACE(hypre_structpfmggetnumiteration, HYPRE_STRUCTPFMGGETNUMITERATION
 void
 hypre_F90_IFACE(hypre_structpfmggetfinalrelativ, HYPRE_STRUCTPFMGGETFINALRELATIV)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructPFMGGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (norm)   ) );
+           hypre_F90_PassRealRef (norm)   ) );
 }

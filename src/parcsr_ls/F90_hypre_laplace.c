@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*****************************************************************************
@@ -35,7 +35,7 @@ hypre_F90_IFACE(hypre_generatelaplacian, HYPRE_GENERATELAPLACIAN)
      hypre_F90_Int *p,
      hypre_F90_Int *q,
      hypre_F90_Int *r,
-     hypre_F90_DblArray *value,
+     hypre_F90_RealArray *value,
      hypre_F90_Obj *matrix,
      hypre_F90_Int *ierr   )
 
@@ -52,7 +52,7 @@ hypre_F90_IFACE(hypre_generatelaplacian, HYPRE_GENERATELAPLACIAN)
            hypre_F90_PassInt (p),
            hypre_F90_PassInt (q),
            hypre_F90_PassInt (r),
-           hypre_F90_PassDblArray (value) ) );
+           hypre_F90_PassRealArray (value) ) );
 
    *ierr = 0;
 }

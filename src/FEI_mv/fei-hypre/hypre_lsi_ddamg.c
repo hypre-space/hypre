@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -34,13 +34,17 @@
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
+/* RDF: What is MPIAPI? */
+#ifndef MPIAPI
+#define MPIAPI
+#endif
 
 int  HYPRE_DummySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                       HYPRE_ParVector x_csr, HYPRE_ParVector y_csr ){return 0;}
 
 void HYPRE_LSI_Get_IJAMatrixFromFile(double**,int**,int**,int*,double**,
                                      char*,char*);
-extern int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
+extern int MPIAPI MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
 
 /***************************************************************************/
 /***************************************************************************/
@@ -893,7 +897,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
 {
    int             i, j, k, *row_partition, local_nrows, num_procs, rowSize;
    int             *colInd, *newColInd, rowCnt, eqnNum, *rowLengths;
-   int             nnz, relaxType[4], maxRowSize, global_nrows;
+   int             nnz=0, relaxType[4], maxRowSize, global_nrows;
    int             myBegin_int, myEnd_int, *itemp_vec, *itemp_vec2;
    int             local_intface_nrows, global_intface_nrows;
    int             num_iterations;

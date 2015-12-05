@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef __MLI_SOLVER_HSGS_H__
@@ -27,7 +27,9 @@ class MLI_Solver_HSGS : public MLI_Solver
 {
    MLI_Matrix  *Amat_;
    int         nSweeps_;
-   int         printRNorm_;
+   // The private field below appears to be unused
+   // int         printRNorm_;
+
    int         calcOmega_;
    double      relaxWeights_;
    double      relaxOmega_;

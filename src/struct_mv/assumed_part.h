@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -21,28 +19,21 @@
 #ifndef hypre_ASSUMED_PART_HEADER
 #define hypre_ASSUMED_PART_HEADER
 
-
-/* to prevent overflow */
-
-#define hypre_doubleBoxVolume(box) \
-   ((double) hypre_BoxSizeX(box) * (double) hypre_BoxSizeY(box) * (double) hypre_BoxSizeZ(box))
-
-
 typedef struct 
 {
    /* the entries will be the same for all procs */  
-   hypre_BoxArray      *regions;  /* areas of the grid with boxes */
-   HYPRE_Int           num_regions;  /* how many regions */    
-   HYPRE_Int           *proc_partitions;  /* proc ids assigned to each region  
-                                             - this is size num_regions +1*/
-   hypre_Index         *divisions;        /* number of proc divisions in x y z 
-                                             direction
-                                             for each region */
+   HYPRE_Int           ndim;             /* number of dimensions */
+   hypre_BoxArray     *regions;          /* areas of the grid with boxes */
+   HYPRE_Int           num_regions;      /* how many regions */    
+   HYPRE_Int          *proc_partitions;  /* proc ids assigned to each region  
+                                            (this is size num_regions +1) */
+   hypre_Index        *divisions;        /* number of proc divisions in each
+                                            direction for each region */
    /* these entries are specific to each proc */
-   hypre_BoxArray      *my_partition;  /*the portion of grid that I own - at most 2 */
-   hypre_BoxArray      *my_partition_boxes;  /* boxes in my portion */
-   HYPRE_Int           *my_partition_proc_ids;
-   HYPRE_Int           *my_partition_boxnums;
+   hypre_BoxArray     *my_partition;        /* my portion of grid (at most 2) */
+   hypre_BoxArray     *my_partition_boxes;  /* boxes in my portion */
+   HYPRE_Int          *my_partition_proc_ids;
+   HYPRE_Int          *my_partition_boxnums;
    HYPRE_Int           my_partition_ids_size;   
    HYPRE_Int           my_partition_ids_alloc;
    HYPRE_Int           my_partition_num_distinct_procs;
@@ -52,6 +43,7 @@ typedef struct
 
 /*Accessor macros */
 
+#define hypre_StructAssumedPartNDim(apart) ((apart)->ndim) 
 #define hypre_StructAssumedPartRegions(apart) ((apart)->regions) 
 #define hypre_StructAssumedPartNumRegions(apart) ((apart)->num_regions) 
 #define hypre_StructAssumedPartDivisions(apart) ((apart)->divisions) 

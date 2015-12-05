@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -46,7 +46,7 @@ HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix,
 
 HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
                              HYPRE_Int size, HYPRE_Int i, HYPRE_Int *col_ind,
-                             double *values );
+                             HYPRE_Real *values );
 
 /*--------------------------------------------------------------------------
  * HYPRE_BuildIJMatrixFromDistributedMatrix
@@ -72,7 +72,7 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    HYPRE_Int first_local_col, last_local_col;
    HYPRE_Int i;
    HYPRE_Int size, *col_ind;
-   double *values;
+   HYPRE_Real *values;
 
 
 

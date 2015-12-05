@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -38,8 +35,8 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
-                              hypre_ParMultivector *x, double beta,
+hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
+                              hypre_ParMultivector *x, HYPRE_Complex beta,
                               hypre_ParMultivector *y)
 {
    hypre_ParCSRCommMultiHandle	*comm_handle;
@@ -62,8 +59,8 @@ hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
    HYPRE_Int	      num_sends, i, j, jj, index, start, offset, length, jv;
    HYPRE_Int        num_active_vectors;
 
-   double     *x_tmp_data, *x_buf_data;
-   double     *x_local_data = hypre_MultivectorData(x_local);
+   HYPRE_Complex     *x_tmp_data, *x_buf_data;
+   HYPRE_Complex     *x_local_data = hypre_MultivectorData(x_local);
  
    /*---------------------------------------------------------------------
     * count the number of active vectors -> num_vec_sends
@@ -106,7 +103,7 @@ hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
     * allocate temporary and send buffers and communication handle
     *--------------------------------------------------------------------*/
 
-   x_buf_data = hypre_CTAlloc(double, num_vec_sends*send_leng);
+   x_buf_data = hypre_CTAlloc(HYPRE_Complex, num_vec_sends*send_leng);
    x_tmp = hypre_SeqMultivectorCreate( num_cols_offd, num_vectors );
    hypre_SeqMultivectorInitialize(x_tmp);
    x_tmp_data = hypre_MultivectorData(x_tmp);
@@ -165,8 +162,8 @@ hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParCSRMatrixMultiMatVecT(double alpha, hypre_ParCSRMatrix *A,
-                               hypre_ParMultivector *x, double beta,
+hypre_ParCSRMatrixMultiMatVecT(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
+                               hypre_ParMultivector *x, HYPRE_Complex beta,
                                hypre_ParMultivector *y)
 {
    hypre_ParCSRCommMultiHandle	*comm_handle;
@@ -188,8 +185,8 @@ hypre_ParCSRMatrixMultiMatVecT(double alpha, hypre_ParCSRMatrix *A,
    HYPRE_Int	      num_sends, i, j, jj, index, start, offset, length, jv;
    HYPRE_Int        num_active_vectors;
 
-   double     *y_tmp_data, *y_buf_data;
-   double     *y_local_data = hypre_MultivectorData(y_local);
+   HYPRE_Complex     *y_tmp_data, *y_buf_data;
+   HYPRE_Complex     *y_local_data = hypre_MultivectorData(y_local);
 
    /*---------------------------------------------------------------------
     * count the number of active vectors -> num_vec_sends
@@ -232,7 +229,7 @@ hypre_ParCSRMatrixMultiMatVecT(double alpha, hypre_ParCSRMatrix *A,
     * allocate temporary and send buffers and communication handle
     *--------------------------------------------------------------------*/
 
-   y_buf_data = hypre_CTAlloc(double, num_vec_sends*send_leng);
+   y_buf_data = hypre_CTAlloc(HYPRE_Complex, num_vec_sends*send_leng);
    y_tmp = hypre_SeqMultivectorCreate( num_cols_offd, num_vectors );
    hypre_SeqMultivectorInitialize(y_tmp);
    y_tmp_data = hypre_MultivectorData(y_tmp);

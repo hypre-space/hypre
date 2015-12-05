@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -45,8 +45,8 @@ hypre_SMGResidualCreate( )
    (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
 
    /* set defaults */
-   hypre_SetIndex((residual_data -> base_index), 0, 0, 0);
-   hypre_SetIndex((residual_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex3((residual_data -> base_index), 0, 0, 0);
+   hypre_SetIndex3((residual_data -> base_stride), 1, 1, 1);
 
    return (void *) residual_data;
 }
@@ -144,10 +144,10 @@ hypre_SMGResidual( void               *residual_vdata,
    HYPRE_Int               bi;
    HYPRE_Int               ri;
                          
-   double                 *Ap;
-   double                 *xp;
-   double                 *bp;
-   double                 *rp;
+   HYPRE_Real             *Ap;
+   HYPRE_Real             *xp;
+   HYPRE_Real             *bp;
+   HYPRE_Real             *rp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;
@@ -197,7 +197,7 @@ hypre_SMGResidual( void               *residual_vdata,
                rp = hypre_StructVectorBoxData(r, i);
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-               hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
 #ifdef HYPRE_USING_OPENMP
@@ -248,7 +248,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                hypre_BoxGetStrideSize(compute_box, base_stride,
                                       loop_size);
-               hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+               hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                    A_data_box, start, base_stride, Ai,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);

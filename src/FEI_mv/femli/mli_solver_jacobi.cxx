@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -283,7 +283,7 @@ int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
 {
    int    i, *fList;
-   double *weights;
+   double *weights=NULL;
 
    if ( !strcmp(paramString, "numSweeps") )
    {

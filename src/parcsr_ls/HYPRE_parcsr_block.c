@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -75,7 +75,7 @@ HYPRE_Int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver,HYPRE_Int n, HYPRE_I
  * HYPRE_BlockTridiagSetAMGStrengthThreshold
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver,double thresh)
+HYPRE_Int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver,HYPRE_Real thresh)
 {
    return(hypre_BlockTridiagSetAMGStrengthThreshold((void *) solver, thresh));
 }

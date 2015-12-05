@@ -388,10 +388,7 @@ method \cite{Ruge_Stueben_1987}.
 It can be used
 both as a solver or as a preconditioner.  The user can choose between various
 different parallel coarsening techniques, interpolation and relaxation schemes.
-See
-\cite{VEHenson_UMYang_2002,UMYang_2005} for a detailed description of the 
-coarsening
-algorithms, interpolation and relaxation schemes as well as numerical results.  
+While the default settings work fairly well for two-dimensional diffusion problems, for three-dimensional diffusion problems, it is recommended to choose a lower complexity coarsening like HMIS or PMIS (coarsening 10 or 8) and combine it with a distance-two interpolation (interpolation 6 or 7), that is also truncated to 4 or 5 elements per row. Additional reduction in complexity and increased scalability can often be achieved using one or two levels of aggressive coarsening.
 
 \subsection{Parameter Options}
 
@@ -403,7 +400,11 @@ BoomerAMG's Create function differs from the synopsis in that it has only one pa
 \code{HYPRE_BoomerAMGCreate(HYPRE_Solver *solver)}. It uses the communicator 
 of the matrix A.
 
-Coarsening can be set by the user using the function \code{HYPRE\_BoomerAMGSetCoarsenType}.
+
+\subsection{Coarsening Options}
+
+Coarsening can be set by the user using the function \code{HYPRE\_BoomerAMGSetCoarsenType}. A detailed description of various coarsening techniques can be found in \cite{VEHenson_UMYang_2002,UMYang_2005}.
+
 Various coarsening techniques are available:
 \begin{itemize}
 \item the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
@@ -417,15 +418,17 @@ as well as
 To use aggressive coarsening the user has to set the number of levels to which he wants to apply
 aggressive coarsening (starting with the finest level) 
 via \code{HYPRE_BoomerAMGSetAggNumLevels}. Since aggressive coarsening requires long range
-interpolation, multipass interpolation is always used on levels with aggressive coarsening.
+interpolation, multipass interpolation is always used on levels with aggressive coarsening, unless the user specifies another long-range interpolation suitable for aggressive coarsening.
 
+\subsection{Interpolation Options}
 Various interpolation techniques can be set using \code{HYPRE_BoomerAMGSetInterpType}:
 \begin{itemize}
 \item the ``classical'' interpolation as defined in \cite{Ruge_Stueben_1987} (default),
 \item direct interpolation \cite{Stueben_1999},
 \item standard interpolation \cite{Stueben_1999},
+\item an extended ``classical'' interpolation, which is a long range interpolation and is recommended to be used with PMIS and HMIS coarsening for harder problems \cite{DeSterck_Falgout_Nolting_Yang_2008},
 \item multipass interpolation \cite{Stueben_1999},
-\item an extended ``classical'' interpolation, which is a long range interpolation and is recommended to be used with PMIS and HMIS coarsening for harder problems,
+\item two-stage interpolation \cite{UMYang_2010},
 \item Jacobi interpolation \cite{Stueben_1999},
 \item the ``classical'' interpolation modified for hyperbolic PDEs.
 \end{itemize}
@@ -436,11 +439,30 @@ and recommended to control complexity and truncate the interpolation operators
 using \code{HYPRE_BoomerAMGSetTruncFactor} and/or \code{HYPRE_BoomerAMGSetPMaxElmts},
 or \code{HYPRE_BoomerAMGSetJacobiTruncTheshold} (for Jacobi interpolation only).
 
-Various relaxation techniques are available:
+\subsection{Non-Galerkin Options}
+In order to reduce communication, there is a non-Galerkin coarse grid
+sparsification option available \cite{FaSc2014}.  This option can be used by
+itself or with existing strategies to reduce communication such as aggressive
+coarsening and HMIS coarsening.  To use, call
+\code{HYPRE_BoomerAMGSetNonGalerkTol}, which gives BoomerAMG a list of level
+specific non-Galerkin drop tolerances.  It is common to drop more aggressively
+on coarser levels.  A common choice of drop-tolerances is $[0.0,
+0.01, 0.05]$ where the value of 0.0 will skip the non-Galerkin process on the
+first coarse level (level 1), use a drop-tolerance of 0.01 on the second coarse
+level (level 2) and then use 0.05 on all subsequent coarse levels.  While still
+experimental, this capability has significantly improved performance on a
+variety of problems.  See the \code{new_ij} driver for an example usage and the
+reference manual for more details.
+
+
+\subsection{Smoother Options}
+A good overview of parallel smoothers and their properties can be found in \cite{Baker_Falgout_Kolev_UMYang_2011}. Various of the described relaxation techniques are available:
 \begin{itemize}
 \item weighted Jacobi relaxation,
 \item a hybrid Gauss-Seidel / Jacobi relaxation scheme, 
-\item a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, and
+\item a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, 
+\item l1-Gauss-Seidel or Jacobi,
+\item Chebyshev smoothers,
 \item hybrid block and Schwarz smoothers \cite{UMYang_2004},
 \item ILU and approximate inverse smoothers.
 \end{itemize}
@@ -455,6 +477,7 @@ then the F-points) on the down cycle and FC-relaxation on the up-cycle. Note tha
 BoomerAMG is used as a preconditioner for conjugate gradient, it is necessary to use
 a symmetric smoother such as weighted Jacobi or hybrid symmetric Gauss-Seidel.
 
+\subsection{AMG for systems of PDEs}
  
 If the users wants to solve systems of PDEs and can provide information on
 which variables belong to which function, BoomerAMG's systems AMG version
@@ -462,14 +485,22 @@ can also be used. Functions that enable the user to access the systems AMG versi
 are \code{HYPRE_BoomerAMGSetNumFunctions}, \code{HYPRE_BoomerAMGSetDofFunc}
 and \code{HYPRE\_BoomerAMGSetNodal}.
 
+If the user can provide the near null-space vectors, such as the rigid body modes for linear elasticity problems, an interpolation is available that will incorporate these vectors with \code{HYPRE_BoomerAMGSetInterpVectors} and \code{HYPRE_BoomerAMGSetInterpVecVariant}. This can lead to improved convergence and scalability \cite{Baker_Kolev_UMYang_2010}.
+
+\subsection{Special AMG Cycles}
+The default cycle is a V(1,1)-cycle, however it is possible to change the number of sweeps of the up- and down-cycle as well as the coare grid. One can also choose a W-cycle, however for parallel processing this is not recommended, since it is not scalable.
+
+BoomerAMG also provides an additive V(1,1)-cycle as well as a mult-additive V(1,1)-cycle and a simplified versioni \cite{Vassilevski_UMYang_2014}. The additive variants can only be used with weighted Jacobi or l1-Jacobi smoothing.
+
+\subsection{Miscellaneous}
 For best performance, it might be necessary to set certain parameters, which will
 affect both coarsening and interpolation.
 One important parameter is the strong threshold, which can be set
 using the function \code{HYPRE_BoomerAMGSetStrongThreshold}.
 The default value is 0.25, which appears to be a good choice for 2-dimensional
 problems and the low complexity coarsening algorithms. 
-A better choice for 3-dimensional problems appears to be 0.5, if one uses the
-default coarsening algorithm or CLJP. However,
+For 3-dimensional problems a better choice appears to be 0.5, when using the
+default coarsening algorithm. However,
 the choice of the strength threshold is problem dependent and therefore
 there could be better choices than the two suggested ones.
 
@@ -815,6 +846,52 @@ HYPRE_AMSSetInterpolations(solver, Pi, Pix, Piy, Piz);
 \end{verbatim}\end{display}
 which will duplicate some memory, but allows for experimentation with all
 available AMS cycle types.
+
+\subsection{Non-conforming AMR Grids}
+
+AMS could also be applied to problems with adaptive mesh refinement (AMR) posed
+on non-conforming quadrilateral/hexahedral meshes, see \cite{ams_hpamr} for
+more details.
+
+On non-conforming grids (assuming also arbitrarily high-order elements), each
+finite element space has two versions: a conforming one,
+e.g. $\mathrm{Q}_k^{c}$/$\mathrm{ND}_k^c$, where the {\em hanging} degrees of
+freedom are constrained by the conforming ({\em real}) degrees of freedom, and
+a non-conforming one, e.g. $\mathrm{Q}_k^{nc}$/$\mathrm{ND}_k^{nc}$ where the
+non-conforming degrees of freedom (hanging and real) are unconstrained.
+These spaces are related with the conforming prolongation and the pure
+restriction operators $P$ and $R$, as well as the conforming and non-conforming
+version of the discrete gradient operator as follows:
+$$
+\xymatrix{
+\mathrm{Q}_k^{c} \ar[r]^{G_{c}} \ar@<-2pt>[d]_{P_{\mathrm{Q}}} & \mathrm{ND}_k^c \ar@<-2pt>[d]_{P_{\mathrm{ND}}} \\
+\mathrm{Q}_k^{nc} \ar[r]^{G_{nc}} \ar@<-2pt>[u]_{R_{\mathrm{Q}}} & \mathrm{ND}_k^{nc} \ar@<-2pt>[u]_{R_{\mathrm{ND}}}
+}
+$$
+Since the linear system is posed on $\mathrm{ND}_k^c$, the user needs to provide
+the conforming discrete gradient matrix $G_c$ to AMS, using 
+\code{HYPRE_AMSSetDiscreteGradient}.
+This matrix is defined by the requirement that the above diagram commutes from
+$\mathrm{Q}_k^{c}$ to $\mathrm{ND}_k^{nc}$, corresponding to the definition
+$$
+G_{c} = R_{\mathrm{ND}}\, G_{nc}\, P_{\mathrm{Q}} \,,
+$$
+i.e. the conforming gradient is computed by starting with a conforming nodal
+$\mathrm{Q}_k$ function, interpolating it in the hanging nodes, computing the
+gradient locally and representing it in the Nedelec space on each element (the
+non-conforming discrete gradient $G_{nc}$ in the above formula), and
+disregarding the values in the hanging $\mathrm{ND}_k$ degrees of freedom.
+
+Similar considerations imply that the conforming Nedelec interpolation matrix
+${\mathbf \Pi}_{c}$ should be defined as
+$$
+{\mathbf \Pi}_{c} = R_{\mathrm{ND}}\, {\mathbf \Pi}_{nc}\, P_{\mathrm{Q}^3} \,,
+$$
+with ${\mathbf \Pi}_{nc}$ computed element-wise as in the previous subsection. Note that
+in the low-order case, ${\mathbf \Pi}_{c}$ can be computed internally in AMS based only
+$G_c$ and the conforming coordinates of the vertices $x_c$/$y_c$/$z_c$, see
+\cite{ams_hpamr}.
+
 
 %-----------------------------------------------------------------------------
 

@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.16 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -21,25 +18,25 @@
 
 #include "_hypre_parcsr_block_mv.h"
 
-#define LB_VERSION 0 /* lapack and blas version 5/12/06 - preliminary testing shows this
-                      is slower for block sizes < 4 (did not try larger block sizes)-
-                      need to edit the Makefile to find blas and lapack */
-
-
+#define LB_VERSION 0 /* lapack and blas version 5/12/06 - preliminary testing
+                        shows this is slower for block sizes < 4 (did not try
+                        larger block sizes)- need to edit the Makefile to find
+                        blas and lapack */
 
 #if LB_VERSION
 #include "hypre_blas.h"
 #include "hypre_lapack.h"
 #endif
 
-
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
 
 hypre_CSRBlockMatrix *
-hypre_CSRBlockMatrixCreate(HYPRE_Int block_size, HYPRE_Int num_rows, HYPRE_Int num_cols,
-			   HYPRE_Int num_nonzeros)
+hypre_CSRBlockMatrixCreate(HYPRE_Int block_size,
+                           HYPRE_Int num_rows,
+                           HYPRE_Int num_cols,
+                           HYPRE_Int num_nonzeros)
 {
    hypre_CSRBlockMatrix  *matrix;
 
@@ -103,7 +100,7 @@ hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *matrix)
 
    nnz = num_nonzeros * block_size * block_size;
    hypre_CSRBlockMatrixI(matrix) = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
-   if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(double, nnz);
+   if (nnz) hypre_CSRBlockMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, nnz);
    else     hypre_CSRBlockMatrixData(matrix) = NULL;
    if (nnz) hypre_CSRBlockMatrixJ(matrix) = hypre_CTAlloc(HYPRE_Int,num_nonzeros);
    else     hypre_CSRBlockMatrixJ(matrix) = NULL;
@@ -132,16 +129,16 @@ hypre_CSRBlockMatrixSetDataOwner(hypre_CSRBlockMatrix *matrix, HYPRE_Int owns_da
 hypre_CSRMatrix *
 hypre_CSRBlockMatrixCompress(hypre_CSRBlockMatrix *matrix)
 {
-   HYPRE_Int    block_size = hypre_CSRBlockMatrixBlockSize(matrix);
-   HYPRE_Int    num_rows = hypre_CSRBlockMatrixNumRows(matrix);
-   HYPRE_Int    num_cols = hypre_CSRBlockMatrixNumCols(matrix);
-   HYPRE_Int    num_nonzeros = hypre_CSRBlockMatrixNumNonzeros(matrix);
-   HYPRE_Int    *matrix_i = hypre_CSRBlockMatrixI(matrix);
-   HYPRE_Int    *matrix_j = hypre_CSRBlockMatrixJ(matrix);
-   double *matrix_data = hypre_CSRBlockMatrixData(matrix);
+   HYPRE_Int      block_size = hypre_CSRBlockMatrixBlockSize(matrix);
+   HYPRE_Int      num_rows = hypre_CSRBlockMatrixNumRows(matrix);
+   HYPRE_Int      num_cols = hypre_CSRBlockMatrixNumCols(matrix);
+   HYPRE_Int      num_nonzeros = hypre_CSRBlockMatrixNumNonzeros(matrix);
+   HYPRE_Int     *matrix_i = hypre_CSRBlockMatrixI(matrix);
+   HYPRE_Int     *matrix_j = hypre_CSRBlockMatrixJ(matrix);
+   HYPRE_Complex *matrix_data = hypre_CSRBlockMatrixData(matrix);
    hypre_CSRMatrix* matrix_C;
-   HYPRE_Int    *matrix_C_i, *matrix_C_j, i, j, bnnz;
-   double *matrix_C_data, ddata;
+   HYPRE_Int     *matrix_C_i, *matrix_C_j, i, j, bnnz;
+   HYPRE_Complex *matrix_C_data, ddata;
 
    matrix_C = hypre_CSRMatrixCreate(num_rows,num_cols,num_nonzeros);
    hypre_CSRMatrixInitialize(matrix_C);
@@ -175,12 +172,12 @@ hypre_CSRBlockMatrixConvertToCSRMatrix( hypre_CSRBlockMatrix *matrix )
    HYPRE_Int num_nonzeros = hypre_CSRBlockMatrixNumNonzeros(matrix);
    HYPRE_Int *matrix_i = hypre_CSRBlockMatrixI(matrix);
    HYPRE_Int *matrix_j = hypre_CSRBlockMatrixJ(matrix);
-   double* matrix_data = hypre_CSRBlockMatrixData(matrix);
+   HYPRE_Complex* matrix_data = hypre_CSRBlockMatrixData(matrix);
 
    hypre_CSRMatrix* matrix_C;
    HYPRE_Int    i, j, k, ii, C_ii, bnnz, new_nrows, new_ncols, new_num_nonzeros;
    HYPRE_Int    *matrix_C_i, *matrix_C_j;
-   double *matrix_C_data;
+   HYPRE_Complex *matrix_C_data;
 
    bnnz      = block_size * block_size;
    new_nrows = num_rows * block_size;
@@ -206,19 +203,19 @@ hypre_CSRBlockMatrixConvertToCSRMatrix( hypre_CSRBlockMatrix *matrix )
       {
          for(ii = matrix_i[i]; ii < matrix_i[i + 1]; ii++)
          {
-	    k = j;
-	    matrix_C_j[C_ii] = matrix_j[ii]*block_size + k;
-	    matrix_C_data[C_ii] = matrix_data[ii*bnnz+j*block_size+k];
-	    C_ii++;
-	    for(k = 0; k < block_size; k++)
+            k = j;
+            matrix_C_j[C_ii] = matrix_j[ii]*block_size + k;
+            matrix_C_data[C_ii] = matrix_data[ii*bnnz+j*block_size+k];
+            C_ii++;
+            for(k = 0; k < block_size; k++)
             {
-	       if(j != k)
+               if(j != k)
                {
-	          matrix_C_j[C_ii] = matrix_j[ii]*block_size + k;
-	          matrix_C_data[C_ii] = matrix_data[ii*bnnz+j*block_size+k];
-	          C_ii++;
-	       }
-	    }
+                  matrix_C_j[C_ii] = matrix_j[ii]*block_size + k;
+                  matrix_C_data[C_ii] = matrix_data[ii*bnnz+j*block_size+k];
+                  C_ii++;
+               }
+            }
          }
       }
    }
@@ -241,11 +238,11 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
    HYPRE_Int num_cols = hypre_CSRMatrixNumCols(matrix);
    HYPRE_Int *matrix_i = hypre_CSRMatrixI(matrix);
    HYPRE_Int *matrix_j = hypre_CSRMatrixJ(matrix);
-   double* matrix_data = hypre_CSRMatrixData(matrix);
+   HYPRE_Complex* matrix_data = hypre_CSRMatrixData(matrix);
 
    hypre_CSRBlockMatrix* matrix_C;
    HYPRE_Int    *matrix_C_i, *matrix_C_j;
-   double *matrix_C_data;
+   HYPRE_Complex *matrix_C_data;
    HYPRE_Int    matrix_C_num_rows, matrix_C_num_cols, matrix_C_num_nonzeros;
    HYPRE_Int    i, j, ii, jj, s_jj, index, *counter;
 
@@ -262,11 +259,11 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
          for(ii = matrix_i[i*matrix_C_block_size+j]; 
              ii < matrix_i[i*matrix_C_block_size+j+1]; ii++)
          {
-	    if(counter[matrix_j[ii]/matrix_C_block_size] < i)
+            if(counter[matrix_j[ii]/matrix_C_block_size] < i)
             {
-	       counter[matrix_j[ii]/matrix_C_block_size] = i;
-	       matrix_C_num_nonzeros++;
-	    }
+               counter[matrix_j[ii]/matrix_C_block_size] = i;
+               matrix_C_num_nonzeros++;
+            }
          }
       }
    }
@@ -287,16 +284,16 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
          for(ii = matrix_i[i*matrix_C_block_size+j];
              ii < matrix_i[i*matrix_C_block_size+j+1]; ii++)
          {
- 	    if(counter[matrix_j[ii]/matrix_C_block_size] < s_jj)
+            if(counter[matrix_j[ii]/matrix_C_block_size] < s_jj)
             {
- 	       counter[matrix_j[ii]/matrix_C_block_size] = jj;
- 	       matrix_C_j[jj] = matrix_j[ii]/matrix_C_block_size;
- 	       jj++;
- 	    }
- 	    index = counter[matrix_j[ii]/matrix_C_block_size] * matrix_C_block_size *
+               counter[matrix_j[ii]/matrix_C_block_size] = jj;
+               matrix_C_j[jj] = matrix_j[ii]/matrix_C_block_size;
+               jj++;
+            }
+            index = counter[matrix_j[ii]/matrix_C_block_size] * matrix_C_block_size *
                     matrix_C_block_size + j * matrix_C_block_size + 
                     matrix_j[ii]%matrix_C_block_size;
- 	    matrix_C_data[index] = matrix_data[ii];
+            matrix_C_data[index] = matrix_data[ii];
          }
       }
       s_jj = jj;
@@ -314,10 +311,11 @@ hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *matrix,
  * (o = i1 + i2) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockAdd(double* i1, double* i2, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockAdd(HYPRE_Complex* i1,
+                             HYPRE_Complex* i2,
+                             HYPRE_Complex* o,
+                             HYPRE_Int block_size)
 {
-
-
    HYPRE_Int i;
    HYPRE_Int sz = block_size*block_size;
    
@@ -333,10 +331,10 @@ hypre_CSRBlockMatrixBlockAdd(double* i1, double* i2, double* o, HYPRE_Int block_
  * (o = i1 + o) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockAddAccumulate(double* i1, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockAddAccumulate(HYPRE_Complex* i1,
+                                       HYPRE_Complex* o,
+                                       HYPRE_Int block_size)
 {
-
-
    HYPRE_Int i;
    HYPRE_Int sz = block_size*block_size;
    
@@ -351,7 +349,9 @@ hypre_CSRBlockMatrixBlockAddAccumulate(double* i1, double* o, HYPRE_Int block_si
  * (diag(o) = diag(i1) + diag(o)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockAddAccumulateDiag(double* i1, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockAddAccumulateDiag(HYPRE_Complex* i1,
+                                           HYPRE_Complex* o,
+                                           HYPRE_Int block_size)
 {
    HYPRE_Int i;
 
@@ -362,20 +362,21 @@ hypre_CSRBlockMatrixBlockAddAccumulateDiag(double* i1, double* o, HYPRE_Int bloc
 
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign
- *only add elements of sign*i1 that are negative (sign is size block_size)
-
+ * only add elements of sign*i1 that are negative (sign is size block_size)
  * (diag(o) = diag(i1) + diag(o)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(double* i1, double* o, HYPRE_Int block_size, double *sign)
+hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(HYPRE_Complex* i1,
+                                                    HYPRE_Complex* o,
+                                                    HYPRE_Int block_size,
+                                                    HYPRE_Real *sign)
 {
    HYPRE_Int i;
-   double tmp;
+   HYPRE_Real tmp;
 
    for (i = 0; i < block_size; i++)
    {
-      
-      tmp = i1[i*block_size+i]*sign[i];
+      tmp = (HYPRE_Real) i1[i*block_size+i]*sign[i];
       if (tmp < 0) 
          o[i*block_size+i] += i1[i*block_size+i];
    }
@@ -389,22 +390,21 @@ hypre_CSRBlockMatrixBlockAddAccumulateDiagCheckSign(double* i1, double* o, HYPRE
  * o = sign(diag(i1)) 
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int hypre_CSRBlockMatrixComputeSign(double *i1, double *o, HYPRE_Int block_size)
+HYPRE_Int hypre_CSRBlockMatrixComputeSign(HYPRE_Complex *i1,
+                                          HYPRE_Complex *o,
+                                          HYPRE_Int block_size)
 {
-
    HYPRE_Int i;
-   
 
     for (i = 0; i < block_size; i++)
    {
-      if (i1[i*block_size+i] < 0)
+      if ((HYPRE_Real) i1[i*block_size+i] < 0)
          o[i] = -1;
       else
          o[i] = 1;
    }
 
    return 0;
-   
 }
 
 
@@ -413,10 +413,10 @@ HYPRE_Int hypre_CSRBlockMatrixComputeSign(double *i1, double *o, HYPRE_Int block
  * (each entry in block o is set to beta ) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockSetScalar(HYPRE_Complex* o,
+                                   HYPRE_Complex beta,
+                                   HYPRE_Int block_size)
 {
-
-
    HYPRE_Int i;
    HYPRE_Int sz = block_size*block_size;
    
@@ -432,9 +432,11 @@ hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, HYPRE_Int block_size)
  * (o = beta*i1 ) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockCopyData(double* i1, double* o, double beta, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockCopyData(HYPRE_Complex* i1,
+                                  HYPRE_Complex* o,
+                                  HYPRE_Complex beta,
+                                  HYPRE_Int block_size)
 {
-   
    HYPRE_Int i;
    HYPRE_Int sz = block_size*block_size;
    
@@ -449,7 +451,10 @@ hypre_CSRBlockMatrixBlockCopyData(double* i1, double* o, double beta, HYPRE_Int 
  * (o = beta*diag(i1)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockCopyDataDiag(double* i1, double* o, double beta, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockCopyDataDiag(HYPRE_Complex* i1,
+                                      HYPRE_Complex* o,
+                                      HYPRE_Complex beta,
+                                      HYPRE_Int block_size)
 {
     HYPRE_Int i;
 
@@ -461,7 +466,6 @@ hypre_CSRBlockMatrixBlockCopyDataDiag(double* i1, double* o, double beta, HYPRE_
     for (i = 0; i < block_size; i++)
        o[i*block_size+i] = beta*i1[i*block_size+i];
 
-
    return 0;
 }
 
@@ -470,7 +474,9 @@ hypre_CSRBlockMatrixBlockCopyDataDiag(double* i1, double* o, double beta, HYPRE_
  * (o = i1' ) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockTranspose(double* i1, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockTranspose(HYPRE_Complex* i1,
+                                   HYPRE_Complex* o,
+                                   HYPRE_Int block_size)
 {
    HYPRE_Int i, j;
 
@@ -480,25 +486,20 @@ hypre_CSRBlockMatrixBlockTranspose(double* i1, double* o, HYPRE_Int block_size)
    return 0;
 }
 
-
-
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockNorm
  * (out = norm(data) ) 
  *
  *  (note: these are not all actually "norms")
  *  
- *
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, HYPRE_Complex* data, HYPRE_Real* out, HYPRE_Int block_size)
 {
-
-
    HYPRE_Int ierr = 0;
    HYPRE_Int i,j;
-   double sum = 0.0;
-   double *totals;
+   HYPRE_Real sum = 0.0;
+   HYPRE_Real *totals;
    HYPRE_Int sz = block_size*block_size;
 
    switch (norm_type)
@@ -507,19 +508,19 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HY
       {
          for(i = 0; i < sz; i++) 
          {
-               sum += (data[i]);
+            sum += (HYPRE_Real)(data[i]);
          }
          break;
       }
       case 5: /* one norm  - max col sum*/
       {
         
-         totals = hypre_CTAlloc(double, block_size);
+         totals = hypre_CTAlloc(HYPRE_Real, block_size);
          for(i = 0; i < block_size; i++) /* row */
          {
             for(j = 0; j < block_size; j++) /* col */
             {
-               totals[j] += fabs(data[i*block_size + j]);
+               totals[j] += hypre_cabs(data[i*block_size + j]);
             }
          }
 
@@ -536,12 +537,12 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HY
       case 4: /* inf norm - max row sum */
       {
       
-         totals = hypre_CTAlloc(double, block_size);
+         totals = hypre_CTAlloc(HYPRE_Real, block_size);
          for(i = 0; i < block_size; i++) /* row */
          {
             for(j = 0; j < block_size; j++) /* col */
             {
-               totals[i] += fabs(data[i*block_size + j]);
+               totals[i] += hypre_cabs(data[i*block_size + j]);
             }
          }
 
@@ -558,11 +559,11 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HY
       case 3: /* largest element of block (return value includes sign) */
       {
       
-         sum = data[0];
+         sum = (HYPRE_Real)data[0];
   
          for(i = 0; i < sz; i++) 
          {
-               if (fabs(data[i]) > fabs(sum))  sum =data[i];
+            if (hypre_cabs(data[i]) > hypre_cabs(sum))  sum = (HYPRE_Real)data[i];
          }
          
          break;
@@ -571,7 +572,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HY
       {
          for(i = 0; i < sz; i++) 
          {
-               sum += fabs(data[i]);
+               sum += hypre_cabs(data[i]);
          }
          break;
       }
@@ -581,7 +582,7 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HY
       {
           for(i = 0; i < sz; i++) 
           {
-               sum += data[i]*data[i];
+             sum += ((HYPRE_Real)data[i])*((HYPRE_Real)data[i]);
           }
           sum = sqrt(sum);
       }
@@ -589,34 +590,31 @@ hypre_CSRBlockMatrixBlockNorm(HYPRE_Int norm_type, double* data, double* out, HY
    
    *out = sum;
    
-
    return ierr;
-      
-
-   
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMultAdd
  * (o = i1 * i2 + beta * o) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAdd(double* i1, double* i2, double beta, 
-                                 double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockMultAdd(HYPRE_Complex* i1,
+                                 HYPRE_Complex* i2,
+                                 HYPRE_Complex beta, 
+                                 HYPRE_Complex* o,
+                                 HYPRE_Int block_size)
 {
 
 #if LB_VERSION
    {
-      double alp = 1.0;
+      HYPRE_Complex alp = 1.0;
       dgemm_("N","N", &block_size, &block_size, &block_size, &alp, i2, &block_size, i1,
           &block_size, &beta, o, &block_size);
    }
 #else
    {
-      
       HYPRE_Int    i, j, k;
-      double ddata;
+      HYPRE_Complex ddata;
 
       if (beta == 0.0)
       {
@@ -672,8 +670,11 @@ hypre_CSRBlockMatrixBlockMultAdd(double* i1, double* i2, double beta,
  * (diag(o) = diag(i1) * diag(i2) + beta * diag(o)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAddDiag(double* i1, double* i2, double beta, 
-                                 double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockMultAddDiag(HYPRE_Complex* i1,
+                                     HYPRE_Complex* i2,
+                                     HYPRE_Complex beta, 
+                                     HYPRE_Complex* o,
+                                     HYPRE_Int block_size)
 {
    HYPRE_Int    i;
 
@@ -708,18 +709,21 @@ hypre_CSRBlockMatrixBlockMultAddDiag(double* i1, double* i2, double beta,
  *(diag(o) = diag(i1) * diag(i2) + beta * diag(o)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(double* i1, double* i2, double beta, 
-                                              double* o, HYPRE_Int block_size, double *sign)
+hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(HYPRE_Complex *i1,
+                                              HYPRE_Complex *i2,
+                                              HYPRE_Complex  beta, 
+                                              HYPRE_Complex *o,
+                                              HYPRE_Int      block_size,
+                                              HYPRE_Real    *sign)
 {
    HYPRE_Int    i;
-   double tmp;
-   
+   HYPRE_Real tmp;
 
    if (beta == 0.0)
    {
       for (i = 0; i < block_size; i++)
       {
-         tmp = i2[i*block_size+i]*sign[i];
+         tmp = (HYPRE_Real) i2[i*block_size+i]*sign[i];
          if (tmp < 0)
             o[i*block_size + i] = i1[i*block_size + i] * i2[i*block_size + i];
       }
@@ -728,7 +732,7 @@ hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(double* i1, double* i2, double bet
    {
       for(i = 0; i < block_size; i++)
       {
-         tmp = i2[i*block_size+i]*sign[i];
+         tmp = (HYPRE_Real) i2[i*block_size+i]*sign[i];
          if (tmp < 0)
             o[i*block_size + i] = o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
       }
@@ -745,21 +749,21 @@ hypre_CSRBlockMatrixBlockMultAddDiagCheckSign(double* i1, double* i2, double bet
    return 0;
 }
 
-
-
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMultAddDiag2 (scales cols of il by diag of i2)
  * ((o) = (i1) * diag(i2) + beta * (o)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAddDiag2(double* i1, double* i2, double beta, 
-                                 double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockMultAddDiag2(HYPRE_Complex* i1,
+                                      HYPRE_Complex* i2,
+                                      HYPRE_Complex beta, 
+                                      HYPRE_Complex* o,
+                                      HYPRE_Int block_size)
 {
    HYPRE_Int    i, j;
 
    if (beta == 0.0)
    {
-
       for (i = 0; i < block_size; i++)
       {
          for (j = 0; j < block_size; j++)
@@ -795,20 +799,24 @@ hypre_CSRBlockMatrixBlockMultAddDiag2(double* i1, double* i2, double beta,
    }
    return 0;
 }
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMultAddDiag3 (scales cols of il by i2 - 
                                           whose diag elements are row sums)
  * ((o) = (i1) * diag(i2) + beta * (o)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockMultAddDiag3(double* i1, double* i2, double beta, 
-                                 double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockMultAddDiag3(HYPRE_Complex* i1,
+                                      HYPRE_Complex* i2,
+                                      HYPRE_Complex beta, 
+                                      HYPRE_Complex* o,
+                                      HYPRE_Int block_size)
 {
    HYPRE_Int    i, j;
 
-   double *row_sum;
+   HYPRE_Complex *row_sum;
 
-   row_sum = hypre_CTAlloc(double, block_size);
+   row_sum = hypre_CTAlloc(HYPRE_Complex, block_size);
    for (i = 0; i < block_size; i++)
       {
          for (j = 0; j < block_size; j++)
@@ -838,8 +846,6 @@ hypre_CSRBlockMatrixBlockMultAddDiag3(double* i1, double* i2, double beta,
             
          }
       }
-
-
    }
    else
    {
@@ -865,10 +871,13 @@ hypre_CSRBlockMatrixBlockMultAddDiag3(double* i1, double* i2, double beta,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-hypre_CSRBlockMatrixBlockMatvec(double alpha, double* mat, double* v, double beta, 
-                                double* ov, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockMatvec(HYPRE_Complex alpha,
+                                HYPRE_Complex* mat,
+                                HYPRE_Complex* v,
+                                HYPRE_Complex beta, 
+                                HYPRE_Complex* ov,
+                                HYPRE_Int block_size)
 {
-
    HYPRE_Int ierr = 0;
 
 #if LB_VERSION
@@ -882,7 +891,7 @@ hypre_CSRBlockMatrixBlockMatvec(double alpha, double* mat, double* v, double bet
 #else
    {
       HYPRE_Int    i, j;
-      double ddata;
+      HYPRE_Complex ddata;
 
       /* if alpha = 0, then no matvec */
       if (alpha == 0.0)
@@ -949,13 +958,13 @@ hypre_CSRBlockMatrixBlockMatvec(double alpha, double* mat, double* v, double bet
  * mat is the matrix - size is block_size^2 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v, 
-                                   double* ov, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockInvMatvec(HYPRE_Complex* mat, HYPRE_Complex* v, 
+                                   HYPRE_Complex* ov, HYPRE_Int block_size)
 {
    HYPRE_Int ierr = 0;
-   double *mat_i;
+   HYPRE_Complex *mat_i;
 
-   mat_i = hypre_CTAlloc(double, block_size*block_size);
+   mat_i = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
 
 #if LB_VERSION
    {
@@ -1000,16 +1009,16 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
    
 #else
    {
-      
       HYPRE_Int m, j, k;
       HYPRE_Int piv_row;
-      double factor, eps;
-      double piv, tmp;
+      HYPRE_Real eps;
+      HYPRE_Complex factor;
+      HYPRE_Complex piv, tmp;
       eps = 1.0e-6;
       
       if (block_size ==1 )
       {
-         if (fabs(mat[0]) > 1e-10)
+         if (hypre_cabs(mat[0]) > 1e-10)
          {
             ov[0] = v[0]/mat[0];
             hypre_TFree(mat_i);
@@ -1046,7 +1055,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
             /* find the largest pivot in position k*/
             for (j=k+1; j < block_size; j++)         
             {
-               if (fabs(mat_i[j*block_size+k]) > fabs(piv))
+               if (hypre_cabs(mat_i[j*block_size+k]) > hypre_cabs(piv))
                {
                   piv =  mat_i[j*block_size+k];
                   piv_row = j;
@@ -1067,7 +1076,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
             }
             /* end of pivoting */
             
-            if (fabs(piv) > eps)
+            if (hypre_cabs(piv) > eps)
             {
                /* now we can factor into U */
                for (j = k+1; j < block_size; j++)
@@ -1091,7 +1100,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
 
          /* we also need to check the pivot in the last row to see if it is zero */  
          k = block_size - 1; /* last row */
-         if ( fabs(mat_i[k*block_size+k]) < eps)
+         if ( hypre_cabs(mat_i[k*block_size+k]) < eps)
          {
             /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n");  */
             hypre_TFree(mat_i);
@@ -1130,14 +1139,14 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
  * (o = i1^{-1} * i2) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockInvMult(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o, HYPRE_Int block_size)
 {
 
    HYPRE_Int ierr = 0;
    HYPRE_Int i, j;
-   double *m_i1;
+   HYPRE_Complex *m_i1;
 
-   m_i1 = hypre_CTAlloc(double, block_size*block_size);
+   m_i1 = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
 
 #if LB_VERSION
    {
@@ -1146,10 +1155,10 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int bl
       HYPRE_Int *piv;
       HYPRE_Int sz;
       
-      double *i2_t;
+      HYPRE_Complex *i2_t;
 
       one = 1;
-      i2_t = hypre_CTAlloc(double, block_size*block_size);
+      i2_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
       piv = hypre_CTAlloc(HYPRE_Int, block_size);
       
 
@@ -1204,17 +1213,17 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int bl
    
 #else
    {
-      
       HYPRE_Int m, k;
       HYPRE_Int piv_row;
-      double factor, eps;
-      double piv, tmp;
+      HYPRE_Real eps;
+      HYPRE_Complex factor;
+      HYPRE_Complex piv, tmp;
       
       eps = 1.0e-6;
       
       if (block_size ==1 )
       {
-         if (fabs(m_i1[0]) > 1e-10)
+         if (hypre_cabs(m_i1[0]) > 1e-10)
          {
             o[0] = i2[0]/i1[0];
             hypre_TFree(m_i1);
@@ -1250,7 +1259,7 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int bl
             /* find the largest pivot in position k*/
             for (j=k+1; j < block_size; j++)         
             {
-               if (fabs(m_i1[j*block_size+k]) > fabs(piv))
+               if (hypre_cabs(m_i1[j*block_size+k]) > hypre_cabs(piv))
                {
                   piv =  m_i1[j*block_size+k];
                   piv_row = j;
@@ -1274,7 +1283,7 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int bl
             /* end of pivoting */
             
             
-            if (fabs(piv) > eps)
+            if (hypre_cabs(piv) > eps)
             {
                /* now we can factor into U */
                for (j = k+1; j < block_size; j++)
@@ -1304,7 +1313,7 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int bl
 
          /* we also need to check the pivot in the last row to see if it is zero */  
          k = block_size - 1; /* last row */
-         if ( fabs(m_i1[k*block_size+k]) < eps)
+         if ( hypre_cabs(m_i1[k*block_size+k]) < eps)
          {
             /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n"); */
             hypre_TFree(m_i1);
@@ -1343,7 +1352,7 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, HYPRE_Int bl
  * (o = i2*il^(-1)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockMultInv(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o, HYPRE_Int block_size)
 {
 
    HYPRE_Int ierr = 0;
@@ -1353,14 +1362,14 @@ hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, HYPRE_Int bl
    
    {
      /* same as solving A^T C^T = B^T */
-      double *m_i1;
+      HYPRE_Complex *m_i1;
       HYPRE_Int info;
       HYPRE_Int *piv;
       HYPRE_Int sz, one;
       
 
       piv = hypre_CTAlloc(HYPRE_Int, block_size);
-      m_i1 = hypre_CTAlloc(double, block_size*block_size);
+      m_i1 = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
       one = 1;
       sz = block_size*block_size;
 
@@ -1393,16 +1402,14 @@ hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, HYPRE_Int bl
    
 #else
    {
-      
-      double eps;
-      double *i1_t, *i2_t, *o_t;
-      
+      HYPRE_Real     eps;
+      HYPRE_Complex *i1_t, *i2_t, *o_t;
       
       eps = 1.0e-12;
       
       if (block_size ==1 )
       {
-         if (fabs(i1[0]) > eps)
+         if (hypre_cabs(i1[0]) > eps)
          {
             o[0] = i2[0]/i1[0];
             return(ierr);
@@ -1416,9 +1423,9 @@ hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, HYPRE_Int bl
       else
       {
          
-         i1_t = hypre_CTAlloc(double, block_size*block_size);
-         i2_t = hypre_CTAlloc(double, block_size*block_size);
-         o_t = hypre_CTAlloc(double, block_size*block_size);
+         i1_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
+         i2_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
+         o_t = hypre_CTAlloc(HYPRE_Complex, block_size*block_size);
          
          /* TO DO:: this could be done more efficiently! */  
          hypre_CSRBlockMatrixBlockTranspose(i1, i1_t, block_size);
@@ -1445,23 +1452,20 @@ hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, HYPRE_Int bl
  * (o = diag(i1)^{-1} * diag(i2)) 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMultDiag(double* i1, double* i2, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockInvMultDiag(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o, HYPRE_Int block_size)
 {
 
-   HYPRE_Int ierr = 0;
-   HYPRE_Int i;
+   HYPRE_Int  ierr = 0;
+   HYPRE_Int  i;
    HYPRE_Int  sz = block_size*block_size;
-
-   double eps;
+   HYPRE_Real eps = 1.0e-8;
    
-   eps = 1.0e-8;
-
    for (i = 0; i < sz; i++)
       o[i] = 0.0;
    
    for (i = 0; i < block_size; i++)
    {
-      if (fabs(i1[i*block_size + i]) > eps)
+      if (hypre_cabs(i1[i*block_size + i]) > eps)
       {
          o[i*block_size + i] = i2[i*block_size + i] / i1[i*block_size + i];
       }
@@ -1481,19 +1485,18 @@ hypre_CSRBlockMatrixBlockInvMultDiag(double* i1, double* i2, double* o, HYPRE_In
                              the diag entries in i2 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMultDiag2(double* i1, double* i2, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockInvMultDiag2(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o, HYPRE_Int block_size)
 {
 
    HYPRE_Int ierr = 0;
    HYPRE_Int i, j;
 
-   double eps, tmp;
+   HYPRE_Real    eps = 1.0e-8;
+   HYPRE_Complex tmp;
    
-   eps = 1.0e-8;
-
    for (i = 0; i < block_size; i++)
    {
-      if (fabs(i2[i*block_size + i]) > eps)
+      if (hypre_cabs(i2[i*block_size + i]) > eps)
       {
          tmp = 1 / i2[i*block_size + i];
       }
@@ -1517,15 +1520,14 @@ hypre_CSRBlockMatrixBlockInvMultDiag2(double* i1, double* i2, double* o, HYPRE_I
                              the i2 whose diags are row sums 
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRBlockMatrixBlockInvMultDiag3(double* i1, double* i2, double* o, HYPRE_Int block_size)
+hypre_CSRBlockMatrixBlockInvMultDiag3(HYPRE_Complex* i1, HYPRE_Complex* i2, HYPRE_Complex* o, HYPRE_Int block_size)
 {
 
    HYPRE_Int ierr = 0;
    HYPRE_Int i, j;
-   double eps, tmp, row_sum;
+   HYPRE_Real    eps = 1.0e-8;
+   HYPRE_Complex tmp, row_sum;
    
-   eps = 1.0e-8;
-
    for (i = 0; i < block_size; i++)
    {
       /* get row sum of i2, row i */
@@ -1536,7 +1538,7 @@ hypre_CSRBlockMatrixBlockInvMultDiag3(double* i1, double* i2, double* o, HYPRE_I
       }
       
       /* invert */
-      if (fabs(row_sum) > eps)
+      if (hypre_cabs(row_sum) > eps)
       {
          tmp = 1 / row_sum;
       }
@@ -1565,7 +1567,7 @@ HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
                                   hypre_CSRBlockMatrix **AT, HYPRE_Int data)
 
 {
-   double       *A_data = hypre_CSRBlockMatrixData(A);
+   HYPRE_Complex       *A_data = hypre_CSRBlockMatrixData(A);
    HYPRE_Int          *A_i = hypre_CSRBlockMatrixI(A);
    HYPRE_Int          *A_j = hypre_CSRBlockMatrixJ(A);
    HYPRE_Int           num_rowsA = hypre_CSRBlockMatrixNumRows(A);
@@ -1573,7 +1575,7 @@ HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
    HYPRE_Int           num_nonzerosA = hypre_CSRBlockMatrixNumNonzeros(A);
    HYPRE_Int           block_size = hypre_CSRBlockMatrixBlockSize(A);
 
-   double       *AT_data;
+   HYPRE_Complex       *AT_data;
    HYPRE_Int          *AT_i;
    HYPRE_Int          *AT_j;
    HYPRE_Int           num_rowsAT;
@@ -1611,7 +1613,7 @@ HYPRE_Int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
    hypre_CSRBlockMatrixJ(*AT) = AT_j;
    if (data) 
    {
-      AT_data = hypre_CTAlloc(double, num_nonzerosAT*bnnz);
+      AT_data = hypre_CTAlloc(HYPRE_Complex, num_nonzerosAT*bnnz);
       hypre_CSRBlockMatrixData(*AT) = AT_data;
    }
 

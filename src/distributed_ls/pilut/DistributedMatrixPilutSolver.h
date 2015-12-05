@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -43,10 +43,10 @@ typedef struct
 {
 MPI_Comm hypre_MPI_communicator;
 HYPRE_Int mype, npes;
-double _secpertick;
+HYPRE_Real _secpertick;
 HYPRE_Int Mfactor;
 HYPRE_Int *jr, *jw, lastjr, *lr, lastlr;	/* Work space */
-double *w;				/* Work space */
+HYPRE_Real *w;				/* Work space */
 HYPRE_Int firstrow, lastrow;			/* Matrix distribution parameters */
 timer SerTmr, ParTmr;
 HYPRE_Int nrows, lnrows, ndone, ntogo, nleft; /* Various values used throught out */
@@ -119,8 +119,8 @@ HYPRE_Int Ul_timer;
 
 
 /* prototype definitions for BLAS calls that are used */
-double SNRM2( HYPRE_Int *, double *, HYPRE_Int *);
-double SDOT(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Real SNRM2( HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Real SDOT(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
 
 
 /*--------------------------------------------------------------------------
@@ -140,7 +140,7 @@ typedef struct
   MPI_Comm               comm;
   HYPRE_DistributedMatrix  Matrix;
   HYPRE_Int                    gmaxnz;
-  double                 tol;
+  HYPRE_Real             tol;
   HYPRE_Int                    max_its;
 
   /* Structure that is used internally and built from matrix */

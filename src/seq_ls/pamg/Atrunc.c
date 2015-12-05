@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -19,13 +19,13 @@
 
          
 HYPRE_Int
-hypre_AMGOpTruncation(hypre_CSRMatrix *A, double trunc_factor, HYPRE_Int max_elmts)
+hypre_AMGOpTruncation(hypre_CSRMatrix *A, HYPRE_Real trunc_factor, HYPRE_Int max_elmts)
 {
    HYPRE_Int ierr = 0;
    HYPRE_Int *A_i = hypre_CSRMatrixI(A);
    HYPRE_Int *A_j = hypre_CSRMatrixJ(A);
-   double *A_data = hypre_CSRMatrixData(A);
-   double max_coef, row_sum, scale;
+   HYPRE_Real *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Real max_coef, row_sum, scale;
    HYPRE_Int i, j, start, diag;
    HYPRE_Int num_variables = hypre_CSRMatrixNumRows(A);
    HYPRE_Int now_checking, num_lost, next_open;

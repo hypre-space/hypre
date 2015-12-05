@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -75,7 +75,7 @@ hypre_F90_IFACE(hypre_sstructvectorsetvalues, HYPRE_SSTRUCTVECTORSETVALUES)
     hypre_F90_Int *part,
     hypre_F90_IntArray *index,
     hypre_F90_Int *var,
-    hypre_F90_Dbl *value,
+    hypre_F90_Complex *value,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -84,7 +84,7 @@ hypre_F90_IFACE(hypre_sstructvectorsetvalues, HYPRE_SSTRUCTVECTORSETVALUES)
           hypre_F90_PassInt (part),
           hypre_F90_PassIntArray (index),
           hypre_F90_PassInt (var),
-          hypre_F90_PassDblRef (value) ) );
+          hypre_F90_PassComplexRef (value) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -97,7 +97,7 @@ hypre_F90_IFACE(hypre_sstructvectoraddtovalues, HYPRE_SSTRUCTVECTORADDTOVALUES)
     hypre_F90_Int *part,
     hypre_F90_IntArray *index,
     hypre_F90_Int *var,
-    hypre_F90_Dbl *value,
+    hypre_F90_Complex *value,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -106,7 +106,7 @@ hypre_F90_IFACE(hypre_sstructvectoraddtovalues, HYPRE_SSTRUCTVECTORADDTOVALUES)
           hypre_F90_PassInt (part),
           hypre_F90_PassIntArray (index),
           hypre_F90_PassInt (var),
-          hypre_F90_PassDblRef (value) ) );
+          hypre_F90_PassComplexRef (value) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -119,7 +119,7 @@ hypre_F90_IFACE(hypre_sstructvectorgetvalues, HYPRE_SSTRUCTVECTORGETVALUES)
     hypre_F90_Int *part,
     hypre_F90_IntArray *index,
     hypre_F90_Int *var,
-    hypre_F90_Dbl *value,
+    hypre_F90_Complex *value,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -128,7 +128,7 @@ hypre_F90_IFACE(hypre_sstructvectorgetvalues, HYPRE_SSTRUCTVECTORGETVALUES)
           hypre_F90_PassInt (part),
           hypre_F90_PassIntArray (index),
           hypre_F90_PassInt (var),
-          hypre_F90_PassDblRef (value) ));
+          hypre_F90_PassComplexRef (value) ));
 }
 
 /*--------------------------------------------------------------------------
@@ -142,7 +142,7 @@ hypre_F90_IFACE(hypre_sstructvectorsetboxvalues, HYPRE_SSTRUCTVECTORSETBOXVALUES
     hypre_F90_IntArray *ilower,
     hypre_F90_IntArray *iupper,
     hypre_F90_Int *var,
-    hypre_F90_DblArray *values,
+    hypre_F90_ComplexArray *values,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -152,7 +152,7 @@ hypre_F90_IFACE(hypre_sstructvectorsetboxvalues, HYPRE_SSTRUCTVECTORSETBOXVALUES
           hypre_F90_PassIntArray (ilower),
           hypre_F90_PassIntArray (iupper),
           hypre_F90_PassInt (var),
-          hypre_F90_PassDblArray (values) ) );
+          hypre_F90_PassComplexArray (values) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -166,7 +166,7 @@ hypre_F90_IFACE(hypre_sstructvectoraddtoboxvalu, HYPRE_SSTRUCTVECTORADDTOBOXVALU
     hypre_F90_IntArray *ilower,
     hypre_F90_IntArray *iupper,
     hypre_F90_Int *var,
-    hypre_F90_DblArray *values,
+    hypre_F90_ComplexArray *values,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -176,7 +176,7 @@ hypre_F90_IFACE(hypre_sstructvectoraddtoboxvalu, HYPRE_SSTRUCTVECTORADDTOBOXVALU
           hypre_F90_PassIntArray (ilower),
           hypre_F90_PassIntArray (iupper),
           hypre_F90_PassInt (var),
-          hypre_F90_PassDblArray (values) ) );
+          hypre_F90_PassComplexArray (values) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -190,7 +190,7 @@ hypre_F90_IFACE(hypre_sstructvectorgetboxvalues, HYPRE_SSTRUCTVECTORGETBOXVALUES
     hypre_F90_IntArray *ilower,
     hypre_F90_IntArray *iupper,
     hypre_F90_Int *var,
-    hypre_F90_DblArray *values,
+    hypre_F90_ComplexArray *values,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
@@ -200,7 +200,7 @@ hypre_F90_IFACE(hypre_sstructvectorgetboxvalues, HYPRE_SSTRUCTVECTORGETBOXVALUES
           hypre_F90_PassIntArray (ilower),
           hypre_F90_PassIntArray (iupper),
           hypre_F90_PassInt (var),
-          hypre_F90_PassDblArray (values) ) );
+          hypre_F90_PassComplexArray (values) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -238,13 +238,13 @@ hypre_F90_IFACE(hypre_sstructvectorgather, HYPRE_SSTRUCTVECTORGATHER)
 void
 hypre_F90_IFACE(hypre_sstructvectorsetconstantv, HYPRE_SSTRUCTVECTORSETCONSTANTV)
    (hypre_F90_Obj *vector,
-    hypre_F90_Dbl *value,
+    hypre_F90_Complex *value,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructVectorSetConstantValues(
           hypre_F90_PassObj (HYPRE_SStructVector, vector),
-          hypre_F90_PassDbl (value)));
+          hypre_F90_PassComplex (value)));
 }
 
 /*--------------------------------------------------------------------------
@@ -319,13 +319,13 @@ hypre_F90_IFACE(hypre_sstructvectorcopy, HYPRE_SSTRUCTVECTORCOPY)
 
 void
 hypre_F90_IFACE(hypre_sstructvectorscale, HYPRE_SSTRUCTVECTORSCALE)
-   (hypre_F90_Dbl *alpha,
+   (hypre_F90_Complex *alpha,
     hypre_F90_Obj *y,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructVectorScale(
-          hypre_F90_PassDbl (alpha),
+          hypre_F90_PassComplex (alpha),
           hypre_F90_PassObj (HYPRE_SStructVector, y) ) );
 }
 
@@ -337,14 +337,14 @@ void
 hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
    (hypre_F90_Obj *x,
     hypre_F90_Obj *y,
-    hypre_F90_Dbl *result,
+    hypre_F90_Complex *result,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructInnerProd(
           hypre_F90_PassObj (HYPRE_SStructVector, x),
           hypre_F90_PassObj (HYPRE_SStructVector, y),
-          hypre_F90_PassDblRef (result) ) );
+          hypre_F90_PassComplexRef (result) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -353,14 +353,14 @@ hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
 
 void
 hypre_F90_IFACE(hypre_sstructaxpy, HYPRE_SSTRUCTAXPY)
-   (hypre_F90_Dbl *alpha,
+   (hypre_F90_Complex *alpha,
     hypre_F90_Obj *x,
     hypre_F90_Obj *y,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructAxpy(
-          hypre_F90_PassDbl (alpha),
+          hypre_F90_PassComplex (alpha),
           hypre_F90_PassObj (HYPRE_SStructVector, x),
           hypre_F90_PassObj (HYPRE_SStructVector, y) ) );
 }

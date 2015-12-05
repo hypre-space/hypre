@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -86,8 +86,8 @@
 
 HYPRE_Int
 hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
-                       double                 strength_threshold,
-                       double                 max_row_sum,
+                       HYPRE_Real             strength_threshold,
+                       HYPRE_Real             max_row_sum,
                        HYPRE_Int                    num_functions,
                        HYPRE_Int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
@@ -97,12 +97,12 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    hypre_ParCSRCommHandle  *comm_handle;
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
-   double             *A_diag_data     = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real         *A_diag_data     = hypre_CSRMatrixData(A_diag);
 
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   double             *A_offd_data = NULL;
+   HYPRE_Real         *A_offd_data = NULL;
    HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
@@ -117,13 +117,13 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *S_diag;
    HYPRE_Int                *S_diag_i;
    HYPRE_Int                *S_diag_j;
-   /* double             *S_diag_data; */
+   /* HYPRE_Real         *S_diag_data; */
    hypre_CSRMatrix    *S_offd;
    HYPRE_Int                *S_offd_i = NULL;
    HYPRE_Int                *S_offd_j = NULL;
-   /* double             *S_offd_data; */
+   /* HYPRE_Real         *S_offd_data; */
                  
-   double              diag, row_scale, row_sum;
+   HYPRE_Real          diag, row_scale, row_sum;
    HYPRE_Int                 i, jA, jS;
                       
    HYPRE_Int                 ierr = 0;
@@ -296,11 +296,10 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
             }
          }
       }
-      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1;
-      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
+      if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
       {
          /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
@@ -510,8 +509,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
 HYPRE_Int
 hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
-                       double                 strength_threshold,
-                       double                 max_row_sum,
+                       HYPRE_Real             strength_threshold,
+                       HYPRE_Real             max_row_sum,
                        HYPRE_Int                    num_functions,
                        HYPRE_Int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
@@ -521,12 +520,12 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    hypre_ParCSRCommHandle  *comm_handle;
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    HYPRE_Int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
-   double             *A_diag_data     = hypre_CSRMatrixData(A_diag);
+   HYPRE_Real         *A_diag_data     = hypre_CSRMatrixData(A_diag);
 
 
    hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
    HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
-   double             *A_offd_data = NULL;
+   HYPRE_Real         *A_offd_data = NULL;
    HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
    HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
 
@@ -541,13 +540,13 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    hypre_CSRMatrix    *S_diag;
    HYPRE_Int                *S_diag_i;
    HYPRE_Int                *S_diag_j;
-   /* double             *S_diag_data; */
+   /* HYPRE_Real         *S_diag_data; */
    hypre_CSRMatrix    *S_offd;
    HYPRE_Int                *S_offd_i = NULL;
    HYPRE_Int                *S_offd_j = NULL;
-   /* double             *S_offd_data; */
+   /* HYPRE_Real         *S_offd_data; */
                  
-   double              diag, row_scale, row_sum;
+   HYPRE_Real          diag, row_scale, row_sum;
    HYPRE_Int                 i, jA, jS;
                       
    HYPRE_Int                 ierr = 0;
@@ -682,11 +681,10 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
                row_sum += fabs(A_offd_data[jA]);
             }
       }
-      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1;
-      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
+      if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
       {
          /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)

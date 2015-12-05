@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -24,7 +24,7 @@
 /* #include "SubdomainGraph_dh.h" */
 
 static void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL, 
-                                      double *AVAL, ExternalRows_dh extRows, 
+                                      HYPRE_Real *AVAL, ExternalRows_dh extRows, 
                                       SortedList_dh sList, Euclid_dh ctx, 
                                       bool debug);
 
@@ -44,7 +44,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
   HYPRE_Int beg_row, beg_rowP, end_rowP;
   SubdomainGraph_dh sg = ctx->sg;
   HYPRE_Int *CVAL, len, idx = 0, count;
-  double *AVAL;
+  HYPRE_Real *AVAL;
   REAL_DH *aval;
   Factor_dh F = ctx->F;
   SortedList_dh slist = ctx->slist;
@@ -229,7 +229,7 @@ void iluk_mpi_pilu(Euclid_dh ctx)
 #undef __FUNC__
 #define __FUNC__ "iluk_symbolic_row_private"
 void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVAL, 
-                               double *AVAL, ExternalRows_dh extRows, 
+                               HYPRE_Real *AVAL, ExternalRows_dh extRows, 
                                SortedList_dh slist, Euclid_dh ctx, bool debug)
 {
   START_FUNC_DH
@@ -244,12 +244,12 @@ void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVA
   HYPRE_Int       *cvalPtr, *fillPtr;
   SRecord   sr, *srPtr;
   REAL_DH   scale, *avalPtr;
-  double    thresh = ctx->sparseTolA;
+  HYPRE_Real    thresh = ctx->sparseTolA;
   bool      wasInserted;
   HYPRE_Int       count = 0;
 
   scale = ctx->scale[localRow];
-  ctx->stats[NZA_STATS] += (double)len;
+  ctx->stats[NZA_STATS] += (HYPRE_Real)len;
 
   /* insert col indices in sorted linked list */
   sr.level = 0;
@@ -277,7 +277,7 @@ void iluk_symbolic_row_private(HYPRE_Int localRow, HYPRE_Int len, HYPRE_Int *CVA
       hypre_fprintf(logFile, "ILU_pilu   inserted missing diagonal: %i\n", 1+localRow+beg_row);
     }
   }
-  ctx->stats[NZA_USED_STATS] += (double)count;
+  ctx->stats[NZA_USED_STATS] += (HYPRE_Real)count;
 
   /* update row from previously factored rows */
   sr.val = 0.0;
@@ -346,7 +346,7 @@ void iluk_numeric_row_private(HYPRE_Int new_row, ExternalRows_dh extRows,
   HYPRE_Int    *rp = ctx->F->rp, *cval = ctx->F->cval, *diag = ctx->F->diag;
   REAL_DH *avalPtr, *aval = ctx->F->aval;
   HYPRE_Int     *cvalPtr;
-  double  multiplier, pc, pv;
+  HYPRE_Real  multiplier, pc, pv;
   SRecord sr, *srPtr;
 
   /* note: non-zero entries from A were inserted in list during iluk_symbolic_row_private */

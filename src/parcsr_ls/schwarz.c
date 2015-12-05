@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.42 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_parcsr_ls.h"
@@ -28,11 +28,11 @@
 #ifdef HYPRE_USING_ESSL
 #include <essl.h>
 #else
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *n, double *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, double *b, HYPRE_Int*, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *n, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
 
 #endif
 
@@ -55,7 +55,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	
 
   HYPRE_Int *i_domain_dof, *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
   hypre_CSRMatrix *domain_structure;
 
@@ -70,7 +70,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
-  double *a_dof_dof = hypre_CSRMatrixData(A);
+  HYPRE_Real *a_dof_dof = hypre_CSRMatrixData(A);
   HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
 
@@ -88,7 +88,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
-  double *AE;
+  HYPRE_Real *AE;
 
 #ifdef HYPRE_USING_ESSL
 #else
@@ -98,7 +98,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   HYPRE_Int cnt;
 
   /* PCG arrays: --------------------------------------------------- 
-  double *x, *rhs, *v, *w, *d, *aux;
+  HYPRE_Real *x, *rhs, *v, *w, *d, *aux;
 
   HYPRE_Int max_iter;
 
@@ -220,9 +220,9 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
   if (option == 1)
-    domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
+    domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, domain_matrixinverse_counter);
   else
-    domain_matrixinverse = hypre_CTAlloc(double, num_dofs * num_functions);
+    domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, num_dofs * num_functions);
 
 
 
@@ -427,8 +427,8 @@ HYPRE_Int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
                             hypre_ParVector *rhs_vector,
                             hypre_CSRMatrix *domain_structure,
                             hypre_ParVector *par_x,
-                            double relax_wt,
-                            double *scale,
+                            HYPRE_Real relax_wt,
+                            HYPRE_Real *scale,
                             hypre_ParVector *Vtemp, HYPRE_Int *pivots, 
                             HYPRE_Int use_nonsymm)
 
@@ -445,29 +445,29 @@ HYPRE_Int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
   hypre_CSRMatrix *A_diag;
   HYPRE_Int *A_diag_i;
   HYPRE_Int *A_diag_j;
-  double *A_diag_data;
+  HYPRE_Real *A_diag_data;
   hypre_CSRMatrix *A_offd;
   HYPRE_Int *A_offd_i;
   HYPRE_Int *A_offd_j;
-  double *A_offd_data;
-  double *x;
-  double *x_ext;
-  double *x_ext_old;
-  double *rhs;
-  double *rhs_ext;
-  double *vtemp_data;
-  double *aux;
-  double *buf_data;
+  HYPRE_Real *A_offd_data;
+  HYPRE_Real *x;
+  HYPRE_Real *x_ext;
+  HYPRE_Real *x_ext_old;
+  HYPRE_Real *rhs;
+  HYPRE_Real *rhs_ext;
+  HYPRE_Real *vtemp_data;
+  HYPRE_Real *aux;
+  HYPRE_Real *buf_data;
 /*hypre_Vector *x_vector;*/
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
   HYPRE_Int max_domain_size = hypre_CSRMatrixNumCols(domain_structure);
   HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
   HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-  double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
+  HYPRE_Real *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
   HYPRE_Int *A_boundary_i;
   HYPRE_Int *A_boundary_j;
-  double *A_boundary_data;
+  HYPRE_Real *A_boundary_data;
   HYPRE_Int num_variables;
   HYPRE_Int num_cols_offd;
 
@@ -512,7 +512,7 @@ HYPRE_Int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
      A_boundary_j = hypre_CSRMatrixJ(A_boundary);
      A_boundary_data = hypre_CSRMatrixData(A_boundary);
   }
-  aux = hypre_CTAlloc(double, max_domain_size);
+  aux = hypre_CTAlloc(HYPRE_Real, max_domain_size);
 
   hypre_ParVectorCopy(rhs_vector,Vtemp);
   hypre_ParCSRMatrixMatvec(-1.0,par_A,par_x,1.0,Vtemp);
@@ -523,10 +523,10 @@ HYPRE_Int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
      send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
      send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
-     buf_data = hypre_CTAlloc(double, send_map_starts[num_sends]);
-     x_ext = hypre_CTAlloc(double, num_cols_offd);
-     x_ext_old = hypre_CTAlloc(double, num_cols_offd);
-     rhs_ext = hypre_CTAlloc(double, num_cols_offd);
+     buf_data = hypre_CTAlloc(HYPRE_Real, send_map_starts[num_sends]);
+     x_ext = hypre_CTAlloc(HYPRE_Real, num_cols_offd);
+     x_ext_old = hypre_CTAlloc(HYPRE_Real, num_cols_offd);
+     rhs_ext = hypre_CTAlloc(HYPRE_Real, num_cols_offd);
 
      index = 0;
      for (i=0; i < num_sends; i++)
@@ -830,7 +830,7 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
                          hypre_Vector *rhs_vector,
                          hypre_CSRMatrix *domain_structure,
                          hypre_ParVector *par_x,
-                         double relax_wt,
+                         HYPRE_Real relax_wt,
                          hypre_Vector *aux_vector, HYPRE_Int *pivots, 
                          HYPRE_Int use_nonsymm)
 
@@ -839,17 +839,17 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
   /* HYPRE_Int num_dofs; */
   HYPRE_Int *i_dof_dof;
   HYPRE_Int *j_dof_dof;
-  double *a_dof_dof;
-  double *x;
-  double *rhs;
-  double *aux;
+  HYPRE_Real *a_dof_dof;
+  HYPRE_Real *x;
+  HYPRE_Real *rhs;
+  HYPRE_Real *aux;
   hypre_CSRMatrix *A;
   hypre_Vector *x_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
   HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
   HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-  double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
+  HYPRE_Real *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
 
   HYPRE_Int piv_counter = 0;
   HYPRE_Int one = 1;
@@ -1038,7 +1038,7 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
                            hypre_Vector *rhs_vector,
                            hypre_CSRMatrix *domain_structure,
                            hypre_ParVector *par_x,
-                           double relax_wt,
+                           HYPRE_Real relax_wt,
                            hypre_Vector *aux_vector,
                            HYPRE_Int *CF_marker,
                            HYPRE_Int rlx_pt, HYPRE_Int *pivots, 
@@ -1049,17 +1049,17 @@ HYPRE_Int hypre_MPSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
   /* HYPRE_Int num_dofs; */
   HYPRE_Int *i_dof_dof;
   HYPRE_Int *j_dof_dof;
-  double *a_dof_dof;
-  double *x;
-  double *rhs;
-  double *aux;
+  HYPRE_Real *a_dof_dof;
+  HYPRE_Real *x;
+  HYPRE_Real *rhs;
+  HYPRE_Real *aux;
   hypre_CSRMatrix *A;
   hypre_Vector *x_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
   HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
   HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-  double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
+  HYPRE_Real *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
 
 
   HYPRE_Int piv_counter = 0;
@@ -1257,7 +1257,7 @@ HYPRE_Int hypre_MPSchwarzFWSolve(hypre_ParCSRMatrix *par_A,
                            hypre_Vector *rhs_vector,
                            hypre_CSRMatrix *domain_structure,
                            hypre_ParVector *par_x,
-                           double relax_wt,
+                           HYPRE_Real relax_wt,
                            hypre_Vector *aux_vector, HYPRE_Int *pivots, 
                            HYPRE_Int use_nonsymm)
 
@@ -1266,17 +1266,17 @@ HYPRE_Int hypre_MPSchwarzFWSolve(hypre_ParCSRMatrix *par_A,
   /* HYPRE_Int num_dofs; */
   HYPRE_Int *i_dof_dof;
   HYPRE_Int *j_dof_dof;
-  double *a_dof_dof;
-  double *x;
-  double *rhs;
-  double *aux;
+  HYPRE_Real *a_dof_dof;
+  HYPRE_Real *x;
+  HYPRE_Real *rhs;
+  HYPRE_Real *aux;
   hypre_CSRMatrix *A;
   hypre_Vector *x_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
   HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
   HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-  double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
+  HYPRE_Real *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
 
 
   HYPRE_Int piv_counter = 0;
@@ -1386,7 +1386,7 @@ HYPRE_Int hypre_MPSchwarzCFFWSolve(hypre_ParCSRMatrix *par_A,
                              hypre_Vector *rhs_vector,
                              hypre_CSRMatrix *domain_structure,
                              hypre_ParVector *par_x,
-                             double relax_wt,
+                             HYPRE_Real relax_wt,
                              hypre_Vector *aux_vector,
                              HYPRE_Int *CF_marker,
                              HYPRE_Int rlx_pt, HYPRE_Int *pivots, 
@@ -1397,17 +1397,17 @@ HYPRE_Int hypre_MPSchwarzCFFWSolve(hypre_ParCSRMatrix *par_A,
   /* HYPRE_Int num_dofs; */
   HYPRE_Int *i_dof_dof;
   HYPRE_Int *j_dof_dof;
-  double *a_dof_dof;
-  double *x;
-  double *rhs;
-  double *aux;
+  HYPRE_Real *a_dof_dof;
+  HYPRE_Real *x;
+  HYPRE_Real *rhs;
+  HYPRE_Real *aux;
   hypre_CSRMatrix *A;
   hypre_Vector *x_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
   HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
   HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
-  double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
+  HYPRE_Real *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
 
   HYPRE_Int piv_counter = 0;
   HYPRE_Int one = 1;
@@ -1744,13 +1744,13 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 {
 
   HYPRE_Int *i_domain_dof, *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
   hypre_CSRMatrix *domain_structure;  
 
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
-  double *a_dof_dof = hypre_CSRMatrixData(A);
+  HYPRE_Real *a_dof_dof = hypre_CSRMatrixData(A);
   HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
   /* HYPRE_Int *i_dof_to_accept_weight; */
@@ -1772,7 +1772,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
   HYPRE_Int nf;
 
-  double *AE;
+  HYPRE_Real *AE;
 
   HYPRE_Int piv_counter = 0;
   HYPRE_Int *ipiv;
@@ -2017,7 +2017,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 	max_local_dof_counter = local_dof_counter;
     }
 
-  domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
+  domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, domain_matrixinverse_counter);
   if (use_nonsymm)
      piv = hypre_CTAlloc(HYPRE_Int, piv_counter);
 
@@ -2025,7 +2025,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
 
   /* OLD-HYPRE_USING_ESSL
-  AE = hypre_CTAlloc(double, max_local_dof_counter*max_local_dof_counter);
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter*max_local_dof_counter);
   */
 
   i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
@@ -2792,7 +2792,7 @@ HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
  matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-HYPRE_Int matinv(double *x, double *a, HYPRE_Int k)
+HYPRE_Int matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 {
   HYPRE_Int i,j,l, ierr =0;
 
@@ -2875,12 +2875,12 @@ HYPRE_Int
 hypre_parCorrRes( hypre_ParCSRMatrix *A,
 		  hypre_ParVector *x,
 		  hypre_Vector *rhs,
-		  double **tmp_ptr)
+		  HYPRE_Real **tmp_ptr)
 {
    HYPRE_Int i, j, index, start;
    HYPRE_Int num_sends, num_cols_offd;
    HYPRE_Int local_size;
-   double *x_buf_data, *x_tmp_data, *x_local_data;
+   HYPRE_Real *x_buf_data, *x_tmp_data, *x_local_data;
 
    hypre_ParCSRCommPkg *comm_pkg;
    hypre_CSRMatrix *offd;
@@ -2898,7 +2898,7 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
    if (num_cols_offd)
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      x_buf_data = hypre_CTAlloc(double, 
+      x_buf_data = hypre_CTAlloc(HYPRE_Real, 
 			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
       index = 0;
@@ -2947,16 +2947,16 @@ hypre_parCorrRes( hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
                          hypre_ParVector *par_rhs,
                          hypre_CSRMatrix *domain_structure,
-                         double *scale,
+                         HYPRE_Real *scale,
                          hypre_ParVector *par_x,
                          hypre_ParVector *par_aux, HYPRE_Int *pivots, 
                          HYPRE_Int use_nonsymm)
 
 {
   HYPRE_Int ierr = 0;
-  double *x;
-  double *aux;
-  double *tmp;
+  HYPRE_Real *x;
+  HYPRE_Real *aux;
+  HYPRE_Real *tmp;
   hypre_Vector *x_vector;
   hypre_Vector *aux_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
@@ -2964,7 +2964,7 @@ HYPRE_Int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
   HYPRE_Int max_domain_size;
   HYPRE_Int *i_domain_dof;
   HYPRE_Int *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
 
   HYPRE_Int piv_counter = 0;
   HYPRE_Int one = 1;
@@ -2995,7 +2995,7 @@ HYPRE_Int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
 
   hypre_ParVectorCopy(par_rhs,par_aux);
   hypre_ParCSRMatrixMatvec(-1.0,par_A,par_x,1.0,par_aux);
-  tmp = hypre_CTAlloc(double,max_domain_size);
+  tmp = hypre_CTAlloc(HYPRE_Real,max_domain_size);
 
   /* forward solve: ----------------------------------------------- */
 
@@ -3073,7 +3073,7 @@ HYPRE_Int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
 HYPRE_Int hypre_AdSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
 		       hypre_ParVector *par_rhs,
 		       hypre_CSRMatrix *domain_structure,
-		       double *scale,
+		       HYPRE_Real *scale,
 		       hypre_ParVector *par_x,
 		       hypre_ParVector *par_aux,
 		       HYPRE_Int *CF_marker,
@@ -3082,9 +3082,9 @@ HYPRE_Int hypre_AdSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
 
 {
   HYPRE_Int ierr = 0;
-  double *x;
-  double *aux;
-  double *tmp;
+  HYPRE_Real *x;
+  HYPRE_Real *aux;
+  HYPRE_Real *tmp;
   hypre_Vector *x_vector;
   hypre_Vector *aux_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
@@ -3092,7 +3092,7 @@ HYPRE_Int hypre_AdSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
   HYPRE_Int max_domain_size;
   HYPRE_Int *i_domain_dof;
   HYPRE_Int *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
 
   HYPRE_Int piv_counter = 0;
   HYPRE_Int one = 1;
@@ -3124,7 +3124,7 @@ HYPRE_Int hypre_AdSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
 
   hypre_ParVectorCopy(par_rhs,par_aux);
   hypre_ParCSRMatrixMatvec(-1.0,par_A,par_x,1.0,par_aux);
-  tmp = hypre_CTAlloc(double,max_domain_size);
+  tmp = hypre_CTAlloc(HYPRE_Real,max_domain_size);
 
   /* forward solve: ----------------------------------------------- */
 
@@ -3207,16 +3207,16 @@ HYPRE_Int hypre_AdSchwarzCFSolve(hypre_ParCSRMatrix *par_A,
 HYPRE_Int 
 hypre_GenerateScale(hypre_CSRMatrix *domain_structure,
 		    HYPRE_Int              num_variables,
-		    double 	     relaxation_weight,
-		    double         **scale_pointer)
+		    HYPRE_Real 	     relaxation_weight,
+		    HYPRE_Real     **scale_pointer)
 {
    HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
    HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
    HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
    HYPRE_Int i, j;
-   double *scale;
+   HYPRE_Real *scale;
 
-   scale = hypre_CTAlloc(double, num_variables);
+   scale = hypre_CTAlloc(HYPRE_Real, num_variables);
 
    for (i=0; i < num_domains; i++)
       for (j = i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
@@ -3234,7 +3234,7 @@ hypre_GenerateScale(hypre_CSRMatrix *domain_structure,
 HYPRE_Int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
                             hypre_ParVector *F,
                             hypre_CSRMatrix *domain_structure,
-                            double *scale,
+                            HYPRE_Real *scale,
                             hypre_ParVector *X,
                             hypre_ParVector *Vtemp, 
                             HYPRE_Int *pivots, 
@@ -3249,20 +3249,20 @@ HYPRE_Int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   hypre_ParCSRCommHandle *comm_handle;
 
   HYPRE_Int ierr = 0;
-  double *x_data;
-  double *x_ext_data;
-  double *aux;
-  double *vtemp_data;
-  double *vtemp_ext_data;
+  HYPRE_Real *x_data;
+  HYPRE_Real *x_ext_data;
+  HYPRE_Real *aux;
+  HYPRE_Real *vtemp_data;
+  HYPRE_Real *vtemp_ext_data;
   HYPRE_Int num_domains, max_domain_size;
   HYPRE_Int *i_domain_dof;
   HYPRE_Int *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
   HYPRE_Int num_variables;
   HYPRE_Int num_cols_offd;
-  double *scale_ext;
-  double *buf_data;
+  HYPRE_Real *scale_ext;
+  HYPRE_Real *buf_data;
   HYPRE_Int index; 
  
   HYPRE_Int piv_counter = 0;
@@ -3293,7 +3293,7 @@ HYPRE_Int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   i_domain_dof = hypre_CSRMatrixI(domain_structure);
   j_domain_dof = hypre_CSRMatrixJ(domain_structure);
   domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
-  aux = hypre_CTAlloc(double, max_domain_size);
+  aux = hypre_CTAlloc(HYPRE_Real, max_domain_size);
 
   if (comm_pkg)
   {
@@ -3301,10 +3301,10 @@ HYPRE_Int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
      send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
      send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
-     buf_data = hypre_CTAlloc(double, send_map_starts[num_sends]);
-     x_ext_data = hypre_CTAlloc(double, num_cols_offd);
-     vtemp_ext_data = hypre_CTAlloc(double, num_cols_offd);
-     scale_ext = hypre_CTAlloc(double, num_cols_offd);
+     buf_data = hypre_CTAlloc(HYPRE_Real, send_map_starts[num_sends]);
+     x_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd);
+     vtemp_ext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd);
+     scale_ext = hypre_CTAlloc(HYPRE_Real, num_cols_offd);
 
      index = 0;
      for (i=0; i < num_sends; i++)
@@ -3456,13 +3456,13 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 {
   hypre_CSRMatrix *domain_structure;
   HYPRE_Int *i_domain_dof, *j_domain_dof;
-  double *domain_matrixinverse;
+  HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
 
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
   HYPRE_Int *a_diag_i = hypre_CSRMatrixI(A_diag);
   HYPRE_Int *a_diag_j = hypre_CSRMatrixJ(A_diag);
-  double *a_diag_data = hypre_CSRMatrixData(A_diag);
+  HYPRE_Real *a_diag_data = hypre_CSRMatrixData(A_diag);
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows(A_diag);
   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
   HYPRE_Int col_0 = first_col_diag -1 ;
@@ -3471,14 +3471,14 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
   HYPRE_Int *a_offd_i = hypre_CSRMatrixI(A_offd);
   HYPRE_Int *a_offd_j = hypre_CSRMatrixJ(A_offd);
-  double *a_offd_data = hypre_CSRMatrixData(A_offd);
+  HYPRE_Real *a_offd_data = hypre_CSRMatrixData(A_offd);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
   hypre_CSRMatrix *A_ext;
   HYPRE_Int *a_ext_i;
   HYPRE_Int *a_ext_j;
-  double *a_ext_data;
+  HYPRE_Real *a_ext_data;
 
   /* HYPRE_Int *i_dof_to_accept_weight; */
   HYPRE_Int *i_dof_to_prefer_weight,
@@ -3504,7 +3504,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 
   HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
-  double *AE;
+  HYPRE_Real *AE;
 
  
   HYPRE_Int *ipiv;
@@ -3832,12 +3832,12 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 	max_local_dof_counter = local_dof_counter;
     }
 
-  domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
+  domain_matrixinverse = hypre_CTAlloc(HYPRE_Real, domain_matrixinverse_counter);
   if (use_nonsymm)
      piv = hypre_CTAlloc(HYPRE_Int, piv_counter);
 
 /* OLD- HYPRE_USING_ESSL
-  AE = hypre_CTAlloc(double, max_local_dof_counter*max_local_dof_counter);
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter*max_local_dof_counter);
 */
 
   if (num_procs > 1)
@@ -3993,16 +3993,16 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 HYPRE_Int
 hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
 		    hypre_CSRMatrix *domain_structure,
-                    double           relaxation_weight,
-                    double         **scale_pointer)
+                    HYPRE_Real       relaxation_weight,
+                    HYPRE_Real     **scale_pointer)
 {
    HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
    HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
    HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
    HYPRE_Int i, j;
-   double *scale;
-   double *scale_ext;
-   double *scale_int;
+   HYPRE_Real *scale;
+   HYPRE_Real *scale_ext;
+   HYPRE_Real *scale_int;
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int num_sends = 0;
@@ -4022,8 +4022,8 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
       send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
    }
 
-   scale = hypre_CTAlloc(double, num_variables);
-   if (num_cols_offd) scale_ext = hypre_CTAlloc(double,num_cols_offd);
+   scale = hypre_CTAlloc(HYPRE_Real, num_variables);
+   if (num_cols_offd) scale_ext = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
 
    for (i=0; i < num_domains; i++)
    {  
@@ -4038,7 +4038,7 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
    }
    if (comm_pkg)
    {
-      scale_int = hypre_CTAlloc(double, send_map_starts[num_sends]);
+      scale_int = hypre_CTAlloc(HYPRE_Real, send_map_starts[num_sends]);
       comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,scale_ext,scale_int); 
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -4068,25 +4068,25 @@ HYPRE_Int
 hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
 		    hypre_CSRMatrix  *domain_structure,
                     hypre_CSRMatrix **A_boundary_pointer,
-                    double          **scale_pointer)
+                    HYPRE_Real      **scale_pointer)
 {
    hypre_CSRMatrix *A_ext;
    HYPRE_Int *A_ext_i;
    HYPRE_Int *A_ext_j;
-   double *A_ext_data;
+   HYPRE_Real *A_ext_data;
 
    hypre_CSRMatrix *A_boundary;
    HYPRE_Int *A_boundary_i;
    HYPRE_Int *A_boundary_j;
-   double *A_boundary_data;
+   HYPRE_Real *A_boundary_data;
  
    HYPRE_Int num_domains = hypre_CSRMatrixNumRows(domain_structure);
    HYPRE_Int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
    HYPRE_Int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
    HYPRE_Int i, j, j_col;
-   double *scale;
-   double *scale_ext;
-   double *scale_int;
+   HYPRE_Real *scale;
+   HYPRE_Real *scale_ext;
+   HYPRE_Real *scale_int;
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    HYPRE_Int num_sends = 0;
@@ -4114,10 +4114,10 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
       send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
    }
 
-   scale = hypre_CTAlloc(double, num_variables);
+   scale = hypre_CTAlloc(HYPRE_Real, num_variables);
    if (num_cols_offd) 
    {
-      scale_ext = hypre_CTAlloc(double,num_cols_offd);
+      scale_ext = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
       index_ext = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
    }
 
@@ -4145,7 +4145,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
    }
    if (comm_pkg)
    {
-      scale_int = hypre_CTAlloc(double, send_map_starts[num_sends]);
+      scale_int = hypre_CTAlloc(HYPRE_Real, send_map_starts[num_sends]);
       comm_handle=hypre_ParCSRCommHandleCreate(2,comm_pkg,scale_ext,scale_int); 
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
@@ -4192,7 +4192,7 @@ hypre_ParGenerateHybridScale(hypre_ParCSRMatrix *A,
       if (index)
       {
          A_boundary_j = hypre_CTAlloc(HYPRE_Int,index);
-         A_boundary_data = hypre_CTAlloc(double,index);
+         A_boundary_data = hypre_CTAlloc(HYPRE_Real,index);
       }
 
       index = 0;

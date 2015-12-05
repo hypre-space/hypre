@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef MAT_DH_DH
@@ -37,22 +37,22 @@ struct _mat_dh {
   HYPRE_Int *cval;
   HYPRE_Int *fill;
   HYPRE_Int *diag;
-  double *aval;
+  HYPRE_Real *aval;
   bool owner;  /* for MPI triangular solves */
 
   /* working space for getRow */
   HYPRE_Int len_private;
   HYPRE_Int rowCheckedOut;
   HYPRE_Int *cval_private;
-  double *aval_private;
+  HYPRE_Real *aval_private;
 
   /* row permutations to increase positive definiteness */
   HYPRE_Int *row_perm;
 
   /* for timing matvecs in experimental studies */
-  double time[MAT_DH_BINS];
-  double time_max[MAT_DH_BINS];
-  double time_min[MAT_DH_BINS];
+  HYPRE_Real time[MAT_DH_BINS];
+  HYPRE_Real time_max[MAT_DH_BINS];
+  HYPRE_Real time_min[MAT_DH_BINS];
   bool matvec_timing;
 
   /* used for MatVecs */
@@ -60,7 +60,7 @@ struct _mat_dh {
   HYPRE_Int          num_send;   /* used in destructor */
   hypre_MPI_Request  *recv_req;
   hypre_MPI_Request  *send_req; 
-  double       *recvbuf, *sendbuf;  
+  HYPRE_Real   *recvbuf, *sendbuf;  
   HYPRE_Int          *sendind;
   HYPRE_Int          sendlen;               
   HYPRE_Int          recvlen;               
@@ -87,16 +87,16 @@ extern void Mat_dhMatVecSetdown(Mat_dh mat);
           and Mat_dhMatVec_uni_omp()
 */
 
-extern void Mat_dhMatVec(Mat_dh mat, double *lhs, double *rhs);
+extern void Mat_dhMatVec(Mat_dh mat, HYPRE_Real *lhs, HYPRE_Real *rhs);
   /* unthreaded MPI version */
 
-extern void Mat_dhMatVec_omp(Mat_dh mat, double *lhs, double *rhs);
+extern void Mat_dhMatVec_omp(Mat_dh mat, HYPRE_Real *lhs, HYPRE_Real *rhs);
   /* OpenMP/MPI version */
 
-extern void Mat_dhMatVec_uni(Mat_dh mat, double *lhs, double *rhs);
+extern void Mat_dhMatVec_uni(Mat_dh mat, HYPRE_Real *lhs, HYPRE_Real *rhs);
   /* unthreaded, single-task version */
 
-extern void Mat_dhMatVec_uni_omp(Mat_dh mat, double *lhs, double *rhs);
+extern void Mat_dhMatVec_uni_omp(Mat_dh mat, HYPRE_Real *lhs, HYPRE_Real *rhs);
   /* OpenMP/single primary task version */
 
 
@@ -134,8 +134,8 @@ extern void Mat_dhFixDiags(Mat_dh A);
 
 extern void Mat_dhPrintDiags(Mat_dh A, FILE *fp);
 
-extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, double **val);
-extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val);
+extern void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
+extern void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val);
 
   /* partition matrix into "k" blocks.  User must free storage. */
 extern void Mat_dhPartition(Mat_dh mat, HYPRE_Int k, HYPRE_Int **beg_rowOUT, 
@@ -151,7 +151,7 @@ extern void Mat_dhReduceTiming(Mat_dh mat);
 extern void Mat_dhRowPermute(Mat_dh);
 
 extern void dldperm(HYPRE_Int job, HYPRE_Int n, HYPRE_Int nnz, HYPRE_Int colptr[], HYPRE_Int adjncy[],
-                double nzval[], HYPRE_Int *perm, double u[], double v[]);
+                HYPRE_Real nzval[], HYPRE_Int *perm, HYPRE_Real u[], HYPRE_Real v[]);
 
 
 #endif

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -34,7 +34,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
 {
    hypre_SparseMSGData  *smsg_data = smsg_vdata;
 
-   double                tol                 = (smsg_data -> tol);
+   HYPRE_Real            tol                 = (smsg_data -> tol);
    HYPRE_Int             max_iter            = (smsg_data -> max_iter);
    HYPRE_Int             rel_change          = (smsg_data -> rel_change);
    HYPRE_Int             zero_guess          = (smsg_data -> zero_guess);
@@ -70,13 +70,13 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
    void                **interpy_array       = (smsg_data -> interpy_array);
    void                **interpz_array       = (smsg_data -> interpz_array);
    HYPRE_Int             logging             = (smsg_data -> logging);
-   double               *norms               = (smsg_data -> norms);
-   double               *rel_norms           = (smsg_data -> rel_norms);
+   HYPRE_Real           *norms               = (smsg_data -> norms);
+   HYPRE_Real           *rel_norms           = (smsg_data -> rel_norms);
 
    HYPRE_Int            *restrict_count;
 
-   double                b_dot_b, r_dot_r, eps;
-   double                e_dot_e, x_dot_x;
+   HYPRE_Real            b_dot_b, r_dot_r, eps;
+   HYPRE_Real            e_dot_e, x_dot_x;
                     
    HYPRE_Int             i, l, lx, ly, lz;
    HYPRE_Int             lymin, lymax, lzmin, lzmax;

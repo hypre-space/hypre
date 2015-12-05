@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -20,9 +20,9 @@ typedef struct
 {
    MPI_Comm              comm;
 
-   double                tol;
-   double                cf_tol;
-   double                pcg_atolf;
+   HYPRE_Real            tol;
+   HYPRE_Real            cf_tol;
+   HYPRE_Real            pcg_atolf;
    HYPRE_Int             dscg_max_its;
    HYPRE_Int             pcg_max_its;
    HYPRE_Int             two_norm;
@@ -39,7 +39,7 @@ typedef struct
    /* log info (always logged) */
    HYPRE_Int             dscg_num_its;
    HYPRE_Int             pcg_num_its;
-   double                final_rel_res_norm;
+   HYPRE_Real            final_rel_res_norm;
    HYPRE_Int             time_index;
 
    HYPRE_Int           print_level;
@@ -110,7 +110,7 @@ hypre_HybridDestroy( void  *hybrid_vdata )
 
 HYPRE_Int
 hypre_HybridSetTol( void   *hybrid_vdata,
-                    double  tol       )
+                    HYPRE_Real  tol       )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
 
@@ -125,7 +125,7 @@ hypre_HybridSetTol( void   *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetConvergenceTol( void   *hybrid_vdata,
-                               double  cf_tol       )
+                               HYPRE_Real  cf_tol       )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
 
@@ -170,7 +170,7 @@ hypre_HybridSetPCGMaxIter( void   *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetPCGAbsoluteTolFactor( void   *hybrid_vdata,
-                                     double  pcg_atolf  )
+                                     HYPRE_Real  pcg_atolf  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
 
@@ -355,7 +355,7 @@ hypre_HybridGetPCGNumIterations( void   *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridGetFinalRelativeResidualNorm( void   *hybrid_vdata,
-                                          double *final_rel_res_norm )
+                                          HYPRE_Real *final_rel_res_norm )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
 
@@ -398,9 +398,9 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
    MPI_Comm           comm           = (hybrid_data -> comm);
 
-   double             tol            = (hybrid_data -> tol);
-   double             cf_tol         = (hybrid_data -> cf_tol);
-   double             pcg_atolf      = (hybrid_data -> pcg_atolf);
+   HYPRE_Real         tol            = (hybrid_data -> tol);
+   HYPRE_Real         cf_tol         = (hybrid_data -> cf_tol);
+   HYPRE_Real         pcg_atolf      = (hybrid_data -> pcg_atolf);
    HYPRE_Int          dscg_max_its   = (hybrid_data -> dscg_max_its);
    HYPRE_Int          pcg_max_its    = (hybrid_data -> pcg_max_its);
    HYPRE_Int          two_norm       = (hybrid_data -> two_norm);
@@ -425,7 +425,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    HYPRE_Int          pcg_num_its;
    HYPRE_Int          converged;
 
-   double             res_norm;
+   HYPRE_Real         res_norm;
    HYPRE_Int          myid;
 
    if (solver_type == 1)

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -19,15 +19,15 @@
 #define log10e 0.43429448190325182765
 
 #ifdef KR_headers
-double log();
-double d_lg10(x) doublereal *x;
+HYPRE_Real log();
+HYPRE_Real d_lg10(x) doublereal *x;
 #else
 /*
 #undef abs
 #include "math.h"
 */
-double log(double); /* declaration added 2/17/00 */
-double d_lg10(doublereal *x)
+HYPRE_Real log(HYPRE_Real); /* declaration added 2/17/00 */
+HYPRE_Real d_lg10(doublereal *x)
 #endif
 {
 return( log10e * log(*x) );
@@ -35,12 +35,12 @@ return( log10e * log(*x) );
 #include "f2c.h"
 
 #ifdef KR_headers
-double d_sign(a,b) doublereal *a, *b;
+HYPRE_Real d_sign(a,b) doublereal *a, *b;
 #else
-double d_sign(doublereal *a, doublereal *b)
+HYPRE_Real d_sign(doublereal *a, doublereal *b)
 #endif
 {
-double x;
+HYPRE_Real x;
 x = (*a >= 0 ? *a : - *a);
 return( *b >= 0 ? x : -x);
 }
@@ -48,12 +48,12 @@ return( *b >= 0 ? x : -x);
 #include "f2c.h"
 
 #ifdef KR_headers
-double pow_di(ap, bp) doublereal *ap; integer *bp;
+HYPRE_Real pow_di(ap, bp) doublereal *ap; integer *bp;
 #else
-double pow_di(doublereal *ap, integer *bp)
+HYPRE_Real pow_di(doublereal *ap, integer *bp)
 #endif
 {
-double pow, x;
+HYPRE_Real pow, x;
 integer n;
 
 pow = 1;
@@ -82,12 +82,12 @@ return(pow);
 #include "f2c.h"
 
 #ifdef KR_headers
-double pow();
-double pow_dd(ap, bp) doublereal *ap, *bp;
+HYPRE_Real pow();
+HYPRE_Real pow_dd(ap, bp) doublereal *ap, *bp;
 #else
 #undef abs
 #include "math.h"
-double pow_dd(doublereal *ap, doublereal *bp)
+HYPRE_Real pow_dd(doublereal *ap, doublereal *bp)
 #endif
 {
 return(pow(*ap, *bp) );

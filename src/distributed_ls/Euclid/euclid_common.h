@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef COMMON_DH
@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <stdarg.h>
 
-#define REAL_DH double
+#define REAL_DH HYPRE_Real
 
 /*-----------------------------------------------------------------------
  * compile-time dependent includes from other libraries.

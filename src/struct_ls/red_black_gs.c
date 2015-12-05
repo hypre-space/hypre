@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -99,7 +99,7 @@ hypre_RedBlackGSSetup( void               *relax_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex(diag_index, 0, 0, 0);
+   hypre_SetIndex3(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
    /*----------------------------------------------------------
@@ -139,6 +139,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
    HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
+   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
    hypre_CommHandle      *comm_handle;
                         
@@ -155,10 +156,10 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              xi, xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
-   double                *Ap;
-   double                *Ap0, *Ap1, *Ap2, *Ap3, *Ap4, *Ap5;
-   double                *bp;
-   double                *xp;
+   HYPRE_Real            *Ap;
+   HYPRE_Real            *Ap0, *Ap1, *Ap2, *Ap3, *Ap4, *Ap5;
+   HYPRE_Real            *bp;
+   HYPRE_Real            *xp;
                         
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -279,6 +280,14 @@ hypre_RedBlackGS( void               *relax_vdata,
                Anj = hypre_BoxSizeY(A_dbox);
                bnj = hypre_BoxSizeY(b_dbox);
                xnj = hypre_BoxSizeY(x_dbox);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
@@ -367,6 +376,14 @@ hypre_RedBlackGS( void               *relax_vdata,
                Anj = hypre_BoxSizeY(A_dbox);
                bnj = hypre_BoxSizeY(b_dbox);
                xnj = hypre_BoxSizeY(x_dbox);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
                switch(stencil_size)
                {
@@ -498,7 +515,7 @@ hypre_RedBlackGS( void               *relax_vdata,
 
 HYPRE_Int
 hypre_RedBlackGSSetTol( void   *relax_vdata,
-                        double  tol )
+                        HYPRE_Real  tol )
 {
    hypre_RedBlackGSData *relax_data = relax_vdata;
 

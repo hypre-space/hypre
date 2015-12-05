@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
@@ -48,7 +45,7 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    HYPRE_Int              stencil_size;
    HYPRE_Int              abs_stencil;
 
-   HYPRE_Int              ndim= hypre_StructStencilDim(stencils);
+   HYPRE_Int              ndim= hypre_StructStencilNDim(stencils);
    HYPRE_Int              i, j;
     
    hypre_ClearIndex(zero_index);
@@ -60,8 +57,8 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
 
    stencil_size       = hypre_StructStencilSize(stencils);
-   stencil_box_extents= hypre_BoxArrayCreate(stencil_size);
-   union_boxes        = hypre_BoxArrayCreate(0);
+   stencil_box_extents= hypre_BoxArrayCreate(stencil_size, ndim);
+   union_boxes        = hypre_BoxArrayCreate(0, ndim);
 
    for (i= 0; i< stencil_size; i++)
    {
@@ -146,7 +143,7 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    HYPRE_Int              stencil_size;
    HYPRE_Int              abs_stencil;
 
-   HYPRE_Int              ndim= hypre_StructStencilDim(stencils);
+   HYPRE_Int              ndim= hypre_StructStencilNDim(stencils);
 
    HYPRE_Int              i;
    HYPRE_Int              ierr= 0;
@@ -159,8 +156,8 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    }
 
    stencil_size       = hypre_StructStencilSize(stencils);
-   stencil_box_extents= hypre_BoxArrayCreate(stencil_size);
-   union_boxes        = hypre_BoxArrayCreate(0);
+   stencil_box_extents= hypre_BoxArrayCreate(stencil_size, ndim);
+   union_boxes        = hypre_BoxArrayCreate(0, ndim);
 
    for (i= 0; i< stencil_size; i++)
    {

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -139,7 +139,7 @@ hypre_FACDestroy2(void *fac_vdata)
 
 HYPRE_Int
 hypre_FACSetTol( void   *fac_vdata,
-                 double  tol       )
+                 HYPRE_Real  tol       )
 {
    hypre_FACData *fac_data = fac_vdata;
    HYPRE_Int          ierr = 0;
@@ -181,7 +181,7 @@ hypre_FACSetPLevels( void *fac_vdata,
 HYPRE_Int
 hypre_FACSetPRefinements( void         *fac_vdata,
                           HYPRE_Int     nparts,
-                          HYPRE_Int   (*prefinements)[3] )
+                          hypre_Index  *prefinements )
 {
    hypre_FACData *fac_data   = fac_vdata;
    hypre_Index   *fac_prefinements;
@@ -284,7 +284,7 @@ hypre_FACSetRelaxType( void *fac_vdata,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_FACSetJacobiWeight( void  *fac_vdata,
-                          double weight )
+                          HYPRE_Real weight )
 {
    hypre_FACData *fac_data = fac_vdata;
                                                                                                                                             
@@ -387,8 +387,8 @@ hypre_FACPrintLogging( void *fac_vdata,
    HYPRE_Int          i;
    HYPRE_Int          num_iterations  = (fac_data -> num_iterations);
    HYPRE_Int          logging   = (fac_data -> logging);
-   double            *norms     = (fac_data -> norms);
-   double            *rel_norms = (fac_data -> rel_norms);
+   HYPRE_Real        *norms     = (fac_data -> norms);
+   HYPRE_Real        *rel_norms = (fac_data -> rel_norms);
 
    if (myid == 0)
    {
@@ -411,14 +411,14 @@ hypre_FACPrintLogging( void *fac_vdata,
 
 HYPRE_Int
 hypre_FACGetFinalRelativeResidualNorm( void   *fac_vdata,
-                                       double *relative_residual_norm )
+                                       HYPRE_Real *relative_residual_norm )
 {
    hypre_FACData *fac_data = fac_vdata;
 
    HYPRE_Int          max_iter        = (fac_data -> max_cycles);
    HYPRE_Int          num_iterations  = (fac_data -> num_iterations);
    HYPRE_Int          logging         = (fac_data -> logging);
-   double            *rel_norms       = (fac_data -> rel_norms);
+   HYPRE_Real        *rel_norms       = (fac_data -> rel_norms);
 
    HYPRE_Int          ierr = 0;
 

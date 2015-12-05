@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -20,29 +18,8 @@
 
 #include "_hypre_utilities.h"
 
-#ifdef HYPRE_USE_PTHREADS
-#include "threading.h"
-
-#ifdef HYPRE_USE_UMALLOC
-#include "umalloc_local.h"
-
-#define _umalloc_(size) (threadid == hypre_NumThreads) ? \
-                        (char *) malloc(size) : \
-                        (char *) _umalloc(_uparam[threadid].myheap, size)
-#define _ucalloc_(count, size) (threadid == hypre_NumThreads) ? \
-                               (char *) calloc(count, size) : \
-                               (char *) _ucalloc(_uparam[threadid].myheap,\
-                                                 count, size)
-#define _urealloc_(ptr, size) (threadid == hypre_NumThreads) ? \
-                              (char *) realloc(ptr, size) : \
-                              (char *) _urealloc(ptr, size)
-#define _ufree_(ptr)          (threadid == hypre_NumThreads) ? \
-                              free(ptr) : _ufree(ptr)
-#endif
-#else
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
-#endif
 #endif
 
 /******************************************************************************
@@ -197,128 +174,3 @@ hypre_Free( char *ptr )
 #endif
    }
 }
-
-
-/*--------------------------------------------------------------------------
- * These Shared routines are for one thread to allocate memory for data
- * will be visible to all threads.  The file-scope pointer
- * global_alloc_ptr is used in these routines.
- *--------------------------------------------------------------------------*/
-
-#ifdef HYPRE_USE_PTHREADS
-
-char *global_alloc_ptr;
-double *global_data_ptr;
-
-/*--------------------------------------------------------------------------
- * hypre_SharedMAlloc
- *--------------------------------------------------------------------------*/
-
-char *
-hypre_SharedMAlloc( size_t size )
-{
-   char *ptr;
-   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
-   HYPRE_Int I_call_malloc = unthreaded ||
-                       pthread_equal(hypre_thread[0],pthread_self());
-
-   if (I_call_malloc) {
-      global_alloc_ptr = hypre_MAlloc( size );
-   }
-
-   hypre_barrier(&talloc_mtx, unthreaded);
-   ptr = global_alloc_ptr;
-   hypre_barrier(&talloc_mtx, unthreaded);
-
-   return ptr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SharedCAlloc
- *--------------------------------------------------------------------------*/
-
-char *
-hypre_SharedCAlloc( size_t count,
-                    size_t elt_size )
-{
-   char *ptr;
-   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
-   HYPRE_Int I_call_calloc = unthreaded ||
-                       pthread_equal(hypre_thread[0],pthread_self());
-
-   if (I_call_calloc) {
-      global_alloc_ptr = hypre_CAlloc( count, elt_size );
-   }
-
-   hypre_barrier(&talloc_mtx, unthreaded);
-   ptr = global_alloc_ptr;
-   hypre_barrier(&talloc_mtx, unthreaded);
-
-   return ptr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SharedReAlloc
- *--------------------------------------------------------------------------*/
-
-char *
-hypre_SharedReAlloc( char   *ptr,
-                     size_t  size )
-{
-   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
-   HYPRE_Int I_call_realloc = unthreaded ||
-                       pthread_equal(hypre_thread[0],pthread_self());
-
-   if (I_call_realloc) {
-      global_alloc_ptr = hypre_ReAlloc( ptr, size );
-   }
-
-   hypre_barrier(&talloc_mtx, unthreaded);
-   ptr = global_alloc_ptr;
-   hypre_barrier(&talloc_mtx, unthreaded);
-
-   return ptr;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SharedFree
- *--------------------------------------------------------------------------*/
-
-void
-hypre_SharedFree( char *ptr )
-{
-   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
-   HYPRE_Int I_call_free = unthreaded ||
-                     pthread_equal(hypre_thread[0],pthread_self());
-
-   hypre_barrier(&talloc_mtx, unthreaded);
-   if (I_call_free) {
-      hypre_Free(ptr);
-   }
-   hypre_barrier(&talloc_mtx, unthreaded);
-}
-
-/*--------------------------------------------------------------------------
- * hypre_IncrementSharedDataPtr
- *--------------------------------------------------------------------------*/
-
-double *
-hypre_IncrementSharedDataPtr( double *ptr, size_t size )
-{
-   HYPRE_Int unthreaded = pthread_equal(initial_thread, pthread_self());
-   HYPRE_Int I_increment = unthreaded ||
-                     pthread_equal(hypre_thread[0],pthread_self());
-
-   if (I_increment) {
-      global_data_ptr = ptr + size;
-   }
-
-   hypre_barrier(&talloc_mtx, unthreaded);
-   ptr = global_data_ptr;
-   hypre_barrier(&talloc_mtx, unthreaded);
-
-   return ptr;
-}
-
-#endif
-

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -16,20 +16,21 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SMGAxpy( double              alpha,
+hypre_SMGAxpy( HYPRE_Real          alpha,
                hypre_StructVector *x,
                hypre_StructVector *y,
                hypre_Index         base_index,
                hypre_Index         base_stride )
 {
+   HYPRE_Int         ndim = hypre_StructVectorNDim(x);
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
                  
    HYPRE_Int         xi;
    HYPRE_Int         yi;
                     
-   double           *xp;
-   double           *yp;
+   HYPRE_Real       *xp;
+   HYPRE_Real       *yp;
                     
    hypre_BoxArray   *boxes;
    hypre_Box        *box;
@@ -38,7 +39,7 @@ hypre_SMGAxpy( double              alpha,
                     
    HYPRE_Int         i;
 
-   box = hypre_BoxCreate();
+   box = hypre_BoxCreate(ndim);
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
@@ -53,7 +54,7 @@ hypre_SMGAxpy( double              alpha,
       yp = hypre_StructVectorBoxData(y, i);
 
       hypre_BoxGetStrideSize(box, base_stride, loop_size);
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, base_stride, xi,
                           y_data_box, start, base_stride, yi);
 #ifdef HYPRE_USING_OPENMP

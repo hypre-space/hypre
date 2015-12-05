@@ -7,7 +7,7 @@ dnl # HYPRE is free software; you can redistribute it and/or modify it under the
 dnl # terms of the GNU Lesser General Public License (as published by the Free
 dnl # Software Foundation) version 2.1 dated February 1999.
 dnl #
-dnl # $Revision: 1.29 $
+dnl # $Revision$
 dnl #EHEADER**********************************************************************
 
 dnl **********************************************************************
@@ -410,7 +410,7 @@ AC_DEFUN([AC_HYPRE_SET_ARCH],
             AC_MSG_RESULT($HYPRE_ARCH)
          fi
       else
-         HYPRE_ARCH = $ARCH
+         HYPRE_ARCH=$ARCH
          AC_MSG_RESULT($HYPRE_ARCH)
       fi
 

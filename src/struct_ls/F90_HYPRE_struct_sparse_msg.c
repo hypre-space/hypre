@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -90,13 +90,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsolve, HYPRE_STRUCTSPARSEMSGSOLVE)
 void
 hypre_F90_IFACE(hypre_structsparsemsgsettol, HYPRE_STRUCTSPARSEMSGSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructSparseMSGSetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (tol) ) );
+           hypre_F90_PassReal (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -197,13 +197,13 @@ hypre_F90_IFACE(hypre_structsparsemsgsetrelaxty, HYPRE_STRUCTSPARSEMSGSETRELAXTY
 void
 hypre_F90_IFACE(hypre_structsparsemsgsetjacobiweigh, HYPRE_STRUCTSPARSEMSGSETJACOBIWEIGH)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *weight,
+    hypre_F90_Real *weight,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_StructSparseMSGSetJacobiWeight(
           hypre_F90_PassObj (HYPRE_StructSolver, solver),
-          hypre_F90_PassDbl (weight) ) );
+          hypre_F90_PassReal (weight) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -309,11 +309,11 @@ hypre_F90_IFACE(hypre_structsparsemsggetnumiter, HYPRE_STRUCTSPARSEMSGGETNUMITER
 void
 hypre_F90_IFACE(hypre_structsparsemsggetfinalre, HYPRE_STRUCTSPARSEMSGGETFINALRE)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (norm) ) );
+           hypre_F90_PassRealRef (norm) ) );
 }

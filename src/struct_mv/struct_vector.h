@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -31,7 +31,7 @@ typedef struct hypre_StructVector_struct
 
    hypre_BoxArray       *data_space;
 
-   double               *data;         /* Pointer to vector data */
+   HYPRE_Complex        *data;         /* Pointer to vector data */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of vector data */
    HYPRE_Int            *data_indices; /* num-boxes array of indices into
@@ -39,7 +39,8 @@ typedef struct hypre_StructVector_struct
                                           is the starting index of vector
                                           data corresponding to box b. */
                       
-   HYPRE_Int             num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
+                                                     * direction */
    HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
    HYPRE_Int             global_size;  /* Total number coefficients */
@@ -64,8 +65,8 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
-#define hypre_StructVectorDim(vector) \
-hypre_StructGridDim(hypre_StructVectorGrid(vector))
+#define hypre_StructVectorNDim(vector) \
+hypre_StructGridNDim(hypre_StructVectorGrid(vector))
 
 #define hypre_StructVectorBox(vector, b) \
 hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)

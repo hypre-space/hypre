@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.57 $
+ * $Revision$
  *********************************************************************EHEADER*/
 
 //***************************************************************************
@@ -36,7 +36,6 @@
 
 //#define HAVE_SYSPDE 
 
-//#define HAVE_DSUPERLU 
 #include "dsuperlu_include.h"
 
 //---------------------------------------------------------------------------
@@ -4296,16 +4295,48 @@ void HYPRE_LinSysCore::setupPreconAMS()
       HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
       HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
 
-      HYPRE_AMSFEISetup(HYPrecon_,
-			A_csr,
-			b_csr,
-			x_csr,
-			AMSData_.EdgeNodeList_,
-			AMSData_.NodeNumbers_,
-			AMSData_.numEdges_,
-			AMSData_.numLocalNodes_,
-			AMSData_.numNodes_,
-			AMSData_.NodalCoord_);
+      if( amsG_ == NULL )  {
+
+        //Old way of doing things
+        //only works for 1 domain per processor (in ALE3D)
+        //not compatible with contact
+        HYPRE_AMSFEISetup(HYPrecon_,
+                          A_csr,
+                          b_csr,
+                          x_csr,
+                          AMSData_.EdgeNodeList_,
+                          AMSData_.NodeNumbers_,
+                          AMSData_.numEdges_,
+                          AMSData_.numLocalNodes_,
+                          AMSData_.numNodes_,
+                          AMSData_.NodalCoord_);
+      } else {
+        //New Code//
+        HYPRE_ParCSRMatrix G_csr;
+        HYPRE_ParVector X_csr;
+        HYPRE_ParVector Y_csr;
+        HYPRE_ParVector Z_csr;
+        HYPRE_IJMatrixGetObject(amsG_, (void **) &G_csr);
+        HYPRE_IJVectorGetObject(amsX_, (void **) &X_csr);
+        HYPRE_IJVectorGetObject(amsY_, (void **) &Y_csr);
+        HYPRE_IJVectorGetObject(amsZ_, (void **) &Z_csr);
+        HYPRE_AMSSetCoordinateVectors(HYPrecon_,X_csr,Y_csr,Z_csr);
+        bool debugprint = false;
+        if( debugprint ) {
+          HYPRE_ParCSRMatrixPrint( G_csr, "G.parcsr" );
+          HYPRE_ParCSRMatrixPrint( A_csr, "A.parcsr" );
+          HYPRE_ParVectorPrint(    b_csr, "B.parvector" );
+          HYPRE_ParVectorPrint(    X_csr, "X.parvector" );
+          HYPRE_ParVectorPrint(    Y_csr, "Y.parvector" );
+          HYPRE_ParVectorPrint(    Z_csr, "Z.parvector" );
+        }
+        HYPRE_AMSSetDiscreteGradient(HYPrecon_,G_csr);
+      }
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+        printf("AMSprecon: finished building auxiliary info, calling AMSSetup\n");
+      //int ierr = HYPRE_AMSSetup(HYPrecon_,A_csr,b_csr,x_csr);
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+        printf("AMSprecon: finished with AMSSetup\n");
    }
 
 }

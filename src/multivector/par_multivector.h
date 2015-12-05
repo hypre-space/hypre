@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
-
 
 /******************************************************************************
  *
@@ -79,32 +75,32 @@ HYPRE_Int hypre_ParMultiVectorInitialize(hypre_ParMultiVector *);
 HYPRE_Int hypre_ParMultiVectorSetDataOwner(hypre_ParMultiVector *, HYPRE_Int);
 HYPRE_Int hypre_ParMultiVectorSetPartitioningOwner(hypre_ParMultiVector *, HYPRE_Int);
 HYPRE_Int hypre_ParMultiVectorSetMask(hypre_ParMultiVector *, HYPRE_Int *);
-HYPRE_Int hypre_ParMultiVectorSetConstantValues(hypre_ParMultiVector *, double);
+HYPRE_Int hypre_ParMultiVectorSetConstantValues(hypre_ParMultiVector *, HYPRE_Complex);
 HYPRE_Int hypre_ParMultiVectorSetRandomValues(hypre_ParMultiVector *, HYPRE_Int);
 HYPRE_Int hypre_ParMultiVectorCopy(hypre_ParMultiVector *, hypre_ParMultiVector *);
-HYPRE_Int hypre_ParMultiVectorScale(double, hypre_ParMultiVector *);
-HYPRE_Int hypre_ParMultiVectorMultiScale(double *, hypre_ParMultiVector *);
-HYPRE_Int hypre_ParMultiVectorAxpy(double, hypre_ParMultiVector *,
+HYPRE_Int hypre_ParMultiVectorScale(HYPRE_Complex, hypre_ParMultiVector *);
+HYPRE_Int hypre_ParMultiVectorMultiScale(HYPRE_Complex *, hypre_ParMultiVector *);
+HYPRE_Int hypre_ParMultiVectorAxpy(HYPRE_Complex, hypre_ParMultiVector *,
                              hypre_ParMultiVector *);
 
 HYPRE_Int hypre_ParMultiVectorByDiag(  hypre_ParMultiVector *x,
                                  HYPRE_Int                *mask, 
                                  HYPRE_Int                n,
-                                 double             *alpha,
+                                 HYPRE_Complex      *alpha,
                                  hypre_ParMultiVector *y);
                                  
 HYPRE_Int hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *, 
-                                      hypre_ParMultiVector *, double *, double *);
+                                      hypre_ParMultiVector *, HYPRE_Real *, HYPRE_Real *);
 HYPRE_Int hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *, 
-                                      hypre_ParMultiVector *, double *, double *);
+                                      hypre_ParMultiVector *, HYPRE_Real *, HYPRE_Real *);
 HYPRE_Int
 hypre_ParMultiVectorCopyWithoutMask(hypre_ParMultiVector *x, hypre_ParMultiVector *y);
 HYPRE_Int
 hypre_ParMultiVectorByMatrix(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-                              HYPRE_Int rWidth, double* rVal, hypre_ParMultiVector * y);
+                              HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y);
 HYPRE_Int
 hypre_ParMultiVectorXapy(hypre_ParMultiVector *x, HYPRE_Int rGHeight, HYPRE_Int rHeight, 
-                              HYPRE_Int rWidth, double* rVal, hypre_ParMultiVector * y);
+                              HYPRE_Int rWidth, HYPRE_Complex* rVal, hypre_ParMultiVector * y);
                                       
 HYPRE_Int
 hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,

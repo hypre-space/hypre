@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -25,7 +25,7 @@
  * George
  *
  * 7/8
- *  - change to generic HYPRE_Int and double (in all files) and verified
+ *  - change to generic HYPRE_Int and HYPRE_Real (in all files) and verified
  *  - added rrowlen to rmat and verified
  * 7/9
  *  - add recv info to the LDU communication struct TriSolveCommType
@@ -35,7 +35,7 @@
  *    This is under the assumption that that is the most likely order
  *    for things to be natural word length, so reduces padding.
  *
- * $Id: struct.h,v 2.5 2010/12/20 19:27:34 falgout Exp $
+ * $Id$
  */
 
 #ifndef true
@@ -71,7 +71,7 @@ typedef struct distdef DataDistType;
 * the triangular solvers.
 **************************************************************************/
 struct cphasedef {
-  double **raddr;	/* A rnbrpes+1 list of addresses to recv data into */
+  HYPRE_Real **raddr;	/* A rnbrpes+1 list of addresses to recv data into */
 
   HYPRE_Int *spes;	/* A snbrpes    list of PEs to send data */
   HYPRE_Int *sptr;	/* An snbrpes+1 list indexing sindex for each spes[i] */
@@ -96,27 +96,27 @@ struct factormatdef {
   HYPRE_Int *lsrowptr;	/* Pointers to the locally stored rows start */
   HYPRE_Int *lerowptr;	/* Pointers to the locally stored rows end */
   HYPRE_Int *lcolind;	/* Array of column indices of lnrows */
-   double *lvalues;	/* Array of locally stored values */
+   HYPRE_Real *lvalues;	/* Array of locally stored values */
   HYPRE_Int *lrowptr;
 
   HYPRE_Int *usrowptr;	/* Pointers to the locally stored rows start */
   HYPRE_Int *uerowptr;	/* Pointers to the locally stored rows end */
   HYPRE_Int *ucolind;	/* Array of column indices of lnrows */
-   double *uvalues;	/* Array of locally stored values */
+   HYPRE_Real *uvalues;	/* Array of locally stored values */
   HYPRE_Int *urowptr;
 
-  double *dvalues;	/* Diagonal values */
+  HYPRE_Real *dvalues;	/* Diagonal values */
 
-  double *nrm2s;	/* Array of the 2-norms of the rows for tolerance testing */
+  HYPRE_Real *nrm2s;	/* Array of the 2-norms of the rows for tolerance testing */
 
   HYPRE_Int *perm;		/* perm and invperm arrays for factorization */
   HYPRE_Int *iperm;
 
   /* Communication info for triangular system solution */
-  double *gatherbuf;            /* maxsend*snbrpes buffer for sends */
+  HYPRE_Real *gatherbuf;            /* maxsend*snbrpes buffer for sends */
 
-  double *lx;
-  double *ux;
+  HYPRE_Real *lx;
+  HYPRE_Real *ux;
   HYPRE_Int lxlen, uxlen;
 
   HYPRE_Int nlevels;			/* The number of reductions performed */
@@ -136,7 +136,7 @@ struct reducematdef {
   HYPRE_Int *rmat_rnz;		/* Pointers to the locally stored rows */
   HYPRE_Int *rmat_rrowlen;	/* Length allocated for each row */
   HYPRE_Int **rmat_rcolind;	/* Array of column indices of lnrows */
-   double **rmat_rvalues;	/* Array of locally stored values */
+   HYPRE_Real **rmat_rvalues;	/* Array of locally stored values */
 
   HYPRE_Int rmat_ndone;	     /* The number of vertices factored so far */
   HYPRE_Int rmat_ntogo;  /* The number of vertices not factored. This is the size of rmat */
@@ -152,10 +152,10 @@ typedef struct reducematdef ReduceMatType;
 * of parallel hypre_ILUT
 **************************************************************************/
 struct comminfodef {
-  double *gatherbuf;	/* Assembly buffer for sending colind & values */
+  HYPRE_Real *gatherbuf;	/* Assembly buffer for sending colind & values */
 
   HYPRE_Int *incolind;	/* Receive buffer for colind */
-   double *invalues;	/* Receive buffer for values */
+   HYPRE_Real *invalues;	/* Receive buffer for values */
 
   HYPRE_Int *rnbrind;	/* The neighbor processors */
   HYPRE_Int *rrowind;	/* The indices that are received */
@@ -185,10 +185,10 @@ struct mvcommdef {
   HYPRE_Int *sindex;	/* Array that stores the actual indices */
 
   HYPRE_Int *rpes;
-  double **raddr;
+  HYPRE_Real **raddr;
 
-  double *bsec;		/* Stores the actual b vector */
-  double *gatherbuf;	/* Used to gather the outgoing packets */
+  HYPRE_Real *bsec;		/* Stores the actual b vector */
+  HYPRE_Real *gatherbuf;	/* Used to gather the outgoing packets */
   HYPRE_Int *perm;	/* Used to map the LIND back to GIND */
 
   HYPRE_Int snpes;		/* Number of send PE's */

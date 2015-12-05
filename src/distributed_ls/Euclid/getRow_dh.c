@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -23,7 +23,7 @@
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (HYPRE_GET_ROW)"
-void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   HYPRE_Int ierr;
@@ -38,7 +38,7 @@ void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, doubl
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (HYPRE_GET_ROW)"
-void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   HYPRE_Int ierr;
@@ -103,7 +103,7 @@ HYPRE_Int EuclidReadLocalNz(void *A)
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (PETSC_GET_ROW)"
-void EuclidGetRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidGetRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   Mat A = Ain;
@@ -120,7 +120,7 @@ void EuclidGetRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, dou
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (PETSC_GET_ROW)"
-void EuclidRestoreRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidRestoreRow(void *Ain, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   Mat A = (Mat)Ain;
@@ -187,7 +187,7 @@ HYPRE_Int EuclidReadLocalNz(void *Ain)
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (EUCLID_GET_ROW)"
-void EuclidGetRow(void *A, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidGetRow(void *A, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   Mat_dh B = (Mat_dh)A;  
@@ -205,7 +205,7 @@ void EuclidGetRow(void *A, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind,
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (EUCLID_GET_ROW)"
-void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   END_FUNC_DH
@@ -240,7 +240,7 @@ HYPRE_Int EuclidReadLocalNz(void *A)
 
 #undef __FUNC__
 #define __FUNC__ "EuclidGetRow (ERROR)"
-void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   SET_ERROR(EUCLID_ERROR, "Oops; missing XXX_GET_ROW definition!");
@@ -249,7 +249,7 @@ void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, doubl
 
 #undef __FUNC__
 #define __FUNC__ "EuclidRestoreRow (ERROR)"
-void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   SET_ERROR(EUCLID_ERROR, "Oops; missing XXX_GET_ROW definition!");
@@ -291,7 +291,7 @@ void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
   FILE *fp;
   HYPRE_Int *o2n_col = NULL, pe, i, j, *cval, len;
   HYPRE_Int newCol, newRow;
-  double *aval;
+  HYPRE_Real *aval;
 
   /* form inverse column permutation */
   if (n2o_col != NULL) {

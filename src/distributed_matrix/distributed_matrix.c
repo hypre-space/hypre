@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -297,7 +297,7 @@ hypre_DistributedMatrixGetRow( hypre_DistributedMatrix *matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;
 
@@ -333,7 +333,7 @@ hypre_DistributedMatrixRestoreRow( hypre_DistributedMatrix *matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    HYPRE_Int ierr = 0;
 

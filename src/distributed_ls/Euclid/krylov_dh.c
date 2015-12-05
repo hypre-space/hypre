@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -19,16 +19,16 @@
 
 #undef __FUNC__
 #define __FUNC__ "bicgstab_euclid"
-void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *itsOUT)
+void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int *itsOUT)
 {
   START_FUNC_DH
   HYPRE_Int its, m = ctx->m;
   bool monitor;
   HYPRE_Int maxIts = ctx->maxIts;
-  double atol = ctx->atol, rtol = ctx->rtol;
+  HYPRE_Real atol = ctx->atol, rtol = ctx->rtol;
 
   /* scalars */
-  double alpha, alpha_1,
+  HYPRE_Real alpha, alpha_1,
          beta_1,
          widget, widget_1,
          rho_1, rho_2,
@@ -36,19 +36,19 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *i
          exit_a, b_iprod, r_iprod;
 
   /* vectors */
-  double *t, *s, *s_hat, *v, *p, *p_hat, *r, *r_hat;
+  HYPRE_Real *t, *s, *s_hat, *v, *p, *p_hat, *r, *r_hat;
 
   monitor = Parser_dhHasSwitch(parser_dh, "-monitor");
 
   /* allocate working space */
-  t = (double*)MALLOC_DH(m*sizeof(double));
-  s = (double*)MALLOC_DH(m*sizeof(double));
-  s_hat = (double*)MALLOC_DH(m*sizeof(double));
-  v = (double*)MALLOC_DH(m*sizeof(double));
-  p = (double*)MALLOC_DH(m*sizeof(double));
-  p_hat = (double*)MALLOC_DH(m*sizeof(double));
-  r = (double*)MALLOC_DH(m*sizeof(double));
-  r_hat = (double*)MALLOC_DH(m*sizeof(double));
+  t = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  s = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  s_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  v = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  p = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  p_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  r = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
+  r_hat = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real));
 
   /* r = b - Ax */
   Mat_dhMatVec(A, x, s); /* s = Ax */
@@ -87,7 +87,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *i
     Mat_dhMatVec(A, p_hat, v); CHECK_V_ERROR;
 
     /* alpha_i = rho_(i-1) / (r_hat^T . v_i ) */
-    { double tmp = InnerProd(m, r_hat, v); CHECK_V_ERROR;
+    { HYPRE_Real tmp = InnerProd(m, r_hat, v); CHECK_V_ERROR;
       alpha = rho_1/tmp;
     }
 
@@ -112,7 +112,7 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *i
     Mat_dhMatVec(A, s_hat, t); CHECK_V_ERROR;
 
     /* w_i = (t . s)/(t . t) */
-    { double tmp1, tmp2;
+    { HYPRE_Real tmp1, tmp2;
       tmp1 = InnerProd(m, t, s); CHECK_V_ERROR;
       tmp2 = InnerProd(m, t, t); CHECK_V_ERROR;
       widget = tmp1/tmp2;
@@ -166,16 +166,16 @@ void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *i
 
 #undef __FUNC__
 #define __FUNC__ "cg_euclid"
-void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *itsOUT)
+void cg_euclid(Mat_dh A, Euclid_dh ctx, HYPRE_Real *x, HYPRE_Real *b, HYPRE_Int *itsOUT)
 {
   START_FUNC_DH
   HYPRE_Int its, m = A->m;
-  double *p, *r, *s;
-  double alpha, beta, gamma, gamma_old, eps, bi_prod, i_prod;
+  HYPRE_Real *p, *r, *s;
+  HYPRE_Real alpha, beta, gamma, gamma_old, eps, bi_prod, i_prod;
   bool monitor;
   HYPRE_Int maxIts = ctx->maxIts;
-  /* double atol = ctx->atol */
-  double  rtol = ctx->rtol;
+  /* HYPRE_Real atol = ctx->atol */
+  HYPRE_Real  rtol = ctx->rtol;
 
   monitor = Parser_dhHasSwitch(parser_dh, "-monitor");
 
@@ -184,9 +184,9 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *itsOUT)
   bi_prod = InnerProd(m, b, b); CHECK_V_ERROR;
   eps = (rtol*rtol)*bi_prod;
 
-  p = (double *) MALLOC_DH(m * sizeof(double));
-  s = (double *) MALLOC_DH(m * sizeof(double));
-  r = (double *) MALLOC_DH(m * sizeof(double));
+  p = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
+  s = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
+  r = (HYPRE_Real *) MALLOC_DH(m * sizeof(HYPRE_Real));
 
   /* r = b - Ax */
   Mat_dhMatVec(A, x, r);       /* r = Ax */ CHECK_V_ERROR;
@@ -207,7 +207,7 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, HYPRE_Int *itsOUT)
     Mat_dhMatVec(A, p, s);  CHECK_V_ERROR;
 
     /* alpha = gamma / <s,p> */
-    { double tmp = InnerProd(m, s, p); CHECK_V_ERROR;
+    { HYPRE_Real tmp = InnerProd(m, s, p); CHECK_V_ERROR;
       alpha = gamma / tmp;
       gamma_old = gamma;
     }

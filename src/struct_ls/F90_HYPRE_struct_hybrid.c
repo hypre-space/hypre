@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -90,13 +90,13 @@ hypre_F90_IFACE(hypre_structhybridsolve, HYPRE_STRUCTHYBRIDSOLVE)
 void
 hypre_F90_IFACE(hypre_structhybridsettol, HYPRE_STRUCTHYBRIDSETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructHybridSetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (tol)    ) );
+           hypre_F90_PassReal (tol)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -106,13 +106,13 @@ hypre_F90_IFACE(hypre_structhybridsettol, HYPRE_STRUCTHYBRIDSETTOL)
 void
 hypre_F90_IFACE(hypre_structhybridsetconvergenc, HYPRE_STRUCTHYBRIDSETCONVERGENC)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *cf_tol,
+     hypre_F90_Real *cf_tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructHybridSetConvergenceTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (cf_tol)  ) );
+           hypre_F90_PassReal (cf_tol)  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -155,13 +155,13 @@ hypre_F90_IFACE(hypre_structhybridsetpcgmaxiter, HYPRE_STRUCTHYBRIDSETPCGMAXITER
 void
 hypre_F90_IFACE(hypre_structhybridsetpcgabsolut, HYPRE_STRUCTHYBRIDSETPCGABSOLUT)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *pcg_atolf,
+     hypre_F90_Real *pcg_atolf,
      hypre_F90_Int *ierr        )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructHybridSetPCGAbsoluteTolFactor(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (pcg_atolf) ) );
+           hypre_F90_PassReal (pcg_atolf) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -372,11 +372,11 @@ hypre_F90_IFACE(hypre_structhybridgetpcgnumiter, HYPRE_STRUCTHYBRIDGETPCGNUMITER
 void
 hypre_F90_IFACE(hypre_structhybridgetfinalrelat, HYPRE_STRUCTHYBRIDGETFINALRELAT)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructHybridGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (norm)    ) );
+           hypre_F90_PassRealRef (norm)    ) );
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -173,13 +173,13 @@ hypre_F90_IFACE(hypre_schwarzsetnumfunctions, HYPRE_SCHWARZSETNUMFUNCTIONS)
 void
 hypre_F90_IFACE(hypre_schwarzsetrelaxweight, HYPRE_SCHWARZSETRELAXWEIGHT)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *relax_weight,
+    hypre_F90_Real *relax_weight,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       (HYPRE_SchwarzSetRelaxWeight(
           hypre_F90_PassObj (HYPRE_Solver, solver),
-          hypre_F90_PassDbl (relax_weight)));
+          hypre_F90_PassReal (relax_weight)));
 }
 
 /*--------------------------------------------------------------------------

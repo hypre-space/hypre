@@ -67,19 +67,27 @@ LFLAGS90 =
 ########################################################################
 ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f \
            ex13 ex14 ex15 ex16
-64BITPROGS = ex5big ex15big
+BIGINTPROGS = ex5big ex15big
 BABELPROGS = ex5b ex5b77 ex5bxx ex6b ex6b77
 # ... ex5bp and ex5b90 are not in BABELPROGS because they require a
 # software environment which many people haven't set up.
 FORTRANPROGS = ex5f ex12f
+MAXDIMPROGS = ex17 ex18
+COMPLEXPROGS = ex18comp
 
 all: $(ALLPROGS)
 
-64bit: $(64BITPROGS)
+default: all
+
+bigint: $(BIGINTPROGS)
 
 babel: $(BABELPROGS)
 
 fortran: $(FORTRANPROGS)
+
+maxdim: $(MAXDIMPROGS)
+
+complex: $(COMPLEXPROGS)
 
 ########################################################################
 # Example 1
@@ -238,17 +246,39 @@ ex16: ex16.o
 	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
+# Example 17
+########################################################################
+ex17: ex17.o
+	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
+# Example 18
+########################################################################
+ex18: ex18.o
+	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
+# Example 18 (complex)
+########################################################################
+ex18comp: ex18comp.o
+	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
 # Clean up
 ########################################################################
 clean:
 	rm -f $(ALLPROGS:=.o)
-	rm -f $(64BITPROGS:=.o)
+	rm -f $(BIGINTPROGS:=.o)
 	rm -f $(BABELPROGS:=.o)
 	rm -f $(FORTRANPROGS:=.o)
+	rm -f $(MAXDIMPROGS:=.o)
+	rm -f $(COMPLEXPROGS:=.o)
 	cd vis; make clean
 distclean: clean
 	rm -f $(ALLPROGS) $(ALLPROGS:=*~)
-	rm -f $(64BITPROGS) $(64BITPROGS:=*~)
+	rm -f $(BIGINTPROGS) $(BIGINTPROGS:=*~)
 	rm -f $(BABELPROGS) $(BABELPROGS:=*~)
 	rm -f $(FORTRANLPROGS) $(FORTRANPROGS:=*~)
+	rm -f $(MAXDIMPROGS) $(MAXDIMPROGS:=*~)
+	rm -f $(COMPLEXPROGS) $(COMPLEXPROGS:=*~)
 	rm -rf $(BABELPROGS:=*-pp.f90)

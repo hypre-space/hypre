@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -30,14 +30,14 @@ typedef struct
 {
    MPI_Comm              comm;
                       
-   double                tol;
+   HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
    HYPRE_Int             jump;
 
    HYPRE_Int             relax_type;     /* type of relaxation to use */
-   double                jacobi_weight;  /* weighted jacobi weight */
+   HYPRE_Real            jacobi_weight;  /* weighted jacobi weight */
    HYPRE_Int             usr_jacobi_weight; /* indicator flag for user weight */
 
    HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
@@ -53,7 +53,7 @@ typedef struct
    hypre_StructGrid    **Py_grid_array;
    hypre_StructGrid    **Pz_grid_array;
 
-   double               *data;
+   HYPRE_Real           *data;
    hypre_StructMatrix  **A_array;
    hypre_StructMatrix  **Px_array;
    hypre_StructMatrix  **Py_array;
@@ -90,8 +90,8 @@ typedef struct
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
-   double               *norms;
-   double               *rel_norms;
+   HYPRE_Real           *norms;
+   HYPRE_Real           *rel_norms;
 
 } hypre_SparseMSGData;
 

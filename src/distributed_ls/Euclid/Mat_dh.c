@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -230,7 +230,7 @@ void setup_matvec_receives_private(Mat_dh mat, HYPRE_Int *beg_rows, HYPRE_Int *e
 
   /* Allocate recvbuf */
   /* recvbuf has numlocal entries saved for local part of x, used in matvec */
-  mat->recvbuf = (double*)MALLOC_DH((reqlen+m) * sizeof(double));
+  mat->recvbuf = (HYPRE_Real*)MALLOC_DH((reqlen+m) * sizeof(HYPRE_Real));
 
   for (i=0; i<reqlen; i=j) { /* j is set below */ 
     /* The processor that owns the row with index reqind[i] */
@@ -278,7 +278,7 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
   sendlen = 0;
   for (i=0; i<np_dh; i++) sendlen += inlist[i];
   mat->sendlen = sendlen;
-  mat->sendbuf = (double *)MALLOC_DH(sendlen * sizeof(double)); CHECK_V_ERROR;
+  mat->sendbuf = (HYPRE_Real *)MALLOC_DH(sendlen * sizeof(HYPRE_Real)); CHECK_V_ERROR;
   mat->sendind = (HYPRE_Int *)MALLOC_DH(sendlen * sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   j = 0;
@@ -315,7 +315,7 @@ void setup_matvec_sends_private(Mat_dh mat, HYPRE_Int *inlist)
 /* unthreaded MPI version */
 #undef __FUNC__
 #define __FUNC__ "Mat_dhMatVec"
-void Mat_dhMatVec(Mat_dh mat, double *x, double *b)
+void Mat_dhMatVec(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   if (np_dh == 1) {
@@ -325,12 +325,12 @@ void Mat_dhMatVec(Mat_dh mat, double *x, double *b)
   else {
     HYPRE_Int    ierr, i, row, m = mat->m;
     HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
-    double *aval = mat->aval;
+    HYPRE_Real *aval = mat->aval;
     HYPRE_Int    *sendind = mat->sendind;
     HYPRE_Int    sendlen = mat->sendlen;
-    double *sendbuf = mat->sendbuf; 
-    double *recvbuf = mat->recvbuf;
-    double t1 = 0, t2 = 0, t3 = 0, t4 = 0;
+    HYPRE_Real *sendbuf = mat->sendbuf; 
+    HYPRE_Real *recvbuf = mat->recvbuf;
+    HYPRE_Real t1 = 0, t2 = 0, t3 = 0, t4 = 0;
     bool   timeFlag = mat->matvec_timing;
   
   
@@ -366,8 +366,8 @@ void Mat_dhMatVec(Mat_dh mat, double *x, double *b)
     for (row=0; row<m; row++) {
       HYPRE_Int len = rp[row+1] - rp[row];
       HYPRE_Int * ind = cval+rp[row];
-      double * val = aval+rp[row];
-      double temp = 0.0;
+      HYPRE_Real * val = aval+rp[row];
+      HYPRE_Real temp = 0.0;
       for (i=0; i<len; i++) {
         temp += (val[i] * recvbuf[ind[i]]);
       }
@@ -387,18 +387,18 @@ void Mat_dhMatVec(Mat_dh mat, double *x, double *b)
 /* OpenMP/MPI version */
 #undef __FUNC__
 #define __FUNC__ "Mat_dhMatVec_omp"
-void Mat_dhMatVec_omp(Mat_dh mat, double *x, double *b)
+void Mat_dhMatVec_omp(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   HYPRE_Int    ierr, i, row, m = mat->m;
   HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
-  double *aval = mat->aval;
+  HYPRE_Real *aval = mat->aval;
   HYPRE_Int    *sendind = mat->sendind;
   HYPRE_Int    sendlen = mat->sendlen;
-  double *sendbuf = mat->sendbuf; 
-  double *recvbuf = mat->recvbuf;
-  double t1 = 0, t2 = 0, t3 = 0, t4 = 0, tx = 0;
-  double *val, temp;
+  HYPRE_Real *sendbuf = mat->sendbuf; 
+  HYPRE_Real *recvbuf = mat->recvbuf;
+  HYPRE_Real t1 = 0, t2 = 0, t3 = 0, t4 = 0, tx = 0;
+  HYPRE_Real *val, temp;
   HYPRE_Int len, *ind;
   bool   timeFlag = mat->matvec_timing;
 
@@ -465,13 +465,13 @@ void Mat_dhMatVec_omp(Mat_dh mat, double *x, double *b)
 /* OpenMP/single primary task version */
 #undef __FUNC__
 #define __FUNC__ "Mat_dhMatVec_uni_omp"
-void Mat_dhMatVec_uni_omp(Mat_dh mat, double *x, double *b)
+void Mat_dhMatVec_uni_omp(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   HYPRE_Int    i, row, m = mat->m;
   HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
-  double *aval = mat->aval;
-  double t1 = 0, t2 = 0;
+  HYPRE_Real *aval = mat->aval;
+  HYPRE_Real t1 = 0, t2 = 0;
   bool   timeFlag = mat->matvec_timing;
 
   if (timeFlag) { t1 = hypre_MPI_Wtime(); }
@@ -483,8 +483,8 @@ void Mat_dhMatVec_uni_omp(Mat_dh mat, double *x, double *b)
   for (row=0; row<m; row++) {
     HYPRE_Int len = rp[row+1] - rp[row];
     HYPRE_Int * ind = cval+rp[row];
-    double * val = aval+rp[row];
-    double temp = 0.0;
+    HYPRE_Real * val = aval+rp[row];
+    HYPRE_Real temp = 0.0;
     for (i=0; i<len; i++) {
       temp += (val[i] * x[ind[i]]);
     }
@@ -504,13 +504,13 @@ void Mat_dhMatVec_uni_omp(Mat_dh mat, double *x, double *b)
 /* unthreaded, single-task version */
 #undef __FUNC__
 #define __FUNC__ "Mat_dhMatVec_uni"
-void Mat_dhMatVec_uni(Mat_dh mat, double *x, double *b)
+void Mat_dhMatVec_uni(Mat_dh mat, HYPRE_Real *x, HYPRE_Real *b)
 {
   START_FUNC_DH
   HYPRE_Int    i, row, m = mat->m;
   HYPRE_Int    *rp = mat->rp, *cval = mat->cval;
-  double *aval = mat->aval;
-  double t1 = 0, t2 = 0;
+  HYPRE_Real *aval = mat->aval;
+  HYPRE_Real t1 = 0, t2 = 0;
   bool   timeFlag = mat->matvec_timing;
 
   if (timeFlag) t1 = hypre_MPI_Wtime();
@@ -518,8 +518,8 @@ void Mat_dhMatVec_uni(Mat_dh mat, double *x, double *b)
   for (row=0; row<m; row++) {
     HYPRE_Int len = rp[row+1] - rp[row];
     HYPRE_Int * ind = cval+rp[row];
-    double * val = aval+rp[row];
-    double temp = 0.0;
+    HYPRE_Real * val = aval+rp[row];
+    HYPRE_Real temp = 0.0;
     for (i=0; i<len; i++) {
       temp += (val[i] * x[ind[i]]);
     }
@@ -571,7 +571,7 @@ void Mat_dhAllocate_getRow_private(Mat_dh A)
 
   /* allocate private storage */
   A->cval_private = (HYPRE_Int*)MALLOC_DH(len*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  A->aval_private = (double*)MALLOC_DH(len*sizeof(double)); CHECK_V_ERROR;
+  A->aval_private = (HYPRE_Real*)MALLOC_DH(len*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   A->len_private = len;
   END_FUNC_DH
 }
@@ -614,7 +614,7 @@ void Mat_dhPermute(Mat_dh A, HYPRE_Int *n2o, Mat_dh *Bout)
   Mat_dh B;
   HYPRE_Int  i, j, *RP = A->rp, *CVAL = A->cval;
   HYPRE_Int  *o2n, *rp, *cval, m = A->m, nz = RP[m];
-  double *aval, *AVAL = A->aval;
+  HYPRE_Real *aval, *AVAL = A->aval;
 
   Mat_dhCreate(&B); CHECK_V_ERROR;
   B->m = B->n = m;
@@ -627,7 +627,7 @@ void Mat_dhPermute(Mat_dh A, HYPRE_Int *n2o, Mat_dh *Bout)
   /* allocate storage for permuted matrix */
   rp = B->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   cval = B->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = B->aval = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  aval = B->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
 
   /* form new rp array */
   rp[0] = 0;
@@ -693,7 +693,7 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
   START_FUNC_DH
   bool noValues; 
   HYPRE_Int m = A->m, *rp = A->rp, *cval = A->cval;
-  double *aval = A->aval;
+  HYPRE_Real *aval = A->aval;
 
   noValues = (Parser_dhHasSwitch(parser_dh, "-noValues"));
   if (noValues) aval = NULL;
@@ -746,7 +746,7 @@ void Mat_dhPrintRows(Mat_dh A, SubdomainGraph_dh sg, FILE *fp)
 
       for (oldRow=beg_row; oldRow<end_row; ++oldRow) {
         HYPRE_Int len = 0, *cval;
-        double *aval;
+        HYPRE_Real *aval;
 
         hypre_fprintf(fp, "%3i (old= %3i) :: ", idx, 1+oldRow);
         ++idx;
@@ -820,7 +820,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
 {
   START_FUNC_DH
   HYPRE_Int m = A->m, *rp = A->rp, *cval = A->cval;
-  double *aval = A->aval;
+  HYPRE_Real *aval = A->aval;
   bool noValues; 
   bool matlab;
   FILE *fp;
@@ -835,7 +835,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
   if (sg == NULL) {
     HYPRE_Int i, j, pe;
     HYPRE_Int beg_row = A->beg_row;
-    double val;
+    HYPRE_Real val;
 
     for (pe=0; pe<np_dh; ++pe) {
       hypre_MPI_Barrier(comm_dh); 
@@ -877,7 +877,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
 
       for (j=beg_row; j<end_row; ++j) {
         HYPRE_Int len = 0, *cval;
-        double *aval;
+        HYPRE_Real *aval;
         HYPRE_Int oldRow = sg->n2o_row[j];
 
         Mat_dhGetRow(A, oldRow, &len, &cval, &aval); CHECK_V_ERROR;
@@ -891,7 +891,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
 
         else {
           for (k=0; k<len; ++k) {
-            double val = aval[k];
+            HYPRE_Real val = aval[k];
             if (val == 0.0 && matlab) val = _MATLAB_ZERO_;
             hypre_fprintf(fp, TRIPLES_FORMAT, idx, 1+sg->o2n_col[cval[k]], val);
           }
@@ -927,7 +927,7 @@ void Mat_dhPrintTriples(Mat_dh A, SubdomainGraph_dh sg, char *filename)
           HYPRE_Int row = n2o_row[i];
           for (j=rp[row]; j<rp[row+1]; ++j) {
             HYPRE_Int col = cval[j];
-            double val = 0.0;
+            HYPRE_Real val = 0.0;
 
             if (aval != NULL) val = aval[j]; 
             if (val == 0.0 && matlab) val = _MATLAB_ZERO_;
@@ -1128,7 +1128,7 @@ void Mat_dhFixDiags(Mat_dh A)
   HYPRE_Int i, j;
   HYPRE_Int *rp = A->rp, *cval = A->cval, m = A->m;
   bool ct = 0;  /* number of missing diagonals */
-  double *aval = A->aval;
+  HYPRE_Real *aval = A->aval;
 
   /* determine if any diagonals are missing */
   for (i=0; i<m; ++i) {
@@ -1154,7 +1154,7 @@ void Mat_dhFixDiags(Mat_dh A)
 
   /* set the value of all diagonal elements */
   for (i=0; i<m; ++i) {
-    double sum = 0.0;
+    HYPRE_Real sum = 0.0;
     for (j=rp[i]; j<rp[i+1]; ++j) {
       sum += fabs(aval[j]);
     }
@@ -1175,13 +1175,13 @@ void insert_diags_private(Mat_dh A, HYPRE_Int ct)
   START_FUNC_DH
   HYPRE_Int *RP = A->rp, *CVAL = A->cval;
   HYPRE_Int *rp, *cval, m = A->m;
-  double *aval, *AVAL = A->aval;
+  HYPRE_Real *aval, *AVAL = A->aval;
   HYPRE_Int nz = RP[m] + ct;
   HYPRE_Int i, j, idx = 0;
 
   rp = A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   cval = A->cval = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-  aval = A->aval = (double*)MALLOC_DH(nz*sizeof(double)); CHECK_V_ERROR;
+  aval = A->aval = (HYPRE_Real*)MALLOC_DH(nz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   rp[0] = 0;
 
   for (i=0; i<m; ++i) {
@@ -1215,7 +1215,7 @@ void Mat_dhPrintDiags(Mat_dh A, FILE *fp)
   START_FUNC_DH
   HYPRE_Int i, j, m = A->m;
   HYPRE_Int *rp = A->rp, *cval = A->cval;
-  double *aval = A->aval;
+  HYPRE_Real *aval = A->aval;
 
   hypre_fprintf(fp, "=================== diagonal elements ====================\n");
   for (i=0; i<m; ++i) {
@@ -1237,7 +1237,7 @@ void Mat_dhPrintDiags(Mat_dh A, FILE *fp)
 
 #undef __FUNC__
 #define __FUNC__ "Mat_dhGetRow"
-void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   HYPRE_Int row = globalRow - B->beg_row;
@@ -1254,7 +1254,7 @@ void Mat_dhGetRow(Mat_dh B, HYPRE_Int globalRow, HYPRE_Int *len, HYPRE_Int **ind
 
 #undef __FUNC__
 #define __FUNC__ "Mat_dhRestoreRow"
-void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val) 
+void Mat_dhRestoreRow(Mat_dh B, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, HYPRE_Real **val) 
 {
   START_FUNC_DH
   END_FUNC_DH
@@ -1271,7 +1271,7 @@ void Mat_dhRowPermute(Mat_dh mat)
   HYPRE_Int i, j, m = mat->m, nz = mat->rp[m];
   HYPRE_Int *o2n, *cval;
   HYPRE_Int algo = 1;
-  double *r1, *c1;
+  HYPRE_Real *r1, *c1;
   bool debug = mat->debug;
   bool isNatural;
   Mat_dh B;
@@ -1303,8 +1303,8 @@ void Mat_dhRowPermute(Mat_dh mat)
   hypre_sprintf(msgBuf_dh, "calling row permutation with algo= %i", algo);
   SET_INFO(msgBuf_dh);
 
-  r1 = (double*)MALLOC_DH(m*sizeof(double)); CHECK_V_ERROR;
-  c1 = (double*)MALLOC_DH(m*sizeof(double)); CHECK_V_ERROR;
+  r1 = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+  c1 = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR;
   if (mat->row_perm == NULL) {
     mat->row_perm = o2n = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   } else {
@@ -1346,7 +1346,7 @@ void Mat_dhRowPermute(Mat_dh mat)
     hypre_printf("@@@ [%i] Mat_dhRowPermute :: got natural ordering!\n", myid_dh);
   } else {
     HYPRE_Int *rp = B->rp, *cval = B->cval;
-    double *aval = B->aval;
+    HYPRE_Real *aval = B->aval;
 
     if (algo == 5) {
       hypre_printf("@@@ [%i] Mat_dhRowPermute :: scaling matrix rows and columns!\n", myid_dh);
@@ -1419,7 +1419,7 @@ void Mat_dhPartition(Mat_dh mat, HYPRE_Int blocks,
   HYPRE_Int *beg_row, *row_count, *n2o, *o2n, bk, new, *part;
   HYPRE_Int m = mat->m;
   HYPRE_Int i, cutEdgeCount;
-  double zero = 0.0;
+  HYPRE_Real zero = 0.0;
   HYPRE_Int metisOpts[5] = {0, 0, 0, 0, 0};
   HYPRE_Int *rp, *cval;
 

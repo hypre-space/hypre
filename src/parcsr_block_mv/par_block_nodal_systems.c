@@ -7,100 +7,96 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_parcsr_block_mv.h"
 
 /*---------------------------------------------------------------------------
  * hypre_BoomerAMGBlockCreateNodalA
 
-   This is the block version of creating a nodal norm matrix.
+ This is the block version of creating a nodal norm matrix.
 
-   option: determine which type of "norm" (or other measurement) is used.
+ option: determine which type of "norm" (or other measurement) is used.
 
-   1 = frobenius
-   2 = sum of abs. value of all elements
-   3 = largest element (positive or negative)
-   4 = 1-norm
-   5 = inf - norm
-   6 = sum of all elements
+ 1 = frobenius
+ 2 = sum of abs. value of all elements
+ 3 = largest element (positive or negative)
+ 4 = 1-norm
+ 5 = inf - norm
+ 6 = sum of all elements
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
-                                 HYPRE_Int                    option, HYPRE_Int diag_option,
-                                 hypre_ParCSRMatrix   **AN_ptr)
+hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
+                                 HYPRE_Int                option,
+                                 HYPRE_Int                diag_option,
+                                 hypre_ParCSRMatrix     **AN_ptr)
 {
-   MPI_Comm 	            comm         = hypre_ParCSRBlockMatrixComm(A);
+   MPI_Comm                 comm         = hypre_ParCSRBlockMatrixComm(A);
    hypre_CSRBlockMatrix    *A_diag       = hypre_ParCSRBlockMatrixDiag(A);
-   HYPRE_Int                     *A_diag_i     = hypre_CSRBlockMatrixI(A_diag);
-   double                  *A_diag_data  = hypre_CSRBlockMatrixData(A_diag);
+   HYPRE_Int               *A_diag_i     = hypre_CSRBlockMatrixI(A_diag);
+   HYPRE_Real              *A_diag_data  = hypre_CSRBlockMatrixData(A_diag);
 
-   HYPRE_Int                  block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
-   HYPRE_Int                  bnnz = block_size*block_size;
+   HYPRE_Int                block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
+   HYPRE_Int                bnnz = block_size*block_size;
 
    hypre_CSRBlockMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
-   HYPRE_Int                     *A_offd_i        = hypre_CSRBlockMatrixI(A_offd);
-   double                  *A_offd_data     = hypre_CSRBlockMatrixData(A_offd);
-   HYPRE_Int                     *A_diag_j        = hypre_CSRBlockMatrixJ(A_diag);
-   HYPRE_Int                     *A_offd_j        = hypre_CSRBlockMatrixJ(A_offd);
+   HYPRE_Int               *A_offd_i        = hypre_CSRBlockMatrixI(A_offd);
+   HYPRE_Real              *A_offd_data     = hypre_CSRBlockMatrixData(A_offd);
+   HYPRE_Int               *A_diag_j        = hypre_CSRBlockMatrixJ(A_diag);
+   HYPRE_Int               *A_offd_j        = hypre_CSRBlockMatrixJ(A_offd);
 
-   HYPRE_Int 		      *row_starts      = hypre_ParCSRBlockMatrixRowStarts(A);
-   HYPRE_Int 		      *col_map_offd    = hypre_ParCSRBlockMatrixColMapOffd(A);
-   HYPRE_Int 		       num_nonzeros_diag;
-   HYPRE_Int 		       num_nonzeros_offd = 0;
-   HYPRE_Int 		       num_cols_offd = 0;
+   HYPRE_Int               *row_starts      = hypre_ParCSRBlockMatrixRowStarts(A);
+   HYPRE_Int               *col_map_offd    = hypre_ParCSRBlockMatrixColMapOffd(A);
+   HYPRE_Int                num_nonzeros_diag;
+   HYPRE_Int                num_nonzeros_offd = 0;
+   HYPRE_Int                num_cols_offd = 0;
                   
    hypre_ParCSRMatrix *AN;
    hypre_CSRMatrix    *AN_diag;
-   HYPRE_Int                *AN_diag_i;
-   HYPRE_Int                *AN_diag_j=NULL;
-   double             *AN_diag_data = NULL; 
+   HYPRE_Int          *AN_diag_i;
+   HYPRE_Int          *AN_diag_j=NULL;
+   HYPRE_Real         *AN_diag_data = NULL; 
    hypre_CSRMatrix    *AN_offd;
-   HYPRE_Int                *AN_offd_i;
-   HYPRE_Int                *AN_offd_j = NULL;
-   double             *AN_offd_data = NULL; 
-   HYPRE_Int		      *col_map_offd_AN = NULL;
-   HYPRE_Int		      *row_starts_AN;
+   HYPRE_Int          *AN_offd_i;
+   HYPRE_Int          *AN_offd_j = NULL;
+   HYPRE_Real         *AN_offd_data = NULL; 
+   HYPRE_Int          *col_map_offd_AN = NULL;
+   HYPRE_Int          *row_starts_AN;
 
                  
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
-   HYPRE_Int		       num_sends;
-   HYPRE_Int		       num_recvs;
-   HYPRE_Int		      *send_procs;
-   HYPRE_Int		      *send_map_starts;
-   HYPRE_Int		      *send_map_elmts;
-   HYPRE_Int		      *recv_procs;
-   HYPRE_Int		      *recv_vec_starts;
+   HYPRE_Int            num_sends;
+   HYPRE_Int            num_recvs;
+   HYPRE_Int           *send_procs;
+   HYPRE_Int           *send_map_starts;
+   HYPRE_Int           *send_map_elmts;
+   HYPRE_Int           *recv_procs;
+   HYPRE_Int           *recv_vec_starts;
 
    hypre_ParCSRCommPkg *comm_pkg_AN = NULL;
-   HYPRE_Int		      *send_procs_AN = NULL;
-   HYPRE_Int		      *send_map_starts_AN = NULL;
-   HYPRE_Int		      *send_map_elmts_AN = NULL;
-   HYPRE_Int		      *recv_procs_AN = NULL;
-   HYPRE_Int		      *recv_vec_starts_AN = NULL;
+   HYPRE_Int           *send_procs_AN = NULL;
+   HYPRE_Int           *send_map_starts_AN = NULL;
+   HYPRE_Int           *send_map_elmts_AN = NULL;
+   HYPRE_Int           *recv_procs_AN = NULL;
+   HYPRE_Int           *recv_vec_starts_AN = NULL;
 
-   HYPRE_Int                 i;
+   HYPRE_Int            i;
                       
-   HYPRE_Int                 ierr = 0;
+   HYPRE_Int            ierr = 0;
 
-   HYPRE_Int		       num_procs;
-   HYPRE_Int		       cnt;
-   HYPRE_Int		       norm_type;
+   HYPRE_Int            num_procs;
+   HYPRE_Int            cnt;
+   HYPRE_Int            norm_type;
 
-   HYPRE_Int		       global_num_nodes;
-   HYPRE_Int		       num_nodes;
+   HYPRE_Int            global_num_nodes;
+   HYPRE_Int            num_nodes;
 
-   HYPRE_Int                 index, k;
+   HYPRE_Int            index, k;
    
-   double             tmp;
-   double             sum;
-   
-
+   HYPRE_Real           tmp;
+   HYPRE_Real           sum;
 
    hypre_MPI_Comm_size(comm,&num_procs);
 
@@ -124,7 +120,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
    }
 #else
    row_starts_AN = hypre_CTAlloc(HYPRE_Int, num_procs+1);
-  for (i=0; i < num_procs+1; i++)
+   for (i=0; i < num_procs+1; i++)
    {
       row_starts_AN[i] = row_starts[i];
    }
@@ -143,8 +139,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
       AN_diag_i[i] = A_diag_i[i];
    }
 
-   AN_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);	
-   AN_diag_data = hypre_CTAlloc(double, num_nonzeros_diag);	
+   AN_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);     
+   AN_diag_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros_diag);      
 
 
    AN_diag = hypre_CSRMatrixCreate(num_nodes, num_nodes, num_nonzeros_diag);
@@ -163,7 +159,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
 
    if (diag_option ==1 )
    {
-      /* make the diag entry the negative of the sum of off-diag entries (NEED to get more below!)*/
+      /* make the diag entry the negative of the sum of off-diag entries (NEED
+       * to get more below!)*/
       /* the diagonal is the first element listed in each row - */
       for (i=0; i < num_nodes; i++)
       {
@@ -191,9 +188,6 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
          AN_diag_data[index] = -AN_diag_data[index];
       }
    }
-
-
-
 
    /* copy the commpkg */
    if (comm_pkg)
@@ -248,9 +242,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
 
    }
 
- /* the off-diag part */
+   /* the off-diag part */
 
-  
    num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
    col_map_offd_AN = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    for (i=0; i < num_cols_offd; i++)
@@ -265,8 +258,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
       AN_offd_i[i] = A_offd_i[i];
    }
       
-   AN_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);	
-   AN_offd_data = hypre_CTAlloc(double, num_nonzeros_offd);
+   AN_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);     
+   AN_offd_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros_offd);
 
    for (i=0; i< num_nonzeros_offd; i++)
    {
@@ -282,13 +275,12 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
    hypre_CSRMatrixJ(AN_offd) = AN_offd_j;
    hypre_CSRMatrixData(AN_offd) = AN_offd_data;
    
-
    if (diag_option ==1 )
    {
-      /* make the diag entry the negative of the sum of off-diag entries (here we are adding the 
-         off_diag contribution)*/
+      /* make the diag entry the negative of the sum of off-diag entries (here
+         we are adding the off_diag contribution)*/
       /* the diagonal is the first element listed in each row of AN_diag_data - */
-       for (i=0; i < num_nodes; i++)
+      for (i=0; i < num_nodes; i++)
       {
          sum = 0.0;
          for (k = AN_offd_i[i]; k < AN_offd_i[i+1]; k++)
@@ -302,14 +294,11 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
       
    }
 
-
-
-
    /* now create AN */   
     
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,
-		row_starts_AN, row_starts_AN, num_cols_offd,
-		num_nonzeros_diag, num_nonzeros_offd);
+                                 row_starts_AN, row_starts_AN, num_cols_offd,
+                                 num_nonzeros_diag, num_nonzeros_offd);
 
    /* we already created the diag and offd matrices - so we don't need the ones
       created above */
@@ -324,5 +313,5 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
 
    *AN_ptr        = AN;
 
-    return (ierr);
+   return (ierr);
 }

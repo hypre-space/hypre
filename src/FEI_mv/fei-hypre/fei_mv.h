@@ -7,13 +7,14 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
 #include "_hypre_utilities.h"
 
-#include "LinearSystemCore.h"
+// NEW FEI (2.23.02)
+#include "fei_LinearSystemCore.hpp"
 #include "LLNL_FEI_Impl.h"
 
 #ifndef hypre_FE_MV_HEADER

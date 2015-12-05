@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -48,7 +45,7 @@ HYPRE_SStructFACDestroy2( HYPRE_SStructSolver solver )
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SStructFACAMR_RAP( HYPRE_SStructMatrix  A,
-                         HYPRE_Int          (*rfactors)[3], 
+                         HYPRE_Int          (*rfactors)[HYPRE_MAXDIM],
                          HYPRE_SStructMatrix *fac_A )
 {
    return( hypre_AMR_RAP(A, rfactors, fac_A) );
@@ -90,7 +87,7 @@ HYPRE_SStructFACSolve3(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFACSetTol( HYPRE_SStructSolver solver,
-                        double             tol    )
+                        HYPRE_Real         tol    )
 {
    return( hypre_FACSetTol( (void *) solver, tol ) );
 }
@@ -113,7 +110,7 @@ HYPRE_Int
 HYPRE_SStructFACZeroCFSten( HYPRE_SStructMatrix  A,
                             HYPRE_SStructGrid    grid,
                             HYPRE_Int            part,
-                            HYPRE_Int            rfactors[3] )
+                            HYPRE_Int            rfactors[HYPRE_MAXDIM] )
 {
     hypre_SStructPMatrix   *Af= hypre_SStructMatrixPMatrix(A, part);
     hypre_SStructPMatrix   *Ac= hypre_SStructMatrixPMatrix(A, part-1);
@@ -142,7 +139,7 @@ HYPRE_SStructFACZeroFCSten( HYPRE_SStructMatrix  A,
 HYPRE_Int
 HYPRE_SStructFACZeroAMRMatrixData( HYPRE_SStructMatrix  A,
                                    HYPRE_Int            part_crse,
-                                   HYPRE_Int            rfactors[3] )
+                                   HYPRE_Int            rfactors[HYPRE_MAXDIM] )
 {
     return( hypre_ZeroAMRMatrixData(A, part_crse, rfactors) );
 }
@@ -153,7 +150,7 @@ HYPRE_SStructFACZeroAMRMatrixData( HYPRE_SStructMatrix  A,
 HYPRE_Int
 HYPRE_SStructFACZeroAMRVectorData( HYPRE_SStructVector  b,
                                    HYPRE_Int           *plevels,
-                                   HYPRE_Int          (*rfactors)[3] )
+                                   HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] )
 {
     return( hypre_ZeroAMRVectorData(b, plevels, rfactors) );
 }
@@ -165,7 +162,7 @@ HYPRE_SStructFACZeroAMRVectorData( HYPRE_SStructVector  b,
 HYPRE_Int
 HYPRE_SStructFACSetPRefinements( HYPRE_SStructSolver  solver,
                                  HYPRE_Int            nparts,
-                                 HYPRE_Int          (*rfactors)[3] )
+                                 HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] )
 {
    return( hypre_FACSetPRefinements( (void *)         solver,
                                                       nparts,
@@ -241,7 +238,7 @@ HYPRE_SStructFACSetRelaxType( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFACSetJacobiWeight( HYPRE_SStructSolver solver,
-                                 double              weight)
+                                 HYPRE_Real          weight)
 {
    return( hypre_FACSetJacobiWeight( (void *) solver, weight) );
 }
@@ -307,7 +304,7 @@ HYPRE_SStructFACGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructFACGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                              double             *norm   )
+                                              HYPRE_Real         *norm   )
 {
    return( hypre_FACGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

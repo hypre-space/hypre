@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -33,6 +33,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              rb_start    = (relax_data -> rb_start);
    HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
+   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
 
    hypre_CommHandle      *comm_handle;
                         
@@ -49,14 +50,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              xi, xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
-   double                *Ap;
-   double                *App;
-   double                *bp;
-   double                *xp;
+   HYPRE_Real            *Ap;
+   HYPRE_Real            *App;
+   HYPRE_Real            *bp;
+   HYPRE_Real            *xp;
 
    /* constant coefficient */
    HYPRE_Int              constant_coeff= hypre_StructMatrixConstantCoefficient(A);
-   double                 App0, App1, App2, App3, App4, App5, AApd;
+   HYPRE_Real             App0, App1, App2, App3, App4, App5, AApd;
                         
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -176,6 +177,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                xni = hypre_BoxSizeX(x_dbox);
                bnj = hypre_BoxSizeY(b_dbox);
                xnj = hypre_BoxSizeY(x_dbox);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
                if (constant_coeff == 1)
                {
@@ -294,6 +303,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                bnj= hypre_BoxSizeY(b_dbox);
                xnj= hypre_BoxSizeY(x_dbox);
                Ai = hypre_CCBoxIndexRank(A_dbox, start);
+               if (ndim < 3)
+               {
+                  nk = 1;
+                  if (ndim < 2)
+                  {
+                     nj = 1;
+                  }
+               }
 
                switch(stencil_size)
                {

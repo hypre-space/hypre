@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -19,13 +19,13 @@
 
          
 HYPRE_Int
-hypre_AMGTruncation(hypre_CSRMatrix *A, double trunc_factor, HYPRE_Int max_elmts)
+hypre_AMGTruncation(hypre_CSRMatrix *A, HYPRE_Real trunc_factor, HYPRE_Int max_elmts)
 {
    HYPRE_Int ierr = 0;
    HYPRE_Int *A_i = hypre_CSRMatrixI(A);
    HYPRE_Int *A_j = hypre_CSRMatrixJ(A);
-   double *A_data = hypre_CSRMatrixData(A);
-   double max_coef, row_sum, scale;
+   HYPRE_Real *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Real max_coef, row_sum, scale;
    HYPRE_Int i, j, start;
    HYPRE_Int num_variables = hypre_CSRMatrixNumRows(A);
    HYPRE_Int now_checking, num_lost, next_open;
@@ -135,12 +135,12 @@ hypre_AMGTruncation(hypre_CSRMatrix *A, double trunc_factor, HYPRE_Int max_elmts
  *--------------------------------------------------------------------------*/
 
 void swap3(HYPRE_Int     *v,
-           double  *w,
+           HYPRE_Real  *w,
            HYPRE_Int      i,
            HYPRE_Int      j )
 {
    HYPRE_Int temp;
-   double temp2;
+   HYPRE_Real temp2;
 
    temp = v[i];
    v[i] = v[j];
@@ -153,7 +153,7 @@ void swap3(HYPRE_Int     *v,
  *--------------------------------------------------------------------------*/
 
 void qsort2( HYPRE_Int *v,
-	     double *w,
+	     HYPRE_Real *w,
              HYPRE_Int  left,
              HYPRE_Int  right )
 {

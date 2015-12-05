@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -34,10 +32,10 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* timer.c */
-double time_getWallclockSeconds( void );
-double time_getCPUSeconds( void );
-double time_get_wallclock_seconds_( void );
-double time_get_cpu_seconds_( void );
+HYPRE_Real time_getWallclockSeconds( void );
+HYPRE_Real time_getCPUSeconds( void );
+HYPRE_Real time_get_wallclock_seconds_( void );
+HYPRE_Real time_get_cpu_seconds_( void );
 
 /*--------------------------------------------------------------------------
  * With timing off
@@ -64,9 +62,9 @@ double time_get_cpu_seconds_( void );
 
 typedef struct
 {
-   double  *wall_time;
-   double  *cpu_time;
-   double  *flops;
+   HYPRE_Real  *wall_time;
+   HYPRE_Real  *cpu_time;
+   HYPRE_Real  *flops;
    char   **name;
    HYPRE_Int     *state;     /* boolean flag to allow for recursive timing */
    HYPRE_Int     *num_regs;  /* count of how many times a name is registered */
@@ -74,9 +72,9 @@ typedef struct
    HYPRE_Int      num_names;
    HYPRE_Int      size;
 
-   double   wall_count;
-   double   CPU_count;
-   double   FLOP_count;
+   HYPRE_Real   wall_count;
+   HYPRE_Real   CPU_count;
+   HYPRE_Real   FLOP_count;
 
 } hypre_TimingType;
 
@@ -90,7 +88,6 @@ extern hypre_TimingType *hypre_global_timing;
  * Accessor functions
  *-------------------------------------------------------*/
 
-#ifndef HYPRE_USE_PTHREADS
 #define hypre_TimingWallTime(i) (hypre_global_timing -> wall_time[(i)])
 #define hypre_TimingCPUTime(i)  (hypre_global_timing -> cpu_time[(i)])
 #define hypre_TimingFLOPS(i)    (hypre_global_timing -> flops[(i)])
@@ -100,18 +97,6 @@ extern hypre_TimingType *hypre_global_timing;
 #define hypre_TimingWallCount   (hypre_global_timing -> wall_count)
 #define hypre_TimingCPUCount    (hypre_global_timing -> CPU_count)
 #define hypre_TimingFLOPCount   (hypre_global_timing -> FLOP_count)
-#else
-#define hypre_TimingWallTime(i) (hypre_global_timing[threadid].wall_time[(i)])
-#define hypre_TimingCPUTime(i)  (hypre_global_timing[threadid].cpu_time[(i)])
-#define hypre_TimingFLOPS(i)    (hypre_global_timing[threadid].flops[(i)])
-#define hypre_TimingName(i)     (hypre_global_timing[threadid].name[(i)])
-#define hypre_TimingState(i)    (hypre_global_timing[threadid].state[(i)])
-#define hypre_TimingNumRegs(i)  (hypre_global_timing[threadid].num_regs[(i)])
-#define hypre_TimingWallCount   (hypre_global_timing[threadid].wall_count)
-#define hypre_TimingCPUCount    (hypre_global_timing[threadid].CPU_count)
-#define hypre_TimingFLOPCount   (hypre_global_timing[threadid].FLOP_count)
-#define hypre_TimingAllFLOPS    (hypre_global_timing[hypre_NumThreads].FLOP_count)
-#endif
 
 /*-------------------------------------------------------
  * Prototypes

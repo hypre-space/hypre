@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -31,7 +31,7 @@ GenerateVarDifConv( MPI_Comm comm,
                  HYPRE_Int      p,
                  HYPRE_Int      q,
                  HYPRE_Int      r,
-                 double eps,
+                 HYPRE_Real eps,
 		 HYPRE_ParVector *rhs_ptr)
 {
    hypre_ParCSRMatrix *A;
@@ -39,15 +39,15 @@ GenerateVarDifConv( MPI_Comm comm,
    hypre_CSRMatrix *offd;
    hypre_ParVector *par_rhs;
    hypre_Vector *rhs;
-   double *rhs_data;
+   HYPRE_Real *rhs_data;
 
    HYPRE_Int    *diag_i;
    HYPRE_Int    *diag_j;
-   double *diag_data;
+   HYPRE_Real *diag_data;
 
    HYPRE_Int    *offd_i;
    HYPRE_Int    *offd_j;
-   double *offd_data;
+   HYPRE_Real *offd_data;
 
    HYPRE_Int *global_part;
    HYPRE_Int ix, iy, iz;
@@ -69,9 +69,9 @@ GenerateVarDifConv( MPI_Comm comm,
    HYPRE_Int num_procs, my_id;
    HYPRE_Int P_busy, Q_busy, R_busy;
 
-   double hhx, hhy, hhz;
-   double xx, yy, zz;
-   double afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
+   HYPRE_Real hhx, hhy, hhz;
+   HYPRE_Real xx, yy, zz;
+   HYPRE_Real afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -111,7 +111,7 @@ GenerateVarDifConv( MPI_Comm comm,
    local_num_rows = nx_local*ny_local*nz_local;
    diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
    offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
-   rhs_data = hypre_CTAlloc(double, local_num_rows);
+   rhs_data = hypre_CTAlloc(HYPRE_Real, local_num_rows);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -129,9 +129,9 @@ GenerateVarDifConv( MPI_Comm comm,
 
    col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
 
-   hhx = 1.0/(double)(nx+1);
-   hhy = 1.0/(double)(ny+1);
-   hhz = 1.0/(double)(nz+1);
+   hhx = 1.0/(HYPRE_Real)(nx+1);
+   hhy = 1.0/(HYPRE_Real)(ny+1);
+   hhz = 1.0/(HYPRE_Real)(nz+1);
 
    cnt = 1;
    o_cnt = 1;
@@ -207,12 +207,12 @@ GenerateVarDifConv( MPI_Comm comm,
    }
 
    diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_data = hypre_CTAlloc(HYPRE_Real, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
       offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_data = hypre_CTAlloc(HYPRE_Real, offd_i[local_num_rows]);
    }
 
    row_index = 0;
@@ -220,13 +220,13 @@ GenerateVarDifConv( MPI_Comm comm,
    o_cnt = 0;
    for (iz = nz_part[r]; iz < nz_part[r+1]; iz++)
    {
-      zz = (double)(iz+1)*hhz;
+      zz = (HYPRE_Real)(iz+1)*hhz;
       for (iy = ny_part[q];  iy < ny_part[q+1]; iy++)
       {
-         yy = (double)(iy+1)*hhy;
+         yy = (HYPRE_Real)(iy+1)*hhy;
          for (ix = nx_part[p]; ix < nx_part[p+1]; ix++)
          {
-            xx = (double)(ix+1)*hhx;
+            xx = (HYPRE_Real)(ix+1)*hhx;
 	    afp = eps*afun(xx+0.5*hhx,yy,zz)/hhx/hhx;
 	    afm = eps*afun(xx-0.5*hhx,yy,zz)/hhx/hhx;
 	    bfp = eps*bfun(xx,yy+0.5*hhy,zz)/hhy/hhy;
@@ -384,9 +384,9 @@ GenerateVarDifConv( MPI_Comm comm,
    return (HYPRE_ParCSRMatrix) A;
 }
 
-double afun(double xx, double yy, double zz)
+HYPRE_Real afun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
+   HYPRE_Real value;
    /* value = 1.0 + 1000.0*fabs(xx-yy); */
    if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
       || (xx < 0.1 && yy < 0.1 && zz > 0.9)
@@ -403,15 +403,15 @@ double afun(double xx, double yy, double zz)
       value = 1000.0;
    else   
       value = 1.0 ;
-   /* double value, pi;
+   /* HYPRE_Real value, pi;
    pi = 4.0 * atan(1.0);
    value = cos(pi*xx)*cos(pi*yy); */
    return value;
 }
 
-double bfun(double xx, double yy, double zz)
+HYPRE_Real bfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
+   HYPRE_Real value;
    /* value = 1.0 + 1000.0*fabs(xx-yy); */
    if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
       || (xx < 0.1 && yy < 0.1 && zz > 0.9)
@@ -428,13 +428,13 @@ double bfun(double xx, double yy, double zz)
       value = 1000.0;
    else   
       value = 1.0 ;
-   /* double value, pi;
+   /* HYPRE_Real value, pi;
    pi = 4.0 * atan(1.0);
    value = 1.0 - 2.0*xx; 
    value = cos(pi*xx)*cos(pi*yy); */
-   /* double value;
+   /* HYPRE_Real value;
    value = 1.0 + 1000.0 * fabs(xx-yy); 
-   double value, x0, y0;
+   HYPRE_Real value, x0, y0;
    x0 = fabs(xx - 0.5);
    y0 = fabs(yy - 0.5);
    if (y0 > x0) x0 = y0;
@@ -445,9 +445,9 @@ double bfun(double xx, double yy, double zz)
    return value;
 }
 
-double cfun(double xx, double yy, double zz)
+HYPRE_Real cfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
+   HYPRE_Real value;
    if ((xx < 0.1 && yy < 0.1 && zz < 0.1)
       || (xx < 0.1 && yy < 0.1 && zz > 0.9)
       || (xx < 0.1 && yy > 0.9 && zz < 0.1)
@@ -472,55 +472,55 @@ double cfun(double xx, double yy, double zz)
    return value;
 }
 
-double dfun(double xx, double yy, double zz)
+HYPRE_Real dfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
-   /*double pi;
+   HYPRE_Real value;
+   /*HYPRE_Real pi;
    pi = 4.0 * atan(1.0);
    value = -sin(pi*xx)*cos(pi*yy);*/
    value = 0;
    return value;
 }
 
-double efun(double xx, double yy, double zz)
+HYPRE_Real efun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
-   /*double pi;
+   HYPRE_Real value;
+   /*HYPRE_Real pi;
    pi = 4.0 * atan(1.0);
    value = sin(pi*yy)*cos(pi*xx);*/
    value = 0;
    return value;
 }
 
-double ffun(double xx, double yy, double zz)
+HYPRE_Real ffun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
+   HYPRE_Real value;
    value = 0.0;
    return value;
 }
 
-double gfun(double xx, double yy, double zz)
+HYPRE_Real gfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
+   HYPRE_Real value;
    value = 0.0;
    return value;
 }
 
-double rfun(double xx, double yy, double zz)
+HYPRE_Real rfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   /* double value, pi;
+   /* HYPRE_Real value, pi;
    pi = 4.0 * atan(1.0);
    value = -4.0*pi*pi*sin(pi*xx)*sin(pi*yy)*cos(pi*xx)*cos(pi*yy); */
-   double value;
+   HYPRE_Real value;
    /* value = xx*(1.0-xx)*yy*(1.0-yy); */
    value = 1.0;
    return value;
 }
 
-double bndfun(double xx, double yy, double zz)
+HYPRE_Real bndfun(HYPRE_Real xx, HYPRE_Real yy, HYPRE_Real zz)
 {
-   double value;
-   /*double pi;
+   HYPRE_Real value;
+   /*HYPRE_Real pi;
    pi = 4.0 * atan(1.0);
    value = sin(pi*xx)+sin(13*pi*xx)+sin(pi*yy)+sin(13*pi*yy);*/
    value = 0.0;

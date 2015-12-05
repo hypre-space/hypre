@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.15 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -56,12 +56,12 @@ SONAME = libHYPRE_DistributedMatrixPilutSolver-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_DistributedMatrixPilutSolver${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+#	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*

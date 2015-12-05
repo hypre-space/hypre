@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -20,7 +20,7 @@ typedef struct
    void                   *relax_data;
    void                   *rb_relax_data;
    HYPRE_Int               relax_type;
-   double                  jacobi_weight;
+   HYPRE_Real              jacobi_weight;
 
 } hypre_PFMGRelaxData;
 
@@ -107,7 +107,7 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
 {
    hypre_PFMGRelaxData *pfmg_relax_data  = pfmg_relax_vdata;
    HYPRE_Int            relax_type       = (pfmg_relax_data -> relax_type);
-   double               jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
+   HYPRE_Real           jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
 
    switch(relax_type)
    {
@@ -151,8 +151,8 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
          hypre_PointRelaxSetWeight(relax_data, 1.0);
          hypre_PointRelaxSetNumPointsets(relax_data, 1);
 
-         hypre_SetIndex(stride, 1, 1, 1);
-         hypre_SetIndex(indices[0], 0, 0, 0);
+         hypre_SetIndex3(stride, 1, 1, 1);
+         hypre_SetIndex3(indices[0], 0, 0, 0);
          hypre_PointRelaxSetPointset(relax_data, 0, 1, stride, indices);
       }
       break;
@@ -170,7 +170,7 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 
 HYPRE_Int
 hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
-                               double weight) 
+                               HYPRE_Real weight) 
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
 
@@ -238,7 +238,7 @@ hypre_PFMGRelaxSetPostRelax( void  *pfmg_relax_vdata )
 
 HYPRE_Int
 hypre_PFMGRelaxSetTol( void   *pfmg_relax_vdata,
-                       double  tol              )
+                       HYPRE_Real  tol              )
 {
    hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
 

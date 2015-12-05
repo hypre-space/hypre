@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -33,7 +33,6 @@ typedef struct
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
    HYPRE_Int               accumulated;  /* AddTo values accumulated? */
-   HYPRE_Int               iscomplex;    /* Is the vector complex */
 
    HYPRE_Int               ref_count;
 
@@ -64,12 +63,11 @@ typedef struct hypre_SStructVector_struct
 
   /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
 
-   double                  *data;        /* GEC1002 pointer to chunk data  */
+   HYPRE_Complex           *data;        /* GEC1002 pointer to chunk data  */
    HYPRE_Int               *dataindices; /* GEC1002 dataindices[partx] is the starting index
                                           of vector data for the part=partx    */
    HYPRE_Int               datasize    ;  /* GEC1002 size of all data = ghlocalsize */
 
-   HYPRE_Int               iscomplex;    /* Is the vector complex */
    HYPRE_Int               global_size;  /* Total number coefficients */
 
    HYPRE_Int               ref_count;
@@ -90,7 +88,6 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
 #define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
 #define hypre_SStructVectorNborNComms(vec)     ((vec) -> nbor_ncomms)
-#define hypre_SStructVectorIsComplex(vec)      ((vec) -> iscomplex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
 #define hypre_SStructVectorData(vec)           ((vec) -> data )
@@ -110,7 +107,6 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
 #define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
-#define hypre_SStructPVectorIsComplex(pvec)   ((pvec) -> iscomplex)
 #define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
 #define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )
 #define hypre_SStructPVectorDataSize(pvec)    ((pvec) -> datasize  )

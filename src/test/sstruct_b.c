@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.23 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -149,7 +149,7 @@ typedef struct
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
    HYPRE_Int                   *graph_entries;
-   double                *graph_values;
+   HYPRE_Real            *graph_values;
    HYPRE_Int                   *graph_boxsizes;
 
    HYPRE_Int                    matrix_nentries;
@@ -158,7 +158,7 @@ typedef struct
    Index                 *matrix_strides;
    HYPRE_Int                   *matrix_vars;
    HYPRE_Int                   *matrix_entries;
-   double                *matrix_values;
+   HYPRE_Real            *matrix_values;
 
    Index                  periodic;
 
@@ -175,7 +175,7 @@ typedef struct
    HYPRE_Int             *stencil_sizes;
    Index          **stencil_offsets;
    HYPRE_Int            **stencil_vars;
-   double         **stencil_values;
+   HYPRE_Real     **stencil_values;
 
    HYPRE_Int              symmetric_nentries;
    HYPRE_Int             *symmetric_parts;
@@ -546,7 +546,7 @@ ReadData( char         *filename,
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int, data.nstencils);
             data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
             data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *, data.nstencils);
-            data.stencil_values  = hypre_CTAlloc(double *, data.nstencils);
+            data.stencil_values  = hypre_CTAlloc(HYPRE_Real *, data.nstencils);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.nstencils, data.stencil_sizes);
             for (s = 0; s < data.nstencils; s++)
@@ -556,7 +556,7 @@ ReadData( char         *filename,
                data.stencil_vars[s] =
                   hypre_CTAlloc(HYPRE_Int, data.stencil_sizes[s]);
                data.stencil_values[s] =
-                  hypre_CTAlloc(double, data.stencil_sizes[s]);
+                  hypre_CTAlloc(HYPRE_Real, data.stencil_sizes[s]);
             }
          }
          else if ( strcmp(key, "StencilSetEntry:") == 0 )
@@ -617,7 +617,7 @@ ReadData( char         *filename,
                pdata.graph_entries =
                   hypre_TReAlloc(pdata.graph_entries, HYPRE_Int, size);
                pdata.graph_values =
-                  hypre_TReAlloc(pdata.graph_values, double, size);
+                  hypre_TReAlloc(pdata.graph_values, HYPRE_Real, size);
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes, HYPRE_Int, size);
             }
@@ -722,7 +722,7 @@ ReadData( char         *filename,
                pdata.matrix_entries =
                   hypre_TReAlloc(pdata.matrix_entries, HYPRE_Int, size);
                pdata.matrix_values =
-                  hypre_TReAlloc(pdata.matrix_values, double, size);
+                  hypre_TReAlloc(pdata.matrix_values, HYPRE_Real, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matrix_ilowers[pdata.matrix_nentries]);
@@ -1327,10 +1327,10 @@ DestroyData( ProblemData   data )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-SetCosineVector(   double  scale,
+SetCosineVector(   HYPRE_Real  scale,
                    Index   ilower,
                    Index   iupper,
-                   double *values)
+                   HYPRE_Real *values)
 {
    HYPRE_Int          i,j,k;
    HYPRE_Int          count = 0;
@@ -1470,7 +1470,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int                   solver_id, object_type;
    HYPRE_Int                   print_system;
    HYPRE_Int                   cosine, struct_cosine;
-   double                scale;
+   HYPRE_Real            scale;
    MPI_Comm              mpi_comm = hypre_MPI_COMM_WORLD;
                         
    bHYPRE_MPICommunicator bmpicomm;
@@ -1510,10 +1510,10 @@ main( HYPRE_Int   argc,
 
    Index                 ilower, iupper;
    Index                 index, to_index;
-   double               *values;
+   HYPRE_Real           *values;
 
    HYPRE_Int                   num_iterations;
-   double                final_res_norm;
+   HYPRE_Real            final_res_norm;
                          
    HYPRE_Int                   num_procs, myid;
    HYPRE_Int                   time_index;
@@ -1526,7 +1526,7 @@ main( HYPRE_Int   argc,
    HYPRE_Int                   jump;
    HYPRE_Int                   solver_type;
 
-   double                cf_tol;
+   HYPRE_Real            cf_tol;
 
    HYPRE_Int                   arg_index, part, box, var, entry, s, i, j, k;
    sidl_BaseInterface _ex1 = NULL;
@@ -1919,7 +1919,7 @@ main( HYPRE_Int   argc,
     *-----------------------------------------------------------*/
    hypre_assert( ierr == 0 );
 
-   values = hypre_TAlloc(double, data.max_boxsize);
+   values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
 
    if ( object_type == HYPRE_PARCSR )
    {
@@ -3320,14 +3320,7 @@ main( HYPRE_Int   argc,
       else if (solver_id == 218)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif /* HYPRE_USE_PTHREADS */
          HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3591,14 +3584,7 @@ main( HYPRE_Int   argc,
       else if (solver_id == 238)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif /* HYPRE_USE_PTHREADS */
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3740,14 +3726,7 @@ main( HYPRE_Int   argc,
       else if (solver_id == 248)
       {
          /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            struct_precond[i] = NULL;
-         }
-#else
          struct_precond = NULL;
-#endif /* HYPRE_USE_PTHREADS */
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -32,7 +32,7 @@
 
 char infile_default[50] = "sstruct_default.in";
 
-typedef HYPRE_Int Index[3];
+typedef HYPRE_Int Index[HYPRE_MAXDIM];
 typedef HYPRE_Int ProblemIndex[9];  /* last 3 digits are shifts */
 
 typedef struct
@@ -71,7 +71,7 @@ typedef struct
    Index                 *matrix_strides;
    HYPRE_Int                   *matrix_vars;
    HYPRE_Int                   *matrix_entries;
-   double                *matrix_values;
+   HYPRE_Real            *matrix_values;
 
    Index                  periodic;
 
@@ -89,11 +89,11 @@ typedef struct
    Index                 *graph_index_maps;
    Index                 *graph_index_signs;
    HYPRE_Int                   *graph_entries;
-   double                *graph_values;
+   HYPRE_Real            *graph_values;
    HYPRE_Int                   *graph_boxsizes;
 
-   double               **graph_fine_to_coarse_data;
-   double               **graph_coarse_to_fine_data;
+   HYPRE_Real           **graph_fine_to_coarse_data;
+   HYPRE_Real           **graph_coarse_to_fine_data;
 
    /* for amr structure */
    HYPRE_Int                    fac_plevel;
@@ -112,7 +112,7 @@ typedef struct
    HYPRE_Int             *stencil_sizes;
    Index          **stencil_offsets;
    HYPRE_Int            **stencil_vars;
-   double         **stencil_values;
+   HYPRE_Real     **stencil_values;
 
    HYPRE_Int              npools;
    HYPRE_Int             *pools;   /* array of size nparts */
@@ -455,7 +455,7 @@ ReadData( char         *filename,
             data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int, data.nstencils);
             data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
             data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *, data.nstencils);
-            data.stencil_values  = hypre_CTAlloc(double *, data.nstencils);
+            data.stencil_values  = hypre_CTAlloc(HYPRE_Real *, data.nstencils);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.nstencils, data.stencil_sizes);
             for (s = 0; s < data.nstencils; s++)
@@ -465,7 +465,7 @@ ReadData( char         *filename,
                data.stencil_vars[s] =
                   hypre_CTAlloc(HYPRE_Int, data.stencil_sizes[s]);
                data.stencil_values[s] =
-                  hypre_CTAlloc(double, data.stencil_sizes[s]);
+                  hypre_CTAlloc(HYPRE_Real, data.stencil_sizes[s]);
             }
          }
          else if ( strcmp(key, "StencilSetEntry:") == 0 )
@@ -522,7 +522,7 @@ ReadData( char         *filename,
                pdata.graph_entries =
                   hypre_TReAlloc(pdata.graph_entries, HYPRE_Int, size);
                pdata.graph_values =
-                  hypre_TReAlloc(pdata.graph_values, double, size);
+                  hypre_TReAlloc(pdata.graph_values, HYPRE_Real, size);
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes, HYPRE_Int, size);
             }
@@ -599,7 +599,7 @@ ReadData( char         *filename,
                pdata.matrix_entries =
                   hypre_TReAlloc(pdata.matrix_entries, HYPRE_Int, size);
                pdata.matrix_values =
-                  hypre_TReAlloc(pdata.matrix_values, double, size);
+                  hypre_TReAlloc(pdata.matrix_values, HYPRE_Real, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matrix_ilowers[pdata.matrix_nentries]);
@@ -1280,13 +1280,13 @@ main( hypre_int argc,
 
    Index                 ilower, iupper;
    Index                 index, to_index;
-   double               *values, *box_values;
+   HYPRE_Real           *values, *box_values;
 
    HYPRE_Int                  *plevels;
    Index                *prefinements;
 
    HYPRE_Int                   num_iterations;
-   double                final_res_norm;
+   HYPRE_Real            final_res_norm;
                          
    HYPRE_Int                   num_procs, myid;
    HYPRE_Int                   time_index;
@@ -1589,7 +1589,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(double, data.max_boxsize);
+   values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
    HYPRE_SStructMatrixInitialize(A);
@@ -1746,7 +1746,7 @@ main( hypre_int argc,
             {
                for (box = 0; box < pdata.nboxes; box++)
                {
-                  box_values= hypre_TAlloc(double, data.max_boxsize);
+                  box_values= hypre_TAlloc(HYPRE_Real, data.max_boxsize);
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                                  pdata.vartypes[var], ilower, iupper);
                   HYPRE_StructMatrixGetBoxValues(sA, ilower, iupper, 1,
@@ -1814,7 +1814,7 @@ main( hypre_int argc,
                                             var);
             for (box = 0; box < pdata.nboxes; box++)
             {
-               box_values= hypre_TAlloc(double, data.max_boxsize);
+               box_values= hypre_TAlloc(HYPRE_Real, data.max_boxsize);
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
                               ilower, iupper);
                HYPRE_StructVectorGetBoxValues(sx, ilower, iupper, box_values); 
@@ -1877,7 +1877,7 @@ main( hypre_int argc,
                                             var);
             for (box = 0; box < pdata.nboxes; box++)
             {
-               box_values= hypre_TAlloc(double, data.max_boxsize);
+               box_values= hypre_TAlloc(HYPRE_Real, data.max_boxsize);
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
                               ilower, iupper);
                HYPRE_StructVectorGetBoxValues(sx, ilower, iupper, box_values); 

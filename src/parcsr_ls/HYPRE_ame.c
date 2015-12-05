@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -100,7 +100,7 @@ HYPRE_Int HYPRE_AMESetMaxIter(HYPRE_Solver esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMESetTol(HYPRE_Solver esolver,
-                    double tol)
+                    HYPRE_Real tol)
 {
    return hypre_AMESetTol((void *) esolver, tol);
 }
@@ -120,7 +120,7 @@ HYPRE_Int HYPRE_AMESetPrintLevel(HYPRE_Solver esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMEGetEigenvalues(HYPRE_Solver esolver,
-                            double **eigenvalues)
+                            HYPRE_Real **eigenvalues)
 {
    return hypre_AMEGetEigenvalues((void *) esolver, eigenvalues);
 }

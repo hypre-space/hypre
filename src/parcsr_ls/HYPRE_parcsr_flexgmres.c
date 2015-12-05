@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_parcsr_ls.h"
@@ -101,7 +101,7 @@ HYPRE_ParCSRFlexGMRESSetKDim( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetTol( HYPRE_Solver solver,
-                             double             tol    )
+                             HYPRE_Real         tol    )
 {
    return( HYPRE_FlexGMRESSetTol( solver, tol ) );
 }
@@ -111,7 +111,7 @@ HYPRE_ParCSRFlexGMRESSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetAbsoluteTol( HYPRE_Solver solver,
-                                     double             a_tol    )
+                                     HYPRE_Real         a_tol    )
 {
    return( HYPRE_FlexGMRESSetAbsoluteTol( solver, a_tol ) );
 }
@@ -203,7 +203,7 @@ HYPRE_ParCSRFlexGMRESGetNumIterations( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                                   double             *norm   )
+                                                   HYPRE_Real         *norm   )
 {
    return( HYPRE_FlexGMRESGetFinalRelativeResidualNorm( solver, norm ) );
 }

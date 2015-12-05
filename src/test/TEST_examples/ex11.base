@@ -1,4 +1,10 @@
 
+
+ Num MPI tasks = 4
+
+ Num OpenMP threads = 1
+
+
 BoomerAMG SETUP PARAMETERS:
 
  Max levels = 25
@@ -39,6 +45,7 @@ lev  rows cols    min max     weight   weight     min       max
 
      Complexity:    grid = 1.719927
                 operator = 2.361942
+                memory = 3.194052
 
 
 
@@ -122,8 +129,8 @@ Residual   9.21811003610402e-09
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.590000 seconds
+  wall clock time = 0.110000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.490000 seconds
+  cpu clock time  = 0.110000 seconds
   cpu MFLOPS      = 0.000000
 

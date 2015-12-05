@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.33 $
+# $Revision$
 #EHEADER**********************************************************************
 
 include ../config/Makefile.config
@@ -32,8 +32,8 @@ SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
 STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
 STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
 UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
-BLASFILES = ${HYPRE_SRC_TOP_DIR}/blas/*.o
-LAPACKFILES = ${HYPRE_SRC_TOP_DIR}/lapack/*.o
+BLASFILES = ${HYPRE_BLAS_FILES}
+LAPACKFILES = ${HYPRE_LAPACK_FILES}
 
 FILES_HYPRE = \
 $(SUPERLUFILES)\
@@ -69,10 +69,10 @@ SOLIBS = ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
 ##################################################################
 
 all: libHYPRE${HYPRE_LIB_SUFFIX}
-	cp -fpPR libHYPRE* ${HYPRE_BUILD_DIR}/lib
+	cp -fR libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
-	cp -fpPR libHYPRE* ${HYPRE_LIB_INSTALL}
+	cp -fR libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
 	rm -f *.o libHYPRE*
@@ -102,9 +102,7 @@ libHYPRE.a: ${FILES_HYPRE}
 	${AR} $@ $(SSTRUCTMVFILES)
 	${AR} $@ $(STRUCTLSFILES)
 	${AR} $@ $(STRUCTMVFILES)
-	${AR} $@ $(UTILITIESFILES)
-	${AR} $@ $(BLASFILES)
-	${AR} $@ $(LAPACKFILES)
+	${AR} $@ $(UTILITIESFILES) $(BLASFILES) $(LAPACKFILES)
 	${RANLIB} $@
 
 libHYPRE.so: ${FILES_HYPRE}

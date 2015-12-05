@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
 
 #ifndef HYPRE_KRYLOV_HEADER
 #define HYPRE_KRYLOV_HEADER
@@ -78,7 +77,7 @@ typedef HYPRE_Int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
 #define HYPRE_MODIFYPC
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                       HYPRE_Int,
-                                      double);
+                                      HYPRE_Real);
 
 #endif
 /*@}*/
@@ -112,7 +111,7 @@ HYPRE_Int HYPRE_PCGSolve(HYPRE_Solver solver,
  * (Optional) Set the relative convergence tolerance.
  **/
 HYPRE_Int HYPRE_PCGSetTol(HYPRE_Solver solver,
-                    double       tol);
+                    HYPRE_Real   tol);
 
 /**
  * (Optional) Set the absolute convergence tolerance (default is
@@ -122,7 +121,7 @@ HYPRE_Int HYPRE_PCGSetTol(HYPRE_Solver solver,
  * max(relative$\_$tolerance$^{2} \ast <C*b, b>$, absolute$\_$tolerance$^2$).)
  **/
 HYPRE_Int HYPRE_PCGSetAbsoluteTol(HYPRE_Solver solver,
-                            double       a_tol);
+                            HYPRE_Real   a_tol);
 
 /**
  * (Optional) Set a residual-based convergence tolerance which checks if
@@ -131,16 +130,16 @@ HYPRE_Int HYPRE_PCGSetAbsoluteTol(HYPRE_Solver solver,
  * roundoff errors affect the approximation.
  **/
 HYPRE_Int HYPRE_PCGSetResidualTol(HYPRE_Solver solver,
-                            double       rtol);
+                            HYPRE_Real   rtol);
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_PCGSetAbsoluteTolFactor(HYPRE_Solver solver, double abstolf);
+HYPRE_Int HYPRE_PCGSetAbsoluteTolFactor(HYPRE_Solver solver, HYPRE_Real abstolf);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_PCGSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
+HYPRE_Int HYPRE_PCGSetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real cf_tol);
 
 /*
  * RE-VISIT
@@ -208,7 +207,7 @@ HYPRE_Int HYPRE_PCGGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_PCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                          double       *norm);
+                                          HYPRE_Real   *norm);
 
 /**
  * Return the residual.
@@ -219,22 +218,22 @@ HYPRE_Int HYPRE_PCGGetResidual(HYPRE_Solver  solver,
 /**
  **/
 HYPRE_Int HYPRE_PCGGetTol(HYPRE_Solver  solver,
-                    double       *tol);
+                    HYPRE_Real   *tol);
 
 /**
  **/
 HYPRE_Int HYPRE_PCGGetResidualTol(HYPRE_Solver  solver,
-                            double       *rtol);
+                            HYPRE_Real   *rtol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_PCGGetAbsoluteTolFactor(HYPRE_Solver solver, double *abstolf);
+HYPRE_Int HYPRE_PCGGetAbsoluteTolFactor(HYPRE_Solver solver, HYPRE_Real *abstolf);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_PCGGetConvergenceFactorTol(HYPRE_Solver solver, double *cf_tol);
+HYPRE_Int HYPRE_PCGGetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real *cf_tol);
 
 /*
  * RE-VISIT
@@ -312,7 +311,7 @@ HYPRE_Int HYPRE_GMRESSolve(HYPRE_Solver solver,
  * (Optional) Set the relative convergence tolerance.
  **/
 HYPRE_Int HYPRE_GMRESSetTol(HYPRE_Solver solver,
-                      double       tol);
+                      HYPRE_Real   tol);
 
 /**
  * (Optional) Set the absolute convergence tolerance (default is 0). 
@@ -323,12 +322,12 @@ HYPRE_Int HYPRE_GMRESSetTol(HYPRE_Solver solver,
  *
  **/
 HYPRE_Int HYPRE_GMRESSetAbsoluteTol(HYPRE_Solver solver,
-                              double       a_tol);
+                              HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_GMRESSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
+HYPRE_Int HYPRE_GMRESSetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real cf_tol);
 
 /*
  * RE-VISIT
@@ -399,7 +398,7 @@ HYPRE_Int HYPRE_GMRESGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_GMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                            double       *norm);
+                                            HYPRE_Real   *norm);
 
 /**
  * Return the residual.
@@ -410,17 +409,17 @@ HYPRE_Int HYPRE_GMRESGetResidual(HYPRE_Solver   solver,
 /**
  **/
 HYPRE_Int HYPRE_GMRESGetTol(HYPRE_Solver  solver,
-                      double       *tol);
+                      HYPRE_Real   *tol);
 
 /**
  **/
 HYPRE_Int HYPRE_GMRESGetAbsoluteTol(HYPRE_Solver  solver,
-                              double       *tol);
+                              HYPRE_Real   *tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_GMRESGetConvergenceFactorTol(HYPRE_Solver solver, double *cf_tol);
+HYPRE_Int HYPRE_GMRESGetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real *cf_tol);
 
 /*
  * OBSOLETE 
@@ -498,7 +497,7 @@ HYPRE_Int HYPRE_FlexGMRESSolve(HYPRE_Solver solver,
  * (Optional) Set the convergence tolerance.
  **/
 HYPRE_Int HYPRE_FlexGMRESSetTol(HYPRE_Solver solver,
-                          double       tol);
+                          HYPRE_Real   tol);
 
 /**
  * (Optional) Set the absolute convergence tolerance (default is 0). 
@@ -509,12 +508,12 @@ HYPRE_Int HYPRE_FlexGMRESSetTol(HYPRE_Solver solver,
  *
  **/
 HYPRE_Int HYPRE_FlexGMRESSetAbsoluteTol(HYPRE_Solver solver,
-                                  double       a_tol);
+                                  HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_FlexGMRESSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
+HYPRE_Int HYPRE_FlexGMRESSetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real cf_tol);
 
 /*
  * RE-VISIT
@@ -563,7 +562,7 @@ HYPRE_Int HYPRE_FlexGMRESGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_FlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                                double       *norm);
+                                                HYPRE_Real   *norm);
 
 /**
  * Return the residual.
@@ -574,12 +573,12 @@ HYPRE_Int HYPRE_FlexGMRESGetResidual(HYPRE_Solver   solver,
 /**
  **/
 HYPRE_Int HYPRE_FlexGMRESGetTol(HYPRE_Solver  solver,
-                          double       *tol);
+                          HYPRE_Real   *tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_FlexGMRESGetConvergenceFactorTol(HYPRE_Solver solver, double *cf_tol);
+HYPRE_Int HYPRE_FlexGMRESGetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real *cf_tol);
 
 /*
  * RE-VISIT
@@ -663,7 +662,7 @@ HYPRE_Int HYPRE_LGMRESSolve(HYPRE_Solver solver,
  * (Optional) Set the convergence tolerance.
  **/
 HYPRE_Int HYPRE_LGMRESSetTol(HYPRE_Solver solver,
-                       double       tol);
+                       HYPRE_Real   tol);
 /**
  * (Optional) Set the absolute convergence tolerance (default is 0). 
  * If one desires
@@ -673,12 +672,12 @@ HYPRE_Int HYPRE_LGMRESSetTol(HYPRE_Solver solver,
  *
  **/
 HYPRE_Int HYPRE_LGMRESSetAbsoluteTol(HYPRE_Solver solver,
-                               double       a_tol);
+                               HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_LGMRESSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
+HYPRE_Int HYPRE_LGMRESSetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real cf_tol);
 
 /*
  * RE-VISIT
@@ -736,7 +735,7 @@ HYPRE_Int HYPRE_LGMRESGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_LGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                             double       *norm);
+                                             HYPRE_Real   *norm);
 
 /**
  * Return the residual.
@@ -747,12 +746,12 @@ HYPRE_Int HYPRE_LGMRESGetResidual(HYPRE_Solver   solver,
 /**
  **/
 HYPRE_Int HYPRE_LGMRESGetTol(HYPRE_Solver  solver,
-                       double       *tol);
+                       HYPRE_Real   *tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_LGMRESGetConvergenceFactorTol(HYPRE_Solver solver, double *cf_tol);
+HYPRE_Int HYPRE_LGMRESGetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real *cf_tol);
 
 /*
  * RE-VISIT
@@ -834,7 +833,7 @@ HYPRE_Int HYPRE_BiCGSTABSolve(HYPRE_Solver solver,
  * (Optional) Set the convergence tolerance.
  **/
 HYPRE_Int HYPRE_BiCGSTABSetTol(HYPRE_Solver solver,
-                         double       tol);
+                         HYPRE_Real   tol);
 
 /**
  * (Optional) Set the absolute convergence tolerance (default is 0). 
@@ -845,12 +844,12 @@ HYPRE_Int HYPRE_BiCGSTABSetTol(HYPRE_Solver solver,
  *
  **/
 HYPRE_Int HYPRE_BiCGSTABSetAbsoluteTol(HYPRE_Solver solver,
-                                 double       a_tol);
+                                 HYPRE_Real   a_tol);
 
 /*
  * RE-VISIT
  **/
-HYPRE_Int HYPRE_BiCGSTABSetConvergenceFactorTol(HYPRE_Solver solver, double cf_tol);
+HYPRE_Int HYPRE_BiCGSTABSetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real cf_tol);
 
 /*
  * RE-VISIT
@@ -898,7 +897,7 @@ HYPRE_Int HYPRE_BiCGSTABGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_BiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                               double       *norm);
+                                               HYPRE_Real   *norm);
 
 /**
  * Return the residual.
@@ -947,7 +946,7 @@ HYPRE_Int HYPRE_CGNRSolve(HYPRE_Solver solver,
  * (Optional) Set the convergence tolerance.
  **/
 HYPRE_Int HYPRE_CGNRSetTol(HYPRE_Solver solver,
-                     double       tol);
+                     HYPRE_Real   tol);
 
 /*
  * RE-VISIT
@@ -1004,7 +1003,7 @@ HYPRE_Int HYPRE_CGNRGetNumIterations(HYPRE_Solver  solver,
  * Return the norm of the final relative residual.
  **/
 HYPRE_Int HYPRE_CGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
-                                           double       *norm);
+                                           HYPRE_Real   *norm);
 
 #if 0 /* need to add */
 /*

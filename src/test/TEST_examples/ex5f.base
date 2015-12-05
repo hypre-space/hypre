@@ -1,4 +1,10 @@
 
+
+ Num MPI tasks = 4
+
+ Num OpenMP threads = 1
+
+
 BoomerAMG SETUP PARAMETERS:
 
  Max levels = 20
@@ -39,6 +45,7 @@ lev  rows cols    min max     weight   weight     min       max
 
      Complexity:    grid = 1.719927
                 operator = 2.361942
+                memory = 3.194052
 
 
 

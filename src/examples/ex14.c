@@ -615,14 +615,7 @@ int main (int argc, char *argv[])
          GLVis_PrintLocalRhombusMesh("vis/ex14.mesh", n, myid, gamma);
 
          /* additional visualization data */
-         if (myid == 0)
-         {
-            sprintf(filename, "%s", "vis/ex14.data");
-            file = fopen(filename, "w");
-            fprintf(file, "np %d\n", num_procs);
-            fflush(file);
-            fclose(file);
-         }
+         GLVis_PrintData("vis/ex14.data", myid, num_procs);
       }
 
       if (myid == 0)

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -51,7 +51,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParCSRMatrix    *transpose;
    hypre_ParCSRMatrix    *parcsr_mat;
    HYPRE_Int              size, *col_inds;
-   double                *values;
+   HYPRE_Real            *values;
 
    hypre_ParVector       *parvector_x;
    hypre_ParVector       *parvector_b;
@@ -70,8 +70,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParVector      **nVtemp_l;
    hypre_ParVector      **nVtemp2_l;
    HYPRE_Int            **nCF_marker_l;
-   double                *nrelax_weight;
-   double                *nomega;
+   HYPRE_Real            *nrelax_weight;
+   HYPRE_Real            *nomega;
    HYPRE_Int              nrelax_type;
    HYPRE_Int              node_numlevels;
 
@@ -84,8 +84,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    hypre_ParVector      **ee_l;
    hypre_ParVector      **eVtemp_l;
    hypre_ParVector      **eVtemp2_l;
-   double                *erelax_weight;
-   double                *eomega;
+   HYPRE_Real            *erelax_weight;
+   HYPRE_Real            *eomega;
    HYPRE_Int            **eCF_marker_l;
    HYPRE_Int              erelax_type;
 
@@ -133,13 +133,13 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    HYPRE_Int              nrows, rank, start_rank;
    HYPRE_Int             *flag, *flag2, *inode, *ncols, *jnode;
-   double                *vals;
+   HYPRE_Real            *vals;
 
    HYPRE_Int              i, j, k, l, m;
 
    hypre_BoxManager      *node_boxman;
    hypre_BoxManEntry     *entry;
-   HYPRE_Int              kstart, kend;
+   HYPRE_Int              kstart=0, kend=0;
    HYPRE_Int              ilower, iupper;
    HYPRE_Int              jlower, jupper;
    HYPRE_Int              myproc;
@@ -231,7 +231,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       {
          for (i= -1; i< 2; i++)
          {
-            hypre_SetIndex(shape, i, j, k);
+            hypre_SetIndex3(shape, i, j, k);
             HYPRE_SStructStencilSetEntry(Ann_stencils[0], m, shape, vars);
             m++;
          }
@@ -316,7 +316,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) parcsr_mat, 
                                i, &size, &col_inds, &values);
       HYPRE_IJMatrixSetValues(Aen, 1, &size, &i, (const HYPRE_Int *) col_inds,
-                              (const double *) values);
+                              (const HYPRE_Real *) values);
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat, 
                                    i, &size, &col_inds, &values);
    }
@@ -337,7 +337,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                i, &size, &col_inds, &values);
       HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
                               1, &size, &i, (const HYPRE_Int *) col_inds,
-                              (const double *) values);
+                              (const HYPRE_Real *) values);
       HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) parcsr_mat, 
                                    i, &size, &col_inds, &values);
    }
@@ -375,7 +375,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
          hypre_BoxManGetEntry(node_boxman, myproc, j, &entry);
          i= hypre_BoxVolume(box);
 
-         tmp_box_array= hypre_BoxArrayCreate(0);
+         tmp_box_array= hypre_BoxArrayCreate(0, ndim);
          ierr        += hypre_BoxBoundaryG(box, sgrid, tmp_box_array);
 
          for (m= 0; m< hypre_BoxArraySize(tmp_box_array); m++)
@@ -395,8 +395,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_BoxLoop0For()
                {
                   hypre_BoxLoopGetIndex(lindex);
-                  hypre_SetIndex(index, lindex[0], lindex[1], lindex[2]);
-                  hypre_AddIndex(index, start, index);
+                  hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
+                  hypre_AddIndexes(index, start, 3, index);
 
                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                         &rank, matrix_type);
@@ -423,7 +423,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    inode= hypre_CTAlloc(HYPRE_Int, j);
    ncols= hypre_CTAlloc(HYPRE_Int, j);
    jnode= hypre_CTAlloc(HYPRE_Int, j);
-   vals = hypre_TAlloc(double, j);
+   vals = hypre_TAlloc(HYPRE_Real, j);
 
    j= 0;
    for (i= 0; i< nrows; i++)
@@ -442,7 +442,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(Ann),
                            j, ncols, (const HYPRE_Int*) inode,
-                           (const HYPRE_Int*) jnode, (const double*) vals);
+                           (const HYPRE_Int*) jnode, (const HYPRE_Real*) vals);
    hypre_TFree(ncols);
    hypre_TFree(inode);
    hypre_TFree(jnode);
@@ -505,8 +505,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
       /* relaxation parameters */
       nCF_marker_l = hypre_CTAlloc(HYPRE_Int *, node_numlevels);
-      nrelax_weight= hypre_CTAlloc(double , node_numlevels);
-      nomega       = hypre_CTAlloc(double , node_numlevels);
+      nrelax_weight= hypre_CTAlloc(HYPRE_Real , node_numlevels);
+      nomega       = hypre_CTAlloc(HYPRE_Real , node_numlevels);
       nrelax_type  = 6;  /* fast parallel hybrid */
 
       for (i= 0; i< node_numlevels; i++)
@@ -575,7 +575,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * scheme to semi-coarsen. That is, coarsen wrt to rfactor, with
     * rfactor[i] > 1 for i < ndim.
     * Determine the number of levels for the edge problem */
-   cboxes= hypre_BoxArrayCreate(0);
+   cboxes= hypre_BoxArrayCreate(0, ndim);
    coarsen= hypre_CTAlloc(HYPRE_Int, nparts);
    edge_maxlevels= 0;
    for (part= 0; part< nparts; part++)
@@ -725,7 +725,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * of the level egrid. After each coarsening, the bounding boxes are 
     * replaced by the generated coarse egrid cell bounding boxes.
     *--------------------------------------------------------------------------*/
-   hypre_SetIndex(cindex, 0, 0, 0);
+   hypre_SetIndex3(cindex, 0, 0, 0);
    j= 0; /* j tracks the number of parts that have been coarsened away */
    edge_numlevels= 1;
 
@@ -1295,8 +1295,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
     * Needed for quick parallel over/under-relaxation.
     *-----------------------------------------------------*/
    erelax_type  = 2;
-   erelax_weight= hypre_TAlloc(double, edge_numlevels);
-   eomega       = hypre_TAlloc(double, edge_numlevels);
+   erelax_weight= hypre_TAlloc(HYPRE_Real, edge_numlevels);
+   eomega       = hypre_TAlloc(HYPRE_Real, edge_numlevels);
    eCF_marker_l = hypre_TAlloc(HYPRE_Int *, edge_numlevels);
 
    relax_type= 6; /* SSOR */
@@ -1355,8 +1355,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    if ((maxwell_TV_data -> logging) > 0)
    {
       i= (maxwell_TV_data -> max_iter);
-      (maxwell_TV_data -> norms)     = hypre_TAlloc(double, i);
-      (maxwell_TV_data -> rel_norms) = hypre_TAlloc(double, i);
+      (maxwell_TV_data -> norms)     = hypre_TAlloc(HYPRE_Real, i);
+      (maxwell_TV_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, i);
    }
 
    return ierr;
@@ -1436,7 +1436,7 @@ hypre_BoxContraction( hypre_Box           *box,
    hypre_Box           *shifted_box;
    hypre_Box            intersect_box;
 
-   HYPRE_Int            ndim= hypre_StructGridDim(sgrid);
+   HYPRE_Int            ndim= hypre_StructGridNDim(sgrid);
 
    hypre_Index          remainder, box_width;
    HYPRE_Int            i, j, k, p;
@@ -1444,11 +1444,12 @@ hypre_BoxContraction( hypre_Box           *box,
 
 
    /* get the boxes out of the box manager - use these as the neighbor boxes */
-   neighbor_boxes = hypre_BoxArrayCreate(0);
+   neighbor_boxes = hypre_BoxArrayCreate(0, ndim);
    hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
 
+   hypre_BoxInit(&intersect_box, ndim);
 
-   contracted_box= hypre_BoxCreate();
+   contracted_box= hypre_BoxCreate(ndim);
 
    hypre_ClearIndex(remainder);
    p= 0;
@@ -1468,7 +1469,7 @@ hypre_BoxContraction( hypre_Box           *box,
    hypre_CopyBox(box, contracted_box);
    if (p)
    {
-      shifted_box= hypre_BoxCreate();
+      shifted_box= hypre_BoxCreate(ndim);
       for (i= 0; i< ndim; i++)
       {
          if (remainder[i])   /* non-divisible in the i'th direction */

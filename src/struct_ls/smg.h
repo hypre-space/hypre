@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -28,7 +28,7 @@ typedef struct
    MPI_Comm              comm;
                       
    HYPRE_Int             memory_use;
-   double                tol;
+   HYPRE_Real            tol;
    HYPRE_Int             max_iter;
    HYPRE_Int             rel_change;
    HYPRE_Int             zero_guess;
@@ -48,7 +48,7 @@ typedef struct
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **PT_grid_l;
                     
-   double               *data;
+   HYPRE_Real           *data;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -74,8 +74,8 @@ typedef struct
 
    /* additional log info (logged when `logging' > 0) */
    HYPRE_Int             logging;
-   double               *norms;
-   double               *rel_norms;
+   HYPRE_Real           *norms;
+   HYPRE_Real           *rel_norms;
 
 } hypre_SMGData;
 
@@ -86,7 +86,7 @@ typedef struct
 #define hypre_SMGSetBIndex(base_index, base_stride, level, bindex) \
 {\
    if (level > 0)\
-      hypre_SetIndex(bindex, 0, 0, 0);\
+      hypre_SetIndex3(bindex, 0, 0, 0);\
    else\
       hypre_CopyIndex(base_index, bindex);\
 }
@@ -94,7 +94,7 @@ typedef struct
 #define hypre_SMGSetBStride(base_index, base_stride, level, bstride) \
 {\
    if (level > 0)\
-      hypre_SetIndex(bstride, 1, 1, 1);\
+      hypre_SetIndex3(bstride, 1, 1, 1);\
    else\
       hypre_CopyIndex(base_stride, bstride);\
 }

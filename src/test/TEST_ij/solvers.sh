@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.19 $
+# $Revision$
 #EHEADER**********************************************************************
 
 TNAME=`basename $0 .sh`
@@ -83,6 +83,9 @@ FILES="\
  ${TNAME}.out.103\
  ${TNAME}.out.104\
  ${TNAME}.out.105\
+ ${TNAME}.out.106\
+ ${TNAME}.out.107\
+ ${TNAME}.out.108\
 "
 
 for i in $FILES

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -192,7 +192,7 @@ HYPRE_Int HYPRE_AMSSetMaxIter(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetTol(HYPRE_Solver solver,
-                          double tol)
+                          HYPRE_Real tol)
 {
    return hypre_AMSSetTol((void *) solver, tol);
 }
@@ -224,8 +224,8 @@ HYPRE_Int HYPRE_AMSSetPrintLevel(HYPRE_Solver solver,
 HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
                                        HYPRE_Int relax_type,
                                        HYPRE_Int relax_times,
-                                       double relax_weight,
-                                       double omega)
+                                       HYPRE_Real relax_weight,
+                                       HYPRE_Real omega)
 {
    return hypre_AMSSetSmoothingOptions((void *) solver,
                                        relax_type,
@@ -235,7 +235,7 @@ HYPRE_Int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ARTSSetChebyOptions
+ * HYPRE_AMSSetChebyOptions
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSSetChebySmoothingOptions(HYPRE_Solver solver,
@@ -255,7 +255,7 @@ HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                       HYPRE_Int alpha_coarsen_type,
                                       HYPRE_Int alpha_agg_levels,
                                       HYPRE_Int alpha_relax_type,
-                                      double alpha_strength_threshold,
+                                      HYPRE_Real alpha_strength_threshold,
                                       HYPRE_Int alpha_interp_type,
                                       HYPRE_Int alpha_Pmax)
 {
@@ -269,6 +269,17 @@ HYPRE_Int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMSSetAlphaAMGCoarseRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_AMSSetAlphaAMGCoarseRelaxType(HYPRE_Solver solver,
+                                              HYPRE_Int alpha_coarse_relax_type)
+{
+   return hypre_AMSSetAlphaAMGCoarseRelaxType((void *) solver,
+                                              alpha_coarse_relax_type);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSSetBetaAMGOptions
  *--------------------------------------------------------------------------*/
 
@@ -276,7 +287,7 @@ HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      HYPRE_Int beta_coarsen_type,
                                      HYPRE_Int beta_agg_levels,
                                      HYPRE_Int beta_relax_type,
-                                     double beta_strength_threshold,
+                                     HYPRE_Real beta_strength_threshold,
                                      HYPRE_Int beta_interp_type,
                                      HYPRE_Int beta_Pmax)
 {
@@ -287,6 +298,17 @@ HYPRE_Int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      beta_strength_threshold,
                                      beta_interp_type,
                                      beta_Pmax);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSSetBetaAMGCoarseRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_AMSSetBetaAMGCoarseRelaxType(HYPRE_Solver solver,
+                                             HYPRE_Int beta_coarse_relax_type)
+{
+   return hypre_AMSSetBetaAMGCoarseRelaxType((void *) solver,
+                                             beta_coarse_relax_type);
 }
 
 /*--------------------------------------------------------------------------
@@ -305,7 +327,7 @@ HYPRE_Int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
-                                                double *rel_resid_norm)
+                                                HYPRE_Real *rel_resid_norm)
 {
    return hypre_AMSGetFinalRelativeResidualNorm((void *) solver,
                                                 rel_resid_norm);
@@ -352,7 +374,7 @@ HYPRE_Int HYPRE_AMSFEISetup(HYPRE_Solver solver,
                             HYPRE_Int numEdges_,
                             HYPRE_Int numLocalNodes_,
                             HYPRE_Int numNodes_,
-                            double *NodalCoord_)
+                            HYPRE_Real *NodalCoord_)
 {
    return hypre_AMSFEISetup((void *) solver,
                             (hypre_ParCSRMatrix *) A,

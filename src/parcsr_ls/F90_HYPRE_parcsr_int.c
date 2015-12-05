@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -67,9 +67,9 @@ hypre_F90_IFACE(hypre_parreadvector, HYPRE_PARREADVECTOR)
 {
    *ierr = 0;
 
-   (void*) (hypre_ParReadVector(
-               hypre_F90_PassComm (comm), 
-               (char *) file ));
+   hypre_ParReadVector(
+               hypre_F90_PassComm (comm),
+               (char *) file );
 }
 
 /*--------------------------------------------------------------------------
@@ -115,9 +115,9 @@ hypre_F90_IFACE(hypre_parcsrmultivectorread, HYPRE_PARCSRMULTIVECTORREAD)
 {
    *ierr = 0;
 
-   (void *) hypre_ParCSRMultiVectorRead(
+   hypre_ParCSRMultiVectorRead(
       hypre_F90_PassComm (comm),
-      (void *)       ii, 
+      (void *)       ii,
       (char *) file );
 }
 

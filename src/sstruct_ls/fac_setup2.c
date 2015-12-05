@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -88,13 +88,13 @@ hypre_FacSetup2( void                 *fac_vdata,
 
    /* coarsest grid solver */
    HYPRE_Int               csolver_type       =(fac_data-> csolver_type);
-   HYPRE_SStructSolver     crse_solver;
-   HYPRE_SStructSolver     crse_precond;
+   HYPRE_SStructSolver     crse_solver=NULL;
+   HYPRE_SStructSolver     crse_precond=NULL;
    
    HYPRE_Int               max_level        =  hypre_FACDataMaxLevels(fac_data);
    HYPRE_Int               relax_type       =  fac_data -> relax_type;
    HYPRE_Int               usr_jacobi_weight=  fac_data -> usr_jacobi_weight;
-   double                  jacobi_weight    =  fac_data -> jacobi_weight;
+   HYPRE_Real              jacobi_weight    =  fac_data -> jacobi_weight;
    HYPRE_Int              *levels;
    HYPRE_Int              *part_to_level;
 
@@ -103,8 +103,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int               stencil_size;
    hypre_Index             stencil_shape_i, loop_size;
    HYPRE_Int              *stencil_vars;
-   double                 *values;
-   double                 *A_smatrix_value;
+   HYPRE_Real             *values;
+   HYPRE_Real             *A_smatrix_value;
    HYPRE_Int               iA;
  
    HYPRE_Int              *nrows;
@@ -112,7 +112,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int             **rows;
    HYPRE_Int             **cols;
    HYPRE_Int              *cnt;
-   double                 *vals;
+   HYPRE_Real             *vals;
    
    HYPRE_Int              *level_rows;
    HYPRE_Int              *level_cols;
@@ -147,8 +147,8 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
    if ((fac_data -> logging) > 0)
    {
       max_cycles = (fac_data -> max_cycles);
-      (fac_data -> norms)    = hypre_TAlloc(double, max_cycles);
-      (fac_data -> rel_norms)= hypre_TAlloc(double, max_cycles);
+      (fac_data -> norms)    = hypre_TAlloc(HYPRE_Real, max_cycles);
+      (fac_data -> rel_norms)= hypre_TAlloc(HYPRE_Real, max_cycles);
    }
 
    /*--------------------------------------------------------------------------
@@ -437,7 +437,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
     *-----------------------------------------------------------*/
 
    A_level= hypre_TAlloc(hypre_SStructMatrix *, max_level+1);
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex3(stride, 1, 1, 1);
    for (level= 0; level <= max_level; level++)
    {
       HYPRE_SStructMatrixCreate(comm, graph_level[level], &A_level[level]);
@@ -461,7 +461,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
          }
       }
 
-      values   = hypre_TAlloc(double, max_box_volume);
+      values   = hypre_TAlloc(HYPRE_Real, max_box_volume);
       A_pmatrix= hypre_SStructMatrixPMatrix(A_rap, levels[level]);
 
       /*-----------------------------------------------------------
@@ -536,7 +536,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
             }
          }
 
-         values   = hypre_TAlloc(double, max_box_volume);
+         values   = hypre_TAlloc(HYPRE_Real, max_box_volume);
          A_pmatrix= hypre_SStructMatrixPMatrix(A_rap, levels[level-1]);
 
          /*-----------------------------------------------------------
@@ -653,7 +653,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
    for (level= 1; level<= max_level; level++)
    {
   
-      vals      = hypre_CTAlloc(double, nrows[level]);
+      vals      = hypre_CTAlloc(HYPRE_Real, nrows[level]);
       level_rows= hypre_TAlloc(HYPRE_Int, nrows[level]);
       level_cols= hypre_TAlloc(HYPRE_Int, nrows[level]);
 
@@ -699,7 +699,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
        *-----------------------------------------------------------*/
       HYPRE_IJMatrixSetValues( hypre_SStructMatrixIJMatrix(A_level[level]),
                                nrows[level], ncols[level], (const HYPRE_Int *) level_rows, 
-                               (const HYPRE_Int *) level_cols, (const double *) vals );
+                               (const HYPRE_Int *) level_cols, (const HYPRE_Real *) vals );
       
       hypre_TFree(ncols[level]);
       hypre_TFree(rows[level]);
@@ -807,7 +807,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
          max_box_volume= hypre_max(max_box_volume, box_volume);
       }
 
-      values   = hypre_TAlloc(double, max_box_volume);
+      values   = hypre_TAlloc(HYPRE_Real, max_box_volume);
    
       stencils= hypre_SStructGraphStencil(graph_level[0], part_fine, var1);
       stencil_size= hypre_SStructStencilSize(stencils);

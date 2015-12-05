@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -79,7 +79,7 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
-                       double             tol    )
+                       HYPRE_Real         tol    )
 {
    return( HYPRE_PCGSetTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -88,7 +88,7 @@ HYPRE_StructPCGSetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructPCGSetAbsoluteTol( HYPRE_StructSolver solver,
-                               double             tol    )
+                               HYPRE_Real         tol    )
 {
    return( HYPRE_PCGSetAbsoluteTol( (HYPRE_Solver) solver, tol ) );
 }
@@ -165,7 +165,7 @@ HYPRE_StructPCGGetNumIterations( HYPRE_StructSolver  solver,
 
 HYPRE_Int
 HYPRE_StructPCGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                             double             *norm   )
+                                             HYPRE_Real         *norm   )
 {
    return( HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, norm ) );
 }
@@ -200,9 +200,9 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    hypre_Box            *y_data_box;
    hypre_Box            *x_data_box;
                      
-   double               *Ap;
-   double               *yp;
-   double               *xp;
+   HYPRE_Real           *Ap;
+   HYPRE_Real           *yp;
+   HYPRE_Real           *xp;
                        
    HYPRE_Int             Ai;
    HYPRE_Int             yi;
@@ -216,7 +216,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    HYPRE_Int             i;
 
    /* x = D^{-1} y */
-   hypre_SetIndex(stride, 1, 1, 1);
+   hypre_SetIndex(stride, 1);
    boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, boxes)
    {
@@ -226,7 +226,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
       x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
       y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
-      hypre_SetIndex(index, 0, 0, 0);
+      hypre_SetIndex(index, 0);
       Ap = hypre_StructMatrixExtractPointerByIndex(A, i, index);
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);
@@ -235,7 +235,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop3Begin(hypre_StructVectorDim(Hx), loop_size,
+      hypre_BoxLoop3Begin(hypre_StructVectorNDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
                           x_data_box, start, stride, xi,
                           y_data_box, start, stride, yi);

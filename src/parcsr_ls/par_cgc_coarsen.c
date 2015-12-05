@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -72,7 +72,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int             *measure_array_master;
    HYPRE_Int             *graph_array;
    HYPRE_Int 	           *int_buf_data=NULL;
-   HYPRE_Int 	           *ci_array=NULL;
+   /*HYPRE_Int 	           *ci_array=NULL;*/
 
    HYPRE_Int              i, j, k, l, jS;
    HYPRE_Int		    ji, jj, index;
@@ -94,7 +94,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 
    HYPRE_Int              ierr = 0;
    HYPRE_Int              use_commpkg_A = 0;
-   double	    wall_time;
+   HYPRE_Real	    wall_time;
 
    HYPRE_Int              measure_max; /* BM Aug 30, 2006: maximal measure, needed for CGC */
 
@@ -600,12 +600,12 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
     * Clean up and return
     *---------------------------------------------------*/
 
-   if (coarsen_type != 1)
-   {   
+   /*if (coarsen_type != 1)
+   { */  
      if (CF_marker_offd) hypre_TFree(CF_marker_offd);  /* BM Aug 21, 2006 */
      if (int_buf_data) hypre_TFree(int_buf_data); /* BM Aug 21, 2006 */
-     if (ci_array) hypre_TFree(ci_array); /* BM Aug 21, 2006 */
-   }   
+     /*if (ci_array) hypre_TFree(ci_array);*/ /* BM Aug 21, 2006 */
+   /*} */   
    hypre_TFree(graph_array);
    if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)
@@ -628,13 +628,14 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   * =====================================================================================================*/
 {
   HYPRE_Int j,/*p,*/mpisize,mpirank,/*rstart,rend,*/choice,*coarse,ierr=0;
-  HYPRE_Int *vertexrange,*vertexrange_all;
-  HYPRE_Int *CF_marker_offd;
+  HYPRE_Int *vertexrange = NULL;
+  HYPRE_Int *vertexrange_all = NULL;
+  HYPRE_Int *CF_marker_offd = NULL;
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (hypre_ParCSRMatrixDiag(S));
 /*   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (hypre_ParCSRMatrixOffd (S)); */
 /*   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S); */
 
-/*   double wall_time; */
+/*   HYPRE_Real wall_time; */
 
   HYPRE_IJMatrix ijG;
   hypre_ParCSRMatrix *G;
@@ -749,11 +750,11 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
     }
 #endif
   HYPRE_IJMatrixDestroy (ijG);
-  if (vertexrange) hypre_TFree (vertexrange);
+  hypre_TFree (vertexrange);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-  if (vertexrange_all) hypre_TFree (vertexrange_all);
+  hypre_TFree (vertexrange_all);
 #endif
-  if (CF_marker_offd)  hypre_TFree (CF_marker_offd);
+  hypre_TFree (CF_marker_offd);
 #if 0
   if (!mpirank) {
     wall_time = time_getWallclockSeconds() - wall_time;
@@ -877,7 +878,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
   HYPRE_Int i,/* ii,*/ip,j,jj,m,n,p;
   HYPRE_Int mpisize,mpirank;
 
-  double weight;
+  HYPRE_Real weight;
 
   MPI_Comm comm = hypre_ParCSRMatrixComm(S);
 /*   hypre_MPI_Status status; */
@@ -893,11 +894,12 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
   HYPRE_Int pointrange_start,pointrange_end;
-  HYPRE_Int *pointrange,*pointrange_nonlocal,*pointrange_strong;
+  HYPRE_Int *pointrange,*pointrange_nonlocal,*pointrange_strong=NULL;
   HYPRE_Int vertexrange_start,vertexrange_end;
-  HYPRE_Int *vertexrange_strong,*vertexrange_nonlocal;
+  HYPRE_Int *vertexrange_strong= NULL;
+  HYPRE_Int *vertexrange_nonlocal;
   HYPRE_Int num_recvs,num_recvs_strong;
-  HYPRE_Int *recv_procs,*recv_procs_strong;
+  HYPRE_Int *recv_procs,*recv_procs_strong=NULL;
   HYPRE_Int /* *zeros,*rownz,*/*rownz_diag,*rownz_offd;
   HYPRE_Int nz;
   HYPRE_Int nlocal;
@@ -1066,11 +1068,11 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
 
   /* assemble */
   HYPRE_IJMatrixAssemble (ijmatrix);
-  if (num_recvs_strong) {
+  /*if (num_recvs_strong) {*/
     hypre_TFree (recv_procs_strong); 
     hypre_TFree (pointrange_strong);
     hypre_TFree (vertexrange_strong);
-  }
+  /*} */
 
   *ijG = ijmatrix;
   return (ierr);
@@ -1093,8 +1095,8 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
 /*   hypre_ParCSRCommPkg    *comm_pkg    = hypre_ParCSRMatrixCommPkg (G); */
 /*   hypre_ParCSRCommHandle *comm_handle; */
 
-  double *G_data = hypre_CSRMatrixData (G);
-  double max;
+  HYPRE_Real *G_data = hypre_CSRMatrixData (G);
+  HYPRE_Real max;
   HYPRE_Int *G_i = hypre_CSRMatrixI(G);
   HYPRE_Int *G_j = hypre_CSRMatrixJ(G);
   hypre_CSRMatrix *H,*HT;

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -41,11 +41,11 @@ typedef struct hypre_SStructSolver_struct
    HYPRE_Int            (***ssolver_destroy)();
    void                  ***ssolver_data;
 
-   double                   tol;
+   HYPRE_Real               tol;
    HYPRE_Int                max_iter;
    HYPRE_Int                zero_guess;
    HYPRE_Int                num_iterations;
-   double                   rel_norm;
+   HYPRE_Real               rel_norm;
    HYPRE_Int                ssolver;
 
    void                    *matvec_data;
@@ -319,7 +319,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    void                 ****smatvec_data     = (solver -> smatvec_data);
    HYPRE_Int            (***ssolver_solve)() = (solver -> ssolver_solve);
    void                  ***ssolver_data     = (solver -> ssolver_data);
-   double                   tol              = (solver -> tol);
+   HYPRE_Real               tol              = (solver -> tol);
    HYPRE_Int                max_iter         = (solver -> max_iter);
    HYPRE_Int                zero_guess       = (solver -> zero_guess);
    void                    *matvec_data      = (solver -> matvec_data);
@@ -337,7 +337,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_ParVector         *pary;
 
    HYPRE_Int                iter, part, vi, vj;
-   double                   b_dot_b = 0, r_dot_r;
+   HYPRE_Real               b_dot_b = 0, r_dot_r;
 
 
 
@@ -436,7 +436,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructSplitSetTol( HYPRE_SStructSolver solver,
-                          double              tol )
+                          HYPRE_Real          tol )
 {
    (solver -> tol) = tol;
    return hypre_error_flag;
@@ -500,7 +500,7 @@ HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
-                                                double              *norm )
+                                                HYPRE_Real          *norm )
 {
    *norm = (solver -> rel_norm);
    return hypre_error_flag;

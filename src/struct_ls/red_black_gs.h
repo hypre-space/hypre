@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@ typedef struct
 {
    MPI_Comm                comm;
 
-   double                  tol;                /* not yet used */
+   HYPRE_Real              tol;                /* not yet used */
    HYPRE_Int               max_iter;
    HYPRE_Int               rel_change;         /* not yet used */
    HYPRE_Int               zero_guess;

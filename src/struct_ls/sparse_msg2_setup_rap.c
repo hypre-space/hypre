@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -77,7 +77,7 @@ hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
              *--------------------------------------------------------------*/
-            hypre_SetIndex(index_temp,i,j,0);
+            hypre_SetIndex3(index_temp,i,j,0);
             MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
             stencil_rank++;
          }
@@ -109,7 +109,7 @@ hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R,
              *--------------------------------------------------------------*/
             if( i+j <=0 )
             {
-               hypre_SetIndex(index_temp,i,j,0);
+               hypre_SetIndex3(index_temp,i,j,0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
                stencil_rank++;
             }
@@ -192,14 +192,14 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -216,7 +216,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -250,11 +250,11 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
        * pb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp,0,-1,0);
       MapIndex(index_temp, cdir, index);
       pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
          hypre_BoxOffsetDistance(P_dbox, index);
@@ -265,11 +265,11 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
        * rb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp,0,-1,0);
       MapIndex(index_temp, cdir, index);
       ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
          hypre_BoxOffsetDistance(R_dbox, index);
@@ -284,23 +284,23 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
        * a_cn is pointer for north coefficient
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,0,0);
+      hypre_SetIndex3(index_temp,0,0,0);
       MapIndex(index_temp, cdir, index);
       a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,-1,0,0);
+      hypre_SetIndex3(index_temp,-1,0,0);
       MapIndex(index_temp, cdir, index);
       a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
       a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp,0,-1,0);
       MapIndex(index_temp, cdir, index);
       a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -315,15 +315,15 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
 
       if(fine_stencil_size > 5)
       {
-         hypre_SetIndex(index_temp,-1,-1,0);
+         hypre_SetIndex3(index_temp,-1,-1,0);
          MapIndex(index_temp, cdir, index);
          a_csw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index_temp,1,-1,0);
+         hypre_SetIndex3(index_temp,1,-1,0);
          MapIndex(index_temp, cdir, index);
          a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index_temp,-1,1,0);
+         hypre_SetIndex3(index_temp,-1,1,0);
          MapIndex(index_temp, cdir, index);
          a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
       }
@@ -336,23 +336,23 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
        * rap_cc is pointer for center coefficient (etc.)
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,0,0);
+      hypre_SetIndex3(index_temp,0,0,0);
       MapIndex(index_temp, cdir, index);
       rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,-1,0,0);
+      hypre_SetIndex3(index_temp,-1,0,0);
       MapIndex(index_temp, cdir, index);
       rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp,0,-1,0);
       MapIndex(index_temp, cdir, index);
       rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,-1,-1,0);
+      hypre_SetIndex3(index_temp,-1,-1,0);
       MapIndex(index_temp, cdir, index);
       rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,1,-1,0);
+      hypre_SetIndex3(index_temp,1,-1,0);
       MapIndex(index_temp, cdir, index);
       rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -364,11 +364,11 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
        * Offsets are used in refering to data associated with other points. 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       yOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
       yOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
-      hypre_SetIndex(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
       xOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
 
@@ -391,7 +391,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -443,7 +443,7 @@ hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -540,14 +540,14 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
 
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -564,7 +564,7 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
    fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -598,11 +598,11 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
        * pb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp,0,-1,0);
       MapIndex(index_temp, cdir, index);
       pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
          hypre_BoxOffsetDistance(P_dbox, index);
@@ -613,11 +613,11 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
        * rb is pointer for weight for f-point below c-point 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,-1,0);
+      hypre_SetIndex3(index_temp,0,-1,0);
       MapIndex(index_temp, cdir, index);
       ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
          hypre_BoxOffsetDistance(R_dbox, index);
@@ -632,19 +632,19 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
        * a_cn is pointer for north coefficient
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,0,0);
+      hypre_SetIndex3(index_temp,0,0,0);
       MapIndex(index_temp, cdir, index);
       a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,-1,0,0);
+      hypre_SetIndex3(index_temp,-1,0,0);
       MapIndex(index_temp, cdir, index);
       a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
       a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -659,15 +659,15 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
 
       if(fine_stencil_size > 5)
       {
-         hypre_SetIndex(index_temp,1,-1,0);
+         hypre_SetIndex3(index_temp,1,-1,0);
          MapIndex(index_temp, cdir, index);
          a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index_temp,-1,1,0);
+         hypre_SetIndex3(index_temp,-1,1,0);
          MapIndex(index_temp, cdir, index);
          a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-         hypre_SetIndex(index_temp,1,1,0);
+         hypre_SetIndex3(index_temp,1,1,0);
          MapIndex(index_temp, cdir, index);
          a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -681,19 +681,19 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
        * rap_ce is pointer for east coefficient (etc.)
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
       rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,1,1,0);
+      hypre_SetIndex3(index_temp,1,1,0);
       MapIndex(index_temp, cdir, index);
       rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-      hypre_SetIndex(index_temp,-1,1,0);
+      hypre_SetIndex3(index_temp,-1,1,0);
       MapIndex(index_temp, cdir, index);
       rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -705,11 +705,11 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
        * Offsets are used in refering to data associated with other points. 
        *-----------------------------------------------------------------*/
 
-      hypre_SetIndex(index_temp,0,1,0);
+      hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
       yOffsetA = hypre_BoxOffsetDistance(A_dbox,index); 
       yOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
-      hypre_SetIndex(index_temp,1,0,0);
+      hypre_SetIndex3(index_temp,1,0,0);
       MapIndex(index_temp, cdir, index);
       xOffsetP = hypre_BoxOffsetDistance(P_dbox,index); 
 
@@ -731,7 +731,7 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -774,7 +774,7 @@ hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-            hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,

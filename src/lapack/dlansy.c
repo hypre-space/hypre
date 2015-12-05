@@ -80,7 +80,7 @@ doublereal dlansy_(char *norm, char *uplo, integer *n, doublereal *a, integer
     integer a_dim1, a_offset, i__1, i__2;
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal absa;
     static integer i__, j;

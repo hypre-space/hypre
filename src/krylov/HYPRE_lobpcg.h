@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
 
 #ifndef hypre_LOBPCG_SOLVER
 #define hypre_LOBPCG_SOLVER
@@ -138,13 +137,13 @@ HYPRE_Int HYPRE_LOBPCGSetupT(HYPRE_Solver solver,
 HYPRE_Int HYPRE_LOBPCGSolve(HYPRE_Solver       solver,
                       mv_MultiVectorPtr  y, 
                       mv_MultiVectorPtr  x,
-                      double            *lambda );
+                      HYPRE_Real        *lambda );
 
 /**
  * (Optional) Set the absolute convergence tolerance.
  **/
 HYPRE_Int HYPRE_LOBPCGSetTol(HYPRE_Solver solver,
-                       double       tol);
+                       HYPRE_Real   tol);
 
 /**
  * (Optional) Set maximum number of iterations.

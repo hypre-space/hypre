@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -190,7 +190,7 @@ HYPRE_Int hypre_AMESetMaxIter(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetTol(void *esolver,
-                          double tol)
+                          HYPRE_Real tol)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> tol = tol;
@@ -262,14 +262,14 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          hypre_CSRMatrix *Ad = hypre_ParCSRMatrixDiag(ams_data -> A);
          HYPRE_Int *AdI = hypre_CSRMatrixI(Ad);
          HYPRE_Int *AdJ = hypre_CSRMatrixJ(Ad);
-         double *AdA = hypre_CSRMatrixData(Ad);
+         HYPRE_Real *AdA = hypre_CSRMatrixData(Ad);
          hypre_CSRMatrix *Ao = hypre_ParCSRMatrixOffd(ams_data -> A);
          HYPRE_Int *AoI = hypre_CSRMatrixI(Ao);
-         double *AoA = hypre_CSRMatrixData(Ao);
-         double l1_norm;
+         HYPRE_Real *AoA = hypre_CSRMatrixData(Ao);
+         HYPRE_Real l1_norm;
 
          /* A row (edge) is boundary if its off-diag l1 norm is less than eps */
-         double eps = DBL_EPSILON * 1e+4;
+         HYPRE_Real eps = DBL_EPSILON * 1e+4;
 
          for (i = 0; i < ne; i++)
          {
@@ -325,11 +325,11 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          hypre_CSRMatrix *Gtd = hypre_ParCSRMatrixDiag(Gt);
          HYPRE_Int *GtdI = hypre_CSRMatrixI(Gtd);
          HYPRE_Int *GtdJ = hypre_CSRMatrixJ(Gtd);
-         double *GtdA = hypre_CSRMatrixData(Gtd);
+         HYPRE_Real *GtdA = hypre_CSRMatrixData(Gtd);
          hypre_CSRMatrix *Gto = hypre_ParCSRMatrixOffd(Gt);
          HYPRE_Int *GtoI = hypre_CSRMatrixI(Gto);
          HYPRE_Int *GtoJ = hypre_CSRMatrixJ(Gto);
-         double *GtoA = hypre_CSRMatrixData(Gto);
+         HYPRE_Real *GtoA = hypre_CSRMatrixData(Gto);
 
          HYPRE_Int bdr;
 
@@ -421,7 +421,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
       HYPRE_ParCSRSetupInterpreter(interpreter);
 
-      ame_data -> eigenvalues = hypre_CTAlloc(double, ame_data -> block_size);
+      ame_data -> eigenvalues = hypre_CTAlloc(HYPRE_Real, ame_data -> block_size);
 
       ame_data -> eigenvectors =
          mv_MultiVectorCreateFromSampleVector(interpreter,
@@ -434,7 +434,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
       /* Make the initial vectors discretely divergence free */
       {
          HYPRE_Int i, j;
-         double *data;
+         HYPRE_Real *data;
 
          mv_TempMultiVector* tmp = mv_MultiVectorGetData(eigenvectors);
          HYPRE_ParVector *v = (HYPRE_ParVector*)(tmp -> vector);
@@ -572,7 +572,7 @@ HYPRE_Int hypre_AMESolve(void *esolver)
    HYPRE_Int nit;
    lobpcg_BLASLAPACKFunctions blap_fn;
    lobpcg_Tolerance lobpcg_tol;
-   double *residuals;
+   HYPRE_Real *residuals;
 
 #ifdef HYPRE_USING_ESSL
    blap_fn.dsygv  = dsygv;
@@ -583,7 +583,7 @@ HYPRE_Int hypre_AMESolve(void *esolver)
 #endif
    lobpcg_tol.relative = ame_data -> tol;
    lobpcg_tol.absolute = ame_data -> tol;
-   residuals = hypre_TAlloc(double, ame_data -> block_size);
+   residuals = hypre_TAlloc(HYPRE_Real, ame_data -> block_size);
 
    lobpcg_solve((mv_MultiVectorPtr) ame_data -> eigenvectors,
                 esolver, hypre_AMEMultiOperatorA,
@@ -628,7 +628,7 @@ HYPRE_Int hypre_AMEGetEigenvectors(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMEGetEigenvalues(void *esolver,
-                                  double **eigenvalues_ptr)
+                                  HYPRE_Real **eigenvalues_ptr)
 {
    hypre_AMEData *ame_data = esolver;
    *eigenvalues_ptr = ame_data -> eigenvalues;

@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /* ----------------------------------------------------------------------- */
 /*                                                                         */
@@ -20,6 +17,7 @@
 /*                     ParCSRMatrix to ParChordMatrix:                     */
 /*                                                                         */
 /* ----------------------------------------------------------------------- */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -130,9 +128,9 @@ hypre_ParChordMatrixToParCSRMatrix(
    HYPRE_Int i,ic,ij,ir,ilocal,p,r,r_p,r_global,r_local, jlen;
    HYPRE_Int *a_i, *a_j, *ilen;
    HYPRE_Int **rdofs, **ps;
-   double data;
-   double *a_data;
-   double **datas;
+   HYPRE_Complex data;
+   HYPRE_Complex *a_data;
+   HYPRE_Complex **datas;
    hypre_CSRMatrix *local_A;
 
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -175,14 +173,14 @@ hypre_ParChordMatrixToParCSRMatrix(
 
    ps = hypre_CTAlloc( HYPRE_Int*, hypre_ParChordMatrixNumIdofs(Ac) );
    rdofs = hypre_CTAlloc( HYPRE_Int*, hypre_ParChordMatrixNumIdofs(Ac) );
-   datas = hypre_CTAlloc( double*, hypre_ParChordMatrixNumIdofs(Ac) );
+   datas = hypre_CTAlloc( HYPRE_Complex*, hypre_ParChordMatrixNumIdofs(Ac) );
    ilen  = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumIdofs(Ac) );
    jlen = 0;
    for ( i=0; i<hypre_ParChordMatrixNumIdofs(Ac); ++i ) {
       ilen[i] = 0;
       ps[i] = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumRdofs(Ac) );
       rdofs[i] = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumRdofs(Ac) );
-      datas[i] = hypre_CTAlloc( double, hypre_ParChordMatrixNumRdofs(Ac) );
+      datas[i] = hypre_CTAlloc( HYPRE_Complex, hypre_ParChordMatrixNumRdofs(Ac) );
       /* ... rdofs[i], datas[i] will generally, not always, be much too big */
    }
    for ( p=0; p<hypre_ParChordMatrixNumInprocessors(Ac); ++p ) {
@@ -200,7 +198,7 @@ hypre_ParChordMatrixToParCSRMatrix(
 
    a_i = hypre_CTAlloc( HYPRE_Int, hypre_ParChordMatrixNumIdofs(Ac)+1 );
    a_j = hypre_CTAlloc( HYPRE_Int, jlen );
-   a_data = hypre_CTAlloc( double, jlen );
+   a_data = hypre_CTAlloc( HYPRE_Complex, jlen );
    a_i[0] = 0;
    for ( ilocal=0; ilocal<hypre_ParChordMatrixNumIdofs(Ac); ++ilocal ) {
       a_i[ilocal+1] = a_i[ilocal] + ilen[ilocal];
@@ -280,8 +278,8 @@ hypre_ParCSRMatrixToParChordMatrix(
    HYPRE_Int *inprocessor, *toprocessor, *pcr, *qcr, *num_inchords, *chord, *chordto;
    HYPRE_Int *inproc, *toproc, *num_rdofs_toprocessor;
    HYPRE_Int **inchord_idof, **inchord_rdof, **rdof_toprocessor;
-   double **inchord_data;
-   double data;
+   HYPRE_Complex **inchord_data;
+   HYPRE_Complex data;
    HYPRE_Int *first_index_idof, *first_index_rdof;
    hypre_MPI_Request * request;
    hypre_MPI_Status * status;
@@ -392,7 +390,7 @@ hypre_ParCSRMatrixToParChordMatrix(
 
    inchord_idof = hypre_CTAlloc( HYPRE_Int*, num_inprocessors );
    inchord_rdof = hypre_CTAlloc( HYPRE_Int*, num_inprocessors );
-   inchord_data = hypre_CTAlloc( double*, num_inprocessors );
+   inchord_data = hypre_CTAlloc( HYPRE_Complex*, num_inprocessors );
    num_inchords = hypre_CTAlloc( HYPRE_Int, num_inprocessors );
    chord = hypre_CTAlloc( HYPRE_Int, num_inprocessors );
    chordto = hypre_CTAlloc( HYPRE_Int, num_toprocessors );
@@ -416,7 +414,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    num_rdofs = hypre_NumbersNEntered( rdofs );
    inchord_idof[my_q] = hypre_CTAlloc( HYPRE_Int, num_inchords[my_q] );
    inchord_rdof[my_q] = hypre_CTAlloc( HYPRE_Int, num_inchords[my_q] );
-   inchord_data[my_q] = hypre_CTAlloc( double, num_inchords[my_q] );
+   inchord_data[my_q] = hypre_CTAlloc( HYPRE_Complex, num_inchords[my_q] );
    chord[0] = 0;
    for ( row=0; row<hypre_CSRMatrixNumRows(diag); ++row ) {
       for ( i=hypre_CSRMatrixI(diag)[row]; i<hypre_CSRMatrixI(diag)[row+1]; ++i ) {
@@ -566,7 +564,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    for ( q=0; q<num_inprocessors; ++q ) if (q!=my_q) {
       inchord_idof[q] = hypre_CTAlloc( HYPRE_Int, num_inchords[q] );
       inchord_rdof[q] = hypre_CTAlloc( HYPRE_Int, num_inchords[q] );
-      inchord_data[q] = hypre_CTAlloc( double, num_inchords[q] );
+      inchord_data[q] = hypre_CTAlloc( HYPRE_Complex, num_inchords[q] );
       chord[q] = 0;
    };
    for ( q=0; q<num_inprocessors; ++q ) if (q!=my_q) {

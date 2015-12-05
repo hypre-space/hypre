@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "_hypre_sstruct_ls.h"
 
@@ -28,7 +25,8 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
 {
    hypre_SStructRecvInfoData *recvinfo_data;
 
-   MPI_Comm                   comm= hypre_SStructVectorComm(cgrid);
+   MPI_Comm                   comm = hypre_StructGridComm(cgrid);
+   HYPRE_Int                  ndim = hypre_StructGridNDim(cgrid);
 
    hypre_BoxArray            *grid_boxes;
    hypre_Box                 *grid_box, fbox;
@@ -47,8 +45,11 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
    HYPRE_Int                  cnt;
    HYPRE_Int                  i, j;
 
+   hypre_BoxInit(&fbox, ndim);
+   hypre_BoxInit(&boxman_entry_box, ndim);
+
    hypre_ClearIndex(index1); 
-   hypre_SetIndex(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);
+   hypre_SetIndex3(index2, rfactor[0]-1, rfactor[1]-1, rfactor[2]-1);
 
    hypre_MPI_Comm_rank(comm, &myproc);
 
@@ -63,10 +64,10 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
     *   Since only coarse data is communicated, these intersection boxes
     *   must be coarsened.
     *------------------------------------------------------------------------*/
-   intersect_box = hypre_CTAlloc(hypre_Box, 1);
+   intersect_box = hypre_BoxCreate(ndim);
    grid_boxes   = hypre_StructGridBoxes(cgrid);
 
-   recv_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
+   recv_boxes= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes), ndim);
    recv_processes= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
 
    hypre_ForBoxI(i, grid_boxes)
@@ -117,7 +118,7 @@ hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
       hypre_TFree(boxman_entries);
    }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
-   hypre_TFree(intersect_box);
+   hypre_BoxDestroy(intersect_box);
 
    (recvinfo_data -> size)      = hypre_BoxArraySize(grid_boxes);
    (recvinfo_data -> recv_boxes)= recv_boxes;

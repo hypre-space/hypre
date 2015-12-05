@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -15,12 +15,12 @@
 
 #undef __FUNC__
 #define __FUNC__ "matvec_euclid_seq"
-void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, double *x, double *y)
+void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Real *x, HYPRE_Real *y)
 {
   START_FUNC_DH
   HYPRE_Int i, j;
   HYPRE_Int from, to, col;
-  double sum;
+  HYPRE_Real sum;
  
   if (np_dh > 1) SET_V_ERROR("only for sequential case!\n");
 
@@ -49,7 +49,7 @@ void matvec_euclid_seq(HYPRE_Int n, HYPRE_Int *rp, HYPRE_Int *cval, double *aval
 
 #undef __FUNC__
 #define __FUNC__ "Axpy"
-void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
+void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 {
   START_FUNC_DH
   HYPRE_Int i;
@@ -67,7 +67,7 @@ void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
 
 #undef __FUNC__
 #define __FUNC__ "CopyVec"
-void CopyVec(HYPRE_Int n, double *xIN, double *yOUT)
+void CopyVec(HYPRE_Int n, HYPRE_Real *xIN, HYPRE_Real *yOUT)
 {
   START_FUNC_DH
   HYPRE_Int i;
@@ -85,7 +85,7 @@ void CopyVec(HYPRE_Int n, double *xIN, double *yOUT)
 
 #undef __FUNC__
 #define __FUNC__ "ScaleVec"
-void ScaleVec(HYPRE_Int n, double alpha, double *x)
+void ScaleVec(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x)
 {
   START_FUNC_DH
   HYPRE_Int i;
@@ -102,10 +102,10 @@ void ScaleVec(HYPRE_Int n, double alpha, double *x)
 
 #undef __FUNC__
 #define __FUNC__ "InnerProd"
-double InnerProd(HYPRE_Int n, double *x, double *y)
+HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y)
 {
   START_FUNC_DH
-  double result, local_result = 0.0;
+  HYPRE_Real result, local_result = 0.0;
 
   HYPRE_Int i;
 
@@ -129,10 +129,10 @@ double InnerProd(HYPRE_Int n, double *x, double *y)
 
 #undef __FUNC__
 #define __FUNC__ "Norm2"
-double Norm2(HYPRE_Int n, double *x)
+HYPRE_Real Norm2(HYPRE_Int n, HYPRE_Real *x)
 {
   START_FUNC_DH
-  double result, local_result = 0.0;
+  HYPRE_Real result, local_result = 0.0;
   HYPRE_Int i;
 
 #ifdef USING_OPENMP_DH

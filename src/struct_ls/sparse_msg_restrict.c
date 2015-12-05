@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -134,9 +134,9 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    HYPRE_Int               ri;
    HYPRE_Int               rci;
                          
-   double                 *Rp0, *Rp1;
-   double                 *rp, *rp0, *rp1;
-   double                 *rcp;
+   HYPRE_Real             *Rp0, *Rp1;
+   HYPRE_Real             *rp, *rp0, *rp1;
+   HYPRE_Real             *rcp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;
@@ -163,7 +163,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    stencil       = hypre_StructMatrixStencil(R);
    stencil_shape = hypre_StructStencilShape(stencil);
 
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*--------------------------------------------------------------------
     * Restrict the residual.
@@ -226,7 +226,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
             hypre_StructMapCoarseToFine(startc, cindex, strideR, startR);
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-            hypre_BoxLoop3Begin(hypre_StructMatrixDim(R), loop_size,
+            hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                 R_dbox,  startR, strideR, Ri,
                                 r_dbox,  start,  stride,  ri,
                                 rc_dbox, startc, stridec, rci);

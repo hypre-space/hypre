@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -25,14 +25,14 @@
 #include "Matrix.h"
 #include "ParaSails.h"
 
-double hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, double *, double *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, double *, double *, HYPRE_Int *, double *, HYPRE_Int *);
+HYPRE_Real hypre_F90_NAME_BLAS(ddot, DDOT)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dcopy, DCOPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(dscal, DSCAL)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_BLAS(daxpy, DAXPY)(HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
 
-static double InnerProd(HYPRE_Int n, double *x, double *y, MPI_Comm comm)
+static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm comm)
 {
-    double local_result, result;
+    HYPRE_Real local_result, result;
 
     HYPRE_Int one = 1;
     local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
@@ -42,19 +42,19 @@ static double InnerProd(HYPRE_Int n, double *x, double *y, MPI_Comm comm)
     return result;
 }
 
-static void CopyVector(HYPRE_Int n, double *x, double *y)
+static void CopyVector(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y)
 {
     HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dcopy, DCOPY)(&n, x, &one, y, &one);
 }
 
-static void ScaleVector(HYPRE_Int n, double alpha, double *x)
+static void ScaleVector(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x)
 {
     HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(dscal, DSCAL)(&n, &alpha, x, &one);
 }
 
-static void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
+static void Axpy(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x, HYPRE_Real *y)
 {
     HYPRE_Int one = 1;
     hypre_F90_NAME_BLAS(daxpy, DAXPY)(&n, &alpha, x, &one, y, &one);
@@ -68,13 +68,13 @@ static void Axpy(HYPRE_Int n, double alpha, double *x, double *y)
  * than 0.1 at that point.
  *--------------------------------------------------------------------------*/
 
-void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
-   double tol, HYPRE_Int max_iter)
+void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
+   HYPRE_Real tol, HYPRE_Int max_iter)
 {
-   double *p, *s, *r;
-   double alpha, beta;
-   double gamma, gamma_old;
-   double bi_prod, i_prod, eps;
+   HYPRE_Real *p, *s, *r;
+   HYPRE_Real alpha, beta;
+   HYPRE_Real gamma, gamma_old;
+   HYPRE_Real bi_prod, i_prod, eps;
    HYPRE_Int i = 0;
    HYPRE_Int mype;
 
@@ -97,9 +97,9 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
       return;
    }
 
-   p = (double *) malloc(n * sizeof(double));
-   s = (double *) malloc(n * sizeof(double));
-   r = (double *) malloc(n * sizeof(double));
+   p = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
+   s = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
+   r = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
 
    /* r = b - Ax */
    MatrixMatvec(mat, x, r);  /* r = Ax */

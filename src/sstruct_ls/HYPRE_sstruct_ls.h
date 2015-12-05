@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.26 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -69,7 +69,7 @@ typedef HYPRE_Int (*HYPRE_PtrToSStructSolverFcn)(HYPRE_SStructSolver,
 
 typedef HYPRE_Int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
                                             HYPRE_Int,
-                                            double);
+                                            HYPRE_Real);
 #endif
 
 /*@}*/
@@ -130,7 +130,7 @@ HYPRE_SStructSysPFMGSolve(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetTol(HYPRE_SStructSolver solver,
-                           double              tol);
+                           HYPRE_Real          tol);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -182,7 +182,7 @@ HYPRE_SStructSysPFMGSetRelaxType(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetJacobiWeight(HYPRE_SStructSolver solver,
-                                    double              weight);
+                                    HYPRE_Real          weight);
 
 /**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
@@ -212,7 +212,7 @@ HYPRE_SStructSysPFMGSetSkipRelax(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGSetDxyz(HYPRE_SStructSolver  solver,
-                            double              *dxyz);
+                            HYPRE_Real          *dxyz);
 
 /**
  * (Optional) Set the amount of logging to do.
@@ -241,7 +241,7 @@ HYPRE_SStructSysPFMGGetNumIterations(HYPRE_SStructSolver  solver,
  **/
 HYPRE_Int
 HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
-                                                 double             *norm);
+                                                 HYPRE_Real         *norm);
 
 /*@}*/
 
@@ -300,7 +300,7 @@ HYPRE_SStructSplitSolve(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructSplitSetTol(HYPRE_SStructSolver solver,
-                         double              tol);
+                         HYPRE_Real          tol);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -344,7 +344,7 @@ HYPRE_SStructSplitGetNumIterations(HYPRE_SStructSolver  solver,
  **/
 HYPRE_Int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                               double              *norm);
+                                               HYPRE_Real          *norm);
 
 /*@}*/
 
@@ -381,7 +381,7 @@ HYPRE_SStructFACDestroy2(HYPRE_SStructSolver solver);
  **/
 HYPRE_Int
 HYPRE_SStructFACAMR_RAP(HYPRE_SStructMatrix  A,
-                        HYPRE_Int          (*rfactors)[3],
+                        HYPRE_Int          (*rfactors)[HYPRE_MAXDIM],
                         HYPRE_SStructMatrix *fac_A);
 
 /**
@@ -415,7 +415,7 @@ HYPRE_SStructFACSetPLevels(HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_SStructFACSetPRefinements(HYPRE_SStructSolver  solver,
                                 HYPRE_Int            nparts,
-                                HYPRE_Int          (*rfactors)[3] );
+                                HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] );
 
 /**
  * (Optional, but user must make sure that they do this function otherwise.)
@@ -425,7 +425,7 @@ HYPRE_Int
 HYPRE_SStructFACZeroCFSten(HYPRE_SStructMatrix  A,
                            HYPRE_SStructGrid    grid,
                            HYPRE_Int            part,
-                           HYPRE_Int            rfactors[3]);
+                           HYPRE_Int            rfactors[HYPRE_MAXDIM]);
 
 /**
  * (Optional, but user must make sure that they do this function otherwise.)
@@ -444,7 +444,7 @@ HYPRE_SStructFACZeroFCSten(HYPRE_SStructMatrix  A,
 HYPRE_Int
 HYPRE_SStructFACZeroAMRMatrixData(HYPRE_SStructMatrix  A,
                                   HYPRE_Int            part_crse,
-                                  HYPRE_Int            rfactors[3]);
+                                  HYPRE_Int            rfactors[HYPRE_MAXDIM]);
 
 /**
  * (Optional, but user must make sure that they do this function otherwise.)
@@ -454,7 +454,7 @@ HYPRE_SStructFACZeroAMRMatrixData(HYPRE_SStructMatrix  A,
 HYPRE_Int
 HYPRE_SStructFACZeroAMRVectorData(HYPRE_SStructVector  b,
                                   HYPRE_Int           *plevels,
-                                  HYPRE_Int          (*rfactors)[3] );
+                                  HYPRE_Int          (*rfactors)[HYPRE_MAXDIM] );
 
 /**
  * (Optional) Set maximum number of FAC levels.
@@ -467,7 +467,7 @@ HYPRE_SStructFACSetMaxLevels( HYPRE_SStructSolver solver ,
  **/
 HYPRE_Int
 HYPRE_SStructFACSetTol(HYPRE_SStructSolver solver,
-                       double              tol);
+                       HYPRE_Real          tol);
 /**
  * (Optional) Set maximum number of iterations.
  **/
@@ -510,7 +510,7 @@ HYPRE_SStructFACSetRelaxType(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructFACSetJacobiWeight(HYPRE_SStructSolver solver,
-                                double              weight);
+                                HYPRE_Real          weight);
 /**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
@@ -557,7 +557,7 @@ HYPRE_SStructFACGetNumIterations(HYPRE_SStructSolver  solver,
  **/
 HYPRE_Int
 HYPRE_SStructFACGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
-                                             double             *norm);
+                                             HYPRE_Real         *norm);
 
 /*@}*/
 
@@ -629,7 +629,7 @@ HYPRE_SStructMaxwellSetGrad(HYPRE_SStructSolver solver,
  **/
 HYPRE_Int
 HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
-                                HYPRE_Int           rfactors[3]);
+                                HYPRE_Int           rfactors[HYPRE_MAXDIM]);
 
 /**
  * Finds the physical boundary row ranks on all levels.
@@ -637,7 +637,7 @@ HYPRE_SStructMaxwellSetRfactors(HYPRE_SStructSolver solver,
 HYPRE_Int
 HYPRE_SStructMaxwellPhysBdy(HYPRE_SStructGrid  *grid_l,
                             HYPRE_Int           num_levels,
-                            HYPRE_Int           rfactors[3],
+                            HYPRE_Int           rfactors[HYPRE_MAXDIM],
                             HYPRE_Int        ***BdryRanks_ptr,
                             HYPRE_Int         **BdryRanksCnt_ptr );
 
@@ -680,7 +680,7 @@ HYPRE_SStructMaxwellGrad(HYPRE_SStructGrid    grid,
  **/
 HYPRE_Int
 HYPRE_SStructMaxwellSetTol(HYPRE_SStructSolver solver,
-                           double              tol);
+                           HYPRE_Real          tol);
 /**
  * (Optional) Set maximum number of iterations.
  **/
@@ -729,7 +729,7 @@ HYPRE_SStructMaxwellGetNumIterations(HYPRE_SStructSolver  solver,
  **/
 HYPRE_Int
 HYPRE_SStructMaxwellGetFinalRelativeResidualNorm(HYPRE_SStructSolver solver,
-                                                 double             *norm);
+                                                 HYPRE_Real         *norm);
 
 /*@}*/
 
@@ -777,11 +777,11 @@ HYPRE_SStructPCGSolve(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructPCGSetTol(HYPRE_SStructSolver solver,
-                       double              tol);
+                       HYPRE_Real          tol);
 
 HYPRE_Int
 HYPRE_SStructPCGSetAbsoluteTol(HYPRE_SStructSolver solver,
-                               double              tol);
+                               HYPRE_Real          tol);
 
 HYPRE_Int
 HYPRE_SStructPCGSetMaxIter(HYPRE_SStructSolver solver,
@@ -815,7 +815,7 @@ HYPRE_SStructPCGGetNumIterations(HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructPCGGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                             double              *norm);
+                                             HYPRE_Real          *norm);
 
 HYPRE_Int
 HYPRE_SStructPCGGetResidual(HYPRE_SStructSolver   solver,
@@ -885,11 +885,11 @@ HYPRE_SStructGMRESSolve(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructGMRESSetTol(HYPRE_SStructSolver solver,
-                         double              tol);
+                         HYPRE_Real          tol);
 
 HYPRE_Int
 HYPRE_SStructGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
-                                 double              tol);
+                                 HYPRE_Real          tol);
 
 /*
  * RE-VISIT
@@ -933,7 +933,7 @@ HYPRE_SStructGMRESGetNumIterations(HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                               double              *norm);
+                                               HYPRE_Real          *norm);
 
 HYPRE_Int
 HYPRE_SStructGMRESGetResidual(HYPRE_SStructSolver   solver,
@@ -985,11 +985,11 @@ HYPRE_SStructFlexGMRESSolve(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetTol(HYPRE_SStructSolver solver,
-                             double              tol);
+                             HYPRE_Real          tol);
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
-                                     double              tol);
+                                     HYPRE_Real          tol);
 
 /*
  * RE-VISIT
@@ -1026,7 +1026,7 @@ HYPRE_SStructFlexGMRESGetNumIterations(HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                   double              *norm);
+                                                   HYPRE_Real          *norm);
 
 HYPRE_Int
 HYPRE_SStructFlexGMRESGetResidual(HYPRE_SStructSolver   solver,
@@ -1082,12 +1082,12 @@ HYPRE_SStructLGMRESSolve(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetTol(HYPRE_SStructSolver solver,
-                          double              tol);
+                          HYPRE_Real          tol);
 
 
 HYPRE_Int
 HYPRE_SStructLGMRESSetAbsoluteTol(HYPRE_SStructSolver solver,
-                                  double              tol);
+                                  HYPRE_Real          tol);
 
 /*
  * RE-VISIT
@@ -1127,7 +1127,7 @@ HYPRE_SStructLGMRESGetNumIterations(HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructLGMRESGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                double              *norm);
+                                                HYPRE_Real          *norm);
 
 HYPRE_Int
 HYPRE_SStructLGMRESGetResidual(HYPRE_SStructSolver   solver,
@@ -1179,11 +1179,11 @@ HYPRE_SStructBiCGSTABSolve(HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetTol(HYPRE_SStructSolver solver,
-                            double              tol);
+                            HYPRE_Real          tol);
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABSetAbsoluteTol(HYPRE_SStructSolver solver,
-                                    double              tol);
+                                    HYPRE_Real          tol);
 /*
  * RE-VISIT
  **/
@@ -1222,7 +1222,7 @@ HYPRE_SStructBiCGSTABGetNumIterations(HYPRE_SStructSolver  solver,
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
-                                                  double              *norm);
+                                                  HYPRE_Real          *norm);
 
 HYPRE_Int
 HYPRE_SStructBiCGSTABGetResidual(HYPRE_SStructSolver   solver,

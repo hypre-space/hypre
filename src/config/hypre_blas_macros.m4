@@ -7,7 +7,7 @@ dnl # HYPRE is free software; you can redistribute it and/or modify it under the
 dnl # terms of the GNU Lesser General Public License (as published by the Free
 dnl # Software Foundation) version 2.1 dated February 1999.
 dnl #
-dnl # $Revision: 1.7 $
+dnl # $Revision$
 dnl #EHEADER*********************************************************************
 
 
@@ -41,7 +41,7 @@ dnl to run it if it is not found.
 dnl
 dnl This macro requires autoconf 2.50 or later.
 dnl
-dnl @version $Id: hypre_blas_macros.m4,v 1.7 2010/01/25 22:51:04 falgout Exp $
+dnl @version $Id$
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([AC_HYPRE_FIND_BLAS],

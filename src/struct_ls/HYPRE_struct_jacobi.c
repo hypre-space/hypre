@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -68,7 +68,7 @@ HYPRE_StructJacobiSolve( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
-                          double             tol    )
+                          HYPRE_Real         tol    )
 {
    return( hypre_JacobiSetTol( (void *) solver, tol ) );
 }
@@ -78,7 +78,7 @@ HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
 
 HYPRE_Int
 HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
-                          double           * tol    )
+                          HYPRE_Real       * tol    )
 {
    return( hypre_JacobiGetTol( (void *) solver, tol ) );
 }
@@ -149,7 +149,7 @@ HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
 
 HYPRE_Int
 HYPRE_StructJacobiGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
-                                                double             *norm   )
+                                                HYPRE_Real         *norm   )
 {
    return( hypre_JacobiGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

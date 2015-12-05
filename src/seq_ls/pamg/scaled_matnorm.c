@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -26,21 +26,21 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixScaledNorm( hypre_CSRMatrix *A, double *scnorm)
+hypre_CSRMatrixScaledNorm( hypre_CSRMatrix *A, HYPRE_Real *scnorm)
 {
    HYPRE_Int			*diag_i = hypre_CSRMatrixI(A);
    HYPRE_Int			*diag_j = hypre_CSRMatrixJ(A);
-   double		*diag_data = hypre_CSRMatrixData(A);
+   HYPRE_Real		*diag_data = hypre_CSRMatrixData(A);
    HYPRE_Int			 num_rows = hypre_CSRMatrixNumRows(A);
 
    hypre_Vector         *dinvsqrt;
-   double		*dis_data;
+   HYPRE_Real		*dis_data;
    hypre_Vector         *sum;
-   double		*sum_data;
+   HYPRE_Real		*sum_data;
   
    HYPRE_Int	      i, j;
 
-   double      mat_norm;
+   HYPRE_Real  mat_norm;
 
    dinvsqrt = hypre_SeqVectorCreate(num_rows);
    hypre_SeqVectorInitialize(dinvsqrt);

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -45,10 +45,10 @@
  *--------------------------------------------------------------------------*/
 
 PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale, 
-  double thresh)
+  HYPRE_Real thresh)
 {
     HYPRE_Int row, len, *ind, count, j, *data;
-    double *val, temp;
+    HYPRE_Real *val, temp;
 
     PrunedRows *p = (PrunedRows *) malloc(sizeof(PrunedRows));
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * Started 9/28/95
  * George
  *
- * $Id: util.c,v 2.7 2011/11/07 18:12:01 kolev1 Exp $
+ * $Id$
  */
 
 #include "ilu.h"
@@ -53,10 +53,10 @@ HYPRE_Int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
 /*************************************************************************
 * This function sort an (idx,val) array in increasing idx values
 **************************************************************************/
-void hypre_IdxIncSort(HYPRE_Int n, HYPRE_Int *idx, double *val)
+void hypre_IdxIncSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 {
   HYPRE_Int i, j, min;
-  double tmpval;
+  HYPRE_Real tmpval;
   HYPRE_Int tmpidx;
 
   for (i=0; i<n; i++) {
@@ -78,11 +78,11 @@ void hypre_IdxIncSort(HYPRE_Int n, HYPRE_Int *idx, double *val)
 /*************************************************************************
 * This function sort an (idx,val) array in decreasing abs val 
 **************************************************************************/
-void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, double *val)
+void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 {
   HYPRE_Int i, j, max;
   HYPRE_Int tmpidx;
-  double tmpval;
+  HYPRE_Real tmpval;
 
   for (i=0; i<n; i++) {
     max = i;
@@ -106,7 +106,7 @@ void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, double *val)
 * This function takes an (idx, val) array and compacts it so that every 
 * entry with idx[] = -1, gets removed. It returns the new count
 **************************************************************************/
-HYPRE_Int hypre_CompactIdx(HYPRE_Int n, HYPRE_Int *idx, double *val)
+HYPRE_Int hypre_CompactIdx(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 {
   HYPRE_Int i, j;
 
@@ -137,7 +137,7 @@ HYPRE_Int hypre_CompactIdx(HYPRE_Int n, HYPRE_Int *idx, double *val)
 /*************************************************************************
 * This function prints an (idx, val) pair
 **************************************************************************/
-void hypre_PrintIdxVal(HYPRE_Int n, HYPRE_Int *idx, double *val)
+void hypre_PrintIdxVal(HYPRE_Int n, HYPRE_Int *idx, HYPRE_Real *val)
 {
   HYPRE_Int i;
 

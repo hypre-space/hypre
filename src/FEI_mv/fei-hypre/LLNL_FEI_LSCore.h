@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -21,10 +21,11 @@
 #ifndef _LLNL_FEI_LSCORE_H_
 #define _LLNL_FEI_LSCORE_H_
 
+//New FEI 2.23.02
 #include "FEI_mv/fei-base/fei_defs.h"
-#include "FEI_mv/fei-base/Data.h"
-#include "FEI_mv/fei-base/Lookup.h"
-#include "FEI_mv/fei-base/LinearSystemCore.h"
+#include "FEI_mv/fei-base/fei_Data.hpp"
+#include "FEI_mv/fei-base/fei_Lookup.hpp"
+#include "FEI_mv/fei-base/fei_LinearSystemCore.hpp"
 #include "cfei_hypre.h"
 
 typedef enum {

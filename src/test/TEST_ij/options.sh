@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.10 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -59,7 +59,7 @@ echo  "# ${TNAME}.out.vrand.2"              >> ${TNAME}.out
 tail -15 ${TNAME}.out.vrand.2     | head -5 >> ${TNAME}.out
 
 echo  "# ${TNAME}.out.verb.0"               >> ${TNAME}.out
-tail -39 ${TNAME}.out.verb.0      | head -3 >> ${TNAME}.out
+tail -40 ${TNAME}.out.verb.0      | head -2 >> ${TNAME}.out
 
 echo  "# ${TNAME}.out.verb.2"               >> ${TNAME}.out
 tail -11 ${TNAME}.out.verb.2      | head -3 >> ${TNAME}.out

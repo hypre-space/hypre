@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_sstruct_ls.h"
@@ -68,7 +68,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    HYPRE_Int              ndim;
 
    hypre_Box             *ac_dbox;
-   double                *ac_ptr;
+   HYPRE_Real            *ac_ptr;
    hypre_Index            loop_size;
 
    HYPRE_Int              iac;
@@ -81,6 +81,9 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    p_cgrid  = hypre_SStructPMatrixPGrid(Ac);
    nvars    = hypre_SStructPMatrixNVars(Ac);
    ndim     = hypre_SStructPGridNDim(p_cgrid);
+
+   hypre_BoxInit(&fgrid_box, ndim);
+   hypre_BoxInit(&scaled_box, ndim);
 
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(stride);
@@ -121,10 +124,10 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
          hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), upper_shift,
                                      refine_factors, hypre_BoxIMax(&scaled_box));
 
-         hypre_SubtractIndex(hypre_BoxIMin(&scaled_box), stride,
-                             hypre_BoxIMin(&scaled_box));
-         hypre_AddIndex(hypre_BoxIMax(&scaled_box), stride,
-                        hypre_BoxIMax(&scaled_box));
+         hypre_SubtractIndexes(hypre_BoxIMin(&scaled_box), stride, 3,
+                               hypre_BoxIMin(&scaled_box));
+         hypre_AddIndexes(hypre_BoxIMax(&scaled_box), stride, 3,
+                          hypre_BoxIMax(&scaled_box));
 
          hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
                                hypre_BoxIMax(&scaled_box), &boxman_entries,
@@ -252,7 +255,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    HYPRE_Int              ndim;
 
    hypre_Box             *a_dbox;
-   double                *a_ptr;
+   HYPRE_Real            *a_ptr;
    hypre_Index            loop_size;
 
    HYPRE_Int              ia;
@@ -267,13 +270,17 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    nvars    = hypre_SStructPMatrixNVars(A);
    ndim     = hypre_SStructPGridNDim(p_fgrid);
 
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&shift_ibox, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
+
    hypre_ClearIndex(stride);
    for (i= 0; i< ndim; i++)
    {
       stride[i]= 1;
    }
 
-   tmp_box_array1= hypre_BoxArrayCreate(1);
+   tmp_box_array1= hypre_BoxArrayCreate(1, ndim);
 
    for (var1= 0; var1< nvars; var1++)
    {
@@ -291,10 +298,10 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
          }
 
          /* expand fgrid_box & boxman_intersect with fboxman. */
-         hypre_SubtractIndex(hypre_BoxIMin(fgrid_box), stride,
-                             hypre_BoxIMin(&scaled_box));
-         hypre_AddIndex(hypre_BoxIMax(fgrid_box), stride,
-                        hypre_BoxIMax(&scaled_box));
+         hypre_SubtractIndexes(hypre_BoxIMin(fgrid_box), stride, 3,
+                               hypre_BoxIMin(&scaled_box));
+         hypre_AddIndexes(hypre_BoxIMax(fgrid_box), stride, 3,
+                          hypre_BoxIMax(&scaled_box));
 
          hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
                                hypre_BoxIMax(&scaled_box), &boxman_entries,
@@ -319,30 +326,30 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                   if (abs_shape)   /* non-centre stencils are zeroed */
                   {
-                     hypre_SetIndex(shift_index,
-                                    size_ibox[0]*stencil_shape[0],
-                                    size_ibox[1]*stencil_shape[1],
-                                    size_ibox[2]*stencil_shape[2]);
-                     hypre_AddIndex(shift_index, hypre_BoxIMin(fgrid_box),
-                                    hypre_BoxIMin(&shift_ibox));
-                     hypre_AddIndex(shift_index, hypre_BoxIMax(fgrid_box),
-                                    hypre_BoxIMax(&shift_ibox));
+                     hypre_SetIndex3(shift_index,
+                                     size_ibox[0]*stencil_shape[0],
+                                     size_ibox[1]*stencil_shape[1],
+                                     size_ibox[2]*stencil_shape[2]);
+                     hypre_AddIndexes(shift_index, hypre_BoxIMin(fgrid_box), 3,
+                                      hypre_BoxIMin(&shift_ibox));
+                     hypre_AddIndexes(shift_index, hypre_BoxIMax(fgrid_box), 3,
+                                      hypre_BoxIMax(&shift_ibox));
                      hypre_IntersectBoxes(&shift_ibox, fgrid_box, &shift_ibox);
 
-                     hypre_SetIndex(shift_index, -stencil_shape[0], -stencil_shape[1],
-                                    -stencil_shape[2]);
+                     hypre_SetIndex3(shift_index, -stencil_shape[0], -stencil_shape[1],
+                                     -stencil_shape[2]);
 
                      /*-----------------------------------------------------------
                       * Check to see if the stencil does not couple to a sibling
                       * box. These boxes should be in boxman_entries. But do not
                       * subtract fgrid_box itself, which is also in boxman_entries.
                       *-----------------------------------------------------------*/
-                     hypre_AddIndex(stencil_shape, hypre_BoxIMin(&shift_ibox),
-                                    hypre_BoxIMin(&shift_ibox));
-                     hypre_AddIndex(stencil_shape, hypre_BoxIMax(&shift_ibox),
-                                    hypre_BoxIMax(&shift_ibox));
+                     hypre_AddIndexes(stencil_shape, hypre_BoxIMin(&shift_ibox), 3,
+                                      hypre_BoxIMin(&shift_ibox));
+                     hypre_AddIndexes(stencil_shape, hypre_BoxIMax(&shift_ibox), 3,
+                                      hypre_BoxIMax(&shift_ibox));
 
-                     intersect_boxes=  hypre_BoxArrayCreate(1);
+                     intersect_boxes=  hypre_BoxArrayCreate(1, ndim);
                      hypre_CopyBox(&shift_ibox, hypre_BoxArrayBox(intersect_boxes,0));
  
                      for (j= 0; j< nboxman_entries; j++)
@@ -362,7 +369,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                               hypre_CopyBox(&intersect_box,
                                             hypre_BoxArrayBox(tmp_box_array1, 0));
 
-                              tmp_box_array2= hypre_BoxArrayCreate(0);
+                              tmp_box_array2= hypre_BoxArrayCreate(0, ndim);
 
                               hypre_SubtractBoxArrays(intersect_boxes,
                                                       tmp_box_array1,
@@ -384,10 +391,10 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                      {
                         hypre_CopyBox(hypre_BoxArrayBox(intersect_boxes, fj), &intersect_box);
 
-                        hypre_AddIndex(shift_index, hypre_BoxIMin(&intersect_box),
-                                       hypre_BoxIMin(&intersect_box));
-                        hypre_AddIndex(shift_index, hypre_BoxIMax(&intersect_box),
-                                       hypre_BoxIMax(&intersect_box));
+                        hypre_AddIndexes(shift_index, hypre_BoxIMin(&intersect_box), 3,
+                                         hypre_BoxIMin(&intersect_box));
+                        hypre_AddIndexes(shift_index, hypre_BoxIMax(&intersect_box), 3,
+                                         hypre_BoxIMax(&intersect_box));
 
                         hypre_BoxGetSize(&intersect_box, loop_size);
 

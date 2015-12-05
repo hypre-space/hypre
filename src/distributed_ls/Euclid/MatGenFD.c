@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -30,17 +30,17 @@ static bool isThreeD;
 #define BACK(a)   a[6]
 #define RHS(a)    a[7]
 
-static void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, double *aval, HYPRE_Int len,
-                 double *rhs, double bc, double coeff, double ctr, HYPRE_Int nabor);
+static void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Int len,
+                 HYPRE_Real *rhs, HYPRE_Real bc, HYPRE_Real coeff, HYPRE_Real ctr, HYPRE_Int nabor);
 static void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, 
-                                    double *aval, Mat_dh A, Vec_dh b);
-static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
+                                    HYPRE_Real *aval, Mat_dh A, Vec_dh b);
+static void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                                                          Mat_dh A, Vec_dh b);
 static void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz);
 
 #if 0
 static void fdaddbc(HYPRE_Int nx, HYPRE_Int ny, HYPRE_Int nz, HYPRE_Int *rp, HYPRE_Int *cval, 
-             HYPRE_Int *diag, double *aval, double *rhs, double h, MatGenFD mg);
+             HYPRE_Int *diag, HYPRE_Real *aval, HYPRE_Real *rhs, HYPRE_Real h, MatGenFD mg);
 #endif
 
 #undef __FUNC__
@@ -188,8 +188,8 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
     A->rp = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     A->rp[0] = 0;  
     A->cval = (HYPRE_Int*)MALLOC_DH(nnz*sizeof(HYPRE_Int)); CHECK_V_ERROR
-    A->aval = (double*)MALLOC_DH(nnz*sizeof(double)); CHECK_V_ERROR;
-    /* rhs->vals = (double*)MALLOC_DH(m*sizeof(double)); CHECK_V_ERROR; */
+    A->aval = (HYPRE_Real*)MALLOC_DH(nnz*sizeof(HYPRE_Real)); CHECK_V_ERROR;
+    /* rhs->vals = (HYPRE_Real*)MALLOC_DH(m*sizeof(HYPRE_Real)); CHECK_V_ERROR; */
   }
 
   /* 4. initialize variables in A and rhs */
@@ -218,7 +218,7 @@ void MatGenFD_Run(MatGenFD mg, HYPRE_Int id, HYPRE_Int np, Mat_dh *AOut, Vec_dh 
 
 #undef __FUNC__
 #define __FUNC__ "generateStriped"
-void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, Mat_dh A, Vec_dh b)
+void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, Mat_dh A, Vec_dh b)
 {
   START_FUNC_DH
   HYPRE_Int mGlobal;
@@ -227,20 +227,20 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
   HYPRE_Int i, j, k, row;
   bool threeD = mg->threeD;
   HYPRE_Int idx = 0;
-  double *stencil = mg->stencil;
+  HYPRE_Real *stencil = mg->stencil;
   bool debug = false;
   HYPRE_Int plane, nodeRemainder;
   HYPRE_Int naborx1, naborx2, nabory1, nabory2;
-  double *rhs;
+  HYPRE_Real *rhs;
 
   bool applyBdry = true;
-  double hhalf;
-  double bcx1 = mg->bcX1;
-  double bcx2 = mg->bcX2;
-  double bcy1 = mg->bcY1;
-  double bcy2 = mg->bcY2;
-  /* double bcz1 = mg->bcZ1; */
-  /* double bcz2 = mg->bcZ2; */
+  HYPRE_Real hhalf;
+  HYPRE_Real bcx1 = mg->bcX1;
+  HYPRE_Real bcx2 = mg->bcX2;
+  HYPRE_Real bcy1 = mg->bcY1;
+  HYPRE_Real bcy2 = mg->bcY2;
+  /* HYPRE_Real bcz1 = mg->bcZ1; */
+  /* HYPRE_Real bcz2 = mg->bcZ2; */
   HYPRE_Int nx, ny;
 
   printf_dh("@@@ using striped partitioning\n");
@@ -343,7 +343,7 @@ void generateStriped(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
        if (!threeD && applyBdry) {
          HYPRE_Int offset = rp[localRow-1];
          HYPRE_Int len = rp[localRow] - rp[localRow-1];
-         double ctr, coeff;
+         HYPRE_Real ctr, coeff;
 
 /* hypre_fprintf(logFile, "globalRow = %i; naborx2 = %i\n", row+1, row); */
 
@@ -435,14 +435,14 @@ if (myid_dh == 0) hypre_printf("x= %i y= %i z= %i  threeD= %i  p= %i q= %i r= %i
 void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz)
 {
   HYPRE_Int k; 
-  double h = g->hh;
-  double hhalf = h*0.5;
-  double x = h*ix;
-  double y = h*iy;
-  double z = h*iz;
-  double cntr = 0.0;
-  double *stencil = g->stencil;
-  double coeff;
+  HYPRE_Real h = g->hh;
+  HYPRE_Real hhalf = h*0.5;
+  HYPRE_Real x = h*ix;
+  HYPRE_Real y = h*iy;
+  HYPRE_Real z = h*iz;
+  HYPRE_Real cntr = 0.0;
+  HYPRE_Real *stencil = g->stencil;
+  HYPRE_Real coeff;
   bool threeD = g->threeD;
 
   for (k=0; k<8; ++k) stencil[k] = 0.0;
@@ -496,36 +496,36 @@ void getstencil(MatGenFD g, HYPRE_Int ix, HYPRE_Int iy, HYPRE_Int iz)
 }
 
 
-double konstant(double coeff, double x, double y, double z)
+HYPRE_Real konstant(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {  return coeff; }
 
-double e2_xy(double coeff, double x, double y, double z)
+HYPRE_Real e2_xy(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 { return exp(coeff*x*y); }
 
-double boxThreeD(double coeff, double x, double y, double z);
+HYPRE_Real boxThreeD(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z);
 
 /* returns diffusivity constant -bd1 if the point
    (x,y,z) is inside the box whose upper left and
    lower right points are (-bx1,-by1), (-bx2,-by2);
    else, returns diffusivity constant -bd2
 */
-double box_1(double coeff, double x, double y, double z)
+HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
   static bool setup = false;
-  double retval = coeff;
+  HYPRE_Real retval = coeff;
  
   /* dffusivity constants */
-  static double dd1 = BOX1_DD;
-  static double dd2 = BOX2_DD;
-  static double dd3 = BOX3_DD;  
+  static HYPRE_Real dd1 = BOX1_DD;
+  static HYPRE_Real dd2 = BOX2_DD;
+  static HYPRE_Real dd3 = BOX3_DD;  
 
   /* boxes */
-  static double ax1 = BOX1_X1, ay1 = BOX1_Y1;
-  static double ax2 = BOX1_X2, ay2 = BOX1_Y2;
-  static double bx1 = BOX2_X1, by1 = BOX2_Y1;
-  static double bx2 = BOX2_X2, by2 = BOX2_Y2;
-  static double cx1 = BOX3_X1, cy1 = BOX3_Y1;
-  static double cx2 = BOX3_X2, cy2 = BOX3_Y2;
+  static HYPRE_Real ax1 = BOX1_X1, ay1 = BOX1_Y1;
+  static HYPRE_Real ax2 = BOX1_X2, ay2 = BOX1_Y2;
+  static HYPRE_Real bx1 = BOX2_X1, by1 = BOX2_Y1;
+  static HYPRE_Real bx2 = BOX2_X2, by2 = BOX2_Y2;
+  static HYPRE_Real cx1 = BOX3_X1, cy1 = BOX3_Y1;
+  static HYPRE_Real cx2 = BOX3_X2, cy2 = BOX3_Y2;
 
   if (isThreeD) {
     return(boxThreeD(coeff,x,y,z));
@@ -563,18 +563,18 @@ double box_1(double coeff, double x, double y, double z)
   return retval;
 } 
 
-double boxThreeD(double coeff, double x, double y, double z)
+HYPRE_Real boxThreeD(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
   static bool setup = false;
-  double retval = coeff;
+  HYPRE_Real retval = coeff;
 
   /* dffusivity constants */
-  static double dd1 = 100;
+  static HYPRE_Real dd1 = 100;
 
   /* boxes */
-  static double x1 = .2, x2 = .8;
-  static double y1 = .3, y2 = .7;
-  static double z1 = .4, z2 = .6;
+  static HYPRE_Real x1 = .2, x2 = .8;
+  static HYPRE_Real y1 = .3, y2 = .7;
+  static HYPRE_Real z1 = .4, z2 = .6;
 
   /* 1st time through, parse for diffusivity constants */
   if (!setup ) {
@@ -591,12 +591,12 @@ double boxThreeD(double coeff, double x, double y, double z)
 } 
 
 #if 0
-double box_1(double coeff, double x, double y, double z)
+HYPRE_Real box_1(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
-  static double x1, x2, y1, y2;
-  static double d1, d2;
+  static HYPRE_Real x1, x2, y1, y2;
+  static HYPRE_Real d1, d2;
   bool setup = false;
-  double retval;
+  HYPRE_Real retval;
 
   /* 1st time through, parse for constants and
      bounding box definition
@@ -627,11 +627,11 @@ double box_1(double coeff, double x, double y, double z)
 /* divide square into 4 quadrants; return one of
    2 constants depending on the quadrant (checkerboard)
 */
-double box_2(double coeff, double x, double y, double z)
+HYPRE_Real box_2(HYPRE_Real coeff, HYPRE_Real x, HYPRE_Real y, HYPRE_Real z)
 {
   bool setup = false;
-  static double d1, d2;
-  double retval;
+  static HYPRE_Real d1, d2;
+  HYPRE_Real retval;
 
   if (!setup ) {
     d1 = 1; d2 = 2;
@@ -650,11 +650,11 @@ double box_2(double coeff, double x, double y, double z)
 
 #undef __FUNC__
 #define __FUNC__ "generateBlocked"
-void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, Mat_dh A, Vec_dh b)
+void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, Mat_dh A, Vec_dh b)
 {
   START_FUNC_DH
   bool applyBdry = true;
-  double *stencil = mg->stencil;
+  HYPRE_Real *stencil = mg->stencil;
   HYPRE_Int id = mg->id;
   bool threeD = mg->threeD;
   HYPRE_Int px = mg->px, py = mg->py, pz = mg->pz; /* processor grid dimensions */
@@ -667,15 +667,15 @@ void generateBlocked(MatGenFD mg, HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
   bool debug = false;
   HYPRE_Int idx = 0, localRow = 0; /* nabor; */
   HYPRE_Int naborx1, naborx2, nabory1, nabory2, naborz1, naborz2;
-  double *rhs;
+  HYPRE_Real *rhs;
 
-  double hhalf = 0.5 * mg->hh;
-  double bcx1 = mg->bcX1;
-  double bcx2 = mg->bcX2;
-  double bcy1 = mg->bcY1;
-  double bcy2 = mg->bcY2;
-  /* double bcz1 = mg->bcZ1; */
-  /* double bcz2 = mg->bcZ2; */
+  HYPRE_Real hhalf = 0.5 * mg->hh;
+  HYPRE_Real bcx1 = mg->bcX1;
+  HYPRE_Real bcx2 = mg->bcX2;
+  HYPRE_Real bcy1 = mg->bcY1;
+  HYPRE_Real bcy2 = mg->bcY2;
+  /* HYPRE_Real bcz1 = mg->bcZ1; */
+  /* HYPRE_Real bcz2 = mg->bcZ2; */
 
   Vec_dhInit(b, A->m); CHECK_V_ERROR;
   rhs = b->vals;
@@ -800,7 +800,7 @@ hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n"
          HYPRE_Int globalRow = localRow+startRow-1;
          HYPRE_Int offset = rp[localRow-1];
          HYPRE_Int len = rp[localRow] - rp[localRow-1];
-         double ctr, coeff;
+         HYPRE_Real ctr, coeff;
 
 /* hypre_fprintf(logFile, "globalRow = %i; naborx2 = %i\n", globalRow+1, naborx2+1); */
 
@@ -847,8 +847,8 @@ hypre_fprintf(logFile, "--- row: %i;  x >= nx*px-1; nobors2 has old value: %i\n"
 
 #undef __FUNC__
 #define __FUNC__ "setBoundary_private"
-void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, double *aval, HYPRE_Int len,
-                               double *rhs, double bc, double coeff, double ctr, HYPRE_Int nabor)
+void setBoundary_private(HYPRE_Int node, HYPRE_Int *cval, HYPRE_Real *aval, HYPRE_Int len,
+                               HYPRE_Real *rhs, HYPRE_Real bc, HYPRE_Real coeff, HYPRE_Real ctr, HYPRE_Int nabor)
 {
   START_FUNC_DH
   HYPRE_Int i;

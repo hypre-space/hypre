@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.34 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -102,6 +102,7 @@ HYPRE_EXAMPLE_DIRS = @EXAMPLEDIR@
 ##  LAPACK Library Flags 
 ##################################################################
 HYPRE_LAPACK_SRC_DIR = @HYPRE_LAPACK_SRC_DIR@
+HYPRE_LAPACK_FILES   = @HYPRE_LAPACK_FILES@
 LAPACKLIBS           = @LAPACKLIBS@
 LAPACKLIBDIRS        = @LAPACKLIBDIRS@
 
@@ -109,6 +110,7 @@ LAPACKLIBDIRS        = @LAPACKLIBDIRS@
 ##  BLAS Library Flags 
 ##################################################################
 HYPRE_BLAS_SRC_DIR = @HYPRE_BLAS_SRC_DIR@
+HYPRE_BLAS_FILES   = @HYPRE_BLAS_FILES@
 BLASLIBS           = @BLASLIBS@
 BLASLIBDIRS        = @BLASLIBDIRS@
 

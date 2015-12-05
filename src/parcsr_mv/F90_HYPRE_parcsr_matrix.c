@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -47,7 +47,6 @@ hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)
            hypre_F90_PassInt (num_nonzeros_diag),
            hypre_F90_PassInt (num_nonzeros_offd),
            hypre_F90_PassObjRef (HYPRE_ParCSRMatrix, matrix)  ) );
-
 }
 
 /*--------------------------------------------------------------------------
@@ -235,14 +234,14 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetrow, HYPRE_PARCSRMATRIXGETROW)
      hypre_F90_Int *ierr )
 {
    HYPRE_Int *col_ind;
-   double    *values;
+   HYPRE_Complex    *values;
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixGetRow(
       hypre_F90_PassObj      (HYPRE_ParCSRMatrix, matrix),
       hypre_F90_PassInt      (row),
       hypre_F90_PassIntRef (size),
       (HYPRE_Int **)         &col_ind,
-      (double **)            &values );
+      (HYPRE_Complex **)            &values );
 
    *col_ind_ptr = (hypre_F90_Obj) col_ind;
    *values_ptr  = (hypre_F90_Obj) values;
@@ -262,14 +261,14 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)
      hypre_F90_Int *ierr )
 {
    HYPRE_Int *col_ind;  
-   double    *values;
+   HYPRE_Complex    *values;
 
    *ierr = (hypre_F90_Int) HYPRE_ParCSRMatrixRestoreRow(
       hypre_F90_PassObj      (HYPRE_ParCSRMatrix, matrix),
       hypre_F90_PassInt      (row),
       hypre_F90_PassIntRef (size),
       (HYPRE_Int **)         &col_ind,
-      (double **)            &values );
+      (HYPRE_Complex **)            &values );
 
    *col_ind_ptr = (hypre_F90_Obj) col_ind;
    *values_ptr  = (hypre_F90_Obj) values;
@@ -323,20 +322,20 @@ hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix_withnewpartitioning, HYPRE_CSRMATR
 
 void
 hypre_F90_IFACE(hypre_parcsrmatrixmatvec, HYPRE_PARCSRMATRIXMATVEC)
-   ( hypre_F90_Dbl *alpha,
+   ( hypre_F90_Complex *alpha,
      hypre_F90_Obj *A,
      hypre_F90_Obj *x,
-     hypre_F90_Dbl *beta,
+     hypre_F90_Complex *beta,
      hypre_F90_Obj *y,  
      hypre_F90_Int *ierr   )
 {
 
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRMatrixMatvec(
-           hypre_F90_PassDbl (alpha),
+           hypre_F90_PassComplex (alpha),
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
            hypre_F90_PassObj (HYPRE_ParVector, x),
-           hypre_F90_PassDbl (beta),
+           hypre_F90_PassComplex (beta),
            hypre_F90_PassObj (HYPRE_ParVector, y)      ) );
 }
 
@@ -346,19 +345,19 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvec, HYPRE_PARCSRMATRIXMATVEC)
 
 void
 hypre_F90_IFACE(hypre_parcsrmatrixmatvect, HYPRE_PARCSRMATRIXMATVECT)
-   ( hypre_F90_Dbl *alpha,
+   ( hypre_F90_Complex *alpha,
      hypre_F90_Obj *A,
      hypre_F90_Obj *x,
-     hypre_F90_Dbl *beta,
+     hypre_F90_Complex *beta,
      hypre_F90_Obj *y,
      hypre_F90_Int *ierr    )
 {
 
    *ierr = (hypre_F90_Int)
       ( HYPRE_ParCSRMatrixMatvecT(
-           hypre_F90_PassDbl (alpha),
+           hypre_F90_PassComplex (alpha),
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
            hypre_F90_PassObj (HYPRE_ParVector, x),
-           hypre_F90_PassDbl (beta),
+           hypre_F90_PassComplex (beta),
            hypre_F90_PassObj (HYPRE_ParVector, y)      ) );
 }

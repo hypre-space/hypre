@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -31,13 +31,13 @@ hypre_ProjectBox( hypre_Box    *box,
                   hypre_Index   index,
                   hypre_Index   stride )
 {
-   HYPRE_Int  i, s, d, hl, hu, kl, ku;
+   HYPRE_Int  i, s, d, hl, hu, kl, ku, ndim = hypre_BoxNDim(box);
 
    /*------------------------------------------------------
-    * project in all 3 dimensions
+    * project in all ndim dimensions
     *------------------------------------------------------*/
 
-   for (d = 0; d < 3; d++)
+   for (d = 0; d < ndim; d++)
    {
 
       i = hypre_IndexD(index, d);

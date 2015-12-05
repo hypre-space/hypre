@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -47,8 +47,8 @@ hypre_SMGResidualCreate( )
    (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
 
    /* set defaults */
-   hypre_SetIndex((residual_data -> base_index), 0, 0, 0);
-   hypre_SetIndex((residual_data -> base_stride), 1, 1, 1);
+   hypre_SetIndex3((residual_data -> base_index), 0, 0, 0);
+   hypre_SetIndex3((residual_data -> base_stride), 1, 1, 1);
 
    return (void *) residual_data;
 }
@@ -86,7 +86,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex3(unit_stride, 1, 1, 1);
 
    base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);
@@ -155,10 +155,10 @@ hypre_SMGResidual( void               *residual_vdata,
    HYPRE_Int               bi;
    HYPRE_Int               ri;
                          
-   double                 *Ap0;
-   double                 *xp0;
-   double                 *bp;
-   double                 *rp;
+   HYPRE_Real             *Ap0;
+   HYPRE_Real             *xp0;
+   HYPRE_Real             *bp;
+   HYPRE_Real             *rp;
                        
    hypre_Index             loop_size;
    hypre_IndexRef          start;
@@ -169,20 +169,20 @@ hypre_SMGResidual( void               *residual_vdata,
 
    HYPRE_Int               compute_i, i, j, si;
 
-   double            *Ap1, *Ap2;
-   double            *Ap3, *Ap4;
-   double            *Ap5, *Ap6;
-   double            *Ap7, *Ap8, *Ap9;
-   double            *Ap10, *Ap11, *Ap12, *Ap13, *Ap14;
-   double            *Ap15, *Ap16, *Ap17, *Ap18;
-   double            *Ap19, *Ap20, *Ap21, *Ap22, *Ap23, *Ap24, *Ap25, *Ap26;
-   double            *xp1, *xp2;
-   double            *xp3, *xp4;
-   double            *xp5, *xp6;
-   double            *xp7, *xp8, *xp9;
-   double            *xp10, *xp11, *xp12, *xp13, *xp14;
-   double            *xp15, *xp16, *xp17, *xp18;
-   double            *xp19, *xp20, *xp21, *xp22, *xp23, *xp24, *xp25, *xp26;
+   HYPRE_Real        *Ap1, *Ap2;
+   HYPRE_Real        *Ap3, *Ap4;
+   HYPRE_Real        *Ap5, *Ap6;
+   HYPRE_Real        *Ap7, *Ap8, *Ap9;
+   HYPRE_Real        *Ap10, *Ap11, *Ap12, *Ap13, *Ap14;
+   HYPRE_Real        *Ap15, *Ap16, *Ap17, *Ap18;
+   HYPRE_Real        *Ap19, *Ap20, *Ap21, *Ap22, *Ap23, *Ap24, *Ap25, *Ap26;
+   HYPRE_Real        *xp1, *xp2;
+   HYPRE_Real        *xp3, *xp4;
+   HYPRE_Real        *xp5, *xp6;
+   HYPRE_Real        *xp7, *xp8, *xp9;
+   HYPRE_Real        *xp10, *xp11, *xp12, *xp13, *xp14;
+   HYPRE_Real        *xp15, *xp16, *xp17, *xp18;
+   HYPRE_Real        *xp19, *xp20, *xp21, *xp22, *xp23, *xp24, *xp25, *xp26;
 
    hypre_BeginTiming(residual_data -> time_index);
 
@@ -223,7 +223,7 @@ hypre_SMGResidual( void               *residual_vdata,
                rp = hypre_StructVectorBoxData(r, i);
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-               hypre_BoxLoop2Begin(hypre_StructMatrixDim(A), loop_size,
+               hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
 #ifdef HYPRE_USING_OPENMP
@@ -593,7 +593,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 1:
    
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -614,7 +614,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 3:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -637,7 +637,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 5:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -662,7 +662,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 7:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -689,7 +689,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 9:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -718,7 +718,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 15:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -753,7 +753,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 19:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -792,7 +792,7 @@ hypre_SMGResidual( void               *residual_vdata,
                case 27:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                  hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
@@ -846,7 +846,7 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      hypre_BoxGetStrideSize(compute_box, base_stride,
                                             loop_size);
-                     hypre_BoxLoop3Begin(hypre_StructMatrixDim(A), loop_size,
+                     hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);

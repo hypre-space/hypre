@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -70,7 +70,7 @@ typedef struct
     HYPRE_Int      *rowptr;
     HYPRE_Int      *colnum;
     HYPRE_Int      *map;
-    double   *values;
+    HYPRE_Real   *values;
     HYPRE_Int      sendProcCnt;
     HYPRE_Int      *sendProc;
     HYPRE_Int      *sendLeng;
@@ -98,8 +98,8 @@ typedef struct
     HYPRE_Int          pre, post;
     HYPRE_Int          pre_sweeps, post_sweeps;
     HYPRE_Int          BGS_blocksize;
-    double       jacobi_wt;
-    double       ag_threshold;
+    HYPRE_Real   jacobi_wt;
+    HYPRE_Real   ag_threshold;
     ML_Aggregate *ml_ag;
     MH_Context   *contxt;
 } 
@@ -160,10 +160,10 @@ HYPRE_Int MH_Send(void* buf, hypre_uint count, HYPRE_Int dest, HYPRE_Int mid, MP
 /* wrapper function for interprocessor communication for matvec and getrow  */
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int MH_ExchBdry(double *vec, void *obj)
+HYPRE_Int MH_ExchBdry(HYPRE_Real *vec, void *obj)
 {
    HYPRE_Int         i, j, msgid, leng, src, dest, offset, *tempList;
-   double      *dbuf;
+   HYPRE_Real  *dbuf;
    MH_Context  *context;
    MH_Matrix   *Amat;
    MPI_Comm    comm;
@@ -191,7 +191,7 @@ HYPRE_Int MH_ExchBdry(double *vec, void *obj)
    offset = nRows;
    for ( i = 0; i < recvProcCnt; i++ )
    {
-      leng = recvLeng[i] * sizeof( double );
+      leng = recvLeng[i] * sizeof( HYPRE_Real );
       src  = recvProc[i];
       MH_Irecv((void*) &(vec[offset]), leng, &src, &msgid, comm, &request[i]);
       offset += recvLeng[i];
@@ -200,8 +200,8 @@ HYPRE_Int MH_ExchBdry(double *vec, void *obj)
    for ( i = 0; i < sendProcCnt; i++ )
    {
       dest = sendProc[i];
-      leng = sendLeng[i] * sizeof( double );
-      dbuf = (double *) malloc( leng * sizeof(double) );
+      leng = sendLeng[i] * sizeof( HYPRE_Real );
+      dbuf = (HYPRE_Real *) malloc( leng * sizeof(HYPRE_Real) );
       tempList = sendList[i];
       for ( j = 0; j < sendLeng[i]; j++ ) {
          dbuf[j] = vec[tempList[j]];
@@ -212,7 +212,7 @@ HYPRE_Int MH_ExchBdry(double *vec, void *obj)
    offset = nRows;
    for ( i = 0; i < recvProcCnt; i++ )
    {
-      leng = recvLeng[i] * sizeof( double );
+      leng = recvLeng[i] * sizeof( HYPRE_Real );
       src  = recvProc[i];
       MH_Wait((void*) &(vec[offset]), leng, &src, &msgid, comm, &request[i]);
       offset += recvLeng[i];
@@ -225,16 +225,16 @@ HYPRE_Int MH_ExchBdry(double *vec, void *obj)
 /* matvec function for local matrix structure MH_Matrix                     */
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int MH_MatVec(void *obj, HYPRE_Int leng1, double p[], HYPRE_Int leng2, double ap[])
+HYPRE_Int MH_MatVec(void *obj, HYPRE_Int leng1, HYPRE_Real p[], HYPRE_Int leng2, HYPRE_Real ap[])
 {
     MH_Context *context;
     MPI_Comm   comm;
     MH_Matrix *Amat;
 
     HYPRE_Int    i, j, length, nRows, ibeg, iend, k;
-    double *dbuf, sum;
+    HYPRE_Real *dbuf, sum;
     HYPRE_Int    *rowptr, *colnum;
-    double *values;
+    HYPRE_Real *values;
 
     context = (MH_Context *) obj;
     comm    = context->comm;
@@ -246,7 +246,7 @@ HYPRE_Int MH_MatVec(void *obj, HYPRE_Int leng1, double p[], HYPRE_Int leng2, dou
 
     length = nRows;
     for ( i = 0; i < Amat->recvProcCnt; i++ ) length += Amat->recvLeng[i];
-    dbuf = (double *) malloc( length * sizeof( double ) );
+    dbuf = (HYPRE_Real *) malloc( length * sizeof( HYPRE_Real ) );
     for ( i = 0; i < nRows; i++ ) dbuf[i] = p[i];
     MH_ExchBdry(dbuf, obj);
     for ( i = 0 ; i < nRows; i++ ) 
@@ -270,7 +270,7 @@ HYPRE_Int MH_MatVec(void *obj, HYPRE_Int leng1, double p[], HYPRE_Int leng2, dou
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int MH_GetRow(void *obj, HYPRE_Int N_requested_rows, HYPRE_Int requested_rows[],
-   HYPRE_Int allocated_space, HYPRE_Int columns[], double values[], HYPRE_Int row_lengths[])
+   HYPRE_Int allocated_space, HYPRE_Int columns[], HYPRE_Real values[], HYPRE_Int row_lengths[])
 {
     HYPRE_Int        i, j, ncnt, colindex, rowLeng, rowindex;
     MH_Context *context = (MH_Context *) obj;
@@ -278,7 +278,7 @@ HYPRE_Int MH_GetRow(void *obj, HYPRE_Int N_requested_rows, HYPRE_Int requested_r
     HYPRE_Int    nRows        = Amat->Nrows;
     HYPRE_Int    *rowptr      = Amat->rowptr;
     HYPRE_Int    *colInd      = Amat->colnum;
-    double *colVal      = Amat->values;
+    HYPRE_Real *colVal      = Amat->values;
     HYPRE_Int    *mapList     = Amat->map;
 
     ncnt = 0;
@@ -377,7 +377,7 @@ HYPRE_Int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     HYPRE_Int        i, my_id, nprocs, coarsest_level, level, sweeps, nlevels;
     HYPRE_Int        *row_partition, localEqns, length;
     HYPRE_Int        Nblocks, *blockList;
-    double     wght;
+    HYPRE_Real wght;
     MH_Context *context;
     MH_Matrix  *mh_mat;
 
@@ -530,7 +530,7 @@ HYPRE_Int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 HYPRE_Int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,   HYPRE_ParVector x      )
 {
-    double  *rhs, *sol;
+    HYPRE_Real  *rhs, *sol;
     MH_Link *link = (MH_Link *) solver;
     ML      *ml = link->ml_ptr;
     HYPRE_Int     leng, level = ml->ML_num_levels - 1;
@@ -562,7 +562,7 @@ HYPRE_Int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_ParCSRMLSetStrongThreshold(HYPRE_Solver solver,
-                                     double strong_threshold)
+                                     HYPRE_Real strong_threshold)
 {
     MH_Link *link = (MH_Link *) solver;
   
@@ -662,7 +662,7 @@ HYPRE_Int HYPRE_ParCSRMLSetPostSmoother( HYPRE_Solver solver, HYPRE_Int smoother
 /* HYPRE_ParCSRMLSetDampingFactor                                           */
 /*--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver solver, double factor  )
+HYPRE_Int HYPRE_ParCSRMLSetDampingFactor( HYPRE_Solver solver, HYPRE_Real factor  )
 {
     MH_Link *link = (MH_Link *) solver;
 
@@ -711,7 +711,7 @@ HYPRE_Int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_ma
     HYPRE_Int         rowLeng, *colInd, startRow, endRow, localEqns;
     HYPRE_Int         *diagSize, *offdiagSize, externLeng, *externList, ncnt, nnz;
     HYPRE_Int         *rowptr, *columns, num_bdry;
-    double      *colVal, *values;
+    HYPRE_Real  *colVal, *values;
     hypre_MPI_Request *Request;
     hypre_MPI_Status  status;
 
@@ -791,7 +791,7 @@ HYPRE_Int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_ma
     for ( i = 0; i < localEqns; i++ ) nnz += diagSize[i] + offdiagSize[i]; 
     rowptr  = (HYPRE_Int *)    malloc( (localEqns + 1) * sizeof(HYPRE_Int) ); 
     columns = (HYPRE_Int *)    malloc( nnz * sizeof(HYPRE_Int) ); 
-    values  = (double *) malloc( nnz * sizeof(double) ); 
+    values  = (HYPRE_Real *) malloc( nnz * sizeof(HYPRE_Real) ); 
     rowptr[0] = 0; 
     for ( i = 1; i <= localEqns; i++ ) 
        rowptr[i] = rowptr[i-1] + diagSize[i-1] + offdiagSize[i-1];

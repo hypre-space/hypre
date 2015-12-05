@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.18 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -49,7 +49,7 @@
          jj= -1;                                \
       if (kk==2)                                \
          kk= -1;                                \
-      hypre_SetIndex(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);     \
    }
 
 
@@ -96,15 +96,15 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    hypre_Index             stencil_shape_i, stencil_last_shape_i;
    hypre_Index             loop_size;
    hypre_Box               loop_box;
-   double                **a_ptrs;
+   HYPRE_Real            **a_ptrs;
    hypre_Box              *A_dbox;
 
    HYPRE_Int               part_crse= level-1;
    HYPRE_Int               part_fine= level;
  
    hypre_StructMatrix     *crse_smatrix;
-   double                 *crse_ptr;
-   double                **crse_ptrs;
+   HYPRE_Real             *crse_ptr;
+   HYPRE_Real            **crse_ptrs;
    hypre_Box              *crse_dbox;
 
    hypre_StructGrid       *cgrid;
@@ -143,9 +143,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int              *stencil_ranks, *rank_stencils;
    HYPRE_Int              *stencil_contrib_cnt;
    HYPRE_Int             **stencil_contrib_i;
-   double                **weight_contrib_i;
-   double                  weights[4]= {1.0, 0.25, 0.125, 0.0625};
-   double                  sum;
+   HYPRE_Real            **weight_contrib_i;
+   HYPRE_Real              weights[4]= {1.0, 0.25, 0.125, 0.0625};
+   HYPRE_Real              sum;
    HYPRE_Int               abs_stencil_shape;
    hypre_Box             **shift_box;
    hypre_Box               coarse_cell_box;
@@ -153,7 +153,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int              *volume_shift_box;
    HYPRE_Int               max_contribut_size, stencil_i, rank;
    HYPRE_Int               startrank;
-   double                 *vals, *vals2;
+   HYPRE_Real             *vals, *vals2;
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
    HYPRE_Int               nvars, var1, var2, var2_start; 
@@ -185,14 +185,14 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int             **interface_rank_stencils;
    HYPRE_Int             **interface_stencil_ranks;
    HYPRE_Int              *coarse_stencil_cnt;
-   double                 *stencil_vals;
+   HYPRE_Real             *stencil_vals;
    HYPRE_Int              *common_rank_stencils, *common_stencil_ranks;
    HYPRE_Int              *common_stencil_i;
    hypre_BoxManEntry      *boxman_entry;
 
    HYPRE_Int              *temp1, *temp2;
-   double                 *temp3;
-   double                  sum_contrib, scaling;
+   HYPRE_Real             *temp3;
+   HYPRE_Real              sum_contrib, scaling;
 
    HYPRE_Int             **OffsetA;
 
@@ -202,8 +202,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               myid;
 
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_SetIndex(zero_index, 0, 0, 0);
-   
+   hypre_SetIndex3(zero_index, 0, 0, 0);
+
+   hypre_BoxInit(&fine_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
+   hypre_BoxInit(&loop_box, ndim);
+   hypre_BoxInit(&coarse_cell_box, ndim);
  
    /*--------------------------------------------------------------------------
     * Task: Coarsen the fbox and f/c connections to form the coarse grid 
@@ -222,7 +226,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    /*--------------------------------------------------------------------------
     * Fine grid strides by the refinement factors.
     *--------------------------------------------------------------------------*/
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
    for (i= 0; i< ndim; i++)
    {
       stridef[i]= refine_factors[i];
@@ -333,9 +337,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             }
          }
 
-         fgrid_crse_extents[var1][ci]= hypre_BoxArrayCreate(cnt1);
-         fbox_interior[var1][ci]  = hypre_BoxArrayCreate(cnt1);
-         fbox_bdy[var1][ci]       = hypre_BoxArrayArrayCreate(cnt1);
+         fgrid_crse_extents[var1][ci]= hypre_BoxArrayCreate(cnt1, ndim);
+         fbox_interior[var1][ci]  = hypre_BoxArrayCreate(cnt1, ndim);
+         fbox_bdy[var1][ci]       = hypre_BoxArrayArrayCreate(cnt1, ndim);
          interior_fboxi[var1][ci] = hypre_CTAlloc(HYPRE_Int, cnt1);
          bdy_fboxi[var1][ci]      = hypre_CTAlloc(HYPRE_Int, cnt1);
 
@@ -352,7 +356,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              * have an f/c interface at an adjusted fstart end. fend may 
              * correspond to an f/c interface whether it has been adjusted or not.
              *--------------------------------------------------------------------*/
-            hypre_SetIndex(index1, 1, 1, 1);
+            hypre_SetIndex3(index1, 1, 1, 1);
             for (i= 0; i< ndim; i++)
             {
                j= fstart[i]%refine_factors[i];
@@ -387,12 +391,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
             /* the following index2 shift for ndim<3 is no problem since 
                refine_factors[j]= 1 for j>=ndim. */
-            hypre_SetIndex(index2, refine_factors[0]-1, refine_factors[1]-1,
-                           refine_factors[2]-1);
+            hypre_SetIndex3(index2, refine_factors[0]-1, refine_factors[1]-1,
+                            refine_factors[2]-1);
             hypre_StructMapCoarseToFine(hypre_BoxIMax(&intersect_box), index2,
                                         refine_factors, hypre_BoxIMax(&fine_box));
 
-            hypre_SetIndex(index2, 1, 1, 1);
+            hypre_SetIndex3(index2, 1, 1, 1);
             hypre_CopyBox(&fine_box, &loop_box);
             for (i= 0; i< ndim; i++)
             {
@@ -478,8 +482,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
     *--------------------------------------------------------------------------*/
    hypre_ClearIndex(index_temp);
    hypre_CopyIndex(index_temp, hypre_BoxIMin(&coarse_cell_box));
-   hypre_SetIndex(index_temp, refine_factors[0]-1, refine_factors[1]-1,
-                  refine_factors[2]-1 );           
+   hypre_SetIndex3(index_temp, refine_factors[0]-1, refine_factors[1]-1,
+                   refine_factors[2]-1 );           
    hypre_CopyIndex(index_temp, hypre_BoxIMax(&coarse_cell_box));
 
    volume_coarse_cell_box= hypre_BoxVolume(&coarse_cell_box);
@@ -575,10 +579,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      hypre_CopyIndex(hypre_StructStencilElement(stencils_last,i),
                                      stencil_last_shape_i);
 
-                     hypre_SetIndex(index_temp,
-                                    stencil_shape_i[0]-stencil_last_shape_i[0],
-                                    stencil_shape_i[1]-stencil_last_shape_i[1],
-                                    stencil_shape_i[2]-stencil_last_shape_i[2]);
+                     hypre_SetIndex3(index_temp,
+                                     stencil_shape_i[0]-stencil_last_shape_i[0],
+                                     stencil_shape_i[1]-stencil_last_shape_i[1],
+                                     stencil_shape_i[2]-stencil_last_shape_i[2]);
 
                      AbsStencilShape(index_temp, abs_stencil_shape);
                      if (abs_stencil_shape)    
@@ -589,7 +593,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         hypre_TFree(stencil_ranks);
                         for (i= 0; i< stencil_size; i++)
                         {
-                           hypre_TFree(shift_box[i]);
+                           hypre_BoxDestroy(shift_box[i]);
                         }
                         hypre_TFree(shift_box);
                         hypre_TFree(volume_shift_box);
@@ -647,7 +651,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                stencil_contrib_cnt= hypre_CTAlloc(HYPRE_Int, stencil_size);
                stencil_contrib_i  = hypre_TAlloc(HYPRE_Int *, stencil_size);
-               weight_contrib_i   = hypre_TAlloc(double *, stencil_size);
+               weight_contrib_i   = hypre_TAlloc(HYPRE_Real *, stencil_size);
                stencil_ranks      = hypre_TAlloc(HYPRE_Int, stencil_size);
                rank_stencils      = hypre_TAlloc(HYPRE_Int, max_stencil_size);
                shift_box          = hypre_TAlloc(hypre_Box *, stencil_size);
@@ -672,21 +676,21 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 *-----------------------------------------------------------------*/
                for (i= 0; i< stencil_size; i++)
                {
-                  shift_box[i]    = hypre_TAlloc(hypre_Box, 1);
+                  shift_box[i] = hypre_BoxCreate(ndim);
                   hypre_CopyIndex(hypre_StructStencilElement(stencils, i),
                                   stencil_shape_i);
                   MapStencilRank(stencil_shape_i, j);
                   stencil_ranks[i]= j;
                   rank_stencils[stencil_ranks[i]] = i;
 
-                  hypre_SetIndex(hypre_BoxIMin(shift_box[i]),
-                                 (refine_factors[0]-1)*stencil_shape_i[0],
-                                 (refine_factors[1]-1)*stencil_shape_i[1],
-                                 (refine_factors[2]-1)*stencil_shape_i[2]);
+                  hypre_SetIndex3(hypre_BoxIMin(shift_box[i]),
+                                  (refine_factors[0]-1)*stencil_shape_i[0],
+                                  (refine_factors[1]-1)*stencil_shape_i[1],
+                                  (refine_factors[2]-1)*stencil_shape_i[2]);
                   
-                  hypre_AddIndex(hypre_BoxIMin(shift_box[i]),
-                                 hypre_BoxIMax(&coarse_cell_box),
-                                 hypre_BoxIMax(shift_box[i]));
+                  hypre_AddIndexes(hypre_BoxIMin(shift_box[i]),
+                                   hypre_BoxIMax(&coarse_cell_box), 3,
+                                   hypre_BoxIMax(shift_box[i]));
 
                   hypre_IntersectBoxes(&coarse_cell_box, shift_box[i], shift_box[i]);
                  
@@ -730,7 +734,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   stencil_contrib_i[stencil_i]= 
                      hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                   weight_contrib_i[stencil_i] = 
-                     hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                   sum= 0.0;
                   k= 0;
 
@@ -811,7 +815,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   stencil_contrib_i[stencil_i]=
                      hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                   weight_contrib_i[stencil_i] =
-                     hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                   sum= 0.0;
                   k= 0;
 
@@ -892,7 +896,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   stencil_contrib_i[stencil_i]=
                      hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                   weight_contrib_i[stencil_i] =
-                     hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                   sum= 0.0;
                   k= 0;
 
@@ -973,7 +977,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   stencil_contrib_i[stencil_i]=
                      hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                   weight_contrib_i[stencil_i] =
-                     hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                     hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                   sum= 0.0;
                   k= 0;
 
@@ -1035,7 +1039,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         stencil_contrib_cnt[stencil_i]++;
                         stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                        weight_contrib_i[stencil_i] =  hypre_TAlloc(double, 1);
+                        weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
                         stencil_contrib_i[stencil_i][0]= stencil_i;
                         weight_contrib_i[stencil_i][0] = weights[0];
                      }
@@ -1049,7 +1053,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         stencil_contrib_cnt[stencil_i]++;
                         stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                        weight_contrib_i[stencil_i] =  hypre_TAlloc(double, 1);
+                        weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
                         stencil_contrib_i[stencil_i][0]= stencil_i;
                         weight_contrib_i[stencil_i][0] = weights[0];
                      }
@@ -1080,7 +1084,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1128,7 +1132,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1176,7 +1180,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1224,7 +1228,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1272,7 +1276,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1320,7 +1324,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1368,7 +1372,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1416,7 +1420,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1464,7 +1468,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1512,7 +1516,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1560,7 +1564,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1608,7 +1612,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1656,7 +1660,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1704,7 +1708,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencil_contrib_i[stencil_i]=
                         hypre_TAlloc(HYPRE_Int, stencil_contrib_cnt[stencil_i]);
                      weight_contrib_i[stencil_i] =
-                        hypre_TAlloc(double, stencil_contrib_cnt[stencil_i]);
+                        hypre_TAlloc(HYPRE_Real, stencil_contrib_cnt[stencil_i]);
                      sum= 0.0;
                      k= 0;
 
@@ -1743,7 +1747,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_cnt[stencil_i]++;
                            stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                           weight_contrib_i[stencil_i] =  hypre_TAlloc(double, 1);
+                           weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
                            stencil_contrib_i[stencil_i][0]= stencil_i;
                            weight_contrib_i[stencil_i][0] = weights[0];
                         }
@@ -1755,7 +1759,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            stencil_contrib_cnt[stencil_i]++;
                            stencil_contrib_i[stencil_i]= hypre_TAlloc(HYPRE_Int, 1);
-                           weight_contrib_i[stencil_i] =  hypre_TAlloc(double, 1);
+                           weight_contrib_i[stencil_i] =  hypre_TAlloc(HYPRE_Real, 1);
                            stencil_contrib_i[stencil_i][0]= stencil_i;
                            weight_contrib_i[stencil_i][0] = weights[0];
                         }
@@ -1767,7 +1771,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 *  Allocate for the temporary vector used in computing the 
                 *  averages.
                 *-----------------------------------------------------------------*/
-               vals= hypre_CTAlloc(double, max_contribut_size);
+               vals= hypre_CTAlloc(HYPRE_Real, max_contribut_size);
 
                /*-----------------------------------------------------------------
                 *  coarse grid stencil contributor structures have been formed.
@@ -1783,8 +1787,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             /*---------------------------------------------------------------------
              *  data ptrs to extract and fill in data.
              *---------------------------------------------------------------------*/
-            a_ptrs   = hypre_TAlloc(double *, stencil_size);
-            crse_ptrs= hypre_TAlloc(double *, stencil_size);
+            a_ptrs   = hypre_TAlloc(HYPRE_Real *, stencil_size);
+            crse_ptrs= hypre_TAlloc(HYPRE_Real *, stencil_size);
 
             hypre_ForBoxI(ci, cgrid_boxes)
             {
@@ -1841,11 +1845,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      {
                         if (j == 0)
                         {
-                           hypre_SetIndex(index_temp, 0, i, 0);
+                           hypre_SetIndex3(index_temp, 0, i, 0);
                         }
                         else
                         {
-                           hypre_SetIndex(index_temp, 0, 0, i);
+                           hypre_SetIndex3(index_temp, 0, 0, i);
                         }
                         OffsetA[j][i] = hypre_BoxOffsetDistance(A_dbox, index_temp);
                      }
@@ -2023,11 +2027,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         {
                            if (j == 0)
                            {
-                              hypre_SetIndex(index_temp, 0, i, 0);
+                              hypre_SetIndex3(index_temp, 0, i, 0);
                            }
                            else
                            {
-                              hypre_SetIndex(index_temp, 0, 0, i);
+                              hypre_SetIndex3(index_temp, 0, 0, i);
                            }
                            OffsetA[j][i] = hypre_BoxOffsetDistance(A_dbox, index_temp);
                         }
@@ -2129,7 +2133,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         hypre_CopyIndex(hypre_BoxIMin(&coarse_cell_box), index1);
                         hypre_CopyIndex(hypre_BoxIMax(&coarse_cell_box), index2);
 
-                        temp3= hypre_CTAlloc(double, volume_coarse_cell_box);
+                        temp3= hypre_CTAlloc(HYPRE_Real, volume_coarse_cell_box);
                     
                         /*---------------------------------------------------------------
                          *  iA_shift_zyx is computed correctly for 1 & 2-d. Also,
@@ -2173,11 +2177,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                  {
                                     jj= kk+ j;
 
-                                    hypre_SetIndex(index_temp,
-                                                   j+lindex[0]*stridef[0],
-                                                   k+lindex[1]*stridef[1],
-                                                   l+lindex[2]*stridef[2]);
-                                    hypre_AddIndex(fstart, index_temp, index_temp);
+                                    hypre_SetIndex3(index_temp,
+                                                    j+lindex[0]*stridef[0],
+                                                    k+lindex[1]*stridef[1],
+                                                    l+lindex[2]*stridef[2]);
+                                    hypre_AddIndexes(fstart, index_temp, 3, index_temp);
 
                                     hypre_SStructGridFindBoxManEntry(grid, part_fine, index_temp,
                                                                      var1, &boxman_entry);
@@ -2227,7 +2231,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                            rows = hypre_TAlloc(HYPRE_Int, cnt1);
                            cols = hypre_TAlloc(HYPRE_Int, cnt1);
-                           vals2= hypre_CTAlloc(double, cnt1);
+                           vals2= hypre_CTAlloc(HYPRE_Real, cnt1);
 
                            cnt1= 0;
                            for (l= index1[2]; l<= index2[2]; l++)
@@ -2240,11 +2244,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                  {
                                     jj= kk+ j;
 
-                                    hypre_SetIndex(index_temp,
-                                                   j+lindex[0]*stridef[0],
-                                                   k+lindex[1]*stridef[1],
-                                                   l+lindex[2]*stridef[2]);
-                                    hypre_AddIndex(fstart, index_temp, index_temp);
+                                    hypre_SetIndex3(index_temp,
+                                                    j+lindex[0]*stridef[0],
+                                                    k+lindex[1]*stridef[1],
+                                                    l+lindex[2]*stridef[2]);
+                                    hypre_AddIndexes(fstart, index_temp, 3, index_temp);
 
                                     hypre_SStructGridFindBoxManEntry(grid, part_fine, index_temp,
                                                                      var1, &boxman_entry);
@@ -2363,7 +2367,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
       for (j= 0; j< stencil_size; j++)
       {
          if (shift_box[j])
-            hypre_TFree(shift_box[j]);
+            hypre_BoxDestroy(shift_box[j]);
       }
       hypre_TFree(shift_box);
    }
@@ -2763,7 +2767,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
             rows=  hypre_TAlloc(HYPRE_Int, nrows);
             cols=  hypre_TAlloc(HYPRE_Int, nrows);
-            vals=  hypre_CTAlloc(double, nrows);
+            vals=  hypre_CTAlloc(HYPRE_Real, nrows);
 
             interface_max_stencil_ranks=  hypre_TAlloc(HYPRE_Int *, cnt1);
             interface_max_stencil_cnt  =  hypre_TAlloc(HYPRE_Int *, cnt1);
@@ -2786,7 +2790,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 * shapes for the Uentry connections.
                 *-----------------------------------------------------------------*/
                hypre_CopyIndex(cindex[i], index1);
-               hypre_SetIndex(index1, -index1[0], -index1[1], -index1[2]);
+               hypre_SetIndex3(index1, -index1[0], -index1[1], -index1[2]);
 
                n= 0;
                for (j= 0; j< box_ranks_cnt[i]; j++)
@@ -2820,7 +2824,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                          *---------------------------------------------------------*/
                         hypre_CopyIndex( hypre_SStructUVEntryToIndex(Uventry,l),
                                          index );
-                        hypre_AddIndex(index, index1, index2);
+                        hypre_AddIndexes(index, index1, 3, index2);
 
                         MapStencilRank(index2, m);
                         interface_max_stencil_ranks[i][n++]= m;
@@ -2894,7 +2898,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
             k= 0;
             for (i= 0; i< cnt1; i++)
             {
-               stencil_vals= hypre_CTAlloc(double, coarse_stencil_cnt[i]);
+               stencil_vals= hypre_CTAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
 
                /*-----------------------------------------------------------------
                 * Compute the arithmetic stencil averages for coarse node i.
@@ -2937,13 +2941,13 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      temp1[j]= j;
                   }
 
-                  qsort1(interface_stencil_ranks[i], (double *) temp1, 0,
+                  qsort1(interface_stencil_ranks[i], (HYPRE_Real *) temp1, 0,
                          coarse_stencil_cnt[i]-1);
 
                   /*---------------------------------------------------------------
                    * swap the stencil_vals to agree with the rank swapping.
                    *---------------------------------------------------------------*/
-                  temp3  = hypre_TAlloc(double, coarse_stencil_cnt[i]);
+                  temp3  = hypre_TAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
                   for (j=0; j< coarse_stencil_cnt[i]; j++)
                   {
                      m         = temp1[j];
@@ -2963,7 +2967,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 * We need to convert the ranks back to stencil_shapes and then
                 * fine the abs of the stencil shape.
                 *-----------------------------------------------------------------*/
-               temp3= hypre_TAlloc(double, coarse_stencil_cnt[i]);
+               temp3= hypre_TAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
                for (j=0; j< coarse_stencil_cnt[i]; j++)
                {
                   InverseMapStencilRank(interface_stencil_ranks[i][j], index_temp);
@@ -3438,7 +3442,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
       smatrix_var  = hypre_SStructPMatrixSMatrix(A_crse, var1, var1);
       stencils     = hypre_SStructPMatrixSStencil(A_crse, var1, var1);
       stencil_size = hypre_StructStencilSize(stencils);
-      a_ptrs       = hypre_TAlloc(double *, stencil_size);
+      a_ptrs       = hypre_TAlloc(HYPRE_Real *, stencil_size);
 
       rank_stencils= hypre_TAlloc(HYPRE_Int, max_stencil_size);
       for (i= 0; i< stencil_size; i++)

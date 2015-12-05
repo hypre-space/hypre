@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /*****************************************************************************
@@ -54,7 +54,7 @@ hypre_BCSRMatrixDenseBlockDestroy(hypre_BCSRMatrixDenseBlock* A) {
 HYPRE_Int
 hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A) {
   if(!A->data) {
-    A->data = hypre_CTAlloc(double, A->num_rows*A->num_cols);
+    A->data = hypre_CTAlloc(HYPRE_Real, A->num_rows*A->num_cols);
   }
 
   return 0;
@@ -62,7 +62,7 @@ hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A) {
 
 HYPRE_Int
 hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
-				   double* data) {
+				   HYPRE_Real* data) {
   HYPRE_Int i;
 
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
@@ -76,7 +76,7 @@ hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
 
 HYPRE_Int
 hypre_BCSRMatrixDenseBlockGetData(hypre_BCSRMatrixDenseBlock* A,
-				   double* data) {
+				   HYPRE_Real* data) {
   HYPRE_Int i;
 
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
@@ -118,7 +118,7 @@ HYPRE_Int
 hypre_BCSRMatrixDenseBlockMultiply(hypre_BCSRMatrixDenseBlock* A,
 				   hypre_BCSRMatrixDenseBlock* B) {
   HYPRE_Int i, j, k;
-  double t[A->num_rows*A->num_cols];
+  HYPRE_Real t[A->num_rows*A->num_cols];
 
   if(A->num_rows != A->num_cols || A->num_rows != B->num_rows
      || A->num_rows != B->num_cols) {
@@ -177,9 +177,9 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 
   HYPRE_Int i, j, k;
   HYPRE_Int num_rows = A->num_rows, num_cols = A->num_cols;
-  double T[A->num_rows*A->num_cols];
-  double Bi[A->num_rows*A->num_cols];
-  double d;
+  HYPRE_Real T[A->num_rows*A->num_cols];
+  HYPRE_Real Bi[A->num_rows*A->num_cols];
+  HYPRE_Real d;
 
   if(A->num_rows != A->num_cols || A->num_rows != B->num_rows
      || A->num_rows != B->num_cols) {
@@ -271,7 +271,7 @@ hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
      A = B*/
 
    hypre_BCSRMatrixBlock *A_t, *B_t;
-   double *out_data;
+   HYPRE_Real *out_data;
    HYPRE_Int ierr = 0;
    
    
@@ -286,7 +286,7 @@ hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
    ierr = hypre_BCSRMatrixDenseBlockMulInv(B_t, A_t);
    
    /*result in B_t -copy to A and then take transpose */
-   out_data = hypre_CTAlloc(double, A->num_rows*A->num_cols);
+   out_data = hypre_CTAlloc(HYPRE_Real, A->num_rows*A->num_cols);
 
    hypre_BCSRMatrixDenseBlockGetData(B_t, out_data);
    hypre_BCSRMatrixDenseBlockFillData(A, out_data);   
@@ -308,7 +308,7 @@ HYPRE_Int
 hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A) {
   HYPRE_Int num_rows = A->num_rows;
   HYPRE_Int num_cols = A->num_cols;
-  double t[num_rows*num_cols];
+  HYPRE_Real t[num_rows*num_cols];
   HYPRE_Int i, j;
 
   for(i = 0; i < num_rows; i++) {
@@ -326,14 +326,14 @@ hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A) {
 }
 
 HYPRE_Int
-hypre_BCSRMatrixDenseBlockMatvec(double alpha, hypre_BCSRMatrixBlock* A,
-				 double* x_data, double beta, double* y_data) {
+hypre_BCSRMatrixDenseBlockMatvec(HYPRE_Real alpha, hypre_BCSRMatrixBlock* A,
+				 HYPRE_Real* x_data, HYPRE_Real beta, HYPRE_Real* y_data) {
   HYPRE_Int num_rows = A->num_rows;
   HYPRE_Int num_cols = A->num_cols;
   HYPRE_Int i, j;
-  double temp;
+  HYPRE_Real temp;
   HYPRE_Int ierr = 0;
-  double* A_data = A->data;
+  HYPRE_Real* A_data = A->data;
 
   /*-----------------------------------------------------------------------
    * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
@@ -384,15 +384,15 @@ hypre_BCSRMatrixDenseBlockMatvec(double alpha, hypre_BCSRMatrixBlock* A,
 }
 
 HYPRE_Int
-hypre_BCSRMatrixDenseBlockMatvecT(double alpha, hypre_BCSRMatrixBlock* A,
-				  double* x_data, double beta,
-				  double* y_data) {
+hypre_BCSRMatrixDenseBlockMatvecT(HYPRE_Real alpha, hypre_BCSRMatrixBlock* A,
+				  HYPRE_Real* x_data, HYPRE_Real beta,
+				  HYPRE_Real* y_data) {
   HYPRE_Int num_rows = A->num_rows;
   HYPRE_Int num_cols = A->num_cols;
   HYPRE_Int i, j;
-  double temp;
+  HYPRE_Real temp;
   HYPRE_Int ierr = 0;
-  double* A_data = A->data;
+  HYPRE_Real* A_data = A->data;
 
   /*-----------------------------------------------------------------------
    * Do (alpha == 0.0) computation - RDF: USE MACHINE EPS
@@ -442,19 +442,19 @@ hypre_BCSRMatrixDenseBlockMatvecT(double alpha, hypre_BCSRMatrixBlock* A,
 
 }
 
-double
+HYPRE_Real
 hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
 			       const char* norm) {
   HYPRE_Int num_rows = A->num_rows;
   HYPRE_Int num_cols = A->num_cols;
-  double* data = A->data;
+  HYPRE_Real* data = A->data;
   HYPRE_Int i, j;
 
   if(!strcmp(norm, "one")) {
-    double col_sums[num_cols];
-    double max_col_sum;
+    HYPRE_Real col_sums[num_cols];
+    HYPRE_Real max_col_sum;
 
-    memset(col_sums, 0, sizeof(double)*num_cols);
+    memset(col_sums, 0, sizeof(HYPRE_Real)*num_cols);
 
     for(i = 0; i < num_rows; i++) {
       for(j = 0; j < num_cols; j++) {
@@ -470,10 +470,10 @@ hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
     return max_col_sum;
   }
   else if(!strcmp(norm, "inf")) {
-    double row_sums[num_rows];
-    double max_row_sum;
+    HYPRE_Real row_sums[num_rows];
+    HYPRE_Real max_row_sum;
 
-    memset(row_sums, 0, sizeof(double)*num_rows);
+    memset(row_sums, 0, sizeof(HYPRE_Real)*num_rows);
 
     for(i = 0; i < num_rows; i++) {
       for(j = 0; j < num_cols; j++) {
@@ -490,7 +490,7 @@ hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
   }
   else {
     /* Froebenius is the default */
-    double sum = 0;
+    HYPRE_Real sum = 0;
 
     for(i = 0; i < num_rows; i++) {
       for(j = 0; j < num_cols; j++) {

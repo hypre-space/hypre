@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 #ifndef CSR_MULTIMATVEC_H
 #define CSR_MULTIMATVEC_H
@@ -26,8 +23,8 @@ extern "C" {
  * hypre_CSRMatrixMatMultivec
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
-                           hypre_Multivector *x, double beta,
+hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
+                           hypre_Multivector *x, HYPRE_Complex beta,
                            hypre_Multivector *y);
                             
 
@@ -40,8 +37,8 @@ hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_CSRMatrixMatMultivecT(double alpha, hypre_CSRMatrix *A,
-                            hypre_Multivector *x, double beta,
+hypre_CSRMatrixMatMultivecT(HYPRE_Complex alpha, hypre_CSRMatrix *A,
+                            hypre_Multivector *x, HYPRE_Complex beta,
                             hypre_Multivector *y);
                              
 #ifdef __cplusplus

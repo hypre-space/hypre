@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -90,13 +90,13 @@ hypre_F90_IFACE(hypre_structjacobisolve, HYPRE_STRUCTJACOBISOLVE)
 void
 hypre_F90_IFACE(hypre_structjacobisettol, HYPRE_STRUCTJACOBISETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructJacobiSetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDbl (tol) ) );
+           hypre_F90_PassReal (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -106,13 +106,13 @@ hypre_F90_IFACE(hypre_structjacobisettol, HYPRE_STRUCTJACOBISETTOL)
 void
 hypre_F90_IFACE(hypre_structjacobigettol, HYPRE_STRUCTJACOBIGETTOL)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *tol,
+     hypre_F90_Real *tol,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructJacobiGetTol(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (tol) ) );
+           hypre_F90_PassRealRef (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -214,11 +214,11 @@ hypre_F90_IFACE(hypre_structjacobigetnumiterati, HYPRE_STRUCTJACOBIGETNUMITERATI
 void
 hypre_F90_IFACE(hypre_structjacobigetfinalrelat, HYPRE_STRUCTJACOBIGETFINALRELAT)
    ( hypre_F90_Obj *solver,
-     hypre_F90_Dbl *norm,
+     hypre_F90_Real *norm,
      hypre_F90_Int *ierr   )
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructJacobiGetFinalRelativeResidualNorm(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassDblRef (norm) ) );
+           hypre_F90_PassRealRef (norm) ) );
 }

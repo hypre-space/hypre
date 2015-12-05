@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -38,7 +38,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    stencil = hypre_StructMatrixStencil(A);
 
 #if OLDRAP
-   switch (hypre_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil)) 
    {
       case 2:
          RAP = hypre_SMG2CreateRAPOp(R ,A, PT, coarse_grid);
@@ -51,7 +51,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
 #endif
 
 #if NEWRAP
-   switch (hypre_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil)) 
    {
       case 2:
          cdir = 1;
@@ -93,7 +93,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
    stencil = hypre_StructMatrixStencil(A);
 
 #if OLDRAP
-   switch (hypre_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil)) 
    {
 
       case 2:
@@ -156,7 +156,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #endif
 
 #if NEWRAP
-   switch (hypre_StructStencilDim(stencil)) 
+   switch (hypre_StructStencilNDim(stencil)) 
    {
 
       case 2:

@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.9.0b)
-set (HYPRE_DATE    2012/10/30)
+set (HYPRE_VERSION 2.10.0b)
+set (HYPRE_DATE    2015/01/22)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -29,14 +29,23 @@ option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
 option(HYPRE_USING_HYPRE_LAPACK   "Use internal LAPACK library" ON)
-option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" OFF)
+option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
 
+if (HYPRE_SHARED)
+  # FEI doesn't currently compile with shared
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
 if (HYPRE_BIGINT)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
   # In the future, also turn off babel
+endif ()
+
+if (HYPRE_SEQUENTIAL)
+  set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
 #   --with-examples         Build example codes.
@@ -175,6 +184,7 @@ list (APPEND HYPRE_SOURCES
   utilities/F90_HYPRE_error.c
   utilities/fortran_matrix.c
   utilities/hypre_ap.c
+  utilities/hypre_complex.c
   utilities/hypre_error.c
   utilities/hypre_memory.c
   utilities/hypre_mpi_comm_f2c.c
@@ -185,7 +195,6 @@ list (APPEND HYPRE_SOURCES
   utilities/qsplit.c
   utilities/random.c
   utilities/threading.c
-  utilities/thread_mpistubs.c
   utilities/timer.c
   utilities/timing.c
   utilities/umalloc_local.c
@@ -460,6 +469,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_coordinates.c
   parcsr_ls/par_cr.c
   parcsr_ls/par_cycle.c
+  parcsr_ls/par_add_cycle.c
   parcsr_ls/par_difconv.c
   parcsr_ls/par_gsmg.c
   parcsr_ls/par_indepset.c
@@ -470,6 +480,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_laplace_9pt.c
   parcsr_ls/par_laplace.c
   parcsr_ls/par_lr_interp.c
+  parcsr_ls/par_nongalerkin.c
   parcsr_ls/par_nodal_systems.c
   parcsr_ls/par_rap.c
   parcsr_ls/par_rap_communication.c
@@ -501,7 +512,6 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   struct_mv/assumed_part.c
   struct_mv/box_algebra.c
-  struct_mv/box_alloc.c
   struct_mv/box_boundary.c
   struct_mv/box.c
   struct_mv/box_manager.c
@@ -511,7 +521,6 @@ list (APPEND HYPRE_SOURCES
   struct_mv/F90_HYPRE_struct_matrix.c
   struct_mv/F90_HYPRE_struct_stencil.c
   struct_mv/F90_HYPRE_struct_vector.c
-  struct_mv/grow.c
   struct_mv/HYPRE_struct_grid.c
   struct_mv/HYPRE_struct_matrix.c
   struct_mv/HYPRE_struct_stencil.c
@@ -526,7 +535,6 @@ list (APPEND HYPRE_SOURCES
   struct_mv/struct_matrix.c
   struct_mv/struct_matrix_mask.c
   struct_mv/struct_matvec.c
-  struct_mv/struct_overlap_innerprod.c
   struct_mv/struct_scale.c
   struct_mv/struct_stencil.c
   struct_mv/struct_vector.c
@@ -626,7 +634,6 @@ list (APPEND HYPRE_SOURCES
   sstruct_mv/sstruct_innerprod.c
   sstruct_mv/sstruct_matrix.c
   sstruct_mv/sstruct_matvec.c
-  sstruct_mv/sstruct_overlap_innerprod.c
   sstruct_mv/sstruct_scale.c
   sstruct_mv/sstruct_stencil.c
   sstruct_mv/sstruct_vector.c
@@ -709,8 +716,9 @@ configure_file (
   "${PROJECT_BINARY_DIR}/HYPRE_config.h"
   )
 
-include_directories(${hypre_SOURCE_DIR})
+# BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
+include_directories(${hypre_SOURCE_DIR})
 include_directories(utilities)
 include_directories(multivector)
 include_directories(krylov)

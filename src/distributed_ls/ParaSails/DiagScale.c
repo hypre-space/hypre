@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -51,7 +51,7 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list);
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen, 
-  HYPRE_Int *reqind, double *diags, HYPRE_Int *num_requests, hypre_MPI_Request *requests,
+  HYPRE_Int *reqind, HYPRE_Real *diags, HYPRE_Int *num_requests, hypre_MPI_Request *requests,
   HYPRE_Int *replies_list)
 {
     hypre_MPI_Request request;
@@ -101,11 +101,11 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat, 
-  double *local_diags, HYPRE_Int num_requests, Mem *mem, hypre_MPI_Request *requests)
+  HYPRE_Real *local_diags, HYPRE_Int num_requests, Mem *mem, hypre_MPI_Request *requests)
 {
     hypre_MPI_Status status;
     HYPRE_Int *recvbuf;
-    double *sendbuf;
+    HYPRE_Real *sendbuf;
     HYPRE_Int i, j, source, count;
 
     /* recvbuf contains requested indices */
@@ -118,7 +118,7 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 	hypre_MPI_Get_count(&status, HYPRE_MPI_INT, &count);
 
         recvbuf = (HYPRE_Int *) MemAlloc(mem, count*sizeof(HYPRE_Int));
-        sendbuf = (double *) MemAlloc(mem, count*sizeof(double));
+        sendbuf = (HYPRE_Real *) MemAlloc(mem, count*sizeof(HYPRE_Real));
 
         hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, 
 	    DIAG_INDS_TAG, comm, &status);
@@ -146,7 +146,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     hypre_MPI_Status  *statuses;
     HYPRE_Int npes, row, j, num_requests, num_replies, *replies_list;
     HYPRE_Int len, *ind;
-    double *val, *temp;
+    HYPRE_Real *val, *temp;
 
     Mem *mem;
     hypre_MPI_Request *requests2;
@@ -154,8 +154,8 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     DiagScale *p = (DiagScale *) malloc(sizeof(DiagScale));
 
     /* Storage for local diagonal entries */
-    p->local_diags = (double *) 
-        malloc((A->end_row - A->beg_row + 1) * sizeof(double));
+    p->local_diags = (HYPRE_Real *) 
+        malloc((A->end_row - A->beg_row + 1) * sizeof(HYPRE_Real));
 
     /* Extract the local diagonal entries */
     for (row=0; row<=A->end_row - A->beg_row; row++)
@@ -187,7 +187,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
         memcpy(ind, &numb->local_to_global[numb->num_loc], len * sizeof(HYPRE_Int));
 
         /* buffer for receiving diagonal values from other processors */
-        p->ext_diags = (double *) malloc(len * sizeof(double));
+        p->ext_diags = (HYPRE_Real *) malloc(len * sizeof(HYPRE_Real));
     }
 
     hypre_MPI_Comm_size(A->comm, &npes);
@@ -220,7 +220,7 @@ DiagScale *DiagScaleCreate(Matrix *A, Numbering *numb)
     NumberingGlobalToLocal(numb, len, ind, ind);
     temp = NULL;
     if (len)
-        temp = (double *) malloc(len * sizeof(double));
+        temp = (HYPRE_Real *) malloc(len * sizeof(HYPRE_Real));
     for (j=0; j<len; j++)
 	temp[ind[j]-p->offset] = p->ext_diags[j];
 
@@ -254,7 +254,7 @@ void DiagScaleDestroy(DiagScale *p)
  * The factor is the reciprocal of the square root of the diagonal entry.
  *--------------------------------------------------------------------------*/
 
-double DiagScaleGet(DiagScale *p, HYPRE_Int index)
+HYPRE_Real DiagScaleGet(DiagScale *p, HYPRE_Int index)
 {
     if (index < p->offset)
     {

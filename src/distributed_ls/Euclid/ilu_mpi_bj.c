@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -24,11 +24,11 @@
 
 HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
                  HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
-                 HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                 HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                  HYPRE_Int *o2n_col, Euclid_dh ctx);
 
 static HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
-                        HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                        HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                         REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx);
 
 
@@ -45,7 +45,7 @@ void iluk_mpi_bj(Euclid_dh ctx)
   HYPRE_Int      temp, m, from = ctx->from, to = ctx->to;
   HYPRE_Int      *n2o_row, *o2n_col;
   HYPRE_Int      first_row, last_row;
-  double   *AVAL;
+  HYPRE_Real   *AVAL;
   REAL_DH  *work, *aval;
   Factor_dh F = ctx->F;
   SubdomainGraph_dh sg = ctx->sg;
@@ -173,7 +173,7 @@ if (ctx->F->rp == NULL) {
 #define __FUNC__ "symbolic_row_private"
 HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
                  HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
-                 HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                 HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                  HYPRE_Int *o2n_col, Euclid_dh ctx)
 {
   START_FUNC_DH
@@ -184,11 +184,11 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int 
   HYPRE_Int j, node, tmp, col, head;
   HYPRE_Int fill1, fill2;
   float val;
-  double thresh = ctx->sparseTolA;
+  HYPRE_Real thresh = ctx->sparseTolA;
   REAL_DH scale;
 
   scale = ctx->scale[localRow]; 
-  ctx->stats[NZA_STATS] += (double)len;
+  ctx->stats[NZA_STATS] += (HYPRE_Real)len;
 
   /* Insert col indices in linked list, and values in work vector.
    * List[m] points to the first (smallest) col in the linked list.
@@ -226,7 +226,7 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int 
     marker[localRow]  = localRow;
     ++count;
   }
-  ctx->stats[NZA_USED_STATS] += (double)count;
+  ctx->stats[NZA_USED_STATS] += (HYPRE_Real)count;
 
   /* update row from previously factored rows */
   head = m;
@@ -271,15 +271,15 @@ HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int 
 #undef __FUNC__
 #define __FUNC__ "numeric_row_private"
 HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
-                        HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                        HYPRE_Int len, HYPRE_Int *CVAL, HYPRE_Real *AVAL,
                         REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx)
 {
   START_FUNC_DH
-  double  pc, pv, multiplier;
+  HYPRE_Real  pc, pv, multiplier;
   HYPRE_Int     j, k, col, row;
   HYPRE_Int     *rp = ctx->F->rp, *cval = ctx->F->cval;
   HYPRE_Int     *diag = ctx->F->diag;
-  double  val;
+  HYPRE_Real  val;
   REAL_DH *aval = ctx->F->aval, scale;
 
   scale = ctx->scale[localRow]; 

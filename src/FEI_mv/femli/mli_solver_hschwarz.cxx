@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <math.h>
@@ -79,7 +79,7 @@ int MLI_Solver_HSchwarz::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
 int MLI_Solver_HSchwarz::setParams( char *paramString, int argc, char **argv )
 {
-   double *weights;
+   double *weights=NULL;
    char   param1[100];
 
    sscanf(paramString, "%s", param1);

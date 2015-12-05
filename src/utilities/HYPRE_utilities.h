@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.33 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -38,7 +37,7 @@ extern "C" {
  * Before a version of HYPRE goes out the door, increment the version
  * number and check in this file (for CVS to substitute the Date).
  */
-#define HYPRE_Version() "HYPRE_RELEASE_NAME  $Date: 2010/12/20 19:27:44 $ Compiled: " __DATE__ " " __TIME__
+#define HYPRE_Version() "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
 
 /*--------------------------------------------------------------------------
  * Big int stuff
@@ -50,6 +49,21 @@ typedef long long int HYPRE_Int;
 #else 
 typedef int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_INT
+#endif
+
+/*--------------------------------------------------------------------------
+ * Complex stuff
+ *--------------------------------------------------------------------------*/
+
+typedef double HYPRE_Real;
+#define HYPRE_MPI_REAL MPI_DOUBLE
+
+#ifdef HYPRE_COMPLEX
+typedef double _Complex HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
+#else 
+typedef HYPRE_Real HYPRE_Complex;
+#define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
 
 /*--------------------------------------------------------------------------

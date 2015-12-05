@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -38,7 +38,7 @@ typedef struct
 {
     HYPRE_Int     pe;
     Matrix *mat;
-    double *buffer;
+    HYPRE_Real *buffer;
 }
 RecipData;
 
@@ -53,7 +53,7 @@ typedef struct
 LoadBal;
 
 LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
-  double local_cost, double beta);
+  HYPRE_Real local_cost, HYPRE_Real beta);
 void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat);
 
 #endif /* _LOADBAL_H */

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -29,11 +29,11 @@
 #include "fortran.h"
 HYPRE_Int hypre_F90_NAME_LAPACK(dsygv, DSYGV)
    ( HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *n,
-     double *a, HYPRE_Int *lda, double *b, HYPRE_Int *ldb, double *w,
-     double *work, HYPRE_Int *lwork, /*@out@*/ HYPRE_Int *info
+     HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb, HYPRE_Real *w,
+     HYPRE_Real *work, HYPRE_Int *lwork, /*@out@*/ HYPRE_Int *info
       );
 HYPRE_Int hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )
-   ( char* uplo, HYPRE_Int* n, double* aval, HYPRE_Int* lda, HYPRE_Int* ierr );
+   ( char* uplo, HYPRE_Int* n, HYPRE_Real* aval, HYPRE_Int* lda, HYPRE_Int* ierr );
 
 #endif
 
@@ -97,8 +97,8 @@ typedef struct
 } hypre_LOBPCGData;
 
 static HYPRE_Int dsygv_interface (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
-                            n, double *a, HYPRE_Int *lda, double *b, HYPRE_Int *ldb,
-                            double *w, double *work, HYPRE_Int *lwork, HYPRE_Int *info)
+                            n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
+                            HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info)
 {
 #ifdef HYPRE_USING_ESSL
    dsygv(*itype, a, *lda, b, *ldb, w, a, *lda, *n, work, *lwork );
@@ -110,7 +110,7 @@ static HYPRE_Int dsygv_interface (HYPRE_Int *itype, char *jobz, char *uplo, HYPR
    return 0;
 }
 
-static HYPRE_Int dpotrf_interface (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *
+static HYPRE_Int dpotrf_interface (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
                              lda, HYPRE_Int *info)
 {
 #ifdef HYPRE_USING_ESSL
@@ -151,9 +151,9 @@ HYPRE_Int
 hypre_LOBPCGDestroy( void *pcg_vdata )
 {
    hypre_LOBPCGData      *pcg_data      = pcg_vdata;
-   HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
 
    if (pcg_data) {
+      HYPRE_MatvecFunctions * mv = pcg_data->matvecFunctions;
       if ( pcg_data->matvecData != NULL ) {
          (*(mv->MatvecDestroy))(pcg_data->matvecData);
          pcg_data->matvecData = NULL;
@@ -237,7 +237,7 @@ hypre_LOBPCGSetupT( void *pcg_vdata, void *T, void *x )
 }
 
 HYPRE_Int
-hypre_LOBPCGSetTol( void* pcg_vdata, double tol )
+hypre_LOBPCGSetTol( void* pcg_vdata, HYPRE_Real tol )
 {
    hypre_LOBPCGData *pcg_data	= pcg_vdata;
 
@@ -388,7 +388,7 @@ HYPRE_Int
 hypre_LOBPCGSolve( void *vdata, 
 		   mv_MultiVectorPtr con, 
 		   mv_MultiVectorPtr vec, 
-		   double* val )
+		   HYPRE_Real* val )
 {
    hypre_LOBPCGData* data = vdata;
    HYPRE_Int (*precond)() = (data->precondFunctions).Precond;
@@ -542,13 +542,13 @@ HYPRE_LOBPCGSetupT( HYPRE_Solver solver,
 
 HYPRE_Int 
 HYPRE_LOBPCGSolve( HYPRE_Solver solver, mv_MultiVectorPtr con, 
-		   mv_MultiVectorPtr vec, double* val )
+		   mv_MultiVectorPtr vec, HYPRE_Real* val )
 {
    return( hypre_LOBPCGSolve( (void *) solver, con, vec, val ) );
 }
 
 HYPRE_Int
-HYPRE_LOBPCGSetTol( HYPRE_Solver solver, double tol )
+HYPRE_LOBPCGSetTol( HYPRE_Solver solver, HYPRE_Real tol )
 {
    return( hypre_LOBPCGSetTol( (void *) solver, tol ) );
 }

@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.23 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -78,9 +78,9 @@ SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
-#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
 	@echo  "Linking" $@ "... "
@@ -107,9 +107,9 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
 install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
-#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
+#	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*

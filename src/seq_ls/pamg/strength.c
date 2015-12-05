@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -47,22 +47,22 @@
  **************************************************************/
 HYPRE_Int
 hypre_AMGCreateS( hypre_CSRMatrix    *A,
-                  double              strength_threshold,
+                  HYPRE_Real          strength_threshold,
                   HYPRE_Int		      mode,
                   HYPRE_Int		     *dof_func,
                   hypre_CSRMatrix   **S_ptr              )
 {
    HYPRE_Int             *A_i           = hypre_CSRMatrixI(A);
    HYPRE_Int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
+   HYPRE_Real      *A_data        = hypre_CSRMatrixData(A);
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A);
                   
    hypre_CSRMatrix *S;
    HYPRE_Int             *S_i;
    HYPRE_Int             *S_j;
-   double          *S_data;
+   HYPRE_Real      *S_data;
                  
-   double           diag, row_scale;
+   HYPRE_Real       diag, row_scale;
    HYPRE_Int              i, jA, jS;
 
    HYPRE_Int              ierr = 0;
@@ -227,10 +227,10 @@ hypre_AMGCompressS( hypre_CSRMatrix    *S,
 {
    HYPRE_Int *S_i = hypre_CSRMatrixI(S);
    HYPRE_Int *S_j = hypre_CSRMatrixJ(S);
-   double *S_data = hypre_CSRMatrixData(S);
+   HYPRE_Real *S_data = hypre_CSRMatrixData(S);
    
-   double dnum_path = (double) num_path;
-   double dat;
+   HYPRE_Real dnum_path = (HYPRE_Real) num_path;
+   HYPRE_Real dat;
    HYPRE_Int num_rows = hypre_CSRMatrixNumRows(S); 
    HYPRE_Int i, j;
    HYPRE_Int col, cnt;
@@ -265,19 +265,19 @@ HYPRE_Int
 hypre_AMGCreate2ndS( hypre_CSRMatrix *A, HYPRE_Int n_coarse,
               HYPRE_Int *CF_marker, HYPRE_Int num_paths, hypre_CSRMatrix **S_ptr)
 {
-   double     *A_data   = hypre_CSRMatrixData(A);
+   HYPRE_Real *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         nrows_A  = hypre_CSRMatrixNumRows(A);
    hypre_CSRMatrix *S;
-   double     *S_data;
+   HYPRE_Real *S_data;
    HYPRE_Int	      *S_i;
    HYPRE_Int        *S_j;
 
    HYPRE_Int         ia, ib, ic, ja, jb, num_nonzeros=0;
    HYPRE_Int	       row_start, cnt, S_cnt;
    HYPRE_Int	       i, j, jcol, col;
-   double      a_entry, b_entry, d_num_paths;
+   HYPRE_Real  a_entry, b_entry, d_num_paths;
    HYPRE_Int         *B_marker;
    HYPRE_Int         *fine_to_coarse;
 
@@ -285,7 +285,7 @@ hypre_AMGCreate2ndS( hypre_CSRMatrix *A, HYPRE_Int n_coarse,
    B_marker = hypre_CTAlloc(HYPRE_Int, nrows_A);
    S_i = hypre_CTAlloc(HYPRE_Int, n_coarse+1);
    fine_to_coarse = hypre_CTAlloc(HYPRE_Int, nrows_A);
-   d_num_paths = (double) num_paths;
+   d_num_paths = (HYPRE_Real) num_paths;
 
    for (ib = 0; ib < nrows_A; ib++)
    {

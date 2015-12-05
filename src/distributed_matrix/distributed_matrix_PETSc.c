@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -104,7 +104,7 @@ hypre_DistributedMatrixGetRowPETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE
@@ -127,7 +127,7 @@ hypre_DistributedMatrixRestoreRowPETSc( hypre_DistributedMatrix *matrix,
                              HYPRE_Int row,
                              HYPRE_Int *size,
                              HYPRE_Int **col_ind,
-                             double **values )
+                             HYPRE_Real **values )
 {
    HYPRE_Int ierr=0;
 #ifdef PETSC_AVAILABLE

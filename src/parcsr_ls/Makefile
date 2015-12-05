@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.39 $
+# $Revision$
 #EHEADER**********************************************************************
 
 
@@ -90,6 +90,7 @@ FILES =\
  par_coordinates.c\
  par_cr.c\
  par_cycle.c\
+ par_add_cycle.c\
  par_difconv.c\
  par_gsmg.c\
  par_indepset.c\
@@ -100,6 +101,7 @@ FILES =\
  par_laplace_9pt.c\
  par_laplace.c\
  par_lr_interp.c\
+ par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\
@@ -131,14 +133,14 @@ SONAME = libHYPRE_parcsr_ls-${HYPRE_RELEASE_VERSION}.so
 ##################################################################
 
 all: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fpPR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_BUILD_DIR)/include
-#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_BUILD_DIR)/include
+#	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
-	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fpPR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_INC_INSTALL)
-#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_INC_INSTALL)
+#	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*

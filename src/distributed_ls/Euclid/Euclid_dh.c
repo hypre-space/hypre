@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -133,7 +133,7 @@ void Euclid_dhSetup(Euclid_dh ctx)
 {
   START_FUNC_DH
   HYPRE_Int m, n, beg_row;
-  double t1;
+  HYPRE_Real t1;
   bool isSetup = ctx->isSetup;
   bool bj = false;
 
@@ -397,10 +397,10 @@ void compute_rho_private(Euclid_dh ctx)
 {
   START_FUNC_DH
   if (ctx->F != NULL) {
-    double bufLocal[3], bufGlobal[3];
+    HYPRE_Real bufLocal[3], bufGlobal[3];
     HYPRE_Int m = ctx->m;
 
-    ctx->stats[NZF_STATS] = (double)ctx->F->rp[m];
+    ctx->stats[NZF_STATS] = (HYPRE_Real)ctx->F->rp[m];
     bufLocal[0] = ctx->stats[NZA_STATS];      /* nzA */
     bufLocal[1] = ctx->stats[NZF_STATS];      /* nzF */
     bufLocal[2] = ctx->stats[NZA_USED_STATS]; /* nzA used */
@@ -592,7 +592,7 @@ void discard_indices_private(Euclid_dh ctx)
   START_FUNC_DH
 #if 0
   HYPRE_Int *rp = ctx->F->rp, *cval = ctx->F->cval;
-  double *aval = ctx->F->aval;
+  HYPRE_Real *aval = ctx->F->aval;
   HYPRE_Int m = F->m, *nabors = ctx->nabors, nc = ctx->naborCount;
   HYPRE_Int i, j, k, idx, count = 0, start_of_row;
   HYPRE_Int beg_row = ctx->beg_row, end_row = beg_row + m;
@@ -634,7 +634,7 @@ void discard_indices_private(Euclid_dh ctx)
   for (i=0; i<m; ++i) {
     for (j=start_of_row; j<rp[i+1]; ++j) {
       HYPRE_Int    col = cval[j];
-      double val = aval[j];
+      HYPRE_Real val = aval[j];
       if (col != -1) { 
         cval[idx] = col;
         aval[idx] = val;
@@ -684,7 +684,7 @@ void Euclid_dhSolve(Euclid_dh ctx, Vec_dh x, Vec_dh b, HYPRE_Int *its)
 void Euclid_dhPrintStats(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
-  double *timing;
+  HYPRE_Real *timing;
   HYPRE_Int nz;
 
   nz = Factor_dhReadNz(ctx->F); CHECK_V_ERROR;
@@ -748,17 +748,17 @@ void Euclid_dhPrintStats(Euclid_dh ctx, FILE *fp)
 */
 #undef __FUNC__
 #define __FUNC__ "Euclid_dhPrintStatsShort"
-void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *fp)
+void Euclid_dhPrintStatsShort(Euclid_dh ctx, HYPRE_Real setup, HYPRE_Real solve, FILE *fp)
 {
   START_FUNC_DH
-  double *timing = ctx->timing;
-  /* double *stats = ctx->stats; */
-  /* double setup_factor; */
-  /* double setup_other; */
-  double apply_total;
-  double apply_per_it;
-  /* double nzUsedRatio; */
-  double perIt;
+  HYPRE_Real *timing = ctx->timing;
+  /* HYPRE_Real *stats = ctx->stats; */
+  /* HYPRE_Real setup_factor; */
+  /* HYPRE_Real setup_other; */
+  HYPRE_Real apply_total;
+  HYPRE_Real apply_per_it;
+  /* HYPRE_Real nzUsedRatio; */
+  HYPRE_Real perIt;
   HYPRE_Int blocks = np_dh;
 
   if (np_dh == 1) blocks = ctx->sg->blocks;
@@ -768,9 +768,9 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
   /* setup_factor  = timing[FACTOR_T]; */
   /* setup_other   = timing[SETUP_T] - setup_factor; */
   apply_total   = timing[TRI_SOLVE_T];
-  apply_per_it  = apply_total/(double)ctx->its;
+  apply_per_it  = apply_total/(HYPRE_Real)ctx->its;
   /* nzUsedRatio   = stats[NZA_RATIO_STATS]; */
-  perIt         = solve/(double)ctx->its;
+  perIt         = solve/(HYPRE_Real)ctx->its;
 
   fprintf_dh(fp, "\n");
   fprintf_dh(fp, "%6s %6s %6s %6s %6s %6s %6s %6s %6s %6s XX\n",
@@ -786,7 +786,7 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
                  setup+solve,       /* total time, from caller */
                  perIt,              /* time per iteration, solver+precond. */
                  apply_per_it,     /* time per iteration, solver+precond. */
-                 (double)ctx->n    /* global unknnowns */
+                 (HYPRE_Real)ctx->n    /* global unknnowns */
              );
 
 
@@ -817,7 +817,7 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
                  ctx->rho_final,    /* rho */
                  ctx->sparseTolA,   /* sparseA tolerance */
                  nzUsedRatio,       /* percent of A that was used */
-                 (double)ctx->n     /* global unknnowns */
+                 (HYPRE_Real)ctx->n     /* global unknnowns */
             );
 #endif
 
@@ -843,11 +843,11 @@ void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *f
 void Euclid_dhPrintStatsShorter(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
-  double *stats = ctx->stats;
+  HYPRE_Real *stats = ctx->stats;
 
   HYPRE_Int    its           = ctx->its;
-  double rho           = ctx->rho_final;
-  double nzUsedRatio   = stats[NZA_RATIO_STATS];
+  HYPRE_Real rho           = ctx->rho_final;
+  HYPRE_Real nzUsedRatio   = stats[NZA_RATIO_STATS];
 
 
   fprintf_dh(fp, "\nStats from last linear solve: YY\n");
@@ -885,9 +885,9 @@ void reduce_timings_private(Euclid_dh ctx)
 {
   START_FUNC_DH
   if (np_dh > 1) {
-    double bufOUT[TIMING_BINS];
+    HYPRE_Real bufOUT[TIMING_BINS];
 
-    memcpy(bufOUT, ctx->timing, TIMING_BINS*sizeof(double));
+    memcpy(bufOUT, ctx->timing, TIMING_BINS*sizeof(HYPRE_Real));
     hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
   }
 
@@ -900,7 +900,7 @@ void reduce_timings_private(Euclid_dh ctx)
 void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
-  double *timing;
+  HYPRE_Real *timing;
   HYPRE_Int nz;
 
   nz = Factor_dhReadNz(ctx->F); CHECK_V_ERROR;

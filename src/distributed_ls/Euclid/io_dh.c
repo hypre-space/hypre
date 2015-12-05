@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_Euclid.h"
@@ -45,17 +45,17 @@ void closeFile_dh(FILE *fpIN)
 
 /*----------------------------------------------------------------*/
 void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
-                                HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
+                                HYPRE_Int *rp, HYPRE_Int *cval, HYPRE_Real *aval, 
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename)
 {}
 
 extern void io_dh_read_ebin_mat_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval,
-                                     double **aval, char *filename)
+                                     HYPRE_Real **aval, char *filename)
 {}
 
-void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_Int beg_row, double *vals,
+void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_Int beg_row, HYPRE_Real *vals,
                            HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename)
 {}
 
-void io_dh_read_ebin_vec_private(HYPRE_Int *n, double **vals, char *filename)
+void io_dh_read_ebin_vec_private(HYPRE_Int *n, HYPRE_Real **vals, char *filename)
 {}

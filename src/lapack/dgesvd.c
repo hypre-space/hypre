@@ -30,7 +30,7 @@ static doublereal c_b438 = 1.;
 
     /* Builtin functions   
        Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
 
     /* Local variables */
     static integer iscl;

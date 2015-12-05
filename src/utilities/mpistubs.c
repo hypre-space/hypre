@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_utilities.h"
@@ -55,13 +55,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
    return(0);
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtime( )
 {
    return(0.0);
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtick( )
 {
    return(0.0);
@@ -181,7 +181,7 @@ hypre_MPI_Allgather( void               *sendbuf,
 
    switch (sendtype)
    {
-      case HYPRE_MPI_INT:
+      case hypre_MPI_INT:
       {
          HYPRE_Int *crecvbuf = (HYPRE_Int *)recvbuf;
          HYPRE_Int *csendbuf = (HYPRE_Int *)sendbuf;
@@ -219,6 +219,28 @@ hypre_MPI_Allgather( void               *sendbuf,
          memcpy(recvbuf, sendbuf, sendcount);
       } 
       break;
+
+      case hypre_MPI_REAL:
+      {
+         HYPRE_Real *crecvbuf = (HYPRE_Real *)recvbuf;
+         HYPRE_Real *csendbuf = (HYPRE_Real *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+	    crecvbuf[i] = csendbuf[i];
+         }
+      } 
+      break;
+
+      case hypre_MPI_COMPLEX:
+      {
+         HYPRE_Complex *crecvbuf = (HYPRE_Complex *)recvbuf;
+         HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
+         for (i = 0; i < sendcount; i++)
+         {
+	    crecvbuf[i] = csendbuf[i];
+         }
+      } 
+      break;
    }
 
    return(0);
@@ -253,6 +275,21 @@ hypre_MPI_Gather( void               *sendbuf,
 }
 
 HYPRE_Int
+hypre_MPI_Gatherv( void              *sendbuf,
+                  HYPRE_Int           sendcount,
+                  hypre_MPI_Datatype  sendtype,
+                  void               *recvbuf,
+                  HYPRE_Int          *recvcounts,
+                  HYPRE_Int          *displs,
+                  hypre_MPI_Datatype  recvtype,
+                  HYPRE_Int           root,
+                  hypre_MPI_Comm      comm )
+{
+   return ( hypre_MPI_Allgather(sendbuf, sendcount, sendtype,
+                                recvbuf, *recvcounts, recvtype, comm) );
+}
+
+HYPRE_Int
 hypre_MPI_Scatter( void               *sendbuf,
                    HYPRE_Int           sendcount,
                    hypre_MPI_Datatype  sendtype,
@@ -263,6 +300,21 @@ hypre_MPI_Scatter( void               *sendbuf,
                    hypre_MPI_Comm      comm )
 {
    return ( hypre_MPI_Allgather(sendbuf, sendcount, sendtype,
+                                recvbuf, recvcount, recvtype, comm) );
+}
+
+HYPRE_Int
+hypre_MPI_Scatterv( void               *sendbuf,
+                   HYPRE_Int           *sendcounts,
+                   HYPRE_Int           *displs,
+                   hypre_MPI_Datatype   sendtype,
+                   void                *recvbuf,
+                   HYPRE_Int            recvcount,
+                   hypre_MPI_Datatype   recvtype,
+                   HYPRE_Int            root,
+                   hypre_MPI_Comm       comm )
+{
+   return ( hypre_MPI_Allgather(sendbuf, *sendcounts, sendtype,
                                 recvbuf, recvcount, recvtype, comm) );
 }
 
@@ -440,7 +492,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
    
    switch (datatype)
    {
-      case HYPRE_MPI_INT:
+      case hypre_MPI_INT:
       {
          HYPRE_Int *crecvbuf = (HYPRE_Int *)recvbuf;
          HYPRE_Int *csendbuf = (HYPRE_Int *)sendbuf;
@@ -477,6 +529,28 @@ hypre_MPI_Allreduce( void              *sendbuf,
       case hypre_MPI_BYTE:
       {
          memcpy(recvbuf, sendbuf, count);
+      } 
+      break;
+
+      case hypre_MPI_REAL:
+      {
+         HYPRE_Real *crecvbuf = (HYPRE_Real *)recvbuf;
+         HYPRE_Real *csendbuf = (HYPRE_Real *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
+      } 
+      break;
+
+      case hypre_MPI_COMPLEX:
+      {
+         HYPRE_Complex *crecvbuf = (HYPRE_Complex *)recvbuf;
+         HYPRE_Complex *csendbuf = (HYPRE_Complex *)sendbuf;
+         for (i = 0; i < count; i++)
+         {
+            crecvbuf[i] = csendbuf[i];
+         }
       } 
       break;
    }
@@ -602,13 +676,13 @@ hypre_MPI_Abort( hypre_MPI_Comm comm,
    return (HYPRE_Int) MPI_Abort(comm, (hypre_int)errorcode);
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtime( )
 {
    return MPI_Wtime();
 }
 
-double
+HYPRE_Real
 hypre_MPI_Wtick( )
 {
    return MPI_Wtick();
@@ -710,7 +784,11 @@ HYPRE_Int
 hypre_MPI_Address( void           *location,
                    hypre_MPI_Aint *address )
 {
+#if MPI_VERSION > 1
+   return (HYPRE_Int) MPI_Get_address(location, address);
+#else
    return (HYPRE_Int) MPI_Address(location, address);
+#endif
 }
 
 HYPRE_Int
@@ -798,6 +876,44 @@ hypre_MPI_Gather( void               *sendbuf,
 }
 
 HYPRE_Int
+hypre_MPI_Gatherv(void               *sendbuf,
+                  HYPRE_Int           sendcount,
+                  hypre_MPI_Datatype  sendtype,
+                  void               *recvbuf,
+                  HYPRE_Int          *recvcounts,
+                  HYPRE_Int          *displs,
+                  hypre_MPI_Datatype  recvtype,
+                  HYPRE_Int           root,
+                  hypre_MPI_Comm      comm )
+{
+   hypre_int *mpi_recvcounts = NULL;
+   hypre_int *mpi_displs = NULL;
+   hypre_int csize, croot;
+   HYPRE_Int  i;
+   HYPRE_Int  ierr;
+
+   MPI_Comm_size(comm, &csize);
+   MPI_Comm_rank(comm, &croot);
+   if (croot == (hypre_int) root)
+   {
+      mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
+      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      for (i = 0; i < csize; i++)
+      {
+         mpi_recvcounts[i] = (hypre_int) recvcounts[i];
+         mpi_displs[i] = (hypre_int) displs[i];
+      }
+   }
+   ierr = (HYPRE_Int) MPI_Gatherv(sendbuf, (hypre_int)sendcount, sendtype,
+                                     recvbuf, mpi_recvcounts, mpi_displs, 
+                                     recvtype, (hypre_int) root, comm);
+   hypre_TFree(mpi_recvcounts);
+   hypre_TFree(mpi_displs);
+
+   return ierr;
+}
+
+HYPRE_Int
 hypre_MPI_Scatter( void               *sendbuf,
                    HYPRE_Int           sendcount,
                    hypre_MPI_Datatype  sendtype,
@@ -810,6 +926,44 @@ hypre_MPI_Scatter( void               *sendbuf,
    return (HYPRE_Int) MPI_Scatter(sendbuf, (hypre_int)sendcount, sendtype,
                                   recvbuf, (hypre_int)recvcount, recvtype,
                                   (hypre_int)root, comm);
+}
+
+HYPRE_Int
+hypre_MPI_Scatterv(void               *sendbuf,
+                   HYPRE_Int          *sendcounts,
+                   HYPRE_Int          *displs,
+                   hypre_MPI_Datatype  sendtype,
+                   void               *recvbuf,
+                   HYPRE_Int           recvcount,
+                   hypre_MPI_Datatype  recvtype,
+                   HYPRE_Int           root,
+                   hypre_MPI_Comm      comm )
+{
+   hypre_int *mpi_sendcounts = NULL;
+   hypre_int *mpi_displs = NULL;
+   hypre_int csize, croot;
+   HYPRE_Int  i;
+   HYPRE_Int  ierr;
+
+   MPI_Comm_size(comm, &csize);
+   MPI_Comm_rank(comm, &croot);
+   if (croot == (hypre_int) root)
+   {
+      mpi_sendcounts = hypre_TAlloc(hypre_int, csize);
+      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      for (i = 0; i < csize; i++)
+      {
+         mpi_sendcounts[i] = (hypre_int) sendcounts[i];
+         mpi_displs[i] = (hypre_int) displs[i];
+      }
+   }
+   ierr = (HYPRE_Int) MPI_Scatterv(sendbuf, mpi_sendcounts, mpi_displs, sendtype,
+                                     recvbuf, (hypre_int) recvcount, 
+                                     recvtype, (hypre_int) root, comm);
+   hypre_TFree(mpi_sendcounts);
+   hypre_TFree(mpi_displs);
+
+   return ierr;
 }
 
 HYPRE_Int
@@ -1071,8 +1225,13 @@ hypre_MPI_Type_hvector( HYPRE_Int           count,
                         hypre_MPI_Datatype  oldtype,
                         hypre_MPI_Datatype *newtype )
 {
+#if MPI_VERSION > 1
+      return (HYPRE_Int) MPI_Type_create_hvector((hypre_int)count, (hypre_int)blocklength,
+                                                 stride, oldtype, newtype);
+#else
    return (HYPRE_Int) MPI_Type_hvector((hypre_int)count, (hypre_int)blocklength,
                                        stride, oldtype, newtype);
+#endif
 }
 
 HYPRE_Int
@@ -1091,9 +1250,17 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
    {
       mpi_array_of_blocklengths[i] = (hypre_int) array_of_blocklengths[i];
    }
-   ierr = (HYPRE_Int) MPI_Type_struct((hypre_int)count, mpi_array_of_blocklengths,
-                                      array_of_displacements, array_of_types,
-                                      newtype);
+
+#if MPI_VERSION > 1
+      ierr = (HYPRE_Int) MPI_Type_create_struct((hypre_int)count, mpi_array_of_blocklengths,
+                                                array_of_displacements, array_of_types,
+                                                newtype);
+#else
+      ierr = (HYPRE_Int) MPI_Type_struct((hypre_int)count, mpi_array_of_blocklengths,
+                                         array_of_displacements, array_of_types,
+                                         newtype);
+#endif
+
    hypre_TFree(mpi_array_of_blocklengths);
 
    return ierr;

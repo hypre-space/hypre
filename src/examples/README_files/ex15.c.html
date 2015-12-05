@@ -1037,46 +1037,39 @@
 <a name="line1030">1030</a>                                    <font color="#2040a0">pi</font><font color="4444FF">*</font><font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">n</font>, <font color="#2040a0">pj</font><font color="4444FF">*</font><font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">n</font>, <font color="#2040a0">pk</font><font color="4444FF">*</font><font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">n</font>, <font color="#2040a0">myid</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line1031">1031</a> 
 <a name="line1032">1032</a>          <font color="#444444">/* Additional visualization data */</font>
-<a name="line1033">1033</a>          <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line1034">1034</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line1035">1035</a>             <font color="#2040a0">sprintf</font><font color="4444FF">(</font><font color="#2040a0">filename</font>, <font color="#008000">&quot;%s&quot;</font>, <font color="#008000">&quot;vis/ex15.data&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1036">1036</a>             <font color="#2040a0">file</font> <font color="4444FF">=</font> <font color="#2040a0">fopen</font><font color="4444FF">(</font><font color="#2040a0">filename</font>, <font color="#008000">&quot;w&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1037">1037</a>             <font color="#2040a0">fprintf</font><font color="4444FF">(</font><font color="#2040a0">file</font>, <font color="#008000">&quot;np %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1038">1038</a>             <font color="#2040a0">fflush</font><font color="4444FF">(</font><font color="#2040a0">file</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1039">1039</a>             <font color="#2040a0">fclose</font><font color="4444FF">(</font><font color="#2040a0">file</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1040">1040</a>          <font color="4444FF"><strong>}</strong></font>
-<a name="line1041">1041</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line1042">1042</a> 
-<a name="line1043">1043</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line1044">1044</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line1045">1045</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1046">1046</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1047">1047</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %g<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1048">1048</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1049">1049</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line1050">1050</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line1051">1051</a> 
-<a name="line1052">1052</a>    <font color="#444444">/* Free memory */</font>
-<a name="line1053">1053</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">edge_grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1054">1054</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">A_graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1055">1055</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1056">1056</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1057">1057</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1058">1058</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">node_grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1059">1059</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1060">1060</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_stencil</font><font color="4444FF">[</font><font color="#FF0000">0</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1061">1061</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_stencil</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1062">1062</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_stencil</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1063">1063</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">G</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1064">1064</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">xcoord</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1065">1065</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">ycoord</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1066">1066</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">zcoord</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1067">1067</a> 
-<a name="line1068">1068</a>    <font color="#444444">/* Finalize MPI */</font>
-<a name="line1069">1069</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line1070">1070</a> 
-<a name="line1071">1071</a>    <strong>return</strong> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line1072">1072</a> <font color="4444FF"><strong>}</strong></font>
+<a name="line1033">1033</a>          <font color="#2040a0">GLVis_PrintData</font><font color="4444FF">(</font><font color="#008000">&quot;vis/ex15.data&quot;</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1034">1034</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line1035">1035</a> 
+<a name="line1036">1036</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line1037">1037</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line1038">1038</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1039">1039</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1040">1040</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %g<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1041">1041</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1042">1042</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line1043">1043</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line1044">1044</a> 
+<a name="line1045">1045</a>    <font color="#444444">/* Free memory */</font>
+<a name="line1046">1046</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">edge_grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1047">1047</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">A_graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1048">1048</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1049">1049</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1050">1050</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1051">1051</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">node_grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1052">1052</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1053">1053</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_stencil</font><font color="4444FF">[</font><font color="#FF0000">0</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1054">1054</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_stencil</font><font color="4444FF">[</font><font color="#FF0000">1</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1055">1055</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">G_stencil</font><font color="4444FF">[</font><font color="#FF0000">2</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1056">1056</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">G</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1057">1057</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">xcoord</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1058">1058</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">ycoord</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1059">1059</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">zcoord</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1060">1060</a> 
+<a name="line1061">1061</a>    <font color="#444444">/* Finalize MPI */</font>
+<a name="line1062">1062</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line1063">1063</a> 
+<a name="line1064">1064</a>    <strong>return</strong> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line1065">1065</a> <font color="4444FF"><strong>}</strong></font>
 
 </pre>
 <hr>

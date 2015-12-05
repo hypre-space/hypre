@@ -24,9 +24,13 @@
 /* SStruct linear solvers headers */
 #include "HYPRE_sstruct_ls.h"
 
+#include "vis.c"
+
 int main (int argc, char *argv[])
 {
    int myid, num_procs;
+
+   int vis = 0;
 
    HYPRE_SStructGrid     grid;
    HYPRE_SStructGraph    graph;
@@ -52,6 +56,45 @@ int main (int argc, char *argv[])
       MPI_Finalize();
 
       return(0);
+   }
+
+   /* Parse command line */
+   {
+      int arg_index = 0;
+      int print_usage = 0;
+
+      while (arg_index < argc)
+      {
+         if ( strcmp(argv[arg_index], "-vis") == 0 )
+         {
+            arg_index++;
+            vis = 1;
+         }
+         else if ( strcmp(argv[arg_index], "-help") == 0 )
+         {
+            print_usage = 1;
+            break;
+         }
+         else
+         {
+            arg_index++;
+         }
+      }
+
+      if ((print_usage) && (myid == 0))
+      {
+         printf("\n");
+         printf("Usage: %s [<options>]\n", argv[0]);
+         printf("\n");
+         printf("  -vis : save the solution for GLVis visualization\n");
+         printf("\n");
+      }
+
+      if (print_usage)
+      {
+         MPI_Finalize();
+         return (0);
+      }
    }
 
    /* 1. Set up the 2D grid.  This gives the index space in each part.
@@ -478,7 +521,6 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorAssemble(x);
    }
 
-
    /* 6. Set up and use a solver (See the Reference Manual for descriptions
       of all of the options.) */
    {
@@ -515,6 +557,14 @@ int main (int argc, char *argv[])
                            HYPRE_StructSMGSetup, precond);
       HYPRE_StructPCGSetup(solver, sA, sb, sx);
       HYPRE_StructPCGSolve(solver, sA, sb, sx);
+   }
+
+   /* Save the solution for GLVis visualization, see vis/glvis-ex6.sh */
+   if (vis)
+   {
+      GLVis_PrintSStructGrid(grid, "vis/ex6.mesh", myid, NULL, NULL);
+      GLVis_PrintSStructVector(x, 0, "vis/ex6.sol", myid);
+      GLVis_PrintData("vis/ex6.data", myid, num_procs);
    }
 
    /* Free memory */

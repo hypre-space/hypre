@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.14 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -91,7 +88,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(double, num_vectors*size);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size);
 
    if ( multivec_storage_method == 0 )
    {
@@ -116,7 +113,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
 
 HYPRE_Int 
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
-                          HYPRE_Int           owns_data   )
+                             HYPRE_Int     owns_data   )
 {
    HYPRE_Int    ierr=0;
 
@@ -136,7 +133,7 @@ hypre_SeqVectorRead( char *file_name )
 
    FILE    *fp;
 
-   double  *data;
+   HYPRE_Complex *data;
    HYPRE_Int      size;
    
    HYPRE_Int      j;
@@ -172,14 +169,15 @@ hypre_SeqVectorRead( char *file_name )
 
 HYPRE_Int
 hypre_SeqVectorPrint( hypre_Vector *vector,
-                   char         *file_name )
+                      char         *file_name )
 {
    FILE    *fp;
 
-   double  *data;
+   HYPRE_Complex *data;
    HYPRE_Int      size, num_vectors, vecstride, idxstride;
    
    HYPRE_Int      i, j;
+   HYPRE_Complex  value;
 
    HYPRE_Int      ierr = 0;
 
@@ -212,7 +210,13 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
          hypre_fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            hypre_fprintf(fp, "%.14e\n",  data[ j*vecstride + i*idxstride ] );
+            value = data[ j*vecstride + i*idxstride ];
+#ifdef HYPRE_COMPLEX
+            hypre_fprintf(fp, "%.14e , %.14e\n",
+                          hypre_creal(value), hypre_cimag(value));
+#else
+            hypre_fprintf(fp, "%.14e\n", value);
+#endif
          }
       }
    }
@@ -220,7 +224,12 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
    {
       for (i = 0; i < size; i++)
       {
+#ifdef HYPRE_COMPLEX
+         hypre_fprintf(fp, "%.14e , %.14e\n",
+                       hypre_creal(data[i]), hypre_cimag(data[i]));
+#else
          hypre_fprintf(fp, "%.14e\n", data[i]);
+#endif
       }
    }
 
@@ -235,9 +244,9 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
 
 HYPRE_Int
 hypre_SeqVectorSetConstantValues( hypre_Vector *v,
-                               double        value )
+                                  HYPRE_Complex value )
 {
-   double  *vector_data = hypre_VectorData(v);
+   HYPRE_Complex *vector_data = hypre_VectorData(v);
    HYPRE_Int      size        = hypre_VectorSize(v);
            
    HYPRE_Int      i;
@@ -263,9 +272,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 
 HYPRE_Int
 hypre_SeqVectorSetRandomValues( hypre_Vector *v,
-                             HYPRE_Int           seed )
+                                HYPRE_Int           seed )
 {
-   double  *vector_data = hypre_VectorData(v);
+   HYPRE_Complex *vector_data = hypre_VectorData(v);
    HYPRE_Int      size        = hypre_VectorSize(v);
            
    HYPRE_Int      i;
@@ -285,21 +294,24 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCopy
  * copies data from x to y
- * y should have already been initialized at the same size as x
+ * if size of x is larger than y only the first size_y elements of x are 
+ * copied to y
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 hypre_SeqVectorCopy( hypre_Vector *x,
-                  hypre_Vector *y )
+                     hypre_Vector *y )
 {
-   double  *x_data = hypre_VectorData(x);
-   double  *y_data = hypre_VectorData(y);
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size_y   = hypre_VectorSize(y);
            
    HYPRE_Int      i;
            
    HYPRE_Int      ierr = 0;
 
+   if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -360,10 +372,10 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorScale( double        alpha,
-                   hypre_Vector *y     )
+hypre_SeqVectorScale( HYPRE_Complex alpha,
+                      hypre_Vector *y     )
 {
-   double  *y_data = hypre_VectorData(y);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(y);
            
    HYPRE_Int      i;
@@ -386,12 +398,12 @@ hypre_SeqVectorScale( double        alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_SeqVectorAxpy( double        alpha,
-            hypre_Vector *x,
-            hypre_Vector *y     )
+hypre_SeqVectorAxpy( HYPRE_Complex alpha,
+                     hypre_Vector *x,
+                     hypre_Vector *y     )
 {
-   double  *x_data = hypre_VectorData(x);
-   double  *y_data = hypre_VectorData(y);
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
            
    HYPRE_Int      i;
@@ -413,16 +425,16 @@ hypre_SeqVectorAxpy( double        alpha,
  * hypre_SeqVectorInnerProd
  *--------------------------------------------------------------------------*/
 
-double   hypre_SeqVectorInnerProd( hypre_Vector *x,
-                          hypre_Vector *y )
+HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
+                                       hypre_Vector *y )
 {
-   double  *x_data = hypre_VectorData(x);
-   double  *y_data = hypre_VectorData(y);
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
            
    HYPRE_Int      i;
 
-   double      result = 0.0;
+   HYPRE_Real     result = 0.0;
 
    size *=hypre_VectorNumVectors(x);
 
@@ -430,7 +442,7 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
 #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
-      result += y_data[i] * x_data[i];
+      result += hypre_conj(y_data[i]) * x_data[i];
 
    return result;
 }
@@ -440,12 +452,12 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
  * Returns the sum of all vector elements.
  *--------------------------------------------------------------------------*/
 
-double hypre_VectorSumElts( hypre_Vector *vector )
+HYPRE_Complex hypre_VectorSumElts( hypre_Vector *vector )
 {
-   double sum = 0;
-   double * data = hypre_VectorData( vector );
-   HYPRE_Int size = hypre_VectorSize( vector );
-   HYPRE_Int i;
+   HYPRE_Complex  sum = 0;
+   HYPRE_Complex *data = hypre_VectorData( vector );
+   HYPRE_Int      size = hypre_VectorSize( vector );
+   HYPRE_Int      i;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE

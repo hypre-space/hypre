@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.22 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_parcsr_ls.h"
@@ -76,7 +76,7 @@ HYPRE_ParCSRHybridSolve( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetTol( HYPRE_Solver solver,
-                          double       tol    )
+                          HYPRE_Real   tol    )
 {
    return( hypre_AMGHybridSetTol( (void *) solver, tol ) );
 }
@@ -86,7 +86,7 @@ HYPRE_ParCSRHybridSetTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetAbsoluteTol( HYPRE_Solver solver,
-                                  double       tol    )
+                                  HYPRE_Real   tol    )
 {
    return( hypre_AMGHybridSetAbsoluteTol( (void *) solver, tol ) );
 }
@@ -97,7 +97,7 @@ HYPRE_ParCSRHybridSetAbsoluteTol( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetConvergenceTol( HYPRE_Solver solver,
-                                     double       cf_tol    )
+                                     HYPRE_Real   cf_tol    )
 {
    return( hypre_AMGHybridSetConvergenceTol( (void *) solver, cf_tol ) );
 }
@@ -233,7 +233,7 @@ HYPRE_ParCSRHybridSetPrintLevel( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetStrongThreshold( HYPRE_Solver solver,
-                                      double       strong_threshold    )
+                                      HYPRE_Real   strong_threshold    )
 {
    return( hypre_AMGHybridSetStrongThreshold( (void *) solver, 
                                               strong_threshold ) );
@@ -245,7 +245,7 @@ HYPRE_ParCSRHybridSetStrongThreshold( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetMaxRowSum( HYPRE_Solver solver,
-                                double       max_row_sum    )
+                                HYPRE_Real   max_row_sum    )
 {
    return( hypre_AMGHybridSetMaxRowSum( (void *) solver, max_row_sum ) );
 }
@@ -256,7 +256,7 @@ HYPRE_ParCSRHybridSetMaxRowSum( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
-                                  double       trunc_factor    )
+                                  HYPRE_Real   trunc_factor    )
 {
    return( hypre_AMGHybridSetTruncFactor( (void *) solver, trunc_factor ) );
 }
@@ -456,7 +456,7 @@ HYPRE_ParCSRHybridSetSeqThreshold( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetRelaxWt( HYPRE_Solver solver,
-                              double       relax_wt    )
+                              HYPRE_Real   relax_wt    )
 {
    return( hypre_AMGHybridSetRelaxWt( (void *) solver, relax_wt ) );
 }
@@ -467,7 +467,7 @@ HYPRE_ParCSRHybridSetRelaxWt( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetLevelRelaxWt( HYPRE_Solver solver,
-                                   double       relax_wt,
+                                   HYPRE_Real   relax_wt,
                                    HYPRE_Int    level )
 {
    return( hypre_AMGHybridSetLevelRelaxWt( (void *) solver, relax_wt, level ) );
@@ -479,7 +479,7 @@ HYPRE_ParCSRHybridSetLevelRelaxWt( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetOuterWt( HYPRE_Solver solver,
-                              double       outer_wt    )
+                              HYPRE_Real   outer_wt    )
 {
    return( hypre_AMGHybridSetOuterWt( (void *) solver, outer_wt ) );
 }
@@ -490,7 +490,7 @@ HYPRE_ParCSRHybridSetOuterWt( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetLevelOuterWt( HYPRE_Solver solver,
-                                   double       outer_wt,
+                                   HYPRE_Real   outer_wt,
                                    HYPRE_Int    level )
 {
    return( hypre_AMGHybridSetLevelOuterWt( (void *) solver, outer_wt, level ) );
@@ -502,7 +502,7 @@ HYPRE_ParCSRHybridSetLevelOuterWt( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
-                                  double      *relax_weight    )
+                                  HYPRE_Real  *relax_weight    )
 {
    return( hypre_AMGHybridSetRelaxWeight( (void *) solver, relax_weight ) );
 }
@@ -513,7 +513,7 @@ HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridSetOmega( HYPRE_Solver solver,
-                            double      *omega    )
+                            HYPRE_Real  *omega    )
 {
    return( hypre_AMGHybridSetOmega( (void *) solver, omega ) );
 }
@@ -612,7 +612,7 @@ HYPRE_ParCSRHybridGetPCGNumIterations( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver,
-                                                double      *norm    )
+                                                HYPRE_Real  *norm    )
 {
    return( hypre_AMGHybridGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }

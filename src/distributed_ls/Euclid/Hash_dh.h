@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef HASH_D_DH
@@ -26,10 +26,10 @@
 */
 typedef struct _hash_node {
   HYPRE_Int     iData;      /* integer */
-  double  fData;      /* float */
+  HYPRE_Real  fData;      /* float */
   HYPRE_Int     *iDataPtr;  /* pointer to integer */
   HYPRE_Int     *iDataPtr2; /* pointer to integer */
-  double  *fDataPtr;  /* pointer to float */
+  HYPRE_Real  *fDataPtr;  /* pointer to float */
 } HashData;
 
 

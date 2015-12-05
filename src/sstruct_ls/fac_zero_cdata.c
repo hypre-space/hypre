@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -68,9 +68,12 @@ hypre_FacZeroCData( void                 *fac_vdata,
 
    HYPRE_Int              ci, i, j, rem, intersect_size;
 
-   double                *values;
+   HYPRE_Real            *values;
  
    HYPRE_Int              ierr = 0;
+
+   hypre_BoxInit(&scaled_box, ndim);
+   hypre_BoxInit(&intersect_box, ndim);
 
    for (level= max_level; level> 0; level--)
    {
@@ -140,7 +143,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
                   /*------------------------------------------------------------
                    * Coarse underlying box found. Now zero off.
                    *------------------------------------------------------------*/
-                   values= hypre_CTAlloc(double, intersect_size);
+                   values= hypre_CTAlloc(HYPRE_Real, intersect_size);
 
                    for (j= 0; j< stencil_size; j++)
                    {

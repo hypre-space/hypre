@@ -1,0 +1,47 @@
+=============================================
+SStruct phase times:
+=============================================
+SStruct Setup:
+  wall clock time = 0.200000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.200000 seconds
+  cpu MFLOPS      = 0.000000
+
+Problem size: 26460
+
+=============================================
+Setup phase times:
+=============================================
+AMS Setup:
+  wall clock time = 0.110000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.110000 seconds
+  cpu MFLOPS      = 0.000000
+
+<C*b,b>: 8.525169e-02
+
+
+Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
+-----    ------------    ---------  ------------ 
+    1    2.580403e-02    0.088376    8.837634e-02
+    2    1.135712e-03    0.044013    3.889706e-03
+    3    9.210442e-05    0.081098    3.154489e-04
+    4    2.211502e-05    0.240108    7.574185e-05
+    5    3.768622e-06    0.170410    1.290717e-05
+    6    7.393492e-07    0.196186    2.532201e-06
+    7    1.149856e-07    0.155523    3.938149e-07
+
+
+=============================================
+Solve phase times:
+=============================================
+AMS Solve:
+  wall clock time = 0.170000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.180000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 7
+Final Relative Residual Norm = 3.93815e-07
+

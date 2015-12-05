@@ -21,7 +21,7 @@ static integer c__0 = 0;
     doublereal d__1, d__2, d__3;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    HYPRE_Real sqrt(doublereal);
 
     /* Local variables */
     extern /* Subroutine */ HYPRE_Int dlas2_(doublereal *, doublereal *, doublereal 

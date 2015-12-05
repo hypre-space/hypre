@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef EUCLID_MPI_INTERFACE_DH
@@ -42,12 +42,12 @@ extern void Euclid_dhCreate(Euclid_dh *ctxOUT);
 extern void Euclid_dhDestroy(Euclid_dh ctx);
 extern void Euclid_dhSetup(Euclid_dh ctx);
 extern void Euclid_dhSolve(Euclid_dh ctx, Vec_dh lhs, Vec_dh rhs, HYPRE_Int *its);
-extern void Euclid_dhApply(Euclid_dh ctx, double *lhs, double *rhs);
+extern void Euclid_dhApply(Euclid_dh ctx, HYPRE_Real *lhs, HYPRE_Real *rhs);
 
 extern void Euclid_dhPrintTestData(Euclid_dh ctx, FILE *fp);
 extern void Euclid_dhPrintScaling(Euclid_dh ctx, FILE *fp);
 
-extern void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *fp);
+extern void Euclid_dhPrintStatsShort(Euclid_dh ctx, HYPRE_Real setup, HYPRE_Real solve, FILE *fp);
 
 
 extern void Euclid_dhPrintStatsShorter(Euclid_dh ctx, FILE *fp);
@@ -102,8 +102,8 @@ enum{ NZA_STATS,       /* cumulative nonzeros for all systems solved */
 struct _mpi_interface_dh {
   bool isSetup;
 
-  double rho_init;  
-  double rho_final;  
+  HYPRE_Real rho_init;  
+  HYPRE_Real rho_final;  
     /* Memory allocation for factor; will initially allocate space for 
        rho_init*nzA nonzeros; rho_final is computed after factorization,
        and is the minimum that rho_init whoulc have been to avoid
@@ -112,7 +112,7 @@ struct _mpi_interface_dh {
 
   HYPRE_Int m;         /* local rows in matrix */
   HYPRE_Int n;         /* global rows in matrix */
-  double *rhs;   /* used for debugging; this vector is not owned! */
+  HYPRE_Real *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */
   SubdomainGraph_dh sg; 
@@ -121,20 +121,20 @@ struct _mpi_interface_dh {
   bool    isScaled;    /* set at runtime, turns scaling on or off */
 
   /* workspace for factorization and triangular solves */
-  double *work;
-  double *work2;
+  HYPRE_Real *work;
+  HYPRE_Real *work2;
   HYPRE_Int from, to;  /* which local rows to factor or solve */
 
   /* runtime parameters (mostly) */
   char algo_par[MAX_OPT_LEN]; /* parallelization strategy */
   char algo_ilu[MAX_OPT_LEN]; /* ILU factorization method */
   HYPRE_Int level;      /* for ILU(k) */
-  double droptol;     /* for ILUT */
-  double sparseTolA;  /* for sparsifying A */
-  double sparseTolF;  /* for sparsifying the factors */
-  double pivotMin;    /* if pivots are <= to this value, fix 'em */
-  double pivotFix;    /* multiplier for adjusting small pivots */
-  double maxVal;      /* largest abs. value in matrix */
+  HYPRE_Real droptol;     /* for ILUT */
+  HYPRE_Real sparseTolA;  /* for sparsifying A */
+  HYPRE_Real sparseTolF;  /* for sparsifying the factors */
+  HYPRE_Real pivotMin;    /* if pivots are <= to this value, fix 'em */
+  HYPRE_Real pivotFix;    /* multiplier for adjusting small pivots */
+  HYPRE_Real maxVal;      /* largest abs. value in matrix */
 
   /* data structures for parallel ilu (pilu) */
   SortedList_dh   slist;
@@ -143,16 +143,16 @@ struct _mpi_interface_dh {
   /* for use with Euclid's internal krylov solvers; */
   char    krylovMethod[MAX_OPT_LEN];
   HYPRE_Int     maxIts;
-  double  rtol;
-  double  atol;
+  HYPRE_Real  rtol;
+  HYPRE_Real  atol;
   HYPRE_Int     its; /* number of times preconditioner was applied since last call to Setup */
   HYPRE_Int     itsTotal; /* cululative number of times preconditioner was applied */
 
   /* internal statistics */
   HYPRE_Int setupCount;
   HYPRE_Int logging;    /* added in support of Hypre */
-  double timing[TIMING_BINS];
-  double stats[STATS_BINS];
+  HYPRE_Real timing[TIMING_BINS];
+  HYPRE_Real stats[STATS_BINS];
   bool timingsWereReduced;
   bool   printStats; /* if true, on 2nd and subsequent calls to Setup,
                         calls Euclid_dhPrintStatsShorter().  Intent is to

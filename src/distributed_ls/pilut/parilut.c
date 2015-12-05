@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -64,7 +64,7 @@
 * This function performs hypre_ILUT on the boundary nodes via MIS computation
 **************************************************************************/
 void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
-	     ReduceMatType *rmat, HYPRE_Int gmaxnz, double tol, 
+	     ReduceMatType *rmat, HYPRE_Int gmaxnz, HYPRE_Real tol, 
              hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int nmis, nlevel;
@@ -458,7 +458,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   HYPRE_Int i, j, k, ku, kg, l, penum, snnbr, rnnbr, cnt, inCnt;
   HYPRE_Int *snbrind, *rnbrind, *rnbrptr, *sgatherbuf, *incolind;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind;
-  double *dgatherbuf, *uvalues, *dvalues, *invalues;
+  HYPRE_Real *dgatherbuf, *uvalues, *dvalues, *invalues;
   hypre_MPI_Status Status; 
   hypre_MPI_Request *index_requests, *value_requests ;
 
@@ -476,7 +476,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   rnbrind = cinfo->rnbrind;
   rnbrptr = cinfo->rnbrptr;
 
-  /* NOTE we cast a (double*) to an (HYPRE_Int*) */
+  /* NOTE we cast a (HYPRE_Real*) to an (HYPRE_Int*) */
   sgatherbuf = (HYPRE_Int *)cinfo->gatherbuf;
   dgatherbuf = cinfo->gatherbuf;
 
@@ -596,13 +596,13 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 		 ReduceMatType *nrmat, CommInfoType *cinfo,
 		 HYPRE_Int *perm,    HYPRE_Int *iperm,
-		 HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, double tol,
+		 HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, HYPRE_Real tol,
                  hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, ir, inr, start, k, kk, l, m, end, nnz;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind, *incolind, *rcolind, rrowlen;
-  double *uvalues, *nrm2s, *invalues, *rvalues, *dvalues;
-  double mult, rtol;
+  HYPRE_Real *uvalues, *nrm2s, *invalues, *rvalues, *dvalues;
+  HYPRE_Real mult, rtol;
 
 #ifdef HYPRE_DEBUG
   hypre_PrintLine("hypre_ComputeRmat", globals);
@@ -782,13 +782,13 @@ void hypre_ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
 void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 		 ReduceMatType *nrmat, CommInfoType *cinfo,
 		 HYPRE_Int *perm,    HYPRE_Int *iperm,
-		 HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, double tol,
+		 HYPRE_Int *newperm, HYPRE_Int *newiperm, HYPRE_Int nmis, HYPRE_Real tol,
                  hypre_PilutSolverGlobals *globals)
 {
   HYPRE_Int i, ir, k, kk, l, m, nnz, diag;
   HYPRE_Int *usrowptr, *uerowptr, *ucolind, *rcolind;
-  double *uvalues, *nrm2s, *rvalues, *dvalues;
-  double mult, rtol;
+  HYPRE_Real *uvalues, *nrm2s, *rvalues, *dvalues;
+  HYPRE_Real mult, rtol;
 
 #ifdef HYPRE_DEBUG
   hypre_PrintLine("hypre_FactorLocal", globals);
@@ -911,7 +911,7 @@ void hypre_FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
 * This function drops small values from the workspace, and also resets
 * the jr[] array to all -1's.
 **************************************************************************/
-void hypre_SecondDropSmall( double rtol,
+void hypre_SecondDropSmall( HYPRE_Real rtol,
              hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int i;
@@ -950,7 +950,7 @@ HYPRE_Int hypre_SeperateLU_byDIAG( HYPRE_Int diag, HYPRE_Int *newiperm,
              hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int first, last, itmp;
-  double dtmp;
+  HYPRE_Real dtmp;
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->SLUD_timer  );
@@ -1034,7 +1034,7 @@ HYPRE_Int hypre_SeperateLU_byDIAG( HYPRE_Int diag, HYPRE_Int *newiperm,
 HYPRE_Int hypre_SeperateLU_byMIS( hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int first, last, itmp;
-  double dtmp;
+  HYPRE_Real dtmp;
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->SLUM_timer  );
@@ -1101,7 +1101,7 @@ void hypre_UpdateL(HYPRE_Int lrow, HYPRE_Int last, FactorMatType *ldu,
 {
   HYPRE_Int i, j, min, start, end;
   HYPRE_Int *lcolind;
-  double *lvalues;
+  HYPRE_Real *lvalues;
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->UL_timer  );
@@ -1153,11 +1153,11 @@ void hypre_UpdateL(HYPRE_Int lrow, HYPRE_Int last, FactorMatType *ldu,
 **************************************************************************/
 void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
                HYPRE_Int max_rowlen,
-	       HYPRE_Int in_rowlen, HYPRE_Int *in_colind, double *in_values,
+	       HYPRE_Int in_rowlen, HYPRE_Int *in_colind, HYPRE_Real *in_values,
                hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int nz, max, j, out_rowlen, *rcolind;
-  double *rvalues;
+  HYPRE_Real *rvalues;
 
 #ifdef HYPRE_TIMING
   hypre_BeginTiming( globals->FNR_timer  );
@@ -1230,12 +1230,12 @@ void hypre_FormNRmat(HYPRE_Int rrow, HYPRE_Int first, ReduceMatType *nrmat,
 * the memory used by the row in the reduced matrix.
 **************************************************************************/
 void hypre_FormDU(HYPRE_Int lrow, HYPRE_Int first, FactorMatType *ldu,
-	    HYPRE_Int *rcolind, double *rvalues, double tol,
+	    HYPRE_Int *rcolind, HYPRE_Real *rvalues, HYPRE_Real tol,
              hypre_PilutSolverGlobals *globals )
 {
   HYPRE_Int nz, max, j, end;
   HYPRE_Int *ucolind, *uerowptr;
-  double *uvalues;
+  HYPRE_Real *uvalues;
 
   ucolind  = ldu->ucolind;
   uerowptr = ldu->uerowptr;
@@ -1350,7 +1350,7 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, HYPRE_Int *rowdis
   nrmat->rmat_rnz     = hypre_idx_malloc(ntogo, "hypre_ParILUT: nrmat->rmat_rnz"    );
   nrmat->rmat_rrowlen = hypre_idx_malloc(ntogo, "hypre_ParILUT: nrmat->rmat_rrowlen");
   nrmat->rmat_rcolind = (HYPRE_Int **) hypre_mymalloc( sizeof(HYPRE_Int*)*ntogo, "hypre_ParILUT: nrmat->rmat_rcolind");
-  nrmat->rmat_rvalues = (double **)  hypre_mymalloc( sizeof(double*) *ntogo, "hypre_ParILUT: nrmat->rmat_rvalues");
+  nrmat->rmat_rvalues = (HYPRE_Real **)  hypre_mymalloc( sizeof(HYPRE_Real*) *ntogo, "hypre_ParILUT: nrmat->rmat_rvalues");
   for ( i=0; i < ntogo; i++ )
   {
      nrmat->rmat_rcolind[ i ] = NULL;
@@ -1390,6 +1390,6 @@ void hypre_ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, HYPRE_Int *rowdis
   /*cinfo->gatherbuf = hypre_fp_malloc(ntogo*(global_maxnz+2), "ComputeMIS: gatherbuf");*/
   /* RDF: There is a purify UMR problem that a calloc gets rid of.
    * Don't know if this is actually an indication of a bug */
-  cinfo->gatherbuf = hypre_CTAlloc(double, ntogo*(global_maxnz+2));
+  cinfo->gatherbuf = hypre_CTAlloc(HYPRE_Real, ntogo*(global_maxnz+2));
 
 }

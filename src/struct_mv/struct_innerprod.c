@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -22,17 +22,13 @@
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
 
-#ifdef HYPRE_USE_PTHREADS
-double          *local_result_ref[hypre_MAX_THREADS];
-#endif
-
-double
-hypre_StructInnerProd(  hypre_StructVector *x,
-                        hypre_StructVector *y )
+HYPRE_Real
+hypre_StructInnerProd( hypre_StructVector *x,
+                       hypre_StructVector *y )
 {
-   double           final_innerprod_result;
-   double           local_result;
-   double           process_result;
+   HYPRE_Real       final_innerprod_result;
+   HYPRE_Real       local_result;
+   HYPRE_Real       process_result;
                    
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
@@ -40,8 +36,8 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    HYPRE_Int        xi;
    HYPRE_Int        yi;
                    
-   double          *xp;
-   double          *yp;
+   HYPRE_Complex   *xp;
+   HYPRE_Complex   *yp;
                    
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
@@ -50,14 +46,11 @@ hypre_StructInnerProd(  hypre_StructVector *x,
    hypre_Index      unit_stride;
                    
    HYPRE_Int        i;
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_Int        threadid = hypre_GetThreadID();
-#endif
 
    local_result = 0.0;
    process_result = 0.0;
 
-   hypre_SetIndex(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
@@ -73,11 +66,7 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 
       hypre_BoxGetSize(box, loop_size);
 
-#ifdef HYPRE_USE_PTHREADS
-      local_result_ref[threadid] = &local_result;
-#endif
-
-      hypre_BoxLoop2Begin(hypre_StructVectorDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
@@ -85,32 +74,16 @@ hypre_StructInnerProd(  hypre_StructVector *x,
 #endif
       hypre_BoxLoop2For(xi, yi)
       {
-         local_result += xp[xi] * yp[yi];
+         local_result += xp[xi] * hypre_conj(yp[yi]);
       }
       hypre_BoxLoop2End(xi, yi);
    }
-
-#ifdef HYPRE_USE_PTHREADS
-   if (threadid != hypre_NumThreads)
-   {
-      for (i = 0; i < hypre_NumThreads; i++)
-         process_result += *local_result_ref[i];
-   }
-   else
-      process_result = *local_result_ref[threadid];
-#else
    process_result = local_result;
-#endif
-
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                       hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
+                       HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
-
-#ifdef HYPRE_USE_PTHREADS
-   if (threadid == 0 || threadid == hypre_NumThreads)
-#endif
-      hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
+   hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
    return final_innerprod_result;
 }

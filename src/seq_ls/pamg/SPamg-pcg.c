@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -41,14 +41,14 @@ main( HYPRE_Int   argc,
    hypre_Vector     *f;
    hypre_Vector     *u;
 
-   double            strong_threshold;
+   HYPRE_Real        strong_threshold;
    char              *filename;
    HYPRE_Int               num_fine;
 
    HYPRE_Int               cycle_type;
-   double           *tmp;
+   HYPRE_Real       *tmp;
 
-   double   stop_tol;
+   HYPRE_Real   stop_tol;
    char     pcg_logfilename[256];
 
    HYPRE_Int     *num_grid_sweeps;  
@@ -122,7 +122,7 @@ main( HYPRE_Int   argc,
    u = hypre_SeqVectorCreate(num_fine);
    hypre_SeqVectorInitialize(u);
 
-   tmp = hypre_CTAlloc(double, num_fine);
+   tmp = hypre_CTAlloc(HYPRE_Real, num_fine);
 
    for (j = 0; j < num_fine; j++)
    {

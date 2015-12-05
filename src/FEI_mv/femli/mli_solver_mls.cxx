@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.1 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -263,7 +263,7 @@ int MLI_Solver_MLS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       /* Wtemp = coef * Vtemp */
 
-      for ( deg = 1; deg < deg; deg++ ) 
+      for ( deg = 1; deg < mlsDeg_; deg++ ) 
       {
          hypre_ParCSRMatrixMatvec(1.0, A, Vtemp, 0.0, Wtemp);
          hypre_ParVectorCopy(Wtemp,Vtemp); 

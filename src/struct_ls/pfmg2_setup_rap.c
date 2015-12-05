@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.20 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #include "_hypre_struct_ls.h"
@@ -77,7 +77,7 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
             /*--------------------------------------------------------------
              * Storage for 9 elements (c,w,e,n,s,sw,se,nw,se)
              *--------------------------------------------------------------*/
-            hypre_SetIndex(index_temp,i,j,0);
+            hypre_SetIndex3(index_temp,i,j,0);
             MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
             stencil_rank++;
          }
@@ -109,7 +109,7 @@ hypre_PFMG2CreateRAPOp( hypre_StructMatrix *R,
              *--------------------------------------------------------------*/
             if( i+j <=0 )
             {
-               hypre_SetIndex(index_temp,i,j,0);
+               hypre_SetIndex3(index_temp,i,j,0);
                MapIndex(index_temp, cdir, RAP_stencil_shape[stencil_rank]);
                stencil_rank++;
             }
@@ -303,14 +303,14 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    hypre_Box            *RAP_dbox;
    hypre_Box            *cgrid_box;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double                a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
-   double                a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real            a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
+   HYPRE_Real            a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
@@ -323,7 +323,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    HYPRE_Int             yOffsetP; 
                       
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -356,11 +356,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -372,11 +372,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -392,23 +392,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -421,23 +421,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,-1,0);
+   hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -449,7 +449,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -463,7 +463,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
       yOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
    }
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -480,7 +480,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -534,7 +534,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
       a_cw_offdm1 = a_cw[iA_offdm1];
       a_ce_offdm1 = a_ce[iA_offdm1];
 
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -610,13 +610,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -627,7 +627,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
    HYPRE_Int             yOffsetP; 
                       
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -658,11 +658,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -674,11 +674,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -694,23 +694,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -722,23 +722,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,-1,0);
+   hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -750,13 +750,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC1(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
    yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
@@ -844,18 +844,18 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw;
-   double                a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
-   double                a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
-   double                a_csw_offd, a_csw_offdm1, a_csw_offdp1, a_cse_offd, a_cse_offdm1;
-   double                a_cnw_offd, a_cnw_offdm1;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real            a_cw_offd, a_cw_offdm1, a_cw_offdp1, a_ce_offdm1;
+   HYPRE_Real            a_cs_offd, a_cs_offdm1, a_cs_offdp1, a_cn_offd, a_cn_offdm1;
+   HYPRE_Real            a_csw_offd, a_csw_offdm1, a_csw_offdp1, a_cse_offd, a_cse_offdm1;
+   HYPRE_Real            a_cnw_offd, a_cnw_offdm1;
 
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
@@ -868,7 +868,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    HYPRE_Int             yOffsetP; 
                       
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -900,11 +900,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -916,11 +916,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -936,23 +936,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -965,15 +965,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * a_cne is pointer for northeast coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,-1,-1,0);
+   hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -985,23 +985,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,-1,0);
+   hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -1013,7 +1013,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -1027,7 +1027,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
       yOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
    }
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -1043,7 +1043,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -1114,7 +1114,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
       a_cnw_offdm1 = a_cnw[iA_offdm1];
 
 
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -1199,13 +1199,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-   double               *a_csw, *a_cse, *a_cnw;
-   double               *rap_cc, *rap_cw, *rap_cs;
-   double               *rap_csw, *rap_cse;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   HYPRE_Real           *a_csw, *a_cse, *a_cnw;
+   HYPRE_Real           *rap_cc, *rap_cw, *rap_cs;
+   HYPRE_Real           *rap_csw, *rap_cse;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -1216,7 +1216,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
    HYPRE_Int             yOffsetP; 
                       
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -1246,11 +1246,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -1262,11 +1262,11 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -1282,23 +1282,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cs = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -1311,15 +1311,15 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * a_cne is pointer for northeast coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,-1,-1,0);
+   hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -1331,23 +1331,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cc = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_cw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cs = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,-1,0);
+   hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -1359,13 +1359,13 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC1(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
    yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
@@ -1580,14 +1580,14 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
 
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               a_cn_offd, a_cn_offdp1, a_cw_offdp1;
-   double               a_ce_offd, a_ce_offdm1, a_ce_offdp1;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           a_cn_offd, a_cn_offdp1, a_cw_offdp1;
+   HYPRE_Real           a_ce_offd, a_ce_offdm1, a_ce_offdp1;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
    HYPRE_Int             iAc;
@@ -1599,7 +1599,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                      
    /*hypre_printf("nosym 5.0\n");*/
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -1630,11 +1630,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -1646,11 +1646,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -1666,19 +1666,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -1690,19 +1690,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
     * rap_ce is pointer for east coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,1,0);
+   hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -1714,7 +1714,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -1729,7 +1729,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       yOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -1746,7 +1746,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    if ( constant_coefficient_A == 0 )
    {
       /*hypre_printf("nosym 5.0.0\n");*/
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -1792,7 +1792,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       a_ce_offdm1 = a_ce[iA_offdm1];
       a_ce_offdp1 = a_ce[iA_offdp1];
 
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -1858,11 +1858,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -1874,7 +1874,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
                      
    /* hypre_printf("nosym 5.1\n");*/
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -1903,11 +1903,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -1919,11 +1919,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -1939,19 +1939,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -1963,19 +1963,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
     * rap_ce is pointer for east coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,1,0);
+   hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -1987,13 +1987,13 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC1(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
    yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
@@ -2072,16 +2072,16 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *a_cse, *a_cnw, *a_cne;
-   double               a_cn_offd, a_cn_offdp1, a_cw_offdp1;
-   double               a_ce_offd, a_ce_offdm1, a_ce_offdp1;
-   double               a_cne_offd, a_cne_offdm1, a_cne_offdp1;
-   double               a_cse_offd, a_cse_offdp1, a_cnw_offd, a_cnw_offdp1;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           a_cn_offd, a_cn_offdp1, a_cw_offdp1;
+   HYPRE_Real           a_ce_offd, a_ce_offdm1, a_ce_offdp1;
+   HYPRE_Real           a_cne_offd, a_cne_offdm1, a_cne_offdp1;
+   HYPRE_Real           a_cse_offd, a_cse_offdp1, a_cnw_offd, a_cnw_offdp1;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1, iA_offd, iA_offdm1, iA_offdp1;
    HYPRE_Int             iAc;
@@ -2093,7 +2093,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                      
    /*hypre_printf("nosym 9.0\n");*/
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -2124,11 +2124,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -2140,11 +2140,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -2160,19 +2160,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -2185,15 +2185,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     * a_cne is pointer for northeast coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,1,0);
+   hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -2205,19 +2205,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     * rap_ce is pointer for east coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,1,0);
+   hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -2229,7 +2229,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -2244,7 +2244,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
       yOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
@@ -2266,7 +2266,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    if ( constant_coefficient_A==0 )
    {
       /*hypre_printf("nosym 9.0.0\n");*/
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -2327,7 +2327,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
       a_cnw_offd = a_cnw[iA_offd];
       a_cnw_offdp1 = a_cnw[iA_offdp1];
 
-      hypre_BoxLoop4Begin(hypre_StructMatrixDim(A), loop_size,
+      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
@@ -2403,12 +2403,12 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   double               *pa, *pb;
-   double               *ra, *rb;
-   double               *a_cc, *a_cw, *a_ce, *a_cn;
-   double               *a_cse, *a_cnw, *a_cne;
-   double               *rap_ce, *rap_cn;
-   double               *rap_cnw, *rap_cne;
+   HYPRE_Real           *pa, *pb;
+   HYPRE_Real           *ra, *rb;
+   HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cn;
+   HYPRE_Real           *a_cse, *a_cnw, *a_cne;
+   HYPRE_Real           *rap_ce, *rap_cn;
+   HYPRE_Real           *rap_cnw, *rap_cne;
 
    HYPRE_Int             iA, iAm1, iAp1;
    HYPRE_Int             iAc;
@@ -2420,7 +2420,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
                      
    /*hypre_printf("nosym 9.1\n");*/
    stridef = cstride;
-   hypre_SetIndex(stridec, 1, 1, 1);
+   hypre_SetIndex3(stridec, 1, 1, 1);
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
@@ -2449,11 +2449,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     * pb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    pa = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
@@ -2465,11 +2465,11 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     * rb is pointer for weight for f-point below c-point 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,-1,0);
+   hypre_SetIndex3(index_temp,0,-1,0);
    MapIndex(index_temp, cdir, index);
    ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
@@ -2485,19 +2485,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     * a_cn is pointer for north coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,0,0);
+   hypre_SetIndex3(index_temp,0,0,0);
    MapIndex(index_temp, cdir, index);
    a_cc = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,0,0);
+   hypre_SetIndex3(index_temp,-1,0,0);
    MapIndex(index_temp, cdir, index);
    a_cw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    a_ce = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -2510,15 +2510,15 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     * a_cne is pointer for northeast coefficient
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,1,-1,0);
+   hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    a_cse = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cnw = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
-   hypre_SetIndex(index_temp,1,1,0);
+   hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
 
@@ -2530,19 +2530,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     * rap_ce is pointer for east coefficient (etc.)
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
    rap_ce = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cn = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,1,1,0);
+   hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
-   hypre_SetIndex(index_temp,-1,1,0);
+   hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
 
@@ -2554,13 +2554,13 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC1(
     * Offsets are used in refering to data associated with other points. 
     *-----------------------------------------------------------------*/
 
-   hypre_SetIndex(index_temp,0,1,0);
+   hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
    yOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
    yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
 
-   hypre_SetIndex(index_temp,1,0,0);
+   hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
    xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);

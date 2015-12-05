@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 
@@ -41,7 +41,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   HYPRE_Int                *coarse_dof_func;
 
 
-  double *Prolong_coeff;
+  HYPRE_Real *Prolong_coeff;
   HYPRE_Int *i_dof_neighbor_coarsedof;
   HYPRE_Int *j_dof_neighbor_coarsedof;
 
@@ -54,7 +54,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
-  double *a_dof_dof = hypre_CSRMatrixData(A);
+  HYPRE_Real *a_dof_dof = hypre_CSRMatrixData(A);
 
 
   HYPRE_Int *i_ext_int, *j_ext_int;
@@ -96,13 +96,13 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   HYPRE_Int *i_fine_to_global, *i_coarse_to_global;
 
 
-  double *AE;
+  HYPRE_Real *AE;
 
-/*  double coeff_sum; */
+/*  HYPRE_Real coeff_sum; */
 
-  double *P_ext_int; 
+  HYPRE_Real *P_ext_int; 
 
-  double diag = 0.e0;
+  HYPRE_Real diag = 0.e0;
  
 
 
@@ -162,7 +162,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 
-  Prolong_coeff = hypre_CTAlloc(double, dof_neighbor_coarsedof_counter);
+  Prolong_coeff = hypre_CTAlloc(HYPRE_Real, dof_neighbor_coarsedof_counter);
 
 
 
@@ -251,7 +251,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
-  AE = hypre_CTAlloc(double, max_local_dof_counter *
+  AE = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 		     max_local_dof_counter);
 
   
@@ -269,7 +269,7 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
   
   i_int = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
-  P_ext_int = hypre_CTAlloc(double, max_local_dof_counter *
+  P_ext_int = hypre_CTAlloc(HYPRE_Real, max_local_dof_counter *
 			    max_local_dof_counter);
 
 
@@ -602,9 +602,9 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
  row_mat_rectmat_prod:    A1[i_row][0:n-1] <---  -A2[i_row][0:m-1]
                                                 * A3[0:m-1][0:n-1];
 ---------------------------------------------------------------------*/
-HYPRE_Int row_mat_rectmat_prod(double *a1,
-                         double *a2,
-                         double *a3,
+HYPRE_Int row_mat_rectmat_prod(HYPRE_Real *a1,
+                         HYPRE_Real *a2,
+                         HYPRE_Real *a3,
                          HYPRE_Int i_row, HYPRE_Int m, HYPRE_Int n)
 {
   HYPRE_Int i,l, ierr =0;
@@ -626,7 +626,7 @@ HYPRE_Int row_mat_rectmat_prod(double *a1,
  matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-HYPRE_Int matinv(double *x, double *a, HYPRE_Int k)
+HYPRE_Int matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 {
   HYPRE_Int i,j,l, ierr =0;
 

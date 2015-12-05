@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 #ifndef SORTEDLIST_DH_H
@@ -20,7 +20,7 @@
 typedef struct _srecord {
     HYPRE_Int    col;
     HYPRE_Int    level;
-    double val;
+    HYPRE_Real val;
     HYPRE_Int next;
 } SRecord;
 
@@ -65,7 +65,7 @@ extern void SortedList_dhInsertOrUpdateVal(SortedList_dh sList, SRecord *sr);
      factorization routines.
    */
 
-extern bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, double thresh);
+extern bool SortedList_dhPermuteAndInsert(SortedList_dh sList, SRecord *sr, HYPRE_Real thresh);
   /* permutes sr->col, and inserts record in sorted list.
      Note: the contents of the passed variable "sr" may be changed.
      Note: this performs sparsification 

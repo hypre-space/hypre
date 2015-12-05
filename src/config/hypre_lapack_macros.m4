@@ -7,7 +7,7 @@ dnl # HYPRE is free software; you can redistribute it and/or modify it under the
 dnl # terms of the GNU Lesser General Public License (as published by the Free
 dnl # Software Foundation) version 2.1 dated February 1999.
 dnl #
-dnl # $Revision: 1.8 $
+dnl # $Revision$
 dnl #EHEADER**********************************************************************
 
 
@@ -39,7 +39,7 @@ dnl ACTION-IF-FOUND is a list of shell commands to run if a LAPACK
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.
 dnl
-dnl @version $Id: hypre_lapack_macros.m4,v 1.8 2010/01/25 22:51:04 falgout Exp $
+dnl @version $Id$
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([AC_HYPRE_FIND_LAPACK], 

@@ -7,12 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision$
  ***********************************************************************EHEADER*/
-
-
-
-
 
 #include "_hypre_parcsr_mv.h"
 
@@ -52,7 +48,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 
    hypre_ParCSRBooleanMatrix *C;
    HYPRE_Int		      *col_map_offd_C;
-   HYPRE_Int		      *map_B_to_C;
+   HYPRE_Int		      *map_B_to_C=NULL;
 
    hypre_CSRBooleanMatrix *C_diag;
    HYPRE_Int             *C_diag_i;
@@ -226,24 +222,10 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
          }
    }
 
-   /*-----------------------------------------------------------------------
-   *  Allocate marker array.
-    *-----------------------------------------------------------------------*/
-
-   B_marker = hypre_CTAlloc(HYPRE_Int, num_cols_diag_B+num_cols_offd_C);
-
-   /*-----------------------------------------------------------------------
-    *  Initialize some stuff.
-    *-----------------------------------------------------------------------*/
-
-   for (i1 = 0; i1 < num_cols_diag_B+num_cols_offd_C; i1++)
-   {      
-      B_marker[i1] = -1;
-   }
-
 
    hypre_ParMatmul_RowSizes(
-      &C_diag_i, &C_offd_i, &B_marker,
+      /*&C_diag_i, &C_offd_i, &B_marker,*/
+      &C_diag_i, &C_offd_i, 
       A_diag_i, A_diag_j, A_offd_i, A_offd_j,
       B_diag_i, B_diag_j, B_offd_i, B_offd_j,
       B_ext_diag_i, B_ext_diag_j, 
@@ -272,6 +254,12 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
     *  Second Pass: Fill in C_diag_j.
     *  Second Pass: Fill in C_offd_j.
     *-----------------------------------------------------------------------*/
+
+   /*-----------------------------------------------------------------------
+   *  Allocate marker array.
+    *-----------------------------------------------------------------------*/
+
+   B_marker = hypre_CTAlloc(HYPRE_Int, num_cols_diag_B+num_cols_offd_C);
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -477,7 +465,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
    HYPRE_Int *B_ext_i;
    HYPRE_Int *B_ext_j;
 
-   double *B_ext_data=NULL, *diag_data=NULL, *offd_data=NULL;
+   HYPRE_Complex *B_ext_data=NULL, *diag_data=NULL, *offd_data=NULL;
    HYPRE_Int *B_ext_row_map=NULL;
    /* ... not referenced, but needed for function call */
  
@@ -551,7 +539,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
    HYPRE_Int *A_ext_j;
 
    HYPRE_Int data = 0;
-   double *A_ext_data = NULL, *diag_data=NULL, *offd_data=NULL;
+   HYPRE_Complex *A_ext_data = NULL, *diag_data=NULL, *offd_data=NULL;
    /* ... not referenced, but needed for function call */
  
    num_cols_A = hypre_ParCSRBooleanMatrix_Get_GlobalNCols(A);

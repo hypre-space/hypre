@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision$
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -164,13 +164,13 @@ hypre_F90_IFACE(hypre_sstructmaxwellsetrfactors, HYPRE_SSTRUCTMAXWELLSETRFACTORS
 void
 hypre_F90_IFACE(hypre_sstructmaxwellsettol, HYPRE_SSTRUCTMAXWELLSETTOL)
    (hypre_F90_Obj *solver,
-    hypre_F90_Dbl *tol,
+    hypre_F90_Real *tol,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_SStructMaxwellSetTol(
            hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-           hypre_F90_PassDbl (tol)    ));
+           hypre_F90_PassReal (tol)    ));
 }
 
 /*--------------------------------------------------------------------------
@@ -325,13 +325,13 @@ hypre_F90_IFACE(hypre_sstructmaxwellgetnumitera, HYPRE_SSTRUCTMAXWELLGETNUMITERA
 void
 hypre_F90_IFACE(hypre_sstructmaxwellgetfinalrel, HYPRE_SSTRUCTMAXWELLGETFINALREL) 
    (hypre_F90_Obj *solver, 
-    hypre_F90_Dbl *norm,
+    hypre_F90_Real *norm,
     hypre_F90_Int *ierr)
 {
    *ierr = (hypre_F90_Int)
       ( HYPRE_SStructMaxwellGetFinalRelativeResidualNorm( 
            hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-           hypre_F90_PassDblRef (norm)   ));
+           hypre_F90_PassRealRef (norm)   ));
 }
 
 /*--------------------------------------------------------------------------
