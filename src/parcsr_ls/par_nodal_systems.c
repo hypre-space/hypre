@@ -132,7 +132,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
-   mode = fabs(option);
+   mode = abs(option);
 
    comm_pkg_AN = NULL;
    col_map_offd_AN = NULL;

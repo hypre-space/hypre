@@ -142,6 +142,8 @@ typedef struct
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
    HYPRE_Real         *nongalerk_tol;
+   HYPRE_Real          nongalerkin_tol;
+   HYPRE_Real         *nongal_tol_array;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -399,8 +401,8 @@ typedef struct
 #define hypre_ParAMGDataAdditive(amg_data) ((amg_data)->additive)
 #define hypre_ParAMGDataMultAdditive(amg_data) ((amg_data)->mult_additive)
 #define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
-#define hypre_ParAMGDataAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
-#define hypre_ParAMGDataAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
+#define hypre_ParAMGDataMultAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
+#define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
 #define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
@@ -409,6 +411,8 @@ typedef struct
 /* non-Galerkin parameters */
 #define hypre_ParAMGDataNonGalerkNumTol(amg_data) ((amg_data)->nongalerk_num_tol)
 #define hypre_ParAMGDataNonGalerkTol(amg_data) ((amg_data)->nongalerk_tol)
+#define hypre_ParAMGDataNonGalerkinTol(amg_data) ((amg_data)->nongalerkin_tol)
+#define hypre_ParAMGDataNonGalTolArray(amg_data) ((amg_data)->nongal_tol_array)
 
 #endif
 

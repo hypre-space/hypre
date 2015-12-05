@@ -108,3 +108,14 @@ mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -hmis -interptype 6 -Pmx 4 
 #redundant coarse grid solve
 mpirun -np 8 ./new_ij -n 80 80 80 -P 2 2 2 -agg_nl 1 -hmis -interptype 6 -Pmx 4 -seq_th 100 -solver 1 -rlx 6 -red 1 > solvers.out.106
 mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -agg_nl 1 -hmis -interptype 6 -Pmx 4 -seq_th 100 -solver 1 -rlx 6 -sysL 3 -nf 3 -red 1 > solvers.out.108
+
+#additive cycles
+mpirun -np 2 ./new_ij -n 20 20 20 -P 2 1 1 -hmis -interptype 6 -Pmx 4 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -rlx_coarse 0 -ns_coarse 2 > solvers.out.109
+mpirun -np 2 ./new_ij -n 20 20 20 -P 2 1 1 -hmis -interptype 6 -Pmx 4 -agg_nl 1 -solver 1 -CF 0 -rlx 0 -w 0.7 -mult_add 0 > solvers.out.110
+mpirun -np 4 ./new_ij -n 20 20 20 -P 2 2 1 -hmis -interptype 6 -Pmx 4 -agg_nl 1 -solver 1 -simple 0 > solvers.out.111
+mpirun -np 8 ./new_ij -n 20 20 20 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -agg_nl 1 -solver 3 -additive 1 > solvers.out.112
+mpirun -np 8 ./new_ij -n 20 20 20 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -agg_nl 1 -solver 3 -mult_add 0 -add_Pmx 5 > solvers.out.113
+
+#nonGalerkin version
+mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -nongalerk_tol 1 0.03 > solvers.out.114
+mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -nongalerk_tol 3 0.0 0.01 0.05 > solvers.out.115

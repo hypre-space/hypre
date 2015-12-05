@@ -293,6 +293,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
    }
    hypre_TFree(B_marker);
   } /*end parallel region */
+  hypre_TFree(jj_count);
   return C;
 }       
 

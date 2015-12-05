@@ -20,7 +20,7 @@ all:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 
@@ -31,7 +31,7 @@ install:
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 
@@ -41,7 +41,7 @@ clean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done
 
@@ -51,6 +51,6 @@ distclean:
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    (cd $$i && $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@) || exit 1; \
 	  fi; \
 	done

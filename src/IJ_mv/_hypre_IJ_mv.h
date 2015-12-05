@@ -190,6 +190,7 @@ typedef struct hypre_IJMatrix_struct
    void       *object;              /* Structure for storing local portion */
    void       *translator;          /* optional storage_type specfic structure
                                        for holding additional local info */
+   void       *assumed_part;	   /* IJMatrix assumed partition */
    HYPRE_Int         assemble_flag;       /* indicates whether matrix has been 
 				       assembled */
 
@@ -199,8 +200,6 @@ typedef struct hypre_IJMatrix_struct
    HYPRE_Int         global_num_cols;
    HYPRE_Int         omp_flag;
    HYPRE_Int         print_level;
-   
-
 
 } hypre_IJMatrix;
 
@@ -216,6 +215,7 @@ typedef struct hypre_IJMatrix_struct
 #define hypre_IJMatrixObjectType(matrix)        ((matrix) -> object_type)
 #define hypre_IJMatrixObject(matrix)            ((matrix) -> object)
 #define hypre_IJMatrixTranslator(matrix)        ((matrix) -> translator)
+#define hypre_IJMatrixAssumedPart(matrix)       ((matrix) -> assumed_part)
 
 #define hypre_IJMatrixAssembleFlag(matrix)      ((matrix) -> assemble_flag)
 
@@ -285,6 +285,8 @@ typedef struct hypre_IJVector_struct
    void         *translator;        /* Structure for storing off processor
 				       information */
 
+   void         *assumed_part;        /* IJ Vector assumed partition */
+
    HYPRE_Int         global_first_row;    /* these for data items are necessary */
    HYPRE_Int         global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
@@ -307,6 +309,8 @@ typedef struct hypre_IJVector_struct
 #define hypre_IJVectorObject(vector)         ((vector) -> object)
 
 #define hypre_IJVectorTranslator(vector)     ((vector) -> translator)
+
+#define hypre_IJVectorAssumedPart(vector)     ((vector) -> assumed_part)
 
 #define hypre_IJVectorGlobalFirstRow(vector)  ((vector) -> global_first_row)
 
@@ -332,6 +336,10 @@ HYPRE_Int hypre_AuxParVectorCreate ( hypre_AuxParVector **aux_vector );
 HYPRE_Int hypre_AuxParVectorDestroy ( hypre_AuxParVector *vector );
 HYPRE_Int hypre_AuxParVectorInitialize ( hypre_AuxParVector *vector );
 HYPRE_Int hypre_AuxParVectorSetMaxOffPRocElmts ( hypre_AuxParVector *vector , HYPRE_Int max_off_proc_elmts );
+
+/* IJ_assumed_part.c */
+HYPRE_Int hypre_IJMatrixCreateAssumedPartition ( hypre_IJMatrix *matrix );
+HYPRE_Int hypre_IJVectorCreateAssumedPartition ( hypre_IJVector *vector );
 
 /* IJMatrix.c */
 HYPRE_Int hypre_IJMatrixGetRowPartitioning ( HYPRE_IJMatrix matrix , HYPRE_Int **row_partitioning );
@@ -389,8 +397,6 @@ HYPRE_Int hypre_IJMatrixDistributePETSc ( hypre_IJMatrix *matrix , HYPRE_Int *ro
 HYPRE_Int hypre_IJMatrixApplyPETSc ( hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b );
 HYPRE_Int hypre_IJMatrixDestroyPETSc ( hypre_IJMatrix *matrix );
 HYPRE_Int hypre_IJMatrixSetTotalSizePETSc ( hypre_IJMatrix *matrix , HYPRE_Int size );
-
-/* IJ_setaddassemble.c */
 
 /* IJVector.c */
 HYPRE_Int hypre_IJVectorDistribute ( HYPRE_IJVector vector , const HYPRE_Int *vec_starts );

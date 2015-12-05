@@ -39,6 +39,8 @@ typedef struct hypre_IJVector_struct
    void         *translator;        /* Structure for storing off processor
 				       information */
 
+   void         *assumed_part;        /* IJ Vector assumed partition */
+
    HYPRE_Int         global_first_row;    /* these for data items are necessary */
    HYPRE_Int         global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
@@ -61,6 +63,8 @@ typedef struct hypre_IJVector_struct
 #define hypre_IJVectorObject(vector)         ((vector) -> object)
 
 #define hypre_IJVectorTranslator(vector)     ((vector) -> translator)
+
+#define hypre_IJVectorAssumedPart(vector)     ((vector) -> assumed_part)
 
 #define hypre_IJVectorGlobalFirstRow(vector)  ((vector) -> global_first_row)
 

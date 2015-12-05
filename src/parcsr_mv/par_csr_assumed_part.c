@@ -33,7 +33,7 @@
 
 HYPRE_Int 
 hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_Int row_start, HYPRE_Int row_end, 
-			HYPRE_Int global_num_rows, 
+			HYPRE_Int global_first_row, HYPRE_Int global_num_rows, 
                         hypre_IJAssumedPart *part, HYPRE_Int myid)
 {  
 
@@ -123,10 +123,10 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_Int row_start, HYPRE_Int row_
    {
   
       /*get start and end row owners */
-      hypre_GetAssumedPartitionProcFromRow(comm, contact_row_start[i], global_num_rows, 
-                                            &owner_start);
-      hypre_GetAssumedPartitionProcFromRow(comm, contact_row_end[i], global_num_rows, 
-                                             &owner_end);
+      hypre_GetAssumedPartitionProcFromRow(comm, contact_row_start[i], global_first_row,
+					global_num_rows, &owner_start);
+      hypre_GetAssumedPartitionProcFromRow(comm, contact_row_end[i], global_first_row,
+					global_num_rows, &owner_end);
 
       if (owner_start == owner_end) /* same processor owns the whole range */
       {
@@ -147,8 +147,8 @@ hypre_LocateAssummedPartition(MPI_Comm comm, HYPRE_Int row_start, HYPRE_Int row_
         complete = 0;
         while (!complete) 
         {
-            hypre_GetAssumedPartitionRowRange(comm, owner_start, global_num_rows, 
-                                         &tmp_row_start, &tmp_row_end); 
+            hypre_GetAssumedPartitionRowRange(comm, owner_start, global_first_row,
+					global_num_rows, &tmp_row_start, &tmp_row_end); 
            
             if (tmp_row_end >= contact_row_end[i])
 	    {
@@ -353,8 +353,8 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 
   /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   hypre_GetAssumedPartitionRowRange( comm, myid, global_num_cols, &(apart->row_start), 
-                                             &(apart->row_end));
+   hypre_GetAssumedPartitionRowRange( comm, myid, 0, global_num_cols, 
+					&(apart->row_start), &(apart->row_end));
 
   /*allocate some space for the partition of the assumed partition */
     apart->length = 0;
@@ -366,7 +366,7 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
-    hypre_LocateAssummedPartition(comm, col_start, col_end, global_num_cols, apart, myid);
+    hypre_LocateAssummedPartition(comm, col_start, col_end, 0, global_num_cols, apart, myid);
 
     /* this partition will be saved in the matrix data structure until the matrix is destroyed */
     hypre_ParCSRMatrixAssumedPartition(matrix) = apart;
@@ -377,17 +377,11 @@ hypre_ParCSRMatrixCreateAssumedPartition( hypre_ParCSRMatrix *matrix)
 }
 
 /*--------------------------------------------------------------------
- * hypre_ParCSRMatrixDestroyAssumedPartition
+ * hypre_AssumedPartitionDestroy
  *--------------------------------------------------------------------*/
 HYPRE_Int 
-hypre_ParCSRMatrixDestroyAssumedPartition(hypre_ParCSRMatrix *matrix )
+hypre_AssumedPartitionDestroy(hypre_IJAssumedPart *apart )
 {
-
-   hypre_IJAssumedPart *apart;
-   
-   apart = hypre_ParCSRMatrixAssumedPartition(matrix);
-   
-
    if(apart->storage_length > 0) 
    {      
       hypre_TFree(apart->proc_list);
@@ -410,8 +404,9 @@ hypre_ParCSRMatrixDestroyAssumedPartition(hypre_ParCSRMatrix *matrix )
 
 
 HYPRE_Int
-hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm, 
-		HYPRE_Int row, HYPRE_Int global_num_rows, HYPRE_Int *proc_id)
+hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm, HYPRE_Int row, 
+			HYPRE_Int global_first_row,
+			HYPRE_Int global_num_rows, HYPRE_Int *proc_id)
 {
 
    HYPRE_Int     num_procs;
@@ -430,7 +425,7 @@ hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm,
 
    size = global_num_rows /num_procs;
    extra = global_num_rows - size*num_procs;
-   switch_row = (size + 1)*extra;
+   switch_row = global_first_row + (size + 1)*extra;
    
    if (row >= switch_row)
    {
@@ -438,7 +433,7 @@ hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm,
    }
    else
    {
-      *proc_id = row/(size+1);      
+      *proc_id = (row - global_first_row)/(size+1);      
    }
 
 
@@ -454,8 +449,8 @@ hypre_GetAssumedPartitionProcFromRow( MPI_Comm comm,
 
 
 HYPRE_Int
-hypre_GetAssumedPartitionRowRange( MPI_Comm comm, HYPRE_Int proc_id, HYPRE_Int global_num_rows, 
-                             HYPRE_Int *row_start, HYPRE_Int* row_end) 
+hypre_GetAssumedPartitionRowRange( MPI_Comm comm, HYPRE_Int proc_id, HYPRE_Int global_first_row,
+				HYPRE_Int global_num_rows, HYPRE_Int *row_start, HYPRE_Int* row_end) 
 {
 
    HYPRE_Int    num_procs;
@@ -473,11 +468,11 @@ hypre_GetAssumedPartitionRowRange( MPI_Comm comm, HYPRE_Int proc_id, HYPRE_Int g
    size = global_num_rows /num_procs;
    extra = global_num_rows - size*num_procs;
 
-   *row_start = size*proc_id;
+   *row_start = global_first_row + size*proc_id;
    *row_start += hypre_min(proc_id, extra);
    
 
-   *row_end =  size*(proc_id+1);
+   *row_end =  global_first_row + size*(proc_id+1);
    *row_end += hypre_min(proc_id+1, extra);
    *row_end = *row_end - 1;
 
@@ -526,7 +521,7 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
 
   /* get my assumed partitioning  - we want partitioning of the vector that the
       matrix multiplies - so we use the col start and end */
-   hypre_GetAssumedPartitionRowRange( comm, myid, global_num, &(apart->row_start), 
+   hypre_GetAssumedPartitionRowRange( comm, myid, 0, global_num, &(apart->row_start), 
                                              &(apart->row_end));
 
   /*allocate some space for the partition of the assumed partition */
@@ -539,38 +534,12 @@ hypre_ParVectorCreateAssumedPartition( hypre_ParVector *vector)
 
 
     /* now we want to reconcile our actual partition with the assumed partition */
-    hypre_LocateAssummedPartition(comm, start, end, global_num, apart, myid);
+    hypre_LocateAssummedPartition(comm, start, end, 0, global_num, apart, myid);
 
     /* this partition will be saved in the vector data structure until the vector is destroyed */
     hypre_ParVectorAssumedPartition(vector) = apart;
    
     return hypre_error_flag;
 
-
-}
-
-/*--------------------------------------------------------------------
- * hypre_ParVectorDestroyAssumedPartition
- *--------------------------------------------------------------------*/
-HYPRE_Int 
-hypre_ParVectorDestroyAssumedPartition(hypre_ParVector *vector )
-{
-
-   hypre_IJAssumedPart *apart;
-   
-   apart = hypre_ParVectorAssumedPartition(vector);
-   
-
-   if(apart->storage_length > 0) 
-   {      
-      hypre_TFree(apart->proc_list);
-      hypre_TFree(apart->row_start_list);
-      hypre_TFree(apart->row_end_list);
-      hypre_TFree(apart->sort_index);
-   }
-
-   hypre_TFree(apart);
-   
-   return hypre_error_flag;
 
 }

@@ -17,6 +17,7 @@
  *****************************************************************************/
  
 #include "_hypre_IJ_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 #include "../HYPRE.h"
 
@@ -45,7 +46,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
    if (hypre_IJMatrixGlobalFirstRow(matrix))
       for (i=0; i < 2; i++)
 	 row_starts[i] = row_partitioning[i]- hypre_IJMatrixGlobalFirstRow(matrix);
-   else
+   else 
       for (i=0; i < 2; i++)
 	 row_starts[i] = row_partitioning[i];
    if (row_partitioning != col_partitioning)
@@ -54,7 +55,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
       if (hypre_IJMatrixGlobalFirstCol(matrix))
 	 for (i=0; i < 2; i++)
 	    col_starts[i] = col_partitioning[i]-hypre_IJMatrixGlobalFirstCol(matrix);
-      else
+      else 
 	 for (i=0; i < 2; i++)
 	    col_starts[i] = col_partitioning[i];
    }
@@ -70,7 +71,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
    if (row_partitioning[0])
       for (i=0; i < num_procs+1; i++)
 	 row_starts[i] = row_partitioning[i]-row_partitioning[0];
-   else
+   else 
       for (i=0; i < num_procs+1; i++)
 	 row_starts[i] = row_partitioning[i];
    if (row_partitioning != col_partitioning)
@@ -79,7 +80,7 @@ hypre_IJMatrixCreateParCSR(hypre_IJMatrix *matrix)
       if (col_partitioning[0])
 	 for (i=0; i < num_procs+1; i++)
 	    col_starts[i] = col_partitioning[i]-col_partitioning[0];
-      else
+      else 
 	 for (i=0; i < num_procs+1; i++)
 	    col_starts[i] = col_partitioning[i];
    }
@@ -1856,6 +1857,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int proc_id, last_proc, prev_id, tmp_id;
    HYPRE_Int max_response_size;
    HYPRE_Int global_num_cols;
+   HYPRE_Int global_first_col;
+   HYPRE_Int global_first_row;
    HYPRE_Int ex_num_contacts = 0, num_rows = 0;
    HYPRE_Int range_start, range_end;
    HYPRE_Int num_elements;
@@ -1865,6 +1868,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int num_recvs;
    HYPRE_Int counter, upper_bound;
    HYPRE_Int num_real_procs;
+   HYPRE_Int current_proc, original_proc_indx;
    
    HYPRE_Int *row_list=NULL, *row_list_num_elements=NULL;
    HYPRE_Int *a_proc_id=NULL, *orig_order=NULL;
@@ -1873,6 +1877,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int *recv_starts=NULL;
    HYPRE_Int *response_buf = NULL, *response_buf_starts=NULL;
    HYPRE_Int *num_rows_per_proc = NULL, *num_elements_total = NULL;
+   HYPRE_Int *argsort_contact_procs = NULL;
   
    HYPRE_Int  obj_size_bytes, int_size, complex_size;
    HYPRE_Int  tmp_int;
@@ -1893,21 +1898,28 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 
    hypre_IJAssumedPart   *apart;
 
-   hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixObject(matrix);
-
    hypre_MPI_Comm_rank(comm, &myid);
    global_num_cols = hypre_IJMatrixGlobalNumCols(matrix);
+   global_first_col = hypre_IJMatrixGlobalFirstCol(matrix);
+   global_first_row = hypre_IJMatrixGlobalFirstRow(matrix);
+
+   num_rows = off_proc_i_indx/2;
    
    /* verify that we have created the assumed partition */
-   if  (hypre_ParCSRMatrixAssumedPartition(par_matrix) == NULL)
+   if  (hypre_IJMatrixAssumedPart(matrix) == NULL)
+   {
+      hypre_IJMatrixCreateAssumedPartition(matrix);
+   }
+
+   apart = hypre_IJMatrixAssumedPart(matrix);
+
+   /*if  (hypre_ParCSRMatrixAssumedPartition(par_matrix) == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(par_matrix);
    }
 
-   apart = hypre_ParCSRMatrixAssumedPartition(par_matrix);
+   apart = hypre_ParCSRMatrixAssumedPartition(par_matrix);*/
 
-   num_rows = off_proc_i_indx/2;
-   
    row_list = hypre_CTAlloc(HYPRE_Int, num_rows);
    row_list_num_elements = hypre_CTAlloc(HYPRE_Int, num_rows);
    a_proc_id = hypre_CTAlloc(HYPRE_Int, num_rows);
@@ -1924,7 +1936,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          row_list[i] = row;
          row_list_num_elements[i] = off_proc_i[i*2+1];
          
-         hypre_GetAssumedPartitionProcFromRow(comm, row, global_num_cols, &proc_id);
+         hypre_GetAssumedPartitionProcFromRow(comm, row, global_first_row, 
+				global_num_cols, &proc_id);
          a_proc_id[i] = proc_id;
          orig_order[i] = i;
       }
@@ -1975,7 +1988,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
          ex_contact_buf[counter*2] =  row_list[i];
          counter++;
          
-         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_num_cols, 
+         hypre_GetAssumedPartitionRowRange(comm, proc_id, global_first_col, global_num_cols, 
                                            &range_start, &range_end); 
       }
    }
@@ -2025,7 +2038,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
       tmp_id = response_buf[i*2];
 
       /* loop through row_list entries - counting how many are in the range */
-      while (row_list[j] <= upper_bound && j < num_rows)     
+      while (j < num_rows && row_list[j] <= upper_bound)    
       {
          real_proc_id[j] = tmp_id;
          j++;
@@ -2218,7 +2231,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    /*estimate inital storage allocation */
    send_proc_obj.length = 0;
    send_proc_obj.storage_length = num_real_procs + 5;
-   send_proc_obj.id = NULL; /* don't care who send it to us */
+   send_proc_obj.id = 
+      hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length + 1);
    send_proc_obj.vec_starts =
       hypre_CTAlloc(HYPRE_Int, send_proc_obj.storage_length + 1); 
    send_proc_obj.vec_starts[0] = 0;
@@ -2245,9 +2259,18 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    hypre_TFree(ex_contact_vec_starts);
 
    /* Now we can unpack the send_proc_objects and call set 
-      and add to values functions */
-
+      and add to values functions.  We unpack messages in a 
+      deterministic order, using processor rank */
+   
    num_recvs = send_proc_obj.length; 
+   argsort_contact_procs = hypre_CTAlloc(HYPRE_Int, num_recvs);
+   for(i=0; i < num_recvs; i++)
+   {
+      argsort_contact_procs[i] = i;
+   }
+   /* This sort's the id array, but the original indices are stored in
+    * argsort_contact_procs */
+   hypre_qsort2i( send_proc_obj.id, argsort_contact_procs, 0, num_recvs-1 );
 
    /* alias */
    recv_data_ptr = send_proc_obj.v_elements;
@@ -2255,8 +2278,12 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    
    for (i=0; i < num_recvs; i++)
    {
-
-      indx = recv_starts[i];
+      
+      /* Find the current processor in order, and reset recv_data_ptr to that processor's message */
+      original_proc_indx = argsort_contact_procs[i];
+      current_proc = send_proc_obj.id[i];
+      indx = recv_starts[original_proc_indx];
+      recv_data_ptr = (void *) ((char *) send_proc_obj.v_elements + indx*obj_size_bytes);
 
       /* get the number of rows for this recv */
       memcpy( &num_rows, recv_data_ptr, int_size);
@@ -2328,6 +2355,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    }
    hypre_TFree(send_proc_obj.v_elements);
    hypre_TFree(send_proc_obj.vec_starts);
+   hypre_TFree(send_proc_obj.id);
+   hypre_TFree(argsort_contact_procs);
  
    if (int_data) hypre_TFree(int_data);
    if (complex_data) hypre_TFree(complex_data);
@@ -2369,17 +2398,27 @@ hypre_FillResponseIJOffProcVals(void      *p_recv_contact_buf,
    hypre_MPI_Comm_rank(comm, &myid );
 
 
-   /*check to see if we need to allocate more space in send_proc_obj for vec starts*/
+   /*check to see if we need to allocate more space in send_proc_obj for vec starts
+    * and id */
    if (send_proc_obj->length == send_proc_obj->storage_length)
    {
       send_proc_obj->storage_length +=20; /*add space for 20 more contact*/
       send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts,HYPRE_Int, 
                                                  send_proc_obj->storage_length + 1);
+      if( send_proc_obj->id != NULL)
+      {
+         send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id, HYPRE_Int, 
+                                         send_proc_obj->storage_length + 1);
+      }
    }
   
    /*initialize*/ 
    count = send_proc_obj->length;
    index = send_proc_obj->vec_starts[count]; /* current number of elements */
+   if( send_proc_obj->id != NULL)
+   {
+      send_proc_obj->id[count] = contact_proc;
+   }
 
    /*do we need more storage for the elements?*/
    if (send_proc_obj->element_storage_length < index + contact_size)

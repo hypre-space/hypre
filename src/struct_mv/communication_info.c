@@ -369,6 +369,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
     * Initializations
     *------------------------------------------------------*/
 
+   hypre_SetIndex(ilower, 0);
+   hypre_SetIndex(iupper, 0);
+   hypre_SetIndex(istart, 0);
+   hypre_SetIndex(istop, 0);
+   hypre_SetIndex(sgindex, 0);
+
    local_boxes = hypre_StructGridBoxes(grid);
    local_ids   = hypre_StructGridIDs(grid);
    num_boxes   = hypre_BoxArraySize(local_boxes);

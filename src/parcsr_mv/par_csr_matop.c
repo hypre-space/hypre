@@ -2468,8 +2468,8 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
    HYPRE_Int *send_map_elmts_C;
    HYPRE_Int *map_to_B;
 
-   HYPRE_Int *C_diag_array;
-   HYPRE_Int *C_offd_array;
+   /*HYPRE_Int *C_diag_array;
+   HYPRE_Int *C_offd_array;*/
    HYPRE_Complex *D_tmp;
    HYPRE_Int size, rest, num_threads, ii;
 
@@ -2477,8 +2477,8 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
    hypre_MPI_Comm_rank(comm,&my_id);
  
    num_threads = hypre_NumThreads();
-   C_diag_array = hypre_CTAlloc(HYPRE_Int, num_threads);
-   C_offd_array = hypre_CTAlloc(HYPRE_Int, num_threads);
+   /*C_diag_array = hypre_CTAlloc(HYPRE_Int, num_threads);
+   C_offd_array = hypre_CTAlloc(HYPRE_Int, num_threads);*/
 
 
    /*---------------------------------------------------------------------

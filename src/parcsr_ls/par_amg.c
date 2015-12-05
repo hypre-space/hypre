@@ -80,6 +80,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      relax_order;   
    HYPRE_Real   relax_wt;
    HYPRE_Real   outer_wt;
+   HYPRE_Real   nongalerkin_tol;
    HYPRE_Int      smooth_type;
    HYPRE_Int      smooth_num_levels;
    HYPRE_Int      smooth_num_sweeps;
@@ -118,8 +119,6 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      debug_flag;
 
    char     plot_file_name[251] = {0};
-
-   HYPRE_Int nongalerk_num_tol;
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -217,7 +216,7 @@ hypre_BoomerAMGCreate()
    /* cycle_op_count = 0; */
    debug_flag = 0;
 
-   nongalerk_num_tol = 0;
+   nongalerkin_tol = 0.0;
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
     *-----------------------------------------------------------------------*/
@@ -298,8 +297,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetAdditive(amg_data, additive);
    hypre_BoomerAMGSetMultAdditive(amg_data, mult_additive);
    hypre_BoomerAMGSetSimple(amg_data, simple);
-   hypre_BoomerAMGSetAddPMaxElmts(amg_data, add_P_max_elmts);
-   hypre_BoomerAMGSetAddTruncFactor(amg_data, add_trunc_factor);
+   hypre_BoomerAMGSetMultAddPMaxElmts(amg_data, add_P_max_elmts);
+   hypre_BoomerAMGSetMultAddTruncFactor(amg_data, add_trunc_factor);
    hypre_ParAMGDataLambda(amg_data) = NULL;
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
@@ -378,8 +377,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataBVec(amg_data) = NULL;
    hypre_ParAMGDataCommInfo(amg_data) = NULL;
 
-   hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
-   hypre_ParAMGDataNonGalerkTol(amg_data) = NULL;
+   hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
+   hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -428,6 +427,11 @@ hypre_BoomerAMGDestroy( void *data )
    {
       hypre_TFree (hypre_ParAMGDataOmega(amg_data));
       hypre_ParAMGDataOmega(amg_data) = NULL; 
+   }
+   if (hypre_ParAMGDataNonGalTolArray(amg_data))
+   {
+      hypre_TFree (hypre_ParAMGDataNonGalTolArray(amg_data));
+      hypre_ParAMGDataNonGalTolArray(amg_data) = NULL; 
    }
    if (hypre_ParAMGDataDofFunc(amg_data))
    {
@@ -665,8 +669,8 @@ hypre_BoomerAMGSetMaxLevels( void *data,
    old_max_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (old_max_levels < max_levels)
    {
-      HYPRE_Real *relax_weight, *omega; 
-      HYPRE_Real relax_wt, outer_wt;
+      HYPRE_Real *relax_weight, *omega, *nongal_tol_array;
+      HYPRE_Real relax_wt, outer_wt, nongalerkin_tol;
       HYPRE_Int i;
       relax_weight = hypre_ParAMGDataRelaxWeight(amg_data);
       if (relax_weight)
@@ -685,6 +689,15 @@ hypre_BoomerAMGSetMaxLevels( void *data,
          for(i=old_max_levels; i < max_levels; i++)
             omega[i] = outer_wt;
          hypre_ParAMGDataOmega(amg_data) = omega;
+      }
+      nongal_tol_array = hypre_ParAMGDataNonGalTolArray(amg_data);
+      if (nongal_tol_array)
+      {
+         nongalerkin_tol = hypre_ParAMGDataNonGalerkinTol(amg_data);
+         nongal_tol_array = hypre_TReAlloc(nongal_tol_array, HYPRE_Real, max_levels);
+         for(i=old_max_levels; i < max_levels; i++)
+            nongal_tol_array[i] = nongalerkin_tol;
+         hypre_ParAMGDataNonGalTolArray(amg_data) = nongal_tol_array;
       }
    }
    hypre_ParAMGDataMaxLevels(amg_data) = max_levels;
@@ -2749,7 +2762,7 @@ hypre_BoomerAMGSetAggPMaxElmts( void     *data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetAddPMaxElmts( void     *data,
+hypre_BoomerAMGSetMultAddPMaxElmts( void     *data,
                             HYPRE_Int       add_P_max_elmts )
 {
    hypre_ParAMGData  *amg_data = data;
@@ -2765,7 +2778,7 @@ hypre_BoomerAMGSetAddPMaxElmts( void     *data,
       hypre_error_in_arg(2);
       return hypre_error_flag;
    } 
-   hypre_ParAMGDataAddPMaxElmts(amg_data) = add_P_max_elmts;
+   hypre_ParAMGDataMultAddPMaxElmts(amg_data) = add_P_max_elmts;
 
    return hypre_error_flag;
 }
@@ -2829,7 +2842,7 @@ hypre_BoomerAMGSetAggTruncFactor( void     *data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetAddTruncFactor( void     *data,
+hypre_BoomerAMGSetMultAddTruncFactor( void     *data,
                             HYPRE_Real      add_trunc_factor )
 {
    hypre_ParAMGData  *amg_data = data;
@@ -2845,7 +2858,7 @@ hypre_BoomerAMGSetAddTruncFactor( void     *data,
       hypre_error_in_arg(2);
       return hypre_error_flag;
    } 
-   hypre_ParAMGDataAddTruncFactor(amg_data) = add_trunc_factor;
+   hypre_ParAMGDataMultAddTruncFactor(amg_data) = add_trunc_factor;
 
    return hypre_error_flag;
 }
@@ -3540,6 +3553,30 @@ HYPRE_Int hypre_BoomerAMGSetInterpVectors(void *solver,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoomerAMGSetInterpVectorValues
+ * -used for post-interpolation fitting of smooth vectors
+ *--------------------------------------------------------------------------*/
+
+/*HYPRE_Int hypre_BoomerAMGSetInterpVectorValues(void *solver,
+                                    HYPRE_Int  num_vectors,
+                                    HYPRE_Complex *interp_vector_values)
+
+{
+   hypre_ParAMGData *amg_data = solver;
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGInterpVectors(amg_data) =  interp_vectors;
+   hypre_ParAMGNumInterpVectors(amg_data) = num_vectors;
+   
+   return hypre_error_flag;
+}*/
+
 HYPRE_Int hypre_BoomerAMGSetInterpVecVariant(void *solver,
                                        HYPRE_Int  var)
 
@@ -3760,15 +3797,93 @@ hypre_BoomerAMGGetSimple( void *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetNonGalerkinTol( void   *data,
+                            HYPRE_Real nongalerkin_tol)
+{
+   hypre_ParAMGData *amg_data = data;
+   HYPRE_Int i, max_num_levels;
+   HYPRE_Real *nongal_tol_array;
+
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (nongalerkin_tol < 0)
+   {
+      hypre_printf("Warning! Negative tolerance!\n");
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   max_num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   nongal_tol_array = hypre_ParAMGDataNonGalTolArray(amg_data);
+
+   if (nongal_tol_array == NULL)
+   {
+      nongal_tol_array = hypre_CTAlloc(HYPRE_Real, max_num_levels);
+      hypre_ParAMGDataNonGalTolArray(amg_data) = nongal_tol_array;
+   }
+   hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
+
+   for (i=0; i < max_num_levels; i++)
+      nongal_tol_array[i] = nongalerkin_tol;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetLevelNonGalerkinTol( void   *data,
+                            HYPRE_Real   nongalerkin_tol,
+                            HYPRE_Int level)
+{
+   hypre_ParAMGData *amg_data = data;
+   HYPRE_Real *nongal_tol_array;
+   HYPRE_Int max_num_levels;
+
+   if (!amg_data)
+   {
+      hypre_printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if (nongalerkin_tol < 0)
+   {
+      hypre_printf("Warning! Negative tolerance!\n");
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   nongal_tol_array = hypre_ParAMGDataNonGalTolArray(amg_data);
+   max_num_levels = hypre_ParAMGDataMaxLevels(amg_data);
+
+   if (nongal_tol_array == NULL)
+   {
+      nongal_tol_array = hypre_CTAlloc(HYPRE_Real, max_num_levels);
+      hypre_ParAMGDataNonGalTolArray(amg_data) = nongal_tol_array;
+   }
+
+   if (level+1 > max_num_levels)
+   {
+      hypre_printf("Warning! Out of Bounds!\n");
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
+   }
+
+   nongal_tol_array[level] = nongalerkin_tol;
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetNonGalerkTol( void   *data,
                             HYPRE_Int   nongalerk_num_tol,
                             HYPRE_Real *nongalerk_tol)
 {
-  HYPRE_Int ierr = 0;
   hypre_ParAMGData *amg_data = data;
 
   hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
   hypre_ParAMGDataNonGalerkTol(amg_data) = nongalerk_tol;
-  return (ierr);
+  return hypre_error_flag;
 }
 

@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.10.0b)
-set (HYPRE_DATE    2015/01/22)
+set (HYPRE_VERSION 2.10.1)
+set (HYPRE_DATE    2015/09/11)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -331,6 +331,7 @@ list (APPEND HYPRE_SOURCES
   IJ_mv/F90_IJMatrix.c
   IJ_mv/HYPRE_IJMatrix.c
   IJ_mv/HYPRE_IJVector.c
+  IJ_mv/IJ_assumed_part.c
   IJ_mv/IJMatrix.c
   IJ_mv/IJMatrix_parcsr.c
   IJ_mv/IJVector.c

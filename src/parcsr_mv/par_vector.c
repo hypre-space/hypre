@@ -120,7 +120,7 @@ hypre_ParVectorDestroy( hypre_ParVector *vector )
 
       if (hypre_ParVectorAssumedPartition(vector))
       {
-         hypre_ParVectorDestroyAssumedPartition(vector);
+         hypre_AssumedPartitionDestroy(hypre_ParVectorAssumedPartition(vector));
       }
 
       hypre_TFree(vector);

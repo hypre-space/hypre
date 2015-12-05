@@ -5,10 +5,10 @@ To use the scripts, one first needs to download and install the latest versions
 of GLVis and the MFEM finite element library (you will need versions 2.0, or
 later) from the following websites:
 
-http://glvis.googlecode.com
-http://mfem.googlecode.com
+http://glvis.org
+http://mfem.org
 
-See http://code.google.com/p/mfem/wiki/Building for building instructions.
+See http://mfem.org/building for building instructions.
 
 Assuming that the "glvis" binary is in your $PATH, you can use it to examine
 the results from hypre's example codes as follows:
@@ -32,8 +32,8 @@ vis/glvis-ex4.sh
    finite elements) directly visualize parallel data.
 
 3) Interact with the solution in the GLVis window using the mouse buttons and
-   command keystrokes documented in http://glvis.googlecode.com/hg/README. Some
-   of the more frequently used keystrokes are as follows:
+   command keystrokes documented in the GLVis README file. Some of the more
+   frequently used keystrokes are as follows:
 
                 h - Prints a short help message in the terminal
                 m - Toggle mesh level lines

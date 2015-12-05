@@ -209,7 +209,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       HYPRE_ParCSRMatrixRestoreRow(A_csr, i, &rowLeng, &colInd, &colVal);
    }
 #ifndef HYPRE_SEQUENTIAL
-   MPI_Allreduce(&max_norm, &dtemp, 1, MPI_INT, MPI_MAX, poly_ptr->comm); 
+   MPI_Allreduce(&max_norm, &dtemp, 1, MPI_DOUBLE, MPI_MAX, poly_ptr->comm); 
 #endif
    if ( pos_diag == 0 && neg_diag > 0 ) max_norm = - max_norm;
 

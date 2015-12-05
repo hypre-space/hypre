@@ -58,7 +58,7 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
    HYPRE_Real        xpar=0.7;
 
    HYPRE_Int         ierr = 0;
-
+   hypre_Vector	    *x_tmp = NULL;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if
@@ -95,6 +95,12 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
          y_data[i] *= beta;
 
       return ierr;
+   }
+
+   if (x == y)
+   {
+      x_tmp = hypre_SeqVectorCloneDeep(x);
+      x_data = hypre_VectorData(x_tmp);
    }
 
    /*-----------------------------------------------------------------------
@@ -203,6 +209,8 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
       for (i = 0; i < num_rows*num_vectors; i++)
          y_data[i] *= alpha;
    }
+
+   if (x == y) hypre_SeqVectorDestroy(x_tmp);
 
    return ierr;
 }
@@ -450,6 +458,8 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
 
    HYPRE_Int         ierr  = 0;
 
+   hypre_Vector     *x_tmp = NULL;
+
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
     *  length of X doesn't equal the number of rows of A,
@@ -484,6 +494,12 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
          y_data[i] *= beta;
 
       return ierr;
+   }
+
+   if (x == y)
+   {
+      x_tmp = hypre_SeqVectorCloneDeep(x);
+      x_data = hypre_VectorData(x_tmp);
    }
 
    /*-----------------------------------------------------------------------
@@ -614,6 +630,8 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
       for (i = 0; i < num_cols*num_vectors; i++)
          y_data[i] *= alpha;
    }
+
+   if (x == y) hypre_SeqVectorDestroy(x_tmp);
 
    return ierr;
 }

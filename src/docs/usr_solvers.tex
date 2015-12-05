@@ -708,7 +708,8 @@ nodes which are interior to a zero-conductivity region provided by the function
 \begin{display}\begin{verbatim}
 HYPRE_AMSSetInteriorNodes(solver, HYPRE_ParVector interior_nodes);
 \end{verbatim}\end{display}
-Based on the \code{interior_nodes} variable, a restricted discrete gradient
+A node is interior, if its entry in the \code{interior_nodes} array is $1.0$.
+Based on this array, a restricted discrete gradient
 operator $G_0$ is constructed, and AMS is then defined based on the matrix
 ${\mathbf A}+\delta G_0^TG_0$ which is non-singular, and a small $\delta>0$ perturbation of
 ${\mathbf A}$. When iterating with this preconditioner, it is advantageous to project on

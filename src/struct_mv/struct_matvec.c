@@ -125,6 +125,8 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    HYPRE_Complex            temp;
    HYPRE_Int                compute_i, i;
 
+   hypre_StructVector      *x_tmp = NULL;
+
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
@@ -168,6 +170,11 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
       return hypre_error_flag;
    }
 
+   if (x == y)
+   {
+      x_tmp = hypre_StructVectorClone(y);
+      x = x_tmp;
+   }
    /*-----------------------------------------------------------------------
     * Do (alpha != 0.0) computation
     *-----------------------------------------------------------------------*/
@@ -274,6 +281,12 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          }
       }
 
+   }
+
+   if (x_tmp)
+   {
+      hypre_StructVectorDestroy(x_tmp);
+      x = y;
    }
    
    return hypre_error_flag;

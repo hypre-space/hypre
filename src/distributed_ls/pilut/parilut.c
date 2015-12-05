@@ -298,7 +298,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, HYPRE_Int *
   cinfo->snnbr = snnbr;
 
   /* Allocate requests */
-  index_requests = hypre_CTAlloc( hypre_MPI_Request, rnnbr );
+  index_requests = hypre_CTAlloc( hypre_MPI_Request, snnbr );
 
   maxnsend = hypre_GlobalSEMax(nsend, pilut_comm);
 

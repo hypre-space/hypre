@@ -171,7 +171,7 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
       hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix));
 
       if (hypre_ParCSRMatrixAssumedPartition(matrix))
-         hypre_ParCSRMatrixDestroyAssumedPartition(matrix);
+         hypre_AssumedPartitionDestroy(hypre_ParCSRMatrixAssumedPartition(matrix));
 
       hypre_TFree(matrix);
    }

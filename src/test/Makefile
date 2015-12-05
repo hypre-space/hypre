@@ -71,6 +71,7 @@ HYPRE_DRIVERS =\
  struct.c\
  ams_driver.c\
  maxwell_unscaled.c\
+ struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
  zboxloop.c
@@ -163,6 +164,10 @@ zboxloop: zboxloop.o
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 struct: struct.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 

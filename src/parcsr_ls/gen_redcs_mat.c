@@ -206,7 +206,11 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
          }
          else
          {
-            hypre_MPI_Gatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, &A_seq_i[1], info,
+            if (A_seq_i) 
+		hypre_MPI_Gatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, &A_seq_i[1], info,
+                        displs, HYPRE_MPI_INT, 0, new_comm );
+            else
+		hypre_MPI_Gatherv ( &A_tmp_i[1], num_rows, HYPRE_MPI_INT, A_seq_i, info,
                         displs, HYPRE_MPI_INT, 0, new_comm );
             if (num_functions > 1)
             {
@@ -367,7 +371,7 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       
       HYPRE_Int nf;
       HYPRE_Int local_info;
-      HYPRE_Real *recv_buf;
+      HYPRE_Real *recv_buf = NULL;
       HYPRE_Int *displs = NULL;
       HYPRE_Int *info = NULL;
       HYPRE_Int size;
@@ -396,8 +400,11 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
             displs[i] = displs[i-1]+info[i-1]; 
          size = displs[new_num_procs];
       
-         tmp_vec =  hypre_ParVectorLocalVector(F_coarse);
-         recv_buf = hypre_VectorData(tmp_vec);
+         if (F_coarse) 
+         {
+            tmp_vec =  hypre_ParVectorLocalVector(F_coarse);
+            recv_buf = hypre_VectorData(tmp_vec);
+         }
       }
 
       if (redundant)

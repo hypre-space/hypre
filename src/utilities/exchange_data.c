@@ -385,7 +385,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          index_ptr = (void *) ((char *) send_response_buf +
                                max_response_size_bytes);
 
-         memcpy(index_ptr, &response_message_size, response_obj_size);
+         memcpy(index_ptr, &response_message_size, sizeof(HYPRE_Int));
          
          /*send the block of data that includes the overhead */        
          /* this is a blocking send - the recv has already been posted */

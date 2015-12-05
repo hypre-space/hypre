@@ -120,7 +120,8 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
         recvbuf = (HYPRE_Int *) MemAlloc(mem, count*sizeof(HYPRE_Int));
         sendbuf = (HYPRE_Real *) MemAlloc(mem, count*sizeof(HYPRE_Real));
 
-        hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, 
+        /*hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, hypre_MPI_ANY_SOURCE, */
+        hypre_MPI_Recv(recvbuf, count, HYPRE_MPI_INT, source, 
 	    DIAG_INDS_TAG, comm, &status);
         source = status.hypre_MPI_SOURCE;
 

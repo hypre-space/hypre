@@ -53,6 +53,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_IJMatrixComm(ijmatrix)         = comm;
    hypre_IJMatrixObject(ijmatrix)       = NULL;
    hypre_IJMatrixTranslator(ijmatrix)   = NULL;
+   hypre_IJMatrixAssumedPart(ijmatrix)   = NULL;
    hypre_IJMatrixObjectType(ijmatrix)   = HYPRE_UNITIALIZED;
    hypre_IJMatrixAssembleFlag(ijmatrix) = 0;
    hypre_IJMatrixPrintLevel(ijmatrix) = 0;
@@ -252,7 +253,8 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
          hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix));
          hypre_TFree(hypre_IJMatrixColPartitioning(ijmatrix));
       }
-
+      if hypre_IJMatrixAssumedPart(ijmatrix)
+         hypre_AssumedPartitionDestroy(hypre_IJMatrixAssumedPart(ijmatrix));
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
          ierr = hypre_IJMatrixDestroyParCSR( ijmatrix );
       else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )

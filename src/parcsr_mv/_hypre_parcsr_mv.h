@@ -39,20 +39,20 @@ extern "C" {
 typedef struct
 {
    MPI_Comm               comm;
-   
-   HYPRE_Int              num_sends;
-   HYPRE_Int             *send_procs;
-   HYPRE_Int             *send_map_starts;
-   HYPRE_Int             *send_map_elmts;
-   
-   HYPRE_Int              num_recvs;
-   HYPRE_Int             *recv_procs;
-   HYPRE_Int             *recv_vec_starts;
-   
+
+   HYPRE_Int                    num_sends;
+   HYPRE_Int                   *send_procs;
+   HYPRE_Int			 *send_map_starts;
+   HYPRE_Int			 *send_map_elmts;
+
+   HYPRE_Int                    num_recvs;
+   HYPRE_Int                   *recv_procs;
+   HYPRE_Int                   *recv_vec_starts;
+
    /* remote communication information */
-   hypre_MPI_Datatype    *send_mpi_types;
-   hypre_MPI_Datatype    *recv_mpi_types;
-   
+   hypre_MPI_Datatype          *send_mpi_types;
+   hypre_MPI_Datatype          *recv_mpi_types;
+
 } hypre_ParCSRCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -62,12 +62,12 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRCommPkg  *comm_pkg;
-   void                 *send_data;
-   void                 *recv_data;
-   
+   void 	  *send_data;
+   void 	  *recv_data;
+
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
-   
+
 } hypre_ParCSRCommHandle;
 
 /*--------------------------------------------------------------------------
@@ -108,24 +108,49 @@ typedef struct
 #define hypre_ParCSRCommHandleRequest(comm_handle, i)  (comm_handle -> requests[i])
 
 #endif /* HYPRE_PAR_CSR_COMMUNICATION_HEADER */
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 #ifndef hypre_PARCSR_ASSUMED_PART
 #define  hypre_PARCSR_ASSUMED_PART
 
 typedef struct
 {
-   HYPRE_Int   length;
-   HYPRE_Int   row_start;
-   HYPRE_Int   row_end;
-   HYPRE_Int   storage_length;
-   HYPRE_Int  *proc_list;
-   HYPRE_Int  *row_start_list;
-   HYPRE_Int  *row_end_list;  
-   HYPRE_Int  *sort_index;
-
+   HYPRE_Int                   length;
+   HYPRE_Int                   row_start;
+   HYPRE_Int                   row_end;
+   HYPRE_Int                   storage_length;
+   HYPRE_Int                   *proc_list;
+   HYPRE_Int		         *row_start_list;
+   HYPRE_Int                   *row_end_list;  
+  HYPRE_Int                    *sort_index;
 } hypre_IJAssumedPart;
 
+
+
+
 #endif /* hypre_PARCSR_ASSUMED_PART */
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 #ifndef hypre_NEW_COMMPKG
 #define hypre_NEW_COMMPKG
@@ -145,6 +170,22 @@ typedef struct
 
 #endif /* hypre_NEW_COMMPKG */
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+
+
+
+
 /******************************************************************************
  *
  * Header info for Parallel Vector data structure
@@ -153,6 +194,7 @@ typedef struct
 
 #ifndef hypre_PAR_VECTOR_HEADER
 #define hypre_PAR_VECTOR_HEADER
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParVector
@@ -164,23 +206,23 @@ typedef struct
 
 typedef struct hypre_ParVector_struct
 {
-   MPI_Comm      comm;
+   MPI_Comm	 comm;
 
-   HYPRE_Int     global_size;
-   HYPRE_Int     first_index;
-   HYPRE_Int     last_index;
-   HYPRE_Int    *partitioning;
-   hypre_Vector *local_vector; 
+   HYPRE_Int      	 global_size;
+   HYPRE_Int      	 first_index;
+   HYPRE_Int           last_index;
+   HYPRE_Int      	*partitioning;
+   hypre_Vector	*local_vector; 
 
    /* Does the Vector create/destroy `data'? */
-   HYPRE_Int     owns_data;
-   HYPRE_Int     owns_partitioning;
+   HYPRE_Int      	 owns_data;
+   HYPRE_Int      	 owns_partitioning;
 
-   hypre_IJAssumedPart *assumed_partition; /* only populated if
-                                              no_global_partition option is used
-                                              (compile-time option) AND this
-                                              partition needed (for setting
-                                              off-proc elements, for example)*/
+   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+                                              is used (compile-time option) AND this partition
+                                              needed
+                                              (for setting off-proc elements, for example)*/
+
 
 } hypre_ParVector;
 
@@ -188,7 +230,7 @@ typedef struct hypre_ParVector_struct
  * Accessor functions for the Vector structure
  *--------------------------------------------------------------------------*/
 
-#define hypre_ParVectorComm(vector)             ((vector) -> comm)
+#define hypre_ParVectorComm(vector)  	        ((vector) -> comm)
 #define hypre_ParVectorGlobalSize(vector)       ((vector) -> global_size)
 #define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
 #define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
@@ -196,10 +238,11 @@ typedef struct hypre_ParVector_struct
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
-#define hypre_ParVectorNumVectors(vector)                               \
-   (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
+#define hypre_ParVectorNumVectors(vector)\
+ (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
 
 #define hypre_ParVectorAssumedPartition(vector) ((vector) -> assumed_partition)
+
 
 #endif
 /*BHEADER**********************************************************************
@@ -236,7 +279,7 @@ typedef struct hypre_ParVector_struct
 typedef struct hypre_ParCSRMatrix_struct
 {
    MPI_Comm              comm;
-   
+
    HYPRE_Int             global_num_rows;
    HYPRE_Int             global_num_cols;
    HYPRE_Int             first_row_index;
@@ -245,22 +288,22 @@ typedef struct hypre_ParCSRMatrix_struct
       are null  (i.e., bgl) AHB 6/05*/
    HYPRE_Int             last_row_index;
    HYPRE_Int             last_col_diag;
-   
+
    hypre_CSRMatrix      *diag;
    hypre_CSRMatrix      *offd;
    HYPRE_Int            *col_map_offd; 
-   /* maps columns of offd to global columns */
+        /* maps columns of offd to global columns */
    HYPRE_Int            *row_starts; 
-   /* array of length num_procs+1, row_starts[i] contains the 
-      global number of the first row on proc i,  
-      first_row_index = row_starts[my_id],
-      row_starts[num_procs] = global_num_rows */
+        /* array of length num_procs+1, row_starts[i] contains the 
+           global number of the first row on proc i,  
+           first_row_index = row_starts[my_id],
+           row_starts[num_procs] = global_num_rows */
    HYPRE_Int            *col_starts;
-   /* array of length num_procs+1, col_starts[i] contains the 
-      global number of the first column of diag on proc i,  
-      first_col_diag = col_starts[my_id],
-      col_starts[num_procs] = global_num_cols */
-   
+        /* array of length num_procs+1, col_starts[i] contains the 
+           global number of the first column of diag on proc i,  
+           first_col_diag = col_starts[my_id],
+           col_starts[num_procs] = global_num_cols */
+
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
    
@@ -269,19 +312,19 @@ typedef struct hypre_ParCSRMatrix_struct
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
    HYPRE_Int             owns_row_starts;
    HYPRE_Int             owns_col_starts;
-   
+
    HYPRE_Int             num_nonzeros;
    HYPRE_Real            d_num_nonzeros;
-   
+
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    HYPRE_Int            *rowindices;
    HYPRE_Complex        *rowvalues;
    HYPRE_Int             getrowactive;
-   
+
    hypre_IJAssumedPart  *assumed_partition; /* only populated if
                                               no_global_partition option is used
-                                              (compile-time option) */
-   
+                                              (compile-time option)*/
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -305,18 +348,16 @@ typedef struct hypre_ParCSRMatrix_struct
 #define hypre_ParCSRMatrixOwnsData(matrix)        ((matrix) -> owns_data)
 #define hypre_ParCSRMatrixOwnsRowStarts(matrix)   ((matrix) -> owns_row_starts)
 #define hypre_ParCSRMatrixOwnsColStarts(matrix)   ((matrix) -> owns_col_starts)
-#define hypre_ParCSRMatrixNumRows(matrix)                       \
-   hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
-#define hypre_ParCSRMatrixNumCols(matrix)                       \
-   hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumRows(matrix) \
+hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
+#define hypre_ParCSRMatrixNumCols(matrix) \
+hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
 #define hypre_ParCSRMatrixDNumNonzeros(matrix)    ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
-
-
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix
@@ -344,7 +385,7 @@ typedef struct
    HYPRE_Int               num_nonzeros;
    HYPRE_Int              *rowindices;
    HYPRE_Int               getrowactive;
-   
+
 } hypre_ParCSRBooleanMatrix;
 
 /*--------------------------------------------------------------------------
@@ -388,6 +429,9 @@ typedef struct
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
+
+
 /******************************************************************************
  *
  * Tree structure for keeping track of numbers (e.g. column numbers) -
@@ -422,7 +466,7 @@ typedef struct
 
 typedef struct {
    void * digit[11];
-   /* ... should be   hypre_NumbersNode * digit[11]; */
+/* ... should be   hypre_NumbersNode * digit[11]; */
 } hypre_NumbersNode;
 
 
@@ -432,6 +476,7 @@ HYPRE_Int hypre_NumbersEnter( hypre_NumbersNode * node, const HYPRE_Int n );
 HYPRE_Int hypre_NumbersNEntered( hypre_NumbersNode * node );
 HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n );
 HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node );
+
 
 #endif
 /*BHEADER**********************************************************************
@@ -468,37 +513,37 @@ typedef struct
 {
    MPI_Comm comm;
 
-   /*  A structure: -------------------------------------------------------- */
-   HYPRE_Int num_inprocessors;
-   HYPRE_Int *inprocessor;
+  /*  A structure: -------------------------------------------------------- */
+  HYPRE_Int num_inprocessors;
+  HYPRE_Int *inprocessor;
 
-   /* receiving in idof from different (in)processors; --------------------- */
-   HYPRE_Int *num_idofs_inprocessor; 
-   HYPRE_Int **idof_inprocessor; 
+  /* receiving in idof from different (in)processors; ---------------------- */
+  HYPRE_Int *num_idofs_inprocessor; 
+  HYPRE_Int **idof_inprocessor; 
 
-   /* symmetric information: ----------------------------------------------- */
-   /* this can be replaces by CSR format: ---------------------------------- */
-   HYPRE_Int *num_inchords;
-   HYPRE_Int **inchord_idof;
-   HYPRE_Int **inchord_rdof;
-   HYPRE_Complex **inchord_data;
+  /* symmetric information: ----------------------------------------------- */
+  /* this can be replaces by CSR format: ---------------------------------- */
+  HYPRE_Int     *num_inchords;
+  HYPRE_Int     **inchord_idof;
+  HYPRE_Int     **inchord_rdof;
+  HYPRE_Complex **inchord_data;
 
-   HYPRE_Int num_idofs;
-   HYPRE_Int num_rdofs;
+  HYPRE_Int num_idofs;
+  HYPRE_Int num_rdofs;
 
-   HYPRE_Int *firstindex_idof; /* not owned by my_id; ---------------------- */
-   HYPRE_Int *firstindex_rdof; /* not owned by my_id; -----------------------*/
+  HYPRE_Int *firstindex_idof; /* not owned by my_id; ---------------------- */
+  HYPRE_Int *firstindex_rdof; /* not owned by my_id; ---------------------- */
 
-   /* --------------------------- mirror information: ---------------------- */
-   /* participation of rdof in different processors; ----------------------- */
+  /* --------------------------- mirror information: ---------------------- */
+  /* participation of rdof in different processors; ----------------------- */
 
-   HYPRE_Int num_toprocessors;
-   HYPRE_Int *toprocessor;
+  HYPRE_Int num_toprocessors;
+  HYPRE_Int *toprocessor;
 
-   /* rdofs to be sentto toprocessors; -------------------------------------
-      ---------------------------------------------------------------------- */
-   HYPRE_Int *num_rdofs_toprocessor;
-   HYPRE_Int **rdof_toprocessor;
+  /* rdofs to be sentto toprocessors; -------------------------------------
+     ---------------------------------------------------------------------- */
+  HYPRE_Int *num_rdofs_toprocessor;
+  HYPRE_Int **rdof_toprocessor;
 
 } hypre_ParChordMatrix;
 
@@ -514,7 +559,6 @@ typedef struct
 #define hypre_ParChordMatrixInprocessor(matrix) ((matrix) -> inprocessor)
 #define hypre_ParChordMatrixNumIdofsInprocessor(matrix) ((matrix) -> num_idofs_inprocessor)
 #define hypre_ParChordMatrixIdofInprocessor(matrix) ((matrix) -> idof_inprocessor)
-
 
 #define hypre_ParChordMatrixNumInchords(matrix) ((matrix) -> num_inchords)
 
@@ -533,6 +577,7 @@ typedef struct
 #define hypre_ParChordMatrixToprocessor(matrix)  ((matrix) -> toprocessor)
 #define hypre_ParChordMatrixNumRdofsToprocessor(matrix) ((matrix) -> num_rdofs_toprocessor)
 #define hypre_ParChordMatrixRdofToprocessor(matrix) ((matrix) -> rdof_toprocessor)
+
 
 #endif
 /*BHEADER**********************************************************************
@@ -553,9 +598,9 @@ typedef struct
 typedef struct
 {
    hypre_ParCSRMatrix * A;
-   hypre_ParVector    * x;
-   hypre_ParVector    * b;
-   
+   hypre_ParVector * x;
+   hypre_ParVector * b;
+
 } HYPRE_ParCSR_System_Problem;
 
 #endif /* hypre_PAR_MAKE_SYSTEM */
@@ -643,13 +688,12 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt ( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt ( hypre_ParCSRMatrix *A , HYPRE_Int data , HYPRE_Int **pA_ext_row_map );
 
 /* par_csr_assumed_part.c */
-HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_Int row_start , HYPRE_Int row_end , HYPRE_Int global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
+HYPRE_Int hypre_LocateAssummedPartition ( MPI_Comm comm , HYPRE_Int row_start , HYPRE_Int row_end , HYPRE_Int global_first_row , HYPRE_Int global_num_rows , hypre_IJAssumedPart *part , HYPRE_Int myid );
 HYPRE_Int hypre_ParCSRMatrixCreateAssumedPartition ( hypre_ParCSRMatrix *matrix );
-HYPRE_Int hypre_ParCSRMatrixDestroyAssumedPartition ( hypre_ParCSRMatrix *matrix );
-HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( MPI_Comm comm , HYPRE_Int row , HYPRE_Int global_num_rows , HYPRE_Int *proc_id );
-HYPRE_Int hypre_GetAssumedPartitionRowRange ( MPI_Comm comm , HYPRE_Int proc_id , HYPRE_Int global_num_rows , HYPRE_Int *row_start , HYPRE_Int *row_end );
+HYPRE_Int hypre_AssumedPartitionDestroy ( hypre_IJAssumedPart *apart );
+HYPRE_Int hypre_GetAssumedPartitionProcFromRow ( MPI_Comm comm , HYPRE_Int row , HYPRE_Int global_first_row , HYPRE_Int global_num_rows , HYPRE_Int *proc_id );
+HYPRE_Int hypre_GetAssumedPartitionRowRange ( MPI_Comm comm , HYPRE_Int proc_id , HYPRE_Int global_first_row , HYPRE_Int global_num_rows , HYPRE_Int *row_start , HYPRE_Int *row_end );
 HYPRE_Int hypre_ParVectorCreateAssumedPartition ( hypre_ParVector *vector );
-HYPRE_Int hypre_ParVectorDestroyAssumedPartition ( hypre_ParVector *vector );
 
 /* par_csr_bool_matop.c */
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul ( hypre_ParCSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *B );
@@ -703,7 +747,6 @@ void hypre_ParCSRMatrixExtractSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_In
 void hypre_ParCSRMatrixExtractRowSubmatrices ( hypre_ParCSRMatrix *A_csr , HYPRE_Int *indices2 , hypre_ParCSRMatrix ***submatrices );
 HYPRE_Complex hypre_ParCSRMatrixLocalSumElts ( hypre_ParCSRMatrix *A );
 HYPRE_Int hypre_ParCSRMatrixAminvDB ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , HYPRE_Complex *d , hypre_ParCSRMatrix **C_ptr );
-HYPRE_Int hypre_MergeArrays ( HYPRE_Int size_A , HYPRE_Real *A , HYPRE_Int size_B , HYPRE_Real *B , HYPRE_Int *size_C_ptr , HYPRE_Real **C_ptr );
 hypre_ParCSRMatrix *hypre_ParTMatmul ( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B );
 
 /* par_csr_matop_marked.c */

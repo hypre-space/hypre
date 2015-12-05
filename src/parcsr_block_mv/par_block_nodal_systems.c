@@ -106,7 +106,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
       comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    }
 
-   norm_type = fabs(option);
+   norm_type = abs(option);
 
 
 /* Set up the new matrix AN */

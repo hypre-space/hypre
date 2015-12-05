@@ -137,6 +137,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    hypre_IJVectorObjectType(vec)   = HYPRE_UNITIALIZED;
    hypre_IJVectorObject(vec)       = NULL;
    hypre_IJVectorTranslator(vec)   = NULL;
+   hypre_IJVectorAssumedPart(vec)   = NULL;
    hypre_IJVectorPrintLevel(vec)   = 0;
 
    *vector = (HYPRE_IJVector) vec;
@@ -161,6 +162,9 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
 
    if (hypre_IJVectorPartitioning(vec))
       hypre_TFree(hypre_IJVectorPartitioning(vec));
+
+   if (hypre_IJVectorAssumedPart(vec))
+      hypre_AssumedPartitionDestroy(hypre_IJVectorAssumedPart(vec));
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {
@@ -371,12 +375,6 @@ HYPRE_IJVectorGetValues( HYPRE_IJVector   vector,
    if (nvalues < 0)
    {
       hypre_error_in_arg(2);
-      return hypre_error_flag;
-   } 
-
-   if (!indices)
-   {
-      hypre_error_in_arg(3);
       return hypre_error_flag;
    } 
 
