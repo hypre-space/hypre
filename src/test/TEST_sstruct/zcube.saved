@@ -1,62 +1,8 @@
-=============================================
-SStruct Interface:
-=============================================
-SStruct Interface:
-  wall clock time = 0.020000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.020000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Setup phase times:
-=============================================
-PCG Setup:
-  wall clock time = 0.000000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.000000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Solve phase times:
-=============================================
-PCG Solve:
-  wall clock time = 0.040000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.040000 seconds
-  cpu MFLOPS      = 0.000000
-
-
+# Output file: zcube.out.0
 Iterations = 43
 Final Relative Residual Norm = 9.942224e-07
 
-=============================================
-SStruct Interface:
-=============================================
-SStruct Interface:
-  wall clock time = 0.020000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.020000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Setup phase times:
-=============================================
-PCG Setup:
-  wall clock time = 0.000000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.000000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Solve phase times:
-=============================================
-PCG Solve:
-  wall clock time = 0.050000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.040000 seconds
-  cpu MFLOPS      = 0.000000
-
-
+# Output file: zcube.out.1
 Iterations = 43
 Final Relative Residual Norm = 9.942224e-07
 

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.5 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -37,7 +37,7 @@
 #include "headers.h"
 
 #include "HYPRE.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "seq_mv/seq_mv.h"
 #include <assert.h>
 
@@ -92,12 +92,7 @@ hypre_ParCSRBlockMatrixMatvec(double alpha, hypre_ParCSRBlockMatrix *A,
 
       if (!comm_pkg)
       {
-
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_BlockNewCommPkgCreate(A); 
-#else
-        hypre_BlockMatvecCommPkgCreate(A);
-#endif
+         hypre_BlockMatvecCommPkgCreate(A);
          comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
       }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -205,11 +200,7 @@ hypre_ParCSRBlockMatrixMatvecT( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_BlockNewCommPkgCreate(A);
-#else
       hypre_BlockMatvecCommPkgCreate(A);
-#endif
       comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
    }
 

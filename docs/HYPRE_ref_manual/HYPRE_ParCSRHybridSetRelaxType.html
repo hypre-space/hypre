@@ -1,6 +1,6 @@
 <html><head><TITLE>HYPRE_ParCSRHybridSetRelaxType</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_ParCSRHybridSetRelaxType ( HYPRE_Solver solver, int relax_type ) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_ParCSRHybridSetRelaxType ( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int relax_type ) </H2><BLOCKQUOTE>
 
 (Optional) Defines the smoother to be used
 </BLOCKQUOTE>
@@ -13,16 +13,16 @@
 smoother on the fine grid, the up and
 the down cycle and sets the solver on the coarsest level to Gaussian
 elimination (9). The default is Gauss-Seidel (3).<P>There are the following options for relax_type:<P><TABLE BORDER>
-<TR><TD> <HR>
-0 &amp;  Jacobi <BR>
-1 &amp;  Gauss-Seidel, sequential (very slow!) <BR>
-2 &amp;  Gauss-Seidel, interior points in parallel, boundary sequential (slow!) <BR>
-3 &amp;  hybrid Gauss-Seidel or SOR, forward solve <BR>
-4 &amp;  hybrid Gauss-Seidel or SOR, backward solve <BR>
-5 &amp;  hybrid chaotic Gauss-Seidel (works only with OpenMP) <BR>
-6 &amp;  hybrid symmetric Gauss-Seidel or SSOR <BR>
-9 &amp;  Gaussian elimination (only on coarsest level) <BR>
-<HR>
+<TR><TD> </TD></TR><TR><TD>
+0 </TD><TD>  Jacobi </TD></TR><TD>
+1 </TD><TD>  Gauss-Seidel, sequential (very slow!) </TD></TR><TD>
+2 </TD><TD>  Gauss-Seidel, interior points in parallel, boundary sequential (slow!) </TD></TR><TD>
+3 </TD><TD>  hybrid Gauss-Seidel or SOR, forward solve </TD></TR><TD>
+4 </TD><TD>  hybrid Gauss-Seidel or SOR, backward solve </TD></TR><TD>
+5 </TD><TD>  hybrid chaotic Gauss-Seidel (works only with OpenMP) </TD></TR><TD>
+6 </TD><TD>  hybrid symmetric Gauss-Seidel or SSOR </TD></TR><TD>
+9 </TD><TD>  Gaussian elimination (only on coarsest level) </TD></TR><TD>
+</TD></TR><TR><TD>
 </TR></TABLE>
 
 </BLOCKQUOTE>

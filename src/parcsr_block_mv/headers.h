@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,4 +32,4 @@
 
 #include "csr_block_matrix.h"
 #include "par_csr_block_matrix.h" 
-#include "parcsr_ls.h"
+#include "_hypre_parcsr_ls.h"

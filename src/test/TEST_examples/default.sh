@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.6 $
+# $Revision: 1.7 $
 #EHEADER**********************************************************************
 
 
@@ -31,20 +31,20 @@
 #           differences (except for timings) indicate errors
 #=============================================================================
 
-diff ex1.base default.out.1 >&2
+diff -bI"time" ex1.base default.out.1 >&2
 
-diff ex2.base default.out.2 >&2
+diff -bI"time" ex2.base default.out.2 >&2
 
-diff ex3.base default.out.3 >&2
+diff -bI"time" ex3.base default.out.3 >&2
 
-diff ex4.base default.out.4 >&2
+diff -bI"time" ex4.base default.out.4 >&2
 
-diff ex5.base default.out.5 >&2
+diff -bI"time" ex5.base default.out.5 >&2
 
-diff ex6.base default.out.6 >&2
+diff -bI"time" ex6.base default.out.6 >&2
 
-diff ex7.base default.out.7 >&2
+diff -bI"time" ex7.base default.out.7 >&2
 
-diff ex8.base default.out.8 >&2
+diff -bI"time" ex8.base default.out.8 >&2
 
-diff ex9.base default.out.9 >&2
+diff -bI"time" ex9.base default.out.9 >&2

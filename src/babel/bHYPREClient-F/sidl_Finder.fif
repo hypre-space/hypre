@@ -3,7 +3,7 @@ C       File:          sidl_Finder_Impl.f
 C       Symbol:        sidl.Finder-v0.9.15
 C       Symbol Type:   interface
 C       Babel Version: 1.0.0
-C       Release:       $Name: V1-13-0b $
+C       Release:       $Name: V1-14-0b $
 C       Revision:      @(#) $Id: sidl_Finder.fif,v 1.27 2006/09/14 21:51:52 painter Exp $
 C       Description:   Client-side documentation text for sidl.Finder
 C       

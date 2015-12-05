@@ -6,11 +6,11 @@
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACCreate</B>( MPI_Comm comm, <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> *solver )
  <DD><I>
-Create a FAC solver object</I>
+Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACDestroy2</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver )
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACDestroy2.html><B>HYPRE_SStructFACDestroy2</B></A> 
  <DD><I>
-Destroy a FAC solver object</I>
+Destroy a solver object</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACAMR_RAP.html><B>HYPRE_SStructFACAMR_RAP</B></A> 
  <DD><I>
@@ -35,23 +35,23 @@ Set up amr refinement factors</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroCFSten.html><B>HYPRE_SStructFACZeroCFSten</B></A> 
  <DD><I>
-(Optional but user must make sure that they do this function otherwise</I>
+(Optional, but user must make sure that they do this function otherwise</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroFCSten.html><B>HYPRE_SStructFACZeroFCSten</B></A> 
  <DD><I>
-(Optional but user must make sure that they do this function otherwise</I>
+(Optional, but user must make sure that they do this function otherwise</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroAMRMatrixData.html><B>HYPRE_SStructFACZeroAMRMatrixData</B></A> 
  <DD><I>
-(Optional but user must make sure that they do this function otherwise</I>
+(Optional, but user must make sure that they do this function otherwise</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroAMRVectorData.html><B>HYPRE_SStructFACZeroAMRVectorData</B></A> 
  <DD><I>
-(Optional but user must make sure that they do this function otherwise</I>
+(Optional, but user must make sure that they do this function otherwise</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetMaxLevels</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_levels )
  <DD><I>
-(Optional) Set max FAC levels</I>
+(Optional) Set maximum number of FAC levels</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetTol</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double tol)
  <DD><I>
@@ -66,27 +66,27 @@ Set up amr refinement factors</I>
 (Optional) Additionally require that the relative difference in
 successive iterates be small</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetZeroGuess</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACSetZeroGuess.html><B>HYPRE_SStructFACSetZeroGuess</B></A> 
  <DD><I>
 (Optional) Use a zero initial guess</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetNonZeroGuess</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACSetNonZeroGuess.html><B>HYPRE_SStructFACSetNonZeroGuess</B></A> 
  <DD><I>
 (Optional) Use a nonzero initial guess</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetRelaxType</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int relax_type)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACSetRelaxType.html><B>HYPRE_SStructFACSetRelaxType</B></A> 
  <DD><I>
 (Optional) Set relaxation type</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetNumPreRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_pre_relax)
  <DD><I>
-(Optional) Set number of pre-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps before coarse-grid correction</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetNumPostRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_post_relax)
  <DD><I>
-(Optional) Set number of post-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps after coarse-grid correction</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetCoarseSolverType</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int csolver_type)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACSetCoarseSolverType.html><B>HYPRE_SStructFACSetCoarseSolverType</B></A> 
  <DD><I>
 (Optional) Set coarsest solver type</I>
 <DT>

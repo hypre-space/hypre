@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.8 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -36,8 +36,8 @@
 #ifndef __MLIMETHODAMGRSH__
 #define __MLIMETHODAMGRSH__
 
-#include "utilities/utilities.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "utilities/_hypre_utilities.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "base/mli.h"
 #include "matrix/mli_matrix.h"
 #include "amgs/mli_method.h"

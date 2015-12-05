@@ -12,14 +12,14 @@ Create a matrix object
 Create a matrix object.  Each process owns some unique consecutive
 range of rows, indicated by the global row indices <TT>ilower</tt> and
 <TT>iupper</tt>.  The row data is required to be such that the value
-of <TT>ilower</tt> on any process <IMG BORDER=0 SRC=g000001.gif> be exactly one more than the
-value of <TT>iupper</tt> on process <IMG BORDER=0 SRC=g000002.gif>.  Note that the first row of
+of <TT>ilower</tt> on any process <IMG BORDER=0 SRC=g000004.gif> be exactly one more than the
+value of <TT>iupper</tt> on process <IMG BORDER=0 SRC=g000005.gif>.  Note that the first row of
 the global matrix may start with any integer value.  In particular,
 one may use zero- or one-based indexing.<P>For square matrices, <TT>jlower</tt> and <TT>jupper</tt> typically should
 match <TT>ilower</tt> and <TT>iupper</tt>, respectively.  For rectangular
 matrices, <TT>jlower</tt> and <TT>jupper</tt> should define a
 partitioning of the columns.  This partitioning must be used for
-any vector <IMG BORDER=0 SRC=g000003.gif> that will be used in matrix-vector products with the
+any vector <IMG BORDER=0 SRC=g000006.gif> that will be used in matrix-vector products with the
 rectangular matrix.  The matrix data structure may use <TT>jlower</tt>
 and <TT>jupper</tt> to store the diagonal blocks (rectangular in
 general) of the matrix separately from the rest of the matrix.<P>Collective.

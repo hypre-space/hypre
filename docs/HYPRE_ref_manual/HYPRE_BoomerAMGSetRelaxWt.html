@@ -1,6 +1,6 @@
 <html><head><TITLE>HYPRE_BoomerAMGSetRelaxWt</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_BoomerAMGSetRelaxWt (HYPRE_Solver solver, double relax_weight) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_BoomerAMGSetRelaxWt (<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double relax_weight) </H2><BLOCKQUOTE>
 
 (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR 
 on all levels
@@ -15,8 +15,8 @@ on all levels. <P><TABLE BORDER>
 <TR><TD> </TD></TR><TR><TD>
 relax_weight &gt; 0 </TD><TD> this assigns the given relaxation weight on all levels </TD></TR><TD>
 relax_weight = 0 </TD><TD>  the weight is determined on each level
-with the estimate <IMG BORDER=0 SRC=g000005.gif>,</TD></TR><TD>
-</TD><TD> where <IMG BORDER=0 SRC=g000006.gif> is the diagonal matrix of <IMG BORDER=0 SRC=g000007.gif> (this should only be used with Jacobi) </TD></TR><TD>
+with the estimate <IMG BORDER=0 SRC=g000008.gif>,</TD></TR><TD>
+</TD><TD> where <IMG BORDER=0 SRC=g000009.gif> is the diagonal matrix of <IMG BORDER=0 SRC=g000010.gif> (this should only be used with Jacobi) </TD></TR><TD>
 relax_weight = -k </TD><TD> the relaxation weight is determined with at most k CG steps
 on each level </TD></TR><TD>
 </TD><TD> this should only be used for symmetric positive definite problems) </TD></TR><TD>

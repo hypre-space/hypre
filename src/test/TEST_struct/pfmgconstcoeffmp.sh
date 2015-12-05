@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -22,17 +22,41 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.5 $
+# $Revision: 1.9 $
 #EHEADER**********************************************************************
+
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # struct: Test PFMG constant coefficient runs on 1 and 2 processors
 # by diffing against each other.
 #=============================================================================
 
-tail -3 pfmgconstcoeffmp.out.0 > pfmgconstcoeffmp.testdata
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp  >&2
 
-tail -3 pfmgconstcoeffmp.out.1 > pfmgconstcoeffmp.testdata.temp
-diff pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp  >&2
+#=============================================================================
+# compare with baseline case
+#=============================================================================
 
-rm -f pfmgconstcoeffmp.testdata pfmgconstcoeffmp.testdata.temp
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

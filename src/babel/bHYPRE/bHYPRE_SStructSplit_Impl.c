@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -65,7 +65,7 @@
 #include "bHYPRE_SStructVector.h"
 #include "bHYPRE_SStructVector_Impl.h"
 #include "HYPRE_sstruct_ls.h"
-#include "sstruct_ls.h"
+#include "_hypre_sstruct_ls.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructSplit._includes) */
 

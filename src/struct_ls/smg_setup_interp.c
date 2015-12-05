@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -312,7 +312,11 @@ hypre_SMGSetupInterpOp( void               *relax_data,
 
    hypre_StructStencilDestroy(compute_pkg_stencil);
 
+#if 0
    hypre_StructMatrixAssemble(PT);
+#else
+   hypre_StructInterpAssemble(A, PT, 1, cdir, cindex, stride);
+#endif
 
    return ierr;
 }

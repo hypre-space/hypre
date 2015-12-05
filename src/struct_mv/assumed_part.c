@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,28 +31,14 @@
 #include "headers.h"
 
 
+/* these are for debugging */
 #define REGION_STAT 0
 #define NO_REFINE   0
 #define REFINE_INFO 0
 
+/* note: functions used in this file to determine the partition - not elsewhere - 
+have names that start with hypre_AP  */
 
-/* functions used in this file to determine the partition - not elsewhere - 
-have names that start with AP */
-
-#if 0
-int hypre_APFillResponseStructAssumedPart(void *, int, int, void *,MPI_Comm, 
-                                          void **, int *);
-int hypre_APSubdivideRegion(hypre_Box*, int, int, hypre_BoxArray*, int*);
-int hypre_APFindMyBoxesInRegions( hypre_BoxArray*, hypre_BoxArray*, int**, 
-                                  double**);
-int hypre_APGetAllBoxesInRegions( hypre_BoxArray*, hypre_BoxArray *, int**, 
-                                  double**, MPI_Comm);
-int hypre_APPruneRegions( hypre_BoxArray*,  int** , double**);
-int hypre_APShrinkRegions( hypre_BoxArray*, hypre_BoxArray*, MPI_Comm );
-int hypre_APRefineRegionsByVol( hypre_BoxArray*,  double*, int, double, 
-                                int, int *, MPI_Comm);
-
-#endif
 
 /******************************************************************************
  *
@@ -124,7 +110,7 @@ int hypre_APSubdivideRegion( hypre_Box *region, int dim, int level,
       }
    }
    
-   /* space for each partition - aliasing makes debugging with tv easier :)*/ 
+   /* space for each partition - aliasing makes debugging easier */ 
    xpart = hypre_TAlloc(int, div[0]+1);
    ypart = hypre_TAlloc(int, div[1]+1);
    zpart = hypre_TAlloc(int, div[2]+1);
@@ -815,6 +801,9 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
  *   8/06 - changed the assumption that
  *   that the local boxes have boxnums 0 to num(local_boxes)-1 (now need to pass in
  *   boxnums)
+ *
+ *   10/06 - changed - no longer need to deal with negative boxes as this is 
+ *   used through the box manager
  *****************************************************************************/
 
 
@@ -842,7 +831,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
    int                tmp, ti1, ti2, t_tmp, t_total;
    double             f1, f2, r,x_box, y_box, z_box, dbl_vol;
    int                initial_level;
-   int                grow, grow_array[6];
+
    
 
    hypre_Index        div_index;
@@ -866,16 +855,52 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
    int        index;
    
 
-
-
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &myid);
 
    
+/* special case where ther are no boxes in the grid */
+   if (global_num_boxes == 0)
+   {
+      region_array = hypre_BoxArrayCreate(0); 
+      assumed_part = hypre_TAlloc(hypre_StructAssumedPart, 1);
+      
+      hypre_StructAssumedPartRegions(assumed_part) = region_array; 
+      hypre_StructAssumedPartNumRegions(assumed_part) = 0;
+      hypre_StructAssumedPartDivisions(assumed_part) =  NULL;                                             
+   
+      hypre_StructAssumedPartProcPartitions(assumed_part) = 
+         hypre_CTAlloc(int, 1); 
+      hypre_StructAssumedPartProcPartition(assumed_part, 0) = 0;
+      hypre_StructAssumedPartMyPartition(assumed_part) =  NULL;
+      hypre_StructAssumedPartMyPartitionBoxes(assumed_part) 
+         = hypre_BoxArrayCreate(0);
+      hypre_StructAssumedPartMyPartitionIdsAlloc(assumed_part) = 0;
+      hypre_StructAssumedPartMyPartitionIdsSize(assumed_part) = 0;
+      hypre_StructAssumedPartMyPartitionNumDistinctProcs(assumed_part) = 0;
+      hypre_StructAssumedPartMyPartitionBoxnums(assumed_part) 
+         = NULL;
+      hypre_StructAssumedPartMyPartitionProcIds(assumed_part) 
+         = NULL;
+      *p_assumed_partition = assumed_part;
+
+     return hypre_error_flag;
+   }
+   
+   /* end special case of zero boxes*/
+
+
    /*FIRST DO ALL THE GLOBAL PARTITION INFO */
 
-
    /*initially divide the bounding box*/
+
+
+   if (!hypre_BoxVolume(bounding_box) && global_num_boxes)
+   {
+      hypre_error(HYPRE_ERROR_GENERIC);
+      if (myid ==0) printf("ERROR: the bounding box has zero volume AND there are grid boxes  ");
+   }
+      
 
    /*first modify any input parameters if necessary */
 
@@ -1056,12 +1081,16 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
 
 
     /*error checking */  
-    hypre_ForBoxI(i, region_array)
+    if (global_num_boxes)
     {
-       if (hypre_BoxVolume(hypre_BoxArrayBox(region_array, i))==0)
+       hypre_ForBoxI(i, region_array)
        {
-          if (myid ==0) printf("ERROR: a region has zero volume!  "
-                               "(this should never happen)");
+          if (hypre_BoxVolume(hypre_BoxArrayBox(region_array, i))==0)
+          {
+             hypre_error(HYPRE_ERROR_GENERIC);
+             if (myid ==0) printf("ERROR: a region has zero volume!  "
+                                  "(this should never happen unless there are 0 global boxes)\n");
+          }
        }
     }
     
@@ -1279,9 +1308,13 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
               t_total = tmp_num;
            }
                    
-           if ( t_total < proc_count ) printf("ERROR: (this shouldn't happen) "
-                                              "the struct assumed partition doesn't"
-                                              "have enough partitions!!!\n");
+           if ( t_total < proc_count ) 
+           {
+              hypre_error(HYPRE_ERROR_GENERIC);
+              printf("ERROR: (this shouldn't happen) "
+                     "the struct assumed partition doesn't"
+                     "have enough partitions!!!\n");
+           }
            hypre_IndexD(div_index, pos0) = t_tmp; 
            hypre_IndexD(div_index, pos1) = t_tmp*ti1; 
            hypre_IndexZ(div_index) = 1;
@@ -1369,10 +1402,14 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
               t_total = tmp_num;
            }
           
-           if ( t_total < proc_count ) printf("ERROR: (this shouldn't happen)"
-                                              " the struct assumed partition "
-                                              "doesn't have enough partitions!!!\n");
-
+           if ( t_total < proc_count ) 
+           {
+              hypre_error(HYPRE_ERROR_GENERIC);
+              printf("ERROR: (this shouldn't happen)"
+                     " the struct assumed partition "
+                     "doesn't have enough partitions!!!\n");
+           }
+           
      
            /*set final division */           
            hypre_IndexD(div_index, pos0) = t_tmp; 
@@ -1412,11 +1449,15 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
             this should never happen according to my proof :) */   
         tmp_num = (hypre_IndexX(div_index))*(hypre_IndexY(div_index))*
            (hypre_IndexZ(div_index));
-        if ( tmp_num > 2*proc_count ) printf("ERROR: the struct assumed partition "
-                                             "has more than 2*procs (this "
-                                             "shouldn't happen) myid = %d, x = %d, y = %d, x = %d, proc_count = %d \n",myid, hypre_IndexX(div_index),
-                                             hypre_IndexY(div_index),hypre_IndexZ(div_index), proc_count);
-           
+        if ( tmp_num > 2*proc_count ) 
+        {
+           hypre_error(HYPRE_ERROR_GENERIC);
+           printf("ERROR: the struct assumed partition "
+                  "has more than 2*procs (this "
+                  "shouldn't happen) myid = %d, x = %d, y = %d, x = %d, proc_count = %d \n",myid, hypre_IndexX(div_index),
+                  hypre_IndexY(div_index),hypre_IndexZ(div_index), proc_count);
+        }
+        
   
         hypre_CopyIndex(div_index, hypre_StructAssumedPartDivision(assumed_part, i));
 
@@ -1480,38 +1521,10 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
      hypre_ForBoxI(i, local_boxes)  
      {
            box = hypre_BoxArrayBox(local_boxes, i); 
-           if (hypre_BoxVolume(box) == 0) /* zero volume boxes - still
-                                            need to be in the partition*/
-           {
-              hypre_CopyBox(box, grow_box);
-              for (d = 0; d < 3; d++)
-              {
-                 if(!hypre_BoxSizeD(box, d))
-                 {
-                    grow = (hypre_BoxIMinD(box, d) - hypre_BoxIMaxD(box, d) + 1)/2;
-                    grow_array[2*d] = grow;
-                    grow_array[2*d+1] = grow;
-                 }
-                 else
-                 {
-                    grow_array[2*d] = 0;
-                    grow_array[2*d+1] = 0;
-                 }
-              }
-              /* expand the grow box (leave our box untouched)*/
-              hypre_BoxExpand(grow_box, grow_array);
 
-              /* NOTE - part of the box could lie outside of the regions */
-              hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, grow_box, 
-                                                 &proc_count, 
-                                                 &proc_alloc, &proc_array);
-           }
-           else /* box with positive volume */
-           {
-              hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, box, &proc_count, 
-                                              &proc_alloc, &proc_array);
-           }
-           
+
+           hypre_StructAssumedPartitionGetProcsFromBox(assumed_part, box, &proc_count, 
+                                                       &proc_alloc, &proc_array);
            /* do we need more storage? */  
            if ((count + proc_count) > size)       
            {
@@ -2028,7 +2041,8 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
    if (in_regions == 0)  
    {
          if (hypre_BoxVolume(box) > 0)
-         {
+         { 
+            hypre_error(HYPRE_ERROR_GENERIC);
             printf("MY_ID = %d Error: positive volume box (%d, %d, %d) x "
                    "(%d, %d, %d)  not in any assumed regions! (this should never"
                    " happen)\n", 

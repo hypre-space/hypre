@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -40,7 +40,7 @@
  * include files 
  *--------------------------------------------------------------------------*/
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 
 #include "vector/mli_vector.h"
 #include "util/mli_utils.h"

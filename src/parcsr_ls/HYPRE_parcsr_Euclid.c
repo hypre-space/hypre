@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -37,7 +37,7 @@
 
 /* AB 8/06 - replace header file */
 /* #include "../parcsr_mv/par_vector.h" */
-#include "../parcsr_mv/parcsr_mv.h"
+#include "../parcsr_mv/_hypre_parcsr_mv.h"
 
 
   /* These are what we need from Euclid */

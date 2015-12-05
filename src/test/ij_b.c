@@ -13,13 +13,13 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 
 #include "bHYPRE.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"

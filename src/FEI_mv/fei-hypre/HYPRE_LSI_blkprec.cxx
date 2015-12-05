@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -67,7 +67,7 @@
 //------------------------------------------------------------------------------
 
 #include "HYPRE.h"
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"

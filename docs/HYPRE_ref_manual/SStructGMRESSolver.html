@@ -12,16 +12,13 @@ Create a solver object</I>
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetup</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
- <DD><I></I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGMRESSetup.html><B>HYPRE_SStructGMRESSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSolve</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
  <DD><I>
 Solve the system</I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetKDim</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int k_dim)
- <DD><I>
-(Optional) Set the maximum size of the Krylov space</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetTol</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double tol)
  <DD><I>
@@ -30,6 +27,10 @@ Solve the system</I>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetMaxIter</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_iter)
  <DD><I>
 (Optional) Set maximum number of iterations</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetKDim</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int k_dim)
+ <DD><I>
+(Optional) Set the maximum size of the Krylov space</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetPrecond</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver)
  <DD><I>
@@ -41,7 +42,7 @@ Solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetPrintLevel</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int print_level)
  <DD><I>
-(Optional) Set the print level</I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
  <DD><I>

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -240,4 +240,41 @@ int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                      beta_agg_levels,
                                      beta_relax_type,
                                      beta_strength_threshold);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
+                              int *num_iterations)
+{
+   return hypre_AMSGetNumIterations((void *) solver,
+                                    num_iterations);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
+                                          double *rel_resid_norm)
+{
+   return hypre_AMSGetFinalRelativeResidualNorm((void *) solver,
+                                                rel_resid_norm);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSConstructDiscreteGradient
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParVector x_coord,
+				       int *edge_vertex,
+                                       HYPRE_ParCSRMatrix *G)
+{
+   return hypre_AMSConstructDiscreteGradient((hypre_ParCSRMatrix *) A,
+                                             (hypre_ParVector *) x_coord,
+                                             edge_vertex,
+                                             (hypre_ParCSRMatrix **) G);
 }

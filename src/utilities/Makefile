@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.21 $
+# $Revision: 2.22 $
 #EHEADER**********************************************************************
 
 include ../config/Makefile.config
@@ -53,7 +53,7 @@ HEADERS =\
  thread_mpistubs.h\
  timing.h\
  umalloc_local.h\
- utilities.h
+ _hypre_utilities.h
 
 ##################################################################
 # Utilities Files
@@ -86,13 +86,13 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_utilities.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 

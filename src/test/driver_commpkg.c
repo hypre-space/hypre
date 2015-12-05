@@ -2,19 +2,23 @@
 /* AHB 06/04 */
 /* purpose:  to test a new communication package for the ij interface */
 
+/* 11/06 - if you want to use this, the the hypre_NewCommPkgCreate has to be
+   reinstated in parcsr_mv/new_commpkg.c - currently it won't compile*/
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 /*   #include <mpi.h>   */
 
-#include "utilities.h"
-#include "parcsr_mv.h"
+#include "_hypre_utilities.h"
+#include "_hypre_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
 
-/* #include "parcsr_ls.h"
+/* #include "_hypre_parcsr_ls.h"
  #include "HYPRE.h" 
  #include "HYPRE_parcsr_mv.h" 
- #include "krylov.h"  */
+ #include "HYPRE_krylov.h"  */
 
 
 

@@ -1,93 +1,12 @@
-=============================================
-SStruct Interface:
-=============================================
-SStruct Interface:
-  wall clock time = 0.270000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.260000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Setup phase times:
-=============================================
-Maxwell Setup:
-  wall clock time = 0.570000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.570000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Solve phase times:
-=============================================
-Maxwell Solve:
-  wall clock time = 0.320000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.320000 seconds
-  cpu MFLOPS      = 0.000000
-
-
+# Output file: maxwell.out.0
 Iterations = 10
 Final Relative Residual Norm = 2.476439e-09
 
-=============================================
-SStruct Interface:
-=============================================
-SStruct Interface:
-  wall clock time = 0.410000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.400000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Setup phase times:
-=============================================
-Maxwell Setup:
-  wall clock time = 0.950000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.790000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Solve phase times:
-=============================================
-Maxwell Solve:
-  wall clock time = 0.720000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 0.670000 seconds
-  cpu MFLOPS      = 0.000000
-
-
+# Output file: maxwell.out.1
 Iterations = 10
 Final Relative Residual Norm = 3.771246e-09
 
-=============================================
-SStruct Interface:
-=============================================
-SStruct Interface:
-  wall clock time = 2.380000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 2.350000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Setup phase times:
-=============================================
-Maxwell Setup:
-  wall clock time = 6.110000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 5.610000 seconds
-  cpu MFLOPS      = 0.000000
-
-=============================================
-Solve phase times:
-=============================================
-Maxwell Solve:
-  wall clock time = 4.870000 seconds
-  wall MFLOPS     = 0.000000
-  cpu clock time  = 4.640000 seconds
-  cpu MFLOPS      = 0.000000
-
-
+# Output file: maxwell.out.2
 Iterations = 10
 Final Relative Residual Norm = 7.153728e-09
 

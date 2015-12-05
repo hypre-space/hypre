@@ -12,8 +12,9 @@ Create a solver object</I>
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGSetup</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
- <DD><I></I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructPCGSetup.html><B>HYPRE_SStructPCGSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGSolve</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
  <DD><I>
@@ -29,11 +30,12 @@ Solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGSetTwoNorm</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int two_norm )
  <DD><I>
-(Optional) Set type of norm to use in stopping criteria</I>
+(Optional) Use the two-norm in stopping criteria</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGSetRelChange</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int rel_change )
  <DD><I>
-(Optional) Set to use additional relative-change convergence test</I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGSetPrecond</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver)
  <DD><I>
@@ -45,7 +47,7 @@ Solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGSetPrintLevel</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int level)
  <DD><I>
-(Optional) Set the print level</I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
  <DD><I>
@@ -58,6 +60,14 @@ Return the norm of the final relative residual</I>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructPCGGetResidual</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, void **residual)
  <DD><I>
 Return the residual</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructDiagScaleSetup</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> y, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x )
+ <DD><I>
+Setup routine for diagonal preconditioning</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructDiagScale</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> y, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x )
+ <DD><I>
+Solve routine for diagonal preconditioning</I>
 </DL>
 <A NAME="DOC.DOCU">
 <DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>

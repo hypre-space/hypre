@@ -21,16 +21,16 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.7 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
 
 
 #include <HYPRE_config.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "par_csr_block_matrix.h"
-#include "../parcsr_mv/parcsr_mv.h"
+#include "../parcsr_mv/_hypre_parcsr_mv.h"
 
 
 /*--------------------------------------------------------------------------
@@ -1802,11 +1802,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
   }
   if (num_procs > 1)
   {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-     hypre_BlockNewCommPkgCreate(RAP); 
-#else
      hypre_BlockMatvecCommPkgCreate(RAP); 
-#endif
   }
 
   *RAP_ptr = RAP;

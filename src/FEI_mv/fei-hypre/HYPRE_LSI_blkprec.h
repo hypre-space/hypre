@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -45,8 +45,8 @@
 #include <math.h>
 #include "HYPRE.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
-#include "parcsr_ls/parcsr_ls.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 
 // *************************************************************************
 // local defines 

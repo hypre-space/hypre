@@ -22,11 +22,8 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.3 $
+# $Revision: 2.4 $
 #EHEADER**********************************************************************
-
-
-
 
 INTERNAL_HEADER=krylov.h
 
@@ -34,16 +31,26 @@ INTERNAL_HEADER=krylov.h
 # Include guards and other includes
 #===========================================================================
 
-cat > $INTERNAL_HEADER < all_krylov.h
-cat >> $INTERNAL_HEADER < bicgstab.h
-cat >> $INTERNAL_HEADER < cgnr.h
-cat >> $INTERNAL_HEADER < gmres.h
-cat >> $INTERNAL_HEADER < pcg.h
-
+cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
 cat >> $INTERNAL_HEADER <<@
+
+#include "HYPRE_krylov.h"
 
 #ifndef hypre_KRYLOV_HEADER
 #define hypre_KRYLOV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "_hypre_utilities.h"
+
+#define hypre_CTAllocF(type, count, funcs) \
+( (type *)(*(funcs->CAlloc))\
+((unsigned int)(count), (unsigned int)sizeof(type)) )
+
+#define hypre_TFreeF( ptr, funcs ) \
+( (*(funcs->Free))((char *)ptr), ptr = NULL )
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,6 +61,11 @@ extern "C" {
 #===========================================================================
 # Structures and prototypes
 #===========================================================================
+
+cat bicgstab.h   >> $INTERNAL_HEADER
+cat cgnr.h       >> $INTERNAL_HEADER
+cat gmres.h      >> $INTERNAL_HEADER
+cat pcg.h        >> $INTERNAL_HEADER
 
 ../utilities/protos bicgstab.c            >> $INTERNAL_HEADER
 ../utilities/protos cgnr.c                >> $INTERNAL_HEADER

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -22,28 +22,58 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.7 $
+# $Revision: 1.11 $
 #EHEADER**********************************************************************
+
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # struct: Test parallel and blocking by diffing against base 3d case
 #=============================================================================
 
-tail -3 psmgbase3d.out.0 > psmgbase3d.testdata
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 psmgbase3d.out.1 > psmgbase3d.testdata.temp
-diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+#=============================================================================
 
-tail -3 psmgbase3d.out.2 > psmgbase3d.testdata.temp
-diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 psmgbase3d.out.3 > psmgbase3d.testdata.temp
-diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+#=============================================================================
 
-tail -3 psmgbase3d.out.4 > psmgbase3d.testdata.temp
-diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-# tail -3 psmgbase3d.out.5 > psmgbase3d.testdata.temp
-# diff psmgbase3d.testdata psmgbase3d.testdata.temp >&2
+#=============================================================================
 
-rm -f psmgbase3d.testdata psmgbase3d.testdata.temp
+tail -3 ${TNAME}.out.4 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

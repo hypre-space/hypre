@@ -6,15 +6,15 @@
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructMaxwellCreate</B>( MPI_Comm comm, <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> *solver )
  <DD><I>
-Create a Maxwell solver object</I>
+Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructMaxwellDestroy</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver )
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructMaxwellDestroy.html><B>HYPRE_SStructMaxwellDestroy</B></A> 
  <DD><I>
-Destroy a Maxwell solver object</I>
+Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructMaxwellSetup</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructMaxwellSetup.html><B>HYPRE_SStructMaxwellSetup</B></A> 
  <DD><I>
-Set up the Maxwell solver structure </I>
+Prepare to solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructMaxwellSolve.html><B>HYPRE_SStructMaxwellSolve</B></A> 
  <DD><I>
@@ -70,11 +70,11 @@ successive iterates be small</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructMaxwellSetNumPreRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_pre_relax)
  <DD><I>
-(Optional) Set number of pre-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps before coarse-grid correction</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructMaxwellSetNumPostRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_post_relax)
  <DD><I>
-(Optional) Set number of post-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps after coarse-grid correction</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructMaxwellSetLogging</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int logging)
  <DD><I>

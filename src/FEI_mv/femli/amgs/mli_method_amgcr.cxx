@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.10 $
+ * $Revision: 1.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,8 +34,8 @@
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
-#include "utilities.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "_hypre_utilities.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "util/mli_utils.h"
 #include "matrix/mli_matrix.h"
 #include "matrix/mli_matrix_misc.h"
@@ -48,7 +48,7 @@ extern "C" {
 #endif
 #include "distributed_ls/ParaSails/Matrix.h"
 #include "distributed_ls/ParaSails/ParaSails.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 #ifdef __cplusplus
 }
 #endif

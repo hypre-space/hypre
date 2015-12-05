@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.29 $
+ * $Revision: 1.30 $
  ***********************************************************************EHEADER*/
 
 
@@ -61,11 +61,11 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._includes) */
 
 #define SIDL_IOR_MAJOR_VERSION 0

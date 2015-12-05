@@ -731,7 +731,12 @@ extern void hypre_F90_NAME(fhypre_sstructmaxwellgetfinalre, FHYPRE_SSTRUCTMAXWEL
 extern void hypre_F90_NAME(fhypre_sstructmaxwellphysbdy, FHYPRE_SSTRUCTMAXWELLPHYSBDY) 
                           (long int *, int *, int *, int *, int *);
 
-#define HYPRE_ParCSRMatrixEliminateRowsCols \
-        hypre_F90_NAME(fhypre_parcsrmatrixeliminaterow, FHYPRE_PARCSRMATRIXELIMINATEROW) 
-extern void hypre_F90_NAME(fhypre_parcsrmatrixeliminaterow, FHYPRE_PARCSRMATRIXELIMINATEROW) 
+#define HYPRE_SStructMaxwellEliminateRowsCols \
+        hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWELLELIMINATER) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWELLELIMINATER) 
+                          (long int *, int *, int *);
+
+#define HYPRE_SStructMaxwellZeroVector \
+        hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR) 
+extern void hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR) 
                           (long int *, int *, int *);

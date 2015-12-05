@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_ls.h"
-#include "krylov.h"
-#include "sstruct_mv.h"
+#include "HYPRE_krylov.h"
+#include "_hypre_sstruct_mv.h"
 
 /* begin lobpcg */
 
@@ -2400,6 +2400,7 @@ main( int   argc,
    }
 
    HYPRE_SStructVectorInitialize(x);
+
    /*-----------------------------------------------------------
     * If requested, reset linear system so that it has
     * exact solution:
@@ -2440,39 +2441,6 @@ main( int   argc,
    hypre_ClearTiming();
 
    /*-----------------------------------------------------------
-    * If requested, reset linear system so that it has
-    * exact solution:
-    *
-    *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
-    * 
-    *-----------------------------------------------------------*/
-
-   if (object_type == HYPRE_STRUCT)
-   {
-      cosine = struct_cosine;
-   }
-
-   if (cosine)
-   {
-      for (part = 0; part < data.nparts; part++)
-      {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
-         {
-            scale = (part+1.0)*(var+1.0);
-            for (box = 0; box < pdata.nboxes; box++)
-            {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
-               SetCosineVector(scale, ilower, iupper, values);
-               HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
-                                               var, values);
-            }
-         }
-      }
-   }
-
-   /*-----------------------------------------------------------
     * Get the objects out
     * NOTE: This should go after the cosine part, but for the bug
     *-----------------------------------------------------------*/
@@ -2499,7 +2467,6 @@ main( int   argc,
       /* This if/else is due to a bug in SStructMatvec */
       if (object_type != HYPRE_PARCSR)
       {
-         HYPRE_SStructVectorAssemble(x);
          /* Apply A to cosine vector to yield righthand side */
          hypre_SStructMatvec(1.0, A, x, 0.0, b);
          /* Reset initial guess to zero */
@@ -2907,7 +2874,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	   
@@ -2916,7 +2883,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 	   
@@ -3077,7 +3044,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	   
@@ -3086,7 +3053,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 	   

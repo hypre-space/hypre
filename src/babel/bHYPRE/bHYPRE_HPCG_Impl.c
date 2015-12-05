@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -96,8 +96,8 @@
 #include "bHYPRE_StructDiagScale.h"
 #include "bHYPRE_SStructDiagScale.h"
 #include "bHYPRE_IdentitySolver_Impl.h"
-#include "struct_ls.h"
-#include "sstruct_ls.h"
+#include "_hypre_struct_ls.h"
+#include "_hypre_sstruct_ls.h"
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 

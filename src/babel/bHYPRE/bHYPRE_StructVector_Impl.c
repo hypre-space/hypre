@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.27 $
+ * $Revision: 1.28 $
  ***********************************************************************EHEADER*/
 
 
@@ -56,7 +56,7 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #include "bHYPRE_StructGrid_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._includes) */

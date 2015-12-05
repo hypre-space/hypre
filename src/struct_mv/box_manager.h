@@ -54,32 +54,36 @@ typedef struct
                                             acessed by a coarsening routine, 
                                             for example) */
    
+   int                 is_entries_sort;     /* Boolean to say that entries were 
+                                            added in sorted order (id, proc)
+                                            (this could be
+                                            acessed by a coarsening routine, 
+                                            for example) */
+
 
    int                 entry_info_size;  /* in bytes, the (max) size of the info 
                                             object for the entries */ 
 
+   int                 is_assembled;        /* flag to indicate if the box manager has been 
+                                            assembled (use to control whether or not
+                                            functions can be used prior to assemble)*/
+   
+
    /* storing the entries */
    int                 nentries;     /* number of entries stored */
-   hypre_BoxManEntry  *entries;      /* These are the actual box manager entries */  
+   hypre_BoxManEntry  *entries;      /* These are the actual box manager entries - these
+                                      are sorted by (proc, id) at the end of the assemble)*/  
 
- 
-
-   /* for accessing an entry via (proc, id) */
-
-   hypre_BoxManEntry  **sort_table;   /* points into *entries and is sorted 
-                                               by each entry's unique two-part id: 
-                                               (proc, id) */
-   
-   int                *procs_sort;    /* the sorted procs corresponding to entries*/
+   int                *procs_sort;    /* the sorted procs corresponding to entries */
    int                *ids_sort;      /* sorted ids corresponding to the entries */
  
    int                num_procs_sort; /* number of distinct procs in *entries */
    int                *procs_sort_offsets;  /* offsets for procs into the 
                                              *entry_sort array */
-   int                first_local;      /* position of local infomation */  
+   int                first_local;      /* position of local infomation in entries*/  
    int                local_proc_offset;  /*position of local information in offsets */
 
-   /* here is the table  that organizes the entires spatially (by index)*/
+   /* here is the table  that organizes the entries spatially (by index)*/
    hypre_BoxManEntry **index_table; /* this points into 'entries' array  
                                             and corresponds to the index arays*/
 
@@ -91,16 +95,17 @@ typedef struct
 
    int                 last_index[3]; /* the last index used in the indexes map */
 
-   /* extra stuff needed for AP implementation */
-
    int                 num_my_entries; /* number of entries with proc_id = myid */
    int                 *my_ids;        /* an array of ids corresponding to my entries */ 
    hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
                                           my_ids array.  This is destroyed in the assemble */
    
    hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
-                                           us ed during the assemble (where it is created)*/
-   int                   dim;           /* problem dimension (known in the grid) */
+                                                  used during the assemble (where it is created)*/
+   int                 dim;           /* problem dimension (known in the grid) */
+
+   hypre_Box           *bounding_box;  /* bounding box - from associated grid */
+   
 
    /* ghost stuff - leave for now */
 
@@ -120,13 +125,14 @@ typedef struct
 #define hypre_BoxManMaxNEntries(manager)        ((manager) -> max_nentries)
 
 #define hypre_BoxManIsGatherCalled(manager)     ((manager) -> is_gather_called)
+#define hypre_BoxManIsEntriesSort(manager)      ((manager) -> is_entries_sort)
 #define hypre_BoxManGatherRegions(manager)      ((manager) -> gather_regions)
 #define hypre_BoxManAllGlobalKnown(manager)     ((manager) -> all_global_known)
 #define hypre_BoxManEntryInfoSize(manager)      ((manager) -> entry_info_size)
 #define hypre_BoxManNEntries(manager)           ((manager) -> nentries)
 #define hypre_BoxManEntries(manager)            ((manager) -> entries)
+#define hypre_BoxManIsAssembled(manager)        ((manager) -> is_assembled) 
 
-#define hypre_BoxManSortTable(manager)          ((manager) -> sort_table)
 #define hypre_BoxManProcsSort(manager)          ((manager) -> procs_sort)
 #define hypre_BoxManIdsSort(manager)            ((manager) -> ids_sort)
 #define hypre_BoxManNumProcsSort(manager)       ((manager) -> num_procs_sort)
@@ -145,6 +151,7 @@ typedef struct
 #define hypre_BoxManMyEntries(manager)          ((manager) -> my_entries)
 #define hypre_BoxManAssumedPartition(manager)   ((manager) -> assumed_partition)
 #define hypre_BoxManDim(manager)                ((manager) -> dim)
+#define hypre_BoxManBoundingBox(manager)        ((manager) -> bounding_box)
 
 #define hypre_BoxManNumGhost(manager)           ((manager) -> num_ghost)
 

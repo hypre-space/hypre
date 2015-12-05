@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,8 +34,8 @@
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
 
-#ifndef HYPRE_LOBPCG_SOLVER
-#define HYPRE_LOBPCG_SOLVER
+#ifndef hypre_LOBPCG_SOLVER
+#define hypre_LOBPCG_SOLVER
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,7 +12,7 @@
  * terms of the GNU General Public License (as published by the Free Software
  * Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * HYPRE is distributed in the hope that it will  useful, but WITHOUT ANY 
  * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
  * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
  * Public License for more details.
@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,6 +32,10 @@
  * Auxilary routines for the long range interpolation methods.
  *  Implemented: "standard", "extended", "multipass", "FF"
  *--------------------------------------------------------------------------*/
+#if 0
+
+/* AHB - this has been replaced by the function after this one - we should
+   delete this */
 
 /* Inserts nodes to position expected for CF_marker_offd and P_marker_offd.
  * This is different than the send/recv vecs
@@ -113,8 +117,195 @@ void insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, int *IN_marker,
   } 
   return;
 } 
+#endif
+/* AHB 11/06: Modification of the above original - takes two
+   communication packages and inserts nodes to position expected for
+   OUT_marker
+  
+   offd nodes from comm_pkg take up first chunk of CF_marker_offd, offd 
+   nodes from extend_comm_pkg take up the second chunk 0f CF_marker_offd. */
+
+
+
+int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
+                          hypre_ParCSRCommPkg *extend_comm_pkg,
+                          int *IN_marker, 
+                          int full_off_procNodes,
+                          int *OUT_marker)
+{   
+  hypre_ParCSRCommHandle  *comm_handle;
+
+  int i, j, start, index, shift;
+
+  int num_sends, num_recvs;
+  
+  int *recv_vec_starts;
+
+  int e_num_sends;
+
+  int *int_buf_data;
+  int *e_out_marker;
+  
+
+  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+  num_recvs =  hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+  recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+
+  e_num_sends = hypre_ParCSRCommPkgNumSends(extend_comm_pkg);
+
+
+  index = hypre_max(hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),
+                    hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, e_num_sends));
+
+  int_buf_data = hypre_CTAlloc(int, index);
+
+  /* orig commpkg data*/
+  index = 0;
+  
+  for (i = 0; i < num_sends; i++)
+  {
+    start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+    for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); 
+	 j++)
+      int_buf_data[index++] 
+	= IN_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+  }
+   
+  comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
+					      OUT_marker);
+   
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+  
+  /* now do the extend commpkg */
+
+  /* first we need to shift our position in the OUT_marker */
+  shift = recv_vec_starts[num_recvs];
+  e_out_marker = OUT_marker + shift;
+  
+  index = 0;
+
+  for (i = 0; i < e_num_sends; i++)
+  {
+    start = hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, i);
+    for (j = start; j < hypre_ParCSRCommPkgSendMapStart(extend_comm_pkg, i+1); 
+	 j++)
+       int_buf_data[index++] 
+	= IN_marker[hypre_ParCSRCommPkgSendMapElmt(extend_comm_pkg,j)];
+  }
+   
+  comm_handle = hypre_ParCSRCommHandleCreate( 11, extend_comm_pkg, int_buf_data, 
+					      e_out_marker);
+   
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  comm_handle = NULL;
+  
+  hypre_TFree(int_buf_data);
+    
+  return hypre_error_flag;
+} 
+
+
+
+/* AHB 11/06 : alternate to the extend function below - creates a
+ * second comm pkg based on found - this makes it easier to use the
+ * global partition*/
+int
+hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, int newoff, int *found, 
+                              hypre_ParCSRCommPkg **extend_comm_pkg)
+
+{
+   
+
+   int			num_sends;
+   int			*send_procs;
+   int			*send_map_starts;
+   int			*send_map_elmts;
+ 
+   int			num_recvs;
+   int			*recv_procs;
+   int			*recv_vec_starts;
+
+   hypre_ParCSRCommPkg	*new_comm_pkg;
+
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+
+   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+  /* use found instead of col_map_offd in A, and newoff instead 
+      of num_cols_offd*/
+
+#if HYPRE_NO_GLOBAL_PARTITION
+
+   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   int        global_num_cols;
+   hypre_IJAssumedPart   *apart;
+   
+   hypre_ParCSRMatrixGetLocalRange( A,
+                                    &row_start, &row_end ,
+                                    &col_start, &col_end );
+   
+
+   global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A); 
+
+   /* Create the assumed partition */
+   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
+   {
+      hypre_ParCSRMatrixCreateAssumedPartition(A);
+   }
+
+   apart = hypre_ParCSRMatrixAssumedPartition(A);
+   
+   hypre_NewCommPkgCreate_core( comm, found, first_col_diag, 
+                                col_start, col_end, 
+                                newoff, global_num_cols,
+                                &num_recvs, &recv_procs, &recv_vec_starts,
+                                &num_sends, &send_procs, &send_map_starts, 
+                                &send_map_elmts, apart);
+
+#else   
+   int  *col_starts = hypre_ParCSRMatrixColStarts(A);
+   int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+   
+   hypre_MatvecCommPkgCreate_core
+      (
+         comm, found, first_col_diag, col_starts,
+         num_cols_diag, newoff,
+         first_col_diag, found,
+         1,
+         &num_recvs, &recv_procs, &recv_vec_starts,
+         &num_sends, &send_procs, &send_map_starts,
+         &send_map_elmts
+         );
+
+#endif
+
+   new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+
+   hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
+
+   hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = recv_vec_starts;
+   hypre_ParCSRCommPkgNumSends(new_comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = send_map_starts;
+   hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = send_map_elmts;
+
+
+
+   *extend_comm_pkg = new_comm_pkg;
+   
+
+   return hypre_error_flag;
+   
+}
+
+#if 0
+/* this has been replaced by the function above - we should delete
+ * this one*/
 
 /* Add new communication patterns for new offd nodes */
+
 void
 hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
 			int *p_num_recvs, int **p_recv_procs,
@@ -433,6 +624,8 @@ hypre_ParCSRCommExtendA(hypre_ParCSRMatrix *A, int newoff, int *found,
    return;
 }
 
+#endif
+
 /* sort for non-ordered arrays */
 int ssort(int *data, int n)
 {
@@ -521,87 +714,91 @@ void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc,
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j, 
-		   int num_cols_A_offd, int *col_map_offd, int col_1, 
-		   int col_n, int *Sop_i, int *Sop_j)
+int new_offd_nodes(int **found, int num_cols_A_offd, int *A_ext_i, int *A_ext_j, 
+		   int num_cols_S_offd, int *col_map_offd, int col_1, 
+		   int col_n, int *Sop_i, int *Sop_j,
+		   int *CF_marker, hypre_ParCSRCommPkg *comm_pkg)
 {
   int i, i1, ii, j, ifound, kk, k1;
   int got_loc, loc_col;
 
-  int min, max;
+  int min;
 
   int size_offP;
 
-  int *tmp_found, *intDummy;
+  int *tmp_found;
+  int *CF_marker_offd = NULL;
+  int *int_buf_data;
   int newoff = 0;
   int full_off_procNodes = 0;
+  hypre_ParCSRCommHandle *comm_handle;
+                                                                                                                                         
+  CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+  int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                hypre_ParCSRCommPkgNumSends(comm_pkg)));
+  ii = 0;
+  for (i=0; i < hypre_ParCSRCommPkgNumSends(comm_pkg); i++)
+  {
+      for (j=hypre_ParCSRCommPkgSendMapStart(comm_pkg,i);
+                j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+        int_buf_data[ii++]
+          = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+  }
+  comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg,int_buf_data,
+        CF_marker_offd);
+  hypre_ParCSRCommHandleDestroy(comm_handle);
+  hypre_TFree(int_buf_data);
 
-  if(num_cols_A_offd)
-  {
-    size_offP = num_cols_A_offd;
-    min = col_map_offd[0];
-    max = col_map_offd[num_cols_A_offd-1];
-  }
-  else
-  {
-    size_offP = 10;
-    min = 0; max = 0;
-  }
+  size_offP = A_ext_i[num_cols_A_offd];
   tmp_found = hypre_CTAlloc(int, size_offP);
 
   /* Find nodes that will be added to the off diag list */ 
-  for (i = 0; i < A_ext_rows; i++)
+  for (i = 0; i < num_cols_A_offd; i++)
   {
+   if (CF_marker_offd[i] < 0)
+   {
     for (j = A_ext_i[i]; j < A_ext_i[i+1]; j++)
     {
       i1 = A_ext_j[j];
       if(i1 < col_1 || i1 >= col_n)
       {
-	if(i1 < min || i1 > max)
-	{
-	  if(newoff >= size_offP)
-	  {
-	    size_offP += 10;
-	    intDummy = hypre_TReAlloc(tmp_found, int, size_offP);
-	    tmp_found = intDummy;
-	  }
-	  if(i1 < min) min = i1;
-	  if(i1 > max) max = i1;
-	  tmp_found[newoff]=i1;
-	  newoff++;
-	}
-	else
-	{
 	  ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
 	  if(ifound == -1)
 	  {
-	    ifound = 0;
-	    for(ii = 0; ii < newoff; ii++)
-	      if(i1 == tmp_found[ii])
-		ifound = 1; 
-	    if(!ifound)
-	    {
-	      if(newoff >= size_offP)
-	      {
-		size_offP = newoff + 10;
-		intDummy = hypre_TReAlloc(tmp_found, int, size_offP);
-		tmp_found = intDummy;
-	      }
 	      tmp_found[newoff]=i1;
 	      newoff++;
-	    }
 	  }
-	}
+	  else
+	  {
+	      A_ext_j[j] = -ifound-1;
+	  }
       }
     }
+   }
   }
   /* Put found in monotone increasing order */
-  qsort0(tmp_found,0,newoff-1);
+  if (newoff > 0)
+  {
+     qsort0(tmp_found,0,newoff-1);
+     ifound = tmp_found[0];
+     min = 1;
+     for (i=1; i < newoff; i++)
+     {
+       if (tmp_found[i] > ifound)
+       {
+          ifound = tmp_found[i];
+          tmp_found[min++] = ifound;
+       }
+     }
+     newoff = min;
+  }
 
   full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
-  for(i = 0; i < num_cols_A_offd; i++)
+  for(i = 0; i < num_cols_S_offd; i++)
+  {
+   if (CF_marker_offd[i] < 0)
    {
      for(kk = Sop_i[i]; kk < Sop_i[i+1]; kk++)
      {
@@ -633,39 +830,32 @@ int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j,
 	 Sop_j[kk] = -loc_col - 1;
        }
      }
+   }
+  }
+  for(i = 0; i < num_cols_A_offd; i++)
+  {
+   if (CF_marker_offd[i] < 0)
+   {
      for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
      {
        k1 = A_ext_j[kk];
-       if(k1 < col_1 || k1 >= col_n)
+       if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        {
-	 if(newoff < num_cols_A_offd)
-	 {  
-	   got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
-	   if(got_loc > -1)
-	     loc_col = got_loc + num_cols_A_offd;
-	   else
-	     loc_col = hypre_BinarySearch(col_map_offd,k1,
-					  num_cols_A_offd);
-	 }
-	 else
-	 {
-	   loc_col = hypre_BinarySearch(col_map_offd,k1,
-					num_cols_A_offd);
-	   if(loc_col == -1)
-	     loc_col = hypre_BinarySearch(tmp_found,k1,newoff) +
-	       num_cols_A_offd;
-	 }
-	 if(loc_col < 0)
-	 {
-	   printf("Could not find node: STOP\n");
-	   return(-1);
-	 }
+	 got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
+	 loc_col = got_loc + num_cols_A_offd;
 	 A_ext_j[kk] = -loc_col - 1;
        }
      }
    }
+  }
+
+
+  hypre_TFree(CF_marker_offd);
+  
 
   *found = tmp_found;
  
+
+
   return newoff;
 }

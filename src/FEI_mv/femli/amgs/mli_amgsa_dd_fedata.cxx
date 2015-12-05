@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.6 $
+ * $Revision: 1.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -43,10 +43,10 @@
 // ---------------------------------------------------------------------
 
 #include "HYPRE.h"
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "seq_mv/seq_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 
 // *********************************************************************
 // local MLI includes

@@ -12,11 +12,11 @@ Create a solver object</I>
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructBiCGSTABSetup</B>( <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x )
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructBiCGSTABSetup.html><B>HYPRE_StructBiCGSTABSetup</B></A> 
  <DD><I>
-set up</I>
+Prepare to solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructBiCGSTABSolve</B>( <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x )
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructBiCGSTABSolve</B>( <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x )
  <DD><I>
 Solve the system</I>
 <DT>
@@ -38,7 +38,7 @@ Solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructBiCGSTABSetPrintLevel</B>( <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int level )
  <DD><I>
-(Optional) Set the print level</I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructBiCGSTABGetNumIterations</B>( <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int *num_iterations )
  <DD><I>

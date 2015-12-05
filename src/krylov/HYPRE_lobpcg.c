@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,10 +33,7 @@
  *
  *****************************************************************************/
 
-#include "HYPRE_lobpcg.h"
-#include "lobpcg.h"
-
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #include "HYPRE_config.h"
 #ifdef HYPRE_USING_ESSL
@@ -46,15 +43,18 @@
 #else
 
 #include "fortran.h"
-void hypre_F90_NAME_BLAS(dsygv, DSYGV)
+int hypre_F90_NAME_BLAS(dsygv, DSYGV)
 ( int *itype, char *jobz, char *uplo, int *n,
   double *a, int *lda, double *b, int *ldb, double *w,
   double *work, int *lwork, /*@out@*/ int *info
 );
-void hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
+int hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
 ( char* uplo, int* n, double* aval, int* lda, int* ierr );
 
 #endif
+
+#include "HYPRE_lobpcg.h"
+#include "lobpcg.h"
 
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
@@ -650,3 +650,4 @@ utilities_FortranMatrix* xy
                                   utilities_FortranMatrixWidth( xy ),
                                   utilities_FortranMatrixValues( xy ) );
 }
+

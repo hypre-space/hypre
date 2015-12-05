@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.16 $
+ * $Revision: 1.17 $
  ***********************************************************************EHEADER*/
 
 
@@ -79,7 +79,7 @@
 
 #include "HYPRE.h"
 #include "HYPRE_struct_ls.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "bHYPRE_StructMatrix.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._includes) */
 

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,7 +35,7 @@
 #ifndef hypre_PAR_MULTIVECTOR_HEADER
 #define hypre_PAR_MULTIVECTOR_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "seq_Multivector.h"
 
 #ifdef __cplusplus

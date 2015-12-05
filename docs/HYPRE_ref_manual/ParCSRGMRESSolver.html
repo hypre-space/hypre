@@ -4,53 +4,53 @@
 <hr>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESCreate</B>(MPI_Comm comm, HYPRE_Solver *solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESCreate</B>(MPI_Comm comm, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *solver)
  <DD><I>
 Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESDestroy</B>(HYPRE_Solver solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESDestroy</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver)
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetup</B>(HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetup</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
  <DD><I></I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSolve</B>(HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSolve</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
  <DD><I>
 Solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetKDim</B>(HYPRE_Solver solver, int k_dim)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetKDim</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int k_dim)
  <DD><I>
 (Optional) Set the maximum size of the Krylov space</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetTol</B>(HYPRE_Solver solver, double tol)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetTol</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double tol)
  <DD><I>
 (Optional) Set the convergence tolerance</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetMaxIter</B>(HYPRE_Solver solver, int max_iter)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int max_iter)
  <DD><I>
 (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetPrecond</B>(HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond, HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_PtrToParSolverFcn precond, HYPRE_PtrToParSolverFcn precond_setup, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> precond_solver)
  <DD><I>
 (Optional) Set the preconditioner to use</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESGetPrecond</B>(HYPRE_Solver solver, HYPRE_Solver *precond_data)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESGetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *precond_data)
  <DD><I></I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetLogging</B>(HYPRE_Solver solver, int logging)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetLogging</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int logging)
  <DD><I>
 (Optional) Set the amount of logging to do</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetPrintLevel</B>(HYPRE_Solver solver, int print_level)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESSetPrintLevel</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int print_level)
  <DD><I>
 (Optional) Set print level</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESGetNumIterations</B>(HYPRE_Solver solver, int *num_iterations)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_iterations)
  <DD><I>
 Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm</B>(HYPRE_Solver solver, double *norm)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *norm)
  <DD><I>
 Return the norm of the final relative residual</I>
 </DL>

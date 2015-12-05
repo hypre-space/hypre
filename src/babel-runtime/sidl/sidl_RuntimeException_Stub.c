@@ -3,7 +3,7 @@
  * Symbol:        sidl.RuntimeException-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name: V1-13-0b $
+ * Release:       $Name: V1-14-0b $
  * Revision:      @(#) $Id: sidl_RuntimeException_Stub.c,v 1.1 2006/08/29 23:31:42 painter Exp $
  * Description:   Client-side glue code for sidl.RuntimeException
  * 

@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.14 $
+# $Revision: 2.15 $
 #EHEADER**********************************************************************
 
 
@@ -42,12 +42,12 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  headers.h\
  HYPRE_parcsr_mv.h\
+ _hypre_parcsr_mv.h\
  new_commpkg.h\
  numbers.h\
  par_chord_matrix.h\
  par_csr_communication.h\
  par_csr_matrix.h\
- parcsr_mv.h\
  par_vector.h
 
 FILES =\
@@ -93,7 +93,7 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
  
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
@@ -122,7 +122,7 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 
 install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:

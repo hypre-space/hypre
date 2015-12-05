@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,6 +33,8 @@
 
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
+
+#include "HYPRE_config.h"
 
 #ifdef WIN32
 #include "mkl.h"
@@ -87,7 +89,7 @@
 #else
 
 #ifdef HYPRE_USING_HYPRE_BLAS
-#define hypre_F90_NAME_BLAS(name,NAME)  name##_
+#define hypre_F90_NAME_BLAS(name,NAME)  hypre_##name
 #else
 #if defined(F77_FUNC)
 /* F77_FUNC macro assumes NO underscores exist in name */
@@ -99,7 +101,7 @@
 #endif
 
 #ifdef HYPRE_USING_HYPRE_LAPACK
-#define hypre_F90_NAME_LAPACK(name,NAME)  name##_
+#define hypre_F90_NAME_LAPACK(name,NAME)  hypre_##name
 #else
 #if defined(F77_FUNC)
 /* F77_FUNC macro assumes NO underscores exist in name */

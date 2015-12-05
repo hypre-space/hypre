@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.13 $
+# $Revision: 2.14 $
 #EHEADER**********************************************************************
 
 
@@ -39,11 +39,11 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- all_krylov.h\
+ HYPRE_krylov.h\
+ krylov.h\
  bicgstab.h\
  cgnr.h\
  gmres.h\
- krylov.h\
  pcg.h\
  HYPRE_lobpcg.h\
  HYPRE_MatvecFunctions.h\
@@ -68,15 +68,15 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/HYPRE_MatvecFunctions.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/*lobpcg*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/HYPRE_MatvecFunctions.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/*lobpcg*.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,7 +33,7 @@
 
 #include <stdio.h>
 #include "HYPRE.h"
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "matrix/mli_matrix.h"
 #include "matrix/mli_matrix_misc.h"
 #include "IJ_mv/IJ_mv.h"

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -112,11 +112,9 @@ HYPRE_StructGridSetPeriodic( HYPRE_StructGrid  grid,
 int
 HYPRE_StructGridAssemble( HYPRE_StructGrid grid )
 {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   return ( hypre_StructGridAssembleWithAP(grid) );
-#else
-   return ( hypre_StructGridAssemble(grid) );
-#endif
+
+ return ( hypre_StructGridAssemble(grid) );
+
 }
 
 /*---------------------------------------------------------------------------

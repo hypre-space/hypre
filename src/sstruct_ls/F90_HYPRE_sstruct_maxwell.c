@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -348,7 +348,7 @@ hypre_F90_IFACE(hypre_sstructmaxwellphysbdy, HYPRE_SSTRUCTMAXWELLPHYSBDY)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructmaxwelleliminaterowscols, HYPRE_SSTRUCTMAXWELLELIMINATEROWSCOLS) 
+hypre_F90_IFACE(hypre_sstructmaxwelleliminatero, HYPRE_SSTRUCTMAXWELLELIMINATERO) 
                                                 (long int *A, 
                                                  int      *nrows,
                                                  int      *rows,

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.11 $
+ * $Revision: 1.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -51,12 +51,12 @@
 */
 
 
+#include "dsp_defs.h"
+#include "superlu_util.h"
+
 #ifndef HYPRE_USING_HYPRE_BLAS
 #define USE_VENDOR_BLAS
 #endif
-
-#include "dsp_defs.h"
-#include "superlu_util.h"
 
 /* 
  * Function prototypes 

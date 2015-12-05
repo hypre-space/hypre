@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.27 $
+ * $Revision: 2.28 $
  ***********************************************************************EHEADER*/
 
 
@@ -97,6 +97,7 @@ typedef struct
    int                **dof_point_array;
    int                **point_dof_map_array;
    int                  num_levels;
+   double             **l1_norms;
 
 
    /* Block data */
@@ -178,6 +179,7 @@ typedef struct
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
+#define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
 
 /* solve params */
 

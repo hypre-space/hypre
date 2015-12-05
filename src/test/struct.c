@@ -2,16 +2,17 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE_struct_ls.h"
-#include "krylov.h"
+#include "HYPRE_krylov.h"
 
 #define HYPRE_MFLOPS 0
 #if HYPRE_MFLOPS
-#include "struct_mv.h"
+#include "_hypre_struct_mv.h"
 #endif
 
-#include "struct_mv.h"
+/* RDF: Why is this include here? */
+#include "_hypre_struct_mv.h"
 
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -1783,7 +1784,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 
@@ -1792,7 +1793,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 
@@ -1999,7 +2000,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	   
@@ -2008,7 +2009,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 	   
@@ -2564,7 +2565,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
                  int                *period, 
                  double             value  )
 {
-#include  "struct_mv.h"
+/* #include  "_hypre_struct_mv.h" */
  int ierr = 0;
  hypre_BoxArray     *gridboxes;
  int                i,ib;

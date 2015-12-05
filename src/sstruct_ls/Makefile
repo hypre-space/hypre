@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.16 $
+# $Revision: 2.17 $
 #EHEADER**********************************************************************
 
 
@@ -48,17 +48,17 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- headers.h\
  HYPRE_sstruct_int.h\
  HYPRE_sstruct_ls.h\
- sstruct_ls.h\
- sys_pfmg.h\
+ _hypre_sstruct_ls.h\
  fac.h\
+ headers.h\
+ maxwell_TV.h\
+ nd1_amge_interpolation.h\
  sstruct_owninfo.h\
  sstruct_recvinfo.h\
  sstruct_sendinfo.h\
- nd1_amge_interpolation.h\
- maxwell_TV.h
+ sys_pfmg.h
 
 FILES =\
  F90_HYPRE_sstruct_bicgstab.c\
@@ -129,12 +129,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/sstruct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/sstruct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

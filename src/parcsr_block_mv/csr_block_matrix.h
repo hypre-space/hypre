@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -42,7 +42,7 @@
 #define hypre_CSR_BLOCK_MATRIX_HEADER
 
 #include "seq_mv.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
                                                                                                                
 #ifdef __cplusplus
 extern "C" {

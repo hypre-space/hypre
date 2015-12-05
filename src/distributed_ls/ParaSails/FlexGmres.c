@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -39,9 +39,9 @@
 #include "ParaSails.h"
 
 double ddot_(int *, double *, int *, double *, int *);
-void dcopy_(int *, double *, int *, double *, int *);
-void dscal_(int *, double *, double *, int *);
-void daxpy_(int *, double *, double *, int *, double *, int *);
+int dcopy_(int *, double *, int *, double *, int *);
+int dscal_(int *, double *, double *, int *);
+int daxpy_(int *, double *, double *, int *, double *, int *);
 
 static double InnerProd(int n, double *x, double *y, MPI_Comm comm)
 {

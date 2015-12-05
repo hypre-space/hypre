@@ -4,30 +4,30 @@
 <hr>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutCreate</B>(MPI_Comm comm, HYPRE_Solver *solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutCreate</B>(MPI_Comm comm, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *solver)
  <DD><I>
 Create a preconditioner object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutDestroy</B>(HYPRE_Solver solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutDestroy</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver)
  <DD><I>
 Destroy a preconditioner object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetup</B>(HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetup</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
  <DD><I></I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSolve</B>(HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSolve</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
  <DD><I>
 Precondition the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetMaxIter</B>(HYPRE_Solver solver, int max_iter)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int max_iter)
  <DD><I>
 (Optional) Set maximum number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetDropTolerance</B>(HYPRE_Solver solver, double tol)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetDropTolerance</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double tol)
  <DD><I>
 (Optional)</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetFactorRowSize</B>(HYPRE_Solver solver, int size)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRPilutSetFactorRowSize</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int size)
  <DD><I>
 (Optional)</I>
 </DL>

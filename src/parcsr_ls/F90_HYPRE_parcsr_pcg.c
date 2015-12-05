@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -248,6 +248,19 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprintlevel, HYPRE_PARCSRPCGSETPRINTLEVEL)( lon
 {
    *ierr = (int) ( HYPRE_ParCSRPCGSetPrintLevel( (HYPRE_Solver) *solver,
                                                  (int)       *level ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetPrintLogging
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrpcgsetlogging, HYPRE_PARCSRPCGSETLOGGING)( long int *solver,
+                                            int      *level,
+                                            int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_ParCSRPCGSetLogging( (HYPRE_Solver) *solver,
+                                               (int)       *level ) );
 }
 
 /*--------------------------------------------------------------------------

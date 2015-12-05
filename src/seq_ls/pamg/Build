@@ -1,0 +1,11 @@
+#!/bin/sh
+cd ../../utilities
+make clean
+make
+cd ../seq_mv
+make clean
+make
+cd ../PETSc_ls/amg
+make clean
+make
+

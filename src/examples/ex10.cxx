@@ -23,7 +23,7 @@
 #include <math.h>
 #include <iostream.h>
 #include <fstream.h>
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "LLNL_FEI_Impl.h"
 
 int main(int argc, char *argv[])

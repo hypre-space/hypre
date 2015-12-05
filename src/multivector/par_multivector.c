@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.4 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -36,11 +36,11 @@
 #include "par_multivector.h"
 #include "seq_multivector.h"
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 /* for temporary implementation of multivectorRead, multivectorPrint */
 #include "seq_mv.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParMultiVectorCreate
@@ -290,7 +290,7 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
  *    MPI_Comm_rank(comm, &myid);
  *    if (myid==0)
  *       for (i=0; i<count; i++)
- *          printf("%22.16e\n",results[i])
+ *          printf("%22.14e\n",results[i])
  */
 
 /* ------------ */

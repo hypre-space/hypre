@@ -1,6 +1,6 @@
 <html><head><TITLE>HYPRE_ParCSRHybridSetRelaxOrder</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_ParCSRHybridSetRelaxOrder ( HYPRE_Solver solver, int relax_order ) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_ParCSRHybridSetRelaxOrder ( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int relax_order ) </H2><BLOCKQUOTE>
 
 (Optional) Defines in which order the points are relaxed
 </BLOCKQUOTE>
@@ -12,16 +12,16 @@
 (Optional) Defines in which order the points are relaxed. There are
 the following options for
 relax_order:<P><TABLE BORDER>
-<TR><TD> <HR>
-0 &amp; the points are relaxed in natural or lexicographic
-order on each processor <BR>
-1 &amp;  CF-relaxation is used, i.e on the fine grid and the down
-cycle the coarse points are relaxed first, <BR>
-&amp; followed by the fine points; on the up cycle the F-points are relaxed
-first, followed by the C-points. <BR>
-&amp; On the coarsest level, if an iterative scheme is used,
-the points are relaxed in lexicographic order. <BR>
-<HR>
+<TR><TD> </TD></TR><TR><TD>
+0 </TD><TD> the points are relaxed in natural or lexicographic
+order on each processor </TD></TR><TD>
+1 </TD><TD>  CF-relaxation is used, i.e on the fine grid and the down
+cycle the coarse points are relaxed first, </TD></TR><TD>
+</TD><TD> followed by the fine points; on the up cycle the F-points are relaxed
+first, followed by the C-points. </TD></TR><TD>
+</TD><TD> On the coarsest level, if an iterative scheme is used,
+the points are relaxed in lexicographic order. </TD></TR><TD>
+</TD></TR><TR><TD>
 </TR></TABLE><P>The default is 1 (CF-relaxation).
 
 </BLOCKQUOTE>

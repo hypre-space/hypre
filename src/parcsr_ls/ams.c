@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -484,11 +484,11 @@ void * hypre_AMSCreate()
    ams_data -> A_relax_weight = 1.0;   /* damping parameter */
    ams_data -> A_omega = 1.0;          /* SSOR coefficient */
    ams_data -> B_G_coarsen_type = 10;  /* HMIS coarsening */
-   ams_data -> B_G_agg_levels = 1;     /* Levels of aggresive coarsening */
+   ams_data -> B_G_agg_levels = 1;     /* Levels of aggressive coarsening */
    ams_data -> B_G_relax_type = 3;     /* hybrid G-S/Jacobi */
    ams_data -> B_G_theta = 0.25;       /* strength threshold */
    ams_data -> B_Pi_coarsen_type = 10; /* HMIS coarsening */
-   ams_data -> B_Pi_agg_levels = 1;    /* Levels of aggresive coarsening */
+   ams_data -> B_Pi_agg_levels = 1;    /* Levels of aggressive coarsening */
    ams_data -> B_Pi_relax_type = 3;    /* hybrid G-S/Jacobi */
    ams_data -> B_Pi_theta = 0.25;      /* strength threshold */
    ams_data -> beta_is_zero = 0;       /* the problem has a mass term */
@@ -527,30 +527,43 @@ int hypre_AMSDestroy(void *solver)
    hypre_AMSData *ams_data = solver;
 
    if (ams_data -> owns_A_G)
-      hypre_ParCSRMatrixDestroy(ams_data -> A_G);
+      if (ams_data -> A_G)
+         hypre_ParCSRMatrixDestroy(ams_data -> A_G);
    if (!ams_data -> beta_is_zero)
-     HYPRE_BoomerAMGDestroy(ams_data -> B_G);
+      if (ams_data -> B_G)
+         HYPRE_BoomerAMGDestroy(ams_data -> B_G);
 
-   hypre_ParCSRMatrixDestroy(ams_data -> Pi);
+   if (ams_data -> Pi)
+      hypre_ParCSRMatrixDestroy(ams_data -> Pi);
    if (ams_data -> owns_A_Pi)
-      hypre_ParCSRMatrixDestroy(ams_data -> A_Pi);
-   HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
+      if (ams_data -> A_Pi)
+         hypre_ParCSRMatrixDestroy(ams_data -> A_Pi);
+   if (ams_data -> B_Pi)
+      HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
 
-   hypre_ParVectorDestroy(ams_data -> r0);
-   hypre_ParVectorDestroy(ams_data -> g0);
+   if (ams_data -> r0)
+      hypre_ParVectorDestroy(ams_data -> r0);
+   if (ams_data -> g0)
+      hypre_ParVectorDestroy(ams_data -> g0);
    if (!ams_data -> beta_is_zero)
    {
-      hypre_ParVectorDestroy(ams_data -> r1);
-      hypre_ParVectorDestroy(ams_data -> g1);
+      if (ams_data -> r1)
+         hypre_ParVectorDestroy(ams_data -> r1);
+      if (ams_data -> g1)
+         hypre_ParVectorDestroy(ams_data -> g1);
    }
-   hypre_ParVectorDestroy(ams_data -> r2);
-   hypre_ParVectorDestroy(ams_data -> g2);
+   if (ams_data -> r2)
+      hypre_ParVectorDestroy(ams_data -> r2);
+   if (ams_data -> g2)
+      hypre_ParVectorDestroy(ams_data -> g2);
 
-   hypre_TFree(ams_data -> A_l1_norms);
+   if (ams_data -> A_l1_norms)
+      hypre_TFree(ams_data -> A_l1_norms);
 
    /* G, x, y ,z, Gx, Gy and Gz are not destroyed */
 
-   hypre_TFree(ams_data);
+   if (ams_data)
+      hypre_TFree(ams_data);
 
    return hypre_error_flag;
 }
@@ -1056,11 +1069,19 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_G, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G, ams_data -> B_G_theta);
 
+      /* don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G,
+                                       ams_data -> B_G_relax_type,
+                                       3);
+
       /* If not given, construct the coarse space matrix by RAP */
       if (!ams_data -> A_G)
       {
          if (!hypre_ParCSRMatrixCommPkg(ams_data -> G))
             hypre_MatvecCommPkgCreate(ams_data -> G);
+
+         if (!hypre_ParCSRMatrixCommPkg(ams_data -> A))
+            hypre_MatvecCommPkgCreate(ams_data -> A);
 
          hypre_BoomerAMGBuildCoarseOperator(ams_data -> G,
                                             ams_data -> A,
@@ -1069,7 +1090,7 @@ int hypre_AMSSetup(void *solver,
 
          /* Make sure that A_G has no zero rows (this can happen
             if beta is zero in part of the domain). */
-         hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G);
+         /* hypre_ParCSRMatrixFixZeroRows(ams_data -> A_G); */
 
          ams_data -> owns_A_G = 1;
       }
@@ -1090,6 +1111,11 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Pi, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Pi, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pi, ams_data -> B_Pi_theta);
+
+      /* don't use exact solve on the coarsest level (matrix may be singular) */
+      HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi,
+                                       ams_data -> B_Pi_relax_type,
+                                       3);
 
       /* If not given, construct the coarse space matrix by RAP and
          notify BoomerAMG that this is a dim x dim block system. */
@@ -1129,7 +1155,7 @@ int hypre_AMSSetup(void *solver,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMSolve
+ * hypre_AMSSolve
  *
  * Solve the system A x = b.
  *--------------------------------------------------------------------------*/
@@ -1150,7 +1176,7 @@ int hypre_AMSSolve(void *solver,
                          hypre_ParVector*,hypre_ParVector*,int);
 
    int i, my_id;
-   double r0_norm, r_norm, b_norm, relative_resid, old_resid;
+   double r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
 
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
@@ -1244,12 +1270,22 @@ int hypre_AMSSolve(void *solver,
                    i+1, r_norm, r_norm / old_resid, relative_resid);
       }
 
-      if (relative_resid < ams_data -> tol) break;
+      if (relative_resid < ams_data -> tol)
+      {
+         i++;
+         break;
+      }
    }
 
-   if (my_id == 0 && ams_data -> print_level > 0)
+   if (my_id == 0 && ams_data -> print_level > 0 && ams_data -> maxit > 1)
       printf("\n\n Average Convergence Factor = %f\n\n",
-             pow((r_norm/r0_norm),(1.0/(double) (i+1))));
+             pow((r_norm/r0_norm),(1.0/(double) i)));
+
+   ams_data -> num_iterations = i;
+   ams_data -> rel_resid_norm = relative_resid;
+
+   if (ams_data -> num_iterations == ams_data -> maxit && ams_data -> tol > 0.0)
+      hypre_error(HYPRE_ERROR_CONV);
 
    return hypre_error_flag;
 }
@@ -1447,7 +1483,7 @@ int hypre_ThreeLevelParCSRMulPrec(/* fine space matrix */
       hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
       hypre_ParVectorAxpy(1.0, r0, y);
 
-      /* pre-smooth: y += S (x - Ay) */
+      /* post-smooth: y += S (x - Ay) */
       hypre_ParCSRRelax(A0, x,
                         A0_relax_type,
                         A0_relax_times,
@@ -1863,6 +1899,127 @@ int hypre_ThreeLevelParCSRAddPrec(/* fine space matrix */
    }
    else
       hypre_error_in_arg(19);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSGetNumIterations
+ *
+ * Get the number of AMS iterations.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSGetNumIterations(void *solver,
+                              int *num_iterations)
+{
+   hypre_AMSData *ams_data = solver;
+   *num_iterations = ams_data -> num_iterations;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSGetFinalRelativeResidualNorm
+ *
+ * Get the final relative residual norm in AMS.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
+                                          double *rel_resid_norm)
+{
+   hypre_AMSData *ams_data = solver;
+   *rel_resid_norm = ams_data -> rel_resid_norm;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMSConstructDiscreteGradient
+ *
+ * Construct and return the discrete gradient matrix G, based on:
+ * - a matrix on the egdes (e.g. the stiffness matrix A)
+ * - a vector on the vertices (e.g. the x coordinates)
+ * - the array edge_vertex, which lists the global indexes of the
+ *   vertices of the local edges.
+ *
+ * We assume that edge_vertex lists the edge vertices consecutively,
+ * and that the orientation of edge i depends only on the sign of
+ * edge_vertex[2*i+1] - edge_vertex[2*i].
+ *
+ * Warning: G steals the (row) partitionings of A and x_coord. This may
+ * break some code, but is necessery since the user is responsible for
+ * destroying the output matrix.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
+                                       hypre_ParVector *x_coord,
+                                       int *edge_vertex,
+                                       hypre_ParCSRMatrix **G_ptr)
+{
+   hypre_ParCSRMatrix *G;
+
+   int nedges, vxstart, vxend, nvert;
+
+   nedges = hypre_ParCSRMatrixNumRows(A);
+
+   vxstart = hypre_ParVectorFirstIndex(x_coord);
+   vxend = hypre_ParVectorLastIndex(x_coord);
+   nvert = vxend - vxstart + 1;
+
+   /* Construct the local part of G based on edge_vertex and the edge
+      and vertex partitionings from A and x_coord */
+   {
+      int i, *I = hypre_CTAlloc(int, nedges+1);
+      double *data = hypre_CTAlloc(double, 2*nedges);
+      hypre_CSRMatrix *local = hypre_CSRMatrixCreate (nedges,
+                                                      hypre_ParVectorGlobalSize(x_coord),
+                                                      2*nedges);
+
+      for (i = 0; i <= nedges; i++)
+         I[i] = 2*i;
+
+      /* Assume that the edge orientation is based on the vertex indexes */
+      for (i = 0; i < 2*nedges; i+=2)
+      {
+         if (edge_vertex[i] < edge_vertex[i+1])
+         {
+            data[i]   = -1.0;
+            data[i+1] =  1.0;
+         }
+         else
+         {
+            data[i]   =  1.0;
+            data[i+1] = -1.0;
+         }
+      }
+
+      hypre_CSRMatrixI(local) = I;
+      hypre_CSRMatrixJ(local) = edge_vertex;
+      hypre_CSRMatrixData(local) = data;
+
+      hypre_CSRMatrixRownnz(local) = NULL;
+      hypre_CSRMatrixOwnsData(local) = 1;
+      hypre_CSRMatrixNumRownnz(local) = nedges;
+
+      G = hypre_ParCSRMatrixCreate(hypre_ParCSRMatrixComm(A),
+                                   hypre_ParCSRMatrixGlobalNumRows(A),
+                                   hypre_ParVectorGlobalSize(x_coord),
+                                   hypre_ParCSRMatrixRowStarts(A),
+                                   hypre_ParVectorPartitioning(x_coord),
+                                   0, 0, 0);
+
+      hypre_ParCSRMatrixOwnsRowStarts(A) = 0;
+      hypre_ParVectorOwnsPartitioning(x_coord) = 0;
+      hypre_ParCSRMatrixOwnsRowStarts(G) = 1;
+      hypre_ParCSRMatrixOwnsColStarts(G) = 1;
+
+      GenerateDiagAndOffd(local, G,
+                          hypre_ParVectorFirstIndex(x_coord),
+                          hypre_ParVectorLastIndex(x_coord));
+
+      hypre_CSRMatrixJ(local) = NULL;
+      hypre_CSRMatrixDestroy(local);
+   }
+
+   *G_ptr = G;
 
    return hypre_error_flag;
 }

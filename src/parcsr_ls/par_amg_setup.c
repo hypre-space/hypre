@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.61 $
+ * $Revision: 2.63 $
  ***********************************************************************EHEADER*/
 
 
@@ -104,6 +104,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *A_H;
    hypre_ParCSRMatrix  *AN;
    double              *SmoothVecs = NULL;
+   double             **l1_norms = NULL;
 
    int       old_num_levels, num_levels;
    int       level;
@@ -199,7 +200,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    P_block_array = hypre_ParAMGDataPBlockArray(amg_data);
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
-
 
 
    /* Verify that settings are correct for solving systmes */
@@ -1318,21 +1318,28 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(SN);
          }
       }
-      else if (hypre_ParAMGDataInterpType(amg_data) == 6) /*Extended interpolation */
+      else if (hypre_ParAMGDataInterpType(amg_data) == 6) /*Extended classical interpolation */
       {
-          hypre_BoomerAMGBuildExtInterp(A_array[level], CF_marker_array[level], 
+          hypre_BoomerAMGBuildExtPIInterp(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
 	  hypre_TFree(col_offd_S_to_A);
       }
-      else if (hypre_ParAMGDataInterpType(amg_data) == 7) /*FF interpolation */
+      else if (hypre_ParAMGDataInterpType(amg_data) == 7) /*Extended (if no common C) interpolation */
+      {
+          hypre_BoomerAMGBuildExtPICCInterp(A_array[level], CF_marker_array[level], 
+                 S, coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
+	  hypre_TFree(col_offd_S_to_A);
+      }
+      else if (hypre_ParAMGDataInterpType(amg_data) == 12) /*FF interpolation */
       {
           hypre_BoomerAMGBuildFFInterp(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &P);
 	  hypre_TFree(col_offd_S_to_A);
       }
-      else if (hypre_ParAMGDataInterpType(amg_data) == 12) /*FF1 interpolation */
+      else if (hypre_ParAMGDataInterpType(amg_data) == 13) /*FF1 interpolation */
       {
           hypre_BoomerAMGBuildFF1Interp(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
@@ -1628,8 +1635,22 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * Setup F and U arrays
     *-----------------------------------------------------------------------*/
 
+   if (grid_relax_type[1] == 8)
+   {
+      l1_norms = hypre_CTAlloc(double *, num_levels);
+      hypre_ParAMGDataL1Norms(amg_data) = l1_norms;
+   }
+
    for (j = 0; j < num_levels; j++)
    {
+      if (grid_relax_type[1] == 8 && j < num_levels-1)
+      {
+	 hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
+      }
+      else if (grid_relax_type[3] == 8 && j == num_levels-1)
+      {
+	 hypre_ParCSRComputeL1Norms(A_array[j], 2, &l1_norms[j]);
+      }
       if ((smooth_type == 9 || smooth_type == 19) && smooth_num_levels > j)
       {
          HYPRE_EuclidCreate(comm, &smoother[j]);

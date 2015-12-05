@@ -1,3 +1,4 @@
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2006   The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -21,7 +22,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.17 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -198,11 +199,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_NewCommPkgCreate(A);
-#else
         hypre_MatvecCommPkgCreate(A);
-#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -984,11 +981,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
         hypre_MatvecCommPkgCreate(A);
-#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -2063,11 +2056,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
         hypre_MatvecCommPkgCreate(A);
-#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 

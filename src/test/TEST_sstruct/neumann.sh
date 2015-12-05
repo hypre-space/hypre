@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -22,22 +22,48 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.7 $
+# $Revision: 1.10 $
 #EHEADER**********************************************************************
+
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # sstruct: Test various blockings and distributions of default problem
 #=============================================================================
 
-tail -3 neumann.out.0 > neumann.testdata
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 neumann.out.2 > neumann.testdata.temp
-diff neumann.testdata neumann.testdata.temp >&2
+#=============================================================================
 
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 neumann.out.1 > neumann.testdata
+#=============================================================================
+# compare with baseline case
+#=============================================================================
 
-tail -3 neumann.out.3 > neumann.testdata.temp
-diff neumann.testdata neumann.testdata.temp >&2
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+"
 
-rm -f neumann.testdata neumann.testdata.temp
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

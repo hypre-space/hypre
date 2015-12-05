@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,7 +30,7 @@
 #ifndef __MLISFEI_H__
 #define __MLISFEI_H__
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "fedata/mli_febase.h"
 
 /****************************************************************************/ 

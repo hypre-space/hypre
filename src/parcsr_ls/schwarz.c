@@ -21,10 +21,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.31 $
+ * $Revision: 2.35 $
  ***********************************************************************EHEADER*/
-
-
 
 
 #include "headers.h"
@@ -44,8 +42,8 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-void hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
-void hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, double *, int *, int *);
+int hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, double *, int *, int *);
 #endif
 
 /*--------------------------------------------------------------------------
@@ -3255,11 +3253,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
      else if (num_procs > 1)
      {
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_NewCommPkgCreate(A);
-#else
         hypre_MatvecCommPkgCreate(A);
-#endif
+
 	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
 	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
      }

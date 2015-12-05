@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,7 +29,7 @@
 
 #include <string.h>
 #include "solver/mli_solver_kaczmarz.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 
 /******************************************************************************
  * Kaczmarz relaxation scheme

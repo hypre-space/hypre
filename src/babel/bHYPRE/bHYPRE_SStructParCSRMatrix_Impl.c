@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.28 $
+ * $Revision: 1.29 $
  ***********************************************************************EHEADER*/
 
 
@@ -61,7 +61,7 @@
 #include <assert.h>
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
-#include "sstruct_mv.h"
+#include "_hypre_sstruct_mv.h"
 #include "bHYPRE_SStructParCSRVector_Impl.h"
 #include "bHYPRE_SStructGraph_Impl.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"

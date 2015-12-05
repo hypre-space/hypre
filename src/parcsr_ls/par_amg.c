@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.44 $
+ * $Revision: 2.48 $
  ***********************************************************************EHEADER*/
 
 
@@ -255,6 +255,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    hypre_ParAMGDataSmoother(amg_data) = NULL;
+   hypre_ParAMGDataL1Norms(amg_data) = NULL;
   
    hypre_ParAMGDataABlockArray(amg_data) = NULL;
    hypre_ParAMGDataPBlockArray(amg_data) = NULL;
@@ -331,6 +332,14 @@ hypre_BoomerAMGDestroy( void *data )
         if (hypre_ParAMGDataPBlockArray(amg_data)[i-1])
            hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataPBlockArray(amg_data)[i-1]);
 
+   }
+
+   if (hypre_ParAMGDataL1Norms(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+         if (hypre_ParAMGDataL1Norms(amg_data)[i])
+           hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataL1Norms(amg_data));
    }
 
    /* get rid of a fine level block matrix */
@@ -794,7 +803,7 @@ hypre_BoomerAMGSetInterpType( void     *data,
       return hypre_error_flag;
    } 
 
-   if (interp_type < 0 || interp_type > 12)
+   if (interp_type < 0 || interp_type > 13)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
@@ -1929,7 +1938,7 @@ hypre_BoomerAMGSetPrintFileName( void       *data,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
-   if( strlen(print_file_name)<=256 );
+   if( strlen(print_file_name) > 256 )
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

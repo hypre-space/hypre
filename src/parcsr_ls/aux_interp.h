@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -43,6 +43,7 @@ int index_of_minimum(int *data, int n);
 void swap_int(int *data, int a, int b);
 int new_offd_nodes(int **found, int A_ext_rows, int *A_ext_i, int *A_ext_j, 
 		   int num_cols_A_offd, int *col_map_offd, int col_1, 
-		   int col_n, int *Sop_i, int *Sop_j);
+		   int col_n, int *Sop_i, int *Sop_j,
+		   int *CF_marker, hypre_ParCSRCommPkg *comm_pkg);
 void initialize_vecs(int diag_n, int offd_n, int *diag_ftc, int *offd_ftc, 
 		     int *diag_pm, int *offd_pm, int *tmp_CF);

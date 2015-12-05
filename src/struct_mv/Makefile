@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.12 $
+# $Revision: 2.14 $
 #EHEADER**********************************************************************
 
 
@@ -38,6 +38,8 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
+ HYPRE_struct_mv.h\
+ _hypre_struct_mv.h\
  assumed_part.h\
  box.h\
  box_manager.h\
@@ -46,11 +48,9 @@ HEADERS =\
  computation.h\
  headers.h\
  hypre_box_smp_forloop.h\
- HYPRE_struct_mv.h\
  struct_communication.h\
  struct_grid.h\
  struct_matrix.h\
- struct_mv.h\
  struct_stencil.h\
  struct_vector.h
 
@@ -61,7 +61,6 @@ FILES =\
  box_boundary.c\
  box.c\
  box_manager.c\
- box_neighbors.c\
  communication_info.c\
  computation.c\
  F90_HYPRE_struct_grid.c\
@@ -73,8 +72,6 @@ FILES =\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\
  HYPRE_struct_vector.c\
- new_assemble.c\
- new_box_neighbors.c\
  project.c\
  struct_axpy.c\
  struct_communication.c\
@@ -98,12 +95,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/struct_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_struct_mv.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_mv${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/struct_mv.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_struct_mv.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

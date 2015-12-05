@@ -4,11 +4,11 @@
 <hr>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGCreate</B>(HYPRE_Solver *solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGCreate</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *solver)
  <DD><I>
 Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGDestroy</B>(HYPRE_Solver solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGDestroy</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver)
  <DD><I>
 Destroy a solver object</I>
 <DT>
@@ -22,7 +22,7 @@ Solve the system or apply AMG as a preconditioner</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSolveT.html><B>HYPRE_BoomerAMGSolveT</B></A> 
  <DD><I>
-Solve the transpose system <IMG BORDER=0 SRC=g000004.gif> or apply AMG as a preconditioner
+Solve the transpose system <IMG BORDER=0 SRC=g000007.gif> or apply AMG as a preconditioner
 to the transpose system </I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetTol.html><B>HYPRE_BoomerAMGSetTol</B></A> 
@@ -52,7 +52,7 @@ diagonal dominant portions of the matrix</I>
  <DD><I>
 (Optional) Defines which parallel coarsening algorithm is used</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetMeasureType</B>(HYPRE_Solver solver, int measure_type)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetMeasureType</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int measure_type)
  <DD><I>
 (Optional) Defines whether local or global measures are used</I>
 <DT>
@@ -122,19 +122,19 @@ on all levels</I>
 (Optional) Defines the outer relaxation weight for hybrid SOR or SSOR
 on the user defined level</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetDebugFlag</B>(HYPRE_Solver solver, int debug_flag)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetDebugFlag</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int debug_flag)
  <DD><I>
 (Optional)</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetResidual</B>(HYPRE_Solver solver, HYPRE_ParVector * residual)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetResidual</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParVector * residual)
  <DD><I>
 Returns the residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetNumIterations</B>(HYPRE_Solver solver, int *num_iterations)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_iterations)
  <DD><I>
 Returns the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetFinalRelativeResidualNorm</B>(HYPRE_Solver solver, double *rel_resid_norm)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *rel_resid_norm)
  <DD><I>
 Returns the norm of the final relative residual</I>
 <DT>
@@ -205,7 +205,7 @@ if using the systems version</I>
  <DD><I>
 (Optional) Defines the type of domain used for the Schwarz method</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetSchwarzRlxWeight</B>(HYPRE_Solver solver, double schwarz_rlx_weight)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetSchwarzRlxWeight</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double schwarz_rlx_weight)
  <DD><I>
 (Optional) Defines a smoothing parameter for the additive Schwarz method</I>
 <DT>
@@ -242,7 +242,7 @@ if using the systems version</I>
 (Optional) Specifies the use of GSMG - geometrically smooth 
 coarsening and interpolation</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetNumSamples</B>(HYPRE_Solver solver, int num_samples)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetNumSamples</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int num_samples)
  <DD><I>
 (Optional) Defines the number of sample vectors used in GSMG
 or LS interpolation</I>

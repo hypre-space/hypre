@@ -12,10 +12,11 @@ Create a solver object</I>
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetup</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
- <DD><I></I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPCGSetup.html><B>HYPRE_StructPCGSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
  <DD><I>
 Solve the system</I>
 <DT>
@@ -46,7 +47,7 @@ successive iterates be small</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGSetPrintLevel</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int level)
  <DD><I>
-(Optional) Set the print level</I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPCGGetNumIterations</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int *num_iterations)
  <DD><I>
@@ -60,11 +61,11 @@ Return the norm of the final relative residual</I>
  <DD><I>
 Return the residual</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructDiagScaleSetup</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> y, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructDiagScaleSetup</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> y, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
  <DD><I>
 Setup routine for diagonal preconditioning</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructDiagScale</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> HA, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> Hy, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> Hx)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructDiagScale</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> HA, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> Hy, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> Hx)
  <DD><I>
 Solve routine for diagonal preconditioning</I>
 </DL>

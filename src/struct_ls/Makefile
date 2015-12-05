@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.14 $
+# $Revision: 2.16 $
 #EHEADER**********************************************************************
 
 
@@ -42,14 +42,14 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- headers.h\
  HYPRE_struct_int.h\
  HYPRE_struct_ls.h\
+ _hypre_struct_ls.h\
+ headers.h\
  pfmg.h\
  red_black_gs.h\
  smg.h\
- sparse_msg.h\
- struct_ls.h
+ sparse_msg.h
 
 FILES =\
  coarsen.c\
@@ -89,6 +89,7 @@ FILES =\
  point_relax.c\
  red_black_constantcoef_gs.c\
  red_black_gs.c\
+ semi.c\
  semi_interp.c\
  semi_restrict.c\
  semi_setup_rap.c\
@@ -121,12 +122,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/struct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_struct_ls.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_struct_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/struct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_struct_ls.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

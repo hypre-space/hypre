@@ -21,9 +21,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
-
 
 
 #include "headers.h"
@@ -1422,19 +1421,25 @@ hypre_CoarsenPGrid( hypre_SStructGrid  *fgrid,
    return ierr;
 }
 
+
+
 /*--------------------------------------------------------------------------
  *  Contracts a box so that the resulting box divides evenly into rfactor.
  *  Contraction is done in the (+) or (-) direction that does not have
  *  neighbor boxes, or if both directions have neighbor boxes, the (-) side
  *  is contracted.
+ *  Modified to use box manager AHB 11/06
  *--------------------------------------------------------------------------*/
+
 hypre_Box *
 hypre_BoxContraction( hypre_Box           *box,
                       hypre_StructGrid    *sgrid,
                       hypre_Index          rfactor )
 {
-   hypre_BoxNeighbors  *neighbors= hypre_StructGridNeighbors(sgrid);
-   hypre_BoxArray      *neighbor_boxes= hypre_BoxNeighborsBoxes(neighbors);
+
+   hypre_BoxManager    *boxman = hypre_StructGridBoxMan(sgrid);
+
+   hypre_BoxArray      *neighbor_boxes= NULL;
    hypre_Box           *nbox;
    hypre_Box           *contracted_box;
    hypre_Box           *shifted_box;
@@ -1445,6 +1450,12 @@ hypre_BoxContraction( hypre_Box           *box,
    hypre_Index          remainder, box_width;
    int                  i, j, k, p;
    int                  npos, nneg;
+
+
+   /* get the boxes out of the box manager - use these as the neighbor boxes */
+   neighbor_boxes = hypre_BoxArrayCreate(0);
+   hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
+
 
    contracted_box= hypre_BoxCreate();
 
@@ -1523,5 +1534,9 @@ hypre_BoxContraction( hypre_Box           *box,
       hypre_BoxDestroy(shifted_box);
    }  /* if (p) */
              
+   hypre_BoxArrayDestroy(neighbor_boxes);
+
    return contracted_box;
 }
+
+

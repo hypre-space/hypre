@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,8 +33,8 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_KRYLOV_PCG_HEADER
-#define HYPRE_KRYLOV_PCG_HEADER
+#ifndef hypre_KRYLOV_PCG_HEADER
+#define hypre_KRYLOV_PCG_HEADER
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -22,20 +22,50 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.5 $
+# $Revision: 1.8 $
 #EHEADER**********************************************************************
+
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # sstruct: Test SetNeighborBox by comparing one-part problem
 #          against equivalent multi-part problems
 #=============================================================================
 
-tail -3 cube.out.0 > cube.testdata
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
 
-tail -3 cube.out.1 > cube.testdata.temp
-diff cube.testdata cube.testdata.temp >&2
+#=============================================================================
 
-tail -3 cube.out.2 > cube.testdata.temp
-diff cube.testdata cube.testdata.temp >&2
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-rm -f cube.testdata cube.testdata.temp
+#=============================================================================
+
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

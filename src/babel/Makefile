@@ -21,26 +21,37 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.11 $
+# $Revision: 2.13 $
 #EHEADER**********************************************************************
 
 include ../config/Makefile.config
+
+# Python support.
+# It is very important that you keep the Python modules up-to-date.
+# They contain copies of hypre binaries taken from the libraries
+# libHYPRE.so and libbHYPRE.so.
+# When you first run make at the top level (linear_solvers directory),
+# the libraries get built before the Python modules, so all is well.
+# But if you later change something and rebuild in a subdirectory, the Python
+# modules won't get automatically updated.  You need to cd to babel, and
+# type "make" there too.
+
+# The build process for the Python interface can be time- and space-consuming,
+# so we don't want to do it unless requested.
+ifeq ($(BUILD_PYTHON),1)
+   BHYPRE_BABEL_PYTHON_DIR=bHYPREClient-P
+endif
 
 BHYPRE_BABEL_DIRS =\
  bHYPRE \
  bHYPREClient-C\
  bHYPREClient-F\
- bHYPREClient-CX
-
-# bHYPREClient-P
+ bHYPREClient-CX\
+ $(BHYPRE_BABEL_PYTHON_DIR)
 
 HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
 
-###HYPRE_BABEL_RUNTIME_PYTHON_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/python
-###  when python option is enabled, uncomment the following line and move it
-###  to the all and install targets, repsectively, with the other cp commands
-###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_BUILD_DIR}/include
-###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_INC_INSTALL}
+HYPRE_BABEL_RUNTIME_PYTHON_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/python
 
 all:
 	@ \

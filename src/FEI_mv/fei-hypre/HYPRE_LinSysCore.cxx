@@ -21,14 +21,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.42 $
+ * $Revision: 2.48 $
  ***********************************************************************EHEADER*/
 
 //***************************************************************************
 // system includes
 //---------------------------------------------------------------------------
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -54,7 +54,7 @@
 #include "HYPRE_parcsr_fgmres.h"
 #include "HYPRE_parcsr_lsicg.h"
 #include "HYPRE_LinSysCore.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "HYPRE_LSI_schwarz.h"
 #include "HYPRE_LSI_ddilut.h"
 #include "HYPRE_LSI_ddict.h"
@@ -310,7 +310,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    mlStrongThreshold_  = 0.08; // one suggested by Vanek/Brezina/Mandel
    mlCoarseSolver_     = 0;    // default coarse solver = SuperLU
    mlCoarsenScheme_    = 1;    // default coarsening scheme = uncoupled
-   mlNumPDEs_          = 1;    // default block size 
+   mlNumPDEs_          = 3;    // default block size 
 
    truncThresh_        = 0.0;
    rhsIDs_             = new int[1];
@@ -327,6 +327,9 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    MLI_Hybrid_MaxIter_  = 100;
    MLI_Hybrid_ConvRate_ = 0.95;
    MLI_Hybrid_NTrials_  = 5;
+   amsX_                = NULL;
+   amsY_                = NULL;
+   amsZ_                = NULL;
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -543,6 +546,9 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       HYPRE_ParCSRMatrixDestroy(maxwellANN_);
       maxwellANN_ = NULL;
    }
+   if (amsX_ != NULL) HYPRE_IJVectorDestroy(amsX_);
+   if (amsY_ != NULL) HYPRE_IJVectorDestroy(amsY_);
+   if (amsZ_ != NULL) HYPRE_IJVectorDestroy(amsZ_);
    // Users who copy this matrix in should be responsible for
    // destroying this
    //if (maxwellGEN_ != NULL)
@@ -2219,6 +2225,34 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    //-------------------------------------------------------------------
+   // This part is for loading the nodal coordinate information for
+   // use with the AMS preconditioner.
+   //-------------------------------------------------------------------
+
+   else if ( fieldID == -4 )
+   {
+      if (numNodes <= 0 || fieldSize <= 0) return 1;
+
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
+      {
+         for ( i = 0; i < numNodes; i++ )
+            for ( j = 0; j < fieldSize; j++ )
+               printf("putNodalFieldData : %4d %2d = %e\n",i,j,
+                      data[i*fieldSize+j]);
+      }    
+      if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
+      if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
+      MLI_FieldSize_  = fieldSize;
+      MLI_NumNodes_   = numNodes;
+      MLI_EqnNumbers_ = new int[numNodes+1];
+      MLI_NodalCoord_ = new double[fieldSize*numNodes+1];
+      for (i = 0; i < numNodes; i++) MLI_EqnNumbers_[i] = nodeNumbers[i];
+      MLI_EqnNumbers_[numNodes] = -1;
+      for (i = 0; i < numNodes*fieldSize; i++) MLI_NodalCoord_[i] = data[i];
+      MLI_NodalCoord_[numNodes*fieldSize] = -99999.0;
+   }
+
+   //-------------------------------------------------------------------
    // this is needed to set up the correct node equation map
    // (the FEI remaps the node IDs in the incoming nodeNumbers array.
    //  to revert to the original ALE3D node numbers, it is passed in
@@ -2684,8 +2718,29 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
 #ifndef NOFEI
 int HYPRE_LinSysCore::copyOutMatrix(double scalar, Data& data) 
 {
+   char *name;
+
    (void) scalar;
-   data.setDataPtr( HYA_ );
+
+   name = data.getTypeName();
+
+   if (!strcmp(name, "A"))
+   {
+      data.setDataPtr((void *) HYA_);
+   }
+   else if (!strcmp(name, "NodeNumbers"))
+   {
+      data.setDataPtr((void *) MLI_EqnNumbers_);
+   }
+   else if (!strcmp(name, "NodalCoord"))
+   {
+      data.setDataPtr((void *) MLI_NodalCoord_);
+   }
+   else
+   {
+      printf("HYPRE_LSC::copyOutMatrix ERROR - invalid command.\n");
+      exit(1);
+   }
    return (0);
 }
 #endif
@@ -3754,13 +3809,14 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
 #ifdef HAVE_MLI
-   int                *constrMap, *constrEqns;
+   int                *constrMap, *constrEqns, ncount, *iArray;
+   double             *tempNodalCoord; 
 #endif
    int                *numSweeps, *relaxType;
    int                *matSizes, *rowInd, retFlag, tempIter, nTrials;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
-   double             rnorm0, rnorm1, convRate, rateThresh;
+   double             rnorm0, rnorm1, convRate, rateThresh; 
    char               fname[40], paramString[100];
    FILE               *fp;
    HYPRE_IJMatrix     TempA, IJI;
@@ -4057,11 +4113,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    }
    if ( HYPreconID_ == HYMLI && MLI_EqnNumbers_ != NULL )
    {
-      int *iArray = new int[MLI_NumNodes_];
+      iArray = new int[MLI_NumNodes_];
       for (i = 0; i < MLI_NumNodes_; i++) iArray[i] = i;
       HYPRE_LSI_qsort1a(MLI_EqnNumbers_, iArray, 0, MLI_NumNodes_-1);
-      double *tempNodalCoord = MLI_NodalCoord_; 
-      int ncount = 1;
+      tempNodalCoord = MLI_NodalCoord_; 
+      ncount = 1;
       for (i = 1; i < MLI_NumNodes_; i++) 
          if (MLI_EqnNumbers_[i] != MLI_EqnNumbers_[ncount-1]) ncount++;
       MLI_NodalCoord_ = new double[ncount*MLI_FieldSize_];
@@ -4092,6 +4148,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, MLI_NumNodes_, 
                MLI_FieldSize_, MLI_EqnNumbers_, MLI_FieldSize_, 
                MLI_NodalCoord_, localEndRow_-localStartRow_+1);
+   }
+#endif
+#if 0
+   // replaced by better scheme, to be deleted later
+   if ( HYPreconID_ == HYAMS && MLI_EqnNumbers_ != NULL )
+   {
+      HYPRE_LSI_BuildNodalCoordinates();
    }
 #endif
 

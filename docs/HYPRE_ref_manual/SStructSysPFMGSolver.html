@@ -8,12 +8,13 @@
  <DD><I>
 Create a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGDestroy</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSysPFMGDestroy.html><B>HYPRE_SStructSysPFMGDestroy</B></A> 
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetup</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
- <DD><I></I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSysPFMGSetup.html><B>HYPRE_SStructSysPFMGSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSolve</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
  <DD><I>
@@ -32,27 +33,27 @@ Solve the system</I>
 (Optional) Additionally require that the relative difference in
 successive iterates be small</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetZeroGuess</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSysPFMGSetZeroGuess.html><B>HYPRE_SStructSysPFMGSetZeroGuess</B></A> 
  <DD><I>
 (Optional) Use a zero initial guess</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetNonZeroGuess</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSysPFMGSetNonZeroGuess.html><B>HYPRE_SStructSysPFMGSetNonZeroGuess</B></A> 
  <DD><I>
 (Optional) Use a nonzero initial guess</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetRelaxType</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int relax_type)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSysPFMGSetRelaxType.html><B>HYPRE_SStructSysPFMGSetRelaxType</B></A> 
  <DD><I>
 (Optional) Set relaxation type</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetNumPreRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_pre_relax)
  <DD><I>
-(Optional) Set number of pre-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps before coarse-grid correction</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetNumPostRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int num_post_relax)
  <DD><I>
-(Optional) Set number of post-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps after coarse-grid correction</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetSkipRelax</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int skip_relax)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructSysPFMGSetSkipRelax.html><B>HYPRE_SStructSysPFMGSetSkipRelax</B></A> 
  <DD><I>
 (Optional) Skip relaxation on certain grids for isotropic problems</I>
 <DT>
@@ -62,7 +63,7 @@ successive iterates be small</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGSetPrintLevel</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int print_level)
  <DD><I>
-(Optional) Set the print level</I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructSysPFMGGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
  <DD><I>

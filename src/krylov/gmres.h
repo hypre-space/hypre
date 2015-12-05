@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,8 +32,8 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_KRYLOV_GMRES_HEADER
-#define HYPRE_KRYLOV_GMRES_HEADER
+#ifndef hypre_KRYLOV_GMRES_HEADER
+#define hypre_KRYLOV_GMRES_HEADER
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -111,7 +111,7 @@ typedef struct
    int      stop_crit;
    int      converged;
    double   tol;
-   int      cf_tol;
+   double   cf_tol;
    double   rel_residual_norm;
 
    void  *A;

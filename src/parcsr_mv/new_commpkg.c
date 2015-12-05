@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -478,7 +478,18 @@ hypre_NewCommPkgCreate_core(
    /*-----------------------------------------------------------
     *  Return output info for setting up the comm package
     *-----------------------------------------------------------*/
-   
+  
+   if (!num_recvs)
+   {
+      hypre_TFree(recv_procs);
+      recv_procs = NULL;
+   }
+   if (!num_sends)
+   {
+      hypre_TFree(send_proc_obj.id);
+      send_proc_obj.id = NULL;
+   }
+
 
    *p_num_recvs = num_recvs;
    *p_recv_procs = recv_procs;
@@ -497,6 +508,12 @@ hypre_NewCommPkgCreate_core(
          send_proc_obj.elements[i] -= first_col_diag;
       }
    }
+   else
+   {
+      hypre_TFree(send_proc_obj.elements);
+      send_proc_obj.elements = NULL;
+   }
+   
    *p_send_map_elements =  send_proc_obj.elements;
 
 
@@ -519,9 +536,16 @@ hypre_NewCommPkgCreate_core(
       recv_procs, recv_vec_starts.  These are aliased to the comm package and
       will be destroyed there */
 
+
    return hypre_error_flag;
 
 }
+
+#if 0
+
+/* now this is incorporated into the std comm pkg routine - it is not deleted 
+   here in in case driver_commpkg.c is to be used for testing commpkg
+   setups */
 
 /*------------------------------------------------------------------
  * hypre_NewCommPkgCreate
@@ -625,6 +649,9 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
       
    
 }
+
+
+#endif
 
 /*------------------------------------------------------------------
  *  hypre_NewCommPkgDestroy

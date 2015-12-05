@@ -21,13 +21,13 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  ***********************************************************************EHEADER*/
 
 
 
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 extern int MLI_Smoother_Apply_Schwarz(void *smoother_obj,hypre_ParCSRMatrix *A,
                                         hypre_ParVector *f,hypre_ParVector *u);

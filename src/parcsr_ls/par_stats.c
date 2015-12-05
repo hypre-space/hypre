@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.17 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 
@@ -87,6 +87,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    int      coarsen_type;
    int      interp_type;
    int      measure_type;
+   int      agg_num_levels;
    double   global_nonzeros;
 
    double  *send_buff;
@@ -168,6 +169,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    smooth_type = hypre_ParAMGDataSmoothType(amg_data);
    smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
+   agg_num_levels = hypre_ParAMGDataAggNumLevels(amg_data);
 
 
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
@@ -257,9 +259,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	printf(" Coarsening Type = CLJP, fixed random \n");
       }
-      if (coarsen_type > 0) 
+      /*if (coarsen_type > 0) 
       {
 	printf(" Hybrid Coarsening (switch to CLJP when coarsening slows)\n");
+      }*/
+
+      if (agg_num_levels > 0)
+      {
+	printf("\n No. of levels of aggressive coarsening: %d\n\n", agg_num_levels);
       }
       
 
@@ -859,7 +866,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
               grid_relax_type[1],
               grid_relax_type[2],grid_relax_type[3]);
       printf( "   Point types, partial sweeps (1=C, -1=F):\n");
-      if (grid_relax_points)
+      if (grid_relax_points && grid_relax_type[1] != 8)
       {
          printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
@@ -874,7 +881,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
               printf("  %2d", grid_relax_points[3][j]);
          printf( "\n\n");
       }
-      else if (relax_order == 1)
+      else if (relax_order == 1 && grid_relax_type[1] != 8)
       {
          printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)

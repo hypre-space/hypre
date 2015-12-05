@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -36,7 +36,7 @@
 #define hypre_DISTRIBUTED_MATRIX_HEADER
 
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 
 /*--------------------------------------------------------------------------

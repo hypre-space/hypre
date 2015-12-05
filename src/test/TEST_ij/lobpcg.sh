@@ -22,11 +22,32 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.5 $
+# $Revision: 1.8 $
 #EHEADER**********************************************************************
 
-
+TNAME=`basename $0 .sh`
 
 #=============================================================================
-# no tests
+# compare with baseline case
 #=============================================================================
+
+FILES="\
+ ${TNAME}.out.vfromfile\
+ ${TNAME}.out.vout.1\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -15 $i | head -5
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

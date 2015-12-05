@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.34 $
+ * $Revision: 2.36 $
  ***********************************************************************EHEADER*/
 
 
@@ -43,7 +43,7 @@
 */
 
 #include "krylov.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PCGFunctionsCreate
@@ -463,8 +463,8 @@ hypre_PCGSolve( void *pcg_vdata,
       }
       else  /* !two_norm */
       {
-         printf("Iters       ||r||_C      ||r||_C/||b||_C\n");
-         printf("-----    ------------    ------------ \n");
+         printf("Iters       ||r||_C     conv.rate  ||r||_C/||b||_C\n");
+         printf("-----    ------------    ---------  ------------ \n");
       }
    }
 

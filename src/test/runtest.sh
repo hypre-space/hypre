@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.29 $
+# $Revision: 1.36 $
 #EHEADER**********************************************************************
 
 # global variables
@@ -38,14 +38,16 @@ HOST=`hostname|cut -c1-4`  #first 4 characters of host platform name
 function usage
 {
    printf "\n"
-   printf "$0 [-n|-norun] [-h|-help] [-t|-trace] {test_path}/{test_name}.sh\n"
+   printf "$0 [options] {test_path}/{test_name}.sh\n"
    printf "\n"
    printf " where: {test_path} is the directory path to the test script;\n"
    printf "        {test_name} is a user defined name for the test script\n"
    printf "\n"
-   printf "        -help          prints this usage information and exits\n"
-   printf "        -norun         turn off execute mode, echo what would be run\n"
-   printf "        -trace         echo each command\n"
+   printf " with options:\n"
+   printf "    -h|-help       prints this usage information and exits\n"
+   printf "    -n|-norun      turn off execute mode, echo what would be run\n"
+   printf "    -t|-trace      echo each command\n"
+   printf "    -D <var>       define <var> when running tests\n"
    printf "\n"
    printf " This is the hypre test driver script.  It is run stand-alone\n"
    printf " or by the autotest regression test script.  It is assumed that\n"
@@ -180,22 +182,23 @@ function CalcProcs
 }
 
 # determine if HOST machine can process batch queues
+#    set to run in debug pool unless batch MUST be used.
 function CheckBatch
 {
    case $HOST in
-      alc*) BATCH_MODE=1
+      alc*) BATCH_MODE=0
          ;;
-      mcr*) BATCH_MODE=1
+      mcr*) BATCH_MODE=0
          ;;
-      peng*) BATCH_MODE=1
+      peng*) BATCH_MODE=0
          ;;
-      thun*) BATCH_MODE=1
+      thun*) BATCH_MODE=0
          ;;
       *bgl*) BATCH_MODE=1
          ;;
-      up*) BATCH_MODE=1
+      up*) BATCH_MODE=0
          ;;
-      vert*) BATCH_MODE=1
+      vert*) BATCH_MODE=0
          ;;
       *) BATCH_MODE=0
          ;;
@@ -411,6 +414,7 @@ function PostProcess
    cd $SavePWD
 }
 
+               
 # removes executable and hostname files from all TEST_* directories
 function CleanUp
 {
@@ -466,6 +470,11 @@ do
          set -xv
          shift
          ;;
+      -D)
+         shift
+         eval export `echo $1`=1
+         shift
+         ;;
       *) InputString=$1
          if [ "$InputString" ] ; then
             if [ -r $InputString ] ; then
@@ -509,4 +518,6 @@ do
          ;;
    esac
 done
+#
+#     remove exectutable files from TEST_* directories
 CleanUp $TestDirNames $ExecFileNames

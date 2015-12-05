@@ -3,12 +3,12 @@
 #include <mpi.h>
 #include <math.h>
 #include "HYPRE.h"
-#include "utilities.h"
-#include "parcsr_mv.h"
+#include "_hypre_utilities.h"
+#include "_hypre_parcsr_mv.h"
 #include "util/mli_utils.h"
 #include "base/mli_defs.h"
 #include "cintface/cmli.h"
-#include "IJ_mv.h"
+#include "_hypre_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
 #include "krylov.h"
 #define habs(x) ((x)>=0 ? x : -x)

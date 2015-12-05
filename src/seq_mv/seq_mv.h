@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.14 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,7 +34,7 @@
 #ifndef hypre_MV_HEADER
 #define hypre_MV_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {

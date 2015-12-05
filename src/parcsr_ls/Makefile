@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.21 $
+# $Revision: 2.23 $
 #EHEADER**********************************************************************
 
 
@@ -59,8 +59,8 @@ HEADERS =\
  headers.h\
  HYPRE_parcsr_int.h\
  HYPRE_parcsr_ls.h\
+ _hypre_parcsr_ls.h\
  par_amg.h\
- parcsr_ls.h\
  schwarz.h\
  block_tridiag.h
 
@@ -93,6 +93,7 @@ FILES =\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
  HYPRE_ams.c\
+ HYPRE_ame.c\
  par_amg.c\
  par_amg_setup.c\
  par_amg_solve.c\
@@ -126,7 +127,8 @@ FILES =\
  pcg_par.c\
  schwarz.c\
  block_tridiag.c\
- ams.c
+ ams.c\
+ ame.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -136,12 +138,12 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/parcsr_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
  
 install: libHYPRE_parcsr_ls${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/parcsr_ls.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/_hypre_parcsr_ls.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:

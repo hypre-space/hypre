@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,7 +35,7 @@
 #define _LLNL_FEI_IMPL_H_
 
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "LLNL_FEI_LSCore.h"
 #include "LLNL_FEI_Fei.h"
 #include "LLNL_FEI_Solver.h"

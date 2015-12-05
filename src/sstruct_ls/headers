@@ -22,19 +22,18 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.7 $
+# $Revision: 2.9 $
 #EHEADER**********************************************************************
 
 
-
-
-INTERNAL_HEADER=sstruct_ls.h
+INTERNAL_HEADER=_hypre_sstruct_ls.h
 
 #===========================================================================
 # Include guards and other includes
 #===========================================================================
 
-cat > $INTERNAL_HEADER <<@
+cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
+cat >> $INTERNAL_HEADER <<@
 
 #include <HYPRE_config.h>
 
@@ -43,10 +42,10 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_SSTRUCT_LS_HEADER
 #define hypre_SSTRUCT_LS_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "krylov.h"
-#include "struct_ls.h"
-#include "sstruct_mv.h"
+#include "_hypre_struct_ls.h"
+#include "_hypre_sstruct_mv.h"
 #include "parcsr_ls.h"
 #include "multivector.h"
 

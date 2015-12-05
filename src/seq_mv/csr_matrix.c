@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -537,7 +537,12 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
          }
          if ( match==0 )
          {
-            C_j[mc] = jC[ B_j[mb] ];
+            if ( col_map_offd_A )
+               C_j[mc] = jC[ B_j[mb] ];
+            else
+               C_j[mc] = B_j[mb];
+            /* ... I don't know whether column indices are required to be in any
+               particular order.  If so, we'll need to sort. */
             ++mc;
          }
       }

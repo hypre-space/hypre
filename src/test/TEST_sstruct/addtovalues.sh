@@ -1,3 +1,4 @@
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -21,8 +22,10 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.4 $
+# $Revision: 1.7 $
 #EHEADER**********************************************************************
+
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # sstruct: Test addtovalue routine. Compares the solutions obtained using
@@ -30,20 +33,55 @@
 # addtovalues
 #=============================================================================
 
-tail -3 addtovalues.out.0 > addtovalues.testdata
-tail -3 addtovalues.out.1 > addtovalues.testdata.temp
-diff addtovalues.testdata addtovalues.testdata.temp >&2
+tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 addtovalues.out.2 > addtovalues.testdata
-tail -3 addtovalues.out.3 > addtovalues.testdata.temp
-diff addtovalues.testdata addtovalues.testdata.temp >&2
+#=============================================================================
 
-tail -3 addtovalues.out.4 > addtovalues.testdata
-tail -3 addtovalues.out.5 > addtovalues.testdata.temp
-diff addtovalues.testdata addtovalues.testdata.temp >&2
+tail -3 ${TNAME}.out.2 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.3 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 addtovalues.out.6 > addtovalues.testdata
-tail -3 addtovalues.out.7 > addtovalues.testdata.temp
-diff addtovalues.testdata addtovalues.testdata.temp >&2
+#=============================================================================
 
-rm -f addtovalues.testdata addtovalues.testdata.temp
+tail -3 ${TNAME}.out.4 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.5 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+
+tail -3 ${TNAME}.out.6 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.7 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# compare with baseline case
+#=============================================================================
+
+FILES="\
+ ${TNAME}.out.0\
+ ${TNAME}.out.1\
+ ${TNAME}.out.2\
+ ${TNAME}.out.3\
+ ${TNAME}.out.4\
+ ${TNAME}.out.5\
+ ${TNAME}.out.6\
+ ${TNAME}.out.7\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

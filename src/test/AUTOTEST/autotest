@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.117 $
+# $Revision: 1.125 $
 #EHEADER**********************************************************************
 
 
@@ -34,12 +34,6 @@ perform_test()
   echo "Running tests $HYPRE_MACHINE_COMMANDS in directory $HYPRE_REMOTE_DIR"
   echo "======================================================================"
   echo ""
-
-#=============================================================================
-#   Set LD_LIBRARY_PATH in order to use shared libraries, if needed.
-#=============================================================================
-  LD_LIBRARY_PATH=${HYPRE_REMOTE_DIR}/linear_solvers/hypre/lib:$LD_LIBRARY_PATH
-  export LD_LIBRARY_PATH
 
 #=============================================================================
 #   Running tests on same machine as that executing this script
@@ -60,6 +54,7 @@ perform_test()
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT}
      rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*
      rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*
+     export HYPRE_RUNTEST_OPTS
      linear_solvers/test/AUTOTEST/autotest_test \
          ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE}
      echo "Autotest Done" > "autotest_done"
@@ -75,6 +70,7 @@ perform_test()
   else
     echo "deleting old AUTOTEST directory...."
     ssh ${HYPRE_COMPILE_MACHINE} "\
+    (/bin/sh -c \"\
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers;\"\
     )"
 
@@ -83,15 +79,17 @@ perform_test()
 
     echo "Begin running remote tests...."
     ssh -f ${HYPRE_COMPILE_MACHINE} "\
+    (/bin/sh -c \"\
       cd ${HYPRE_REMOTE_DIR};\
-      echo "Autotest Started" > "autotest_start";\
+      echo 'Autotest Started' > 'autotest_start';\
       [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
       rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*;\
       rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*;\
+      export HYPRE_RUNTEST_OPTS=\\\"${HYPRE_RUNTEST_OPTS}\\\";\
       linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
-      echo "Autotest Done" > "autotest_done";\
+      echo 'Autotest Done' > 'autotest_done';\
       chmod -fR a+rX,ug+w,o-w linear_solvers;\
       chgrp -fR hypre linear_solvers\"\
     )" 
@@ -152,12 +150,32 @@ usage ()
 hypre_set_machine_options()
 {
   case $1 in
+     -tux149)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux149"
+        HYPRE_RUN_MACHINE="tux149"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
+        HYPRE_MESSAGE='PRIMARY[default]'
+        COMPILERSELECT="default"
+        ;;
+     -insure)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux149"
+        HYPRE_RUN_MACHINE="tux149"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -i 2"
+        HYPRE_RUNTEST_OPTS=""
+        HYPRE_MESSAGE='PRIMARY[insure++]'
+        ;;
      -alc)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="alc"
         HYPRE_RUN_MACHINE="alc"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[ALC]'
         ;;
      -mcr)
@@ -166,6 +184,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="mcr"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -Bcf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[MCR]'
         ;;
      -pengra)
@@ -174,6 +193,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="pengra"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[Pengra]'
         ;;
      -thunder)
@@ -183,6 +203,7 @@ hypre_set_machine_options()
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_ia64_elan4/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Thunder]'
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         ;;
      -ubgl)
         HYPRE_ARCH="linux"
@@ -190,14 +211,16 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="ubgl"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/sles_9_ppc64/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[uBGL]'
         ;;
      -up)
-        HYPRE_ARCH="blue"
+        HYPRE_ARCH="aix"
         HYPRE_COMPILE_MACHINE="up"
         HYPRE_RUN_MACHINE="up"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/aix_5_64_fed/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[uP]'
         ;;
      -vertex)
@@ -206,24 +229,8 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="vertex"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/chaos_3_x86_64_ib/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[vertex]'
-        ;;
-     -insure)
-        HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -i 2"
-        HYPRE_MESSAGE='PRIMARY[insure++]'
-        ;;
-     -tux149)
-        HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE="tux149"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -ABcf"
-        HYPRE_MESSAGE='PRIMARY[default]'
-        COMPILERSELECT="default"
         ;;
      -tuxpgi)
         HYPRE_ARCH="linux"
@@ -231,6 +238,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ndse 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[pgi]'
         COMPILERSELECT="pgi"
         ;;
@@ -240,6 +248,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[Absoft-Pro8.0]'
         COMPILERSELECT="absoft"
         ;;
@@ -249,6 +258,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[lahey]'
         COMPILERSELECT="lahey"
         ;;
@@ -258,6 +268,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[Intel-8.0]'
         COMPILERSELECT="intel"
         ;;
@@ -267,6 +278,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='SECONDARY[KCC]'
         COMPILERSELECT="kai"
         ;;
@@ -276,6 +288,7 @@ hypre_set_machine_options()
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="`pwd`"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -l 1 -a 2"
+        HYPRE_RUNTEST_OPTS="-D HYPRE_NO_SAVED"
         HYPRE_MESSAGE='LOCAL-TEST[default]'
         COMPILERSELECT="default"
         ;;

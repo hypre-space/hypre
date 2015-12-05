@@ -9,7 +9,7 @@
 A grid object is constructed out of several ``boxes'', defined on a global
 abstract index space</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridCreate</B>(MPI_Comm comm, int ndim, <!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> *grid)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridCreate</B>(MPI_Comm comm, int ndim, <!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGrid</A> *grid)
  <DD><I>
 Create an <TT>ndim</tt>-dimensional grid object</I>
 <DT>
@@ -17,19 +17,19 @@ Create an <TT>ndim</tt>-dimensional grid object</I>
  <DD><I>
 Destroy a grid object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridSetExtents</B>(<!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> grid, int *ilower, int *iupper)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridSetExtents</B>(<!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGrid</A> grid, int *ilower, int *iupper)
  <DD><I>
 Set the extents for a box on the grid</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridAssemble</B>(<!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> grid)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridAssemble</B>(<!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGrid</A> grid)
  <DD><I>
 Finalize the construction of the grid before using</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridSetPeriodic</B>(<!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> grid, int *periodic)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructGridSetPeriodic.html><B>HYPRE_StructGridSetPeriodic</B></A> 
  <DD><I>
-Set periodic</I>
+Set the periodicity for the grid</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridSetNumGhost</B>(<!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> grid, int *num_ghost)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructGridSetNumGhost</B>(<!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGrid</A> grid, int *num_ghost)
  <DD><I>
 Set the ghost layer in the grid object</I>
 </DL>

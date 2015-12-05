@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -1768,11 +1768,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    if (num_procs > 1)
    {
         /* hypre_GenerateRAPCommPkg(RAP, A); */
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_NewCommPkgCreate(RAP);
-#else
         hypre_MatvecCommPkgCreate(RAP); 
-#endif
    }
 
    *RAP_ptr = RAP;

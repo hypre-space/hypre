@@ -12,10 +12,11 @@ Create a solver object</I>
  <DD><I>
 Destroy a solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetup</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
- <DD><I></I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPFMGSetup.html><B>HYPRE_StructPFMGSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
  <DD><I>
 Solve the system</I>
 <DT>
@@ -27,36 +28,40 @@ Solve the system</I>
  <DD><I>
 (Optional) Set maximum number of iterations</I>
 <DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetMaxLevels</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int max_levels)
+ <DD><I>
+(Optional) Set maximum number of multigrid grid levels</I>
+<DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetRelChange</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int rel_change)
  <DD><I>
 (Optional) Additionally require that the relative difference in
 successive iterates be small</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetZeroGuess</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPFMGSetZeroGuess.html><B>HYPRE_StructPFMGSetZeroGuess</B></A> 
  <DD><I>
 (Optional) Use a zero initial guess</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetNonZeroGuess</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPFMGSetNonZeroGuess.html><B>HYPRE_StructPFMGSetNonZeroGuess</B></A> 
  <DD><I>
 (Optional) Use a nonzero initial guess</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetRelaxType</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int relax_type)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPFMGSetRelaxType.html><B>HYPRE_StructPFMGSetRelaxType</B></A> 
  <DD><I>
 (Optional) Set relaxation type</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetRAPType</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int rap_type)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPFMGSetRAPType.html><B>HYPRE_StructPFMGSetRAPType</B></A> 
  <DD><I>
-(Optional) Set type of code used for coarse operator</I>
+(Optional) Set type of coarse-grid operator to use</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetNumPreRelax</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int num_pre_relax)
  <DD><I>
-(Optional) Set number of pre-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps before coarse-grid correction</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetNumPostRelax</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int num_post_relax)
  <DD><I>
-(Optional) Set number of post-relaxation sweeps</I>
+(Optional) Set number of relaxation sweeps after coarse-grid correction</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetSkipRelax</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int skip_relax)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructPFMGSetSkipRelax.html><B>HYPRE_StructPFMGSetSkipRelax</B></A> 
  <DD><I>
 (Optional) Skip relaxation on certain grids for isotropic problems</I>
 <DT>
@@ -66,7 +71,7 @@ successive iterates be small</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGSetPrintLevel</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int print_level)
  <DD><I>
-(Optional) To allow printing to the screen </I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructPFMGGetNumIterations</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int *num_iterations)
  <DD><I>

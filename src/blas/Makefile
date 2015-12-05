@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.13 $
+# $Revision: 2.15 $
 #EHEADER**********************************************************************
 
 
@@ -68,7 +68,6 @@ OBJS = ${BLAS_FILES:.c=.o}
 
 all: ${OBJS}
 	cp -fp *.*o ${HYPRE_SRC_TOP_DIR}/utilities
-	cp -fp *.h ${HYPRE_BUILD_DIR}/include
 
 install: all
 	cp -fp *.h ${HYPRE_INC_INSTALL}/include

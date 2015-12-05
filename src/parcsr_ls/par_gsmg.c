@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.34 $
+ * $Revision: 2.36 $
  ***********************************************************************EHEADER*/
 
 
@@ -44,7 +44,7 @@
 #include <essl.h>
 #else
 #include "fortran.h"
-void hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
+int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
   int *, double *, int *, double *, int *, int *);
 #endif
 
@@ -501,11 +501,8 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
       hypre_MatvecCommPkgCreate(A);
-#endif
+
         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
@@ -861,11 +858,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
       hypre_MatvecCommPkgCreate(S);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 
@@ -1425,11 +1418,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(S);
-#else
 	hypre_MatvecCommPkgCreate(S);
-#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 

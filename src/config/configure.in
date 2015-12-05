@@ -21,7 +21,7 @@ dnl # You should have received a copy of the GNU Lesser General Public License
 dnl # along with this program; if not, write to the Free Software Foundation,
 dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 dnl #
-dnl # $Revision: 1.60 $
+dnl # $Revision: 1.62 $
 dnl #EHEADER**********************************************************************
 
 dnl *********************************************************************
@@ -53,15 +53,15 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [1.13.0b])
-m4_define([HYPRE_DATE], [2006/10/03])
-m4_define([HYPRE_TIME], [08:05:00])
+m4_define([HYPRE_VERSION], [1.14.0b])
+m4_define([HYPRE_DATE], [2006/11/30])
+m4_define([HYPRE_TIME], [14:48:32])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE HYPRE_TIME])
 m4_define([HYPRE_BUGS], [hypre-support@llnl.gov])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.60 2006/09/29 23:13:11 hill66 Exp $)
+AC_REVISION($Id: configure.in,v 1.62 2006/11/30 22:54:36 falgout Exp $)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
@@ -176,6 +176,22 @@ AC_ARG_ENABLE(shared,
           *) AC_MSG_ERROR([Bad value ${enableval} for --enable-shared]) ;;
  esac],
 [casc_using_shared=no]
+)
+
+AC_ARG_ENABLE(python,
+  AS_HELP_STRING([  --enable-python=PYTHON],
+                 [ Build interface to specified instance of Python (turns on shared libraries, requires Babel; default is NO).]),
+[case "${enableval}" in
+        yes) casc_using_python=yes
+             casc_python="python"
+             ;;
+    no | "") casc_using_python=no ;;
+          *) casc_using_python=yes
+             casc_python=${enableval}
+             casc_using_shared=yes
+             ;;
+ esac],
+[casc_using_python=no]
 )
 
 dnl *********************************************************************
@@ -1083,7 +1099,7 @@ LINK_CXX="${CXX}"
 HYPRE_LIBSUFFIX=".a"
 
 dnl *********************************************************************
-dnl * Set flags if needed to enable shared libraries 
+dnl * Set flags if needed to enable shared libraries and Python
 dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
@@ -1107,6 +1123,14 @@ then
                           BUILD_CXX_SHARED="${CXX} -shared"
                           ;;
    esac
+fi
+
+BUILD_PYTHON=0
+PYTHON=""
+if test "$casc_using_python" = "yes"
+then
+  BUILD_PYTHON=1
+  PYTHON="${casc_python}"
 fi
 
 dnl *********************************************************************
@@ -1262,6 +1286,9 @@ AC_SUBST(LINK_CXX)
 AC_SUBST(BUILD_F77_SHARED)
 AC_SUBST(BUILD_CC_SHARED)
 AC_SUBST(BUILD_CXX_SHARED)
+
+AC_SUBST(BUILD_PYTHON)
+AC_SUBST(PYTHON)
 
 dnl *********************************************************************
 dnl * Installation Directories

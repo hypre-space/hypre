@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -200,11 +200,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
 	hypre_MatvecCommPkgCreate(A);
-#endif
+
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -626,11 +623,8 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
 	hypre_MatvecCommPkgCreate(A);
-#endif
+
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -1183,11 +1177,8 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
    {
       if (!comm_pkg)
       {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-         hypre_NewCommPkgCreate(S);
-#else
          hypre_MatvecCommPkgCreate(S);
-#endif
+
          comm_pkg = hypre_ParCSRMatrixCommPkg(S);
       }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);

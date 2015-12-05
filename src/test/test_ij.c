@@ -9,14 +9,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_parcsr_mv.h"
+#include "HYPRE_krylov.h"
 
 #include "hypre_test.h"
 
@@ -2677,7 +2677,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	    
@@ -2686,7 +2686,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 	    
@@ -3042,7 +3042,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	    
@@ -3051,7 +3051,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 

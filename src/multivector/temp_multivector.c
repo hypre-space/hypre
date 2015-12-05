@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,7 +32,7 @@
 
 #include "temp_multivector.h"
 #include "interpreter.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 
 static void
 mv_collectVectorPtr( int* mask, mv_TempMultiVector* x, void** px ) {

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,6 +35,7 @@
  *****************************************************************************/
 
 #include "headers.h"
+
 
 /*--------------------------------------------------------------------------
  * Take away from the boxes in boxes1 whatever is adjacent to boxes in boxes2,
@@ -107,6 +108,9 @@ hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1,
 
    return ierr;
 }
+
+
+
 
 /*--------------------------------------------------------------------------
  * Find the parts of the given box which lie on a (physical) boundary, in
@@ -195,6 +199,8 @@ hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
    return ierr;
 }
 
+
+
 /*--------------------------------------------------------------------------
  * Find the parts of the given box which lie on a (physical) boundary.
  * Stick them into the user-provided box array boundary (any input contents
@@ -208,13 +214,31 @@ int
 hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
                     hypre_BoxArray *boundary )
 {
-   hypre_BoxNeighbors  *neighbors = hypre_StructGridNeighbors(g);
-   hypre_BoxArray *neighbor_boxes = hypre_BoxNeighborsBoxes( neighbors );
+
+    
+
+   hypre_BoxManager *boxman;
+   hypre_BoxArray   *neighbor_boxes = NULL;
+   int              *thickness = hypre_StructGridNumGhost(g);
+ 
    /* neighbor_boxes are this processor's neighbors, not this box's
       neighbors.  But it's likely to be cheaper to use them all in the
       next step than to try to shrink it to just this box's neighbors. */
-   int * thickness = hypre_StructGridNumGhost(g);
-   return hypre_BoxBoundaryNT( box, neighbor_boxes, boundary, thickness );
+
+   /* get the boxes out of the box manager - use these as the neighbor boxes */
+   boxman = hypre_StructGridBoxMan(g);
+   neighbor_boxes = hypre_BoxArrayCreate(0);
+   hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
+      
+   hypre_BoxBoundaryNT( box, neighbor_boxes, boundary, thickness );
+
+   /* clean up */
+   hypre_BoxArrayDestroy(neighbor_boxes);
+
+   return hypre_error_flag;
+   
+
+
 }
 
 /*--------------------------------------------------------------------------
@@ -232,17 +256,27 @@ hypre_BoxBoundaryDG( hypre_Box *box, hypre_StructGrid *g,
                      hypre_BoxArray *boundarym, hypre_BoxArray *boundaryp,
                      int d )
 {
-   int ierr = 0;
-   hypre_BoxNeighbors  *neighbors = hypre_StructGridNeighbors(g);
-   hypre_BoxArray *neighbor_boxes = hypre_BoxNeighborsBoxes( neighbors );
+   hypre_BoxManager *boxman;
+   hypre_BoxArray *neighbor_boxes = NULL;
    int i;
    int thickness[6];
-   for ( i=0; i<6; ++i ) thickness[i] = 1;
+
    /* neighbor_boxes are this processor's neighbors, not this box's
       neighbors.  But it's likely to be cheaper to use them all in the
       next step than to try to shrink it to just this box's neighbors. */
-   ierr += hypre_BoxBoundaryDNT( box, neighbor_boxes, boundarym, 2*d, thickness[2*d] );
-   ierr += hypre_BoxBoundaryDNT( box, neighbor_boxes, boundaryp, 2*d+1, thickness[2*d] );
-   return ierr;
+   
+   /* get the boxes out of the box manager - use these as the neighbor boxes */
+   boxman = hypre_StructGridBoxMan(g);
+   neighbor_boxes = hypre_BoxArrayCreate(0);
+   hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
+   
+   for ( i=0; i<6; ++i ) thickness[i] = 1;
+   
+   hypre_BoxBoundaryDNT( box, neighbor_boxes, boundarym, 2*d, thickness[2*d] );
+   hypre_BoxBoundaryDNT( box, neighbor_boxes, boundaryp, 2*d+1, thickness[2*d] );
+
+   hypre_BoxArrayDestroy(neighbor_boxes);
+
+   return hypre_error_flag;
 }
 

@@ -3,7 +3,7 @@
  * Symbol:        sidl.MemoryAllocationException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name: V1-13-0b $
+ * Release:       $Name: V1-14-0b $
  * Revision:      @(#) $Id: sidl_MemoryAllocationException_fStub.h,v 1.2 2006/09/14 21:51:52 painter Exp $
  * Description:   Client-side documentation text for sidl.MemoryAllocationException
  * 

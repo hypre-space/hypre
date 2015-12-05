@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.14 $
+ * $Revision: 1.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -37,10 +37,10 @@
 #define __MLIUTILS__
 
 #include <time.h>
-#include "utilities/utilities.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "utilities/_hypre_utilities.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "krylov/krylov.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
 typedef struct MLI_Function_Struct MLI_Function;
 #include "cintface/cmli.h"
 

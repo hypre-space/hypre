@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.7 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -39,9 +39,9 @@
 #ifndef hypre_PAR_CSR_BLOCK_MATRIX_HEADER
 #define hypre_PAR_CSR_BLOCK_MATRIX_HEADER
                                                                                                                
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "csr_block_matrix.h"
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
                                                                                                                
 #ifdef __cplusplus
 extern "C" {
@@ -221,8 +221,6 @@ hypre_ParCSRBlockCommHandleDestroy(hypre_ParCSRCommHandle *comm_handle);
 int
 hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A);
 
-int
-hypre_BlockNewCommPkgCreate(hypre_ParCSRBlockMatrix *A);
 
 int
 hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix);

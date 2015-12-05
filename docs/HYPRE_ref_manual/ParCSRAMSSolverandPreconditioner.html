@@ -4,11 +4,11 @@
 <hr>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_AMSCreate</B>(HYPRE_Solver *solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_AMSCreate</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *solver)
  <DD><I>
 Create an AMS solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_AMSDestroy</B>(HYPRE_Solver solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_AMSDestroy</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver)
  <DD><I>
 Destroy an AMS solver object</I>
 <DT>
@@ -26,28 +26,28 @@ Solve the system or apply AMS as a preconditioner</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetDiscreteGradient.html><B>HYPRE_AMSSetDiscreteGradient</B></A> 
  <DD><I>
-Sets the discrete gradient matrix <IMG BORDER=0 SRC=g000012.gif></I>
+Sets the discrete gradient matrix <IMG BORDER=0 SRC=g000015.gif></I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetCoordinateVectors.html><B>HYPRE_AMSSetCoordinateVectors</B></A> 
  <DD><I>
-Sets the <IMG BORDER=0 SRC=g000013.gif>, <IMG BORDER=0 SRC=g000014.gif> and <IMG BORDER=0 SRC=g000015.gif> coordinates of the vertices in the mesh</I>
+Sets the <IMG BORDER=0 SRC=g000016.gif>, <IMG BORDER=0 SRC=g000017.gif> and <IMG BORDER=0 SRC=g000018.gif> coordinates of the vertices in the mesh</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetEdgeConstantVectors.html><B>HYPRE_AMSSetEdgeConstantVectors</B></A> 
  <DD><I>
-Sets the vectors <IMG BORDER=0 SRC=g000016.gif>, <IMG BORDER=0 SRC=g000017.gif> and <IMG BORDER=0 SRC=g000018.gif> which give the representations of
-the constant vector fields <IMG BORDER=0 SRC=g000019.gif>, <IMG BORDER=0 SRC=g000020.gif> and <IMG BORDER=0 SRC=g000021.gif> in the
+Sets the vectors <IMG BORDER=0 SRC=g000019.gif>, <IMG BORDER=0 SRC=g000020.gif> and <IMG BORDER=0 SRC=g000021.gif> which give the representations of
+the constant vector fields <IMG BORDER=0 SRC=g000022.gif>, <IMG BORDER=0 SRC=g000023.gif> and <IMG BORDER=0 SRC=g000024.gif> in the
 edge element basis</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetAlphaPoissonMatrix.html><B>HYPRE_AMSSetAlphaPoissonMatrix</B></A> 
  <DD><I>
-(Optional) Sets the matrix <IMG BORDER=0 SRC=g000022.gif> corresponding to the Poisson
-problem with coefficient <IMG BORDER=0 SRC=g000023.gif> (the curl-curl term coefficient in
+(Optional) Sets the matrix <IMG BORDER=0 SRC=g000025.gif> corresponding to the Poisson
+problem with coefficient <IMG BORDER=0 SRC=g000026.gif> (the curl-curl term coefficient in
 the Maxwell problem)</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetBetaPoissonMatrix.html><B>HYPRE_AMSSetBetaPoissonMatrix</B></A> 
  <DD><I>
-(Optional) Sets the matrix <IMG BORDER=0 SRC=g000027.gif> corresponding to the Poisson
-problem with coefficient <IMG BORDER=0 SRC=g000028.gif> (the mass term coefficient in the
+(Optional) Sets the matrix <IMG BORDER=0 SRC=g000030.gif> corresponding to the Poisson
+problem with coefficient <IMG BORDER=0 SRC=g000031.gif> (the mass term coefficient in the
 Maxwell problem)</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetMaxIter.html><B>HYPRE_AMSSetMaxIter</B></A> 
@@ -71,15 +71,28 @@ solution iterations</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetSmoothingOptions.html><B>HYPRE_AMSSetSmoothingOptions</B></A> 
  <DD><I>
-(Optional) Sets relaxation parameters for <IMG BORDER=0 SRC=g000007.gif></I>
+(Optional) Sets relaxation parameters for <IMG BORDER=0 SRC=g000010.gif></I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetAlphaAMGOptions.html><B>HYPRE_AMSSetAlphaAMGOptions</B></A> 
  <DD><I>
-(Optional) Sets AMG parameters for <IMG BORDER=0 SRC=g000036.gif></I>
+(Optional) Sets AMG parameters for <IMG BORDER=0 SRC=g000039.gif></I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSSetBetaAMGOptions.html><B>HYPRE_AMSSetBetaAMGOptions</B></A> 
  <DD><I>
-(Optional) Sets AMG parameters for <IMG BORDER=0 SRC=g000040.gif></I>
+(Optional) Sets AMG parameters for <IMG BORDER=0 SRC=g000043.gif></I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_AMSGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_iterations)
+ <DD><I>
+Returns the number of iterations taken</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_AMSGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *rel_resid_norm)
+ <DD><I>
+Returns the norm of the final relative residual</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_AMSConstructDiscreteGradient.html><B>HYPRE_AMSConstructDiscreteGradient</B></A> 
+ <DD><I>
+Construct and return the discrete gradient matrix G using some
+edge and vertex information</I>
 </DL>
 <A NAME="DOC.DOCU">
 <BLOCKQUOTE>

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.22 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -874,6 +874,7 @@ hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
                          int               *col_start,
                          int               *col_end )
 {  
+
    int my_id;
 
    if (!matrix)
@@ -881,14 +882,15 @@ hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
+   MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
+
 #ifdef HYPRE_NO_GLOBAL_PARTITION
   *row_start = hypre_ParCSRMatrixFirstRowIndex(matrix);
   *row_end = hypre_ParCSRMatrixLastRowIndex(matrix);
   *col_start =  hypre_ParCSRMatrixFirstColDiag(matrix);
   *col_end =  hypre_ParCSRMatrixLastColDiag(matrix);
 #else
-
-   MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
 
    *row_start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
    *row_end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ]-1;

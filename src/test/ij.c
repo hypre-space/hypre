@@ -9,14 +9,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_parcsr_mv.h"
+#include "HYPRE_krylov.h"
 
 /* begin lobpcg */
 
@@ -176,7 +176,8 @@ main( int   argc,
    int iterations;
    int maxIterations = 100;
    int checkOrtho = 0;
-   int printLevel = 0;
+   int printLevel = 0; /* also c.f. poutdat */
+   int two_norm = 1;
    int pcgIterations = 0;
    int pcgMode = 1;
    double pcgTol = 1e-2;
@@ -2036,7 +2037,7 @@ main( int   argc,
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter(pcg_solver, 1000);
       HYPRE_PCGSetTol(pcg_solver, tol);
-      HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_PCGSetTwoNorm(pcg_solver, two_norm);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
       HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
  
@@ -2426,7 +2427,7 @@ main( int   argc,
        HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
        HYPRE_PCGSetMaxIter(pcg_solver, pcgIterations);
        HYPRE_PCGSetTol(pcg_solver, pcgTol);
-       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+       HYPRE_PCGSetTwoNorm(pcg_solver, two_norm);
        HYPRE_PCGSetRelChange(pcg_solver, 0);
        HYPRE_PCGSetPrintLevel(pcg_solver, 0);
  
@@ -2737,7 +2738,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	    
@@ -2746,7 +2747,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 	    
@@ -3112,7 +3113,7 @@ main( int   argc,
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	       fprintf(filePtr, "%22.14e\n", eigenvalues[i]);
 	     fclose(filePtr);
 	   }
 	    
@@ -3121,7 +3122,7 @@ main( int   argc,
 	     residuals = utilities_FortranMatrixValues( residualNorms );
 	     fprintf(filePtr, "%d\n", blockSize);
 	     for ( i = 0; i < blockSize; i++ )
-	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	       fprintf(filePtr, "%22.14e\n", residuals[i]);
 	     fclose(filePtr);
 	   }
 

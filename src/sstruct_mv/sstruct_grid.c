@@ -21,9 +21,8 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.17 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
-
 
 
 /******************************************************************************
@@ -270,8 +269,13 @@ hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid  *pgrid,
    return ierr;
 }
 
+
+
+
 /*--------------------------------------------------------------------------
- * hypre_SStructPGridAssemble
+   hypre_SStructPGridAssemble 
+
+  11/06 AHB - modified to use the box manager
  *--------------------------------------------------------------------------*/
 
 int
@@ -292,7 +296,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_IndexRef         cell_imax;
    hypre_StructGrid      *sgrid;
    hypre_BoxArray        *iboxarray;
-   hypre_BoxNeighbors    *hood;
+   hypre_BoxManager      *boxman;
    hypre_BoxArray        *hood_boxes;
    int                    hood_first_local;
    int                    hood_num_local;
@@ -319,10 +323,13 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    /* this is used to truncate boxes when periodicity is on */
    cell_imax = hypre_BoxIMax(hypre_StructGridBoundingBox(cell_sgrid));
 
-   hood = hypre_StructGridNeighbors(cell_sgrid);
-   hood_boxes       = hypre_BoxNeighborsBoxes(hood);
-   hood_first_local = hypre_BoxNeighborsFirstLocal(hood);
-   hood_num_local   = hypre_BoxNeighborsNumLocal(hood);
+   /* get neighbor info from the struct grid box manager */
+   boxman     = hypre_StructGridBoxMan(cell_sgrid);
+   hood_boxes =  hypre_BoxArrayCreate(0);
+   hypre_BoxManGetAllEntriesBoxes( boxman, hood_boxes);
+   hood_first_local = hypre_BoxManFirstLocal(boxman);
+   hood_num_local   = hypre_BoxManNumMyEntries(boxman);
+
 
    pneighbors_size = hypre_BoxArraySize(pneighbors);
    nbor_boxes_size = pneighbors_size + hood_first_local + hood_num_local;
@@ -398,6 +405,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
       }            
    }
 
+   hypre_BoxArrayDestroy(hood_boxes);
+   
+
    hypre_BoxArrayDestroy(nbor_boxes);
    hypre_BoxArrayDestroy(diff_boxes);
    hypre_BoxArrayDestroy(tmp_boxes);
@@ -447,6 +457,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    return ierr;
 }
+
 
 /*==========================================================================
  * SStructGrid routines

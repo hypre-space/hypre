@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -53,7 +53,7 @@
 
 /* AB 8/06 - replace header file */
 /* #include "../parcsr_mv/par_vector.h" */
-#include "../parcsr_mv/parcsr_mv.h"
+#include "../parcsr_mv/_hypre_parcsr_mv.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPilutCreate
@@ -78,9 +78,9 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 int 
 HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
-   HYPRE_DistributedMatrixDestroy( 
-      HYPRE_DistributedMatrixPilutSolverGetMatrix(
-         (HYPRE_DistributedMatrixPilutSolver) solver ) );
+   HYPRE_DistributedMatrix mat = HYPRE_DistributedMatrixPilutSolverGetMatrix(
+      (HYPRE_DistributedMatrixPilutSolver) solver );
+   if ( mat ) HYPRE_DistributedMatrixDestroy( mat );
 
    HYPRE_FreeDistributedMatrixPilutSolver(
       (HYPRE_DistributedMatrixPilutSolver) solver );

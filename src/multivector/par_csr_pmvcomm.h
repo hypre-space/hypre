@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,7 +29,7 @@
 #ifndef HYPRE_PAR_CSR_PMVCOMM_HEADER
 #define HYPRE_PAR_CSR_PMVCOMM_HEADER
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 #ifdef __cplusplus
 extern "C" {

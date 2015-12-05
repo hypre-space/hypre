@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -182,11 +182,7 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_BlockNewCommPkgCreate(A); 
-#else
 	hypre_BlockMatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
    }
 
@@ -1570,11 +1566,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
 
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-        hypre_BlockNewCommPkgCreate(A); 
-#else
 	hypre_BlockMatvecCommPkgCreate(A);
-#endif
 	comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A); 
    }
 

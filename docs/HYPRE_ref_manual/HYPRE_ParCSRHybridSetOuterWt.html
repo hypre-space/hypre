@@ -1,6 +1,6 @@
 <html><head><TITLE>HYPRE_ParCSRHybridSetOuterWt</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_ParCSRHybridSetOuterWt ( HYPRE_Solver solver, double outer_wt ) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_ParCSRHybridSetOuterWt ( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double outer_wt ) </H2><BLOCKQUOTE>
 
 (Optional) Defines the outer relaxation weight for hybrid SOR and SSOR
 on all levels
@@ -12,13 +12,13 @@ on all levels
 
 (Optional) Defines the outer relaxation weight for hybrid SOR and SSOR
 on all levels.<P><TABLE BORDER>
-<TR><TD> <HR>
-omega &gt; 0 &amp; this assigns the same outer relaxation weight omega on each level<BR>
-omega = -k &amp; an outer relaxation weight is determined with at most k CG
-steps on each level <BR>
-&amp; (this only makes sense for symmetric
-positive definite problems and smoothers, e.g. SSOR) <BR>
-<HR>
+<TR><TD> </TD></TR><TR><TD>
+omega &gt; 0 </TD><TD> this assigns the same outer relaxation weight omega on each level</TD></TR><TD>
+omega = -k </TD><TD> an outer relaxation weight is determined with at most k CG
+steps on each level </TD></TR><TD>
+</TD><TD> (this only makes sense for symmetric
+positive definite problems and smoothers, e.g. SSOR) </TD></TR><TD>
+</TD></TR><TR><TD>
 </TR></TABLE><P>The default is 1.
 
 </BLOCKQUOTE>

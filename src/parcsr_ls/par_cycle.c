@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.19 $
+ * $Revision: 2.21 $
  ***********************************************************************EHEADER*/
 
 
@@ -114,6 +114,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int       smooth_num_levels;
 
    double    alpha;
+   double  **l1_norms = NULL;
 
 #if 0
    double   *D_mat;
@@ -147,6 +148,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    omega               = hypre_ParAMGDataOmega(amg_data); 
    smooth_type         = hypre_ParAMGDataSmoothType(amg_data); 
    smooth_num_levels   = hypre_ParAMGDataSmoothNumLevels(amg_data); 
+   l1_norms            = hypre_ParAMGDataL1Norms(amg_data); 
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
@@ -203,7 +205,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    }
 
    level = 0;
-   cycle_param = 0;
+   cycle_param = 1;
 
    if (smooth_num_levels > 0)
    {
@@ -317,6 +319,19 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                cycle_op_count += num_coeffs[level]; 
             }
 
+            if (relax_type == 8)
+            {
+               hypre_ParCSRRelax(A_array[level], 
+                                            Aux_F,
+                                            2,
+                                            1,
+                                            l1_norms[level],
+                                            relax_weight[level],
+                                            omega[level],
+                                            Aux_U,
+                                            Vtemp);
+               
+            }
             if (smooth_num_levels > level && 
 			(smooth_type == 7 || smooth_type == 8 ||
 			smooth_type == 9 || smooth_type == 19 ||
@@ -501,7 +516,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          
          --level;
          cycle_param = 2;
-         if (level == 0) cycle_param = 0;
       }
       else
       {

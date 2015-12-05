@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.6 $
+# $Revision: 1.7 $
 #EHEADER**********************************************************************
 
 
@@ -38,7 +38,9 @@ HYPRE_ARCH=""
 # Determine the OS
 #=============================================================================
 
+if [ -f "/bin/uname" ]
 then
+   HYPRE_OS="`/bin/uname -s`"
 fi
 
 #=============================================================================
@@ -51,7 +53,7 @@ then
 	OSF1)
 	    HYPRE_ARCH="dec";;
 	AIX)
-	    HYPRE_ARCH="blue";;
+	    HYPRE_ARCH="aix";;
 	"TFLOPS O/S")
 	    HYPRE_ARCH="red";;
 	Linux)

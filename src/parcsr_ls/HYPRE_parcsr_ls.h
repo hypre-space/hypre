@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.64 $
+ * $Revision: 2.68 $
  ***********************************************************************EHEADER*/
 
 
@@ -478,8 +478,29 @@ int HYPRE_BoomerAMGSetSCommPkgSwitch(HYPRE_Solver solver,
                                   double       S_commpkg_switch);
 
 /*
- * (Optional) Specifies the use of LS interpolation - least-squares
- * fitting of smooth vectors.
+ * (Optional) Defines which parallel interpolation operator is used.
+ * There are the following options for interp\_type: 
+* 
+* \begin{tabular}{|c|l|} \hline
+ * 0 &	classical modified interpolation \\
+ * 1 &	LS interpolation (for use with GSMG) \\
+ * 2 &	classical modified interpolation for hyperbolic PDEs \\
+ * 3 &	direct interpolation (with separation of weights) \\
+ * 4 &	multipass interpolation \\
+ * 5 &	multipass interpolation (with separation of weights) \\
+ * 6 &  extended classical modified interpolation \\
+ * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+ * 8 &	standard interpolation \\
+ * 9 &	standard interpolation (with separation of weights) \\
+ * 10 &	classical block interpolation (for use with nodal systems version only) \\
+ * 11 &	classical block interpolation (for use with nodal systems version only) \\
+ *   &	with diagonalized diagonal blocks \\
+ * 12 &	FF interpolation \\
+ * 13 &	FF1 interpolation \\
+ * \hline
+ * \end{tabular}
+ * 
+ * The default is 0. 
  **/
 int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                  int          interp_type);
@@ -1220,6 +1241,30 @@ int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                int beta_agg_levels,
                                int beta_relax_type,
                                double beta_strength_threshold);
+
+/**
+ * Returns the number of iterations taken.
+ **/
+int HYPRE_AMSGetNumIterations(HYPRE_Solver solver,
+                              int *num_iterations);
+
+/**
+ * Returns the norm of the final relative residual.
+ **/
+int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
+                                          double *rel_resid_norm);
+
+
+/**
+ * Construct and return the discrete gradient matrix G using some
+ * edge and vertex information. We assume that edge\_vertex lists
+ * the edge vertices consecutively, and that the orientation of edge i
+ * depends only on the sign of edge\_vertex[2*i+1] - edge\_vertex[2*i].
+ **/
+int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
+                                       HYPRE_ParVector x_coord,
+				       int *edge_vertex,
+                                       HYPRE_ParCSRMatrix *G);
 
 /*@}*/
 

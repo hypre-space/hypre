@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.20 $
+# $Revision: 2.23 $
 #EHEADER**********************************************************************
 
 
@@ -200,7 +200,8 @@ distclean:
 	rm -rf ./autom4te.cache
 	rm -rf ./config.log
 	rm -rf ./config.status
+	rm -rf ./HYPRE_config.h
 
 tags:
-	etags `find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
-	-name "*.c??" -or -name "*.h??" -or -name "*.f"`
+	find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
+	-name "*.c??" -or -name "*.h??" -or -name "*.f" | etags -

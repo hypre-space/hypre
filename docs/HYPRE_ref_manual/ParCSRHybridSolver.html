@@ -4,20 +4,20 @@
 <hr>
 <DL>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridCreate</B>( HYPRE_Solver *solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridCreate</B>( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *solver)
  <DD><I>
 Create solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridDestroy</B>(HYPRE_Solver solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridDestroy</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver)
  <DD><I>
 Destroy solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetup</B>(HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetup</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
  <DD><I>
 Setup the hybrid solver
 </I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSolve</B>(HYPRE_Solver solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSolve</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_ParCSRMatrix A, HYPRE_ParVector b, HYPRE_ParVector x)
  <DD><I>
 Solve linear system
 </I>
@@ -26,16 +26,16 @@ Solve linear system
  <DD><I>
 Set the convergence tolerance for the Krylov solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetConvergenceTol</B>(HYPRE_Solver solver, double cf_tol)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetConvergenceTol</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double cf_tol)
  <DD><I>
 Set the desired convergence factor</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetDSCGMaxIter</B>(HYPRE_Solver solver, int dscg_max_its)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetDSCGMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int dscg_max_its)
  <DD><I>
 Set the maximal number of iterations for the diagonally
 preconditioned solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPCGMaxIter</B>(HYPRE_Solver solver, int pcg_max_its)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPCGMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int pcg_max_its)
  <DD><I>
 Set the maximal number of iterations for the AMG
 preconditioned solver</I>
@@ -48,24 +48,24 @@ Set the desired solver type</I>
  <DD><I>
 Set the Krylov dimension for restarted GMRES</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetTwoNorm</B>(HYPRE_Solver solver, int two_norm)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetTwoNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int two_norm)
  <DD><I>
 Set the type of norm for PCG</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetStopCrit</B>(HYPRE_Solver solver, int stop_crit)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetStopCrit</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int stop_crit)
  <DD><I>
 Set the choice of stopping criterion for PCG</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPrecond</B>(HYPRE_Solver solver, HYPRE_PtrToParSolverFcn precond, HYPRE_PtrToParSolverFcn precond_setup, HYPRE_Solver precond_solver)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_PtrToParSolverFcn precond, HYPRE_PtrToParSolverFcn precond_setup, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> precond_solver)
  <DD><I>
 Set preconditioner if wanting to use one that is not set up by
 the hybrid solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetLogging</B>(HYPRE_Solver solver, int logging)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetLogging</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int logging)
  <DD><I>
 Set logging parameter (default: 0, no logging)</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPrintLevel</B>(HYPRE_Solver solver, int print_level)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetPrintLevel</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int print_level)
  <DD><I>
 Set print level (default: 0, no printing)</I>
 <DT>
@@ -86,7 +86,7 @@ diagonal dominant portions of the matrix</I>
  <DD><I>
 (Optional) Defines the maximal number of levels used for AMG</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetMeasureType</B>( HYPRE_Solver solver, int measure_type )
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridSetMeasureType</B>( <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int measure_type )
  <DD><I>
 (Optional) Defines whether local or global measures are used</I>
 <DT>
@@ -160,19 +160,19 @@ if using the systems version</I>
  <DD><I>
 (Optional) Sets whether to use the nodal systems version</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetNumIterations</B>(HYPRE_Solver solver, int *num_its)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_its)
  <DD><I>
 Retrieves the total number of iterations</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetDSCGNumIterations</B>(HYPRE_Solver solver, int *dscg_num_its)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetDSCGNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *dscg_num_its)
  <DD><I>
 Retrieves the number of iterations used by the diagonally scaled solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetPCGNumIterations</B>(HYPRE_Solver solver, int *pcg_num_its)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetPCGNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *pcg_num_its)
  <DD><I>
 Retrieves the number of iterations used by the AMG preconditioned solver</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetFinalRelativeResidualNorm</B>(HYPRE_Solver solver, double *norm)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_ParCSRHybridGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *norm)
  <DD><I>
 Retrieves the final relative residual norm</I>
 </DL>

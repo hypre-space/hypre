@@ -9,14 +9,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "parcsr_mv.h"
-#include "krylov.h"
+#include "_hypre_parcsr_mv.h"
+#include "HYPRE_krylov.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParRhsFromFile (int argc , char *argv [], int arg_index , HYPRE_ParVector *b_ptr );
@@ -511,7 +511,7 @@ main( int   argc,
          arg_index++;
          agg_num_levels = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-np") == 0 )
+      else if ( strcmp(argv[arg_index], "-npaths") == 0 )
       {
          arg_index++;
          num_paths = atoi(argv[arg_index++]);
@@ -836,12 +836,14 @@ main( int   argc,
       printf("       3=direct interpolation with separation of weights  \n");
       printf("       4=multipass interpolation  \n");
       printf("       5=multipass interpolation with separation of weights  \n");
-      printf("       6=extended interpolation  \n");
-      printf("       7=F-F interpolation  \n");
+      printf("       6=extended classical modified interpolation  \n");
+      printf("       7=extended (only if no common C neighbor) interpolation  \n");
       printf("       8=standard interpolation  \n");
       printf("       9=standard interpolation with separation of weights  \n");
       printf("      10=classical block interpolation for nodal systems AMG\n");
       printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
+      printf("      12=FF interpolation  \n");
+      printf("      13=FF1 interpolation  \n");
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");

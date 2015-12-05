@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.5 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,8 +31,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "HYPRE.h"
-#include "utilities/utilities.h"
-#include "parcsr_mv/parcsr_mv.h"
+#include "utilities/_hypre_utilities.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "matrix/mli_matrix.h"
 #include "util/mli_utils.h"

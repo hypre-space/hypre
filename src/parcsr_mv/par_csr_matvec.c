@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -110,11 +110,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
       hypre_MatvecCommPkgCreate(A);
-#endif
       comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -260,11 +256,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-      hypre_NewCommPkgCreate(A);
-#else
       hypre_MatvecCommPkgCreate(A);
-#endif
       comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -401,11 +393,7 @@ hypre_ParCSRMatrixMatvec_FF( double           alpha,
     *--------------------------------------------------------------------*/
       if (!comm_pkg)
       {
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-         hypre_NewCommPkgCreate(A);
-#else
          hypre_MatvecCommPkgCreate(A);
-#endif
          comm_pkg = hypre_ParCSRMatrixCommPkg(A);
       }
                                                                                                               

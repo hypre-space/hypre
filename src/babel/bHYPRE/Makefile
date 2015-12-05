@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.10 $
+# $Revision: 1.13 $
 #EHEADER**********************************************************************
 
 
@@ -40,6 +40,12 @@ CDEFS =
  
 BABEL_RUNTIME_INCLUDES=\
   -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
+BABEL_RUNTIME_SIDL_LIBS=\
+  -L$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl/.libs\
+  -lsidl-1.0.0 -lsidl
+# ... note re the use of the .libs directory above.  Its contents will
+# get copied (by babel/Makefile) to hypre/lib, but the copy hasn't
+# happened yet, and we need to point to the sidl libraries now.
 
 C_COMPILE_FLAGS=\
  -I..\
@@ -67,7 +73,7 @@ FILES = ${IMPLSRCS} ${IORSRCS_NONNULL} ${SKELSRCS} ${STUBSRCS} \
  bHYPRE_Extensions.c
 
 OBJS = ${FILES:.c=.o}
-SHARED_OBJS = ${FILES:.c=.lo}
+# SHARED_OBJS = ${FILES:.c=.lo}
 
 ##################################################################
 # Targets
@@ -95,13 +101,30 @@ libbHYPRE.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libbHYPRE.so: ${OBJS} ${SHARED_OBJS}
+libbHYPRE.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${LINK_CC} -o $@ -shared ${OBJS} -L${HYPRE_LIB_INSTALL} -lHYPRE -lsidl-1.0.0
-
+	${BUILD_CC_SHARED} -o $@ ${OBJS} -L${HYPRE_LIB_INSTALL} \
+	-lHYPRE_DistributedMatrixPilutSolver\
+	-lHYPRE_DistributedMatrixPilutSolver\
+	-lHYPRE_DistributedMatrix\
+	-lHYPRE_Euclid\
+	-lHYPRE_IJ_mv\
+	-lHYPRE_krylov\
+	-lHYPRE_MatrixMatrix\
+	-lHYPRE_multivector\
+	-lHYPRE_ParaSails\
+	-lHYPRE_parcsr_block_mv\
+	-lHYPRE_parcsr_ls\
+	-lHYPRE_parcsr_mv\
+	-lHYPRE_seq_mv\
+	-lHYPRE_sstruct_ls\
+	-lHYPRE_sstruct_mv\
+	-lHYPRE_struct_ls\
+	-lHYPRE_struct_mv\
+	-lHYPRE_superlu\
+	-lHYPRE_utilities\
+	${BABEL_RUNTIME_SIDL_LIBS}
 
 ${OBJS}: ${HEADERS}
 
-%.lo: %.c
-	$(LTCOMPILE) -c -o $@ $<
 

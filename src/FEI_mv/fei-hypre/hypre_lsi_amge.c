@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities/utilities.h"
+#include "utilities/_hypre_utilities.h"
 #include "HYPRE.h"
 #include "seq_ls/amge/AMGe_matrix_topology.h"
 #include "seq_mv/csr_matrix.h"

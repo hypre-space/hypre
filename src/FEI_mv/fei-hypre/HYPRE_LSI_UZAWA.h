@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,10 +38,11 @@
 // system libraries used
 // --------------------------------------------------------------------------
 
-#include "utilities/utilities.h"
-#include "IJ_mv/IJ_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
-#include "parcsr_ls/parcsr_ls.h"
+#include "utilities/_hypre_utilities.h"
+#include "IJ_mv/_hypre_IJ_mv.h"
+#include "parcsr_mv/_hypre_parcsr_mv.h"
+#include "parcsr_ls/_hypre_parcsr_ls.h"
+
 
 // *************************************************************************
 // Solver-Preconditioner parameter data structure

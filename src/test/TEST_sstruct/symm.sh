@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER**********************************************************************
 # Copyright (c) 2006   The Regents of the University of California.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -22,55 +22,94 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.5 $
+# $Revision: 1.8 $
 #EHEADER**********************************************************************
+
+TNAME=`basename $0 .sh`
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_SSTRUCT data type (2D)
 #=============================================================================
 
-tail -3 symm.out.20 > symm.testdata
+tail -3 ${TNAME}.out.20 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.21 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 symm.out.21 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+#=============================================================================
 
-tail -3 symm.out.22 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+tail -3 ${TNAME}.out.22 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 symm.out.23 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+#=============================================================================
+
+tail -3 ${TNAME}.out.23 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_PARCSR data type (2D)
 #=============================================================================
 
-tail -3 symm.out.24 > symm.testdata
-
-tail -3 symm.out.25 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+tail -3 ${TNAME}.out.24 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.25 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_SSTRUCT data type (3D)
 #=============================================================================
 
-tail -3 symm.out.30 > symm.testdata
+tail -3 ${TNAME}.out.30 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 symm.out.31 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+#=============================================================================
 
-tail -3 symm.out.32 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+tail -3 ${TNAME}.out.32 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 symm.out.33 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+#=============================================================================
+
+tail -3 ${TNAME}.out.33 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 # sstruct: Check SetSymmetric for HYPRE_PARCSR data type (3D)
 #=============================================================================
 
-tail -3 symm.out.34 > symm.testdata
+tail -3 ${TNAME}.out.34 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.35 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
-tail -3 symm.out.35 > symm.testdata.temp
-diff symm.testdata symm.testdata.temp >&2
+#=============================================================================
+# compare with baseline case
+#=============================================================================
 
-rm -f symm.testdata symm.testdata.temp
+FILES="\
+ ${TNAME}.out.20\
+ ${TNAME}.out.21\
+ ${TNAME}.out.22\
+ ${TNAME}.out.23\
+ ${TNAME}.out.24\
+ ${TNAME}.out.25\
+ ${TNAME}.out.30\
+ ${TNAME}.out.31\
+ ${TNAME}.out.32\
+ ${TNAME}.out.33\
+ ${TNAME}.out.34\
+ ${TNAME}.out.35\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+done > ${TNAME}.out
+
+if [ -z $HYPRE_NO_SAVED ]; then
+   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+fi
+
+#=============================================================================
+# remove temporary files
+#=============================================================================
+
+rm -f ${TNAME}.testdata*

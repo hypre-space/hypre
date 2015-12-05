@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.25 $
+ * $Revision: 1.27 $
  ***********************************************************************EHEADER*/
 
 
@@ -85,8 +85,8 @@
 
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE.h"
-#include "utilities.h"
-#include "parcsr_ls.h"
+#include "_hypre_utilities.h"
+#include "_hypre_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
 
 /*

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -75,7 +75,7 @@
 
 
 #include "HYPRE.h"
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "bHYPRE_SStructMatrix.h"
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._includes) */

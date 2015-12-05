@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,7 +34,7 @@
 
 #include "par_csr_multimatvec.h"
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 #include "seq_multivector.h"
 #include "par_multivector.h"

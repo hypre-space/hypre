@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.13 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
 
 
@@ -60,14 +60,14 @@
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
 
-#include "../../utilities/utilities.h"
+#include "../../utilities/_hypre_utilities.h"
 #include "../../distributed_matrix/HYPRE_distributed_matrix_types.h"
 #include "../../distributed_matrix/HYPRE_distributed_matrix_protos.h"
 
 #include "../../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 
 #include "../../seq_mv/vector.h"
-#include "../../parcsr_mv/parcsr_mv.h" 
+#include "../../parcsr_mv/_hypre_parcsr_mv.h" 
 /* #include "../../parcsr_mv/par_vector.h" */
 
 extern void qsort0(int *, int, int);

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,6 +31,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 
 

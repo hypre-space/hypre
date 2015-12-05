@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -50,10 +50,10 @@
 #include <math.h>
 
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
-#include "../../utilities/utilities.h"
+#include "../../utilities/_hypre_utilities.h"
 #include "../../seq_mv/vector.h"
 /* #include "../../parcsr_mv/par_vector.h" */
-#include "../../parcsr_mv/parcsr_mv.h"
+#include "../../parcsr_mv/_hypre_parcsr_mv.h"
 #include "HYPRE_MLMatrix.h"
 #include "HYPRE_MLMaxwell.h"
 

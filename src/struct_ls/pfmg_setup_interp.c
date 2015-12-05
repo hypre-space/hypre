@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -137,8 +137,6 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    int                    mrk0, mrk1;
    int                    d;
 
-   int                    ierr = 0;
-
    /*----------------------------------------------------------
     * Initialize some things
     *----------------------------------------------------------*/
@@ -211,7 +209,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          if ( constant_coefficient==1 )
             /* all coefficients are constant */
          {
-            ierr += hypre_PFMGSetupInterpOp_CC1
+            hypre_PFMGSetupInterpOp_CC1
                ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
                  P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
          }
@@ -219,7 +217,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          else if ( constant_coefficient==2 )
             /* all coefficients are constant except the diagonal is variable */
          {
-            ierr += hypre_PFMGSetupInterpOp_CC2
+            hypre_PFMGSetupInterpOp_CC2
                ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
                  P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
          }
@@ -227,19 +225,19 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          else
             /* constant_coefficient == 0 , all coefficients in A vary */
          {
-            ierr += hypre_PFMGSetupInterpOp_CC0
+            hypre_PFMGSetupInterpOp_CC0
                ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
                  P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
          }
       }
 
+#if 0
    hypre_StructMatrixAssemble(P);
+#else
+   hypre_StructInterpAssemble(A, P, 0, cdir, findex, stride);
+#endif
 
-   /*-----------------------------------------------------------------------
-    * Return
-    *-----------------------------------------------------------------------*/
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -262,7 +260,6 @@ hypre_PFMGSetupInterpOp_CC0
   int                 si0,
   int                 si1 )
 {
-   int ierr = 0;
    int                    si;
    int                    Ai, Pi;
    double                *Ap;
@@ -327,7 +324,7 @@ hypre_PFMGSetupInterpOp_CC0
       }
    hypre_BoxLoop2End(Ai, Pi);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -350,7 +347,6 @@ hypre_PFMGSetupInterpOp_CC1
   int                 si0,
   int                 si1 )
 {
-   int ierr = 0;
    int                    si;
    int                    Ai, Pi;
    double                *Ap;
@@ -412,7 +408,7 @@ hypre_PFMGSetupInterpOp_CC1
    if (mrk1 != 0)
       Pp1[Pi] = 0.0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -435,7 +431,6 @@ hypre_PFMGSetupInterpOp_CC2
   int                 si0,
   int                 si1 )
 {
-   int ierr = 0;
    int                    si;
    int                    Ai;
    int                    Pi;
@@ -560,5 +555,6 @@ hypre_PFMGSetupInterpOp_CC2
          }
       hypre_BoxLoop2End(Ai, Pi);
    }
-   return ierr;
+
+   return hypre_error_flag;
 }

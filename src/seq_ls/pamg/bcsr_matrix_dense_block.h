@@ -1,0 +1,108 @@
+/*****************************************************************************
+ *
+ * This code implements a class for a dense block of a compressed sparse row
+ * matrix.
+ *
+ *****************************************************************************/
+
+#ifndef hypre_BCSR_MATRIX_DENSE_BLOCK_HEADER
+#define hypre_BCSR_MATRIX_DENSE_BLOCK_HEADER
+
+typedef struct {
+  double* data;
+  int num_rows;
+  int num_cols;
+} hypre_BCSRMatrixDenseBlock;
+
+/*****************************************************************************
+ *
+ * Prototypes
+ *
+ *****************************************************************************/
+
+hypre_BCSRMatrixDenseBlock*
+hypre_BCSRMatrixDenseBlockCreate(int num_rows, int num_cols);
+
+int
+hypre_BCSRMatrixDenseBlockDestroy(hypre_BCSRMatrixDenseBlock* A);
+
+int
+hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A);
+
+int
+hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
+				   double* data);
+
+int
+hypre_BCSRMatrixDenseBlockGetData(hypre_BCSRMatrixDenseBlock* A,
+				   double* data);
+
+hypre_BCSRMatrixDenseBlock*
+hypre_BCSRMatrixDenseBlockCopy(hypre_BCSRMatrixDenseBlock* A);
+
+int
+hypre_BCSRMatrixDenseBlockAdd(hypre_BCSRMatrixDenseBlock* A,
+			      hypre_BCSRMatrixDenseBlock* B);
+
+int
+hypre_BCSRMatrixDenseBlockMultiply(hypre_BCSRMatrixDenseBlock* A,
+				   hypre_BCSRMatrixDenseBlock* B);
+
+int
+hypre_BCSRMatrixDenseBlockNeg(hypre_BCSRMatrixDenseBlock* A);
+
+hypre_BCSRMatrixDenseBlock*
+hypre_BCSRMatrixDenseBlockDiag(hypre_BCSRMatrixDenseBlock* A);
+
+int
+hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
+			      hypre_BCSRMatrixDenseBlock* B);
+
+int
+hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
+			      hypre_BCSRMatrixDenseBlock* B);
+
+
+int
+hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A);
+
+int
+hypre_BCSRMatrixBlockMatvec(double alpha, hypre_BCSRMatrixDenseBlock* A,
+			    double* x_data, double beta, double* y_data);
+
+int
+hypre_BCSRMatrixBlockMatvecT(double alpha, hypre_BCSRMatrixDenseBlock* A,
+			     double* x_data, double beta, double* y_data);
+
+double
+hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
+			       const char* norm);
+
+int
+hypre_BCSRMatrixDenseBlockPrint(hypre_BCSRMatrixDenseBlock* A,
+				FILE* out_file);
+
+#ifdef hypre_BCSR_MATRIX_USE_DENSE_BLOCKS
+
+#define hypre_BCSRMatrixBlock hypre_BCSRMatrixDenseBlock
+#define hypre_BCSRMatrixBlockCreate hypre_BCSRMatrixDenseBlockCreate
+#define hypre_BCSRMatrixBlockDestroy hypre_BCSRMatrixDenseBlockDestroy
+#define hypre_BCSRMatrixBlockInitialise hypre_BCSRMatrixDenseBlockInitialise
+#define hypre_BCSRMatrixBlockFillData hypre_BCSRMatrixDenseBlockFillData
+#define hypre_BCSRMatrixBlockGetData hypre_BCSRMatrixDenseBlockGetData
+#define hypre_BCSRMatrixBlockCopy hypre_BCSRMatrixDenseBlockCopy
+#define hypre_BCSRMatrixBlockAdd hypre_BCSRMatrixDenseBlockAdd
+#define hypre_BCSRMatrixBlockMultiply hypre_BCSRMatrixDenseBlockMultiply
+#define hypre_BCSRMatrixBlockNeg hypre_BCSRMatrixDenseBlockNeg
+#define hypre_BCSRMatrixBlockDiag hypre_BCSRMatrixDenseBlockDiag
+#define hypre_BCSRMatrixBlockMulInv hypre_BCSRMatrixDenseBlockMulInv
+#define hypre_BCSRMatrixBlockMultiplyInverse2 hypre_BCSRMatrixDenseBlockMultiplyInverse2
+#define hypre_BCSRMatrixBlockTranspose hypre_BCSRMatrixDenseBlockTranspose
+#define hypre_BCSRMatrixBlockMatvec hypre_BCSRMatrixDenseBlockMatvec
+#define hypre_BCSRMatrixBlockMatvecT hypre_BCSRMatrixDenseBlockMatvecT
+#define hypre_BCSRMatrixBlockNorm hypre_BCSRMatrixDenseBlockNorm
+#define hypre_BCSRMatrixBlockPrint hypre_BCSRMatrixDenseBlockPrint
+
+#endif
+
+#endif

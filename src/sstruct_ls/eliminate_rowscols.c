@@ -21,12 +21,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
 
-#include "parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
 #include "eliminate_rowscols.h"
 
 int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,

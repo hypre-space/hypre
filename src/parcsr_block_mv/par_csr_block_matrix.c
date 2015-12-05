@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -144,7 +144,6 @@ hypre_ParCSRBlockMatrixCreate(  MPI_Comm comm,
 int 
 hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix )
 {
-   int  ierr=0;
 
    if (matrix)
    {
@@ -171,7 +170,7 @@ hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix )
       hypre_TFree(matrix);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -736,6 +735,83 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
 int
 hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 {
+
+#if HYPRE_NO_GLOBAL_PARTITION
+ 
+   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   int        num_recvs, *recv_procs, *recv_vec_starts;
+
+   int        num_sends, *send_procs, *send_map_starts;
+   int        *send_map_elmts;
+
+   int        num_cols_off_d; 
+   int       *col_map_off_d; 
+
+   int        first_col_diag;
+   int        global_num_cols;
+
+
+   MPI_Comm   comm;
+
+   hypre_ParCSRCommPkg	 *comm_pkg;
+   hypre_IJAssumedPart   *apart;
+   
+   /*-----------------------------------------------------------
+    * get parcsr_A information 
+    *----------------------------------------------------------*/
+
+   row_start = hypre_ParCSRBlockMatrixFirstRowIndex(A);
+   row_end = hypre_ParCSRBlockMatrixLastRowIndex(A);
+   col_start =  hypre_ParCSRBlockMatrixFirstColDiag(A);
+   col_end =  hypre_ParCSRBlockMatrixLastColDiag(A);
+   
+   col_map_off_d =  hypre_ParCSRBlockMatrixColMapOffd(A);
+   num_cols_off_d = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
+   
+   global_num_cols = hypre_ParCSRBlockMatrixGlobalNumCols(A); 
+   
+   comm = hypre_ParCSRBlockMatrixComm(A);
+
+   first_col_diag = hypre_ParCSRBlockMatrixFirstColDiag(A);
+
+   /* Create the assumed partition */
+   if  (hypre_ParCSRBlockMatrixAssumedPartition(A) == NULL)
+   {
+      hypre_ParCSRBlockMatrixCreateAssumedPartition(A);
+   }
+
+   apart = hypre_ParCSRBlockMatrixAssumedPartition(A);
+
+
+   /*-----------------------------------------------------------
+    * get commpkg info information 
+    *----------------------------------------------------------*/
+
+   hypre_NewCommPkgCreate_core( comm, col_map_off_d, first_col_diag, 
+                                col_start, col_end, 
+                                num_cols_off_d, global_num_cols,
+                                &num_recvs, &recv_procs, &recv_vec_starts,
+                                &num_sends, &send_procs, &send_map_starts, 
+                                &send_map_elmts, apart);
+
+
+
+   if (!num_recvs)
+   {
+      hypre_TFree(recv_procs);
+      recv_procs = NULL;
+   }
+   if (!num_sends)
+   {
+      hypre_TFree(send_procs);
+      hypre_TFree(send_map_elmts);
+      send_procs = NULL;
+      send_map_elmts = NULL;
+   }
+
+
+#else
+
    hypre_ParCSRCommPkg	*comm_pkg;
    
    MPI_Comm             comm = hypre_ParCSRBlockMatrixComm(A);
@@ -752,7 +828,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    int  first_col_diag = hypre_ParCSRBlockMatrixFirstColDiag(A);
    int  *col_starts = hypre_ParCSRBlockMatrixColStarts(A);
 
-   int	ierr = 0;
    int	num_cols_diag = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixDiag(A));
    int	num_cols_offd = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
 
@@ -760,6 +835,12 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
          col_starts, num_cols_diag, num_cols_offd, first_col_diag, 
          col_map_offd, 1, &num_recvs, &recv_procs, &recv_vec_starts,
          &num_sends, &send_procs, &send_map_starts, &send_map_elmts);
+
+#endif
+
+  /*-----------------------------------------------------------
+   * setup commpkg
+   *----------------------------------------------------------*/
 
    comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
 
@@ -775,8 +856,11 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
 
    hypre_ParCSRBlockMatrixCommPkg(A) = comm_pkg;
+   
 
-   return ierr;
+
+
+   return hypre_error_flag;
 }
 
 /* ----------------------------------------------------------------------
