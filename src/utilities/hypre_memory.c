@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.5 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -30,8 +17,7 @@
  * Memory management utilities
  *
  *****************************************************************************/
-#include <stdlib.h>
-#include <stdio.h>
+
 #include "_hypre_utilities.h"
 
 #ifdef HYPRE_USE_PTHREADS
@@ -70,9 +56,9 @@
  *--------------------------------------------------------------------------*/
 
 int
-hypre_OutOfMemory( int size )
+hypre_OutOfMemory( size_t size )
 {
-   printf("Out of memory trying to allocate %d bytes\n", size);
+   printf("Out of memory trying to allocate %d bytes\n", (int) size);
    fflush(stdout);
 
    hypre_error(HYPRE_ERROR_MEMORY);
@@ -85,7 +71,7 @@ hypre_OutOfMemory( int size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_MAlloc( int size )
+hypre_MAlloc( size_t size )
 {
    char *ptr;
 
@@ -119,8 +105,8 @@ hypre_MAlloc( int size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_CAlloc( int count,
-              int elt_size )
+hypre_CAlloc( size_t count,
+              size_t elt_size )
 {
    char *ptr;
    int   size = count*elt_size;
@@ -155,8 +141,8 @@ hypre_CAlloc( int count,
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_ReAlloc( char *ptr,
-               int   size )
+hypre_ReAlloc( char   *ptr,
+               size_t  size )
 {
 #ifdef HYPRE_USE_UMALLOC
    if (ptr == NULL)
@@ -229,7 +215,7 @@ double *global_data_ptr;
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SharedMAlloc( int size )
+hypre_SharedMAlloc( size_t size )
 {
    char *ptr;
    int unthreaded = pthread_equal(initial_thread, pthread_self());
@@ -252,8 +238,8 @@ hypre_SharedMAlloc( int size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SharedCAlloc( int count,
-              int elt_size )
+hypre_SharedCAlloc( size_t count,
+                    size_t elt_size )
 {
    char *ptr;
    int unthreaded = pthread_equal(initial_thread, pthread_self());
@@ -276,8 +262,8 @@ hypre_SharedCAlloc( int count,
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_SharedReAlloc( char *ptr,
-                     int   size )
+hypre_SharedReAlloc( char   *ptr,
+                     size_t  size )
 {
    int unthreaded = pthread_equal(initial_thread, pthread_self());
    int I_call_realloc = unthreaded ||
@@ -317,7 +303,7 @@ hypre_SharedFree( char *ptr )
  *--------------------------------------------------------------------------*/
 
 double *
-hypre_IncrementSharedDataPtr( double *ptr, int size )
+hypre_IncrementSharedDataPtr( double *ptr, size_t size )
 {
    int unthreaded = pthread_equal(initial_thread, pthread_self());
    int I_increment = unthreaded ||

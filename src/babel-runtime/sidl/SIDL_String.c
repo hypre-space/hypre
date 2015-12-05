@@ -1,8 +1,8 @@
 /*
  * File:        sidl_String.c
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:50 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:44 $
  * Description: convenience string manipulation functions for C clients
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.

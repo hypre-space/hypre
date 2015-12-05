@@ -2,9 +2,9 @@
  * File:          sidl_SIDLException.h
  * Symbol:        sidl.SIDLException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_SIDLException.h,v 1.6 2006/08/29 22:29:50 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_SIDLException.h,v 1.7 2007/09/27 19:35:44 painter Exp $
  * Description:   Client-side glue code for sidl.SIDLException
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -173,10 +173,12 @@ sidl_SIDLException_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -197,10 +199,12 @@ sidl_SIDLException_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -217,9 +221,11 @@ sidl_SIDLException_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -236,9 +242,11 @@ sidl_SIDLException_getNote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getNote)(
+  char* _result;
+  _result = (*self->d_epv->f_getNote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -277,9 +285,11 @@ sidl_SIDLException_getTrace(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getTrace)(
+  char* _result;
+  _result = (*self->d_epv->f_getTrace)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -426,9 +436,11 @@ sidl_SIDLException__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -462,9 +474,11 @@ sidl_SIDLException__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -981,8 +995,8 @@ sidl_SIDLException__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_SIDLException__object*
-sidl_SIDLException__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_SIDLException__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

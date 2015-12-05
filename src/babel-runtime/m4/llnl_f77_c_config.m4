@@ -9,9 +9,6 @@ AC_REQUIRE([AC_CANONICAL_TARGET])dnl
 AC_REQUIRE([AC_PROG_F77])dnl
 AC_REQUIRE([LLNL_F77_NAME_MANGLING])
 dnl set some resonable defaults
-sidl_cv_f77_str="str" dnl can also be "struct"
-sidl_cv_f77_str_len="far" dnl can also be "near", only meaningful if $sidl_cv_str="str"
-sidl_cv_f77_str_struct="str_len" dnl can also be "len_str", only meaningful if $sidl_cv_str="struct"
 sidl_cv_f77_char="as_string"
 dnl sidl_cv_f77_true=1
 dnl sidl_cv_f77_false=0
@@ -77,33 +74,11 @@ else
    fi  
    AC_DEFINE(SIDL_F77_LOWER_CASE,,[F77 symbols are lower case])
 fi;
-dnl strings
-if test "$sidl_cv_f77_str" = "struct"; then 
-   if test "$sidl_cv_f77_str_struct" = "len_str"; then
-      AC_DEFINE(SIDL_F77_STR_STRUCT_LEN_STR,,[F77 strings as length-char* structs])
-   else 
-      if test "$sidl_cv_f77_str_struct" != "str_len"; then
-         AC_MSG_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
-      fi;
-      AC_DEFINE(SIDL_F77_STR_STRUCT_STR_LEN,,[F77 strings as char*-length structs])
-   fi;
-else
-   if test "$sidl_cv_f77_str" != "str"; then 
-      AC_MSG_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
-   fi;
-   if test "$sidl_cv_f77_str_len" = "near"; then
-      AC_DEFINE(SIDL_F77_STR_LEN_NEAR,,[F77 strings lengths at end])
-   else
-      if test "$sidl_cv_f77_str_len" != "far"; then
-         AC_MSG_WARN([string length immediately following char* or at end undetermined, assuming at end])
-      fi
-      AC_DEFINE(SIDL_F77_STR_LEN_FAR,,[F77 strings lengths immediately follow string])
-   fi;
-fi;
+AC_DEFINE_UNQUOTED(SIDL_F77_TRUE,$sidl_cv_f77_true,[F77 logical true value])
+AC_DEFINE_UNQUOTED(SIDL_F77_FALSE,$sidl_cv_f77_false,[F77 logical false value])
+LLNL_FORTRAN_STRING_TEST(Fortran 77,F77,$FLIBS)
 if test "$sidl_cv_f77_char" = "as_string"; then
    AC_DEFINE(SIDL_F77_CHAR_AS_STRING,,[F77 char args are strings])
 fi; 
-AC_DEFINE_UNQUOTED(SIDL_F77_TRUE,$sidl_cv_f77_true,[F77 logical true value])
-AC_DEFINE_UNQUOTED(SIDL_F77_FALSE,$sidl_cv_f77_false,[F77 logical false value])
 AC_DEFINE_UNQUOTED(SIDL_F77_STR_MINSIZE,$sidl_cv_f77_str_minsize,[Minimum size for out strings])
 ])

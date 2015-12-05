@@ -2,7 +2,7 @@
 // File:          bHYPRE_IJMatrixView.hxx
 // Symbol:        bHYPRE.IJMatrixView-v1.0.0
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.IJMatrixView
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -371,7 +371,9 @@ namespace bHYPRE {
     typedef struct bHYPRE_IJMatrixView__sepv sepv_t;
 
     // default constructor
-    IJMatrixView() { }
+    IJMatrixView() { 
+      bHYPRE_IJMatrixView_IORCache = NULL;
+    }
 
     // RMI connect
     static inline ::bHYPRE::IJMatrixView _connect( /*in*/ const std::string& 
@@ -380,7 +382,7 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::IJMatrixView _connect( /*in*/ const std::string& url,
+    static ::bHYPRE::IJMatrixView _connect( /*in*/ const std::string& url, 
       /*in*/ const bool ar  );
 
     // default destructor
@@ -400,13 +402,22 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     IJMatrixView ( IJMatrixView::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      if(!bHYPRE_IJMatrixView_IORCache) { 
+        bHYPRE_IJMatrixView_IORCache = ::bHYPRE::IJMatrixView::_cast((
+          void*)d_self);
+        if (bHYPRE_IJMatrixView_IORCache) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          (bHYPRE_IJMatrixView_IORCache->d_epv->f_deleteRef)(
+            bHYPRE_IJMatrixView_IORCache->d_object, &throwaway_exception);  
+        }  
+      }
+      return bHYPRE_IJMatrixView_IORCache;
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -463,15 +474,23 @@ namespace bHYPRE {
   public:
     static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+    //////////////////////////////////////////////////
+    // 
+    // Locally Cached IOR pointer
+    // 
+
+  protected:
+    mutable ior_t* bHYPRE_IJMatrixView_IORCache;
   }; // end class IJMatrixView
 } // end namespace bHYPRE
 
 extern "C" {
 
 
-  #pragma weak bHYPRE_IJMatrixView__connectI
+#pragma weak bHYPRE_IJMatrixView__connectI
 
-  #pragma weak bHYPRE_IJMatrixView__rmicast
+#pragma weak bHYPRE_IJMatrixView__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -484,8 +503,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_IJMatrixView__object*
-  bHYPRE_IJMatrixView__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_IJMatrixView__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

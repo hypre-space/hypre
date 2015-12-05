@@ -1,0 +1,101 @@
+\documentclass[11pt]{book}
+
+%\usepackage{epsfig}
+%\usepackage{html}
+\usepackage{hypre}
+%\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage[
+pdftex,
+linktocpage,       % make page numbers be the link on TOC, LOF and LOT
+pagebackref,       % adds backlink to the bibliography
+plainpages=false,  % page anchors are named by their formatted form
+pdfstartview=Fit,  % startup page view
+bookmarksopen,     % show bookmarks with all the subtrees expanded
+bookmarksnumbered  % include section numbers in bookmarks
+]{hyperref}
+
+% set margins
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.0in}
+
+% define various commands and macros
+\def\pilut{{\sl PILUT}}
+
+% define the version number
+% NOTE: this is automatically generated from another file in hypre
+\input{version}
+
+% write out the index entries in the `.idx' file
+%\makeindex
+
+%=============================================================================
+% Body:
+%=============================================================================
+
+\begin{document}
+
+%--------------- Title Page
+
+\begin{TitlePage}
+
+\Title{User's Manual}
+\SubTitle{Software Version: \HYPREVersion}
+\SubTitle{Date: \HYPREVersionDate}
+\vfill
+\begin{center}
+\includegraphics[width=.7\textwidth]{hypre_wiw}
+\end{center}
+\vfill
+\Author{%
+Center for Applied Scientific Computing\\
+Lawrence Livermore National Laboratory
+}
+
+\end{TitlePage}
+
+%--------------- Copyright Page
+
+\begin{CopyrightPage}
+\input{copyright.txt}
+\end{CopyrightPage}
+
+%--------------- Table of Contents
+
+\pagenumbering{roman}
+\tableofcontents
+\cleardoublepage
+\pagenumbering{arabic}
+
+%--------------- Include Chapters
+
+\input{usr_intro}
+%\input{usr_starting}
+\input{usr_struct}
+\input{usr_sstruct}
+\input{usr_fei}
+\input{usr_ij}
+\input{usr_solvers}
+\input{usr_fei_solvers}
+\input{usr_misc}
+\input{usr_babel}
+
+%--------------- Include Other
+
+% \input{glossary}
+
+%--------------- Print the References here
+
+\bibliographystyle{plain}
+\bibliography{hypre}
+
+%--------------- Print the Index here
+
+%\printindex
+
+\end{document}
+
+

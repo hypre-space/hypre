@@ -2,9 +2,9 @@
 // File:          sidl_Finder.hxx
 // Symbol:        sidl.Finder-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
-// Release:       $Name: V2-2-0b $
-// Revision:      @(#) $Id: sidl_Finder.hxx,v 1.3 2006/12/29 21:24:48 painter Exp $
+// Babel Version: 1.0.4
+// Release:       $Name: V2-4-0b $
+// Revision:      @(#) $Id: sidl_Finder.hxx,v 1.4 2007/09/27 19:55:45 painter Exp $
 // Description:   Client-side glue code for sidl.Finder
 // 
 // Copyright (c) 2000-2002, The Regents of the University of California.
@@ -209,7 +209,9 @@ namespace sidl {
     typedef struct sidl_Finder__sepv sepv_t;
 
     // default constructor
-    Finder() { }
+    Finder() { 
+      sidl_Finder_IORCache = NULL;
+    }
 
     // RMI connect
     static inline ::sidl::Finder _connect( /*in*/ const std::string& url ) { 
@@ -217,8 +219,8 @@ namespace sidl {
     }
 
     // RMI connect 2
-    static ::sidl::Finder _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::sidl::Finder _connect( /*in*/ const std::string& url, /*in*/ const 
+      bool ar  );
 
     // default destructor
     virtual ~Finder () { }
@@ -237,13 +239,21 @@ namespace sidl {
     // For internal use by Impls (fixes bug#275)
     Finder ( Finder::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      if(!sidl_Finder_IORCache) { 
+        sidl_Finder_IORCache = ::sidl::Finder::_cast((void*)d_self);
+        if (sidl_Finder_IORCache) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          (sidl_Finder_IORCache->d_epv->f_deleteRef)(
+            sidl_Finder_IORCache->d_object, &throwaway_exception);  
+        }  
+      }
+      return sidl_Finder_IORCache;
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -299,15 +309,23 @@ namespace sidl {
   public:
     static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+    //////////////////////////////////////////////////
+    // 
+    // Locally Cached IOR pointer
+    // 
+
+  protected:
+    mutable ior_t* sidl_Finder_IORCache;
   }; // end class Finder
 } // end namespace sidl
 
 extern "C" {
 
 
-  #pragma weak sidl_Finder__connectI
+#pragma weak sidl_Finder__connectI
 
-  #pragma weak sidl_Finder__rmicast
+#pragma weak sidl_Finder__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -320,8 +338,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_Finder__object*
-  sidl_Finder__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_Finder__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

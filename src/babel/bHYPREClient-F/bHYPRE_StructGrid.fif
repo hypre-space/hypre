@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_StructGrid_Impl.f
 C       Symbol:        bHYPRE.StructGrid-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.StructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -67,7 +67,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_StructGrid__cast2_f(self, name, retval,
+        subroutine bHYPRE_StructGrid__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -86,7 +86,7 @@ C       Method:  Create[]
 C        This function is the preferred way to create a Struct Grid. 
 C       
 
-        subroutine bHYPRE_StructGrid_Create_f(mpi_comm, dim, retval,
+        subroutine bHYPRE_StructGrid_Create_f(mpi_comm, dim, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.MPICommunicator mpi_comm
@@ -106,7 +106,7 @@ C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       
 
-        subroutine bHYPRE_StructGrid_SetCommunicator_f(self, mpi_comm,
+        subroutine bHYPRE_StructGrid_SetCommunicator_f(self, mpi_comm, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -141,7 +141,7 @@ C
 C       Method:  SetDimension[]
 C       
 
-        subroutine bHYPRE_StructGrid_SetDimension_f(self, dim, retval,
+        subroutine bHYPRE_StructGrid_SetDimension_f(self, dim, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -162,7 +162,7 @@ C       "ilower" and "iupper" are arrays of size "dim", the number of spatial
 C       dimensions. 
 C       
 
-        subroutine bHYPRE_StructGrid_SetExtents_f(self, ilower, iupper,
+        subroutine bHYPRE_StructGrid_SetExtents_f(self, ilower, iupper, 
      &     dim, retval, exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -194,7 +194,7 @@ C       NOTE: Some of the solvers in hypre have power-of-two restrictions on the
 C       of the periodic dimensions.
 C       
 
-        subroutine bHYPRE_StructGrid_SetPeriodic_f(self, periodic, dim,
+        subroutine bHYPRE_StructGrid_SetPeriodic_f(self, periodic, dim, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -217,7 +217,7 @@ C       for each dimension.
 C       "num_ghost" is an array of size "dim2", twice the number of dimensions. 
 C       
 
-        subroutine bHYPRE_StructGrid_SetNumGhost_f(self, num_ghost,
+        subroutine bHYPRE_StructGrid_SetNumGhost_f(self, num_ghost, 
      &     dim2, retval, exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -298,7 +298,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_StructGrid_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_StructGrid_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -320,7 +320,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_StructGrid_isType_f(self, name, retval,
+        subroutine bHYPRE_StructGrid_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -339,7 +339,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_StructGrid_getClassInfo_f(self, retval,
+        subroutine bHYPRE_StructGrid_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -356,7 +356,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine bHYPRE_StructGrid__exec_f(self, methodName, inArgs,
+        subroutine bHYPRE_StructGrid__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in bHYPRE.StructGrid self
@@ -393,7 +393,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_StructGrid__isRemote_f(self, retval,
+        subroutine bHYPRE_StructGrid__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructGrid self

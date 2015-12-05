@@ -2,7 +2,7 @@
  * File:          bHYPRE_Euclid_Impl.c
  * Symbol:        bHYPRE.Euclid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.Euclid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -39,8 +39,8 @@
 #include "hypre_babel_exception_handler.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -57,9 +57,9 @@ impl_bHYPRE_Euclid__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid._load) */
   /* Insert-Code-Here {bHYPRE.Euclid._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._load) */
   }
 }
 /*
@@ -79,7 +79,7 @@ impl_bHYPRE_Euclid__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid._ctor) */
   /* Insert-Code-Here {bHYPRE.Euclid._ctor} (constructor method) */
 
    /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
@@ -92,7 +92,7 @@ impl_bHYPRE_Euclid__ctor(
 
    bHYPRE_Euclid__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._ctor) */
   }
 }
 
@@ -142,7 +142,7 @@ impl_bHYPRE_Euclid__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid._dtor) */
   /* Insert-Code-Here {bHYPRE.Euclid._dtor} (destructor method) */
 
    int ierr = 0;
@@ -157,7 +157,7 @@ impl_bHYPRE_Euclid__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._dtor) */
   }
 }
 
@@ -179,7 +179,7 @@ impl_bHYPRE_Euclid_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.Create) */
   /* Insert-Code-Here {bHYPRE.Euclid.Create} (Create method) */
 
    int ierr = 0;
@@ -199,7 +199,7 @@ impl_bHYPRE_Euclid_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.Create) */
   }
 }
 
@@ -222,7 +222,7 @@ impl_bHYPRE_Euclid_SetParameters(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetParameters) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetParameters) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetParameters} (SetParameters method) */
 
    int ierr = 0;
@@ -235,7 +235,7 @@ impl_bHYPRE_Euclid_SetParameters(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetParameters) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetParameters) */
   }
 }
 
@@ -258,7 +258,7 @@ impl_bHYPRE_Euclid_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetOperator) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetOperator} (SetOperator method) */
 
 
@@ -277,7 +277,7 @@ impl_bHYPRE_Euclid_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetOperator) */
   }
 }
 
@@ -300,12 +300,12 @@ impl_bHYPRE_Euclid_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetTolerance} (SetTolerance method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetTolerance) */
   }
 }
 
@@ -328,12 +328,12 @@ impl_bHYPRE_Euclid_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetMaxIterations} (SetMaxIterations method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetMaxIterations) */
   }
 }
 
@@ -360,12 +360,12 @@ impl_bHYPRE_Euclid_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetLogging) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetLogging} (SetLogging method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetLogging) */
   }
 }
 
@@ -392,12 +392,12 @@ impl_bHYPRE_Euclid_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetPrintLevel} (SetPrintLevel method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetPrintLevel) */
   }
 }
 
@@ -419,12 +419,12 @@ impl_bHYPRE_Euclid_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.Euclid.GetNumIterations} (GetNumIterations method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetNumIterations) */
   }
 }
 
@@ -446,12 +446,12 @@ impl_bHYPRE_Euclid_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.Euclid.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetRelResidualNorm) */
   }
 }
 
@@ -474,10 +474,10 @@ impl_bHYPRE_Euclid_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetCommunicator} (SetCommunicator method) */
    return 1;  /* DEPRECATED and will never be implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetCommunicator) */
   }
 }
 
@@ -528,7 +528,7 @@ impl_bHYPRE_Euclid_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetIntParameter} (SetIntParameter method) */
 
    /* Euclid has its own parameter parsing system, based on a C-program-style
@@ -558,7 +558,7 @@ impl_bHYPRE_Euclid_SetIntParameter(
    hypre_TFree( *argv );
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetIntParameter) */
   }
 }
 
@@ -581,7 +581,7 @@ impl_bHYPRE_Euclid_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetDoubleParameter} (SetDoubleParameter method) */
 
 
@@ -613,7 +613,7 @@ impl_bHYPRE_Euclid_SetDoubleParameter(
    return ierr;
 
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetDoubleParameter) */
   }
 }
 
@@ -636,12 +636,12 @@ impl_bHYPRE_Euclid_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetStringParameter) */
   }
 }
 
@@ -665,12 +665,12 @@ impl_bHYPRE_Euclid_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetIntArray1Parameter) */
   }
 }
 
@@ -693,12 +693,12 @@ impl_bHYPRE_Euclid_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetIntArray2Parameter) */
   }
 }
 
@@ -722,12 +722,12 @@ impl_bHYPRE_Euclid_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetDoubleArray1Parameter) */
   }
 }
 
@@ -750,12 +750,12 @@ impl_bHYPRE_Euclid_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.Euclid.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.SetDoubleArray2Parameter) */
   }
 }
 
@@ -778,12 +778,12 @@ impl_bHYPRE_Euclid_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.Euclid.GetIntValue} (GetIntValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetIntValue) */
   }
 }
 
@@ -806,12 +806,12 @@ impl_bHYPRE_Euclid_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.Euclid.GetDoubleValue} (GetDoubleValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.GetDoubleValue) */
   }
 }
 
@@ -835,7 +835,7 @@ impl_bHYPRE_Euclid_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.Setup) */
   /* Insert-Code-Here {bHYPRE.Euclid.Setup} (Setup method) */
 
 
@@ -887,7 +887,7 @@ impl_bHYPRE_Euclid_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.Setup) */
   }
 }
 
@@ -910,7 +910,7 @@ impl_bHYPRE_Euclid_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.Apply) */
   /* Insert-Code-Here {bHYPRE.Euclid.Apply} (Apply method) */
 
 
@@ -971,7 +971,7 @@ impl_bHYPRE_Euclid_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.Apply) */
   }
 }
 
@@ -994,12 +994,12 @@ impl_bHYPRE_Euclid_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.Euclid.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.Euclid.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
@@ -1007,33 +1007,32 @@ struct bHYPRE_Euclid__object* impl_bHYPRE_Euclid_fconnect_bHYPRE_Euclid(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Euclid__connectI(url, ar, _ex);
 }
-struct bHYPRE_Euclid__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Euclid(void* bi,
+struct bHYPRE_Euclid__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Euclid(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Euclid__cast(bi, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_Euclid_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Euclid_fconnect_bHYPRE_IJParCSRMatrix(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_Euclid_fcast_bHYPRE_IJParCSRMatrix(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Euclid_fcast_bHYPRE_IJParCSRMatrix(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Euclid_fconnect_bHYPRE_MPICommunicator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Euclid_fconnect_bHYPRE_MPICommunicator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Euclid_fcast_bHYPRE_MPICommunicator(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Euclid_fcast_bHYPRE_MPICommunicator(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
-struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Euclid_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct bHYPRE_Operator__object* impl_bHYPRE_Euclid_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Operator(void* 
@@ -1044,7 +1043,7 @@ struct bHYPRE_Solver__object* impl_bHYPRE_Euclid_fconnect_bHYPRE_Solver(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Solver(void* bi,
+struct bHYPRE_Solver__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Solver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
@@ -1052,7 +1051,7 @@ struct bHYPRE_Vector__object* impl_bHYPRE_Euclid_fconnect_bHYPRE_Vector(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Vector(void* bi,
+struct bHYPRE_Vector__object* impl_bHYPRE_Euclid_fcast_bHYPRE_Vector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
@@ -1065,13 +1064,12 @@ struct sidl_BaseClass__object* impl_bHYPRE_Euclid_fcast_sidl_BaseClass(void* bi,
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Euclid_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_bHYPRE_Euclid_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Euclid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_bHYPRE_Euclid_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_Euclid_fconnect_sidl_ClassInfo(const 
@@ -1083,12 +1081,13 @@ struct sidl_ClassInfo__object* impl_bHYPRE_Euclid_fcast_sidl_ClassInfo(void* bi,
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Euclid_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_Euclid_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Euclid_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_Euclid_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

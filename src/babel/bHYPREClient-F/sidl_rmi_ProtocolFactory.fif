@@ -2,9 +2,9 @@ C
 C       File:          sidl_rmi_ProtocolFactory_Impl.f
 C       Symbol:        sidl.rmi.ProtocolFactory-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
-C       Release:       $Name: V2-2-0b $
-C       Revision:      @(#) $Id: sidl_rmi_ProtocolFactory.fif,v 1.28 2006/12/29 21:24:29 painter Exp $
+C       Babel Version: 1.0.4
+C       Release:       $Name: V2-4-0b $
+C       Revision:      @(#) $Id: sidl_rmi_ProtocolFactory.fif,v 1.29 2007/09/27 19:56:36 painter Exp $
 C       Description:   Client-side documentation text for sidl.rmi.ProtocolFactory
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.
@@ -67,7 +67,7 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__cast_f(ref, retval,
+        subroutine sidl_rmi_ProtocolFactory__cast_f(ref, retval, 
      &     exception)
         implicit none
 C        in opaque ref
@@ -210,7 +210,7 @@ C       Return true iff the addition is successful.  (no collisions
 C       allowed)
 C       
 
-        subroutine sidl_rmi_ProtocolFactory_addProtocol_f(prefix,
+        subroutine sidl_rmi_ProtocolFactory_addProtocol_f(prefix, 
      &     typeName, retval, exception)
         implicit none
 C        in string prefix
@@ -230,7 +230,7 @@ C       Return the typeName associated with a particular prefix.
 C       Return empty string if the prefix
 C       
 
-        subroutine sidl_rmi_ProtocolFactory_getProtocol_f(prefix,
+        subroutine sidl_rmi_ProtocolFactory_getProtocol_f(prefix, 
      &     retval, exception)
         implicit none
 C        in string prefix
@@ -247,7 +247,7 @@ C       Method:  deleteProtocol[]
 C       Remove a protocol from the active list.
 C       
 
-        subroutine sidl_rmi_ProtocolFactory_deleteProtocol_f(prefix,
+        subroutine sidl_rmi_ProtocolFactory_deleteProtocol_f(prefix, 
      &     retval, exception)
         implicit none
 C        in string prefix
@@ -267,7 +267,7 @@ C       The server and port number are in the url.  Return nil
 C       if protocol unknown or InstanceHandle.init() failed.
 C       
 
-        subroutine sidl_rmi_ProtocolFactory_createInstance_f(url,
+        subroutine sidl_rmi_ProtocolFactory_createInstance_f(url, 
      &     typeName, retval, exception)
         implicit none
 C        in string url
@@ -292,7 +292,7 @@ C       unknown or InstanceHandle.init() failed.  The boolean addRef
 C       should be true if connect should remotely addRef
 C       
 
-        subroutine sidl_rmi_ProtocolFactory_connectInstance_f(url, ar,
+        subroutine sidl_rmi_ProtocolFactory_connectInstance_f(url, ar, 
      &     retval, exception)
         implicit none
 C        in string url
@@ -315,7 +315,7 @@ C       of the remote object in the remote instance registry.  Return
 C       null if protocol unknown or InstanceHandle.init() failed.  
 C       
 
-        subroutine sidl_rmi_ProtocolFactory_unserializeInstance_f(url,
+        subroutine sidl_rmi_ProtocolFactory_unserializeInstance_f(url, 
      &     retval, exception)
         implicit none
 C        in string url
@@ -332,7 +332,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__exec_f(self, methodName,
+        subroutine sidl_rmi_ProtocolFactory__exec_f(self, methodName, 
      &     inArgs, outArgs, exception)
         implicit none
 C        in sidl.rmi.ProtocolFactory self
@@ -353,7 +353,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__getURL_f(self, retval,
+        subroutine sidl_rmi_ProtocolFactory__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolFactory self
@@ -370,7 +370,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__isRemote_f(self, retval,
+        subroutine sidl_rmi_ProtocolFactory__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolFactory self
@@ -387,7 +387,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__isLocal_f(self, retval,
+        subroutine sidl_rmi_ProtocolFactory__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolFactory self
@@ -404,7 +404,7 @@ C       Method:  _set_hooks[]
 C       Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__set_hooks_f(self, on,
+        subroutine sidl_rmi_ProtocolFactory__set_hooks_f(self, on, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolFactory self
@@ -421,7 +421,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_ProtocolFactory__set_hooks_static_f(on,
+        subroutine sidl_rmi_ProtocolFactory__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

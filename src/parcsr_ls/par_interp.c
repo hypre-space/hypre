@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.22 $
+ * $Revision: 2.26 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -73,7 +60,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
@@ -162,7 +149,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -492,7 +479,10 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+ 	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+ 	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -1048,7 +1038,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
@@ -1135,7 +1125,7 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -1464,7 +1454,10 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -1955,7 +1948,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix    *P_diag;
@@ -2030,7 +2023,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -2288,7 +2281,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,diagonal,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
+#define HYPRE_SMP_PRIVATE i,j,jl,i1,jj,ns,ne,size,rest,diagonal,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
 #include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {
@@ -2310,7 +2303,10 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -2946,7 +2942,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
 
-   int             *CF_marker_offd;
+   int             *CF_marker_offd = NULL;
    int             *dof_func_offd = NULL;
 
    hypre_CSRMatrix *A_ext;
@@ -3035,7 +3031,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+   if (num_cols_A_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
    if (num_functions > 1 && num_cols_A_offd)
 	dof_func_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
@@ -3365,7 +3361,10 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
      P_marker = hypre_CTAlloc(int, n_fine);
-     P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     if (num_cols_A_offd)
+	P_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
+     else
+	P_marker_offd = NULL;
 
      for (i = 0; i < n_fine; i++)
      {      

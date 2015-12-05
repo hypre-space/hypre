@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructStencil_IOR.c
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -63,8 +63,8 @@ static struct sidl_recursive_mutex_t bHYPRE_SStructStencil__mutex= SIDL_RECURSIV
  * Static variables to hold version of IOR
  */
 
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /*
  * Static variable to hold shared ClassInfo interface.
@@ -334,7 +334,7 @@ bHYPRE_SStructStencil_isSame__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "iobj", &iobj_str, _ex);SIDL_CHECK(*_ex);
-  iobj = skel_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(iobj_str, TRUE,
+  iobj = skel_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(iobj_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -348,8 +348,8 @@ bHYPRE_SStructStencil_isSame__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(iobj) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj, _ex); SIDL_CHECK(
+      *_ex);
     if(iobj_str) {free(iobj_str);}
   }
   return;
@@ -430,7 +430,7 @@ bHYPRE_SStructStencil_getClassInfo__exec(
 
   /* pack return value */
   if(_retval){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -439,12 +439,12 @@ bHYPRE_SStructStencil_getClassInfo__exec(
   }
   /* pack out and inout argments */
   /* clean-up dangling references */
-  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
-    _ex)) {
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval, _ex)) 
+    {
     (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
       sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval, _ex); SIDL_CHECK(
+      *_ex);
   }
   return;
 
@@ -487,14 +487,14 @@ static void* ior_bHYPRE_SStructStencil__cast(
   cmp0 = strcmp(name, "sidl.BaseClass");
   if (!cmp0) {
     (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-    cast = self;
+    cast = ((struct sidl_BaseClass__object*)self);
     return cast;
   }
   else if (cmp0 < 0) {
     cmp1 = strcmp(name, "bHYPRE.SStructStencil");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct bHYPRE_SStructStencil__object*)self);
       return cast;
     }
   }
@@ -543,8 +543,8 @@ static void ior_bHYPRE_SStructStencil__set_hooks(
  */
 
 static void ior_bHYPRE_SStructStencil__delete(
-  struct bHYPRE_SStructStencil__object* self,
-    struct sidl_BaseInterface__object **_ex)
+  struct bHYPRE_SStructStencil__object* self, struct sidl_BaseInterface__object 
+    **_ex)
 {
   *_ex = NULL; /* default to no exception */
   bHYPRE_SStructStencil__fini(self,_ex);
@@ -557,11 +557,10 @@ ior_bHYPRE_SStructStencil__getURL(
     struct bHYPRE_SStructStencil__object* self,
     struct sidl_BaseInterface__object **_ex) {
   char* ret = NULL;
-  char* objid = 
-    sidl_rmi_InstanceRegistry_getInstanceByClass((sidl_BaseClass)self,
-    _ex); SIDL_CHECK(*_ex);
+  char* objid = sidl_rmi_InstanceRegistry_getInstanceByClass((
+    sidl_BaseClass)self, _ex); SIDL_CHECK(*_ex);
   if(!objid) {
-    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self,
+    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self, 
       _ex); SIDL_CHECK(*_ex);
   }
   ret = sidl_rmi_ServerRegistry_getServerURL(objid, _ex); SIDL_CHECK(*_ex);
@@ -674,76 +673,76 @@ static void bHYPRE_SStructStencil__init_epv(void)
   epv->f_SetNumDimSize            = NULL;
   epv->f_SetEntry                 = NULL;
   epv->f_addRef                   = (void (*)(struct 
-    bHYPRE_SStructStencil__object*,
-    struct sidl_BaseInterface__object **)) s1->f_addRef;
+    bHYPRE_SStructStencil__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_addRef;
   epv->f_deleteRef                = (void (*)(struct 
-    bHYPRE_SStructStencil__object*,
-    struct sidl_BaseInterface__object **)) s1->f_deleteRef;
+    bHYPRE_SStructStencil__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_deleteRef;
   epv->f_isSame                   = (sidl_bool (*)(struct 
-    bHYPRE_SStructStencil__object*,struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) s1->f_isSame;
+    bHYPRE_SStructStencil__object*,struct sidl_BaseInterface__object*,struct 
+    sidl_BaseInterface__object **)) s1->f_isSame;
   epv->f_isType                   = (sidl_bool (*)(struct 
-    bHYPRE_SStructStencil__object*,const char*,
-    struct sidl_BaseInterface__object **)) s1->f_isType;
+    bHYPRE_SStructStencil__object*,const char*,struct 
+    sidl_BaseInterface__object **)) s1->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
-    bHYPRE_SStructStencil__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getClassInfo;
+    bHYPRE_SStructStencil__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_getClassInfo;
 
   bHYPRE_SStructStencil__set_epv(epv);
 
   memcpy((void*)hepv, epv, sizeof(struct bHYPRE_SStructStencil__epv));
-  e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
-    const char*, struct sidl_BaseInterface__object**)) epv->f__cast;
-  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*,
+  e0->f__cast               = (void* (*)(struct sidl_BaseClass__object*,const 
+    char*, struct sidl_BaseInterface__object**)) epv->f__cast;
+  e0->f__delete             = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e0->f__getURL             = (char* (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e0->f__raddRef            = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e0->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*, 
     struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f__exec               = (void (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef              = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
   e0->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    struct sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
   e0->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
   memcpy((void*) he0, e0, sizeof(struct sidl_BaseClass__epv));
 
-  e1->f__cast               = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e1->f__delete             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e1->f__getURL             = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e1->f__raddRef            = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e1->f__isRemote           = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e1->f__exec               = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef           = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType              = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__cast               = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e1->f__delete             = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e1->f__getURL             = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e1->f__raddRef            = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e1->f__isRemote           = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e1->f__exec               = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef              = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_addRef;
+  e1->f_deleteRef           = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_deleteRef;
+  e1->f_isSame              = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e1->f_isType              = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he1, e1, sizeof(struct sidl_BaseInterface__epv));
 
@@ -782,10 +781,10 @@ static void bHYPRE_SStructStencil__init_sepv(void)
 void bHYPRE_SStructStencil__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
-  struct bHYPRE_SStructStencil__epv **s_arg_epv__bhypre_sstructstencil,
-    struct bHYPRE_SStructStencil__epv **s_arg_epv_hooks__bhypre_sstructstencil)
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct bHYPRE_SStructStencil__epv **s_arg_epv__bhypre_sstructstencil,struct 
+    bHYPRE_SStructStencil__epv **s_arg_epv_hooks__bhypre_sstructstencil)
 {
   LOCK_STATIC_GLOBALS;
   if (!s_method_initialized) {
@@ -839,7 +838,7 @@ initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
     s_classInfo = sidl_ClassInfo__cast(impl,_ex);
     if (impl) {
       sidl_ClassInfoI_setName(impl, "bHYPRE.SStructStencil",_ex);
-      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
+      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION, 
         s_IOR_MINOR_VERSION,_ex);
       sidl_ClassInfoI_deleteRef(impl,_ex);
       sidl_atexit(sidl_deleteRef_atexit, &s_classInfo);
@@ -860,13 +859,13 @@ initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
  */
 
 static void
-initMetadata(struct bHYPRE_SStructStencil__object* self,
-  sidl_BaseInterface* _ex)
+initMetadata(struct bHYPRE_SStructStencil__object* self, sidl_BaseInterface* 
+  _ex)
 {
   *_ex = 0; /* default no exception */
   if (self) {
-    struct sidl_BaseClass__data *data = (struct 
-      sidl_BaseClass__data*)((*self).d_sidl_baseclass.d_data);
+    struct sidl_BaseClass__data *data = (struct sidl_BaseClass__data*)((
+      *self).d_sidl_baseclass.d_data);
     if (data) {
       data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
       data->d_IOR_minor_version = s_IOR_MINOR_VERSION;
@@ -882,8 +881,8 @@ return;
  */
 
 struct bHYPRE_SStructStencil__object*
-bHYPRE_SStructStencil__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex)
+bHYPRE_SStructStencil__new(void* ddata, struct sidl_BaseInterface__object ** 
+  _ex)
 {
   struct bHYPRE_SStructStencil__object* self =
     (struct bHYPRE_SStructStencil__object*) malloc(
@@ -975,8 +974,8 @@ s_externalEntryPoints = {
   bHYPRE_SStructStencil__new,
   bHYPRE_SStructStencil__statics,
   bHYPRE_SStructStencil__super,
-  0, 
-  10
+  1, 
+  0
 };
 
 /*

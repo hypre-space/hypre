@@ -2,9 +2,9 @@
  * File:          sidl_rmi_ServerRegistry_Impl.c
  * Symbol:        sidl.rmi.ServerRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_ServerRegistry_Impl.c,v 1.1 2006/08/29 23:31:44 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_ServerRegistry_Impl.c,v 1.2 2007/09/27 19:35:48 painter Exp $
  * Description:   Server-side implementation for sidl.rmi.ServerRegistry
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -80,8 +80,8 @@ static sidl_rmi_ServerInfo s_si;
 
 /* DO-NOT-DELETE splicer.end(sidl.rmi.ServerRegistry._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -329,62 +329,62 @@ impl_sidl_rmi_ServerRegistry_getExceptions(
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ServerRegistry_fconnect_sidl_BaseClass(const char* url,
+  impl_sidl_rmi_ServerRegistry_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ServerRegistry_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidl_rmi_ServerRegistry_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ServerRegistry_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidl_rmi_ServerRegistry_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ServerRegistry_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidl_rmi_ServerRegistry_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_RuntimeException(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_ServerRegistry_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidl_rmi_ServerRegistry_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_io_Serializable__connectI(url, ar, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_io_Serializable(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_Serializable__cast(bi, _ex);
 }
 struct sidl_rmi_ServerInfo__object* 
-  impl_sidl_rmi_ServerRegistry_fconnect_sidl_rmi_ServerInfo(const char* url,
+  impl_sidl_rmi_ServerRegistry_fconnect_sidl_rmi_ServerInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_rmi_ServerInfo__connectI(url, ar, _ex);
 }
 struct sidl_rmi_ServerInfo__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerInfo(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_rmi_ServerInfo__cast(bi, _ex);
 }
@@ -394,7 +394,7 @@ struct sidl_rmi_ServerRegistry__object*
   return sidl_rmi_ServerRegistry__connectI(url, ar, _ex);
 }
 struct sidl_rmi_ServerRegistry__object* 
-  impl_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerRegistry(void* bi,
+  impl_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerRegistry(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_rmi_ServerRegistry__cast(bi, _ex);
 }

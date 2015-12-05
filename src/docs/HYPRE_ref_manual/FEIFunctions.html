@@ -1,0 +1,124 @@
+<html><head><TITLE>FEI Functions </TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  FEI Functions   </H2>
+<hr>
+<DL>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <B>LLNL_FEI_Impl</B>(MPI_Comm comm)
+ <DD><I>
+Finite element interface constructor: this function creates an
+instantiation of the HYPRE fei class</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <B>~LLNL_FEI_Impl</B>()
+ <DD><I>
+Finite element interface destructor: this function destroys
+the object as well as its internal memory allocations</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>parameters</B>(int numParams, char **paramStrings)
+ <DD><I>
+The parameter function is the single most important function
+to pass solver information (which solver, which preconditioner,
+tolerance, other solver parameters) to HYPRE</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=initFields.html><B>initFields</B></A> 
+ <DD><I>
+Each node or element variable has one or more fields</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=initElemBlock.html><B>initElemBlock</B></A> 
+ <DD><I>
+The whole finite element mesh can be broken down into a number of
+element blocks</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=initElem.html><B>initElem</B></A> 
+ <DD><I>
+This function initializes element connectivity (that is, the node
+identifiers associated with the current element) given an element 
+block identifier and the element identifier with the element block</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=initSharedNodes.html><B>initSharedNodes</B></A> 
+ <DD><I>
+This function initializes the nodes that are shared between the
+current processor and its neighbors</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>initCRMult</B>(int CRListLen, int *CRNodeList, int *CRFieldList, int *CRID)
+ <DD><I>
+This function initializes the Lagrange multiplier constraints
+</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=initComplete.html><B>initComplete</B></A> 
+ <DD><I>
+This function signals to the FEI that the initialization step has
+been completed</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=resetSystem.html><B>resetSystem</B></A> 
+ <DD><I>
+This function resets the global matrix to be of the same sparsity
+pattern as before but with every entry set to s</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>resetMatrix</B>(double s)
+ <DD><I>
+This function resets the global matrix to be of the same sparsity
+pattern as before but with every entry set to s</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>resetRHSVector</B>(double s)
+ <DD><I>
+This function resets the right hand side vector to s</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>resetInitialGuess</B>(double s)
+ <DD><I>
+This function resets the solution vector to s</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=loadNodeBCs.html><B>loadNodeBCs</B></A> 
+ <DD><I>
+This function loads the nodal boundary conditions</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>sumInElem</B>(int elemBlockID, int elemID, int *elemConn, double **elemStiff, double *elemLoad, int elemFormat)
+ <DD><I>
+This function adds the element contribution to the global stiffness matrix
+and also the element load to the right hand side vector
+</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>sumInElemMatrix</B>(int elemBlock, int elemID, int* elemConn, double **elemStiffness, int elemFormat)
+ <DD><I>
+This function differs from the sumInElem function in that the right hand
+load vector is not passed</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>sumInElemRHS</B>(int elemBlock, int elemID, int *elemConn, double *elemLoad)
+ <DD><I>
+This function adds the element load to the right hand side vector
+</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=loadComplete.html><B>loadComplete</B></A> 
+ <DD><I>
+This function signals to the FEI that the loading phase has
+been completed</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>getNumBlockActNodes</B>(int elemBlockID, int *nNodes)
+ <DD><I>
+This function returns the number of nodes given the element block</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>getNumBlockActEqns</B>(int elemBlockID, int *nEqns)
+ <DD><I>
+This function returns the number of unknowns given the element block</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>getBlockNodeIDList</B>(int elemBlockID, int numNodes, int *nodeIDList)
+ <DD><I>
+This function returns the node identifiers given the element block</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>getBlockNodeSolution</B>(int elemBlockID, int numNodes, int *nodeIDList, int *solnOffsets, double *solnValues)
+ <DD><I>
+This function returns the nodal solutions given the element block number</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>loadCRMult</B>(int CRID, int CRListLen, int *CRNodeList, int *CRFieldList, double *CRWeightList, double CRValue)
+ <DD><I>
+This function loads the Lagrange multiplier constraints
+</I>
+</DL>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

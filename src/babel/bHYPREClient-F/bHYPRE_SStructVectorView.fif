@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_SStructVectorView_Impl.f
 C       Symbol:        bHYPRE.SStructVectorView-v1.0.0
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.SStructVectorView
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -23,7 +23,7 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine bHYPRE_SStructVectorView__cast_f(ref, retval,
+        subroutine bHYPRE_SStructVectorView__cast_f(ref, retval, 
      &     exception)
         implicit none
 C        in opaque ref
@@ -59,7 +59,7 @@ C       Method:  SetGrid[]
 C       Set the vector grid.
 C       
 
-        subroutine bHYPRE_SStructVectorView_SetGrid_f(self, grid,
+        subroutine bHYPRE_SStructVectorView_SetGrid_f(self, grid, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -86,7 +86,7 @@ C       of doubles representing the real and imaginary parts of the
 C       complex value.
 C       
 
-        subroutine bHYPRE_SStructVectorView_SetValues_f(self, part,
+        subroutine bHYPRE_SStructVectorView_SetValues_f(self, part, 
      &     index, dim, var, value, retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -121,7 +121,7 @@ C       of doubles representing the real and imaginary parts of each
 C       complex value.
 C       
 
-        subroutine bHYPRE_SStructVectorView_SetBoxValues_f(self, part,
+        subroutine bHYPRE_SStructVectorView_SetBoxValues_f(self, part, 
      &     ilower, iupper, dim, var, values, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -160,7 +160,7 @@ C       of doubles representing the real and imaginary parts of the
 C       complex value.
 C       
 
-        subroutine bHYPRE_SStructVectorView_AddToValues_f(self, part,
+        subroutine bHYPRE_SStructVectorView_AddToValues_f(self, part, 
      &     index, dim, var, value, retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -226,7 +226,7 @@ C       Method:  Gather[]
 C       Gather vector data before calling {\tt GetValues}.
 C       
 
-        subroutine bHYPRE_SStructVectorView_Gather_f(self, retval,
+        subroutine bHYPRE_SStructVectorView_Gather_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -250,7 +250,7 @@ C       of doubles representing the real and imaginary parts of the
 C       complex value.
 C       
 
-        subroutine bHYPRE_SStructVectorView_GetValues_f(self, part,
+        subroutine bHYPRE_SStructVectorView_GetValues_f(self, part, 
      &     index, dim, var, value, retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -284,7 +284,7 @@ C       of doubles representing the real and imaginary parts of each
 C       complex value.
 C       
 
-        subroutine bHYPRE_SStructVectorView_GetBoxValues_f(self, part,
+        subroutine bHYPRE_SStructVectorView_GetBoxValues_f(self, part, 
      &     ilower, iupper, dim, var, values, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -315,7 +315,7 @@ C       Method:  SetComplex[]
 C       Set the vector to be complex.
 C       
 
-        subroutine bHYPRE_SStructVectorView_SetComplex_f(self, retval,
+        subroutine bHYPRE_SStructVectorView_SetComplex_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -376,7 +376,7 @@ C       Method:  SetCommunicator[]
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 
-        subroutine bHYPRE_SStructVectorView_SetCommunicator_f(self,
+        subroutine bHYPRE_SStructVectorView_SetCommunicator_f(self, 
      &     mpi_comm, retval, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -413,7 +413,7 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 
-        subroutine bHYPRE_SStructVectorView_Initialize_f(self, retval,
+        subroutine bHYPRE_SStructVectorView_Initialize_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -434,7 +434,7 @@ C       Initialize preceding Assemble. Values can only be set in
 C       between a call to Initialize and Assemble.
 C       
 
-        subroutine bHYPRE_SStructVectorView_Assemble_f(self, retval,
+        subroutine bHYPRE_SStructVectorView_Assemble_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -553,7 +553,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine bHYPRE_SStructVectorView__exec_f(self, methodName,
+        subroutine bHYPRE_SStructVectorView__exec_f(self, methodName, 
      &     inArgs, outArgs, exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -574,7 +574,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_SStructVectorView__getURL_f(self, retval,
+        subroutine bHYPRE_SStructVectorView__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -591,7 +591,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_SStructVectorView__isRemote_f(self, retval,
+        subroutine bHYPRE_SStructVectorView__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -608,7 +608,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_SStructVectorView__isLocal_f(self, retval,
+        subroutine bHYPRE_SStructVectorView__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self
@@ -625,7 +625,7 @@ C       Method:  _set_hooks[]
 C       Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_SStructVectorView__set_hooks_f(self, on,
+        subroutine bHYPRE_SStructVectorView__set_hooks_f(self, on, 
      &     exception)
         implicit none
 C        in bHYPRE.SStructVectorView self

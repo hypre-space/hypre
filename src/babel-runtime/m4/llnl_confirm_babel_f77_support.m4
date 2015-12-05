@@ -36,27 +36,39 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F77_SUPPORT], [
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[       write (*,*) 'Hello world'])],
       AC_MSG_RESULT([yes]),[
       AC_MSG_RESULT([no])
-      AC_MSG_ERROR([The F77 compiler $F77 fails to compile a trivial program (see config.log)])])
+      AC_MSG_WARN([The F77 compiler $F77 fails to compile a trivial program (see config.log)])
+      AC_MSG_WARN([Disabling F77 Support])
+      enable_fortran77="broken"
+    ])
     AC_LANG_POP([])
-    # 5.a. Libraries (existence)
-    LLNL_LIB_FMAIN
-    LLNL_F77_LIBRARY_LDFLAGS
-    _STAR_RESTFP_FIX_F77
-    LLNL_F77_DUMMY_MAIN
-    case $target_os in
-    "darwin7"*) ;; # ignore
-    *)
-      LLNL_SORT_FLIBS
-      ;;
-    esac
-    LLNL_F77_NAME_MANGLING
-    LLNL_F77_C_CONFIG
+    if test "X$enable_fortran90" != "Xbroken"; then
+      # 5.a. Libraries (existence)
+      LLNL_LIB_FMAIN
+      LLNL_F77_LIBRARY_LDFLAGS
+      _STAR_RESTFP_FIX_F77
+      LLNL_F77_DUMMY_MAIN
+      case $target_os in
+      "darwin7"*) ;; # ignore
+      *)
+        if test "X$FLIBS_NOSORT" != "Xtrue" ; then
+	  dnl don't sort when the user specified FLIBS directly
+          LLNL_SORT_FLIBS
+        fi
+        ;;
+      esac
+      LLNL_F77_NAME_MANGLING
+      LLNL_F77_C_CONFIG
+    fi
   fi
-  AM_CONDITIONAL(SUPPORT_FORTRAN77, test "X$enable_fortran77" != "Xno")
+  AM_CONDITIONAL(SUPPORT_FORTRAN77, test "X$enable_fortran77" = "Xyes")
   if test "X$enable_fortran77" = "Xno"; then
     AC_DEFINE(FORTRAN77_DISABLED, 1, [If defined, Fortran support was disabled at configure time])
     msgs="$msgs
 	  Fortran77 disabled by request";
+  elif test "X$enable_fortran77" = "Xbroken"; then
+    AC_DEFINE(FORTRAN77_DISABLED, 1, [If defined, Fortran support was disabled at configure time])
+    msgs="$msgs
+          Fortran 77 disabled against user request: no viable compiler found.";    
   else
     msgs="$msgs
 	  Fortran77 enabled.";

@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructStencil.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -127,11 +127,13 @@ bHYPRE_SStructStencil_SetNumDimSize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetNumDimSize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetNumDimSize)(
     self,
     ndim,
     size,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -152,18 +154,23 @@ bHYPRE_SStructStencil_SetEntry(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t offset_lower[1], offset_upper[1], offset_stride[1]; 
   struct sidl_int__array offset_real;
   struct sidl_int__array*offset_tmp = &offset_real;
   offset_upper[0] = dim-1;
-  sidl_int__array_init(offset, offset_tmp, 1, offset_lower, offset_upper,
+  sidl_int__array_init(offset, offset_tmp, 1, offset_lower, offset_upper, 
     offset_stride);
-  return (*self->d_epv->f_SetEntry)(
+  _result = (*self->d_epv->f_SetEntry)(
     self,
     entry,
     offset_tmp,
     var,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)offset_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -210,10 +217,12 @@ bHYPRE_SStructStencil_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -228,10 +237,12 @@ bHYPRE_SStructStencil_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -245,9 +256,11 @@ bHYPRE_SStructStencil_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -305,9 +318,11 @@ bHYPRE_SStructStencil__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -341,9 +356,11 @@ bHYPRE_SStructStencil__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -600,8 +617,8 @@ bHYPRE_SStructStencil__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructStencil__object*
-bHYPRE_SStructStencil__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructStencil__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

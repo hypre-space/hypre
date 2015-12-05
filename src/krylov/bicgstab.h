@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.7 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -73,7 +60,6 @@ char *hypre_ParKrylovCAlloc( int count , int elt_size );
 int hypre_ParKrylovFree( char *ptr );
 void *hypre_ParKrylovCreateVectorArray( int n , void *vvector );
 int hypre_ParKrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-int hypre_ParKrylovClearVector( void *x );
 */
 /* functions in pcg_struct.c which are used here:
   void *hypre_ParKrylovCreateVector( void *vvector );
@@ -83,6 +69,7 @@ int hypre_ParKrylovClearVector( void *x );
   int hypre_ParKrylovMatvecDestroy( void *matvec_data );
   double hypre_ParKrylovInnerProd( void *x , void *y );
   int hypre_ParKrylovCopyVector( void *x , void *y );
+  int hypre_ParKrylovClearVector( void *x );
   int hypre_ParKrylovScaleVector( double alpha , void *x );
   int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
   int hypre_ParKrylovCommInfo( void *A , int *my_id , int *num_procs );
@@ -99,6 +86,7 @@ typedef struct
   int (*MatvecDestroy)( void *matvec_data );
   double (*InnerProd)( void *x , void *y );
   int (*CopyVector)( void *x , void *y );
+  int (*ClearVector)( void *x );
   int (*ScaleVector)( double alpha , void *x );
   int (*Axpy)( double alpha , void *x , void *y );
   int (*CommInfo)( void *A , int *my_id , int *num_procs );
@@ -120,6 +108,8 @@ typedef struct
    double   tol;
    double   cf_tol;
    double   rel_residual_norm;
+   double   a_tol;
+   
 
    void  *A;
    void  *r;
@@ -171,6 +161,7 @@ extern "C" {
       int (*MatvecDestroy)( void *matvec_data ),
       double (*InnerProd)( void *x , void *y ),
       int (*CopyVector)( void *x , void *y ),
+      int (*ClearVector)( void *x ),
       int (*ScaleVector)( double alpha , void *x ),
       int (*Axpy)( double alpha , void *x , void *y ),
       int (*CommInfo)( void *A , int *my_id , int *num_procs ),

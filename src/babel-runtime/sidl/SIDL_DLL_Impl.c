@@ -2,9 +2,9 @@
  * File:          sidl_DLL_Impl.c
  * Symbol:        sidl.DLL-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_DLL_Impl.c,v 1.7 2006/08/29 22:29:49 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_DLL_Impl.c,v 1.8 2007/09/27 19:35:43 painter Exp $
  * Description:   Server-side implementation for sidl.DLL
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -142,8 +142,8 @@ static void showLoadResult(void *handle)
 
 /* DO-NOT-DELETE splicer.end(sidl.DLL._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -601,13 +601,12 @@ struct sidl_BaseClass__object* impl_sidl_DLL_fconnect_sidl_BaseClass(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* impl_sidl_DLL_fcast_sidl_BaseClass(void* bi,
+struct sidl_BaseClass__object* impl_sidl_DLL_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_sidl_DLL_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseInterface__object* impl_sidl_DLL_fconnect_sidl_BaseInterface(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* impl_sidl_DLL_fcast_sidl_BaseInterface(void* 
@@ -618,24 +617,24 @@ struct sidl_ClassInfo__object* impl_sidl_DLL_fconnect_sidl_ClassInfo(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* impl_sidl_DLL_fcast_sidl_ClassInfo(void* bi,
+struct sidl_ClassInfo__object* impl_sidl_DLL_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
-struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(const char* url,
+struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_DLL__connectI(url, ar, _ex);
 }
-struct sidl_DLL__object* impl_sidl_DLL_fcast_sidl_DLL(void* bi,
+struct sidl_DLL__object* impl_sidl_DLL_fcast_sidl_DLL(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_DLL__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_DLL_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar,
+  impl_sidl_DLL_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
-struct sidl_RuntimeException__object* 
-  impl_sidl_DLL_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* _ex) {
+struct sidl_RuntimeException__object* impl_sidl_DLL_fcast_sidl_RuntimeException(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

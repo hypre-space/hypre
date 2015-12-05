@@ -2,9 +2,9 @@
  * File:          sidl_BaseInterface_fStub.h
  * Symbol:        sidl.BaseInterface-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_BaseInterface_fStub.h,v 1.3 2006/12/29 21:24:27 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_BaseInterface_fStub.h,v 1.4 2007/09/27 19:56:34 painter Exp $
  * Description:   Client-side documentation text for sidl.BaseInterface
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -69,8 +69,8 @@ sidl_BaseInterface__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_BaseInterface__object*
-sidl_BaseInterface__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_BaseInterface__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

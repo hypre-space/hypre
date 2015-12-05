@@ -69,6 +69,9 @@ extern "C" { /* } */
   int s_accept( int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen, 
 		sidl_BaseInterface *_ex );
 
+  int s_connect(int sockfd, const struct sockaddr *servaddr, socklen_t addrlen,
+                sidl_BaseInterface *_ex );
+
   /* same as fork(), but using sidl exceptions */
   pid_t s_fork( sidl_BaseInterface *_ex );
 

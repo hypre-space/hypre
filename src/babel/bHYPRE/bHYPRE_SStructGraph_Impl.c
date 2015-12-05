@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructGraph_Impl.c
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -39,8 +39,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -57,9 +57,9 @@ impl_bHYPRE_SStructGraph__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._load) */
   /* Insert-Code-Here {bHYPRE.SStructGraph._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._load) */
   }
 }
 /*
@@ -79,7 +79,7 @@ impl_bHYPRE_SStructGraph__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /*
@@ -96,7 +96,7 @@ impl_bHYPRE_SStructGraph__ctor(
    data -> graph = NULL;
    bHYPRE_SStructGraph__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._ctor) */
   }
 }
 
@@ -146,7 +146,7 @@ impl_bHYPRE_SStructGraph__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -158,7 +158,7 @@ impl_bHYPRE_SStructGraph__dtor(
    hypre_assert( ierr==0 );
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._dtor) */
   }
 }
 
@@ -180,7 +180,7 @@ impl_bHYPRE_SStructGraph_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Create) */
   /* Insert-Code-Here {bHYPRE.SStructGraph.Create} (Create method) */
 
    int ierr = 0;
@@ -203,7 +203,7 @@ impl_bHYPRE_SStructGraph_Create(
    return graph;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Create) */
   }
 }
 
@@ -227,7 +227,7 @@ impl_bHYPRE_SStructGraph_SetCommGrid(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommGrid) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommGrid) */
   /* Insert the implementation of the SetCommGrid method here... */
 
    /* DEPRECATED    use Create */
@@ -250,7 +250,7 @@ impl_bHYPRE_SStructGraph_SetCommGrid(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetCommGrid) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetCommGrid) */
   }
 }
 
@@ -275,7 +275,7 @@ impl_bHYPRE_SStructGraph_SetStencil(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetStencil) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
 
    int ierr = 0;
@@ -292,7 +292,7 @@ impl_bHYPRE_SStructGraph_SetStencil(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetStencil) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetStencil) */
   }
 }
 
@@ -326,7 +326,7 @@ impl_bHYPRE_SStructGraph_AddEntries(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.AddEntries) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.AddEntries) */
   /* Insert the implementation of the AddEntries method here... */
 
    int ierr = 0;
@@ -341,7 +341,7 @@ impl_bHYPRE_SStructGraph_AddEntries(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.AddEntries) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.AddEntries) */
   }
 }
 
@@ -363,7 +363,7 @@ impl_bHYPRE_SStructGraph_SetObjectType(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetObjectType) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetObjectType) */
   /* Insert the implementation of the SetObjectType method here... */
 
    int ierr = 0;
@@ -376,7 +376,7 @@ impl_bHYPRE_SStructGraph_SetObjectType(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetObjectType) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetObjectType) */
   }
 }
 
@@ -398,10 +398,10 @@ impl_bHYPRE_SStructGraph_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
    return 1; /* corresponding HYPRE function isn't implemented, and shouldn't be */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetCommunicator) */
   }
 }
 
@@ -451,13 +451,13 @@ impl_bHYPRE_SStructGraph_Initialize(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Initialize) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Initialize) */
   /* Insert the implementation of the Initialize method here... */
    /* this function is not necessary for SStructGraph */
 
    return 0;
    
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Initialize) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Initialize) */
   }
 }
 
@@ -482,7 +482,7 @@ impl_bHYPRE_SStructGraph_Assemble(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Assemble) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Assemble) */
   /* Insert the implementation of the Assemble method here... */
 
    int ierr = 0;
@@ -495,97 +495,94 @@ impl_bHYPRE_SStructGraph_Assemble(
 
    return ierr;
    
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Assemble) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Assemble) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructGraph_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_ProblemDefinition(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_SStructGraph_fcast_bHYPRE_ProblemDefinition(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_ProblemDefinition__cast(bi, _ex);
 }
 struct bHYPRE_SStructGraph__object* 
-  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGraph(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGraph(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_SStructGraph__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructGraph__object* 
-  impl_bHYPRE_SStructGraph_fcast_bHYPRE_SStructGraph(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_bHYPRE_SStructGraph(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructGraph__cast(bi, _ex);
 }
 struct bHYPRE_SStructGrid__object* 
-  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_SStructGrid__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructGrid__object* 
-  impl_bHYPRE_SStructGraph_fcast_bHYPRE_SStructGrid(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_bHYPRE_SStructGrid(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructGrid__cast(bi, _ex);
 }
 struct bHYPRE_SStructStencil__object* 
-  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructStencil(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructStencil(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_SStructStencil__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructStencil__object* 
-  impl_bHYPRE_SStructGraph_fcast_bHYPRE_SStructStencil(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_bHYPRE_SStructStencil(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructStencil__cast(bi, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructGraph_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_SStructGraph_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructGraph_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_SStructGraph_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructGraph_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructGraph_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructGraph_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_SStructGraph_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructGraph_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_SStructGraph_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructGraph_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_SStructGraph_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

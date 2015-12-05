@@ -2,9 +2,9 @@
  * File:          sidl_rmi_ServerRegistry_IOR.h
  * Symbol:        sidl.rmi.ServerRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_ServerRegistry_IOR.h,v 1.1 2006/08/29 23:39:47 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_ServerRegistry_IOR.h,v 1.2 2007/09/27 19:35:23 painter Exp $
  * Description:   Intermediate Object Representation for sidl.rmi.ServerRegistry
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -250,84 +250,84 @@ const struct sidl_rmi_ServerRegistry__external*
 sidl_rmi_ServerRegistry__externals(void);
 
 extern struct sidl_rmi_ServerRegistry__object*
-sidl_rmi_ServerRegistry__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex);
+sidl_rmi_ServerRegistry__new(void* ddata,struct sidl_BaseInterface__object ** 
+  _ex);
 
 extern struct sidl_rmi_ServerRegistry__sepv*
 sidl_rmi_ServerRegistry__statics(void);
 
 extern void sidl_rmi_ServerRegistry__init(
-  struct sidl_rmi_ServerRegistry__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct sidl_rmi_ServerRegistry__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void sidl_rmi_ServerRegistry__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_rmi_ServerRegistry__epv **s_arg_epv__sidl_rmi_serverregistry,
     struct sidl_rmi_ServerRegistry__epv 
     **s_arg_epv_hooks__sidl_rmi_serverregistry);
   extern void sidl_rmi_ServerRegistry__fini(
-    struct sidl_rmi_ServerRegistry__object* self,
-      struct sidl_BaseInterface__object ** _ex);
-  extern void sidl_rmi_ServerRegistry__IOR_version(int32_t *major,
-    int32_t *minor);
+    struct sidl_rmi_ServerRegistry__object* self, struct 
+      sidl_BaseInterface__object ** _ex);
+  extern void sidl_rmi_ServerRegistry__IOR_version(int32_t *major, int32_t 
+    *minor);
 
   struct sidl_BaseClass__object* 
-    skel_sidl_rmi_ServerRegistry_fconnect_sidl_BaseClass(const char* url,
+    skel_sidl_rmi_ServerRegistry_fconnect_sidl_BaseClass(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_BaseClass(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_BaseClass(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_sidl_rmi_ServerRegistry_fconnect_sidl_BaseInterface(const char* url,
+    skel_sidl_rmi_ServerRegistry_fconnect_sidl_BaseInterface(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* 
-    skel_sidl_rmi_ServerRegistry_fconnect_sidl_ClassInfo(const char* url,
+    skel_sidl_rmi_ServerRegistry_fconnect_sidl_ClassInfo(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_ClassInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_ClassInfo(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
     skel_sidl_rmi_ServerRegistry_fconnect_sidl_RuntimeException(const char* url,
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Serializable__object* 
-    skel_sidl_rmi_ServerRegistry_fconnect_sidl_io_Serializable(const char* url,
+    skel_sidl_rmi_ServerRegistry_fconnect_sidl_io_Serializable(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Serializable__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_io_Serializable(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_io_Serializable(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_ServerInfo__object* 
-    skel_sidl_rmi_ServerRegistry_fconnect_sidl_rmi_ServerInfo(const char* url,
+    skel_sidl_rmi_ServerRegistry_fconnect_sidl_rmi_ServerInfo(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_ServerInfo__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerInfo(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_ServerRegistry__object* 
     skel_sidl_rmi_ServerRegistry_fconnect_sidl_rmi_ServerRegistry(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_ServerRegistry__object* 
-    skel_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerRegistry(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_ServerRegistry_fcast_sidl_rmi_ServerRegistry(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_ServerRegistry__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

@@ -15,10 +15,11 @@ independently.  That is to ensure that the two configure scripts use
 the same compiler settings.
 
 The "assert" macro is frequently invoked here.  This violates hypre
-policy, which is to use hypre_assert instead (the difference is that
-assert defaults to on, hypre_assert defaults to off; we have customers
-who complain if asserts are on and don't want to have to turn them
-off).  I don't have a solution.
+policy, which is to use hypre_assert instead (hypre_assert doesn't
+terminate the program; we have customers who want to decide for
+themselves whether to terminate).  This is not much of a problem
+because I've never seen one of these asserts fail.  One workaround
+might be to define NDEBUG during the configuration process.
 
 ---- the rest of this file is from an older readme file, not recently
      tested ... 

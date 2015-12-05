@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -48,6 +35,7 @@ typedef struct
    hypre_StructVector    **svectors;     /* nvar array of svectors */
    hypre_CommPkg         **comm_pkgs;    /* nvar array of comm pkgs */
 
+   int                     accumulated;  /* AddTo values accumulated? */
    int                     complex;      /* Is the vector complex */
 
    int                     ref_count;
@@ -73,6 +61,9 @@ typedef struct hypre_SStructVector_struct
    /* u-vector info */
    HYPRE_IJVector          ijvector;
    hypre_ParVector        *parvector;
+
+   /* inter-part communication info */
+   int                     nbor_ncomms;  /* num comm_pkgs with neighbor parts */
 
   /* GEC10020902 pointer to big chunk of memory and auxiliary information   */
 
@@ -101,6 +92,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructVectorPVector(vec, part)  ((vec) -> pvectors[part])
 #define hypre_SStructVectorIJVector(vec)       ((vec) -> ijvector)
 #define hypre_SStructVectorParVector(vec)      ((vec) -> parvector)
+#define hypre_SStructVectorNborNComms(vec)     ((vec) -> nbor_ncomms)
 #define hypre_SStructVectorComplex(vec)        ((vec) -> complex)
 #define hypre_SStructVectorGlobalSize(vec)     ((vec) -> global_size)
 #define hypre_SStructVectorRefCount(vec)       ((vec) -> ref_count)
@@ -120,6 +112,7 @@ typedef struct hypre_SStructVector_struct
 #define hypre_SStructPVectorSVector(pvec, v)  ((pvec) -> svectors[v])
 #define hypre_SStructPVectorCommPkgs(pvec)    ((pvec) -> comm_pkgs)
 #define hypre_SStructPVectorCommPkg(pvec, v)  ((pvec) -> comm_pkgs[v])
+#define hypre_SStructPVectorAccumulated(pvec) ((pvec) -> accumulated)
 #define hypre_SStructPVectorComplex(pvec)     ((pvec) -> complex)
 #define hypre_SStructPVectorRefCount(pvec)    ((pvec) -> ref_count)
 #define hypre_SStructPVectorDataIndices(pvec) ((pvec) -> dataindices  )

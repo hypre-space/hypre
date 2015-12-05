@@ -2,7 +2,7 @@
  * File:          bHYPRE_Euclid_IOR.h
  * Symbol:        bHYPRE.Euclid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.Euclid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -328,22 +328,22 @@ extern struct bHYPRE_Euclid__sepv*
 bHYPRE_Euclid__statics(void);
 
 extern void bHYPRE_Euclid__init(
-  struct bHYPRE_Euclid__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct bHYPRE_Euclid__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void bHYPRE_Euclid__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct bHYPRE_Operator__epv **s_arg_epv__bhypre_operator,
   struct bHYPRE_Operator__epv **s_arg_epv_hooks__bhypre_operator,
   struct bHYPRE_Solver__epv **s_arg_epv__bhypre_solver,
   struct bHYPRE_Solver__epv **s_arg_epv_hooks__bhypre_solver,
-  struct bHYPRE_Euclid__epv **s_arg_epv__bhypre_euclid,
-    struct bHYPRE_Euclid__epv **s_arg_epv_hooks__bhypre_euclid);
+  struct bHYPRE_Euclid__epv **s_arg_epv__bhypre_euclid,struct 
+    bHYPRE_Euclid__epv **s_arg_epv_hooks__bhypre_euclid);
   extern void bHYPRE_Euclid__fini(
-    struct bHYPRE_Euclid__object* self,
-      struct sidl_BaseInterface__object ** _ex);
+    struct bHYPRE_Euclid__object* self, struct sidl_BaseInterface__object ** 
+      _ex);
   extern void bHYPRE_Euclid__IOR_version(int32_t *major, int32_t *minor);
 
   struct bHYPRE_Euclid__object* skel_bHYPRE_Euclid_fconnect_bHYPRE_Euclid(const 
@@ -352,22 +352,21 @@ extern void bHYPRE_Euclid__getEPVs(
     struct sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_IJParCSRMatrix__object* 
-    skel_bHYPRE_Euclid_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+    skel_bHYPRE_Euclid_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_IJParCSRMatrix__object* 
-    skel_bHYPRE_Euclid_fcast_bHYPRE_IJParCSRMatrix(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_Euclid_fcast_bHYPRE_IJParCSRMatrix(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_MPICommunicator__object* 
-    skel_bHYPRE_Euclid_fconnect_bHYPRE_MPICommunicator(const char* url,
+    skel_bHYPRE_Euclid_fconnect_bHYPRE_MPICommunicator(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_MPICommunicator__object* 
-    skel_bHYPRE_Euclid_fcast_bHYPRE_MPICommunicator(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_Euclid_fcast_bHYPRE_MPICommunicator(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
-  struct bHYPRE_Operator__object* 
-    skel_bHYPRE_Euclid_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_Operator__object* skel_bHYPRE_Euclid_fconnect_bHYPRE_Operator(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_Operator__object* skel_bHYPRE_Euclid_fcast_bHYPRE_Operator(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
@@ -381,38 +380,36 @@ extern void bHYPRE_Euclid__getEPVs(
   struct bHYPRE_Vector__object* skel_bHYPRE_Euclid_fcast_bHYPRE_Vector(void *bi,
     struct sidl_BaseInterface__object **_ex);
 
-  struct sidl_BaseClass__object* 
-    skel_bHYPRE_Euclid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* skel_bHYPRE_Euclid_fconnect_sidl_BaseClass(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* skel_bHYPRE_Euclid_fcast_sidl_BaseClass(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_Euclid_fconnect_sidl_BaseInterface(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_Euclid_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_Euclid_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_Euclid_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
-  struct sidl_ClassInfo__object* 
-    skel_bHYPRE_Euclid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* skel_bHYPRE_Euclid_fconnect_sidl_ClassInfo(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* skel_bHYPRE_Euclid_fcast_sidl_ClassInfo(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_Euclid_fconnect_sidl_RuntimeException(const char* url,
+    skel_bHYPRE_Euclid_fconnect_sidl_RuntimeException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_Euclid_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_Euclid_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_Euclid__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

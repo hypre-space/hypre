@@ -3,7 +3,7 @@
 ! Symbol:        sidl.io.Serializable-v0.9.15
 ! Symbol Type:   interface
 ! Babel Version: 1.0.0
-! Release:       $Name: V2-2-0b $
+! Release:       $Name: V2-4-0b $
 ! Revision:      @(#) $Id: sidl_io_Serializable.F90,v 1.1 2007/02/06 01:23:09 painter Exp $
 ! Description:   Client-side module for sidl.io.Serializable
 ! 

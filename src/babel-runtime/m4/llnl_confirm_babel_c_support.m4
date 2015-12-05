@@ -28,7 +28,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   AC_HEADER_DIRENT
   AC_HEADER_STDC
   AC_HEADER_STDBOOL
-  AC_CHECK_HEADERS([argz.h float.h inttypes.h limits.h malloc.h memory.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/socket.h unistd.h ctype.h sys/stat.h sys/types.h sys/time.h])
+  AC_CHECK_HEADERS([argz.h float.h limits.h malloc.h memory.h netinet/in.h sched.h stddef.h stdlib.h string.h strings.h sys/socket.h unistd.h ctype.h sys/stat.h sys/time.h])
   AC_HEADER_TIME
   # c. Typedefs, Structs, Compiler Characteristics
   AC_C_CONST

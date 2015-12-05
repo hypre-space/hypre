@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.24 $
+ * $Revision: 2.28 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -41,6 +28,7 @@ typedef struct
 {
 
    double                tol;
+   double                a_tol;
    double                cf_tol;
    int                   dscg_max_its;
    int                   pcg_max_its;
@@ -106,6 +94,7 @@ hypre_AMGHybridCreate( )
 
    /* set defaults */
    (AMGhybrid_data -> tol)               = 1.0e-06;
+   (AMGhybrid_data -> a_tol)             = 0.0;
    (AMGhybrid_data -> cf_tol)            = 0.90;
    (AMGhybrid_data -> dscg_max_its)      = 1000;
    (AMGhybrid_data -> pcg_max_its)       = 200;
@@ -235,7 +224,30 @@ hypre_AMGHybridSetTol( void   *AMGhybrid_vdata,
 
    return hypre_error_flag;
 }
+/*--------------------------------------------------------------------------
+ * hypre_AMGHybridSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
 
+int
+hypre_AMGHybridSetAbsoluteTol( void   *AMGhybrid_vdata,
+                    double  a_tol       )
+{
+   hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
+
+   if (!AMGhybrid_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (a_tol < 0 || a_tol > 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   (AMGhybrid_data -> a_tol) = a_tol;
+
+   return hypre_error_flag;
+}
 /*--------------------------------------------------------------------------
  * hypre_AMGHybridSetConvergenceTol
  *--------------------------------------------------------------------------*/
@@ -1396,6 +1408,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    hypre_AMGHybridData  *AMGhybrid_data    = AMGhybrid_vdata;
 
    double             tol;
+   double             a_tol;
    double             cf_tol;
    int                dscg_max_its;
    int                pcg_max_its;
@@ -1470,6 +1483,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       return hypre_error_flag;
    }
    tol            = (AMGhybrid_data -> tol);
+   a_tol          = (AMGhybrid_data -> a_tol);
    cf_tol         = (AMGhybrid_data -> cf_tol);
    dscg_max_its   = (AMGhybrid_data -> dscg_max_its);
    pcg_max_its    = (AMGhybrid_data -> pcg_max_its);
@@ -1555,6 +1569,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                                                                                                                         
       hypre_PCGSetMaxIter(pcg_solver, dscg_max_its);
       hypre_PCGSetTol(pcg_solver, tol);
+      hypre_PCGSetAbsoluteTol(pcg_solver, a_tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetStopCrit(pcg_solver, stop_crit);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
@@ -1608,6 +1623,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                                                                                                                         
       hypre_GMRESSetMaxIter(pcg_solver, dscg_max_its);
       hypre_GMRESSetTol(pcg_solver, tol);
+      hypre_GMRESSetAbsoluteTol(pcg_solver, a_tol);
       hypre_GMRESSetKDim(pcg_solver, k_dim);
       hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
       hypre_GMRESSetRelChange(pcg_solver, rel_change);
@@ -1651,6 +1667,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_ParKrylovMatvec,
          hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
@@ -1658,6 +1675,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
                                                                                                                                         
       hypre_BiCGSTABSetMaxIter(pcg_solver, dscg_max_its);
       hypre_BiCGSTABSetTol(pcg_solver, tol);
+      hypre_BiCGSTABSetAbsoluteTol(pcg_solver, a_tol);
       hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
       hypre_BiCGSTABSetLogging(pcg_solver, logging);
       hypre_BiCGSTABSetPrintLevel(pcg_solver, sol_print_level);

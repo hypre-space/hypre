@@ -9,7 +9,7 @@ dnl the compiler accepts the keyword.  Otherwise, if the compiler supports
 dnl an equivalent (like gcc's __restrict__) defines "restrict" to be that.
 dnl Otherwise, defines "restrict" to be empty.
 dnl
-dnl @version $Id: acx_restrict.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: acx_restrict.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([ACX_C_RESTRICT],

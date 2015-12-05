@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.8 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -43,12 +30,12 @@
 #else
 
 #include "fortran.h"
-int hypre_F90_NAME_BLAS(dsygv, DSYGV)
+int hypre_F90_NAME_LAPACK(dsygv, DSYGV)
 ( int *itype, char *jobz, char *uplo, int *n,
   double *a, int *lda, double *b, int *ldb, double *w,
   double *work, int *lwork, /*@out@*/ int *info
 );
-int hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
+int hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )
 ( char* uplo, int* n, double* aval, int* lda, int* ierr );
 
 #endif
@@ -119,7 +106,7 @@ static int dsygv_interface (int *itype, char *jobz, char *uplo, int *
 #ifdef HYPRE_USING_ESSL
    dsygv(*itype, a, *lda, b, *ldb, w, a, *lda, *n, work, *lwork );
 #else
-   hypre_F90_NAME_BLAS( dsygv, DSYGV )( itype, jobz, uplo, n, 
+   hypre_F90_NAME_LAPACK( dsygv, DSYGV )( itype, jobz, uplo, n, 
 		       a, lda, b, ldb,
 		       w, work, lwork, info );
 #endif
@@ -132,7 +119,7 @@ static int dpotrf_interface (char *uplo, int *n, double *a, int *
 #ifdef HYPRE_USING_ESSL
    dpotrf(uplo, *n, a, *lda, info);
 #else
-   hypre_F90_NAME_BLAS( dpotrf, DPOTRF )(uplo, n, a, lda, info);
+   hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )(uplo, n, a, lda, info);
 #endif
    return 0;
 }

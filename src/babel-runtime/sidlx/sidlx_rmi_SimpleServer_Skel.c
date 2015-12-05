@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleServer_Skel.c
  * Symbol:        sidlx.rmi.SimpleServer-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for sidlx.rmi.SimpleServer
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -38,52 +38,52 @@ impl_sidlx_rmi_SimpleServer__dtor(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ServerInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ServerInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 void
@@ -139,52 +139,52 @@ impl_sidlx_rmi_SimpleServer_shutdown(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ServerInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ServerInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi, 
   sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
@@ -221,100 +221,98 @@ void sidlx_rmi_SimpleServer__call_load(void) {
   impl_sidlx_rmi_SimpleServer__load(&_throwaway_exception);
 }
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi,
+  skel_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(url, ar,
+  return impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(url, ar, 
     _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi,
+  skel_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(bi, _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(url, ar,
+  return impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(url, ar, 
     _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi,
+  skel_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(bi, _ex);
 }
 
 struct sidl_rmi_ServerInfo__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(url, ar, _ex);
 }
 
 struct sidl_rmi_ServerInfo__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi,
+  skel_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(bi, _ex);
 }
 
 struct sidlx_rmi_SimpleServer__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(url, ar,
+  return impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(url, ar, 
     _ex);
 }
 
 struct sidlx_rmi_SimpleServer__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi,
+  skel_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(bi, _ex);
 }
 
 struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url,
+  skel_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(url, ar, _ex);
 }
 
 struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi,
+  skel_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(bi, _ex);
 }

@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructStencil_Impl.h
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -32,10 +32,10 @@
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._includes) */
-/* Put additional include files here... */
-
+/* Insert-Code-Here {bHYPRE.StructStencil._includes} (include files) */
 
 #include "_hypre_struct_mv.h"
+
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._includes) */
 
 /*
@@ -104,34 +104,34 @@ impl_bHYPRE_StructStencil_Create(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructStencil_fcast_bHYPRE_StructStencil(void* bi,
+  impl_bHYPRE_StructStencil_fcast_bHYPRE_StructStencil(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructStencil_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_StructStencil_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructStencil_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 void
@@ -163,35 +163,36 @@ impl_bHYPRE_StructStencil_SetElement(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructStencil__object* 
-  impl_bHYPRE_StructStencil_fcast_bHYPRE_StructStencil(void* bi,
+  impl_bHYPRE_StructStencil_fcast_bHYPRE_StructStencil(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructStencil_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_StructStencil_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructStencil_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructStencil_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructStencil_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructStencil_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
+
 #ifdef __cplusplus
 }
 #endif

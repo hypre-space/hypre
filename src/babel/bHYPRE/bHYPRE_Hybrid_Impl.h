@@ -2,7 +2,7 @@
  * File:          bHYPRE_Hybrid_Impl.h
  * Symbol:        bHYPRE.Hybrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.Hybrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -49,8 +49,8 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.Hybrid._includes) */
 /* Insert-Code-Here {bHYPRE.Hybrid._includes} (include files) */
 
-
 #include "HYPRE.h"
+
 /* DO-NOT-DELETE splicer.end(bHYPRE.Hybrid._includes) */
 
 /*
@@ -123,60 +123,57 @@ impl_bHYPRE_Hybrid_Create(
   /* in */ bHYPRE_Operator A,
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct bHYPRE_Hybrid__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Hybrid(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct bHYPRE_Hybrid__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Hybrid(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Hybrid__object* impl_bHYPRE_Hybrid_fconnect_bHYPRE_Hybrid(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_Hybrid__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Hybrid(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_MPICommunicator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_Hybrid_fconnect_bHYPRE_MPICommunicator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_MPICommunicator(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_Hybrid_fcast_bHYPRE_MPICommunicator(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Operator__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_Hybrid_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_Hybrid_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_Hybrid_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_Hybrid_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_bHYPRE_Hybrid_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_Hybrid_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_bHYPRE_Hybrid_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_Hybrid_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_Hybrid_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex);
 extern
 int32_t
 impl_bHYPRE_Hybrid_GetFirstSolver(
@@ -351,60 +348,58 @@ impl_bHYPRE_Hybrid_ApplyAdjoint(
   /* inout */ bHYPRE_Vector* x,
   /* out */ sidl_BaseInterface *_ex);
 
-extern struct bHYPRE_Hybrid__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Hybrid(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct bHYPRE_Hybrid__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Hybrid(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Hybrid__object* impl_bHYPRE_Hybrid_fconnect_bHYPRE_Hybrid(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_Hybrid__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Hybrid(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_MPICommunicator(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_Hybrid_fconnect_bHYPRE_MPICommunicator(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_MPICommunicator(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_Hybrid_fcast_bHYPRE_MPICommunicator(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Operator__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_Hybrid_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_Hybrid_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_Hybrid_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_Hybrid_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_Hybrid_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_Hybrid_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_Hybrid_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_bHYPRE_Hybrid_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_Hybrid_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_Hybrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_bHYPRE_Hybrid_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Hybrid_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_Hybrid_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_Hybrid_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_Hybrid_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex);
+
 #ifdef __cplusplus
 }
 #endif

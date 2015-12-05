@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructVectorView.h
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -80,10 +80,12 @@ bHYPRE_StructVectorView_SetGrid(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetGrid)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetGrid)(
     self->d_object,
     grid,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -104,16 +106,21 @@ bHYPRE_StructVectorView_SetNumGhost(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
   struct sidl_int__array num_ghost_real;
   struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
   num_ghost_upper[0] = dim2-1;
-  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower, 
     num_ghost_upper, num_ghost_stride);
-  return (*self->d_epv->f_SetNumGhost)(
+  _result = (*self->d_epv->f_SetNumGhost)(
     self->d_object,
     num_ghost_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)num_ghost_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -135,17 +142,22 @@ bHYPRE_StructVectorView_SetValue(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t grid_index_lower[1], grid_index_upper[1], grid_index_stride[1]; 
   struct sidl_int__array grid_index_real;
   struct sidl_int__array*grid_index_tmp = &grid_index_real;
   grid_index_upper[0] = dim-1;
-  sidl_int__array_init(grid_index, grid_index_tmp, 1, grid_index_lower,
+  sidl_int__array_init(grid_index, grid_index_tmp, 1, grid_index_lower, 
     grid_index_upper, grid_index_stride);
-  return (*self->d_epv->f_SetValue)(
+  _result = (*self->d_epv->f_SetValue)(
     self->d_object,
     grid_index_tmp,
     value,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)grid_index_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -177,10 +189,12 @@ bHYPRE_StructVectorView_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self->d_object,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -210,9 +224,11 @@ bHYPRE_StructVectorView_Initialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Initialize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Initialize)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -226,9 +242,11 @@ bHYPRE_StructVectorView_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -275,10 +293,12 @@ bHYPRE_StructVectorView_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -293,10 +313,12 @@ bHYPRE_StructVectorView_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -310,9 +332,11 @@ bHYPRE_StructVectorView_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -370,9 +394,11 @@ bHYPRE_StructVectorView__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -406,9 +432,11 @@ bHYPRE_StructVectorView__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -665,8 +693,8 @@ bHYPRE_StructVectorView__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructVectorView__object*
-bHYPRE_StructVectorView__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructVectorView__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

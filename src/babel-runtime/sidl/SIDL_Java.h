@@ -1,8 +1,8 @@
 /*
  * File:        sidl_Java.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:49 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:43 $
  * Description: run-time support for Java integration with the JVM
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -302,7 +302,8 @@ jstring sidl_Java_I2J_string(
 void* sidl_Java_J2I_cls_holder(
   JNIEnv* env,
   jobject obj,
-  const char* java_name);
+  const char* java_name,
+  int addRef);
 
 /**
  * Set the IOR class type in the holder class.  The name of the held class
@@ -312,7 +313,9 @@ void sidl_Java_I2J_cls_holder(
   JNIEnv* env,
   jobject obj,
   void* value,
-  const char* java_name);
+  const char* java_name,
+  int addRef
+  );
 
 /**
  * Extract the IOR class type from the Java class wrapper.  The IOR class
@@ -321,7 +324,8 @@ void sidl_Java_I2J_cls_holder(
  */
 void* sidl_Java_J2I_cls(
   JNIEnv* env,
-  jobject obj);
+  jobject obj,
+  int addRef);
 
 /**
  * Create a new Java class object to represent the sidl class.  The Java
@@ -330,7 +334,8 @@ void* sidl_Java_J2I_cls(
 jobject sidl_Java_I2J_cls(
   JNIEnv* env,
   void* value,
-  const char* java_name);
+  const char* java_name,
+  int addRef);
 
 /**
  * Extract the IOR interface type from the holder class.  The IOR interface
@@ -340,7 +345,8 @@ jobject sidl_Java_I2J_cls(
 void* sidl_Java_J2I_ifc_holder(
   JNIEnv* env,
   jobject obj,
-  const char* java_name);
+  const char* java_name,
+  int addRef);
 
 /**
  * Set the IOR interface type in the holder class.  The name of the held
@@ -350,7 +356,8 @@ void sidl_Java_I2J_ifc_holder(
   JNIEnv* env,
   jobject obj,
   void* value,
-  const char* java_name);
+  const char* java_name,
+  int addRef);
 
 /**
  * Extract the IOR interface type from the Java interface wrapper.  The
@@ -361,7 +368,8 @@ void sidl_Java_I2J_ifc_holder(
 void* sidl_Java_J2I_ifc(
   JNIEnv* env,
   jobject obj,
-  const char* sidl_name);
+  const char* sidl_name,
+  int addRef);
 
 /**
  * Create a new Java object to represent the sidl interface.  The Java
@@ -370,7 +378,8 @@ void* sidl_Java_J2I_ifc(
 jobject sidl_Java_I2J_ifc(
   JNIEnv* env,
   void* value,
-  const char* java_name);
+  const char* java_name,
+  int addRef);
 
 /**
  * Create a new Java object to represent the sidl interface.  The Java
@@ -398,6 +407,14 @@ void sidl_Java_I2J_array_holder(
   jobject obj,
   void* value,
   const char* java_name);
+
+/*
+ * Assumes array is NULL or is a valid instance of gov.llnl.sidl.BaseArray
+ * (or one of its descendents). This will call the "destroy" method and
+ * delete the local reference for array.
+ */
+void sidl_Java_destroy_array(JNIEnv *env,
+                             jobject array);
 
 /*
  * Extract the IOR array type from the holder class.  The IOR array type

@@ -2,8 +2,8 @@
  * File:        sidlObjA.c
  * Package:     sidl Python Object Adaptor
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.5 $
- * Date:        $Date: 2006/08/29 22:29:27 $
+ * Revision:    @(#) $Revision: 1.6 $
+ * Date:        $Date: 2007/09/27 19:35:21 $
  * Description: Python extension type written in C for sidl object/interface
  *
  * This is a Python extension type written in C to wrap instances of
@@ -98,6 +98,10 @@ static sidl_Opaque_Convert_RETURN
 sidl_Opaque_Convert sidl_Opaque_Convert_PROTO {
   if (PyCObject_Check(obj)) {
     *opaque_ptr = PyCObject_AsVoidPtr(obj);
+    return 1;
+  }
+  else if (obj == Py_None) {
+    *opaque_ptr = NULL;
     return 1;
   }
   return 0;

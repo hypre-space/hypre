@@ -1,9 +1,9 @@
 /*
  * File:        sidl_Exception.c
  * Copyright:   (c) 2005 The Regents of the University of California
- * Release:     $Name: V2-2-0b $
- * Revision:    @(#) $Revision: 1.1 $
- * Date:        $Date: 2006/08/29 23:31:42 $
+ * Release:     $Name: V2-4-0b $
+ * Revision:    @(#) $Revision: 1.2 $
+ * Date:        $Date: 2007/09/27 19:35:43 $
  * Description: 
  *
  */

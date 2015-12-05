@@ -2,9 +2,9 @@
 // File:          sidl_rmi_TicketBook.hxx
 // Symbol:        sidl.rmi.TicketBook-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
-// Release:       $Name: V2-2-0b $
-// Revision:      @(#) $Id: sidl_rmi_TicketBook.hxx,v 1.3 2006/12/29 21:24:50 painter Exp $
+// Babel Version: 1.0.4
+// Release:       $Name: V2-4-0b $
+// Revision:      @(#) $Id: sidl_rmi_TicketBook.hxx,v 1.4 2007/09/27 19:55:47 painter Exp $
 // Description:   Client-side glue code for sidl.rmi.TicketBook
 // 
 // Copyright (c) 2000-2002, The Regents of the University of California.
@@ -175,7 +175,9 @@ namespace sidl {
       typedef struct sidl_rmi_TicketBook__sepv sepv_t;
 
       // default constructor
-      TicketBook() { }
+      TicketBook() { 
+        sidl_rmi_TicketBook_IORCache = NULL;
+      }
 
       // RMI connect
       static inline ::sidl::rmi::TicketBook _connect( /*in*/ const std::string& 
@@ -184,7 +186,7 @@ namespace sidl {
       }
 
       // RMI connect 2
-      static ::sidl::rmi::TicketBook _connect( /*in*/ const std::string& url,
+      static ::sidl::rmi::TicketBook _connect( /*in*/ const std::string& url, 
         /*in*/ const bool ar  );
 
       // default destructor
@@ -204,13 +206,22 @@ namespace sidl {
       // For internal use by Impls (fixes bug#275)
       TicketBook ( TicketBook::ior_t* ior, bool isWeak );
 
-      ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+      inline ior_t* _get_ior() const throw() {
+        if(!sidl_rmi_TicketBook_IORCache) { 
+          sidl_rmi_TicketBook_IORCache = ::sidl::rmi::TicketBook::_cast((
+            void*)d_self);
+          if (sidl_rmi_TicketBook_IORCache) {
+            struct sidl_BaseInterface__object *throwaway_exception;
+            (sidl_rmi_TicketBook_IORCache->d_epv->f_deleteRef)(
+              sidl_rmi_TicketBook_IORCache->d_object, &throwaway_exception);  
+          }  
+        }
+        return sidl_rmi_TicketBook_IORCache;
+      }
 
-      const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-        ior_t*>(d_self); }
-
-      void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-        void*>(ptr); }
+      void _set_ior( ior_t* ptr ) throw () { 
+        d_self = reinterpret_cast< void*>(ptr);
+      }
 
       bool _is_nil() const throw () { return (d_self==0); }
 
@@ -267,6 +278,14 @@ namespace sidl {
     public:
       static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+      //////////////////////////////////////////////////
+      // 
+      // Locally Cached IOR pointer
+      // 
+
+    protected:
+      mutable ior_t* sidl_rmi_TicketBook_IORCache;
     }; // end class TicketBook
   } // end namespace rmi
 } // end namespace sidl
@@ -274,9 +293,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_rmi_TicketBook__connectI
+#pragma weak sidl_rmi_TicketBook__connectI
 
-  #pragma weak sidl_rmi_TicketBook__rmicast
+#pragma weak sidl_rmi_TicketBook__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -289,8 +308,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_rmi_TicketBook__object*
-  sidl_rmi_TicketBook__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_rmi_TicketBook__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

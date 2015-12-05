@@ -43,7 +43,7 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT([babel-runtime],[1.0.0],[babel-bugs@cca-forum.org])
+AC_INIT([babel-runtime],[1.0.4],[babel-bugs@cca-forum.org])
 AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
@@ -51,7 +51,7 @@ AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE([foreign no-dependencies no-installinfo no-installman no-texinfo.tex 1.8])
 AC_CONFIG_HEADERS([sidl/babel_internal.h])
-AC_DEFINE([BABEL_VERSION_HEX],[0x01000000],
+AC_DEFINE([BABEL_VERSION_HEX],[0x01000400],
 	[Hexified form of release number: 2 hex digits each for major, minor, bugfix, and alpha/beta/candidate/distributed ])
 
 LLNL_CHECK_AUTOMAKE(1.9.6)
@@ -65,6 +65,7 @@ LLNL_CHECK_AUTOCONF(2.59)
 AM_CONDITIONAL(BABEL_RUNTIME_ONLY, ! ((grep UCRL-CODE-2002-054 $srcdir/../COPYRIGHT > /dev/null 2>&1) && (test -e ../bin/babel) ))
 
 AC_PROG_CC
+AC_CHECK_HEADERS([inttypes.h sys/types.h])
 ############################################################
 #
 # F90 Compiler

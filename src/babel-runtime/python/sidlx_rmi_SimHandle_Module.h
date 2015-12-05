@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimHandle_Module.h
  * Symbol:        sidlx.rmi.SimHandle-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   expose a constructor for the Python wrapper
  * 
  * WARNING: Automatically generated; only changes within splicers preserved

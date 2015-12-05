@@ -2,7 +2,7 @@
  * File:          bHYPRE_IJParCSRMatrix_Impl.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,8 +38,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -56,9 +56,9 @@ impl_bHYPRE_IJParCSRMatrix__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._load) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._load) */
   }
 }
 /*
@@ -78,7 +78,7 @@ impl_bHYPRE_IJParCSRMatrix__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* Note: User calls of __create are DEPRECATED.
@@ -96,7 +96,7 @@ impl_bHYPRE_IJParCSRMatrix__ctor(
 
    bHYPRE_IJParCSRMatrix__set_data( self, data );
    
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._ctor) */
   }
 }
 
@@ -146,7 +146,7 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    int ierr = 0;
@@ -162,7 +162,7 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
 
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._dtor) */
   }
 }
 
@@ -187,7 +187,7 @@ impl_bHYPRE_IJParCSRMatrix_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Create) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.Create} (Create method) */
 
    int ierr = 0;
@@ -207,7 +207,7 @@ impl_bHYPRE_IJParCSRMatrix_Create(
    return mat;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Create) */
   }
 }
 
@@ -240,7 +240,7 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.GenerateLaplacian} (GenerateLaplacian method) */
 
    /* The returned matrix represents a Laplacian with 7,9,or 27 point discretization
@@ -300,7 +300,7 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
    return bHA;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
   }
 }
 
@@ -334,7 +334,7 @@ impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
   /* Insert the implementation of the SetDiagOffdSizes method here... */
 
    int ierr=0;
@@ -351,7 +351,7 @@ impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
   }
 }
 
@@ -395,7 +395,7 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetLocalRange) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetLocalRange) */
   /* Insert the implementation of the SetLocalRange method here... */
 
    /* DEPRECATED  Use Create */
@@ -427,7 +427,7 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
       return( ierr );
    }
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetLocalRange) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetLocalRange) */
   }
 }
 
@@ -467,7 +467,7 @@ impl_bHYPRE_IJParCSRMatrix_SetValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
 
    int ierr=0;
@@ -486,7 +486,7 @@ impl_bHYPRE_IJParCSRMatrix_SetValues(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetValues) */
   }
 }
 
@@ -518,7 +518,7 @@ impl_bHYPRE_IJParCSRMatrix_AddToValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.AddToValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
 
    int ierr=0;
@@ -537,7 +537,7 @@ impl_bHYPRE_IJParCSRMatrix_AddToValues(
    
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.AddToValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.AddToValues) */
   }
 }
 
@@ -563,7 +563,7 @@ impl_bHYPRE_IJParCSRMatrix_GetLocalRange(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetLocalRange) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetLocalRange) */
   /* Insert the implementation of the GetLocalRange method here... */
 
    int ierr=0;
@@ -578,7 +578,7 @@ impl_bHYPRE_IJParCSRMatrix_GetLocalRange(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetLocalRange) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetLocalRange) */
   }
 }
 
@@ -604,7 +604,7 @@ impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRowCounts) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRowCounts) */
   /* Insert the implementation of the GetRowCounts method here... */
 
    int ierr=0;
@@ -621,7 +621,7 @@ impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRowCounts) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRowCounts) */
   }
 }
 
@@ -649,7 +649,7 @@ impl_bHYPRE_IJParCSRMatrix_GetValues(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetValues) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetValues) */
   /* Insert the implementation of the GetValues method here... */
 
    int ierr=0;
@@ -668,7 +668,7 @@ impl_bHYPRE_IJParCSRMatrix_GetValues(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetValues) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetValues) */
   }
 }
 
@@ -698,7 +698,7 @@ impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetRowSizes) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetRowSizes) */
   /* Insert the implementation of the SetRowSizes method here... */
 
    int ierr=0;
@@ -713,7 +713,7 @@ impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetRowSizes) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetRowSizes) */
   }
 }
 
@@ -736,7 +736,7 @@ impl_bHYPRE_IJParCSRMatrix_Print(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Print) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Print) */
   /* Insert the implementation of the Print method here... */
 
    int ierr=0;
@@ -751,7 +751,7 @@ impl_bHYPRE_IJParCSRMatrix_Print(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Print) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Print) */
   }
 }
 
@@ -775,7 +775,7 @@ impl_bHYPRE_IJParCSRMatrix_Read(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Read) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Read) */
   /* Insert the implementation of the Read method here... */
 
    int ierr=0;
@@ -791,7 +791,7 @@ impl_bHYPRE_IJParCSRMatrix_Read(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Read) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Read) */
   }
 }
 
@@ -813,7 +813,7 @@ impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
    /* The data type of the last argument, mpi_comm, should be MPI_Comm */
 
@@ -830,7 +830,7 @@ impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetCommunicator) */
   }
 }
 
@@ -880,7 +880,7 @@ impl_bHYPRE_IJParCSRMatrix_Initialize(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Initialize) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Initialize) */
   /* Insert the implementation of the Initialize method here... */
 
    int ierr=0;
@@ -895,7 +895,7 @@ impl_bHYPRE_IJParCSRMatrix_Initialize(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Initialize) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Initialize) */
   }
 }
 
@@ -920,7 +920,7 @@ impl_bHYPRE_IJParCSRMatrix_Assemble(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Assemble) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Assemble) */
   /* Insert the implementation of the Assemble method here... */
 
    int ierr=0;
@@ -935,7 +935,7 @@ impl_bHYPRE_IJParCSRMatrix_Assemble(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Assemble) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Assemble) */
   }
 }
 
@@ -958,12 +958,12 @@ impl_bHYPRE_IJParCSRMatrix_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntParameter) */
   }
 }
 
@@ -986,12 +986,12 @@ impl_bHYPRE_IJParCSRMatrix_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleParameter) */
   }
 }
 
@@ -1014,12 +1014,12 @@ impl_bHYPRE_IJParCSRMatrix_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetStringParameter) */
   }
 }
 
@@ -1043,10 +1043,10 @@ impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
   }
 }
 
@@ -1069,10 +1069,10 @@ impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
   }
 }
 
@@ -1096,10 +1096,10 @@ impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
   }
 }
 
@@ -1122,10 +1122,10 @@ impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
   }
 }
 
@@ -1148,7 +1148,7 @@ impl_bHYPRE_IJParCSRMatrix_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
 
@@ -1182,7 +1182,7 @@ impl_bHYPRE_IJParCSRMatrix_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetIntValue) */
   }
 }
 
@@ -1205,12 +1205,12 @@ impl_bHYPRE_IJParCSRMatrix_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetDoubleValue) */
   }
 }
 
@@ -1234,7 +1234,7 @@ impl_bHYPRE_IJParCSRMatrix_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    int ierr=0;
@@ -1249,7 +1249,7 @@ impl_bHYPRE_IJParCSRMatrix_Setup(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Setup) */
   }
 }
 
@@ -1272,7 +1272,7 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
 
    /* Apply means to multiply by a vector, y = A*x .  Here, we call
@@ -1321,7 +1321,7 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Apply) */
   }
 }
 
@@ -1344,7 +1344,7 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.ApplyAdjoint} (ApplyAdjoint method) */
 
    /* ApplyAdjoing means to multiply by a vector, y = A'*x , where A' is the
@@ -1394,7 +1394,7 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
    return( ierr );
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
   }
 }
 
@@ -1423,7 +1423,7 @@ impl_bHYPRE_IJParCSRMatrix_GetRow(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRow) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRow) */
   /* Insert the implementation of the GetRow method here... */
 
    int ierr=0;
@@ -1454,127 +1454,124 @@ impl_bHYPRE_IJParCSRMatrix_GetRow(
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRow) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRow) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_CoefficientAccess__connectI(url, ar, _ex);
 }
 struct bHYPRE_CoefficientAccess__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_CoefficientAccess(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_CoefficientAccess__cast(bi, _ex);
 }
 struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJMatrixView__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJMatrixView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJMatrixView(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_IJMatrixView__cast(bi, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MatrixVectorView__connectI(url, ar, _ex);
 }
 struct bHYPRE_MatrixVectorView__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_MatrixVectorView(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MatrixVectorView__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_ProblemDefinition__connectI(url, ar, _ex);
 }
 struct bHYPRE_ProblemDefinition__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_ProblemDefinition(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_ProblemDefinition__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_IJParCSRMatrix_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_IJParCSRMatrix_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_IJParCSRMatrix_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

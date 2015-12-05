@@ -1,28 +1,14 @@
-dnl #BHEADER**********************************************************************
-dnl # Copyright (c) 2006   The Regents of the University of California.
-dnl # Produced at the Lawrence Livermore National Laboratory.
-dnl # Written by the HYPRE team, UCRL-CODE-222953.
-dnl # All rights reserved.
-dnl #
-dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-dnl # disclaimer, contact information and the GNU Lesser General Public License.
-dnl #
-dnl # This program is free software; you can redistribute it and/or modify it
-dnl # under the terms of the GNU General Public License (as published by the Free
-dnl # Software Foundation) version 2.1 dated February 1999.
-dnl #
-dnl # This program is distributed in the hope that it will be useful, but WITHOUT
-dnl # ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
-dnl # FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
-dnl # GNU General Public License for more details.
-dnl #
-dnl # You should have received a copy of the GNU Lesser General Public License
-dnl # along with this program; if not, write to the Free Software Foundation,
-dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-dnl #
-dnl # $Revision: 1.68 $
-dnl #EHEADER**********************************************************************
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 1.82 $
+ ***********************************************************************EHEADER*/
 
 dnl *********************************************************************
 dnl * File Name: configure.in
@@ -53,18 +39,18 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [2.2.0b])
-m4_define([HYPRE_DATE], [2007/09/20])
+m4_define([HYPRE_VERSION], [2.4.0b])
+m4_define([HYPRE_DATE], [2008/08/08])
 m4_define([HYPRE_TIME], [00:00:00])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE])
 m4_define([HYPRE_BUGS], [hypre-support@llnl.gov])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.68 2007/09/20 17:22:28 baker59 Exp $)
+AC_REVISION($Id: configure.in,v 1.82 2008/08/08 16:21:35 baker59 Exp $)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
-AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
+AC_COPYRIGHT([ Copyright (c) 2007,  Lawrence Livermore National Security, LLC.
  Produced at the Lawrence Livermore National Laboratory.
  Written by the HYPRE team, UCRL-CODE-222953.
  All rights reserved.
@@ -193,6 +179,20 @@ AC_ARG_ENABLE(python,
              ;;
  esac],
 [casc_using_python=no]
+)
+
+AC_ARG_ENABLE(java,
+  AS_HELP_STRING([  --enable-java],
+                 [ Build interface to Java (turns on shared libraries, requires Babel; default is NO).]),
+[case "${enableval}" in
+        yes) casc_using_java=yes
+             ;;
+    no | "") casc_using_java=no ;;
+          *) casc_using_java=yes
+             casc_using_shared=yes
+             ;;
+ esac],
+[casc_using_java=no]
 )
 
 dnl *********************************************************************
@@ -467,7 +467,7 @@ AC_ARG_WITH(strict-checking,
   casc_using_debug=yes
   casc_using_mpi=no
 
-  AC_CHECK_PROGS(CC, [gcc icc pgcc xlc kcc KCC], [""])
+  AC_CHECK_PROGS(CC, [gcc g++ icc icpc pgcc pgCC xlc xlC kcc KCC], [""])
   if test "x$CC" = "x"
   then
      casc_using_c=no
@@ -498,7 +498,7 @@ AC_ARG_WITH(strict-checking,
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
   fi
  
-  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC xlC KCC], [""])
+  AC_CHECK_PROGS(CXX, [g++ gcc icpc icc pgCC pgcc xlC xlc KCC kcc], [""])
   if test "x$CXX" = "x"
   then
      casc_using_cxx=no
@@ -773,10 +773,10 @@ if test "$casc_user_chose_ccompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CC, [mpguidec guidec icc xlc pgcc cc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc xlc mpguidec guidec mpiicc icc pgcc cc], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc gcc pgcc icc cc kcc], [""])
+      AC_CHECK_PROGS(CC, [xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC], [""])
    else
       AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
    fi
@@ -791,12 +791,12 @@ if test "$casc_user_chose_cxxcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CXX, [mpguidec++ guidec++ icc xlC pgCC CC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ mpiicpc icpc pgCC CC], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [xlC icpc icc pgCC g++ gcc cxx KCC], [""])
+      AC_CHECK_PROGS(CXX, [xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc], [""])
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpicxx mpiCC mpiicc mpipgCC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpiCC mpicxx mpiicpc mpipgCC], [""])
    fi
 
    if test "x$CXX" = "x"
@@ -809,10 +809,10 @@ if test "$casc_user_chose_fcompilers" = "no"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(F77, [mpguidef77 guidef77 ifort xlf pg77 f77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 mpiifort ifort pg77 f77], [""])
    elif test "$casc_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf ifort g77 pgf77 f77 kf77], [""])
+      AC_CHECK_PROGS(F77, [xlf g77 pgf77 ifort f77], [""])
    else
       AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
    fi
@@ -1033,7 +1033,7 @@ then
    if test "$casc_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/*.o"
+      HYPRE_FEI_SUPERLU_FILES="HYPRE_TOP_SRC_DIR/FEI_mv/SuperLU/SRC/*.o"
    else
       HYPRE_FEI_SUPERLU_FILES=
    fi
@@ -1100,7 +1100,7 @@ LINK_CXX="${CXX}"
 HYPRE_LIBSUFFIX=".a"
 
 dnl *********************************************************************
-dnl * Set flags if needed to enable shared libraries and Python
+dnl * Set flags if needed to enable shared libraries and Python, Java
 dnl *********************************************************************
 if test "$casc_using_shared" = "yes"
 then
@@ -1130,6 +1130,12 @@ if test "$casc_using_python" = "yes"
 then
   BUILD_PYTHON=1
   PYTHON="${casc_python}"
+fi
+
+BUILD_JAVA=0
+if test "$casc_using_java" = "yes"
+then
+  BUILD_JAVA=1
 fi
 
 dnl *********************************************************************
@@ -1291,6 +1297,8 @@ AC_SUBST(SHARED_BUILD_FLAG)
 
 AC_SUBST(BUILD_PYTHON)
 AC_SUBST(PYTHON)
+
+AC_SUBST(BUILD_JAVA)
 
 dnl *********************************************************************
 dnl * Installation Directories

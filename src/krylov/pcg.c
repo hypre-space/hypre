@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.37 $
+ * $Revision: 2.41 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -51,7 +38,7 @@
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
@@ -110,6 +97,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> tol)          = 1.0e-06;
    (pcg_data -> atolf)        = 0.0;
    (pcg_data -> cf_tol)       = 0.0;
+   (pcg_data -> a_tol)        = 0.0;
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
@@ -139,7 +127,6 @@ hypre_PCGDestroy( void *pcg_vdata )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
-   int ierr = 0;
 
    if (pcg_data)
    {
@@ -177,7 +164,7 @@ hypre_PCGDestroy( void *pcg_vdata )
       hypre_TFreeF( pcg_functions, pcg_functions );
    }
 
-   return(ierr);
+   return(hypre_error_flag);
 }
 
 /*--------------------------------------------------------------------------
@@ -187,10 +174,10 @@ hypre_PCGDestroy( void *pcg_vdata )
 int hypre_PCGGetResidual( void *pcg_vdata, void **residual )
 {
    /* returns a pointer to the residual vector */
-   int ierr = 0;
+
    hypre_PCGData  *pcg_data     = pcg_vdata;
    *residual = pcg_data->r;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -208,7 +195,7 @@ hypre_PCGSetup( void *pcg_vdata,
    int            max_iter         = (pcg_data -> max_iter);
    int          (*precond_setup)() = (pcg_functions -> precond_setup);
    void          *precond_data     = (pcg_data -> precond_data);
-   int            ierr = 0;
+
 
    (pcg_data -> A) = A;
 
@@ -234,7 +221,7 @@ hypre_PCGSetup( void *pcg_vdata,
       (*(pcg_functions->MatvecDestroy))(pcg_data -> matvec_data);
    (pcg_data -> matvec_data) = (*(pcg_functions->MatvecCreate))(A, x);
 
-   ierr = precond_setup(precond_data, A, b, x);
+   precond_setup(precond_data, A, b, x);
 
    /*-----------------------------------------------------
     * Allocate space for log info
@@ -253,7 +240,7 @@ hypre_PCGSetup( void *pcg_vdata,
                                                 pcg_functions );
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -283,7 +270,8 @@ hypre_PCGSolve( void *pcg_vdata,
    hypre_PCGData  *pcg_data     = pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
 
-   double          tol          = (pcg_data -> tol);
+   double          r_tol        = (pcg_data -> tol);
+   double          a_tol        = (pcg_data -> a_tol);
    double          atolf        = (pcg_data -> atolf);
    double          cf_tol       = (pcg_data -> cf_tol);
    int             max_iter     = (pcg_data -> max_iter);
@@ -321,7 +309,6 @@ hypre_PCGSolve( void *pcg_vdata,
    int             tentatively_converged = 0; 
 
    int             i = 0;
-   int             ierr = 0;
    int             my_id, num_procs;
 
    (pcg_data -> converged) = 0;
@@ -377,11 +364,11 @@ hypre_PCGSolve( void *pcg_vdata,
         printf("Returning error flag += 101.  Program not terminated.\n");
         printf("ERROR detected by Hypre ...  END\n\n\n");
       }
-      ierr += 101;
-      return ierr;
+      hypre_error(HYPRE_ERROR_GENERIC);
+      return hypre_error_flag;
    }
 
-   eps = tol*tol;
+   eps = r_tol*r_tol; /* note: this may be re-assigned below */
    if ( bi_prod > 0.0 ) {
       if ( stop_crit && !rel_change && atolf<=0 ) {  /* pure absolute tolerance */
          eps = eps / bi_prod;
@@ -391,6 +378,16 @@ hypre_PCGSolve( void *pcg_vdata,
       }
       else if ( atolf>0 )  /* mixed relative and absolute tolerance */
          bi_prod += atolf;
+      else /* DEFAULT (stop_crit and atolf exist for backwards compatibilty
+              and are not in the reference manual) */
+      {
+        /* convergence criteria:  <C*r,r>  <= max( a_tol^2, r_tol^2 * <C*b,b> )
+            note: default for a_tol is 0.0, so relative residual criteria is used unless
+            user specifies a_tol, or sets r_tol = 0.0, which means absolute
+            tol only is checked  */
+         eps = hypre_max(r_tol*r_tol, a_tol*a_tol/bi_prod);
+         
+      }
    }
    else    /* bi_prod==0.0: the rhs vector b is zero */
    {
@@ -401,8 +398,8 @@ hypre_PCGSolve( void *pcg_vdata,
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
       }
-      ierr = 0;
-      return ierr;
+
+      return hypre_error_flag;
       /* In this case, for the original parcsr pcg, the code would take special
          action to force iterations even though the exact value was known. */
    };
@@ -436,8 +433,8 @@ hypre_PCGSolve( void *pcg_vdata,
         printf("Returning error flag += 101.  Program not terminated.\n");
         printf("ERROR detected by Hypre ...  END\n\n\n");
       }
-      ierr += 101;
-      return ierr;
+      hypre_error(HYPRE_ERROR_GENERIC);
+      return hypre_error_flag;
    }
 
    /* Set initial residual norm */
@@ -485,7 +482,7 @@ hypre_PCGSolve( void *pcg_vdata,
       sdotp = (*(pcg_functions->InnerProd))(s, p);
       if ( sdotp==0.0 )
       {
-         ++ierr;
+         /* ++ierr;*/
          if (i==1) i_prod=i_prod_0;
          break;
       }
@@ -598,7 +595,9 @@ hypre_PCGSolve( void *pcg_vdata,
       }
 
       if ( (gamma<1.0e-292) && ((-gamma)<1.0e-292) ) {
-         ierr = 1;
+         /* ierr = 1;*/
+         hypre_error(HYPRE_ERROR_CONV);
+         
          break;
       }
       /* ... gamma should be >=0.  IEEE subnormal numbers are < 2**(-1022)=2.2e-308
@@ -623,7 +622,9 @@ hypre_PCGSolve( void *pcg_vdata,
                enough to pass the convergence test.  Therefore initial guess was good,
                and we're just calculating garbage - time to bail out before the
                next step, which will be a divide by zero (or close to it). */
-            ierr = 1;
+            /* ierr = 1; */
+            hypre_error(HYPRE_ERROR_CONV);
+            
             break;
          }
 	 cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
@@ -663,7 +664,7 @@ hypre_PCGSolve( void *pcg_vdata,
    else /* actually, we'll never get here... */
       (pcg_data -> rel_residual_norm) = 0.0;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -675,11 +676,10 @@ hypre_PCGSetTol( void   *pcg_vdata,
                  double  tol       )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    (pcg_data -> tol) = tol;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -687,11 +687,35 @@ hypre_PCGGetTol( void   *pcg_vdata,
                  double * tol       )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    *tol = (pcg_data -> tol);
  
-   return ierr;
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetAbsoluteTol, hypre_PCGGetAbsoluteTol
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetAbsoluteTol( void   *pcg_vdata,
+                 double  a_tol       )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+ 
+   (pcg_data -> a_tol) = a_tol;
+ 
+   return hypre_error_flag;
+}
+
+int
+hypre_PCGGetAbsoluteTol( void   *pcg_vdata,
+                 double * a_tol       )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+ 
+   *a_tol = (pcg_data -> a_tol);
+ 
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -703,11 +727,10 @@ hypre_PCGSetAbsoluteTolFactor( void   *pcg_vdata,
                                double  atolf   )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    (pcg_data -> atolf) = atolf;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -715,11 +738,10 @@ hypre_PCGGetAbsoluteTolFactor( void   *pcg_vdata,
                                double  * atolf   )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    *atolf = (pcg_data -> atolf);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -731,11 +753,10 @@ hypre_PCGSetConvergenceFactorTol( void   *pcg_vdata,
                                   double  cf_tol   )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    (pcg_data -> cf_tol) = cf_tol;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -743,11 +764,10 @@ hypre_PCGGetConvergenceFactorTol( void   *pcg_vdata,
                                   double * cf_tol   )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    *cf_tol = (pcg_data -> cf_tol);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -759,11 +779,10 @@ hypre_PCGSetMaxIter( void *pcg_vdata,
                      int   max_iter  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    (pcg_data -> max_iter) = max_iter;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -771,11 +790,11 @@ hypre_PCGGetMaxIter( void *pcg_vdata,
                      int * max_iter  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    *max_iter = (pcg_data -> max_iter);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -787,11 +806,11 @@ hypre_PCGSetTwoNorm( void *pcg_vdata,
                      int   two_norm  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    (pcg_data -> two_norm) = two_norm;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -799,11 +818,11 @@ hypre_PCGGetTwoNorm( void *pcg_vdata,
                      int * two_norm  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    *two_norm = (pcg_data -> two_norm);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -815,11 +834,11 @@ hypre_PCGSetRelChange( void *pcg_vdata,
                        int   rel_change  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    (pcg_data -> rel_change) = rel_change;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -827,11 +846,11 @@ hypre_PCGGetRelChange( void *pcg_vdata,
                        int * rel_change  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    *rel_change = (pcg_data -> rel_change);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -843,11 +862,11 @@ hypre_PCGSetRecomputeResidual( void *pcg_vdata,
                        int   recompute_residual  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    (pcg_data -> recompute_residual) = recompute_residual;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -855,11 +874,11 @@ hypre_PCGGetRecomputeResidual( void *pcg_vdata,
                        int * recompute_residual  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    *recompute_residual = (pcg_data -> recompute_residual);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -871,11 +890,11 @@ hypre_PCGSetStopCrit( void *pcg_vdata,
                        int   stop_crit  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    (pcg_data -> stop_crit) = stop_crit;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -883,11 +902,11 @@ hypre_PCGGetStopCrit( void *pcg_vdata,
                        int * stop_crit  )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    *stop_crit = (pcg_data -> stop_crit);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -899,11 +918,11 @@ hypre_PCGGetPrecond( void         *pcg_vdata,
                      HYPRE_Solver *precond_data_ptr )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
 
    *precond_data_ptr = (HYPRE_Solver)(pcg_data -> precond_data);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -918,13 +937,13 @@ hypre_PCGSetPrecond( void  *pcg_vdata,
 {
    hypre_PCGData *pcg_data = pcg_vdata;
    hypre_PCGFunctions *pcg_functions = pcg_data->functions;
-   int            ierr = 0;
+
  
    (pcg_functions -> precond)       = precond;
    (pcg_functions -> precond_setup) = precond_setup;
    (pcg_data -> precond_data)  = precond_data;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -936,11 +955,11 @@ hypre_PCGSetPrintLevel( void *pcg_vdata,
                         int   level)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    (pcg_data -> print_level) = level;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -948,11 +967,11 @@ hypre_PCGGetPrintLevel( void *pcg_vdata,
                         int * level)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
+
  
    *level = (pcg_data -> print_level);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -964,11 +983,10 @@ hypre_PCGSetLogging( void *pcg_vdata,
                       int   level)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    (pcg_data -> logging) = level;
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 int
@@ -976,11 +994,10 @@ hypre_PCGGetLogging( void *pcg_vdata,
                       int * level)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
  
    *level = (pcg_data -> logging);
  
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -992,11 +1009,10 @@ hypre_PCGGetNumIterations( void *pcg_vdata,
                            int  *num_iterations )
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
 
    *num_iterations = (pcg_data -> num_iterations);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1008,11 +1024,10 @@ hypre_PCGGetConverged( void *pcg_vdata,
                        int  *converged)
 {
    hypre_PCGData *pcg_data = pcg_vdata;
-   int            ierr = 0;
 
    *converged = (pcg_data -> converged);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1031,7 +1046,6 @@ hypre_PCGPrintLogging( void *pcg_vdata,
    double        *rel_norms       = (pcg_data -> rel_norms);
 
    int            i;
-   int            ierr = 0;
 
    if (myid == 0)
    {
@@ -1045,7 +1059,7 @@ hypre_PCGPrintLogging( void *pcg_vdata,
       }
    }
   
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1058,12 +1072,10 @@ hypre_PCGGetFinalRelativeResidualNorm( void   *pcg_vdata,
 {
    hypre_PCGData *pcg_data = pcg_vdata;
 
-   int            ierr = 0;
-   
    double         rel_residual_norm = (pcg_data -> rel_residual_norm);
 
   *relative_residual_norm = rel_residual_norm;
    
-   return ierr;
+   return hypre_error_flag;
 }
 

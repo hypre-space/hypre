@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.5 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -31,19 +18,37 @@
 
 /*--------------------------------------------------------------------------
  * hypre_CommInfo:
+ *
+ * For "reverse" communication, the following are not needed (may be NULL)
+ *    send_rboxnums, send_rboxes, send_transforms
+ *
+ * For "forward" communication, the following are not needed (may be NULL)
+ *    recv_rboxnums, recv_rboxes, recv_transforms
+ *
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommInfo_struct
 {
    hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
    hypre_Index            send_stride;
-   hypre_Index            recv_stride;
    int                  **send_processes;
-   int                  **recv_processes;
    int                  **send_rboxnums;
-   int                  **recv_rboxnums; /* required for "inverse" communication */
-   hypre_BoxArrayArray   *send_rboxes;
+   hypre_BoxArrayArray   *send_rboxes;  /* send_boxes, some with periodic shift */
+
+   hypre_BoxArrayArray   *recv_boxes;
+   hypre_Index            recv_stride;
+   int                  **recv_processes;
+   int                  **recv_rboxnums;
+   hypre_BoxArrayArray   *recv_rboxes;  /* recv_boxes, some with periodic shift */
+
+   int                    num_transforms;  /* may be 0    = identity transform */
+   hypre_Index           *coords;          /* may be NULL = identity transform */
+   hypre_Index           *dirs;            /* may be NULL = identity transform */
+   int                  **send_transforms; /* may be NULL = identity transform */
+   int                  **recv_transforms; /* may be NULL = identity transform */
+
+   int                    boxes_match;  /* true (>0) if each send box has a
+                                         * matching box on the recv processor */
 
 } hypre_CommInfo;
 
@@ -55,8 +60,9 @@ typedef struct hypre_CommEntryType_struct
 {
    int  offset;           /* offset for the data */
    int  dim;              /* dimension of the communication */
-   int  length_array[4];
+   int  length_array[3];  /* 4th dimension has length 'num_values' */
    int  stride_array[4];
+   int *order;            /* order of 4th dimension values */
 
 } hypre_CommEntryType;
 
@@ -71,9 +77,8 @@ typedef struct hypre_CommType_struct
    int                   num_entries;
    hypre_CommEntryType  *entries;
 
-   int                  *loc_boxnums; /* entry local box numbers */
+   /* this is only needed until first send buffer prefix is packed */
    int                  *rem_boxnums; /* entry remote box numbers */
-   hypre_Box            *loc_boxes;   /* entry local boxes */
    hypre_Box            *rem_boxes;   /* entry remote boxes */
 
 } hypre_CommType;
@@ -87,8 +92,7 @@ typedef struct hypre_CommPkg_struct
 {
    MPI_Comm          comm;
 
-   int               first_send; /* is this the first send? */
-   int               first_recv; /* is this the first recv? */
+   int               first_comm; /* is this the first communication? */
                    
    int               num_values;
    hypre_Index       send_stride;
@@ -104,8 +108,15 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType   *copy_from_type;
    hypre_CommType   *copy_to_type;
 
+   int               num_orders;
+   int             **orders;            /* num_orders x num_values */
+
    int              *recv_data_offsets; /* offsets into recv data (by box) */
    hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
+
+   hypre_Index       identity_coord;
+   hypre_Index       identity_dir;
+   int              *identity_order;
 
 } hypre_CommPkg;
 
@@ -126,21 +137,34 @@ typedef struct hypre_CommHandle_struct
    double        **send_buffers;
    double        **recv_buffers;
 
+   /* set = 0, add = 1 */
+   int             action;
+
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommInto
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommInfoSendBoxes(info)     (info -> send_boxes)
-#define hypre_CommInfoRecvBoxes(info)     (info -> recv_boxes)
-#define hypre_CommInfoSendStride(info)    (info -> send_stride)
-#define hypre_CommInfoRecvStride(info)    (info -> recv_stride)
-#define hypre_CommInfoSendProcesses(info) (info -> send_processes)
-#define hypre_CommInfoRecvProcesses(info) (info -> recv_processes)
-#define hypre_CommInfoSendRBoxnums(info)  (info -> send_rboxnums)
-#define hypre_CommInfoRecvRBoxnums(info)  (info -> recv_rboxnums)
-#define hypre_CommInfoSendRBoxes(info)    (info -> send_rboxes)
+#define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
+#define hypre_CommInfoSendStride(info)     (info -> send_stride)
+#define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
+#define hypre_CommInfoSendRBoxnums(info)   (info -> send_rboxnums)
+#define hypre_CommInfoSendRBoxes(info)     (info -> send_rboxes)
+                                           
+#define hypre_CommInfoRecvBoxes(info)      (info -> recv_boxes)
+#define hypre_CommInfoRecvStride(info)     (info -> recv_stride)
+#define hypre_CommInfoRecvProcesses(info)  (info -> recv_processes)
+#define hypre_CommInfoRecvRBoxnums(info)   (info -> recv_rboxnums)
+#define hypre_CommInfoRecvRBoxes(info)     (info -> recv_rboxes)
+                                           
+#define hypre_CommInfoNumTransforms(info)  (info -> num_transforms)
+#define hypre_CommInfoCoords(info)         (info -> coords)
+#define hypre_CommInfoDirs(info)           (info -> dirs)
+#define hypre_CommInfoSendTransforms(info) (info -> send_transforms)
+#define hypre_CommInfoRecvTransforms(info) (info -> recv_transforms)
+                                           
+#define hypre_CommInfoBoxesMatch(info)     (info -> boxes_match)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommEntryType
@@ -150,6 +174,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommEntryTypeDim(entry)          (entry -> dim)
 #define hypre_CommEntryTypeLengthArray(entry)  (entry -> length_array)
 #define hypre_CommEntryTypeStrideArray(entry)  (entry -> stride_array)
+#define hypre_CommEntryTypeOrder(entry)        (entry -> order)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
@@ -160,12 +185,9 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommTypeNumEntries(type)    (type -> num_entries)
 #define hypre_CommTypeEntries(type)       (type -> entries)
 #define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
-#define hypre_CommTypeLocBoxnums(type)    (type -> loc_boxnums)
-#define hypre_CommTypeLocBoxnum(type, i)  (type -> loc_boxnums[i])
+
 #define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
 #define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
-#define hypre_CommTypeLocBoxes(type)      (type -> loc_boxes)
-#define hypre_CommTypeLocBox(type, i)    &(type -> loc_boxes[i])
 #define hypre_CommTypeRemBoxes(type)      (type -> rem_boxes)
 #define hypre_CommTypeRemBox(type, i)    &(type -> rem_boxes[i])
 
@@ -175,8 +197,7 @@ typedef struct hypre_CommHandle_struct
  
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
 
-#define hypre_CommPkgFirstSend(comm_pkg)       (comm_pkg -> first_send)
-#define hypre_CommPkgFirstRecv(comm_pkg)       (comm_pkg -> first_recv)
+#define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
 
 #define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
@@ -194,8 +215,15 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
+#define hypre_CommPkgNumOrders(comm_pkg)       (comm_pkg -> num_orders)
+#define hypre_CommPkgOrders(comm_pkg)          (comm_pkg -> orders)
+
 #define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
 #define hypre_CommPkgRecvDataSpace(comm_pkg)   (comm_pkg -> recv_data_space)
+
+#define hypre_CommPkgIdentityCoord(comm_pkg)   (comm_pkg -> identity_coord)
+#define hypre_CommPkgIdentityDir(comm_pkg)     (comm_pkg -> identity_dir)
+#define hypre_CommPkgIdentityOrder(comm_pkg)   (comm_pkg -> identity_order)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommHandle
@@ -209,5 +237,6 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleStatus(comm_handle)      (comm_handle -> status)
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
+#define hypre_CommHandleAction(comm_handle)      (comm_handle -> action)
 
 #endif

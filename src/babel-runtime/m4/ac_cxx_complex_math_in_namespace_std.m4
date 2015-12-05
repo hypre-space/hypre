@@ -6,7 +6,7 @@ dnl
 dnl If the C math functions are in the cmath header file and std:: namespace,
 dnl define HAVE_MATH_FN_IN_NAMESPACE_STD.
 dnl
-dnl @version $Id: ac_cxx_complex_math_in_namespace_std.m4,v 1.6 2006/08/29 22:29:23 painter Exp $
+dnl @version $Id: ac_cxx_complex_math_in_namespace_std.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_COMPLEX_MATH_IN_NAMESPACE_STD],

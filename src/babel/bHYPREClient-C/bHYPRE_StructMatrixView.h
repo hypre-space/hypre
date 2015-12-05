@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructMatrixView.h
  * Symbol:        bHYPRE.StructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.StructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -84,10 +84,12 @@ bHYPRE_StructMatrixView_SetGrid(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetGrid)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetGrid)(
     self->d_object,
     grid,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -105,10 +107,12 @@ bHYPRE_StructMatrixView_SetStencil(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetStencil)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetStencil)(
     self->d_object,
     stencil,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -169,16 +173,21 @@ bHYPRE_StructMatrixView_SetNumGhost(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
   struct sidl_int__array num_ghost_real;
   struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
   num_ghost_upper[0] = dim2-1;
-  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower, 
     num_ghost_upper, num_ghost_stride);
-  return (*self->d_epv->f_SetNumGhost)(
+  _result = (*self->d_epv->f_SetNumGhost)(
     self->d_object,
     num_ghost_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)num_ghost_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -197,10 +206,12 @@ bHYPRE_StructMatrixView_SetSymmetric(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetSymmetric)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetSymmetric)(
     self->d_object,
     symmetric,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -222,19 +233,24 @@ bHYPRE_StructMatrixView_SetConstantEntries(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  int32_t stencil_constant_points_lower[1], stencil_constant_points_upper[1],
+  int32_t _result;
+  int32_t stencil_constant_points_lower[1], stencil_constant_points_upper[1], 
     stencil_constant_points_stride[1]; 
   struct sidl_int__array stencil_constant_points_real;
   struct sidl_int__array*stencil_constant_points_tmp = 
     &stencil_constant_points_real;
   stencil_constant_points_upper[0] = num_stencil_constant_points-1;
-  sidl_int__array_init(stencil_constant_points, stencil_constant_points_tmp, 1,
-    stencil_constant_points_lower, stencil_constant_points_upper,
+  sidl_int__array_init(stencil_constant_points, stencil_constant_points_tmp, 1, 
+    stencil_constant_points_lower, stencil_constant_points_upper, 
     stencil_constant_points_stride);
-  return (*self->d_epv->f_SetConstantEntries)(
+  _result = (*self->d_epv->f_SetConstantEntries)(
     self->d_object,
     stencil_constant_points_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)stencil_constant_points_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -263,10 +279,12 @@ bHYPRE_StructMatrixView_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self->d_object,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -296,9 +314,11 @@ bHYPRE_StructMatrixView_Initialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Initialize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Initialize)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -312,9 +332,11 @@ bHYPRE_StructMatrixView_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -361,10 +383,12 @@ bHYPRE_StructMatrixView_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -379,10 +403,12 @@ bHYPRE_StructMatrixView_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -396,9 +422,11 @@ bHYPRE_StructMatrixView_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -456,9 +484,11 @@ bHYPRE_StructMatrixView__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -492,9 +522,11 @@ bHYPRE_StructMatrixView__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -751,8 +783,8 @@ bHYPRE_StructMatrixView__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructMatrixView__object*
-bHYPRE_StructMatrixView__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructMatrixView__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,87 @@
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
+\contentsline {section}{\numberline {1.1}Overview of Features}{1}{section.1.1}
+\contentsline {section}{\numberline {1.2}Getting More Information}{2}{section.1.2}
+\contentsline {section}{\numberline {1.3}How to get started}{3}{section.1.3}
+\contentsline {subsection}{\numberline {1.3.1}Installing {\sl hypre}{}}{3}{subsection.1.3.1}
+\contentsline {subsection}{\numberline {1.3.2}Choosing a conceptual interface}{3}{subsection.1.3.2}
+\contentsline {subsection}{\numberline {1.3.3}Writing your code}{5}{subsection.1.3.3}
+\contentsline {chapter}{\numberline {2}Structured-Grid System Interface (Struct)}{7}{chapter.2}
+\contentsline {section}{\numberline {2.1}Setting Up the Struct Grid}{8}{section.2.1}
+\contentsline {section}{\numberline {2.2}Setting Up the Struct Stencil}{10}{section.2.2}
+\contentsline {section}{\numberline {2.3}Setting Up the Struct Matrix}{10}{section.2.3}
+\contentsline {section}{\numberline {2.4}Setting Up the Struct Right-Hand-Side Vector}{13}{section.2.4}
+\contentsline {section}{\numberline {2.5}Symmetric Matrices}{14}{section.2.5}
+\contentsline {chapter}{\numberline {3}Semi-Structured-Grid System Interface (SStruct)}{17}{chapter.3}
+\contentsline {section}{\numberline {3.1}Block-Structured Grids}{18}{section.3.1}
+\contentsline {section}{\numberline {3.2}Structured Adaptive Mesh Refinement}{22}{section.3.2}
+\contentsline {chapter}{\numberline {4}Finite Element Interface}{27}{chapter.4}
+\contentsline {section}{\numberline {4.1}Introduction}{27}{section.4.1}
+\contentsline {section}{\numberline {4.2}A Brief Description of the Finite Element Interface}{28}{section.4.2}
+\contentsline {chapter}{\numberline {5}Linear-Algebraic System Interface (IJ)}{31}{chapter.5}
+\contentsline {section}{\numberline {5.1}IJ Matrix Interface}{31}{section.5.1}
+\contentsline {section}{\numberline {5.2}IJ Vector Interface}{33}{section.5.2}
+\contentsline {section}{\numberline {5.3}A Scalable Interface}{34}{section.5.3}
+\contentsline {chapter}{\numberline {6}Solvers and Preconditioners}{35}{chapter.6}
+\contentsline {section}{\numberline {6.1}SMG}{37}{section.6.1}
+\contentsline {section}{\numberline {6.2}PFMG}{38}{section.6.2}
+\contentsline {section}{\numberline {6.3}SysPFMG}{38}{section.6.3}
+\contentsline {section}{\numberline {6.4}SplitSolve}{38}{section.6.4}
+\contentsline {section}{\numberline {6.5}FAC}{38}{section.6.5}
+\contentsline {section}{\numberline {6.6}Maxwell}{39}{section.6.6}
+\contentsline {section}{\numberline {6.7}Hybrid}{41}{section.6.7}
+\contentsline {section}{\numberline {6.8}BoomerAMG}{41}{section.6.8}
+\contentsline {subsection}{\numberline {6.8.1}Parameter Options}{41}{subsection.6.8.1}
+\contentsline {section}{\numberline {6.9}AMS}{43}{section.6.9}
+\contentsline {subsection}{\numberline {6.9.1}Overview}{43}{subsection.6.9.1}
+\contentsline {subsection}{\numberline {6.9.2}Sample Usage}{44}{subsection.6.9.2}
+\contentsline {section}{\numberline {6.10}The MLI Package}{48}{section.6.10}
+\contentsline {section}{\numberline {6.11}ParaSails}{48}{section.6.11}
+\contentsline {subsection}{\numberline {6.11.1}Parameter Settings}{48}{subsection.6.11.1}
+\contentsline {subsection}{\numberline {6.11.2}Preconditioning Nearly Symmetric Matrices}{50}{subsection.6.11.2}
+\contentsline {section}{\numberline {6.12}Euclid}{50}{section.6.12}
+\contentsline {subsection}{\numberline {6.12.1}Overview}{50}{subsection.6.12.1}
+\contentsline {subsection}{\numberline {6.12.2}Setting Options: Examples}{51}{subsection.6.12.2}
+\contentsline {subsection}{\numberline {6.12.3}Options Summary}{53}{subsection.6.12.3}
+\contentsline {section}{\numberline {6.13}{\sl PILUT}: Parallel Incomplete Factorization}{53}{section.6.13}
+\contentsline {section}{\numberline {6.14}FEI Solvers}{54}{section.6.14}
+\contentsline {subsection}{\numberline {6.14.1}Solvers Available Only through the FEI}{55}{subsection.6.14.1}
+\contentsline {subsubsection}{Sequential and Parallel Solvers}{55}{section*.7}
+\contentsline {subsubsection}{Parallel Preconditioners}{55}{section*.8}
+\contentsline {subsubsection}{Matrix Reduction}{56}{section*.9}
+\contentsline {subsubsection}{Schur Complement Reduction}{56}{section*.10}
+\contentsline {subsubsection}{Slide Surface Reduction}{56}{section*.11}
+\contentsline {subsubsection}{Other Features}{57}{section*.12}
+\contentsline {chapter}{\numberline {7}General Information}{59}{chapter.7}
+\contentsline {section}{\numberline {7.1}Getting the Source Code}{59}{section.7.1}
+\contentsline {section}{\numberline {7.2}Building the Library}{59}{section.7.2}
+\contentsline {subsection}{\numberline {7.2.1}Configure Options}{60}{subsection.7.2.1}
+\contentsline {subsection}{\numberline {7.2.2}Make Targets}{61}{subsection.7.2.2}
+\contentsline {section}{\numberline {7.3}Testing the Library}{61}{section.7.3}
+\contentsline {section}{\numberline {7.4}Linking to the Library}{62}{section.7.4}
+\contentsline {section}{\numberline {7.5}Error Flags}{62}{section.7.5}
+\contentsline {section}{\numberline {7.6}Bug Reporting and General Support}{63}{section.7.6}
+\contentsline {section}{\numberline {7.7}Using HYPRE in External FEI Implementations}{63}{section.7.7}
+\contentsline {section}{\numberline {7.8}Calling HYPRE from Other Languages}{64}{section.7.8}
+\contentsline {chapter}{\numberline {8}Babel-based Interfaces}{67}{chapter.8}
+\contentsline {section}{\numberline {8.1}Introduction}{67}{section.8.1}
+\contentsline {section}{\numberline {8.2}Interfaces Are Similar}{67}{section.8.2}
+\contentsline {section}{\numberline {8.3}Interfaces Are Different}{68}{section.8.3}
+\contentsline {section}{\numberline {8.4}Names and Conventions}{68}{section.8.4}
+\contentsline {section}{\numberline {8.5}Parameters and Error Flags}{69}{section.8.5}
+\contentsline {subsubsection}{C-only}{69}{section*.13}
+\contentsline {subsubsection}{C-Babel}{69}{section*.14}
+\contentsline {subsubsection}{Fortran-Babel}{70}{section*.15}
+\contentsline {subsubsection}{C++-Babel}{70}{section*.16}
+\contentsline {subsubsection}{Python-Babel}{70}{section*.17}
+\contentsline {section}{\numberline {8.6}MPI Communicator}{70}{section.8.6}
+\contentsline {subsubsection}{C-Babel}{70}{section*.18}
+\contentsline {subsubsection}{C++-Babel}{71}{section*.19}
+\contentsline {subsubsection}{Fortran-Babel}{71}{section*.20}
+\contentsline {section}{\numberline {8.7}Memory Management}{71}{section.8.7}
+\contentsline {section}{\numberline {8.8}Casting}{72}{section.8.8}
+\contentsline {section}{\numberline {8.9}The HYPRE Object Structure}{73}{section.8.9}
+\contentsline {section}{\numberline {8.10}Arrays}{74}{section.8.10}
+\contentsline {subsubsection}{C}{75}{section*.21}
+\contentsline {subsubsection}{Fortran}{75}{section*.22}
+\contentsline {section}{\numberline {8.11}Building HYPRE with the Babel Interface}{75}{section.8.11}
+\contentsline {subsection}{\numberline {8.11.1}Building HYPRE with Python Using the Babel Interface}{76}{subsection.8.11.1}

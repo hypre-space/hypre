@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructPFMG_Impl.h
  * Symbol:        bHYPRE.StructPFMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.StructPFMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -47,13 +47,13 @@
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._includes) */
-/* Put additional include files here... */
-
+/* Insert-Code-Here {bHYPRE.StructPFMG._includes} (include files) */
 
 #include "HYPRE.h"
 #include "HYPRE_struct_ls.h"
 #include "_hypre_utilities.h"
 #include "bHYPRE_StructMatrix.h"
+
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._includes) */
 
 /*
@@ -122,62 +122,62 @@ impl_bHYPRE_StructPFMG_Create(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructMatrix(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructMatrix(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructMatrix(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_StructPFMG__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructPFMG__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructPFMG(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructPFMG(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 int32_t
@@ -340,63 +340,64 @@ impl_bHYPRE_StructPFMG_ApplyAdjoint(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructMatrix(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructMatrix__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructMatrix(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructMatrix(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_StructPFMG__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructPFMG__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructPFMG(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_bHYPRE_StructPFMG(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_StructPFMG_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_StructPFMG_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructPFMG_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructPFMG_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructPFMG_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructPFMG_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructPFMG_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.15 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -37,9 +24,13 @@
 #include <assert.h>
 #include <math.h>
 
-#if HAVE_SUPERLU
+#if HAVE_SUPERLU_20
 #include "dsp_defs.h"
 #include "superlu_util.h"
+#endif
+#if HAVE_SUPERLU
+#include "SRC/slu_ddefs.h"
+#include "SRC/slu_util.h"
 #endif
 
 /*-------------------------------------------------------------------------
@@ -3355,7 +3346,9 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR;
    double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
-   char   refact[1], trans[1];
+   superlu_options_t slu_options;
+   SuperLUStat_t     slu_stat;
+   trans_t           trans;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
    SuperMatrix superLU_Umat;
@@ -3407,23 +3400,30 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
     * -------------------------------------------------------------*/
 
    dCreate_CompCol_Matrix(&superLU_Amat, localNRows, localNRows, 
-                          cscJA[localNRows], cscAA, cscIA, cscJA, NC, 
-                          D_D, GE);
-   *refact   = 'N';
+                          cscJA[localNRows], cscAA, cscIA, cscJA, SLU_NC, 
+                          SLU_D, SLU_GE);
    etree     = new int[localNRows];
    permC     = new int[localNRows];
    permR     = new int[localNRows];
    permcSpec = 0;
    get_perm_c(permcSpec, &superLU_Amat, permC);
-   sp_preorder(refact, &superLU_Amat, permC, etree, &AC);
+   slu_options.Fact = DOFACT;
+   slu_options.SymmetricMode = NO;
+   sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
    dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
-   StatInit(panelSize, relax);
+   StatInit(&slu_stat);
    lwork = 0;
-   dgstrf(refact, &AC, diagPivotThresh, dropTol, relax, panelSize,
-          etree,NULL,lwork,permR,permC,&superLU_Lmat,&superLU_Umat,&info);
+   slu_options.ColPerm = MY_PERMC;
+   slu_options.Fact = DOFACT;
+   slu_options.DiagPivotThresh = diagPivotThresh;
+
+   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+          &superLU_Umat, &slu_stat, &info);
+
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;
@@ -3436,14 +3436,15 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    for ( irow = 0; irow < localNRows; irow++ ) 
       solnVector_[irow] = rhsVector_[irow];
    dCreate_Dense_Matrix(&B, localNRows, 1, solnVector_, localNRows, 
-                        DN, D_D, GE);
+                        SLU_DN, SLU_D, SLU_GE);
 
    /* -------------------------------------------------------------
     * solve the problem
     * -----------------------------------------------------------*/
 
-   *trans  = 'N';
-   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permR, permC, &B, &info);
+   trans = NOTRANS;
+   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC, permR, &B, 
+           &slu_stat, &info);
    rVec = new double[localNRows];
    matvec( solnVector_, rVec ); 
    for ( irow = 0; irow < localNRows; irow++ ) 
@@ -3472,7 +3473,7 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    }
    delete [] permR;
    delete [] permC;
-   StatFree();
+   StatFree(&slu_stat);
    return (info);
 #else
    return (1);

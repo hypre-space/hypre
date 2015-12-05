@@ -1,8 +1,8 @@
 /*
  * File:        sidl_exec_err.h
  * Copyright:   (c) 2001-2003 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.1 $
- * Date:        $Date: 2006/08/29 23:20:39 $
+ * Revision:    @(#) $Revision: 1.2 $
+ * Date:        $Date: 2007/09/27 19:35:45 $
  * Description: convenience C macros for managing sidl exceptions in exec functions
  *
  * See sidl_Exception.h for more information on handling exception in Babel.

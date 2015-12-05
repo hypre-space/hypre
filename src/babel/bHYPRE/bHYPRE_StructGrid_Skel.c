@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructGrid_Skel.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,40 +45,40 @@ impl_bHYPRE_StructGrid_Create(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 int32_t
@@ -132,40 +132,40 @@ impl_bHYPRE_StructGrid_Assemble(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_StructGrid__object* 
-  impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 static int32_t
 skel_bHYPRE_StructGrid_SetExtents(
@@ -175,10 +175,10 @@ skel_bHYPRE_StructGrid_SetExtents(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
+  struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1, 
     sidl_column_major_order);
   int32_t* ilower_tmp = ilower_proxy->d_firstElement;
-  struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
+  struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1, 
     sidl_column_major_order);
   int32_t* iupper_tmp = iupper_proxy->d_firstElement;
   int32_t dim = sidlLength(iupper_proxy,0);
@@ -189,6 +189,8 @@ skel_bHYPRE_StructGrid_SetExtents(
       iupper_tmp,
       dim,
       _ex);
+  sidl_int__array_deleteRef(ilower_proxy);
+  sidl_int__array_deleteRef(iupper_proxy);
   return _return;
 }
 
@@ -199,7 +201,7 @@ skel_bHYPRE_StructGrid_SetPeriodic(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1,
+  struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1, 
     sidl_column_major_order);
   int32_t* periodic_tmp = periodic_proxy->d_firstElement;
   int32_t dim = sidlLength(periodic_proxy,0);
@@ -209,6 +211,7 @@ skel_bHYPRE_StructGrid_SetPeriodic(
       periodic_tmp,
       dim,
       _ex);
+  sidl_int__array_deleteRef(periodic_proxy);
   return _return;
 }
 
@@ -229,6 +232,7 @@ skel_bHYPRE_StructGrid_SetNumGhost(
       num_ghost_tmp,
       dim2,
       _ex);
+  sidl_int__array_deleteRef(num_ghost_proxy);
   return _return;
 }
 
@@ -277,73 +281,69 @@ void bHYPRE_StructGrid__call_load(void) {
   impl_bHYPRE_StructGrid__load(&_throwaway_exception);
 }
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url,
+  skel_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(url, ar, _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi,
+  skel_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fcast_bHYPRE_MPICommunicator(bi, _ex);
 }
 
 struct bHYPRE_StructGrid__object* 
-  skel_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(url, ar, _ex);
 }
 
 struct bHYPRE_StructGrid__object* 
-  skel_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_bHYPRE_StructGrid_fcast_bHYPRE_StructGrid(bi, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_bHYPRE_StructGrid_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_bHYPRE_StructGrid_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_bHYPRE_StructGrid_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_bHYPRE_StructGrid_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_StructGrid_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_bHYPRE_StructGrid_fcast_sidl_BaseInterface(bi, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_bHYPRE_StructGrid_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_bHYPRE_StructGrid_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url,
+  skel_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fconnect_sidl_RuntimeException(url, ar, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi,
+  skel_bHYPRE_StructGrid_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_StructGrid_fcast_sidl_RuntimeException(bi, _ex);
 }

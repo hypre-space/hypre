@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.23 $
+ * $Revision: 2.28 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -346,6 +333,13 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 	printf(" Interpolation = block classical interpolation with diagonal blocks\n");
 	printf("                 for nodal systems AMG\n");
       }
+      else if (interp_type == 24) 
+      {
+	printf(" Interpolation = block direct interpolation \n");
+	printf("                 for nodal systems AMG\n");
+      }
+
+
 
       if (block_mode)
       {
@@ -881,7 +875,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
       printf( "  Relaxation Parameters:\n");
       printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "            Number of partial sweeps: %4d   %2d  %4d \n",
+      printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
       printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",
@@ -1020,8 +1014,7 @@ void    *data;
       printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
       printf( "  Relaxation Parameters:\n");
       printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "   Visiting Grid:                     down   up  coarse\n");
-      printf( "            Number of partial sweeps: %4d   %2d  %4d \n",
+      printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],num_grid_sweeps[3]);
       printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d \n",

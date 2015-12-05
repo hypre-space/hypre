@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -32,6 +19,8 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
+ * Note that send_coords, recv_coords, send_dirs, recv_dirs may be NULL to
+ * represent an identity transform.
  *--------------------------------------------------------------------------*/
 
 int
@@ -42,9 +31,10 @@ hypre_CommInfoCreate( hypre_BoxArrayArray  *send_boxes,
                       int                 **send_rboxnums,
                       int                 **recv_rboxnums,
                       hypre_BoxArrayArray  *send_rboxes,
+                      hypre_BoxArrayArray  *recv_rboxes,
+                      int                   boxes_match,
                       hypre_CommInfo      **comm_info_ptr )
 {
-   int  ierr = 0;
    hypre_CommInfo  *comm_info;
 
    comm_info = hypre_TAlloc(hypre_CommInfo, 1);
@@ -56,13 +46,57 @@ hypre_CommInfoCreate( hypre_BoxArrayArray  *send_boxes,
    hypre_CommInfoSendRBoxnums(comm_info)  = send_rboxnums;
    hypre_CommInfoRecvRBoxnums(comm_info)  = recv_rboxnums;
    hypre_CommInfoSendRBoxes(comm_info)    = send_rboxes;
+   hypre_CommInfoRecvRBoxes(comm_info)    = recv_rboxes;
 
+   hypre_CommInfoNumTransforms(comm_info)  = 0;
+   hypre_CommInfoCoords(comm_info)         = NULL;
+   hypre_CommInfoDirs(comm_info)           = NULL;
+   hypre_CommInfoSendTransforms(comm_info) = NULL;
+   hypre_CommInfoRecvTransforms(comm_info) = NULL;
+
+   hypre_CommInfoBoxesMatch(comm_info)    = boxes_match;
    hypre_SetIndex(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
    hypre_SetIndex(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
 
    *comm_info_ptr = comm_info;
 
-   return ierr;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CommInfoSetTransforms( hypre_CommInfo  *comm_info,
+                             int              num_transforms,
+                             hypre_Index     *coords,
+                             hypre_Index     *dirs,
+                             int            **send_transforms,
+                             int            **recv_transforms )
+{
+   hypre_CommInfoNumTransforms(comm_info)  = num_transforms;
+   hypre_CommInfoCoords(comm_info)         = coords;
+   hypre_CommInfoDirs(comm_info)           = dirs;
+   hypre_CommInfoSendTransforms(comm_info) = send_transforms;
+   hypre_CommInfoRecvTransforms(comm_info) = recv_transforms;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CommInfoGetTransforms( hypre_CommInfo  *comm_info,
+                             int             *num_transforms,
+                             hypre_Index    **coords,
+                             hypre_Index    **dirs )
+{
+   *num_transforms = hypre_CommInfoNumTransforms(comm_info);
+   *coords         = hypre_CommInfoCoords(comm_info);
+   *dirs           = hypre_CommInfoDirs(comm_info);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -73,15 +107,13 @@ hypre_CommInfoProjectSend( hypre_CommInfo  *comm_info,
                            hypre_Index      index,
                            hypre_Index      stride )
 {
-   int  ierr = 0;
-
    hypre_ProjectBoxArrayArray(hypre_CommInfoSendBoxes(comm_info),
                               index, stride);
    hypre_ProjectBoxArrayArray(hypre_CommInfoSendRBoxes(comm_info),
                               index, stride);
    hypre_CopyIndex(stride, hypre_CommInfoSendStride(comm_info));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -92,13 +124,11 @@ hypre_CommInfoProjectRecv( hypre_CommInfo  *comm_info,
                            hypre_Index      index,
                            hypre_Index      stride )
 {
-   int  ierr = 0;
-
    hypre_ProjectBoxArrayArray(hypre_CommInfoRecvBoxes(comm_info),
                               index, stride);
    hypre_CopyIndex(stride, hypre_CommInfoRecvStride(comm_info));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -107,44 +137,73 @@ hypre_CommInfoProjectRecv( hypre_CommInfo  *comm_info,
 int
 hypre_CommInfoDestroy( hypre_CommInfo  *comm_info )
 {
-   int                   ierr = 0;
-   hypre_BoxArrayArray  *boxes;
-   int                 **procs;
-   int                 **boxnums;
-   hypre_BoxArrayArray  *rboxes;
-   int                   i;
+   int                 **processes;
+   int                 **rboxnums;
+   int                 **transforms;
+   int                   i, size;
 
-   boxes    = hypre_CommInfoSendBoxes(comm_info);
-   procs    = hypre_CommInfoSendProcesses(comm_info);
-   boxnums  = hypre_CommInfoSendRBoxnums(comm_info);
-   rboxes   = hypre_CommInfoSendRBoxes(comm_info);
-   hypre_ForBoxArrayI(i, boxes)
+   size = hypre_BoxArrayArraySize(hypre_CommInfoSendBoxes(comm_info));
+   hypre_BoxArrayArrayDestroy(hypre_CommInfoSendBoxes(comm_info));
+   processes = hypre_CommInfoSendProcesses(comm_info);
+   for (i = 0; i < size; i++)
+   {
+      hypre_TFree(processes[i]);
+   }
+   hypre_TFree(processes);
+   rboxnums = hypre_CommInfoSendRBoxnums(comm_info);
+   if (rboxnums != NULL)
+   {
+      for (i = 0; i < size; i++)
       {
-         hypre_TFree(procs[i]);
-         hypre_TFree(boxnums[i]);
+         hypre_TFree(rboxnums[i]);
       }
-   hypre_BoxArrayArrayDestroy(boxes);
-   hypre_BoxArrayArrayDestroy(rboxes);
-   hypre_TFree(procs);
-   hypre_TFree(boxnums);
+      hypre_TFree(rboxnums);
+   }
+   hypre_BoxArrayArrayDestroy(hypre_CommInfoSendRBoxes(comm_info));
+   transforms = hypre_CommInfoSendTransforms(comm_info);
+   if (transforms != NULL)
+   {
+      for (i = 0; i < size; i++)
+      {
+         hypre_TFree(transforms[i]);
+      }
+      hypre_TFree(transforms);
+   }
 
-   boxes    = hypre_CommInfoRecvBoxes(comm_info);
-   procs    = hypre_CommInfoRecvProcesses(comm_info);
-   boxnums  = hypre_CommInfoRecvRBoxnums(comm_info);
-   hypre_ForBoxArrayI(i, boxes)
+   size = hypre_BoxArrayArraySize(hypre_CommInfoRecvBoxes(comm_info));
+   hypre_BoxArrayArrayDestroy(hypre_CommInfoRecvBoxes(comm_info));
+   processes = hypre_CommInfoRecvProcesses(comm_info);
+   for (i = 0; i < size; i++)
+   {
+      hypre_TFree(processes[i]);
+   }
+   hypre_TFree(processes);
+   rboxnums = hypre_CommInfoRecvRBoxnums(comm_info);
+   if (rboxnums != NULL)
+   {
+      for (i = 0; i < size; i++)
       {
-         hypre_TFree(procs[i]);
-         if (boxnums[i])
-            hypre_TFree(boxnums[i]);
+         hypre_TFree(rboxnums[i]);
       }
-   hypre_BoxArrayArrayDestroy(boxes);
-   hypre_TFree(procs);
-   if (boxnums)
-      hypre_TFree(boxnums);
+      hypre_TFree(rboxnums);
+   }
+   hypre_BoxArrayArrayDestroy(hypre_CommInfoRecvRBoxes(comm_info));
+   transforms = hypre_CommInfoRecvTransforms(comm_info);
+   if (transforms != NULL)
+   {
+      for (i = 0; i < size; i++)
+      {
+         hypre_TFree(transforms[i]);
+      }
+      hypre_TFree(transforms);
+   }
+
+   hypre_TFree(hypre_CommInfoCoords(comm_info));
+   hypre_TFree(hypre_CommInfoDirs(comm_info));
 
    hypre_TFree(comm_info);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
@@ -260,6 +319,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    int                  **send_rboxnums;
    int                  **recv_rboxnums;
    hypre_BoxArrayArray   *send_rboxes;
+   hypre_BoxArrayArray   *recv_rboxes;
 
    hypre_BoxArray        *local_boxes;
    int                    num_boxes;
@@ -734,9 +794,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
     * Return
     *------------------------------------------------------*/
 
+   /* This needs to be fixed to handle periodicity correctly */
+   recv_rboxes= hypre_BoxArrayArrayDuplicate(recv_boxes);
+
    hypre_CommInfoCreate(send_boxes, recv_boxes, send_procs, recv_procs,
-                        send_rboxnums, recv_rboxnums, send_rboxes, 
-                        comm_info_ptr);
+                        send_rboxnums, recv_rboxnums, send_rboxes, recv_rboxes,
+                        1, comm_info_ptr);
 
    return hypre_error_flag;
 }
@@ -756,8 +819,6 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
                                   int                   *num_ghost,
                                   hypre_CommInfo       **comm_info_ptr )
 {
-   int  ierr = 0;
-
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
    int                   startstop[6], ii[3], i, d, size;
@@ -795,7 +856,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    
    hypre_StructStencilDestroy(stencil);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -808,8 +869,6 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
                                hypre_StructGrid      *to_grid,
                                hypre_CommInfo       **comm_info_ptr )
 {
-   int                      ierr = 0;
-
    hypre_BoxArrayArray     *send_boxes;
    hypre_BoxArrayArray     *recv_boxes;
    int                    **send_procs;
@@ -817,6 +876,7 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
    int                    **send_rboxnums;
    int                    **recv_rboxnums;
    hypre_BoxArrayArray     *send_rboxes;
+   hypre_BoxArrayArray     *recv_rboxes;
 
    hypre_BoxArrayArray     *comm_boxes;
    int                    **comm_procs;
@@ -927,12 +987,14 @@ hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,
          recv_boxes = comm_boxes;
          recv_procs = comm_procs;
          recv_rboxnums = comm_boxnums;
+         recv_rboxes = hypre_BoxArrayArrayDuplicate(comm_boxes);
          break;
       }
    }
 
    hypre_CommInfoCreate(send_boxes, recv_boxes, send_procs, recv_procs,
-                        send_rboxnums, recv_rboxnums, send_rboxes, comm_info_ptr);
+                        send_rboxnums, recv_rboxnums, send_rboxes, recv_rboxes,
+                        1, comm_info_ptr);
 
-   return ierr;
+   return hypre_error_flag;
 }

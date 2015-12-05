@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleTicket.h
  * Symbol:        sidlx.rmi.SimpleTicket-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.SimpleTicket
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -175,10 +175,12 @@ sidlx_rmi_SimpleTicket_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -199,10 +201,12 @@ sidlx_rmi_SimpleTicket_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -219,9 +223,11 @@ sidlx_rmi_SimpleTicket_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -259,9 +265,11 @@ sidlx_rmi_SimpleTicket_test(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_test)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_test)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -278,9 +286,11 @@ sidlx_rmi_SimpleTicket_createEmptyTicketBook(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_createEmptyTicketBook)(
+  sidl_rmi_TicketBook _result;
+  _result = (*self->d_epv->f_createEmptyTicketBook)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -299,9 +309,11 @@ sidlx_rmi_SimpleTicket_getResponse(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getResponse)(
+  sidl_rmi_Response _result;
+  _result = (*self->d_epv->f_getResponse)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -359,9 +371,11 @@ sidlx_rmi_SimpleTicket__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -395,9 +409,11 @@ sidlx_rmi_SimpleTicket__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -914,8 +930,8 @@ sidlx_rmi_SimpleTicket__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_SimpleTicket__object*
-sidlx_rmi_SimpleTicket__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_SimpleTicket__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

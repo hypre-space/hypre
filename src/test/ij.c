@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 1.26 $
+ ***********************************************************************EHEADER*/
+
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * Do `driver -help' for usage info.
@@ -1341,6 +1353,8 @@ main( int   argc,
       the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
 
 
+   if (build_matrix_type > -1)
+   {
        ierr = HYPRE_IJMatrixInitialize( ij_A );
 
        /* Loop through all locally stored rows and insert them into ij_matrix */
@@ -1366,11 +1380,11 @@ main( int   argc,
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
 
-   if (build_matrix_type > -1)
      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
+   }
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess

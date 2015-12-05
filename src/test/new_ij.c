@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 1.48 $
+ ***********************************************************************EHEADER*/
+
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * Do `driver -help' for usage info.
@@ -42,6 +54,12 @@ int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, double vc
 
 int BuildParCoordinates (int argc , char *argv [], int arg_index , int *coorddim_ptr , float **coord_ptr );
                                                                                 
+extern int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations, 
+                                          double rel_residual_norm);
+
+extern int hypre_FlexGMRESModifyPCDefault(void *precond_data, int iteration, 
+                                       double rel_residual_norm);
+
 
 #define SECOND_TIME 0
  
@@ -116,6 +134,8 @@ main( int   argc,
    double schwarz_rlx_weight;
    double *values, val;
 
+   int use_nonsymm_schwarz = 0;
+
    const double dt_inf = 1.e40;
    double dt = dt_inf;
 
@@ -151,6 +171,7 @@ main( int   argc,
    double   outer_wt;
    double   outer_wt_level;
    double   tol = 1.e-8, pc_tol = 0.;
+   double   atol = 0.0;
    double   max_row_sum = 1.;
    int      amg_max_iter = 20;
    /* for CGC BM Aug 25, 2006 */
@@ -169,15 +190,28 @@ main( int   argc,
    double   drop_tol = -1;
    int      nonzeros_to_keep = -1;
 
+   /* parameters for Euclid or ILU smoother in AMG */
+   double   eu_ilut = 0.0;
+   double   eu_sparse_A = 0.0;
+   int	    eu_bj = 0;
+   int	    eu_level = -1;
+   int	    eu_stats = 0;
+   int	    eu_mem = 0;
+   int	    eu_row_scale = 0; /* Euclid only */
+
    /* parameters for GMRES */
    int	    k_dim;
-
+   /* parameters for LGMRES */
+   int	    aug_dim;
    /* parameters for GSMG */
    int      gsmg_samples = 5;
    int      interp_type  = 0; /* default value */
    int      post_interp_type  = 0; /* default value */
 
    int      print_system = 0;
+
+   int rel_change = 0;
+   
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -614,7 +648,7 @@ main( int   argc,
    /* defaults for BoomerAMG */
    if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
 	|| solver_id == 9 || solver_id == 13 || solver_id == 14
- 	|| solver_id == 15 || solver_id == 20)
+ 	|| solver_id == 15 || solver_id == 20 || solver_id == 51 || solver_id == 61)
    {
    strong_threshold = 0.25;
    trunc_factor = 0.;
@@ -640,6 +674,9 @@ main( int   argc,
 
    k_dim = 5;
 
+   /* defaults for LGMRES - should use a larger k_dim, though*/
+   aug_dim = 2;
+
    arg_index = 0;
    while (arg_index < argc)
    {
@@ -647,6 +684,11 @@ main( int   argc,
       {
          arg_index++;
          k_dim = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-aug") == 0 )
+      {
+         arg_index++;
+         aug_dim = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-w") == 0 )
       {
@@ -695,6 +737,11 @@ main( int   argc,
          arg_index++;
          tol  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-atol") == 0 )
+      {
+         arg_index++;
+         atol  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-mxrs") == 0 )
       {
          arg_index++;
@@ -719,6 +766,41 @@ main( int   argc,
       {
          arg_index++;
          nonzeros_to_keep  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilut") == 0 )
+      {
+         arg_index++;
+         eu_ilut  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sparseA") == 0 )
+      {
+         arg_index++;
+         eu_sparse_A  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rowScale") == 0 )
+      {
+         arg_index++;
+         eu_row_scale  = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-level") == 0 )
+      {
+         arg_index++;
+         eu_level  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-bj") == 0 )
+      {
+         arg_index++;
+         eu_bj  = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-eu_stats") == 0 )
+      {
+         arg_index++;
+         eu_stats  = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-eu_mem") == 0 )
+      {
+         arg_index++;
+         eu_mem  = 1;
       }
       else if ( strcmp(argv[arg_index], "-tr") == 0 )
       {
@@ -760,6 +842,11 @@ main( int   argc,
          arg_index++;
          variant  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-use_ns") == 0 )
+      {
+         arg_index++;
+         use_nonsymm_schwarz = 1;
+      }
       else if ( strcmp(argv[arg_index], "-ov") == 0 )
       {
          arg_index++;
@@ -769,6 +856,14 @@ main( int   argc,
       {
          arg_index++;
          domain_type  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-blk_sm") == 0 )
+      {
+         arg_index++;
+         smooth_num_levels = atoi(argv[arg_index++]);
+         overlap = 0;
+         smooth_type = 6;
+         domain_type = 1;
       }
       else if ( strcmp(argv[arg_index], "-mu") == 0 )
       {
@@ -794,6 +889,11 @@ main( int   argc,
       {
          arg_index++;
          nodal  = atoi(argv[arg_index++]);
+      }
+       else if ( strcmp(argv[arg_index], "-rel_change") == 0 )
+      {
+         arg_index++;
+         rel_change = 1;
       }
       else if ( strcmp(argv[arg_index], "-nodal_diag") == 0 )
       {
@@ -891,6 +991,8 @@ main( int   argc,
       printf("       20=Hybrid solver/ DiagScale, AMG \n");
       printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
       printf("       45=Euclid-BICGSTAB\n");
+      printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
+      printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
       printf("\n");
       printf("  -cljp                 : CLJP coarsening \n");
       printf("  -cljp1                : CLJP coarsening, fixed random \n");
@@ -932,7 +1034,8 @@ main( int   argc,
       printf("      21=same as 11, but don't add weak connect. to diag \n");
       printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
       printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
-        
+      printf("      24=direct block interpolation for nodal systems AMG\n");
+
 
      
       printf("\n");
@@ -954,9 +1057,9 @@ main( int   argc,
       printf("       1 = Frobenius norm  \n");
       printf("       2 = Sum of Abs.value of elements  \n");
       printf("       3 = Largest magnitude element (includes its sign)  \n");
-      printf("       4 = Inf. norm (block only) \n");
-      printf("       5 = One norm  (block only) \n");
-      printf("       6 = Sum of all elements in block (block only) \n");
+      printf("       4 = Inf. norm  \n");
+      printf("       5 = One norm  (note: use with block version only) \n");
+      printf("       6 = Sum of all elements in block  \n");
       printf("  -nodal_diag <val>        :how to treat diag elements\n");
       printf("       0 = no special treatment \n");
       printf("       1 = make diag = neg.sum of the off_diag  \n");
@@ -987,13 +1090,23 @@ main( int   argc,
      
       printf("  -w   <val>             : set Jacobi relax weight = val\n");
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
+      printf("  -aug   <val>           : number of augmentation vectors for LGMRES (-k indicates total approx space size)\n");
+
       printf("  -mxl  <val>            : maximum number of levels (AMG, ParaSAILS)\n");
       printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+      printf("  -atol  <val>           : set solver absolute convergence tolerance = val\n");
       printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
       printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
       printf("\n");
       printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
       printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
+      printf("\n");
+      printf("  -level   <val>         : set k in ILU(k) for Euclid \n");
+      printf("  -bj <val>              : enable block Jacobi ILU for Euclid \n");
+      printf("  -ilut <val>            : set drop tolerance for ILUT in Euclid\n");
+      printf("                           Note ILUT is sequential only!\n");
+      printf("  -sparseA <val>         : set drop tolerance in ILU(k) for Euclid \n");
+      printf("  -rowScale <val>        : enable row scaling in Euclid \n");
       printf("\n");  
       printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
       printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
@@ -1009,6 +1122,14 @@ main( int   argc,
       printf("\n");
       printf("  -plot_grids            : print out information for plotting the grids\n");
       printf("  -plot_file_name <val>  : file name for plotting output\n");
+ printf("\n");
+      printf("  -smtype <val>      :smooth type\n");
+      printf("  -smlv <val>        :smooth num levels\n");
+      printf("  -ov <val>          :over lap:\n");
+      printf("  -dom <val>         :domain type\n");
+      printf("  -use_ns            : use non-symm schwarz smoother\n");
+      printf("  -var <val>         : schwarz smoother variant (0-3) \n");
+      printf("  -blk_sm <val>      : same as '-smtype 6 -ov 0 -dom 1 -smlv <val>'\n");
       exit(1);
    }
 
@@ -1742,6 +1863,7 @@ main( int   argc,
 
       HYPRE_ParCSRHybridCreate(&amg_solver); 
       HYPRE_ParCSRHybridSetTol(amg_solver, tol);
+      HYPRE_ParCSRHybridSetAbsoluteTol(amg_solver, atol);
       HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
       HYPRE_ParCSRHybridSetSolverType(amg_solver, solver_type);
       HYPRE_ParCSRHybridSetLogging(amg_solver, ioutdat);
@@ -1890,7 +2012,13 @@ main( int   argc,
       HYPRE_BoomerAMGSetVariant(amg_solver, variant);
       HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
+      HYPRE_BoomerAMGSetSchwarzUseNonSymm(amg_solver, use_nonsymm_schwarz);
+     
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
+      if (eu_level < 0) eu_level = 0;
+      HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
+      HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
+      HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
@@ -1994,7 +2122,12 @@ main( int   argc,
       HYPRE_BoomerAMGSetVariant(amg_solver, variant);
       HYPRE_BoomerAMGSetOverlap(amg_solver, overlap);
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
+      HYPRE_BoomerAMGSetSchwarzUseNonSymm(amg_solver, use_nonsymm_schwarz);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
+      if (eu_level < 0) eu_level = 0;
+      HYPRE_BoomerAMGSetEuLevel(amg_solver, eu_level);
+      HYPRE_BoomerAMGSetEuBJ(amg_solver, eu_bj);
+      HYPRE_BoomerAMGSetEuSparseA(amg_solver, eu_sparse_A);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
@@ -2070,9 +2203,10 @@ main( int   argc,
       HYPRE_PCGSetMaxIter(pcg_solver, 1000);
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
-      HYPRE_PCGSetRelChange(pcg_solver, 0);
+      HYPRE_PCGSetRelChange(pcg_solver, rel_change);
       HYPRE_PCGSetPrintLevel(pcg_solver, ioutdat);
- 
+      HYPRE_PCGSetAbsoluteTol(pcg_solver, atol);
+
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
@@ -2128,7 +2262,12 @@ main( int   argc,
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(pcg_precond, use_nonsymm_schwarz);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2174,7 +2313,7 @@ main( int   argc,
 	 HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
 	 HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
          HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
-
+         HYPRE_SchwarzSetNonSymm(pcg_precond, use_nonsymm_schwarz);
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
@@ -2236,6 +2375,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
@@ -2263,7 +2406,15 @@ main( int   argc,
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -2359,9 +2510,11 @@ main( int   argc,
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
       HYPRE_GMRESSetTol(pcg_solver, tol);
+      HYPRE_GMRESSetAbsoluteTol(pcg_solver, atol);
       HYPRE_GMRESSetLogging(pcg_solver, 1);
       HYPRE_GMRESSetPrintLevel(pcg_solver, ioutdat);
- 
+      HYPRE_GMRESSetRelChange(pcg_solver, rel_change);
+
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
@@ -2417,7 +2570,12 @@ main( int   argc,
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(pcg_precond, use_nonsymm_schwarz);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2513,7 +2671,12 @@ main( int   argc,
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(pcg_precond, use_nonsymm_schwarz);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
@@ -2552,12 +2715,14 @@ main( int   argc,
 
          HYPRE_EuclidCreate(MPI_COMM_WORLD, &pcg_precond);
 
-         /* note: There are three three methods of setting run-time 
-            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
-            we'll use what I think is simplest: let Euclid internally 
-            parse the command line.
-         */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          HYPRE_GMRESSetPrecond (pcg_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -2632,6 +2797,307 @@ main( int   argc,
          printf("\n");
       }
    }
+/*-----------------------------------------------------------
+    * Solve the system using LGMRES 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 50 || solver_id == 51 )
+   {
+      time_index = hypre_InitializeTiming("LGMRES Setup");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRLGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_LGMRESSetKDim(pcg_solver, k_dim);
+      HYPRE_LGMRESSetAugDim(pcg_solver, aug_dim);
+      HYPRE_LGMRESSetMaxIter(pcg_solver, 1000);
+      HYPRE_LGMRESSetTol(pcg_solver, tol);
+      HYPRE_LGMRESSetAbsoluteTol(pcg_solver, atol);
+      HYPRE_LGMRESSetLogging(pcg_solver, 1);
+      HYPRE_LGMRESSetPrintLevel(pcg_solver, ioutdat);
+ 
+      if (solver_id == 51)
+      {
+         /* use BoomerAMG as preconditioner */
+         if (myid == 0) printf("Solver: AMG-LGMRES\n");
+
+         HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
+         HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
+         HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
+         HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
+         if (relax_down > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
+         if (relax_up > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_up, 2);
+         if (relax_coarse > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
+         HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
+         HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
+         HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
+         if (level_w > -1)
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+         if (level_ow > -1)
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
+         HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(pcg_precond, use_nonsymm_schwarz);
+         HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_LGMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                               pcg_precond);
+      }
+      else if (solver_id == 50)
+      {
+         /* use diagonal scaling as preconditioner */
+         if (myid == 0) printf("Solver: DS-LGMRES\n");
+         pcg_precond = NULL;
+
+         HYPRE_LGMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+                               pcg_precond);
+      }
+
+      HYPRE_LGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
+      if (pcg_precond_gotten != pcg_precond)
+      {
+        printf("HYPRE_LGMRESGetPrecond got bad precond\n");
+        return(-1);
+      }
+      else
+        if (myid == 0)
+          printf("HYPRE_LGMRESGetPrecond got good precond\n");
+      HYPRE_LGMRESSetup
+         (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("LGMRES Solve");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_LGMRESSolve
+         (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      HYPRE_LGMRESGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_LGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+
+      HYPRE_ParCSRLGMRESDestroy(pcg_solver);
+ 
+      if (solver_id == 51)
+      {
+         HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("LGMRES Iterations = %d\n", num_iterations);
+         printf("Final LGMRES Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+   }
+ /*-----------------------------------------------------------
+    * Solve the system using FlexGMRES 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 60 || solver_id == 61 )
+   {
+      time_index = hypre_InitializeTiming("FlexGMRES Setup");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_ParCSRFlexGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_FlexGMRESSetKDim(pcg_solver, k_dim);
+      HYPRE_FlexGMRESSetMaxIter(pcg_solver, 1000);
+      HYPRE_FlexGMRESSetTol(pcg_solver, tol);
+      HYPRE_FlexGMRESSetAbsoluteTol(pcg_solver, atol);
+      HYPRE_FlexGMRESSetLogging(pcg_solver, 1);
+      HYPRE_FlexGMRESSetPrintLevel(pcg_solver, ioutdat);
+ 
+      if (solver_id == 61)
+      {
+         /* use BoomerAMG as preconditioner */
+         if (myid == 0) printf("Solver: AMG-FlexGMRES\n");
+
+         HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
+         HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
+         HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
+         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
+         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
+         HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
+         HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
+         HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
+         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
+         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
+         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
+         HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
+         HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
+         if (relax_down > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
+         if (relax_up > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_up, 2);
+         if (relax_coarse > -1)
+            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_coarse, 3);
+         HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
+         HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
+         HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
+         if (level_w > -1)
+            HYPRE_BoomerAMGSetLevelRelaxWt(pcg_precond, relax_wt_level,level_w);
+         if (level_ow > -1)
+            HYPRE_BoomerAMGSetLevelOuterWt(pcg_precond,outer_wt_level,level_ow);
+         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumLevels(pcg_precond, smooth_num_levels);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
+         HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
+         HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(pcg_precond, use_nonsymm_schwarz);
+         HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
+         if (num_functions > 1)
+            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_FlexGMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                               pcg_precond);
+      }
+      else if (solver_id == 60)
+      {
+         /* use diagonal scaling as preconditioner */
+         if (myid == 0) printf("Solver: DS-FlexGMRES\n");
+         pcg_precond = NULL;
+
+         HYPRE_FlexGMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
+                               pcg_precond);
+      }
+
+      HYPRE_FlexGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
+      if (pcg_precond_gotten != pcg_precond)
+      {
+        printf("HYPRE_FlexGMRESGetPrecond got bad precond\n");
+        return(-1);
+      }
+      else
+        if (myid == 0)
+          printf("HYPRE_FlexGMRESGetPrecond got good precond\n");
+
+#if 0
+      if (solver_id == 61)                                             
+         HYPRE_FlexGMRESSetModifyPC( pcg_solver, 
+                                  (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+#endif
+      /* this is optional - could be a user defined one instead*/
+      HYPRE_FlexGMRESSetModifyPC( pcg_solver, 
+                               (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCDefault);
+
+
+      HYPRE_FlexGMRESSetup
+         (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("FlexGMRES Solve");
+      hypre_BeginTiming(time_index);
+ 
+      HYPRE_FlexGMRESSolve
+         (pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+
+      HYPRE_ParCSRFlexGMRESDestroy(pcg_solver);
+ 
+      if (solver_id == 61)
+      {
+         HYPRE_BoomerAMGDestroy(pcg_precond);
+      }
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("FlexGMRES Iterations = %d\n", num_iterations);
+         printf("Final FlexGMRES Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+   }
+
    /*-----------------------------------------------------------
     * Solve the system using BiCGSTAB 
     *-----------------------------------------------------------*/
@@ -2644,6 +3110,7 @@ main( int   argc,
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
+      HYPRE_BiCGSTABSetAbsoluteTol(pcg_solver, atol);
       HYPRE_BiCGSTABSetLogging(pcg_solver, ioutdat);
       HYPRE_BiCGSTABSetPrintLevel(pcg_solver, ioutdat);
  
@@ -2701,7 +3168,13 @@ main( int   argc,
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzUseNonSymm(pcg_precond, use_nonsymm_schwarz);
+       
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         if (eu_level < 0) eu_level = 0;
+         HYPRE_BoomerAMGSetEuLevel(pcg_precond, eu_level);
+         HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
+         HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2756,7 +3229,15 @@ main( int   argc,
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/
 
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
@@ -3504,6 +3985,24 @@ BuildParLaplacian( int                  argc,
                
                /* mtrx[3] */
                SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep2*1.0, 1.0, 3, mtrx_values);
+            }
+            else if (vcoef_opt == 5) /* use with default sys_opt  - */
+            {
+               double  alp, beta;
+               alp = .001;
+               beta = 10;
+               
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, alp*1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta*1.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, alp*1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, beta*1.0, 1.0, 3, mtrx_values);
             }
             else  /* = 0 */
             {

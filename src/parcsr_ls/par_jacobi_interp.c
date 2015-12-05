@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.10 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
+
 
 #include "headers.h"
 #include "par_amg.h"
@@ -71,9 +58,8 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
                                     double truncation_threshold,
                                     double truncation_threshold_minus,
                                     int * dof_func, int * dof_func_offd,
-                                    double weight_AF
-   )
-/* One step of Jacobin interpolation.
+                                    double weight_AF)
+/* One step of Jacobi interpolation:
    A is the linear system.
    P is an interpolation matrix, input and output
    CF_marker identifies coarse and fine points
@@ -90,7 +76,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    where DFF is the diagonal of AFF, (-1) represents the inverse, and
    where "old" denotes a value on entry to this function, "new" a returned value.
 
- */
+*/
 {
    hypre_ParCSRMatrix * Pnew;
    hypre_ParCSRMatrix * C;

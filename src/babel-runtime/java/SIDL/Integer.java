@@ -2,8 +2,8 @@
 // File:	Integer.java
 // Package:	sidl
 // Copyright:	(c) 2000-2001 The Regents of the University of California
-// Revision:	$Revision: 1.5 $
-// Modified:	$Date: 2006/08/29 22:29:21 $
+// Revision:	$Revision: 1.6 $
+// Modified:	$Date: 2007/09/27 19:35:14 $
 // Description:	holder and array classes for built-in data types
 //
 // Copyright (c) 2000-2001, The Regents of the University of Calfornia.
@@ -250,6 +250,13 @@ public class Integer {
     public Array get() {
       return d_obj;
     }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
+    }
   }
 
 }
@@ -446,6 +453,13 @@ public class Integer {
      */
     public Array1 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
   }
@@ -651,6 +665,14 @@ public class Integer {
      */
     public Array2 get() {
       return d_obj;
+    }
+
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
     }
   }
@@ -864,6 +886,13 @@ public class Integer {
      */
     public Array3 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -1090,6 +1119,13 @@ public class Integer {
      */
     public Array4 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -1325,6 +1361,13 @@ public class Integer {
      */
     public Array5 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 
@@ -1567,6 +1610,13 @@ public class Integer {
      */
     public Array6 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
   }
@@ -1823,6 +1873,13 @@ public class Integer {
      */
     public Array7 get() {
       return d_obj;
+    }
+
+    /**
+     * Destroy held array
+     */
+    public void destroy() {
+      if (d_obj != null) { d_obj.destroy(); d_obj = null; }
     }
   }
 

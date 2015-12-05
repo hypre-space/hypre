@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_JimEchoServer_Stub.c
  * Symbol:        sidlx.rmi.JimEchoServer-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for sidlx.rmi.JimEchoServer
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -59,11 +59,10 @@ static const struct sidlx_rmi_JimEchoServer__external* _loadIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
   _externals = sidlx_rmi_JimEchoServer__externals();
 #else
-  _externals = (struct 
-    sidlx_rmi_JimEchoServer__external*)sidl_dynamicLoadIOR(
+  _externals = (struct sidlx_rmi_JimEchoServer__external*)sidl_dynamicLoadIOR(
     "sidlx.rmi.JimEchoServer","sidlx_rmi_JimEchoServer__externals") ;
-  sidl_checkIORVersion("sidlx.rmi.JimEchoServer",
-    _externals->d_ior_major_version, _externals->d_ior_minor_version, 0, 10);
+  sidl_checkIORVersion("sidlx.rmi.JimEchoServer", 
+    _externals->d_ior_major_version, _externals->d_ior_minor_version, 1, 0);
 #endif
   return _externals;
 }
@@ -102,7 +101,7 @@ sidlx_rmi_JimEchoServer__createRemote(const char* url, sidl_BaseInterface *_ex)
 }
 
 static struct sidlx_rmi_JimEchoServer__object* 
-  sidlx_rmi_JimEchoServer__remoteConnect(const char* url, sidl_bool ar,
+  sidlx_rmi_JimEchoServer__remoteConnect(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 static struct sidlx_rmi_JimEchoServer__object* 
   sidlx_rmi_JimEchoServer__IHConnect(struct sidl_rmi_InstanceHandle__object* 
@@ -150,10 +149,12 @@ sidlx_rmi_JimEchoServer_isLocalObject(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isLocalObject)(
+  char* _result;
+  _result = (*self->d_epv->f_isLocalObject)(
     self,
     url,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -173,9 +174,11 @@ sidlx_rmi_JimEchoServer_getExceptions(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getExceptions)(
+  struct sidl_io_Serializable__array* _result;
+  _result = (*self->d_epv->f_getExceptions)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -216,10 +219,12 @@ sidlx_rmi_JimEchoServer_requestPort(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_requestPort)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_requestPort)(
     self,
     port,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -239,11 +244,13 @@ sidlx_rmi_JimEchoServer_requestPortInRange(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_requestPortInRange)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_requestPortInRange)(
     self,
     minport,
     maxport,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -260,9 +267,11 @@ sidlx_rmi_JimEchoServer_getPort(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getPort)(
+  int32_t _result;
+  _result = (*self->d_epv->f_getPort)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -279,9 +288,11 @@ sidlx_rmi_JimEchoServer_getServerName(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getServerName)(
+  char* _result;
+  _result = (*self->d_epv->f_getServerName)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -299,10 +310,12 @@ sidlx_rmi_JimEchoServer_getServerURL(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getServerURL)(
+  char* _result;
+  _result = (*self->d_epv->f_getServerURL)(
     self,
     objID,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -320,9 +333,11 @@ sidlx_rmi_JimEchoServer_run(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_run)(
+  int64_t _result;
+  _result = (*self->d_epv->f_run)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -413,10 +428,12 @@ sidlx_rmi_JimEchoServer_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -437,10 +454,12 @@ sidlx_rmi_JimEchoServer_isType(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -457,9 +476,11 @@ sidlx_rmi_JimEchoServer_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -478,8 +499,8 @@ sidlx_rmi_JimEchoServer__cast(
 
   if(!connect_loaded) {
     connect_loaded = 1;
-    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.JimEchoServer",
-      (void*)sidlx_rmi_JimEchoServer__IHConnect,_ex);SIDL_CHECK(*_ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.JimEchoServer", (
+      void*)sidlx_rmi_JimEchoServer__IHConnect,_ex);SIDL_CHECK(*_ex);
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
@@ -549,9 +570,11 @@ sidlx_rmi_JimEchoServer__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -610,9 +633,11 @@ sidlx_rmi_JimEchoServer__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -645,7 +670,7 @@ sidlx_rmi_JimEchoServer__array_createCol(
   const int32_t upper[])
 {
   return (struct 
-    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_createCol(dimen,
+    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_createCol(dimen, 
     lower, upper);
 }
 
@@ -663,7 +688,7 @@ sidlx_rmi_JimEchoServer__array_createRow(
   const int32_t upper[])
 {
   return (struct 
-    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_createRow(dimen,
+    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_createRow(dimen, 
     lower, upper);
 }
 
@@ -677,8 +702,8 @@ sidlx_rmi_JimEchoServer__array_createRow(
 struct sidlx_rmi_JimEchoServer__array*
 sidlx_rmi_JimEchoServer__array_create1d(int32_t len)
 {
-  return (struct 
-    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_create1d(len);
+  return (struct sidlx_rmi_JimEchoServer__array*)sidl_interface__array_create1d(
+    len);
 }
 
 /**
@@ -695,8 +720,8 @@ sidlx_rmi_JimEchoServer__array_create1dInit(
   sidlx_rmi_JimEchoServer* data)
 {
   return (struct 
-    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_create1dInit(len,
-    (struct sidl_BaseInterface__object **)data);
+    sidlx_rmi_JimEchoServer__array*)sidl_interface__array_create1dInit(len, (
+    struct sidl_BaseInterface__object **)data);
 }
 
 /**
@@ -911,7 +936,7 @@ sidlx_rmi_JimEchoServer__array_get(
   const int32_t indices[])
 {
   return (sidlx_rmi_JimEchoServer)
-    sidl_interface__array_get((const struct sidl_interface__array *)array,
+    sidl_interface__array_get((const struct sidl_interface__array *)array, 
       indices);
 }
 
@@ -1037,8 +1062,8 @@ sidlx_rmi_JimEchoServer__array_set(
   const int32_t indices[],
   sidlx_rmi_JimEchoServer const value)
 {
-  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
-    (struct sidl_BaseInterface__object *)value);
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices, (
+    struct sidl_BaseInterface__object *)value);
 }
 
 /**
@@ -1062,7 +1087,7 @@ sidlx_rmi_JimEchoServer__array_lower(
   const struct sidlx_rmi_JimEchoServer__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_lower((struct sidl_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1076,7 +1101,7 @@ sidlx_rmi_JimEchoServer__array_upper(
   const struct sidlx_rmi_JimEchoServer__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_upper((struct sidl_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1090,7 +1115,7 @@ sidlx_rmi_JimEchoServer__array_length(
   const struct sidlx_rmi_JimEchoServer__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_length((struct sidl_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1104,7 +1129,7 @@ sidlx_rmi_JimEchoServer__array_stride(
   const struct sidlx_rmi_JimEchoServer__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_stride((struct sidl_interface__array *)array,
+  return sidl_interface__array_stride((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1270,7 +1295,7 @@ sidlx_rmi_JimEchoServer__array_ensure(
   int     ordering)
 {
   return (struct sidlx_rmi_JimEchoServer__array*)
-    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen, 
       ordering);
 }
 
@@ -1325,8 +1350,8 @@ static struct sidl_recursive_mutex_t sidlx_rmi_JimEchoServer__mutex= SIDL_RECURS
 #endif
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -1363,8 +1388,7 @@ static void* remote_sidlx_rmi_JimEchoServer__cast(
     cmp1 = strcmp(name, "sidl.BaseInterface");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = 
-        &((
+      cast = &((
         *self).d_sidlx_rmi_simpleserver.d_sidl_baseclass.d_sidl_baseinterface);
       return cast;
     }
@@ -1372,7 +1396,7 @@ static void* remote_sidlx_rmi_JimEchoServer__cast(
       cmp2 = strcmp(name, "sidl.BaseClass");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_BaseClass__object*)self);
         return cast;
       }
     }
@@ -1381,23 +1405,23 @@ static void* remote_sidlx_rmi_JimEchoServer__cast(
     cmp1 = strcmp(name, "sidlx.rmi.SimpleServer");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidlx_rmi_SimpleServer__object*)self);
       return cast;
     }
     else if (cmp1 < 0) {
       cmp2 = strcmp(name, "sidlx.rmi.JimEchoServer");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidlx_rmi_JimEchoServer__object*)self);
         return cast;
       }
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih, _ex);
@@ -1440,7 +1464,7 @@ static void remote_sidlx_rmi_JimEchoServer__raddRef(
   struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
     sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
   sidl_rmi_Response _rsvp = NULL;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
     "addRef", _ex ); SIDL_CHECK(*_ex);
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -1485,7 +1509,7 @@ remote_sidlx_rmi_JimEchoServer__set_hooks(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "_set_hooks", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1539,12 +1563,12 @@ remote_sidlx_rmi_JimEchoServer_serviceRequest(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "serviceRequest", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(sock){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)sock,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)sock, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "sock", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -1591,7 +1615,7 @@ remote_sidlx_rmi_JimEchoServer_isLocalObject(
     char* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isLocalObject", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1610,8 +1634,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1639,7 +1663,7 @@ remote_sidlx_rmi_JimEchoServer_getExceptions(
     struct sidl_io_Serializable__array* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getExceptions", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1686,7 +1710,7 @@ remote_sidlx_rmi_JimEchoServer_setMaxThreadPool(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "setMaxThreadPool", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1731,7 +1755,7 @@ remote_sidlx_rmi_JimEchoServer_requestPort(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "requestPort", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1750,8 +1774,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1781,14 +1805,14 @@ remote_sidlx_rmi_JimEchoServer_requestPortInRange(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "requestPortInRange", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
-    sidl_rmi_Invocation_packInt( _inv, "minport", minport,
-      _ex);SIDL_CHECK(*_ex);
-    sidl_rmi_Invocation_packInt( _inv, "maxport", maxport,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Invocation_packInt( _inv, "minport", minport, _ex);SIDL_CHECK(
+      *_ex);
+    sidl_rmi_Invocation_packInt( _inv, "maxport", maxport, _ex);SIDL_CHECK(
+      *_ex);
 
     /* send actual RMI request */
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1803,8 +1827,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1832,7 +1856,7 @@ remote_sidlx_rmi_JimEchoServer_getPort(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getPort", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1850,8 +1874,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1879,7 +1903,7 @@ remote_sidlx_rmi_JimEchoServer_getServerName(
     char* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getServerName", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1897,8 +1921,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1927,7 +1951,7 @@ remote_sidlx_rmi_JimEchoServer_getServerURL(
     char* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getServerURL", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1946,8 +1970,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1975,7 +1999,7 @@ remote_sidlx_rmi_JimEchoServer_run(
     int64_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "run", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1993,8 +2017,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackLong( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackLong( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -2021,7 +2045,7 @@ remote_sidlx_rmi_JimEchoServer_shutdown(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "shutdown", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -2104,12 +2128,12 @@ remote_sidlx_rmi_JimEchoServer_isSame(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isSame", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(iobj){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -2130,8 +2154,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -2160,7 +2184,7 @@ remote_sidlx_rmi_JimEchoServer_isType(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isType", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -2179,8 +2203,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -2209,7 +2233,7 @@ remote_sidlx_rmi_JimEchoServer_getClassInfo(
     struct sidl_ClassInfo__object* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidlx_rmi_JimEchoServer__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getClassInfo", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -2227,10 +2251,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.JimEchoSe
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -2293,75 +2317,75 @@ static void sidlx_rmi_JimEchoServer__init_remote_epv(void)
     sidl_BaseInterface*)) epv->f__raddRef;
   e0->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,
     sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,
+  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t, 
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e1->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e2->f__cast         = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e2->f__cast         = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e2->f__delete       = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e2->f__getURL       = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e2->f__raddRef      = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e2->f__isRemote     = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e2->f__set_hooks    = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e2->f__exec         = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_getServerURL  = (char* (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_getServerURL;
-  e2->f_isLocalObject = (char* (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isLocalObject;
-  e2->f_getExceptions = (struct sidl_io_Serializable__array* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getExceptions;
-  e2->f_addRef        = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef     = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e2->f__isRemote     = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e2->f__set_hooks    = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e2->f__exec         = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_getServerURL  = (char* (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_getServerURL;
+  e2->f_isLocalObject = (char* (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isLocalObject;
+  e2->f_getExceptions = (struct sidl_io_Serializable__array* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getExceptions;
+  e2->f_addRef        = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e2->f_deleteRef     = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e2->f_isSame        = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType        = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e2->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e2->f_isType        = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo  = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   e3->f__cast              = (void* (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*,sidl_BaseInterface*)) epv->f__cast;
@@ -2381,42 +2405,42 @@ static void sidlx_rmi_JimEchoServer__init_remote_epv(void)
   e3->f_setMaxThreadPool   = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     int32_t,struct sidl_BaseInterface__object **)) epv->f_setMaxThreadPool;
   e3->f_requestPort        = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,int32_t,
-    struct sidl_BaseInterface__object **)) epv->f_requestPort;
+    sidlx_rmi_SimpleServer__object*,int32_t,struct sidl_BaseInterface__object 
+    **)) epv->f_requestPort;
   e3->f_requestPortInRange = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,int32_t,int32_t,
-    struct sidl_BaseInterface__object **)) epv->f_requestPortInRange;
+    sidlx_rmi_SimpleServer__object*,int32_t,int32_t,struct 
+    sidl_BaseInterface__object **)) epv->f_requestPortInRange;
   e3->f_getPort            = (int32_t (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getPort;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getPort;
   e3->f_getServerName      = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_getServerName;
   e3->f_getServerURL       = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_getServerURL;
   e3->f_run                = (int64_t (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_run;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_run;
   e3->f_shutdown           = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_shutdown;
   e3->f_serviceRequest     = (void (*)(struct sidlx_rmi_SimpleServer__object*,
-    struct sidlx_rmi_Socket__object*,
-    struct sidl_BaseInterface__object **)) epv->f_serviceRequest;
+    struct sidlx_rmi_Socket__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_serviceRequest;
   e3->f_getExceptions      = (struct sidl_io_Serializable__array* (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getExceptions;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getExceptions;
   e3->f_addRef             = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_addRef;
   e3->f_deleteRef          = (void (*)(struct sidlx_rmi_SimpleServer__object*,
     struct sidl_BaseInterface__object **)) epv->f_deleteRef;
   e3->f_isSame             = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_isSame;
   e3->f_isType             = (sidl_bool (*)(struct 
-    sidlx_rmi_SimpleServer__object*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
+    sidlx_rmi_SimpleServer__object*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
   e3->f_getClassInfo       = (struct sidl_ClassInfo__object* (*)(struct 
-    sidlx_rmi_SimpleServer__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidlx_rmi_SimpleServer__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
   e3->f_isLocalObject      = (char* (*)(struct sidlx_rmi_SimpleServer__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isLocalObject;
 
@@ -2425,7 +2449,7 @@ static void sidlx_rmi_JimEchoServer__init_remote_epv(void)
 
 /* Create an instance that connects to an existing remote object. */
 static struct sidlx_rmi_JimEchoServer__object*
-sidlx_rmi_JimEchoServer__remoteConnect(const char *url, sidl_bool ar,
+sidlx_rmi_JimEchoServer__remoteConnect(const char *url, sidl_bool ar, 
   sidl_BaseInterface *_ex)
 {
   struct sidlx_rmi_JimEchoServer__object* self;
@@ -2442,13 +2466,13 @@ sidlx_rmi_JimEchoServer__remoteConnect(const char *url, sidl_bool ar,
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi = 
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
-      objectID, _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface bi = (
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(objectID,
+      _ex); SIDL_CHECK(*_ex);
     return sidlx_rmi_JimEchoServer__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex ); 
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_JimEchoServer__object*) malloc(
@@ -2494,7 +2518,7 @@ sidlx_rmi_JimEchoServer__remoteConnect(const char *url, sidl_bool ar,
 /* Create an instance that uses an already existing  */
 /* InstanceHandle to connect to an existing remote object. */
 static struct sidlx_rmi_JimEchoServer__object*
-sidlx_rmi_JimEchoServer__IHConnect(sidl_rmi_InstanceHandle instance,
+sidlx_rmi_JimEchoServer__IHConnect(sidl_rmi_InstanceHandle instance, 
   sidl_BaseInterface *_ex)
 {
   struct sidlx_rmi_JimEchoServer__object* self;
@@ -2558,9 +2582,8 @@ sidlx_rmi_JimEchoServer__remoteCreate(const char *url, sidl_BaseInterface *_ex)
   struct sidl_BaseClass__object* s2;
 
   struct sidlx_rmi_JimEchoServer__remote* r_obj;
-  sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_createInstance(url, "sidlx.rmi.JimEchoServer",
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance(
+    url, "sidlx.rmi.JimEchoServer", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_JimEchoServer__object*) malloc(
@@ -2601,7 +2624,7 @@ sidlx_rmi_JimEchoServer__remoteCreate(const char *url, sidl_BaseInterface *_ex)
 
   return self;
   EXIT:
-  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,
+  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance, 
     &_throwaway_exception); }
   return NULL;
 }
@@ -2618,8 +2641,8 @@ sidlx_rmi_JimEchoServer__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.JimEchoServer",
-      (void*)sidlx_rmi_JimEchoServer__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.JimEchoServer", (
+      void*)sidlx_rmi_JimEchoServer__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -2640,8 +2663,8 @@ sidlx_rmi_JimEchoServer__rmicast(
  */
 
 struct sidlx_rmi_JimEchoServer__object*
-sidlx_rmi_JimEchoServer__connectI(const char* url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex)
+sidlx_rmi_JimEchoServer__connectI(const char* url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex)
 {
   return sidlx_rmi_JimEchoServer__remoteConnect(url, ar, _ex);
 }

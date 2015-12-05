@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructJacobi_fStub.h
  * Symbol:        bHYPRE.StructJacobi-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.StructJacobi
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,8 +45,8 @@ bHYPRE_StructJacobi__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructJacobi__object*
-bHYPRE_StructJacobi__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructJacobi__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -1,29 +1,19 @@
 #!/bin/ksh
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team. UCRL-CODE-222953.
-# All rights reserved.
-#
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer, contact information and the GNU Lesser General Public License.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
 #
 # HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License (as published by the Free Software 
-# Foundation) version 2.1 dated February 1999.
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
 #
-# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-# Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# $Revision: 1.10 $
+# $Revision: 1.13 $
 #EHEADER**********************************************************************
+
+
+
+
 
 
 
@@ -39,6 +29,9 @@
 #    8: ParaSails_PCG
 #   20: Hybrid_PCG
 #
+
+
+
 # lobpcg: Run default case with all available PCG preconditioners
 #    1: BoomerAMG_PCG
 #    2: DS_PCG
@@ -50,6 +43,12 @@
 #	  unknown approach
 #	  hybrid approach with block smoother
 # 	  nodal approach
+#       more solvers:
+#        51: BoomerAMG_LGMRES
+#        50: DS_LGMRES
+#        61: BoomerAMG_FlexGMRES
+#        60: DS_FlexGMRES
+#
 #=============================================================================
 
 mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
@@ -95,3 +94,9 @@ mpirun -np 2 ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > s
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
 mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 > solvers.out.sysn
+
+#LGMRS and FlexGMRES
+mpirun -np 2 ./new_ij -solver 50 -rhsrand > solvers.out.101
+mpirun -np 2 ./new_ij -solver 51 -rhsrand > solvers.out.102
+mpirun -np 2 ./new_ij -solver 60 -rhsrand > solvers.out.103
+mpirun -np 2 ./new_ij -solver 61 -rhsrand > solvers.out.104

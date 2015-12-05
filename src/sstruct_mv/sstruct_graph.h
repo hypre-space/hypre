@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -44,7 +31,7 @@ typedef struct
    int           to_part;
    hypre_Index   to_index;
    int           to_var;
-   int           to_box;         /* local box number */
+   int           to_boxnum;      /* local box number */
    int           to_proc;
    int           rank;
 
@@ -55,7 +42,7 @@ typedef struct
    int                  part;
    hypre_Index          index;
    int                  var;
-   int                  box;     /* local box number */
+   int                  boxnum;  /* local box number */
    int                  nUentries;
    hypre_SStructUEntry *Uentries;
 
@@ -113,14 +100,14 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUVEntryPart(Uv)        ((Uv) -> part)
 #define hypre_SStructUVEntryIndex(Uv)       ((Uv) -> index)
 #define hypre_SStructUVEntryVar(Uv)         ((Uv) -> var)
-#define hypre_SStructUVEntryBox(Uv)         ((Uv) -> box)
+#define hypre_SStructUVEntryBoxnum(Uv)      ((Uv) -> boxnum)
 #define hypre_SStructUVEntryNUEntries(Uv)   ((Uv) -> nUentries)
 #define hypre_SStructUVEntryUEntries(Uv)    ((Uv) -> Uentries)
 #define hypre_SStructUVEntryUEntry(Uv, i)  &((Uv) -> Uentries[i])
 #define hypre_SStructUVEntryToPart(Uv, i)   ((Uv) -> Uentries[i].to_part)
 #define hypre_SStructUVEntryToIndex(Uv, i)  ((Uv) -> Uentries[i].to_index)
 #define hypre_SStructUVEntryToVar(Uv, i)    ((Uv) -> Uentries[i].to_var)
-#define hypre_SStructUVEntryToBox(Uv, i)    ((Uv) -> Uentries[i].to_box)
+#define hypre_SStructUVEntryToBoxnum(Uv, i) ((Uv) -> Uentries[i].to_boxnum)
 #define hypre_SStructUVEntryToProc(Uv, i)   ((Uv) -> Uentries[i].to_proc)
 #define hypre_SStructUVEntryRank(Uv, i)     ((Uv) -> Uentries[i].rank)
 /*--------------------------------------------------------------------------
@@ -130,7 +117,7 @@ typedef struct hypre_SStructGraph_struct
 #define hypre_SStructUEntryToPart(U)   ((U) -> to_part)
 #define hypre_SStructUEntryToIndex(U)  ((U) -> to_index)
 #define hypre_SStructUEntryToVar(U)    ((U) -> to_var)
-#define hypre_SStructUEntryToBox(U)    ((U) -> to_box)
+#define hypre_SStructUEntryToBoxnum(U) ((U) -> to_boxnum)
 #define hypre_SStructUEntryToProc(U)   ((U) -> to_proc)
 #define hypre_SStructUEntryRank(U)     ((U) -> rank)
 

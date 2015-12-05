@@ -1,0 +1,71 @@
+\BOOKMARK [0][]{chapter.1}{1 Introduction}{}
+\BOOKMARK [1][]{section.1.1}{1.1 Overview of Features}{chapter.1}
+\BOOKMARK [1][]{section.1.2}{1.2 Getting More Information}{chapter.1}
+\BOOKMARK [1][]{section.1.3}{1.3 How to get started}{chapter.1}
+\BOOKMARK [2][]{subsection.1.3.1}{1.3.1 Installing hypre}{section.1.3}
+\BOOKMARK [2][]{subsection.1.3.2}{1.3.2 Choosing a conceptual interface}{section.1.3}
+\BOOKMARK [2][]{subsection.1.3.3}{1.3.3 Writing your code}{section.1.3}
+\BOOKMARK [0][]{chapter.2}{2 Structured-Grid System Interface \(Struct\)}{}
+\BOOKMARK [1][]{section.2.1}{2.1 Setting Up the Struct Grid}{chapter.2}
+\BOOKMARK [1][]{section.2.2}{2.2 Setting Up the Struct Stencil}{chapter.2}
+\BOOKMARK [1][]{section.2.3}{2.3 Setting Up the Struct Matrix}{chapter.2}
+\BOOKMARK [1][]{section.2.4}{2.4 Setting Up the Struct Right-Hand-Side Vector}{chapter.2}
+\BOOKMARK [1][]{section.2.5}{2.5 Symmetric Matrices}{chapter.2}
+\BOOKMARK [0][]{chapter.3}{3 Semi-Structured-Grid System Interface \(SStruct\)}{}
+\BOOKMARK [1][]{section.3.1}{3.1 Block-Structured Grids}{chapter.3}
+\BOOKMARK [1][]{section.3.2}{3.2 Structured Adaptive Mesh Refinement}{chapter.3}
+\BOOKMARK [0][]{chapter.4}{4 Finite Element Interface}{}
+\BOOKMARK [1][]{section.4.1}{4.1 Introduction}{chapter.4}
+\BOOKMARK [1][]{section.4.2}{4.2 A Brief Description of the Finite Element Interface}{chapter.4}
+\BOOKMARK [0][]{chapter.5}{5 Linear-Algebraic System Interface \(IJ\)}{}
+\BOOKMARK [1][]{section.5.1}{5.1 IJ Matrix Interface}{chapter.5}
+\BOOKMARK [1][]{section.5.2}{5.2 IJ Vector Interface}{chapter.5}
+\BOOKMARK [1][]{section.5.3}{5.3 A Scalable Interface}{chapter.5}
+\BOOKMARK [0][]{chapter.6}{6 Solvers and Preconditioners}{}
+\BOOKMARK [1][]{section.6.1}{6.1 SMG}{chapter.6}
+\BOOKMARK [1][]{section.6.2}{6.2 PFMG}{chapter.6}
+\BOOKMARK [1][]{section.6.3}{6.3 SysPFMG}{chapter.6}
+\BOOKMARK [1][]{section.6.4}{6.4 SplitSolve}{chapter.6}
+\BOOKMARK [1][]{section.6.5}{6.5 FAC}{chapter.6}
+\BOOKMARK [1][]{section.6.6}{6.6 Maxwell}{chapter.6}
+\BOOKMARK [1][]{section.6.7}{6.7 Hybrid}{chapter.6}
+\BOOKMARK [1][]{section.6.8}{6.8 BoomerAMG}{chapter.6}
+\BOOKMARK [2][]{subsection.6.8.1}{6.8.1 Parameter Options}{section.6.8}
+\BOOKMARK [1][]{section.6.9}{6.9 AMS}{chapter.6}
+\BOOKMARK [2][]{subsection.6.9.1}{6.9.1 Overview}{section.6.9}
+\BOOKMARK [2][]{subsection.6.9.2}{6.9.2 Sample Usage}{section.6.9}
+\BOOKMARK [1][]{section.6.10}{6.10 The MLI Package}{chapter.6}
+\BOOKMARK [1][]{section.6.11}{6.11 ParaSails}{chapter.6}
+\BOOKMARK [2][]{subsection.6.11.1}{6.11.1 Parameter Settings}{section.6.11}
+\BOOKMARK [2][]{subsection.6.11.2}{6.11.2 Preconditioning Nearly Symmetric Matrices}{section.6.11}
+\BOOKMARK [1][]{section.6.12}{6.12 Euclid}{chapter.6}
+\BOOKMARK [2][]{subsection.6.12.1}{6.12.1 Overview}{section.6.12}
+\BOOKMARK [2][]{subsection.6.12.2}{6.12.2 Setting Options: Examples}{section.6.12}
+\BOOKMARK [2][]{subsection.6.12.3}{6.12.3 Options Summary}{section.6.12}
+\BOOKMARK [1][]{section.6.13}{6.13 PILUT: Parallel Incomplete Factorization}{chapter.6}
+\BOOKMARK [1][]{section.6.14}{6.14 FEI Solvers}{chapter.6}
+\BOOKMARK [2][]{subsection.6.14.1}{6.14.1 Solvers Available Only through the FEI}{section.6.14}
+\BOOKMARK [0][]{chapter.7}{7 General Information}{}
+\BOOKMARK [1][]{section.7.1}{7.1 Getting the Source Code}{chapter.7}
+\BOOKMARK [1][]{section.7.2}{7.2 Building the Library}{chapter.7}
+\BOOKMARK [2][]{subsection.7.2.1}{7.2.1 Configure Options}{section.7.2}
+\BOOKMARK [2][]{subsection.7.2.2}{7.2.2 Make Targets}{section.7.2}
+\BOOKMARK [1][]{section.7.3}{7.3 Testing the Library}{chapter.7}
+\BOOKMARK [1][]{section.7.4}{7.4 Linking to the Library}{chapter.7}
+\BOOKMARK [1][]{section.7.5}{7.5 Error Flags}{chapter.7}
+\BOOKMARK [1][]{section.7.6}{7.6 Bug Reporting and General Support}{chapter.7}
+\BOOKMARK [1][]{section.7.7}{7.7 Using HYPRE in External FEI Implementations}{chapter.7}
+\BOOKMARK [1][]{section.7.8}{7.8 Calling HYPRE from Other Languages}{chapter.7}
+\BOOKMARK [0][]{chapter.8}{8 Babel-based Interfaces}{}
+\BOOKMARK [1][]{section.8.1}{8.1 Introduction}{chapter.8}
+\BOOKMARK [1][]{section.8.2}{8.2 Interfaces Are Similar}{chapter.8}
+\BOOKMARK [1][]{section.8.3}{8.3 Interfaces Are Different}{chapter.8}
+\BOOKMARK [1][]{section.8.4}{8.4 Names and Conventions}{chapter.8}
+\BOOKMARK [1][]{section.8.5}{8.5 Parameters and Error Flags}{chapter.8}
+\BOOKMARK [1][]{section.8.6}{8.6 MPI Communicator}{chapter.8}
+\BOOKMARK [1][]{section.8.7}{8.7 Memory Management}{chapter.8}
+\BOOKMARK [1][]{section.8.8}{8.8 Casting}{chapter.8}
+\BOOKMARK [1][]{section.8.9}{8.9 The HYPRE Object Structure}{chapter.8}
+\BOOKMARK [1][]{section.8.10}{8.10 Arrays}{chapter.8}
+\BOOKMARK [1][]{section.8.11}{8.11 Building HYPRE with the Babel Interface}{chapter.8}
+\BOOKMARK [2][]{subsection.8.11.1}{8.11.1 Building HYPRE with Python Using the Babel Interface}{section.8.11}

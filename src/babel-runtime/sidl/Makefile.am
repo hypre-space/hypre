@@ -1,8 +1,8 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Revision:    $Revision: 1.13 $
-## Modified:    $Date: 2006/08/29 22:29:48 $
+## Revision:    $Revision: 1.14 $
+## Modified:    $Date: 2007/09/27 19:35:41 $
 ## Description: automake makefile to build the sidl runtime library
 ##
 ## Copyright (c) 2000-2002, The Regents of the University of Calfornia.
@@ -55,7 +55,8 @@ SIDLXINCLUDE=
 endif
 libsidl_la_LIBADD = $(LIBADD_DL) $(CHASM_LIBS) $(LIBXML2_LIB)
 libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
-$(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h
+$(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h $(STUBHDRS) $(IORHDRS) $(SKELHDRS) $(CUSTOMHDRS)
+
 
 EXTRA_DIST = $(SRCS_EXCLUDED) ltdl.h ignore_me.h.in \
 	libsidl.scl.in scl.dtd changeundef.py

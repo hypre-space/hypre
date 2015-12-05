@@ -1,8 +1,8 @@
 /*
  * File:        sidlArray.c
  * Copyright:   (c) 2004 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.5 $
- * Date:        $Date: 2006/08/29 22:29:48 $
+ * Revision:    @(#) $Revision: 1.6 $
+ * Date:        $Date: 2007/09/27 19:35:42 $
  * Description: Generic array data type functions
  *
  * Copyright (c) 2004, The Regents of the University of Calfornia.
@@ -33,8 +33,16 @@
 #include "sidlArray.h"
 #include <stddef.h>
 #ifdef SIDL_DEBUG_REFCOUNT
+#include "sidlOps.h"
 #include <stdio.h>
+#include <stdlib.h>
 
+struct sidl_Array_list_t {
+  struct sidl_Array_list_t *d_next;
+  struct sidl__array       *d_array;
+};
+
+static struct sidl_Array_list_t *s_array_list = NULL;
 
 const char *safeArrayType(struct sidl__array *array) {
   const static char * const s_array_types[] = {
@@ -51,7 +59,8 @@ const char *safeArrayType(struct sidl__array *array) {
     "string",
     "interface"
   };
-  int32_t arrayType = array ? sidl__array_type(array) : 0;
+  int32_t arrayType = (array && (array->d_dimen <= 7) && (array->d_dimen > 0) && (array->d_refcount >= 0) && array->d_lower && array->d_upper && array->d_stride && array->d_vtable && array->d_vtable->d_arraytype)
+    ? sidl__array_type(array) : 0;
   if ((arrayType < 0) ||
       (arrayType >= sizeof(s_array_types)/sizeof(char*))) {
     arrayType = 0;
@@ -59,6 +68,92 @@ const char *safeArrayType(struct sidl__array *array) {
   return s_array_types[arrayType];
 }
 
+static void
+sidl_report_arrays(void *ignored)
+{
+  struct sidl_Array_list_t *ptr = s_array_list;
+  if (ptr) {
+    do {
+      fprintf(stderr, "babel: leaked array %p reference count %d (type %s)\n",
+              ptr->d_array, 
+              ptr->d_array ? ptr->d_array->d_refcount : -1,
+              safeArrayType(ptr->d_array));
+
+      ptr = ptr->d_next;
+    } while (ptr);
+  }
+  else {
+    fprintf(stderr, "babel: no arrays leaked\n");
+  }
+  while (s_array_list) {
+    ptr = s_array_list->d_next;
+    free((void *)s_array_list);
+    s_array_list = ptr;
+  }
+}
+
+static void
+sidl_initialize_array_list(void)
+{
+  static int s_not_initialized = 1;
+  if (s_not_initialized) {
+    s_not_initialized = 0;
+    sidl_atexit(sidl_report_arrays, NULL);
+  }
+}
+
+void
+sidl__array_add(struct sidl__array *array) {
+  sidl_initialize_array_list();
+  if (array) {
+    struct sidl_Array_list_t *ptr = 
+      malloc(sizeof(struct sidl_Array_list_t));
+    ptr->d_next = s_array_list;
+    ptr->d_array = array;
+    s_array_list = ptr;
+    fprintf(stderr, 
+            "babel: create array %p initial count %d (type %s)\n",
+            array, array->d_refcount, safeArrayType(array));
+  }
+}
+
+void 
+sidl__array_remove(struct sidl__array * const array)
+{
+  sidl_initialize_array_list();
+  if (array) {
+    struct sidl_Array_list_t *prev, *ptr;
+    if (s_array_list && (s_array_list->d_array == array)) {
+      ptr = s_array_list->d_next;
+      free((void *)s_array_list);
+      s_array_list = ptr;
+    }
+    else {
+      prev = s_array_list;
+      ptr = (prev ? prev->d_next : NULL);
+      while (ptr) {
+        if (ptr->d_array == array) {
+          prev->d_next = ptr->d_next;
+          free((void *)ptr);
+          return;
+        }
+        prev = ptr;
+        ptr = ptr->d_next;
+      }
+      fprintf(stderr, "babel: array data type invariant failure %p\n", array);
+    }
+  }
+}
+#else
+void
+sidl__array_add(struct sidl__array * const array)
+{
+}
+
+void 
+sidl__array_remove(struct sidl__array * const array)
+{
+}
 #endif /* SIDL_DEBUG_REFCOUNT */
 
 

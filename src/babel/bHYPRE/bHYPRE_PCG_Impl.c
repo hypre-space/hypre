@@ -2,7 +2,7 @@
  * File:          bHYPRE_PCG_Impl.c
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -38,8 +38,8 @@
 #include "hypre_babel_exception_handler.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -56,9 +56,9 @@ impl_bHYPRE_PCG__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._load) */
   /* Insert-Code-Here {bHYPRE.PCG._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._load) */
   }
 }
 /*
@@ -78,7 +78,7 @@ impl_bHYPRE_PCG__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    struct bHYPRE_PCG__data * data;
@@ -108,7 +108,7 @@ impl_bHYPRE_PCG__ctor(
    bHYPRE_PCG__set_data( self, data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._ctor) */
   }
 }
 
@@ -158,7 +158,7 @@ impl_bHYPRE_PCG__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    struct bHYPRE_PCG__data * data;
@@ -202,7 +202,7 @@ impl_bHYPRE_PCG__dtor(
    }
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._dtor) */
   }
 }
 
@@ -224,7 +224,7 @@ impl_bHYPRE_PCG_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Create) */
   /* Insert-Code-Here {bHYPRE.PCG.Create} (Create method) */
 
    bHYPRE_PCG solver = bHYPRE_PCG__create(_ex); SIDL_CHECK(*_ex);
@@ -252,7 +252,7 @@ impl_bHYPRE_PCG_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Create) */
   }
 }
 
@@ -274,7 +274,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPreconditioner) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */
 
    int ierr = 0;
@@ -288,7 +288,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetPreconditioner) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetPreconditioner) */
   }
 }
 
@@ -310,7 +310,7 @@ impl_bHYPRE_PCG_GetPreconditioner(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetPreconditioner) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetPreconditioner) */
   /* Insert-Code-Here {bHYPRE.PCG.GetPreconditioner} (GetPreconditioner method) */
 
    int ierr = 0;
@@ -320,7 +320,7 @@ impl_bHYPRE_PCG_GetPreconditioner(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetPreconditioner) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetPreconditioner) */
   }
 }
 
@@ -342,7 +342,7 @@ impl_bHYPRE_PCG_Clone(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Clone) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Clone) */
   /* Insert-Code-Here {bHYPRE.PCG.Clone} (Clone method) */
 
    int ierr = 0;
@@ -378,8 +378,8 @@ impl_bHYPRE_PCG_Clone(
    bHYPRE_PCG_deleteRef( PCG_x,_ex ); SIDL_CHECK(*_ex);
    return ierr;
 
-   return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Clone) */
+   hypre_babel_exception_return_error(_ex);
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Clone) */
   }
 }
 
@@ -402,7 +402,7 @@ impl_bHYPRE_PCG_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
 
    /* DEPRECATED  the second argument in Create does the same thing */
@@ -420,7 +420,7 @@ impl_bHYPRE_PCG_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetOperator) */
   }
 }
 
@@ -443,7 +443,7 @@ impl_bHYPRE_PCG_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
 
    int ierr = 0;
@@ -453,7 +453,7 @@ impl_bHYPRE_PCG_SetTolerance(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetTolerance) */
   }
 }
 
@@ -476,7 +476,7 @@ impl_bHYPRE_PCG_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
 
    int ierr = 0;
@@ -486,7 +486,7 @@ impl_bHYPRE_PCG_SetMaxIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetMaxIterations) */
   }
 }
 
@@ -513,7 +513,7 @@ impl_bHYPRE_PCG_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
 
    int ierr = 0;
@@ -523,7 +523,7 @@ impl_bHYPRE_PCG_SetLogging(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetLogging) */
   }
 }
 
@@ -550,7 +550,7 @@ impl_bHYPRE_PCG_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
 
    int ierr = 0;
@@ -560,7 +560,7 @@ impl_bHYPRE_PCG_SetPrintLevel(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetPrintLevel) */
   }
 }
 
@@ -582,7 +582,7 @@ impl_bHYPRE_PCG_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
 
    int ierr = 0;
@@ -592,7 +592,7 @@ impl_bHYPRE_PCG_GetNumIterations(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetNumIterations) */
   }
 }
 
@@ -614,7 +614,7 @@ impl_bHYPRE_PCG_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
 
    int ierr = 0;
@@ -624,7 +624,7 @@ impl_bHYPRE_PCG_GetRelResidualNorm(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetRelResidualNorm) */
   }
 }
 
@@ -647,10 +647,10 @@ impl_bHYPRE_PCG_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
    return 1;  /* DEPRECATED and will never be implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetCommunicator) */
   }
 }
 
@@ -701,7 +701,7 @@ impl_bHYPRE_PCG_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    int ierr = 0;
@@ -734,7 +734,7 @@ impl_bHYPRE_PCG_SetIntParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntParameter) */
   }
 }
 
@@ -757,7 +757,7 @@ impl_bHYPRE_PCG_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    int ierr = 0;
@@ -783,7 +783,7 @@ impl_bHYPRE_PCG_SetDoubleParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleParameter) */
   }
 }
 
@@ -806,12 +806,12 @@ impl_bHYPRE_PCG_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetStringParameter) */
   }
 }
 
@@ -835,12 +835,12 @@ impl_bHYPRE_PCG_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArray1Parameter) */
   }
 }
 
@@ -863,12 +863,12 @@ impl_bHYPRE_PCG_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArray2Parameter) */
   }
 }
 
@@ -892,12 +892,12 @@ impl_bHYPRE_PCG_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArray1Parameter) */
   }
 }
 
@@ -920,12 +920,12 @@ impl_bHYPRE_PCG_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArray2Parameter) */
   }
 }
 
@@ -948,7 +948,7 @@ impl_bHYPRE_PCG_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
@@ -989,7 +989,7 @@ impl_bHYPRE_PCG_GetIntValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetIntValue) */
   }
 }
 
@@ -1012,7 +1012,7 @@ impl_bHYPRE_PCG_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    int ierr = 0;
@@ -1045,7 +1045,7 @@ impl_bHYPRE_PCG_GetDoubleValue(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetDoubleValue) */
   }
 }
 
@@ -1069,7 +1069,7 @@ impl_bHYPRE_PCG_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    int ierr = 0;
@@ -1124,7 +1124,7 @@ impl_bHYPRE_PCG_Setup(
    return ierr;
    
      hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Setup) */
   }
 }
 
@@ -1147,7 +1147,7 @@ impl_bHYPRE_PCG_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Apply) */
   /* Insert the implementation of the Apply method here... */
 
 /*--------------------------------------------------------------------------
@@ -1531,8 +1531,8 @@ impl_bHYPRE_PCG_Apply(
 
    return ierr;
 
-   return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Apply) */
+   hypre_babel_exception_return_error(_ex);
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Apply) */
   }
 }
 
@@ -1555,12 +1555,12 @@ impl_bHYPRE_PCG_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.PCG.ApplyAdjoint} (ApplyAdjoint method) */
 
    return 1; /* not implemented */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
@@ -1570,33 +1570,33 @@ struct bHYPRE_MPICommunicator__object*
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_PCG_fcast_bHYPRE_MPICommunicator(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_PCG_fcast_bHYPRE_MPICommunicator(void* bi, sidl_BaseInterface* 
+  _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* impl_bHYPRE_PCG_fconnect_bHYPRE_Operator(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
-struct bHYPRE_Operator__object* impl_bHYPRE_PCG_fcast_bHYPRE_Operator(void* bi,
+struct bHYPRE_Operator__object* impl_bHYPRE_PCG_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
-struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(const char* url,
+struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_PCG__connectI(url, ar, _ex);
 }
-struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fcast_bHYPRE_PCG(void* bi,
+struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fcast_bHYPRE_PCG(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_PCG__cast(bi, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_PCG_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_PCG_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_PreconditionedSolver__connectI(url, ar, _ex);
 }
 struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_PCG_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_PCG_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_PreconditionedSolver__cast(bi, _ex);
 }
@@ -1604,7 +1604,7 @@ struct bHYPRE_Solver__object* impl_bHYPRE_PCG_fconnect_bHYPRE_Solver(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* impl_bHYPRE_PCG_fcast_bHYPRE_Solver(void* bi,
+struct bHYPRE_Solver__object* impl_bHYPRE_PCG_fcast_bHYPRE_Solver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
@@ -1612,7 +1612,7 @@ struct bHYPRE_Vector__object* impl_bHYPRE_PCG_fconnect_bHYPRE_Vector(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* impl_bHYPRE_PCG_fcast_bHYPRE_Vector(void* bi,
+struct bHYPRE_Vector__object* impl_bHYPRE_PCG_fcast_bHYPRE_Vector(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
@@ -1620,34 +1620,34 @@ struct sidl_BaseClass__object* impl_bHYPRE_PCG_fconnect_sidl_BaseClass(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* impl_bHYPRE_PCG_fcast_sidl_BaseClass(void* bi,
+struct sidl_BaseClass__object* impl_bHYPRE_PCG_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_PCG_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseInterface__object* impl_bHYPRE_PCG_fconnect_sidl_BaseInterface(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_bHYPRE_PCG_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_bHYPRE_PCG_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* impl_bHYPRE_PCG_fconnect_sidl_ClassInfo(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* impl_bHYPRE_PCG_fcast_sidl_ClassInfo(void* bi,
+struct sidl_ClassInfo__object* impl_bHYPRE_PCG_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_PCG_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar,
+  impl_bHYPRE_PCG_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_PCG_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_bHYPRE_PCG_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

@@ -14,7 +14,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id: ac_prog_javac_works.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: ac_prog_javac_works.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl
 AC_DEFUN([AC_PROG_JAVAC_WORKS],[
 AC_CACHE_CHECK([if $JAVAC works], ac_cv_prog_javac_works, [

@@ -1,0 +1,3096 @@
+This is pdfTeX, Version 3.14159-14h-released-20010417 (Web2C 7.3.3.1) (format=pdflatex 2007.11.8)  8 AUG 2008 09:31
+**vbref_manual
+(./vbref_manual.tex{/usr/share/texmf/pdftex/config/pdftex.cfg}
+LaTeX2e <2001/06/01>
+Babel <v3.7h> and hyphenation patterns for american, french, german, ngerman, i
+talian, nohyphenation, loaded.
+(/usr/share/texmf/tex/latex/base/article.cls
+Document Class: article 2001/04/21 v1.4e Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo
+File: size10.clo 2001/04/21 v1.4e Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+) (./docxx.sty
+(/usr/share/texmf/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2002/08/04 v6.72v Hypertext links for LaTeX
+
+(/usr/share/texmf/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+\@linkdim=\dimen103
+\Hy@linkcounter=\count87
+\Hy@pagecounter=\count88
+
+(/usr/share/texmf/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2002/08/04 v6.72v Hyperref: PDFDocEncoding definition (HO)
+)
+Package hyperref Info: Option `linktocpage' set `true' on input line 1739.
+Package hyperref Info: Option `plainpages' set `false' on input line 1739.
+Package hyperref Info: Option `bookmarksopen' set `true' on input line 1739.
+Package hyperref Info: Option `bookmarksnumbered' set `true' on input line 1739
+.
+Package hyperref Info: Bookmarks ON on input line 1797.
+Package hyperref Info: Hyper figures OFF on input line 1816.
+Package hyperref Info: Link nesting OFF on input line 1821.
+Package hyperref Info: Hyper index ON on input line 1824.
+Package hyperref Info: Plain pages OFF on input line 1831.
+Package hyperref Info: Backreferencing ON on input line 1834.
+
+Implicit mode ON; LaTeX internals redefined
+(/usr/share/texmf/tex/latex/hyperref/backref.sty
+Package: backref 2002/06/09 v1.20 Bibliographical back referencing
+)
+(/usr/share/texmf/tex/latex/misc/url.sty
+\Urlmuskip=\muskip10
+Package: url 1999/03/28  ver 1.5x  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 2048.
+\Fld@menulength=\count89
+\Field@Width=\dimen104
+\Fld@charsize=\dimen105
+\Choice@toks=\toks15
+\Field@toks=\toks16
+Package hyperref Info: Hyper figures OFF on input line 2506.
+Package hyperref Info: Link nesting OFF on input line 2511.
+Package hyperref Info: Hyper index ON on input line 2514.
+Package hyperref Info: backreferencing ON on input line 2519.
+Package hyperref Info: Link coloring OFF on input line 2526.
+\c@Item=\count90
+\c@Hfootnote=\count91
+)
+*hyperref using driver hpdftex*
+(/usr/share/texmf/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2002/08/04 v6.72v Hyperref driver for pdfTeX
+
+(/usr/share/texmf/tex/latex/psnfss/pifont.sty
+Package: pifont 2001/06/04 PSNFSS-v8.2 Pi font support (SPQR) 
+LaTeX Font Info:    Try loading font information for U+pzd on input line 62.
+
+(/usr/share/texmf/tex/latex/psnfss/upzd.fd
+File: upzd.fd 2001/06/04 font definitions for U/pzd.
+)
+LaTeX Font Info:    Try loading font information for U+psy on input line 63.
+
+(/usr/share/texmf/tex/latex/psnfss/upsy.fd
+File: upsy.fd 2001/06/04 font definitions for U/psy.
+))
+\Fld@listcount=\count92
+\@outlinefile=\write3
+)
+\cxxcodewidth=\dimen106
+\cxxIdWidth=\dimen107
+\cxxTypeWidth=\dimen108
+\cxxProtoWidth=\dimen109
+\cxxMemoWidth=\dimen110
+\cxxPageWidth=\dimen111
+\cxxProtoMemoWidth=\dimen112
+\cxxtypestart=\dimen113
+\cxxnamestart=\dimen114
+\cxxargsstart=\dimen115
+\cxxargswidth=\dimen116
+\cxxmemostart=\dimen117
+\cxxBoxLen=\skip43
+\cxxBoxHt=\skip44
+\cxxBoxDp=\skip45
+\cxxSideHt=\skip46
+\cxxSideLen=\skip47
+\cxxTitleLen=\skip48
+\cxxHeadName=\box26
+\c@cxxContentsDepth=\count93
+\cxxContentsLengthIncr=\dimen118
+\cxxContentsLength=\dimen119
+\cxxClassGraphShift=\dimen120
+\cxxClassGraphLength=\dimen121
+\cxxClassGraphHeight=\dimen122
+\cxxClassGraphDepth=\dimen123
+\cxxClassGraphTotV=\dimen124
+\cxxgenericstart=\dimen125
+\cxxgenericwidth=\dimen126
+\c@cxxDepth=\count94
+\cxxSize=\skip49
+) (./vbref_manual.aux)
+\openout1 = `vbref_manual.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 3.
+LaTeX Font Info:    ... okay on input line 3.
+Package hyperref Info: Link coloring OFF on input line 3.
+
+(/usr/share/texmf/tex/latex/hyperref/nameref.sty
+Package: nameref 2001/01/27 v2.19 Cross-referencing by name of section
+\c@section@level=\count95
+)
+LaTeX Info: Redefining \ref on input line 3.
+LaTeX Info: Redefining \pageref on input line 3.
+ (./vbref_manual.out)
+(./vbref_manual.out)
+\openout3 = `vbref_manual.out'.
+
+ [1
+
+{/usr/share/texmf/dvips/config/pdftex.map}]
+LaTeX Font Info:    Try loading font information for OMS+cmss on input line 161
+.
+LaTeX Font Info:    No file OMScmss.fd. on input line 161.
+
+
+LaTeX Font Warning: Font shape `OMS/cmss/m/n' undefined
+(Font)              using `OMS/cmsy/m/n' instead on input line 161.
+
+[2] [3]
+Underfull \hbox (badness 10000) in paragraph at lines 224--225
+
+ []
+
+[4
+
+] [5
+
+] [6]
+Underfull \hbox (badness 10000) in paragraph at lines 434--435
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 450--451
+
+ []
+
+[7]
+Underfull \hbox (badness 10000) in paragraph at lines 462--463
+
+ []
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 468.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 468.
+
+Underfull \hbox (badness 10000) in paragraph at lines 493--494
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 518--519
+
+ []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 536--537
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 550--551
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 569--570
+
+ []
+
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 582--583
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 595--596
+
+ []
+
+[10] [11]
+Underfull \hbox (badness 10000) in paragraph at lines 735--736
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 747--748
+
+ []
+
+[12]
+Underfull \hbox (badness 10000) in paragraph at lines 759--760
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 780--781
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 798--799
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 813--814
+
+ []
+
+[13]
+Underfull \hbox (badness 10000) in paragraph at lines 828--829
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 841--842
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 854--855
+
+ []
+
+
+Overfull \hbox (15.8281pt too wide) in paragraph at lines 925--925
+/cmr10/bHYPRE[]StructMatrixView 
+ []
+
+
+Overfull \hbox (15.77809pt too wide) in paragraph at lines 925--925
+/cmr10/num[]stencil[]constant[]points, 
+ []
+
+
+Overfull \hbox (12.71002pt too wide) in paragraph at lines 932--932
+/cmr10/bHYPRE[]StructMatrixView 
+ []
+
+[14] [15] [16]
+Underfull \hbox (badness 10000) in paragraph at lines 1003--1004
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1015--1016
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1027--1028
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1040--1041
+
+ []
+
+[17]
+Underfull \hbox (badness 10000) in paragraph at lines 1052--1053
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1068--1069
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1090--1091
+
+ []
+
+[18]
+Underfull \hbox (badness 10000) in paragraph at lines 1104--1105
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1120--1121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1135--1136
+
+ []
+
+[19] [20]
+Underfull \hbox (badness 10000) in paragraph at lines 1257--1258
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1269--1270
+
+ []
+
+[21]
+Underfull \hbox (badness 10000) in paragraph at lines 1282--1283
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1296--1297
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1310--1311
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1326--1327
+
+ []
+
+[22]
+Overfull \hbox (16.8823pt too wide) in paragraph at lines 1381--1381
+/cmr10/bHYPRE[]SStructMatrixView 
+ []
+
+
+Overfull \hbox (0.763pt too wide) in paragraph at lines 1388--1388
+/cmr10/bHYPRE[]SStructMatrixView 
+ []
+
+
+Overfull \hbox (16.15181pt too wide) in paragraph at lines 1395--1395
+/cmr10/bHYPRE[]SStructMatrixView 
+ []
+
+[23] [24]
+Underfull \hbox (badness 10000) in paragraph at lines 1480--1481
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1492--1493
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1504--1505
+
+ []
+
+[25]
+Underfull \hbox (badness 10000) in paragraph at lines 1517--1518
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1543--1544
+
+ []
+
+[26]
+Underfull \hbox (badness 10000) in paragraph at lines 1569--1570
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1594--1595
+
+ []
+
+[27]
+Underfull \hbox (badness 10000) in paragraph at lines 1619--1620
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1643--1644
+
+ []
+
+
+Overfull \hbox (9.07315pt too wide) in paragraph at lines 1655--1655
+ /cmr12/struct  bHYPRE[]SStructMatrixView[][]object* bHYPRE[]SStructMatrixView[
+][]connectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1656--1657
+
+ []
+
+
+Overfull \hbox (13.31284pt too wide) in paragraph at lines 1712--1712
+/cmr10/bHYPRE[]SStructVectorView 
+ []
+
+[28] [29] [30]
+Underfull \hbox (badness 10000) in paragraph at lines 1815--1816
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1827--1828
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1839--1840
+
+ []
+
+[31]
+Underfull \hbox (badness 10000) in paragraph at lines 1859--1860
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1879--1880
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1899--1900
+
+ []
+
+[32]
+Underfull \hbox (badness 10000) in paragraph at lines 1919--1920
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1938--1939
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1957--1958
+
+ []
+
+[33]
+Overfull \hbox (5.15652pt too wide) in paragraph at lines 1969--1969
+ /cmr12/struct  bHYPRE[]SStructVectorView[][]object* bHYPRE[]SStructVectorView[
+][]connectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1970--1971
+
+ []
+
+[34] [35
+
+] [36]
+Underfull \hbox (badness 10000) in paragraph at lines 2164--2165
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2181--2182
+
+ []
+
+[37]
+Underfull \hbox (badness 10000) in paragraph at lines 2193--2194
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2206--2207
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2221--2222
+
+ []
+
+[38] [39
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 2358--2359
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2370--2371
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2382--2383
+
+ []
+
+[40]
+Underfull \hbox (badness 10000) in paragraph at lines 2399--2400
+
+ []
+
+[41]
+Underfull \hbox (badness 10000) in paragraph at lines 2495--2495
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 3623) in paragraph at lines 2495--2495
+/cmti10/bHYPRE[]IJParCSRMatrix[][]data) passed in rather than run-ning the
+ []
+
+
+Overfull \hbox (11.85309pt too wide) in paragraph at lines 2515--2515
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (8.5129pt too wide) in paragraph at lines 2590--2590
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (12.61002pt too wide) in paragraph at lines 2624--2624
+/cmr10/bHYPRE[]IJParCSRMatrix 
+ []
+
+
+Overfull \hbox (7.7281pt too wide) in paragraph at lines 2631--2631
+/cmr10/bHYPRE[]IJParCSRMatrix 
+ []
+
+
+Overfull \hbox (26.95715pt too wide) in paragraph at lines 2638--2638
+/cmr10/bHYPRE[]IJParCSRMatrix 
+ []
+
+
+Overfull \hbox (26.95715pt too wide) in paragraph at lines 2645--2645
+/cmr10/bHYPRE[]IJParCSRMatrix 
+ []
+
+
+Overfull \hbox (47.86678pt too wide) in paragraph at lines 2652--2652
+/cmr10/bHYPRE[]IJParCSRMatrix 
+ []
+
+
+Overfull \hbox (5.58888pt too wide) in paragraph at lines 2652--2652
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (47.86678pt too wide) in paragraph at lines 2659--2659
+/cmr10/bHYPRE[]IJParCSRMatrix 
+ []
+
+
+Overfull \hbox (10.95561pt too wide) in paragraph at lines 2659--2659
+/cmr10/sidl[]double[][]array* 
+ []
+
+
+Overfull \hbox (5.58888pt too wide) in paragraph at lines 2659--2659
+/cmr10/sidl[]BaseInterface 
+ []
+
+[42
+
+] [43] [44] [45] [46] [47]
+Underfull \hbox (badness 10000) in paragraph at lines 2774--2775
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2791--2792
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2804--2805
+
+ []
+
+[48]
+Underfull \hbox (badness 10000) in paragraph at lines 2826--2827
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2857--2858
+
+ []
+
+[49]
+Underfull \hbox (badness 10000) in paragraph at lines 2882--2883
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2900--2901
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2914--2915
+
+ []
+
+[50]
+Underfull \hbox (badness 10000) in paragraph at lines 2933--2934
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2946--2947
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2959--2960
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2971--2972
+
+ []
+
+[51]
+Underfull \hbox (badness 10000) in paragraph at lines 2987--2988
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3005
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3020--3021
+
+ []
+
+[52]
+Underfull \hbox (badness 10000) in paragraph at lines 3059--3059
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 4531) in paragraph at lines 3059--3059
+/cmti10/bHYPRE[]IJParCSRVector[][]data) passed in rather than run-ning the
+ []
+
+
+Overfull \hbox (5.33238pt too wide) in paragraph at lines 3123--3123
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+[53] [54] [55]
+Underfull \hbox (badness 10000) in paragraph at lines 3256--3257
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3273--3274
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3285--3286
+
+ []
+
+[56]
+Underfull \hbox (badness 10000) in paragraph at lines 3306--3307
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3324--3325
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3339--3340
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3354--3355
+
+ []
+
+[57]
+Underfull \hbox (badness 10000) in paragraph at lines 3367--3368
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3380--3381
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3392--3393
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3408--3409
+
+ []
+
+[58]
+Underfull \hbox (badness 10000) in paragraph at lines 3424--3425
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3441--3442
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3480--3480
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1648) in paragraph at lines 3480--3480
+/cmti10/bHYPRE[]StructMatrix[][]data) passed in rather than run-ning the con-
+ []
+
+
+Overfull \hbox (10.85995pt too wide) in paragraph at lines 3615--3615
+/cmr10/bHYPRE[]StructMatrix 
+ []
+
+
+Overfull \hbox (10.85995pt too wide) in paragraph at lines 3622--3622
+/cmr10/bHYPRE[]StructMatrix 
+ []
+
+[59] [60] [61] [62] [63]
+Underfull \hbox (badness 10000) in paragraph at lines 3730--3731
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3749--3750
+
+ []
+
+[64]
+Underfull \hbox (badness 10000) in paragraph at lines 3761--3762
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3774--3775
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3786--3787
+
+ []
+
+[65]
+Underfull \hbox (badness 10000) in paragraph at lines 3802--3803
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3824--3825
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3838--3839
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3854--3855
+
+ []
+
+[66]
+Underfull \hbox (badness 10000) in paragraph at lines 3869--3870
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3881--3882
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3897--3898
+
+ []
+
+[67]
+Underfull \hbox (badness 10000) in paragraph at lines 3913--3914
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3952--3952
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1895) in paragraph at lines 3952--3952
+/cmti10/bHYPRE[]StructVector[][]data) passed in rather than run-ning the con-
+ []
+
+[68] [69]
+Underfull \hbox (badness 10000) in paragraph at lines 4131--4132
+
+ []
+
+[70]
+Underfull \hbox (badness 10000) in paragraph at lines 4143--4144
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4156--4157
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4170--4171
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4184--4185
+
+ []
+
+[71]
+Underfull \hbox (badness 10000) in paragraph at lines 4200--4201
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4212--4213
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4228--4229
+
+ []
+
+[72]
+Underfull \hbox (badness 10000) in paragraph at lines 4244--4245
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4261--4262
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4300--4300
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Overfull \hbox (1.89476pt too wide) in paragraph at lines 4440--4440
+/cmr10/bHYPRE[]SStructMatrix 
+ []
+
+
+Overfull \hbox (1.89476pt too wide) in paragraph at lines 4447--4447
+/cmr10/bHYPRE[]SStructMatrix 
+ []
+
+
+Overfull \hbox (22.80438pt too wide) in paragraph at lines 4454--4454
+/cmr10/bHYPRE[]SStructMatrix 
+ []
+
+
+Overfull \hbox (22.80438pt too wide) in paragraph at lines 4461--4461
+/cmr10/bHYPRE[]SStructMatrix 
+ []
+
+[73] [74] [75] [76] [77]
+Underfull \hbox (badness 10000) in paragraph at lines 4569--4570
+
+ []
+
+[78]
+Underfull \hbox (badness 10000) in paragraph at lines 4586--4587
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4598--4599
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4611--4612
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4637--4638
+
+ []
+
+[79]
+Underfull \hbox (badness 10000) in paragraph at lines 4663--4664
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4688--4689
+
+ []
+
+[80]
+Underfull \hbox (badness 10000) in paragraph at lines 4713--4714
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4737--4738
+
+ []
+
+[81]
+Underfull \hbox (badness 10000) in paragraph at lines 4751--4752
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4766--4767
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4778--4779
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4794--4795
+
+ []
+
+[82]
+Underfull \hbox (badness 10000) in paragraph at lines 4810--4811
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 4849--4849
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+[83] [84] [85] [86]
+Underfull \hbox (badness 10000) in paragraph at lines 5079--5080
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5096--5097
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5108--5109
+
+ []
+
+[87]
+Underfull \hbox (badness 10000) in paragraph at lines 5128--5129
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5148--5149
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5168--5169
+
+ []
+
+[88]
+Underfull \hbox (badness 10000) in paragraph at lines 5188--5189
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5207--5208
+
+ []
+
+[89]
+Underfull \hbox (badness 10000) in paragraph at lines 5226--5227
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5240--5241
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5255--5256
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5267--5268
+
+ []
+
+[90]
+Underfull \hbox (badness 10000) in paragraph at lines 5283--5284
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5299--5300
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5316--5317
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5355--5355
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 3108) in paragraph at lines 5355--5355
+/cmti10/bHYPRE[]SStructParCSRMatrix[][]data) passed in rather than run-ning
+ []
+
+
+Overfull \hbox (7.86023pt too wide) in paragraph at lines 5375--5375
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (8.43105pt too wide) in paragraph at lines 5381--5381
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (28.1115pt too wide) in paragraph at lines 5387--5387
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (26.56288pt too wide) in paragraph at lines 5393--5393
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (46.24333pt too wide) in paragraph at lines 5399--5399
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (30.12404pt too wide) in paragraph at lines 5406--5406
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (45.51285pt too wide) in paragraph at lines 5413--5413
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (20.27686pt too wide) in paragraph at lines 5420--5420
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (12.40189pt too wide) in paragraph at lines 5434--5434
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (50.2489pt too wide) in paragraph at lines 5440--5440
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (36.16554pt too wide) in paragraph at lines 5440--5440
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (3.55469pt too wide) in paragraph at lines 5453--5453
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (6.738pt too wide) in paragraph at lines 5461--5461
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (43.40866pt too wide) in paragraph at lines 5467--5467
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (64.31828pt too wide) in paragraph at lines 5474--5474
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (59.43637pt too wide) in paragraph at lines 5481--5481
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (78.66542pt too wide) in paragraph at lines 5488--5488
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (12.33191pt too wide) in paragraph at lines 5488--5488
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (78.66542pt too wide) in paragraph at lines 5495--5495
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (0.75415pt too wide) in paragraph at lines 5495--5495
+/cmr10/sidl[]int[][]array* 
+ []
+
+
+Overfull \hbox (12.33191pt too wide) in paragraph at lines 5495--5495
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (99.57504pt too wide) in paragraph at lines 5502--5502
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (33.24153pt too wide) in paragraph at lines 5502--5502
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (99.57504pt too wide) in paragraph at lines 5509--5509
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (38.60826pt too wide) in paragraph at lines 5509--5509
+/cmr10/sidl[]double[][]array* 
+ []
+
+
+Overfull \hbox (33.24153pt too wide) in paragraph at lines 5509--5509
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (21.45042pt too wide) in paragraph at lines 5516--5516
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (42.36005pt too wide) in paragraph at lines 5523--5523
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (28.4018pt too wide) in paragraph at lines 5545--5545
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (3.60442pt too wide) in paragraph at lines 5573--5573
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (5.32661pt too wide) in paragraph at lines 5580--5580
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+
+Overfull \hbox (10.42522pt too wide) in paragraph at lines 5587--5587
+/cmr10/bHYPRE[]SStructParCSRMatrix 
+ []
+
+[91] [92] [93] [94] [95] [96] [97]
+Underfull \hbox (badness 10000) in paragraph at lines 5617--5618
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5634--5635
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5646--5647
+
+ []
+
+[98]
+Underfull \hbox (badness 10000) in paragraph at lines 5659--5660
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5685--5686
+
+ []
+
+[99]
+Underfull \hbox (badness 10000) in paragraph at lines 5711--5712
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5736--5737
+
+ []
+
+[100]
+Underfull \hbox (badness 10000) in paragraph at lines 5761--5762
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5785--5786
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5799--5800
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5814--5815
+
+ []
+
+[101]
+Underfull \hbox (badness 10000) in paragraph at lines 5826--5827
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5842--5843
+
+ []
+
+
+Overfull \hbox (41.05896pt too wide) in paragraph at lines 5857--5857
+ /cmr12/struct  bHYPRE[]SStructParCSRMatrix[][]object* bHYPRE[]SStructParCSRMat
+rix[][]connectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 5858--5859
+
+ []
+
+[102]
+Underfull \hbox (badness 10000) in paragraph at lines 5897--5897
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 4108) in paragraph at lines 5897--5897
+/cmti10/bHYPRE[]SStructParCSRVector[][]data) passed in rather than run-ning
+ []
+
+
+Overfull \hbox (2.47269pt too wide) in paragraph at lines 5924--5924
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (22.15314pt too wide) in paragraph at lines 5930--5930
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (20.60452pt too wide) in paragraph at lines 5936--5936
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (40.28497pt too wide) in paragraph at lines 5942--5942
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (5.12544pt too wide) in paragraph at lines 5955--5955
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (24.8059pt too wide) in paragraph at lines 5961--5961
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (14.3185pt too wide) in paragraph at lines 5967--5967
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (6.44353pt too wide) in paragraph at lines 5981--5981
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (44.29054pt too wide) in paragraph at lines 5987--5987
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (32.98503pt too wide) in paragraph at lines 5987--5987
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (0.77965pt too wide) in paragraph at lines 6008--6008
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+
+Overfull \hbox (4.46686pt too wide) in paragraph at lines 6090--6090
+/cmr10/bHYPRE[]SStructParCSRVector 
+ []
+
+[103] [104] [105] [106]
+Underfull \hbox (badness 10000) in paragraph at lines 6120--6121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6137--6138
+
+ []
+
+[107]
+Underfull \hbox (badness 10000) in paragraph at lines 6149--6150
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6169--6170
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6189--6190
+
+ []
+
+[108]
+Underfull \hbox (badness 10000) in paragraph at lines 6209--6210
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6229--6230
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6248--6249
+
+ []
+
+[109]
+Underfull \hbox (badness 10000) in paragraph at lines 6267--6268
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6281--6282
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6296--6297
+
+ []
+
+[110]
+Underfull \hbox (badness 10000) in paragraph at lines 6308--6309
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6324--6325
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6340--6341
+
+ []
+
+[111]
+Overfull \hbox (34.53125pt too wide) in paragraph at lines 6356--6356
+ /cmr12/struct  bHYPRE[]SStructParCSRVector[][]object* bHYPRE[]SStructParCSRVec
+tor[][]connectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6357--6358
+
+ []
+
+[112] [113
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 6513--6514
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6525--6526
+
+ []
+
+[114]
+Underfull \hbox (badness 10000) in paragraph at lines 6537--6538
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6550--6551
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6563--6564
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6577--6578
+
+ []
+
+[115]
+Underfull \hbox (badness 10000) in paragraph at lines 6596--6597
+
+ []
+
+
+Underfull \hbox (badness 1163) in paragraph at lines 6612--6612
+ /cmr12/struct  bHYPRE[]Solver[][]object* bHYPRE[]Solver[][]connectI const char
+ * url
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6613--6614
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6651--6651
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Overfull \hbox (19.24188pt too wide) in paragraph at lines 6765--6765
+/cmr10/bHYPRE[]IdentitySolver 
+ []
+
+
+Overfull \hbox (19.24188pt too wide) in paragraph at lines 6772--6772
+/cmr10/bHYPRE[]IdentitySolver 
+ []
+
+[116] [117] [118] [119]
+Underfull \hbox (badness 10000) in paragraph at lines 6880--6881
+
+ []
+
+[120]
+Underfull \hbox (badness 10000) in paragraph at lines 6898--6899
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6910--6911
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6923--6924
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6936--6937
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6950--6951
+
+ []
+
+[121]
+Underfull \hbox (badness 10000) in paragraph at lines 6969--6970
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6986--6987
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 6999--7000
+
+ []
+
+[122]
+Underfull \hbox (badness 10000) in paragraph at lines 7014--7015
+
+ []
+
+[123] [124] [125]
+Underfull \hbox (badness 10000) in paragraph at lines 7296--7297
+
+ []
+
+[126]
+Underfull \hbox (badness 10000) in paragraph at lines 7321--7322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7333--7334
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7346--7347
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7359--7360
+
+ []
+
+[127]
+Underfull \hbox (badness 10000) in paragraph at lines 7373--7374
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7392--7393
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7409--7410
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7422--7423
+
+ []
+
+[128]
+Underfull \hbox (badness 10000) in paragraph at lines 7437--7438
+
+ []
+
+[129]
+Underfull \hbox (badness 10000) in paragraph at lines 7450--7489
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7529--7529
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 2409) in paragraph at lines 7529--7529
+/cmti10/bHYPRE[]ParCSRDiagScale[][]data) passed in rather than run-ning the
+ []
+
+
+Overfull \hbox (2.84056pt too wide) in paragraph at lines 7561--7561
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (7.88916pt too wide) in paragraph at lines 7582--7582
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (23.49326pt too wide) in paragraph at lines 7589--7589
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (6.02669pt too wide) in paragraph at lines 7596--7596
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (12.13785pt too wide) in paragraph at lines 7596--7596
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (20.09607pt too wide) in paragraph at lines 7615--7615
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (15.21416pt too wide) in paragraph at lines 7622--7622
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (34.4432pt too wide) in paragraph at lines 7629--7629
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (34.4432pt too wide) in paragraph at lines 7636--7636
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (55.35283pt too wide) in paragraph at lines 7643--7643
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (9.21384pt too wide) in paragraph at lines 7643--7643
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (55.35283pt too wide) in paragraph at lines 7650--7650
+/cmr10/bHYPRE[]ParCSRDiagScale 
+ []
+
+
+Overfull \hbox (14.58057pt too wide) in paragraph at lines 7650--7650
+/cmr10/sidl[]double[][]array* 
+ []
+
+
+Overfull \hbox (9.21384pt too wide) in paragraph at lines 7650--7650
+/cmr10/sidl[]BaseInterface 
+ []
+
+[130
+
+] [131] [132] [133]
+Underfull \hbox (badness 10000) in paragraph at lines 7758--7759
+
+ []
+
+[134]
+Underfull \hbox (badness 10000) in paragraph at lines 7775--7776
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7787--7788
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7800--7801
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7813--7814
+
+ []
+
+[135]
+Underfull \hbox (badness 10000) in paragraph at lines 7827--7828
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7846--7847
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7863--7864
+
+ []
+
+[136]
+Underfull \hbox (badness 10000) in paragraph at lines 7876--7877
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7891--7892
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7930--7930
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1297) in paragraph at lines 7930--7930
+/cmti10/bHYPRE[]BoomerAMG[][]data) passed in rather than run-ning the con-
+ []
+
+
+Overfull \hbox (13.84605pt too wide) in paragraph at lines 8058--8058
+/cmr10/bHYPRE[]BoomerAMG 
+ []
+
+
+Overfull \hbox (13.84605pt too wide) in paragraph at lines 8065--8065
+/cmr10/bHYPRE[]BoomerAMG 
+ []
+
+[137] [138] [139] [140]
+Underfull \hbox (badness 10000) in paragraph at lines 8173--8174
+
+ []
+
+[141] [142]
+Underfull \hbox (badness 10000) in paragraph at lines 8339--8340
+
+ []
+
+[143]
+Underfull \hbox (badness 10000) in paragraph at lines 8351--8352
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8364--8365
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8377--8378
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8391--8392
+
+ []
+
+[144]
+Underfull \hbox (badness 10000) in paragraph at lines 8410--8411
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8427--8428
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8440--8441
+
+ []
+
+[145]
+Underfull \hbox (badness 10000) in paragraph at lines 8455--8456
+
+ []
+
+[146] [147] [148]
+Underfull \hbox (badness 10000) in paragraph at lines 8730--8731
+
+ []
+
+[149]
+Underfull \hbox (badness 10000) in paragraph at lines 8748--8749
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8760--8761
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8773--8774
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8786--8787
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8800--8801
+
+ []
+
+[150]
+Underfull \hbox (badness 10000) in paragraph at lines 8819--8820
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8836--8837
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8849--8850
+
+ []
+
+[151]
+Underfull \hbox (badness 1072) in paragraph at lines 8863--8863
+ /cmr12/struct  bHYPRE[]Euclid[][]object* bHYPRE[]Euclid[][]connectI const char
+ * url
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 8864--8865
+
+ []
+
+[152] [153] [154]
+Underfull \hbox (badness 10000) in paragraph at lines 9132--9133
+
+ []
+
+[155]
+Underfull \hbox (badness 10000) in paragraph at lines 9149--9150
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9161--9162
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9174--9175
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9187--9188
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9201--9202
+
+ []
+
+[156]
+Underfull \hbox (badness 10000) in paragraph at lines 9220--9221
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9237--9238
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9250--9251
+
+ []
+
+[157]
+Underfull \hbox (badness 10000) in paragraph at lines 9265--9266
+
+ []
+
+[158] [159] [160]
+Underfull \hbox (badness 10000) in paragraph at lines 9533--9534
+
+ []
+
+[161]
+Underfull \hbox (badness 10000) in paragraph at lines 9550--9551
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9562--9563
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9575--9576
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9588--9589
+
+ []
+
+[162]
+Underfull \hbox (badness 10000) in paragraph at lines 9602--9603
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9621--9622
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9638--9639
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9651--9652
+
+ []
+
+[163]
+Underfull \hbox (badness 10000) in paragraph at lines 9666--9667
+
+ []
+
+[164] [165] [166]
+Underfull \hbox (badness 10000) in paragraph at lines 9934--9935
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9951--9952
+
+ []
+
+[167]
+Underfull \hbox (badness 10000) in paragraph at lines 9963--9964
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9976--9977
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9989--9990
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10003--10004
+
+ []
+
+[168]
+Underfull \hbox (badness 10000) in paragraph at lines 10022--10023
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10039--10040
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10052--10053
+
+ []
+
+[169]
+Underfull \hbox (badness 10000) in paragraph at lines 10067--10068
+
+ []
+
+[170]
+Underfull \hbox (badness 10000) in paragraph at lines 10080--10107
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10146--10146
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 6141) in paragraph at lines 10146--10146
+/cmti10/bHYPRE[]StructDiagScale[][]data) passed in rather than run-ning the
+ []
+
+
+Overfull \hbox (5.54195pt too wide) in paragraph at lines 10206--10206
+/cmr10/bHYPRE[]StructDiagScale 
+ []
+
+
+Overfull \hbox (2.51987pt too wide) in paragraph at lines 10213--10213
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (2.14476pt too wide) in paragraph at lines 10232--10232
+/cmr10/bHYPRE[]StructDiagScale 
+ []
+
+
+Overfull \hbox (16.4919pt too wide) in paragraph at lines 10246--10246
+/cmr10/bHYPRE[]StructDiagScale 
+ []
+
+
+Overfull \hbox (16.4919pt too wide) in paragraph at lines 10253--10253
+/cmr10/bHYPRE[]StructDiagScale 
+ []
+
+
+Overfull \hbox (37.40152pt too wide) in paragraph at lines 10260--10260
+/cmr10/bHYPRE[]StructDiagScale 
+ []
+
+
+Overfull \hbox (37.40152pt too wide) in paragraph at lines 10267--10267
+/cmr10/bHYPRE[]StructDiagScale 
+ []
+
+
+Overfull \hbox (4.96259pt too wide) in paragraph at lines 10267--10267
+/cmr10/sidl[]double[][]array* 
+ []
+
+[171
+
+] [172] [173] [174]
+Underfull \hbox (badness 10000) in paragraph at lines 10375--10376
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10392--10393
+
+ []
+
+[175]
+Underfull \hbox (badness 10000) in paragraph at lines 10404--10405
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10417--10418
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10430--10431
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10444--10445
+
+ []
+
+[176]
+Underfull \hbox (badness 10000) in paragraph at lines 10463--10464
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10480--10481
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10493--10494
+
+ []
+
+[177]
+Underfull \hbox (badness 1817) in paragraph at lines 10507--10507
+ /cmr12/struct  bHYPRE[]StructDiagScale[][]object* bHYPRE[]StructDiagScale[][]c
+onnectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10508--10509
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10547--10547
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 2057) in paragraph at lines 10547--10547
+/cmti10/bHYPRE[]StructJacobi[][]data) passed in rather than run-ning the con-
+ []
+
+
+Overfull \hbox (5.74883pt too wide) in paragraph at lines 10661--10661
+/cmr10/bHYPRE[]StructJacobi 
+ []
+
+
+Overfull \hbox (5.74883pt too wide) in paragraph at lines 10668--10668
+/cmr10/bHYPRE[]StructJacobi 
+ []
+
+[178] [179] [180] [181]
+Underfull \hbox (badness 10000) in paragraph at lines 10776--10777
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10793--10794
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10805--10806
+
+ []
+
+[182]
+Underfull \hbox (badness 10000) in paragraph at lines 10818--10819
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10831--10832
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10845--10846
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10864--10865
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10881--10882
+
+ []
+
+[183]
+Underfull \hbox (badness 10000) in paragraph at lines 10894--10895
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10909--10910
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 10948--10948
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1527) in paragraph at lines 10948--10948
+/cmti10/bHYPRE[]StructPFMG[][]data) passed in rather than run-ning the con-
+ []
+
+
+Overfull \hbox (11.25577pt too wide) in paragraph at lines 11062--11062
+/cmr10/bHYPRE[]StructPFMG 
+ []
+
+
+Overfull \hbox (11.25577pt too wide) in paragraph at lines 11069--11069
+/cmr10/bHYPRE[]StructPFMG 
+ []
+
+[184] [185] [186] [187]
+Underfull \hbox (badness 10000) in paragraph at lines 11177--11178
+
+ []
+
+[188]
+Underfull \hbox (badness 10000) in paragraph at lines 11194--11195
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11206--11207
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11219--11220
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11232--11233
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11246--11247
+
+ []
+
+[189]
+Underfull \hbox (badness 10000) in paragraph at lines 11265--11266
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11282--11283
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11295--11296
+
+ []
+
+[190]
+Underfull \hbox (badness 10000) in paragraph at lines 11310--11311
+
+ []
+
+[191] [192] [193] [194]
+Underfull \hbox (badness 10000) in paragraph at lines 11578--11579
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11595--11596
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11607--11608
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11620--11621
+
+ []
+
+[195]
+Underfull \hbox (badness 10000) in paragraph at lines 11633--11634
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11647--11648
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11666--11667
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11683--11684
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11696--11697
+
+ []
+
+[196]
+Underfull \hbox (badness 10000) in paragraph at lines 11711--11712
+
+ []
+
+[197]
+Underfull \hbox (badness 10000) in paragraph at lines 11724--11739
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11778--11778
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 3713) in paragraph at lines 11778--11778
+/cmti10/bHYPRE[]SStructDiagScale[][]data) passed in rather than run-ning the
+ []
+
+
+Overfull \hbox (1.88228pt too wide) in paragraph at lines 11831--11831
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (17.48637pt too wide) in paragraph at lines 11838--11838
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (8.90872pt too wide) in paragraph at lines 11845--11845
+/cmr10/bHYPRE[]MPICommunicator 
+ []
+
+
+Overfull \hbox (14.08919pt too wide) in paragraph at lines 11864--11864
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (9.20728pt too wide) in paragraph at lines 11871--11871
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (28.43633pt too wide) in paragraph at lines 11878--11878
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (28.43633pt too wide) in paragraph at lines 11885--11885
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (49.34595pt too wide) in paragraph at lines 11892--11892
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (5.98471pt too wide) in paragraph at lines 11892--11892
+/cmr10/sidl[]BaseInterface 
+ []
+
+
+Overfull \hbox (49.34595pt too wide) in paragraph at lines 11899--11899
+/cmr10/bHYPRE[]SStructDiagScale 
+ []
+
+
+Overfull \hbox (11.35144pt too wide) in paragraph at lines 11899--11899
+/cmr10/sidl[]double[][]array* 
+ []
+
+
+Overfull \hbox (5.98471pt too wide) in paragraph at lines 11899--11899
+/cmr10/sidl[]BaseInterface 
+ []
+
+[198
+
+] [199] [200] [201]
+Underfull \hbox (badness 10000) in paragraph at lines 12007--12008
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12019--12020
+
+ []
+
+[202]
+Underfull \hbox (badness 10000) in paragraph at lines 12031--12032
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12044--12045
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12057--12058
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12071--12072
+
+ []
+
+[203]
+Underfull \hbox (badness 10000) in paragraph at lines 12090--12091
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12107--12108
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12120--12121
+
+ []
+
+[204]
+Underfull \hbox (badness 10000) in paragraph at lines 12135--12136
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12174--12174
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Overfull \hbox (1.99193pt too wide) in paragraph at lines 12288--12288
+/cmr10/bHYPRE[]SStructSplit 
+ []
+
+
+Overfull \hbox (1.99193pt too wide) in paragraph at lines 12295--12295
+/cmr10/bHYPRE[]SStructSplit 
+ []
+
+[205] [206] [207] [208]
+Underfull \hbox (badness 10000) in paragraph at lines 12403--12404
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12418--12419
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12430--12431
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12443--12444
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12456--12457
+
+ []
+
+[209]
+Underfull \hbox (badness 10000) in paragraph at lines 12470--12471
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12489--12490
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12506--12507
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12519--12520
+
+ []
+
+[210]
+Underfull \hbox (badness 10000) in paragraph at lines 12534--12535
+
+ []
+
+[211]
+Overfull \hbox (37.36014pt too wide) in paragraph at lines 12566--12566
+/cmr10/bHYPRE[]PreconditionedSolver 
+ []
+
+
+Overfull \hbox (40.0129pt too wide) in paragraph at lines 12573--12573
+/cmr10/bHYPRE[]PreconditionedSolver 
+ []
+
+[212
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 12652--12653
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12664--12665
+
+ []
+
+
+Overfull \hbox (29.03687pt too wide) in paragraph at lines 12675--12675
+ /cmr12/struct  bHYPRE[]PreconditionedSolver[][]object* bHYPRE[]PreconditionedS
+olver[][]connectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 12676--12677
+
+ []
+
+[213] [214] [215
+
+] [216] [217] [218]
+Underfull \hbox (badness 10000) in paragraph at lines 12998--12999
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13014--13015
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13026--13027
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13039--13040
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13052--13053
+
+ []
+
+[219]
+Underfull \hbox (badness 10000) in paragraph at lines 13066--13067
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13085--13086
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13102--13103
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13115--13116
+
+ []
+
+[220]
+Underfull \hbox (badness 10000) in paragraph at lines 13130--13131
+
+ []
+
+[221] [222] [223] [224]
+Underfull \hbox (badness 10000) in paragraph at lines 13419--13420
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13435--13436
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13447--13448
+
+ []
+
+[225]
+Underfull \hbox (badness 10000) in paragraph at lines 13460--13461
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13473--13474
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13487--13488
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13506--13507
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13523--13524
+
+ []
+
+[226]
+Underfull \hbox (badness 10000) in paragraph at lines 13536--13537
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13551--13552
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13590--13590
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+[227] [228] [229] [230]
+Underfull \hbox (badness 10000) in paragraph at lines 13840--13841
+
+ []
+
+[231]
+Underfull \hbox (badness 10000) in paragraph at lines 13856--13857
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13868--13869
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13881--13882
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13894--13895
+
+ []
+
+[232]
+Underfull \hbox (badness 10000) in paragraph at lines 13908--13909
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13927--13928
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13944--13945
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13957--13958
+
+ []
+
+[233]
+Underfull \hbox (badness 10000) in paragraph at lines 13972--13973
+
+ []
+
+[234] [235] [236] [237]
+Underfull \hbox (badness 10000) in paragraph at lines 14261--14262
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14277--14278
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14289--14290
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14302--14303
+
+ []
+
+[238]
+Underfull \hbox (badness 10000) in paragraph at lines 14315--14316
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14329--14330
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14348--14349
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14365--14366
+
+ []
+
+[239]
+Underfull \hbox (badness 10000) in paragraph at lines 14378--14379
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14393--14394
+
+ []
+
+[240]
+Underfull \hbox (badness 10000) in paragraph at lines 14448--14448
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1178) in paragraph at lines 14448--14448
+/cmti10/bHYPRE[]MPICommunicator[][]data) passed in rather than run-ning the
+ []
+
+
+Overfull \hbox (1.94418pt too wide) in paragraph at lines 14475--14475
+/cmr10/sidl[]BaseInterface 
+ []
+
+[241
+
+] [242]
+Underfull \hbox (badness 10000) in paragraph at lines 14568--14569
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14586--14587
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14598--14599
+
+ []
+
+
+Overfull \hbox (8.08984pt too wide) in paragraph at lines 14612--14612
+ /cmr12/struct  bHYPRE[]MPICommunicator[][]object* bHYPRE[]MPICommunicator[][]c
+onnectI
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14613--14614
+
+ []
+
+[243] [244
+
+] [245]
+Underfull \hbox (badness 10000) in paragraph at lines 14804--14805
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14818--14819
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14830--14831
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14843--14844
+
+ []
+
+[246]
+Underfull \hbox (badness 10000) in paragraph at lines 14858--14859
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14872--14873
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14894--14895
+
+ []
+
+[247]
+Underfull \hbox (badness 10000) in paragraph at lines 14908--14909
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 14947--14947
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1635) in paragraph at lines 14947--14947
+/cmti10/bHYPRE[]StructStencil[][]data) passed in rather than run-ning the con-
+ []
+
+[248] [249]
+Underfull \hbox (badness 10000) in paragraph at lines 15055--15056
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15072--15073
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15084--15085
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15098--15099
+
+ []
+
+[250]
+Underfull \hbox (badness 10000) in paragraph at lines 15113--15114
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15125--15126
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15138--15139
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15152--15153
+
+ []
+
+[251] [252]
+Underfull \hbox (badness 10000) in paragraph at lines 15225--15225
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+
+Underfull \hbox (badness 1152) in paragraph at lines 15225--15225
+/cmti10/bHYPRE[]SStructGraph[][]data) passed in rather than run-ning the con-
+ []
+
+[253
+
+] [254]
+Underfull \hbox (badness 10000) in paragraph at lines 15364--15365
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15378--15379
+
+ []
+
+[255]
+Underfull \hbox (badness 10000) in paragraph at lines 15390--15391
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15403--15404
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15421--15422
+
+ []
+
+[256]
+Underfull \hbox (badness 10000) in paragraph at lines 15433--15434
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15449--15450
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15465--15466
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15504--15504
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+[257] [258] [259]
+Underfull \hbox (badness 10000) in paragraph at lines 15664--15665
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15678--15679
+
+ []
+
+[260]
+Underfull \hbox (badness 10000) in paragraph at lines 15690--15691
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15706--15707
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15722--15723
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15738--15739
+
+ []
+
+[261]
+Underfull \hbox (badness 10000) in paragraph at lines 15771--15772
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15790--15791
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15829--15829
+[]/cmti10/Wraps up the pri-vate data struct pointer (struct
+ []
+
+[262] [263]
+Underfull \hbox (badness 10000) in paragraph at lines 15933--15934
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15947--15948
+
+ []
+
+[264]
+Underfull \hbox (badness 10000) in paragraph at lines 15959--15960
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15974--15975
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15987--15988
+
+ []
+
+[265]
+Underfull \hbox (badness 10000) in paragraph at lines 16015--16016
+
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 1603
+2.
+(/usr/share/texmf/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 16032
+.
+ [266] [267
+
+] (./vbref_manual.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 4652 strings out of 50453
+ 57899 string characters out of 690528
+ 143512 words of memory out of 1500001
+ 6895 multiletter control sequences out of 10000+25000
+ 9581 words of font info for 33 fonts, out of 400000 for 1000
+ 14 hyphenation exceptions out of 10000
+ 34i,14n,35p,349b,706s stack positions out of 3000i,500n,3000p,50000b,5000s
+</usr/share/texmf/fonts/type1/bluesky/cm/cmsy10.pfb></usr/share/texmf/fonts/t
+ype1/bluesky/cm/cmmi10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmtt10.pfb>
+</usr/share/texmf/fonts/type1/bluesky/cm/cmbx9.pfb></usr/share/texmf/fonts/type
+1/bluesky/cm/cmti10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmsy5.pfb></us
+r/share/texmf/fonts/type1/bluesky/cm/cmss8.pfb></usr/share/texmf/fonts/type1/bl
+uesky/cm/cmbxti10.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmr10.pfb></usr/
+share/texmf/fonts/type1/bluesky/cm/cmbx10.pfb></usr/share/texmf/fonts/type1/blu
+esky/cm/cmr12.pfb></usr/share/texmf/fonts/type1/bluesky/cm/cmss9.pfb></usr/shar
+e/texmf/fonts/type1/bluesky/cm/cmbx12.pfb></usr/share/texmf/fonts/type1/bluesky
+/cm/cmti12.pfb>
+Output written on vbref_manual.pdf (267 pages, 1059432 bytes).

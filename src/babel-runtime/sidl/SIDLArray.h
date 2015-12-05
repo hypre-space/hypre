@@ -1,7 +1,7 @@
 /*
  * File:        sidlArray.h
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:48 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:42 $
  * Description: Generic array data types & convenience macros
  *
  * Copyright (c) 2000-2004, The Regents of the University of Calfornia.
@@ -538,6 +538,15 @@ sidl__array_isRowOrder(const struct sidl__array* array);
 int32_t
 sidl__array_type(const struct sidl__array* array);
 
+/**
+ * The following two functions are used for low level array reference
+ * count debugging. They are not intended for Babel end-users.
+ */
+void
+sidl__array_add(struct sidl__array * const array);
+
+void 
+sidl__array_remove(struct sidl__array * const array);
 #ifdef __cplusplus
 }
 #endif

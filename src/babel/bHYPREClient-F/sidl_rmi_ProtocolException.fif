@@ -2,9 +2,9 @@ C
 C       File:          sidl_rmi_ProtocolException_Impl.f
 C       Symbol:        sidl.rmi.ProtocolException-v0.9.15
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
-C       Release:       $Name: V2-2-0b $
-C       Revision:      @(#) $Id: sidl_rmi_ProtocolException.fif,v 1.3 2006/12/29 21:24:29 painter Exp $
+C       Babel Version: 1.0.4
+C       Release:       $Name: V2-4-0b $
+C       Revision:      @(#) $Id: sidl_rmi_ProtocolException.fif,v 1.4 2007/09/27 19:56:36 painter Exp $
 C       Description:   Client-side documentation text for sidl.rmi.ProtocolException
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.
@@ -62,7 +62,7 @@ C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine sidl_rmi_ProtocolException__cast_f(ref, retval,
+        subroutine sidl_rmi_ProtocolException__cast_f(ref, retval, 
      &     exception)
         implicit none
 C        in opaque ref
@@ -79,7 +79,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine sidl_rmi_ProtocolException__cast2_f(self, name,
+        subroutine sidl_rmi_ProtocolException__cast2_f(self, name, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -127,7 +127,7 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine sidl_rmi_ProtocolException_deleteRef_f(self,
+        subroutine sidl_rmi_ProtocolException_deleteRef_f(self, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -143,7 +143,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine sidl_rmi_ProtocolException_isSame_f(self, iobj,
+        subroutine sidl_rmi_ProtocolException_isSame_f(self, iobj, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -165,7 +165,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine sidl_rmi_ProtocolException_isType_f(self, name,
+        subroutine sidl_rmi_ProtocolException_isType_f(self, name, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -184,7 +184,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine sidl_rmi_ProtocolException_getClassInfo_f(self,
+        subroutine sidl_rmi_ProtocolException_getClassInfo_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -201,7 +201,7 @@ C       Method:  getNote[]
 C       Return the message associated with the exception.
 C       
 
-        subroutine sidl_rmi_ProtocolException_getNote_f(self, retval,
+        subroutine sidl_rmi_ProtocolException_getNote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -218,7 +218,7 @@ C       Method:  setNote[]
 C       Set the message associated with the exception.
 C       
 
-        subroutine sidl_rmi_ProtocolException_setNote_f(self, message,
+        subroutine sidl_rmi_ProtocolException_setNote_f(self, message, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -236,7 +236,7 @@ C       Returns formatted string containing the concatenation of all
 C       tracelines.
 C       
 
-        subroutine sidl_rmi_ProtocolException_getTrace_f(self, retval,
+        subroutine sidl_rmi_ProtocolException_getTrace_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -271,7 +271,7 @@ C       Formats and adds an entry to the stack trace based on the
 C       file name, line number, and method name.
 C       
 
-        subroutine sidl_rmi_ProtocolException_add_f(self, filename,
+        subroutine sidl_rmi_ProtocolException_add_f(self, filename, 
      &     lineno, methodname, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -291,7 +291,7 @@ C
 C       Method:  getHopCount[]
 C       
 
-        subroutine sidl_rmi_ProtocolException_getHopCount_f(self,
+        subroutine sidl_rmi_ProtocolException_getHopCount_f(self, 
      &     retval, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -307,7 +307,7 @@ C
 C       Method:  packObj[]
 C       
 
-        subroutine sidl_rmi_ProtocolException_packObj_f(self, ser,
+        subroutine sidl_rmi_ProtocolException_packObj_f(self, ser, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -323,7 +323,7 @@ C
 C       Method:  unpackObj[]
 C       
 
-        subroutine sidl_rmi_ProtocolException_unpackObj_f(self, des,
+        subroutine sidl_rmi_ProtocolException_unpackObj_f(self, des, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -340,7 +340,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine sidl_rmi_ProtocolException__exec_f(self, methodName,
+        subroutine sidl_rmi_ProtocolException__exec_f(self, methodName, 
      &     inArgs, outArgs, exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -361,7 +361,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine sidl_rmi_ProtocolException__getURL_f(self, retval,
+        subroutine sidl_rmi_ProtocolException__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -378,7 +378,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine sidl_rmi_ProtocolException__isRemote_f(self, retval,
+        subroutine sidl_rmi_ProtocolException__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -395,7 +395,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine sidl_rmi_ProtocolException__isLocal_f(self, retval,
+        subroutine sidl_rmi_ProtocolException__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self
@@ -412,7 +412,7 @@ C       Method:  _set_hooks[]
 C       Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine sidl_rmi_ProtocolException__set_hooks_f(self, on,
+        subroutine sidl_rmi_ProtocolException__set_hooks_f(self, on, 
      &     exception)
         implicit none
 C        in sidl.rmi.ProtocolException self

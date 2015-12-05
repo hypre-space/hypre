@@ -2,9 +2,9 @@
 // File:          sidl_io_Serializer.cxx
 // Symbol:        sidl.io.Serializer-v0.9.15
 // Symbol Type:   interface
-// Babel Version: 1.0.0
-// Release:       $Name: V2-2-0b $
-// Revision:      @(#) $Id: sidl_io_Serializer.cxx,v 1.3 2006/12/29 21:24:49 painter Exp $
+// Babel Version: 1.0.4
+// Release:       $Name: V2-4-0b $
+// Revision:      @(#) $Id: sidl_io_Serializer.cxx,v 1.4 2007/09/27 19:55:46 painter Exp $
 // Description:   Client-side glue code for sidl.io.Serializer
 // 
 // Copyright (c) 2000-2002, The Regents of the University of California.
@@ -136,8 +136,8 @@ static struct sidl_recursive_mutex_t sidl_io__Serializer__mutex= SIDL_RECURSIVE_
 #endif
 
   // Static variables to hold version of IOR
-  static const int32_t s_IOR_MAJOR_VERSION = 0;
-  static const int32_t s_IOR_MINOR_VERSION = 10;
+  static const int32_t s_IOR_MAJOR_VERSION = 1;
+  static const int32_t s_IOR_MINOR_VERSION = 0;
 
   // Static variables for managing EPV initialization.
   static int s_remote_initialized = 0;
@@ -177,15 +177,15 @@ static struct sidl_recursive_mutex_t sidl_io__Serializer__mutex= SIDL_RECURSIVE_
       cmp1 = strcmp(name, "sidl.io._Serializer");
       if (!cmp1) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_io__Serializer__object*)self);
         return cast;
       }
     }
     if ((*self->d_epv->f_isType)(self,name, _ex)) {
-      void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**) = 
-        (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-          struct sidl_BaseInterface__object**)) 
+      void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**) = 
+        (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+          sidl_BaseInterface__object**)) 
         sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
       cast =  (*func)(((struct sidl_io__Serializer__remote*)self->d_data)->d_ih,
         _ex);
@@ -228,7 +228,7 @@ static struct sidl_recursive_mutex_t sidl_io__Serializer__mutex= SIDL_RECURSIVE_
     struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
       sidl_io__Serializer__remote*)self->d_data)->d_ih;
     sidl_rmi_Response _rsvp = NULL;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "addRef", _ex ); SIDL_CHECK(*_ex);
     // send actual RMI request
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -372,14 +372,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       if(iobj){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "iobj", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "iobj", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -395,8 +395,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -444,8 +444,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -492,10 +492,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
-      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -713,8 +713,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packOpaque( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packOpaque( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -760,8 +760,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFloat( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packFloat( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -807,8 +807,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDouble( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -854,8 +854,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFcomplex( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packFcomplex( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -901,8 +901,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDcomplex( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packDcomplex( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -948,8 +948,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -996,14 +996,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
       if(value){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)value,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)value, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "value", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "value", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "value", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "value", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -1053,12 +1053,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBoolArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packBoolArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1108,12 +1108,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packCharArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packCharArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1163,12 +1163,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packIntArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packIntArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1218,12 +1218,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packLongArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packLongArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1273,12 +1273,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packOpaqueArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packOpaqueArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1328,12 +1328,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFloatArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packFloatArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1383,12 +1383,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDoubleArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packDoubleArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1438,12 +1438,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packFcomplexArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packFcomplexArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1493,12 +1493,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDcomplexArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packDcomplexArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1548,12 +1548,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packStringArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packStringArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1601,9 +1601,9 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packGenericArray( _inv, "value", value,0,
+      sidl_rmi_Invocation_packGenericArray( _inv, "value", value,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1654,12 +1654,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "key", key, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packSerializableArray( _inv, "value", value,0,0,0,
+      sidl_rmi_Invocation_packSerializableArray( _inv, "value", value,0,0,0, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packInt( _inv, "ordering", ordering, _ex);SIDL_CHECK(
+        *_ex);
       sidl_rmi_Invocation_packInt( _inv, "dimen", dimen, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array,
+      sidl_rmi_Invocation_packBool( _inv, "reuse_array", reuse_array, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -1743,124 +1743,122 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
     epv->f_packSerializableArray      = 
       remote_sidl_io__Serializer_packSerializableArray;
 
-    e0->f__cast        = (void* (*)(void*,const char*,
-      sidl_BaseInterface*)) epv->f__cast;
+    e0->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+      epv->f__cast;
     e0->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
     e0->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
     e0->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-    e0->f__isRemote    = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e0->f__set_hooks   = (void (*)(void*,int32_t,
-      sidl_BaseInterface*)) epv->f__set_hooks;
-    e0->f__exec        = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e0->f_addRef       = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e0->f_deleteRef    = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e0->f_isSame       = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e0->f_isType       = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
-    e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    e0->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e0->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+      epv->f__set_hooks;
+    e0->f__exec        = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e0->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_addRef;
+    e0->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_deleteRef;
+    e0->f_isSame       = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e0->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
+    e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
     e1->f__cast                 = (void* (*)(void*,const char*,
       sidl_BaseInterface*)) epv->f__cast;
-    e1->f__delete               = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__delete;
-    e1->f__getURL               = (char* (*)(void*,
-      sidl_BaseInterface*)) epv->f__getURL;
-    e1->f__raddRef              = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__raddRef;
-    e1->f__isRemote             = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e1->f__set_hooks            = (void (*)(void*,int32_t,
+    e1->f__delete               = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__delete;
+    e1->f__getURL               = (char* (*)(void*,sidl_BaseInterface*)) 
+      epv->f__getURL;
+    e1->f__raddRef              = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__raddRef;
+    e1->f__isRemote             = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e1->f__set_hooks            = (void (*)(void*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
-    e1->f__exec                 = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e1->f_addRef                = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e1->f_deleteRef             = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e1->f_isSame                = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e1->f_isType                = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
+    e1->f__exec                 = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e1->f_addRef                = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e1->f_deleteRef             = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e1->f_isSame                = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e1->f_isType                = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
     e1->f_getClassInfo          = (struct sidl_ClassInfo__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
-    e1->f_packBool              = (void (*)(void*,const char*,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packBool;
-    e1->f_packChar              = (void (*)(void*,const char*,char,
-      struct sidl_BaseInterface__object **)) epv->f_packChar;
-    e1->f_packInt               = (void (*)(void*,const char*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_packInt;
-    e1->f_packLong              = (void (*)(void*,const char*,int64_t,
-      struct sidl_BaseInterface__object **)) epv->f_packLong;
-    e1->f_packOpaque            = (void (*)(void*,const char*,void*,
-      struct sidl_BaseInterface__object **)) epv->f_packOpaque;
-    e1->f_packFloat             = (void (*)(void*,const char*,float,
-      struct sidl_BaseInterface__object **)) epv->f_packFloat;
-    e1->f_packDouble            = (void (*)(void*,const char*,double,
-      struct sidl_BaseInterface__object **)) epv->f_packDouble;
-    e1->f_packFcomplex          = (void (*)(void*,const char*,
-      struct sidl_fcomplex,
-      struct sidl_BaseInterface__object **)) epv->f_packFcomplex;
-    e1->f_packDcomplex          = (void (*)(void*,const char*,
-      struct sidl_dcomplex,
-      struct sidl_BaseInterface__object **)) epv->f_packDcomplex;
+    e1->f_packBool              = (void (*)(void*,const char*,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packBool;
+    e1->f_packChar              = (void (*)(void*,const char*,char,struct 
+      sidl_BaseInterface__object **)) epv->f_packChar;
+    e1->f_packInt               = (void (*)(void*,const char*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_packInt;
+    e1->f_packLong              = (void (*)(void*,const char*,int64_t,struct 
+      sidl_BaseInterface__object **)) epv->f_packLong;
+    e1->f_packOpaque            = (void (*)(void*,const char*,void*,struct 
+      sidl_BaseInterface__object **)) epv->f_packOpaque;
+    e1->f_packFloat             = (void (*)(void*,const char*,float,struct 
+      sidl_BaseInterface__object **)) epv->f_packFloat;
+    e1->f_packDouble            = (void (*)(void*,const char*,double,struct 
+      sidl_BaseInterface__object **)) epv->f_packDouble;
+    e1->f_packFcomplex          = (void (*)(void*,const char*,struct 
+      sidl_fcomplex,struct sidl_BaseInterface__object **)) epv->f_packFcomplex;
+    e1->f_packDcomplex          = (void (*)(void*,const char*,struct 
+      sidl_dcomplex,struct sidl_BaseInterface__object **)) epv->f_packDcomplex;
     e1->f_packString            = (void (*)(void*,const char*,const char*,
       struct sidl_BaseInterface__object **)) epv->f_packString;
-    e1->f_packSerializable      = (void (*)(void*,const char*,
-      struct sidl_io_Serializable__object*,
-      struct sidl_BaseInterface__object **)) epv->f_packSerializable;
-    e1->f_packBoolArray         = (void (*)(void*,const char*,
-      struct sidl_bool__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packBoolArray;
-    e1->f_packCharArray         = (void (*)(void*,const char*,
-      struct sidl_char__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packCharArray;
-    e1->f_packIntArray          = (void (*)(void*,const char*,
-      struct sidl_int__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packIntArray;
-    e1->f_packLongArray         = (void (*)(void*,const char*,
-      struct sidl_long__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packLongArray;
-    e1->f_packOpaqueArray       = (void (*)(void*,const char*,
-      struct sidl_opaque__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packOpaqueArray;
-    e1->f_packFloatArray        = (void (*)(void*,const char*,
-      struct sidl_float__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packFloatArray;
-    e1->f_packDoubleArray       = (void (*)(void*,const char*,
-      struct sidl_double__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packDoubleArray;
-    e1->f_packFcomplexArray     = (void (*)(void*,const char*,
-      struct sidl_fcomplex__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packFcomplexArray;
-    e1->f_packDcomplexArray     = (void (*)(void*,const char*,
-      struct sidl_dcomplex__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packDcomplexArray;
-    e1->f_packStringArray       = (void (*)(void*,const char*,
-      struct sidl_string__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packStringArray;
-    e1->f_packGenericArray      = (void (*)(void*,const char*,
-      struct sidl__array*,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packGenericArray;
-    e1->f_packSerializableArray = (void (*)(void*,const char*,
-      struct sidl_io_Serializable__array*,int32_t,int32_t,sidl_bool,
-      struct sidl_BaseInterface__object **)) epv->f_packSerializableArray;
+    e1->f_packSerializable      = (void (*)(void*,const char*,struct 
+      sidl_io_Serializable__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_packSerializable;
+    e1->f_packBoolArray         = (void (*)(void*,const char*,struct 
+      sidl_bool__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packBoolArray;
+    e1->f_packCharArray         = (void (*)(void*,const char*,struct 
+      sidl_char__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packCharArray;
+    e1->f_packIntArray          = (void (*)(void*,const char*,struct 
+      sidl_int__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packIntArray;
+    e1->f_packLongArray         = (void (*)(void*,const char*,struct 
+      sidl_long__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packLongArray;
+    e1->f_packOpaqueArray       = (void (*)(void*,const char*,struct 
+      sidl_opaque__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packOpaqueArray;
+    e1->f_packFloatArray        = (void (*)(void*,const char*,struct 
+      sidl_float__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packFloatArray;
+    e1->f_packDoubleArray       = (void (*)(void*,const char*,struct 
+      sidl_double__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packDoubleArray;
+    e1->f_packFcomplexArray     = (void (*)(void*,const char*,struct 
+      sidl_fcomplex__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packFcomplexArray;
+    e1->f_packDcomplexArray     = (void (*)(void*,const char*,struct 
+      sidl_dcomplex__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packDcomplexArray;
+    e1->f_packStringArray       = (void (*)(void*,const char*,struct 
+      sidl_string__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packStringArray;
+    e1->f_packGenericArray      = (void (*)(void*,const char*,struct 
+      sidl__array*,sidl_bool,struct sidl_BaseInterface__object **)) 
+      epv->f_packGenericArray;
+    e1->f_packSerializableArray = (void (*)(void*,const char*,struct 
+      sidl_io_Serializable__array*,int32_t,int32_t,sidl_bool,struct 
+      sidl_BaseInterface__object **)) epv->f_packSerializableArray;
 
     s_remote_initialized = 1;
   }
 
   // Create an instance that connects to an existing remote object.
   static struct sidl_io_Serializer__object*
-  sidl_io_Serializer__remoteConnect(const char *url, sidl_bool ar,
+  sidl_io_Serializer__remoteConnect(const char *url, sidl_bool ar, 
     sidl_BaseInterface *_ex)
   {
     struct sidl_io__Serializer__object* self;
@@ -1872,8 +1870,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
     char* objectID = NULL;
     objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
     if(objectID) {
-      sidl_BaseInterface bi = 
-        (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
+      sidl_BaseInterface bi = (
+        sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
         objectID, _ex);
       if(ar) {
         sidl_BaseInterface_addRef(bi, _ex);
@@ -1916,7 +1914,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
   // Create an instance that uses an already existing 
   // InstanceHandel to connect to an existing remote object.
   static struct sidl_io_Serializer__object*
-  sidl_io_Serializer__IHConnect(sidl_rmi_InstanceHandle instance,
+  sidl_io_Serializer__IHConnect(sidl_rmi_InstanceHandle instance, 
     sidl_BaseInterface *_ex)
   {
     struct sidl_io__Serializer__object* self;
@@ -1968,8 +1966,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
 
     *_ex = NULL;
     if(!connect_loaded) {
-      sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Serializer",
-        (void*)sidl_io_Serializer__IHConnect, _ex);
+      sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Serializer", (
+        void*)sidl_io_Serializer__IHConnect, _ex);
       connect_loaded = 1;
     }
     if (obj != NULL) {
@@ -1989,8 +1987,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.io._Serializer
   // RMI connector function for the class.
   // 
   struct sidl_io_Serializer__object*
-  sidl_io_Serializer__connectI(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex)
+  sidl_io_Serializer__connectI(const char* url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex)
   {
     return sidl_io_Serializer__remoteConnect(url, ar, _ex);
   }
@@ -2011,11 +2009,11 @@ sidl::io::Serializer::throwException0(
   void * _p = 0;
   struct sidl_BaseInterface__object *throwaway_exception;
 
-  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object,
+  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object, 
     "sidl.RuntimeException", &throwaway_exception)) != 0 ) {
     struct sidl_RuntimeException__object * _realtype = reinterpret_cast< struct 
       sidl_RuntimeException__object*>(_p);
-    (*_exception->d_epv->f_deleteRef)(_exception->d_object,
+    (*_exception->d_epv->f_deleteRef)(_exception->d_object, 
       &throwaway_exception);
     // Note: alternate constructor does not increment refcount.
     ::sidl::RuntimeException _resolved_exception = ::sidl::RuntimeException( 
@@ -2040,25 +2038,24 @@ sidl::io::Serializer::throwException0(
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packBool( /* in */const ::std::string& key,
-  /* in */bool value )
+sidl::io::Serializer::packBool( /* in */const ::std::string& key, /* in */bool 
+  value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_value = value;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packBool))(loc_self->d_object, /* in */ key.c_str(),
-    /* in */ _local_value, &_exception );
+  (*(loc_self->d_epv->f_packBool))(loc_self->d_object, /* in */ key.c_str(), /* 
+    in */ _local_value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2066,24 +2063,95 @@ sidl::io::Serializer::packBool( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packChar( /* in */const ::std::string& key,
-  /* in */char value )
+sidl::io::Serializer::packChar( /* in */const ::std::string& key, /* in */char 
+  value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packChar))(loc_self->d_object, /* in */ key.c_str(),
+  (*(loc_self->d_epv->f_packChar))(loc_self->d_object, /* in */ key.c_str(), /* 
+    in */ value, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packInt( /* in */const ::std::string& key, /* in 
+  */int32_t value )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packInt))(loc_self->d_object, /* in */ key.c_str(), /* 
+    in */ value, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packLong( /* in */const ::std::string& key, /* in 
+  */int64_t value )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packLong))(loc_self->d_object, /* in */ key.c_str(), /* 
+    in */ value, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packOpaque( /* in */const ::std::string& key, /* in 
+  */void* value )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packOpaque))(loc_self->d_object, /* in */ key.c_str(), 
     /* in */ value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2091,24 +2159,23 @@ sidl::io::Serializer::packChar( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packInt( /* in */const ::std::string& key,
-  /* in */int32_t value )
+sidl::io::Serializer::packFloat( /* in */const ::std::string& key, /* in 
+  */float value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packInt))(loc_self->d_object, /* in */ key.c_str(),
+  (*(loc_self->d_epv->f_packFloat))(loc_self->d_object, /* in */ key.c_str(), 
     /* in */ value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2116,24 +2183,23 @@ sidl::io::Serializer::packInt( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packLong( /* in */const ::std::string& key,
-  /* in */int64_t value )
+sidl::io::Serializer::packDouble( /* in */const ::std::string& key, /* in 
+  */double value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packLong))(loc_self->d_object, /* in */ key.c_str(),
+  (*(loc_self->d_epv->f_packDouble))(loc_self->d_object, /* in */ key.c_str(), 
     /* in */ value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2141,88 +2207,13 @@ sidl::io::Serializer::packLong( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packOpaque( /* in */const ::std::string& key,
-  /* in */void* value )
+sidl::io::Serializer::packFcomplex( /* in */const ::std::string& key, /* in 
+  */const ::std::complex<float>& value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packOpaque))(loc_self->d_object, /* in */ key.c_str(),
-    /* in */ value, &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packFloat( /* in */const ::std::string& key,
-  /* in */float value )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packFloat))(loc_self->d_object, /* in */ key.c_str(),
-    /* in */ value, &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packDouble( /* in */const ::std::string& key,
-  /* in */double value )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packDouble))(loc_self->d_object, /* in */ key.c_str(),
-    /* in */ value, &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packFcomplex( /* in */const ::std::string& key,
-  /* in */const ::std::complex<float>& value )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   struct sidl_fcomplex _local_value = {value.real(), value.imag() } ; 
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
@@ -2230,11 +2221,10 @@ sidl::io::Serializer::packFcomplex( /* in */const ::std::string& key,
     /* in */ _local_value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2242,13 +2232,13 @@ sidl::io::Serializer::packFcomplex( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packDcomplex( /* in */const ::std::string& key,
-  /* in */const ::std::complex<double>& value )
+sidl::io::Serializer::packDcomplex( /* in */const ::std::string& key, /* in 
+  */const ::std::complex<double>& value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   struct sidl_dcomplex _local_value = {value.real(), value.imag() } ; 
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
@@ -2256,11 +2246,10 @@ sidl::io::Serializer::packDcomplex( /* in */const ::std::string& key,
     /* in */ _local_value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2268,24 +2257,23 @@ sidl::io::Serializer::packDcomplex( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packString( /* in */const ::std::string& key,
-  /* in */const ::std::string& value )
+sidl::io::Serializer::packString( /* in */const ::std::string& key, /* in 
+  */const ::std::string& value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packString))(loc_self->d_object, /* in */ key.c_str(),
+  (*(loc_self->d_epv->f_packString))(loc_self->d_object, /* in */ key.c_str(), 
     /* in */ value.c_str(), &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2293,32 +2281,25 @@ sidl::io::Serializer::packString( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packSerializable( /* in */const ::std::string& key,
-  /* in */::sidl::io::Serializable value )
+sidl::io::Serializer::packSerializable( /* in */const ::std::string& key, /* in 
+  */::sidl::io::Serializable value )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   struct sidl_io_Serializable__object* _local_value = (struct 
-    sidl_io_Serializable__object*) 
-    ::sidl::io::Serializable::_cast((void*)(value._get_ior()));
+    sidl_io_Serializable__object*) value.::sidl::io::Serializable::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packSerializable))(loc_self->d_object,
-    /* in */ key.c_str(), /* in */ _local_value, &_exception );
+  (*(loc_self->d_epv->f_packSerializable))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in */ _local_value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  if (_local_value) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_value->d_epv->f_deleteRef)(_local_value->d_object,
-    &throwaway_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2335,28 +2316,26 @@ sidl::io::Serializer::packSerializable( /* in */const ::std::string& key,
  * passed into it or not.
  */
 void
-sidl::io::Serializer::packBoolArray( /* in */const ::std::string& key,
-  /* in array<bool> */::sidl::array<bool> value, /* in */int32_t ordering,
-  /* in */int32_t dimen, /* in */bool reuse_array )
+sidl::io::Serializer::packBoolArray( /* in */const ::std::string& key, /* in 
+  array<bool> */::sidl::array<bool> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_reuse_array = reuse_array;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packBoolArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<bool> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
+  (*(loc_self->d_epv->f_packBoolArray))(loc_self->d_object, /* in */ key.c_str(
+    ), /* in array<bool> */ value._get_ior(), /* in */ ordering, /* in */ dimen,
+    /* in */ _local_reuse_array, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2364,28 +2343,26 @@ sidl::io::Serializer::packBoolArray( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packCharArray( /* in */const ::std::string& key,
-  /* in array<char> */::sidl::array<char> value, /* in */int32_t ordering,
-  /* in */int32_t dimen, /* in */bool reuse_array )
+sidl::io::Serializer::packCharArray( /* in */const ::std::string& key, /* in 
+  array<char> */::sidl::array<char> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_reuse_array = reuse_array;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packCharArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<char> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
+  (*(loc_self->d_epv->f_packCharArray))(loc_self->d_object, /* in */ key.c_str(
+    ), /* in array<char> */ value._get_ior(), /* in */ ordering, /* in */ dimen,
+    /* in */ _local_reuse_array, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2393,27 +2370,53 @@ sidl::io::Serializer::packCharArray( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packIntArray( /* in */const ::std::string& key,
-  /* in array<int> */::sidl::array<int32_t> value, /* in */int32_t ordering,
-  /* in */int32_t dimen, /* in */bool reuse_array )
+sidl::io::Serializer::packIntArray( /* in */const ::std::string& key, /* in 
+  array<int> */::sidl::array<int32_t> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_reuse_array = reuse_array;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
   (*(loc_self->d_epv->f_packIntArray))(loc_self->d_object, /* in */ key.c_str(),
-    /* in array<int> */ value._get_ior(), /* in */ ordering, /* in */ dimen,
+    /* in array<int> */ value._get_ior(), /* in */ ordering, /* in */ dimen, /* 
+    in */ _local_reuse_array, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packLongArray( /* in */const ::std::string& key, /* in 
+  array<long> */::sidl::array<int64_t> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_bool _local_reuse_array = reuse_array;
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packLongArray))(loc_self->d_object, /* in */ key.c_str(
+    ), /* in array<long> */ value._get_ior(), /* in */ ordering, /* in */ dimen,
     /* in */ _local_reuse_array, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2421,28 +2424,161 @@ sidl::io::Serializer::packIntArray( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packLongArray( /* in */const ::std::string& key,
-  /* in array<long> */::sidl::array<int64_t> value, /* in */int32_t ordering,
+sidl::io::Serializer::packOpaqueArray( /* in */const ::std::string& key, /* in 
+  array<opaque> */::sidl::array<void*> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_bool _local_reuse_array = reuse_array;
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packOpaqueArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<opaque> */ value._get_ior(), /* in */ ordering, /* 
+    in */ dimen, /* in */ _local_reuse_array, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packFloatArray( /* in */const ::std::string& key, /* in 
+  array<float> */::sidl::array<float> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_bool _local_reuse_array = reuse_array;
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packFloatArray))(loc_self->d_object, /* in */ key.c_str(
+    ), /* in array<float> */ value._get_ior(), /* in */ ordering, /* in */ 
+    dimen, /* in */ _local_reuse_array, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packDoubleArray( /* in */const ::std::string& key, /* in 
+  array<double> */::sidl::array<double> value, /* in */int32_t ordering, /* in 
+  */int32_t dimen, /* in */bool reuse_array )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_bool _local_reuse_array = reuse_array;
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packDoubleArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<double> */ value._get_ior(), /* in */ ordering, /* 
+    in */ dimen, /* in */ _local_reuse_array, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packFcomplexArray( /* in */const ::std::string& key, /* 
+  in array<fcomplex> */::sidl::array< ::sidl::fcomplex> value, /* in */int32_t 
+  ordering, /* in */int32_t dimen, /* in */bool reuse_array )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_bool _local_reuse_array = reuse_array;
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packFcomplexArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<fcomplex> */ value._get_ior(), /* in */ ordering, 
+    /* in */ dimen, /* in */ _local_reuse_array, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packDcomplexArray( /* in */const ::std::string& key, /* 
+  in array<dcomplex> */::sidl::array< ::sidl::dcomplex> value, /* in */int32_t 
+  ordering, /* in */int32_t dimen, /* in */bool reuse_array )
+
+{
+
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
+  sidl_bool _local_reuse_array = reuse_array;
+  sidl_BaseInterface__object * _exception;
+  /*pack args to dispatch to ior*/
+  (*(loc_self->d_epv->f_packDcomplexArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<dcomplex> */ value._get_ior(), /* in */ ordering, 
+    /* in */ dimen, /* in */ _local_reuse_array, &_exception );
+  /*dispatch to ior*/
+  if (_exception != 0 ) {
+
+    throwException0(_exception);
+  }
+  /*unpack results and cleanup*/
+}
+
+
+/**
+ * user defined non-static method.
+ */
+void
+sidl::io::Serializer::packStringArray( /* in */const ::std::string& key, /* in 
+  array<string> */::sidl::array< ::std::string> value, /* in */int32_t ordering,
   /* in */int32_t dimen, /* in */bool reuse_array )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_reuse_array = reuse_array;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packLongArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<long> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
+  (*(loc_self->d_epv->f_packStringArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<string> */ value._get_ior(), /* in */ ordering, /* 
+    in */ dimen, /* in */ _local_reuse_array, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2450,28 +2586,25 @@ sidl::io::Serializer::packLongArray( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packOpaqueArray( /* in */const ::std::string& key,
-  /* in array<opaque> */::sidl::array<void*> value, /* in */int32_t ordering,
-  /* in */int32_t dimen, /* in */bool reuse_array )
+sidl::io::Serializer::packGenericArray( /* in */const ::std::string& key, /* in 
+  array<> */::sidl::basearray value, /* in */bool reuse_array )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_reuse_array = reuse_array;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packOpaqueArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<opaque> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
+  (*(loc_self->d_epv->f_packGenericArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<> */ value._get_baseior(), /* in */ 
+    _local_reuse_array, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2479,201 +2612,27 @@ sidl::io::Serializer::packOpaqueArray( /* in */const ::std::string& key,
  * user defined non-static method.
  */
 void
-sidl::io::Serializer::packFloatArray( /* in */const ::std::string& key,
-  /* in array<float> */::sidl::array<float> value, /* in */int32_t ordering,
-  /* in */int32_t dimen, /* in */bool reuse_array )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_bool _local_reuse_array = reuse_array;
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packFloatArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<float> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packDoubleArray( /* in */const ::std::string& key,
-  /* in array<double> */::sidl::array<double> value, /* in */int32_t ordering,
-  /* in */int32_t dimen, /* in */bool reuse_array )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_bool _local_reuse_array = reuse_array;
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packDoubleArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<double> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packFcomplexArray( /* in */const ::std::string& key,
-  /* in array<fcomplex> */::sidl::array< ::sidl::fcomplex> value,
-  /* in */int32_t ordering, /* in */int32_t dimen, /* in */bool reuse_array )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_bool _local_reuse_array = reuse_array;
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packFcomplexArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<fcomplex> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packDcomplexArray( /* in */const ::std::string& key,
-  /* in array<dcomplex> */::sidl::array< ::sidl::dcomplex> value,
-  /* in */int32_t ordering, /* in */int32_t dimen, /* in */bool reuse_array )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_bool _local_reuse_array = reuse_array;
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packDcomplexArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<dcomplex> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packStringArray( /* in */const ::std::string& key,
-  /* in array<string> */::sidl::array< ::std::string> value,
-  /* in */int32_t ordering, /* in */int32_t dimen, /* in */bool reuse_array )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_bool _local_reuse_array = reuse_array;
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packStringArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<string> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packGenericArray( /* in */const ::std::string& key,
-  /* in array<> */::sidl::basearray value, /* in */bool reuse_array )
-
-{
-
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
-  sidl_bool _local_reuse_array = reuse_array;
-  sidl_BaseInterface__object * _exception;
-  /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packGenericArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<> */ value._get_baseior(),
-    /* in */ _local_reuse_array, &_exception );
-  /*dispatch to ior*/
-  if (_exception != 0 ) {
-    throwException0(_exception);
-  }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
-}
-
-
-/**
- * user defined non-static method.
- */
-void
-sidl::io::Serializer::packSerializableArray( /* in */const ::std::string& key,
+sidl::io::Serializer::packSerializableArray( /* in */const ::std::string& key, 
   /* in array<sidl.io.Serializable> */::sidl::array< ::sidl::io::Serializable> 
-  value, /* in */int32_t ordering, /* in */int32_t dimen,
-  /* in */bool reuse_array )
+  value, /* in */int32_t ordering, /* in */int32_t dimen, /* in */bool 
+  reuse_array )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_reuse_array = reuse_array;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f_packSerializableArray))(loc_self->d_object,
-    /* in */ key.c_str(), /* in array<sidl.io.Serializable> */ value._get_ior(),
-    /* in */ ordering, /* in */ dimen, /* in */ _local_reuse_array,
-    &_exception );
+  (*(loc_self->d_epv->f_packSerializableArray))(loc_self->d_object, /* in */ 
+    key.c_str(), /* in array<sidl.io.Serializable> */ value._get_ior(), /* in 
+    */ ordering, /* in */ dimen, /* in */ _local_reuse_array, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 
@@ -2685,22 +2644,27 @@ sidl::io::Serializer::packSerializableArray( /* in */const ::std::string& key,
 //  Babel's C++ bindings)
 // 
 
-// remote connector 2
+// remote connector
 ::sidl::io::Serializer
 sidl::io::Serializer::_connect(const std::string& url, const bool ar ) {
   ior_t* ior_self;
-  sidl_BaseInterface__object* _ex = 0;
-  ior_self = sidl_io_Serializer__remoteConnect( url.c_str(), ar?TRUE:FALSE,
-    &_ex );
-  if (_ex != 0 ) {
-    ; //TODO: handle exception
+  struct sidl_BaseInterface__object *_exception;
+  ior_self = sidl_io_Serializer__remoteConnect( url.c_str(), ar?TRUE:FALSE, 
+    &_exception );
+  if (_exception != 0 ) {
+    throwException0(_exception);
   }
   return ::sidl::io::Serializer( ior_self, false );
 }
 
 // copy constructor
 sidl::io::Serializer::Serializer ( const ::sidl::io::Serializer& original ) {
-  d_self = ::sidl::io::Serializer::_cast(original._get_ior());
+  d_self = (struct sidl_io_Serializer__object*) 
+    original.::sidl::io::Serializer::_get_ior();
+  sidl_io_Serializer_IORCache = (ior_t*) d_self;
+  if(d_self) {
+    addRef();
+  }
   d_weak_reference = false;
 }
 
@@ -2711,8 +2675,12 @@ sidl::io::Serializer::operator=( const ::sidl::io::Serializer& rhs ) {
     if ( d_self != 0 ) {
       deleteRef();
     }
-    d_self = ::sidl::io::Serializer::_cast(rhs._get_ior());
-    // note _cast incremements the reference count
+    d_self = (struct sidl_io_Serializer__object*) 
+      rhs.::sidl::io::Serializer::_get_ior();
+    sidl_io_Serializer_IORCache = (ior_t*) d_self;
+    if(d_self) {
+      addRef();
+    }
     d_weak_reference = false;
   }
   return *this;
@@ -2720,14 +2688,17 @@ sidl::io::Serializer::operator=( const ::sidl::io::Serializer& rhs ) {
 
 // conversion from ior to C++ class
 sidl::io::Serializer::Serializer ( ::sidl::io::Serializer::ior_t* ior ) 
-   : StubBase(reinterpret_cast< void*>(ior)) { }
+   : StubBase(reinterpret_cast< void*>(ior)) { 
+  sidl_io_Serializer_IORCache = (ior_t*) d_self;
+}
 
 // Alternate constructor: does not call addRef()
 // (sets d_weak_reference=isWeak)
 // For internal use by Impls (fixes bug#275)
-sidl::io::Serializer::Serializer ( ::sidl::io::Serializer::ior_t* ior,
-  bool isWeak ) : 
+sidl::io::Serializer::Serializer ( ::sidl::io::Serializer::ior_t* ior, bool 
+  isWeak ) : 
 StubBase(reinterpret_cast< void*>(ior), isWeak){ 
+  sidl_io_Serializer_IORCache = (ior_t*) d_self;
 }
 
 // exec has special argument passing to avoid #include circularities
@@ -2754,24 +2725,23 @@ sidl::io::Serializer::_getURL(  )
 
 {
   ::std::string _result;
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   char * _local_result;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _local_result = (*(loc_self->d_epv->f__getURL))(loc_self->d_object,
+  _local_result = (*(loc_self->d_epv->f__getURL))(loc_self->d_object, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if (_local_result) {
     _result = _local_result;
     ::sidl_String_free( _local_result );
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
   return _result;
 }
 
@@ -2786,20 +2756,19 @@ sidl::io::Serializer::_set_hooks( /* in */bool on )
 
 {
 
-  ior_t* const loc_self = (ior_t*) 
-    ::sidl::io::Serializer::_cast((void*)(_get_ior()));
+  ior_t* const loc_self = (struct sidl_io_Serializer__object*) 
+    ::sidl::io::Serializer::_get_ior();
   sidl_bool _local_on = on;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f__set_hooks))(loc_self->d_object, /* in */ _local_on,
+  (*(loc_self->d_epv->f__set_hooks))(loc_self->d_object, /* in */ _local_on, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
-  {  struct sidl_BaseInterface__object *throwaway_exception;  
-    (*loc_self->d_epv->f_deleteRef)(loc_self->d_object, &throwaway_exception);
-  }/*unpack results and cleanup*/
+  /*unpack results and cleanup*/
 }
 
 // protected method that implements casting
@@ -2809,8 +2778,8 @@ struct sidl_io_Serializer__object* sidl::io::Serializer::_cast(const void* src)
 
   if(!connect_loaded) {
     struct sidl_BaseInterface__object *throwaway_exception;
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Serializer",
-      (void*)sidl_io_Serializer__IHConnect, &throwaway_exception);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.io.Serializer", (
+      void*)sidl_io_Serializer__IHConnect, &throwaway_exception);
     connect_loaded = 1;
   }
   if ( src != 0 ) {
@@ -2819,7 +2788,7 @@ struct sidl_io_Serializer__object* sidl::io::Serializer::_cast(const void* src)
     struct sidl_BaseInterface__object *throwaway_exception;
     struct sidl_BaseInterface__object * base = reinterpret_cast< struct 
       sidl_BaseInterface__object *>(tmp);
-    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object,
+    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object, 
       "sidl.io.Serializer", &throwaway_exception));
   }
   return cast;

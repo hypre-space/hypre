@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimpleServer_Impl.c
  * Symbol:        sidlx.rmi.SimpleServer-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for sidlx.rmi.SimpleServer
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -143,32 +143,39 @@ static void * threadFunc(void *arg) {
 static void * serverFunc(void *arg) {
 
   sidlx_rmi_SimpleServer self = (sidlx_rmi_SimpleServer)arg;
+  sidlx_rmi_ServerSocket serverSocket = NULL;
   sidlx_rmi_Socket ac_sock = NULL;
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface _ex2 = NULL;
   sidl_SIDLException e_x_p = NULL;
 
   struct sidlx_rmi_SimpleServer__data *dptr=sidlx_rmi_SimpleServer__get_data(self);
-  if(!dptr) {
+  if(!dptr || !dptr->s_sock) {
     SIDL_THROW(_ex, sidl_rmi_NetworkException,"Simple Server not initialized");
   }
 
+  /* Now that we know we'll be using this, addRef it */
+  sidlx_rmi_SimpleServer_addRef(self, &_ex);
+  serverSocket = dptr->s_sock;
+  sidlx_rmi_ServerSocket_addRef(serverSocket, &_ex);
+
   while (1) { 
     pthread_t tid = 0;
-    ac_sock = sidlx_rmi_ServerSocket_accept(dptr->s_sock, &_ex); SIDL_CHECK(_ex);
-    
+
+    ac_sock = sidlx_rmi_ServerSocket_accept(serverSocket, &_ex); SIDL_CHECK(_ex);
+
     pthread_mutex_lock(&g_poolLock);
     if (g_shutdownPool) {
+      pthread_mutex_unlock(&g_poolLock);
       if (DEBUG) printf("Have a connection, but we shouldn't service it!\n");
-      sidlx_rmi_Socket_close(ac_sock,&_ex);
-      SIDL_CLEAR(_ex);
-      ac_sock = 0;
-      break;
+      goto EXIT;
     }
     if ( (g_nBusy == g_nPool) && (g_nPool < g_maxPool) ) {
       pthread_create(&tid,0,threadFunc,(void*)0);
-      pthread_detach(tid);
-      g_nPool++;
+      if(tid) {
+        pthread_detach(tid);
+        ++g_nPool;
+      }
     }
     
     /* Make sure we don't have pending work */
@@ -187,6 +194,11 @@ static void * serverFunc(void *arg) {
  EXIT:
   if (ac_sock) {
     sidlx_rmi_Socket_close(ac_sock,&_ex2);
+    ac_sock = 0;
+    SIDL_CLEAR(_ex2);
+  }
+  if (serverSocket) {
+    sidlx_rmi_ServerSocket_deleteRef(serverSocket,&_ex2);
     SIDL_CLEAR(_ex2);
   }
   if (g_shutdownPool) {
@@ -203,8 +215,8 @@ static void * serverFunc(void *arg) {
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -306,7 +318,7 @@ impl_sidlx_rmi_SimpleServer__dtor(
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer._dtor) */
   struct sidlx_rmi_SimpleServer__data * data = sidlx_rmi_SimpleServer__get_data( self );
   if (data) {
-    sidlx_rmi_ServerSocket_deleteRef(data->s_sock, _ex);
+    if(data->s_sock) { sidlx_rmi_ServerSocket_deleteRef(data->s_sock, _ex); }
     free((void*) data);
   }
   sidlx_rmi_SimpleServer__set_data( self, NULL );
@@ -543,7 +555,11 @@ impl_sidlx_rmi_SimpleServer_shutdown(
   pthread_mutex_unlock(&g_poolLock);
 
   struct sidlx_rmi_SimpleServer__data *dptr=sidlx_rmi_SimpleServer__get_data(self);
-  if (dptr) sidlx_rmi_ServerSocket_close(dptr->s_sock,_ex);
+  if (dptr && dptr->s_sock) {
+    sidlx_rmi_ServerSocket_close(dptr->s_sock,_ex);
+    sidlx_rmi_ServerSocket_deleteRef(dptr->s_sock, _ex);
+    dptr->s_sock = 0;
+  }
   if (*_ex) return;
 
   /* Wait until any current messages are done */
@@ -568,82 +584,80 @@ impl_sidlx_rmi_SimpleServer_shutdown(
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_sidlx_rmi_SimpleServer_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_io_Serializable__connectI(url, ar, _ex);
 }
 struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_io_Serializable__cast(bi, _ex);
 }
 struct sidl_rmi_ServerInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidl_rmi_ServerInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_rmi_ServerInfo__connectI(url, ar, _ex);
 }
 struct sidl_rmi_ServerInfo__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidl_rmi_ServerInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_rmi_ServerInfo__cast(bi, _ex);
 }
 struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_SimpleServer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidlx_rmi_SimpleServer__connectI(url, ar, _ex);
 }
 struct sidlx_rmi_SimpleServer__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_SimpleServer(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidlx_rmi_SimpleServer__cast(bi, _ex);
 }
 struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url,
+  impl_sidlx_rmi_SimpleServer_fconnect_sidlx_rmi_Socket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidlx_rmi_Socket__connectI(url, ar, _ex);
 }
 struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi,
+  impl_sidlx_rmi_SimpleServer_fcast_sidlx_rmi_Socket(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidlx_rmi_Socket__cast(bi, _ex);
 }

@@ -2,7 +2,7 @@
  * File:          bHYPRE_BoomerAMG.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -109,6 +109,18 @@
  * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
  * for additive Schwarz.
  * 
+ * \item[SchwarzUseNonSymm] ({\tt Int}) - defines whether to use a nonsymmetric
+ * Schwarz smoother. Default:0 (symmetric smoother)
+ * 
+ * \item[EuLevel] ({\tt Int}) - defines number of levels for ILU(k) smoother.
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0 
+ * 
+ * \item[EuSparseA] ({\tt Double}) - defines drop tolerance for ILU(k) smoother
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0 
+ * 
+ * \item[EuBJ] ({\tt Int}) - defines use of block Jacobi ILUT smoother.
+ *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0 
+ * 
  * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
  * is used as a solver; ignored if this is used as a preconditioner
  * 
@@ -138,6 +150,15 @@
  * 
  * The default is 0. 
  * 
+ * \item[PMaxElmts] ({\tt Int}) - Defines the maximal number of nonzero entries
+ * allowed in interpolation. Default: 0 (i.e. no limit)
+ *
+ * \item[AggNumLevels] ({\tt Int}) - Defines the number of levels
+ * of aggressive coarsening performed. Default:0
+ *
+ * \item[NumPaths] ({\tt Int}) - Defines the number of paths used for
+ * aggressive coarsening. Default:1
+ *
  * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
  * in GSMG or LS interpolation.
  * 
@@ -268,11 +289,13 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetLevelRelaxWt)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetLevelRelaxWt)(
     self,
     relax_wt,
     level,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -288,16 +311,17 @@ bHYPRE_BoomerAMG_InitGridRelaxation(
   /* in */ bHYPRE_BoomerAMG self,
   /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
   /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
-  /* out array<int,2,
-    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* out array<int,2,column-major> */ struct sidl_int__array** 
+    grid_relax_points,
   /* in */ int32_t coarsen_type,
-  /* out array<double,
-    column-major> */ struct sidl_double__array** relax_weights,
+  /* out array<double,column-major> */ struct sidl_double__array** 
+    relax_weights,
   /* in */ int32_t max_levels,
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_InitGridRelaxation)(
+  int32_t _result;
+  _result = (*self->d_epv->f_InitGridRelaxation)(
     self,
     num_grid_sweeps,
     grid_relax_type,
@@ -306,6 +330,7 @@ bHYPRE_BoomerAMG_InitGridRelaxation(
     relax_weights,
     max_levels,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -352,10 +377,12 @@ bHYPRE_BoomerAMG_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -370,10 +397,12 @@ bHYPRE_BoomerAMG_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -387,9 +416,11 @@ bHYPRE_BoomerAMG_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -408,10 +439,12 @@ bHYPRE_BoomerAMG_SetOperator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetOperator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetOperator)(
     self,
     A,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -430,10 +463,12 @@ bHYPRE_BoomerAMG_SetTolerance(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetTolerance)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetTolerance)(
     self,
     tolerance,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -452,10 +487,12 @@ bHYPRE_BoomerAMG_SetMaxIterations(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetMaxIterations)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetMaxIterations)(
     self,
     max_iterations,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -478,10 +515,12 @@ bHYPRE_BoomerAMG_SetLogging(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetLogging)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetLogging)(
     self,
     level,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -504,10 +543,12 @@ bHYPRE_BoomerAMG_SetPrintLevel(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetPrintLevel)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetPrintLevel)(
     self,
     level,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -525,10 +566,12 @@ bHYPRE_BoomerAMG_GetNumIterations(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetNumIterations)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetNumIterations)(
     self,
     num_iterations,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -546,10 +589,12 @@ bHYPRE_BoomerAMG_GetRelResidualNorm(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetRelResidualNorm)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetRelResidualNorm)(
     self,
     norm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -568,10 +613,12 @@ bHYPRE_BoomerAMG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -612,11 +659,13 @@ bHYPRE_BoomerAMG_SetIntParameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetIntParameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetIntParameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -635,11 +684,13 @@ bHYPRE_BoomerAMG_SetDoubleParameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetDoubleParameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetDoubleParameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -658,11 +709,13 @@ bHYPRE_BoomerAMG_SetStringParameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetStringParameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetStringParameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -682,17 +735,22 @@ bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
   struct sidl_int__array value_real;
   struct sidl_int__array*value_tmp = &value_real;
   value_upper[0] = nvalues-1;
-  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper,
+  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper, 
     value_stride);
-  return (*self->d_epv->f_SetIntArray1Parameter)(
+  _result = (*self->d_epv->f_SetIntArray1Parameter)(
     self,
     name,
     value_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)value_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -711,11 +769,13 @@ bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetIntArray2Parameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetIntArray2Parameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -735,17 +795,22 @@ bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
   struct sidl_double__array value_real;
   struct sidl_double__array*value_tmp = &value_real;
   value_upper[0] = nvalues-1;
-  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper,
+  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper, 
     value_stride);
-  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+  _result = (*self->d_epv->f_SetDoubleArray1Parameter)(
     self,
     name,
     value_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)value_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -764,11 +829,13 @@ bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetDoubleArray2Parameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetDoubleArray2Parameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -787,11 +854,13 @@ bHYPRE_BoomerAMG_GetIntValue(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetIntValue)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetIntValue)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -810,11 +879,13 @@ bHYPRE_BoomerAMG_GetDoubleValue(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetDoubleValue)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetDoubleValue)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -834,11 +905,13 @@ bHYPRE_BoomerAMG_Setup(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Setup)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Setup)(
     self,
     b,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -857,11 +930,13 @@ bHYPRE_BoomerAMG_Apply(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Apply)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Apply)(
     self,
     b,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -880,11 +955,13 @@ bHYPRE_BoomerAMG_ApplyAdjoint(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_ApplyAdjoint)(
+  int32_t _result;
+  _result = (*self->d_epv->f_ApplyAdjoint)(
     self,
     b,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -942,9 +1019,11 @@ bHYPRE_BoomerAMG__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -978,9 +1057,11 @@ bHYPRE_BoomerAMG__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1237,8 +1318,8 @@ bHYPRE_BoomerAMG__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_BoomerAMG__object*
-bHYPRE_BoomerAMG__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_BoomerAMG__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

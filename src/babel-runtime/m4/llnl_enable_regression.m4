@@ -8,7 +8,7 @@ dnl LLNL_ENABLE_REGRESSION defines a conditional that allows the regression
 dnl tests to be skipped.
 dnl 
 dnl @author Tom Epperly
-dnl @version $Id: llnl_enable_regression.m4,v 1.2 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: llnl_enable_regression.m4,v 1.3 2007/09/27 19:35:18 painter Exp $
 
 AC_DEFUN([LLNL_ENABLE_REGRESSION],[
 AC_ARG_ENABLE([regression],

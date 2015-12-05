@@ -1,8 +1,8 @@
 /*
  * File:        sidl_header.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:50 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:45 $
  * Description: 
  *
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.

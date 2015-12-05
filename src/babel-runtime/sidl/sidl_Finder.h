@@ -2,9 +2,9 @@
  * File:          sidl_Finder.h
  * Symbol:        sidl.Finder-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_Finder.h,v 1.5 2006/08/29 22:29:49 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_Finder.h,v 1.6 2007/09/27 19:35:43 painter Exp $
  * Description:   Client-side glue code for sidl.Finder
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -139,13 +139,15 @@ sidl_Finder_findLibrary(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_findLibrary)(
+  sidl_DLL _result;
+  _result = (*self->d_epv->f_findLibrary)(
     self->d_object,
     sidl_name,
     target,
     lScope,
     lResolve,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -187,9 +189,11 @@ sidl_Finder_getSearchPath(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getSearchPath)(
+  char* _result;
+  _result = (*self->d_epv->f_getSearchPath)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -285,10 +289,12 @@ sidl_Finder_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -309,10 +315,12 @@ sidl_Finder_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -329,9 +337,11 @@ sidl_Finder_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -389,9 +399,11 @@ sidl_Finder__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -425,9 +437,11 @@ sidl_Finder__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -944,8 +958,8 @@ sidl_Finder__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidl_Finder__object*
-sidl_Finder__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+sidl_Finder__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

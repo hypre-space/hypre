@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.18 $
+ * $Revision: 2.25 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -173,6 +160,54 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  * Describe how regions just outside of a part relate to other parts.  This is
  * done a box at a time.
  *
+ * Parts {\tt part} and {\tt nbor\_part} must be different, except in the case
+ * where only cell-centered data is used.
+ *
+ * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
+ * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
+ * nbor\_iupper}.  This is to ease the transition from the old {\tt
+ * SetNeighborBox} function, and to provide some flexibility for users.
+ * 
+ * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
+ * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
+ * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
+ * map to indexes 1, 2, and 0 on part {\tt nbor\_part}, respectively.
+ *
+ * The {\tt index\_dir} describes the direction of the mapping in {\tt
+ * index\_map}.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
+ * increasing values map to increasing values on {\tt nbor\_part}, while for
+ * index 2, decreasing values map to increasing values.
+ *
+ * NOTE: All parts related to each other via this routine must have an identical
+ * list of variables and variable types.  For example, if part 0 has only two
+ * variables on it, a cell centered variable and a node centered variable, and
+ * we declare part 1 to be a neighbor of part 0, then part 1 must also have only
+ * two variables on it, and they must be of type cell and node.  In addition,
+ * variables associated with FACEs or EDGEs must be grouped together and listed
+ * in X, Y, Z order.  This is to enable the code to correctly associate
+ * variables on one part with variables on its neighbor part when a coordinate
+ * transformation is specified.  For example, an XFACE variable on one part may
+ * correspond to a YFACE variable on a neighbor part under a particular
+ * tranformation, and the code determines this association by assuming that the
+ * variable lists are as noted here.
+ **/
+int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
+                                     int                part,
+                                     int               *ilower,
+                                     int               *iupper,
+                                     int                nbor_part,
+                                     int               *nbor_ilower,
+                                     int               *nbor_iupper,
+                                     int               *index_map,
+                                     int               *index_dir);
+
+/**
+ * (DEFUNCT) Describe how regions just outside of a part relate to other parts.
+ * This is done a box at a time.  SHOULD USE {\tt SetNeighborPart} INSTEAD!
+ *
+ * Parts {\tt part} and {\tt nbor\_part} must be different, except in the case
+ * where only cell-centered data is used.
+ *
  * The indexes {\tt ilower} and {\tt iupper} map directly to the indexes {\tt
  * nbor\_ilower} and {\tt nbor\_iupper}.  Although, it is required that indexes
  * increase from {\tt ilower} to {\tt iupper}, indexes may increase and/or
@@ -197,38 +232,6 @@ int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
                                     int               *nbor_ilower,
                                     int               *nbor_iupper,
                                     int               *index_map);
-
-/*
- * ** TEMPORARY routine until more thorough testing is completed **
- *
- * This is the same as HYPRE_SStructGridSetNeighborBox, except for the addition
- * of the last argument which enables hypre to couple a part to itself.
- *
- * SetNeighborBox calls can imply that certain variables on the grid are the
- * same as other variables on the grid.  This redundancy must be reconciled
- * somehow.  When SetNeighborBox couples the index spaces of two different
- * parts, hypre can resolve this redundancy issue very easily.  However, when
- * SetNeighborBox couples the index space of a part to itself, resolving the
- * redundancey is much more complex and costly in general.  The best solution to
- * this problem is to let the user dictate which variables are primary variables
- * and which are secondary variables.
- *
- * The last argument 'primary' works as follows:
- *
- * 'primary' > 0  - the 'part' box variables are primary variables
- * 'primary' = 0  - the 'part' box variables are secondary variables
- * 'primary' < 0  - let hypre decide; only works for two different parts
- *
- **/
-int HYPRE_SStructGridSetNeighborBoxZ(HYPRE_SStructGrid  grid,
-                                     int                part,
-                                     int               *ilower,
-                                     int               *iupper,
-                                     int                nbor_part,
-                                     int               *nbor_ilower,
-                                     int               *nbor_iupper,
-                                     int               *index_map,
-                                     int                primary);
 
 /**
  * Add an unstructured part to the grid.  The variables in the unstructured part
@@ -525,6 +528,56 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
  * Finalize the construction of the matrix before using.
  **/
 int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
+
+/**
+ * Get matrix coefficients index by index.  The {\tt values} array is of length
+ * {\tt nentries}.
+ *
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixGetBoxValues} to get
+ * coefficients a box at a time.
+ *
+ * NOTE: Users may get values on any process that owns the associated variables.
+ *
+ * NOTE: The entries in this routine must all be of the same type: either
+ * stencil or non-stencil, but not both.  Also, if they are stencil entries,
+ * they must all represent couplings to the same variable type (there are no
+ * such restrictions for non-stencil entries).
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
+                                 int                  part,
+                                 int                 *index,
+                                 int                  var,
+                                 int                  nentries,
+                                 int                 *entries,
+                                 double              *values);
+
+/**
+ * Get matrix coefficients a box at a time.  The data in {\tt values} is
+ * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
+ *
+ * NOTE: Users may get values on any process that owns the associated variables.
+ *
+ * NOTE: The entries in this routine must all be of stencil type.  Also, they
+ * must all represent couplings to the same variable type.
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
+                                    int                  part,
+                                    int                 *ilower,
+                                    int                 *iupper,
+                                    int                  var,
+                                    int                  nentries,
+                                    int                 *entries,
+                                    double              *values);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The

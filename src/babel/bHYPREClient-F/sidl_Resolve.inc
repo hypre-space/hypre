@@ -2,9 +2,9 @@ C
 C       File:          sidl_Resolve.inc
 C       Symbol:        sidl.Resolve-v0.9.15
 C       Symbol Type:   enumeration
-C       Babel Version: 1.0.0
-C       Release:       $Name: V2-2-0b $
-C       Revision:      @(#) $Id: sidl_Resolve.inc,v 1.28 2006/12/29 21:24:28 painter Exp $
+C       Babel Version: 1.0.4
+C       Release:       $Name: V2-4-0b $
+C       Revision:      @(#) $Id: sidl_Resolve.inc,v 1.29 2007/09/27 19:56:34 painter Exp $
 C       Description:   Client-side glue code for sidl.Resolve
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.

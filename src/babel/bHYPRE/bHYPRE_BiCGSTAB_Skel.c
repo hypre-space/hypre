@@ -2,7 +2,7 @@
  * File:          bHYPRE_BiCGSTAB_Skel.c
  * Symbol:        bHYPRE.BiCGSTAB-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for bHYPRE.BiCGSTAB
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,58 +45,58 @@ impl_bHYPRE_BiCGSTAB_Create(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_BiCGSTAB__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct bHYPRE_BiCGSTAB__object* 
   impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern
 int32_t
@@ -280,58 +280,58 @@ impl_bHYPRE_BiCGSTAB_ApplyAdjoint(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_BiCGSTAB__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct bHYPRE_BiCGSTAB__object* 
   impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Operator__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_PreconditionedSolver__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Solver__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Solver(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Solver__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct bHYPRE_Vector__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(void* bi, sidl_BaseInterface* _ex);
+extern struct bHYPRE_Vector__object* impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 static int32_t
 skel_bHYPRE_BiCGSTAB_SetIntArray1Parameter(
@@ -341,7 +341,7 @@ skel_bHYPRE_BiCGSTAB_SetIntArray1Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1, 
     sidl_column_major_order);
   int32_t* value_tmp = value_proxy->d_firstElement;
   int32_t nvalues = sidlLength(value_proxy,0);
@@ -352,6 +352,7 @@ skel_bHYPRE_BiCGSTAB_SetIntArray1Parameter(
       value_tmp,
       nvalues,
       _ex);
+  sidl_int__array_deleteRef(value_proxy);
   return _return;
 }
 
@@ -363,7 +364,7 @@ skel_bHYPRE_BiCGSTAB_SetIntArray2Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2, 
     sidl_column_major_order);
   _return =
     impl_bHYPRE_BiCGSTAB_SetIntArray2Parameter(
@@ -383,7 +384,7 @@ skel_bHYPRE_BiCGSTAB_SetDoubleArray1Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1, 
     sidl_column_major_order);
   double* value_tmp = value_proxy->d_firstElement;
   int32_t nvalues = sidlLength(value_proxy,0);
@@ -394,6 +395,7 @@ skel_bHYPRE_BiCGSTAB_SetDoubleArray1Parameter(
       value_tmp,
       nvalues,
       _ex);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
 
@@ -405,7 +407,7 @@ skel_bHYPRE_BiCGSTAB_SetDoubleArray2Parameter(
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
-  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2, 
     sidl_column_major_order);
   _return =
     impl_bHYPRE_BiCGSTAB_SetDoubleArray2Parameter(
@@ -480,51 +482,47 @@ void bHYPRE_BiCGSTAB__call_load(void) {
   sidl_BaseInterface _throwaway_exception = NULL;
   impl_bHYPRE_BiCGSTAB__load(&_throwaway_exception);
 }
-struct bHYPRE_BiCGSTAB__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct bHYPRE_BiCGSTAB__object* skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_BiCGSTAB(url, ar, _ex);
 }
 
-struct bHYPRE_BiCGSTAB__object* 
-  skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct bHYPRE_BiCGSTAB__object* skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_BiCGSTAB(bi, _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url,
+  skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_MPICommunicator(url, ar, _ex);
 }
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi,
+  skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_MPICommunicator(bi, _ex);
 }
 
-struct bHYPRE_Operator__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct bHYPRE_Operator__object* skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Operator(url, ar, _ex);
 }
 
-struct bHYPRE_Operator__object* 
-  skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct bHYPRE_Operator__object* skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Operator(bi, _ex);
 }
 
 struct bHYPRE_PreconditionedSolver__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+  skel_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(url, ar,
+  return impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_PreconditionedSolver(url, ar, 
     _ex);
 }
 
 struct bHYPRE_PreconditionedSolver__object* 
-  skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi,
+  skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_PreconditionedSolver(bi, _ex);
 }
@@ -549,9 +547,8 @@ struct bHYPRE_Vector__object* skel_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(void* bi,
   return impl_bHYPRE_BiCGSTAB_fcast_bHYPRE_Vector(bi, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
@@ -561,20 +558,19 @@ struct sidl_BaseClass__object* skel_bHYPRE_BiCGSTAB_fcast_sidl_BaseClass(void*
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fcast_sidl_BaseInterface(bi, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
@@ -584,14 +580,14 @@ struct sidl_ClassInfo__object* skel_bHYPRE_BiCGSTAB_fcast_sidl_ClassInfo(void*
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url,
+  skel_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fconnect_sidl_RuntimeException(url, ar, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_bHYPRE_BiCGSTAB_fcast_sidl_RuntimeException(bi, _ex);
 }
 

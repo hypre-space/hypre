@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.5 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -40,6 +27,7 @@ typedef struct
    int      domain_type;
    int      overlap;
    int      num_functions;
+   int      use_nonsymm;  
    double   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
@@ -47,6 +35,9 @@ typedef struct
    hypre_ParVector *Vtemp;
    double  *scale;
    int     *dof_func;
+   int     *pivots;
+   
+   
 
 } hypre_SchwarzData;
 
@@ -59,6 +50,8 @@ typedef struct
 #define hypre_SchwarzDataOverlap(schwarz_data) ((schwarz_data)->overlap)
 #define hypre_SchwarzDataNumFunctions(schwarz_data) \
 ((schwarz_data)->num_functions)
+#define hypre_SchwarzDataUseNonSymm(schwarz_data) \
+((schwarz_data)->use_nonsymm)
 #define hypre_SchwarzDataRelaxWeight(schwarz_data) \
 ((schwarz_data)->relax_weight)
 #define hypre_SchwarzDataDomainStructure(schwarz_data) \
@@ -67,6 +60,7 @@ typedef struct
 #define hypre_SchwarzDataVtemp(schwarz_data) ((schwarz_data)->Vtemp)
 #define hypre_SchwarzDataScale(schwarz_data) ((schwarz_data)->scale)
 #define hypre_SchwarzDataDofFunc(schwarz_data) ((schwarz_data)->dof_func)
+#define hypre_SchwarzDataPivots(schwarz_data) ((schwarz_data)->pivots)
 
 #endif
 

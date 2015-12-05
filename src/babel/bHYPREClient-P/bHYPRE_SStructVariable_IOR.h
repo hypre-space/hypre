@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructVariable_IOR.h
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost

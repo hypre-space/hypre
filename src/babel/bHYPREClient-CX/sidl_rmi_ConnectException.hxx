@@ -2,9 +2,9 @@
 // File:          sidl_rmi_ConnectException.hxx
 // Symbol:        sidl.rmi.ConnectException-v0.9.15
 // Symbol Type:   class
-// Babel Version: 1.0.0
-// Release:       $Name: V2-2-0b $
-// Revision:      @(#) $Id: sidl_rmi_ConnectException.hxx,v 1.3 2006/12/29 21:24:49 painter Exp $
+// Babel Version: 1.0.4
+// Release:       $Name: V2-4-0b $
+// Revision:      @(#) $Id: sidl_rmi_ConnectException.hxx,v 1.4 2007/09/27 19:55:46 painter Exp $
 // Description:   Client-side glue code for sidl.rmi.ConnectException
 // 
 // Copyright (c) 2000-2002, The Regents of the University of California.
@@ -118,7 +118,8 @@ namespace sidl {
       typedef struct sidl_rmi_ConnectException__sepv sepv_t;
 
       // default constructor
-      ConnectException() { }
+      ConnectException() { 
+      }
 
       // static constructor
       static ::sidl::rmi::ConnectException _create();
@@ -154,13 +155,13 @@ namespace sidl {
       // For internal use by Impls (fixes bug#275)
       ConnectException ( ConnectException::ior_t* ior, bool isWeak );
 
-      ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+      inline ior_t* _get_ior() const throw() {
+        return reinterpret_cast< ior_t*>(d_self);
+      }
 
-      const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-        ior_t*>(d_self); }
-
-      void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-        void*>(ptr); }
+      void _set_ior( ior_t* ptr ) throw () { 
+        d_self = reinterpret_cast< void*>(ptr);
+      }
 
       bool _is_nil() const throw () { return (d_self==0); }
 
@@ -224,9 +225,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_rmi_ConnectException__connectI
+#pragma weak sidl_rmi_ConnectException__connectI
 
-  #pragma weak sidl_rmi_ConnectException__rmicast
+#pragma weak sidl_rmi_ConnectException__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -239,8 +240,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_rmi_ConnectException__object*
-  sidl_rmi_ConnectException__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_rmi_ConnectException__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

@@ -2,7 +2,7 @@
  * File:          bHYPRE_IdentitySolver_Impl.c
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -39,8 +39,8 @@
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -57,9 +57,9 @@ impl_bHYPRE_IdentitySolver__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._load) */
   /* Insert-Code-Here {bHYPRE.IdentitySolver._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._load) */
   }
 }
 /*
@@ -79,7 +79,7 @@ impl_bHYPRE_IdentitySolver__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    struct bHYPRE_IdentitySolver__data * data;
@@ -90,7 +90,7 @@ impl_bHYPRE_IdentitySolver__ctor(
 
    bHYPRE_IdentitySolver__set_data( self, data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._ctor) */
   }
 }
 
@@ -140,7 +140,7 @@ impl_bHYPRE_IdentitySolver__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._dtor) */
   /* Insert the implementation of the destructor method here... */
 
 
@@ -148,7 +148,7 @@ impl_bHYPRE_IdentitySolver__dtor(
       bHYPRE_IdentitySolver__get_data( self );
    hypre_TFree( data );
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._dtor) */
   }
 }
 
@@ -169,13 +169,14 @@ impl_bHYPRE_IdentitySolver_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Create) */
   /* Insert-Code-Here {bHYPRE.IdentitySolver.Create} (Create method) */
 
+   SIDL_CHECK(*_ex);
    return bHYPRE_IdentitySolver__create(_ex);
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Create) */
   }
 }
 
@@ -198,10 +199,10 @@ impl_bHYPRE_IdentitySolver_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetOperator) */
   }
 }
 
@@ -224,10 +225,10 @@ impl_bHYPRE_IdentitySolver_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetTolerance) */
   }
 }
 
@@ -250,10 +251,10 @@ impl_bHYPRE_IdentitySolver_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetMaxIterations) */
   }
 }
 
@@ -280,10 +281,10 @@ impl_bHYPRE_IdentitySolver_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetLogging) */
   }
 }
 
@@ -310,10 +311,10 @@ impl_bHYPRE_IdentitySolver_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetPrintLevel) */
   }
 }
 
@@ -335,11 +336,11 @@ impl_bHYPRE_IdentitySolver_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
    num_iterations = 0;
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetNumIterations) */
   }
 }
 
@@ -361,11 +362,11 @@ impl_bHYPRE_IdentitySolver_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
    *norm = 0.0;
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetRelResidualNorm) */
   }
 }
 
@@ -388,10 +389,10 @@ impl_bHYPRE_IdentitySolver_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
    return 0;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetCommunicator) */
   }
 }
 
@@ -442,10 +443,10 @@ impl_bHYPRE_IdentitySolver_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetIntParameter) */
   }
 }
 
@@ -468,10 +469,10 @@ impl_bHYPRE_IdentitySolver_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetDoubleParameter) */
   }
 }
 
@@ -494,10 +495,10 @@ impl_bHYPRE_IdentitySolver_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetStringParameter) */
   }
 }
 
@@ -521,10 +522,10 @@ impl_bHYPRE_IdentitySolver_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetIntArray1Parameter) */
   }
 }
 
@@ -547,10 +548,10 @@ impl_bHYPRE_IdentitySolver_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetIntArray2Parameter) */
   }
 }
 
@@ -574,10 +575,10 @@ impl_bHYPRE_IdentitySolver_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetDoubleArray1Parameter) */
   }
 }
 
@@ -600,10 +601,10 @@ impl_bHYPRE_IdentitySolver_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetDoubleArray2Parameter) */
   }
 }
 
@@ -626,10 +627,10 @@ impl_bHYPRE_IdentitySolver_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetIntValue) */
   }
 }
 
@@ -652,10 +653,10 @@ impl_bHYPRE_IdentitySolver_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.GetDoubleValue) */
   }
 }
 
@@ -679,7 +680,7 @@ impl_bHYPRE_IdentitySolver_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    int ierr = 0;
@@ -715,7 +716,7 @@ impl_bHYPRE_IdentitySolver_Setup(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Setup) */
   }
 }
 
@@ -738,7 +739,7 @@ impl_bHYPRE_IdentitySolver_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Apply) */
   /* Insert the implementation of the Apply method here... */
 
      int32_t ierr = bHYPRE_Vector_Copy( *x, b, _ex );  /* copies data of b to x */
@@ -747,7 +748,7 @@ impl_bHYPRE_IdentitySolver_Apply(
      return ierr;
 
      hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Apply) */
   }
 }
 
@@ -770,7 +771,7 @@ impl_bHYPRE_IdentitySolver_ApplyAdjoint(
 {
   *_ex = 0;
   {
-     /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.ApplyAdjoint) */
      /* Insert-Code-Here {bHYPRE.IdentitySolver.ApplyAdjoint} (ApplyAdjoint method) */
 
      int32_t ierr = bHYPRE_Vector_Copy( *x, b, _ex );  /* copies data of b to x */
@@ -779,97 +780,92 @@ impl_bHYPRE_IdentitySolver_ApplyAdjoint(
      return ierr;
 
      hypre_babel_exception_return_error(_ex);
-     /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_IdentitySolver__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_IdentitySolver(const char* url,
+  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_IdentitySolver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IdentitySolver__connectI(url, ar, _ex);
 }
 struct bHYPRE_IdentitySolver__object* 
-  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_IdentitySolver(void* bi,
+  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_IdentitySolver(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_IdentitySolver__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Operator(const char* url,
+  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_Operator(void* bi,
+  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Solver(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Solver(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_Solver(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_IdentitySolver_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Vector(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Vector(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_IdentitySolver_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_IdentitySolver_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_IdentitySolver_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_IdentitySolver_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_IdentitySolver_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_IdentitySolver_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_IdentitySolver_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_IdentitySolver_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_IdentitySolver_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_IdentitySolver_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_IdentitySolver_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IdentitySolver_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_IdentitySolver_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_IdentitySolver_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_IdentitySolver_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

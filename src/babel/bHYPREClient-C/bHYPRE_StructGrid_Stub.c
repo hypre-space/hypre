@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructGrid_Stub.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -59,11 +59,10 @@ static const struct bHYPRE_StructGrid__external* _loadIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
   _externals = bHYPRE_StructGrid__externals();
 #else
-  _externals = (struct 
-    bHYPRE_StructGrid__external*)sidl_dynamicLoadIOR("bHYPRE.StructGrid",
-    "bHYPRE_StructGrid__externals") ;
-  sidl_checkIORVersion("bHYPRE.StructGrid", _externals->d_ior_major_version,
-    _externals->d_ior_minor_version, 0, 10);
+  _externals = (struct bHYPRE_StructGrid__external*)sidl_dynamicLoadIOR(
+    "bHYPRE.StructGrid","bHYPRE_StructGrid__externals") ;
+  sidl_checkIORVersion("bHYPRE.StructGrid", _externals->d_ior_major_version, 
+    _externals->d_ior_minor_version, 1, 0);
 #endif
   return _externals;
 }
@@ -105,7 +104,7 @@ bHYPRE_StructGrid__wrapObj(void* data, sidl_BaseInterface* _ex)
   return (*(_getExternals()->createObject))(data,_ex);
 }
 
-static bHYPRE_StructGrid bHYPRE_StructGrid__remoteCreate(const char* url,
+static bHYPRE_StructGrid bHYPRE_StructGrid__remoteCreate(const char* url, 
   sidl_BaseInterface *_ex);
 /*
  * RMI constructor function for the class.
@@ -141,10 +140,12 @@ bHYPRE_StructGrid_Create(
   /* in */ int32_t dim,
   /* out */ sidl_BaseInterface *_ex)
 {
-  return (_getSEPV()->f_Create)(
+  bHYPRE_StructGrid _result;
+  _result = (_getSEPV()->f_Create)(
     mpi_comm,
     dim,
     _ex);
+  return _result;
 }
 
 /*
@@ -160,10 +161,12 @@ bHYPRE_StructGrid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -203,10 +206,12 @@ bHYPRE_StructGrid_SetDimension(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_SetDimension)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetDimension)(
     self,
     dim,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -226,6 +231,7 @@ bHYPRE_StructGrid_SetExtents(
   /* in */ int32_t dim,
   /* out */ sidl_BaseInterface *_ex)
 {
+  int32_t _result;
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
   struct sidl_int__array ilower_real;
   struct sidl_int__array*ilower_tmp = &ilower_real;
@@ -233,16 +239,21 @@ bHYPRE_StructGrid_SetExtents(
   struct sidl_int__array iupper_real;
   struct sidl_int__array*iupper_tmp = &iupper_real;
   ilower_upper[0] = dim-1;
-  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper, 
     ilower_stride);
   iupper_upper[0] = dim-1;
-  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper, 
     iupper_stride);
-  return (*self->d_epv->f_SetExtents)(
+  _result = (*self->d_epv->f_SetExtents)(
     self,
     ilower_tmp,
     iupper_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)ilower_tmp);
+  sidl__array_deleteRef((struct sidl__array*)iupper_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 
 /*
@@ -267,16 +278,21 @@ bHYPRE_StructGrid_SetPeriodic(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
+  int32_t _result;
   int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1]; 
   struct sidl_int__array periodic_real;
   struct sidl_int__array*periodic_tmp = &periodic_real;
   periodic_upper[0] = dim-1;
-  sidl_int__array_init(periodic, periodic_tmp, 1, periodic_lower,
+  sidl_int__array_init(periodic, periodic_tmp, 1, periodic_lower, 
     periodic_upper, periodic_stride);
-  return (*self->d_epv->f_SetPeriodic)(
+  _result = (*self->d_epv->f_SetPeriodic)(
     self,
     periodic_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)periodic_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -297,16 +313,21 @@ bHYPRE_StructGrid_SetNumGhost(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
+  int32_t _result;
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
   struct sidl_int__array num_ghost_real;
   struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
   num_ghost_upper[0] = dim2-1;
-  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower, 
     num_ghost_upper, num_ghost_stride);
-  return (*self->d_epv->f_SetNumGhost)(
+  _result = (*self->d_epv->f_SetNumGhost)(
     self,
     num_ghost_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)num_ghost_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -323,9 +344,11 @@ bHYPRE_StructGrid_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -397,10 +420,12 @@ bHYPRE_StructGrid_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -421,10 +446,12 @@ bHYPRE_StructGrid_isType(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -441,9 +468,11 @@ bHYPRE_StructGrid_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -462,8 +491,8 @@ bHYPRE_StructGrid__cast(
 
   if(!connect_loaded) {
     connect_loaded = 1;
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructGrid",
-      (void*)bHYPRE_StructGrid__IHConnect,_ex);SIDL_CHECK(*_ex);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructGrid", (
+      void*)bHYPRE_StructGrid__IHConnect,_ex);SIDL_CHECK(*_ex);
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
@@ -533,9 +562,11 @@ bHYPRE_StructGrid__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -608,9 +639,11 @@ bHYPRE_StructGrid__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -635,9 +668,8 @@ bHYPRE_StructGrid__array_createCol(
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct 
-    bHYPRE_StructGrid__array*)sidl_interface__array_createCol(dimen, lower,
-    upper);
+  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_createCol(
+    dimen, lower, upper);
 }
 
 struct bHYPRE_StructGrid__array*
@@ -646,9 +678,8 @@ bHYPRE_StructGrid__array_createRow(
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct 
-    bHYPRE_StructGrid__array*)sidl_interface__array_createRow(dimen, lower,
-    upper);
+  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_createRow(
+    dimen, lower, upper);
 }
 
 struct bHYPRE_StructGrid__array*
@@ -662,22 +693,21 @@ bHYPRE_StructGrid__array_create1dInit(
   int32_t len, 
   bHYPRE_StructGrid* data)
 {
-  return (struct 
-    bHYPRE_StructGrid__array*)sidl_interface__array_create1dInit(len,
-    (struct sidl_BaseInterface__object **)data);
+  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_create1dInit(
+    len, (struct sidl_BaseInterface__object **)data);
 }
 
 struct bHYPRE_StructGrid__array*
 bHYPRE_StructGrid__array_create2dCol(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_create2dCol(m,
+  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_create2dCol(m, 
     n);
 }
 
 struct bHYPRE_StructGrid__array*
 bHYPRE_StructGrid__array_create2dRow(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_create2dRow(m,
+  return (struct bHYPRE_StructGrid__array*)sidl_interface__array_create2dRow(m, 
     n);
 }
 
@@ -813,7 +843,7 @@ bHYPRE_StructGrid__array_get(
   const int32_t indices[])
 {
   return (bHYPRE_StructGrid)
-    sidl_interface__array_get((const struct sidl_interface__array *)array,
+    sidl_interface__array_get((const struct sidl_interface__array *)array, 
       indices);
 }
 
@@ -914,8 +944,8 @@ bHYPRE_StructGrid__array_set(
   const int32_t indices[],
   bHYPRE_StructGrid const value)
 {
-  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
-    (struct sidl_BaseInterface__object *)value);
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices, (
+    struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
@@ -930,7 +960,7 @@ bHYPRE_StructGrid__array_lower(
   const struct bHYPRE_StructGrid__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_lower((struct sidl_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -939,7 +969,7 @@ bHYPRE_StructGrid__array_upper(
   const struct bHYPRE_StructGrid__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_upper((struct sidl_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -948,7 +978,7 @@ bHYPRE_StructGrid__array_length(
   const struct bHYPRE_StructGrid__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_length((struct sidl_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -957,7 +987,7 @@ bHYPRE_StructGrid__array_stride(
   const struct bHYPRE_StructGrid__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_stride((struct sidl_interface__array *)array,
+  return sidl_interface__array_stride((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1007,7 +1037,7 @@ bHYPRE_StructGrid__array_ensure(
   int     ordering)
 {
   return (struct bHYPRE_StructGrid__array*)
-    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen, 
       ordering);
 }
 
@@ -1062,8 +1092,8 @@ static struct sidl_recursive_mutex_t bHYPRE_StructGrid__mutex= SIDL_RECURSIVE_MU
 #endif
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -1088,14 +1118,14 @@ static void* remote_bHYPRE_StructGrid__cast(
   cmp0 = strcmp(name, "sidl.BaseClass");
   if (!cmp0) {
     (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-    cast = self;
+    cast = ((struct sidl_BaseClass__object*)self);
     return cast;
   }
   else if (cmp0 < 0) {
     cmp1 = strcmp(name, "bHYPRE.StructGrid");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct bHYPRE_StructGrid__object*)self);
       return cast;
     }
   }
@@ -1108,12 +1138,12 @@ static void* remote_bHYPRE_StructGrid__cast(
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
-    cast =  (*func)(((struct bHYPRE_StructGrid__remote*)self->d_data)->d_ih,
+    cast =  (*func)(((struct bHYPRE_StructGrid__remote*)self->d_data)->d_ih, 
       _ex);
   }
 
@@ -1154,7 +1184,7 @@ static void remote_bHYPRE_StructGrid__raddRef(
   struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
     bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
   sidl_rmi_Response _rsvp = NULL;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
     "addRef", _ex ); SIDL_CHECK(*_ex);
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -1199,7 +1229,7 @@ remote_bHYPRE_StructGrid__set_hooks(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "_set_hooks", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1254,19 +1284,19 @@ remote_bHYPRE_StructGrid_SetCommunicator(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "SetCommunicator", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(mpi_comm){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)mpi_comm,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)mpi_comm, 
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url, _ex);SIDL_CHECK(
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL, _ex);SIDL_CHECK(
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -1282,8 +1312,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.S
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1310,7 +1340,7 @@ remote_bHYPRE_StructGrid_Destroy(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "Destroy", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1354,7 +1384,7 @@ remote_bHYPRE_StructGrid_SetDimension(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "SetDimension", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1373,8 +1403,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.S
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1404,7 +1434,7 @@ remote_bHYPRE_StructGrid_SetExtents(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "SetExtents", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1426,8 +1456,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.S
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1456,7 +1486,7 @@ remote_bHYPRE_StructGrid_SetPeriodic(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "SetPeriodic", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1476,8 +1506,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.S
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1506,7 +1536,7 @@ remote_bHYPRE_StructGrid_SetNumGhost(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "SetNumGhost", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1526,8 +1556,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.S
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1555,7 +1585,7 @@ remote_bHYPRE_StructGrid_Assemble(
     int32_t _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "Assemble", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1573,8 +1603,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.A
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1642,12 +1672,12 @@ remote_bHYPRE_StructGrid_isSame(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isSame", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(iobj){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -1668,8 +1698,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.i
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1698,7 +1728,7 @@ remote_bHYPRE_StructGrid_isType(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isType", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1717,8 +1747,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.i
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1747,7 +1777,7 @@ remote_bHYPRE_StructGrid_getClassInfo(
     struct sidl_ClassInfo__object* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       bHYPRE_StructGrid__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getClassInfo", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1765,10 +1795,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.StructGrid.g
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1821,53 +1851,53 @@ static void bHYPRE_StructGrid__init_remote_epv(void)
     sidl_BaseInterface*)) epv->f__raddRef;
   e0->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,
     sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,
+  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t, 
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e1->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
 
 /* Create an instance that connects to an existing remote object. */
 static struct bHYPRE_StructGrid__object*
-bHYPRE_StructGrid__remoteConnect(const char *url, sidl_bool ar,
+bHYPRE_StructGrid__remoteConnect(const char *url, sidl_bool ar, 
   sidl_BaseInterface *_ex)
 {
   struct bHYPRE_StructGrid__object* self;
@@ -1883,13 +1913,13 @@ bHYPRE_StructGrid__remoteConnect(const char *url, sidl_bool ar,
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi = 
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
-      objectID, _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface bi = (
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(objectID,
+      _ex); SIDL_CHECK(*_ex);
     return bHYPRE_StructGrid__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex ); 
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_StructGrid__object*) malloc(
@@ -1928,7 +1958,7 @@ bHYPRE_StructGrid__remoteConnect(const char *url, sidl_bool ar,
 /* Create an instance that uses an already existing  */
 /* InstanceHandle to connect to an existing remote object. */
 static struct bHYPRE_StructGrid__object*
-bHYPRE_StructGrid__IHConnect(sidl_rmi_InstanceHandle instance,
+bHYPRE_StructGrid__IHConnect(sidl_rmi_InstanceHandle instance, 
   sidl_BaseInterface *_ex)
 {
   struct bHYPRE_StructGrid__object* self;
@@ -1983,9 +2013,8 @@ bHYPRE_StructGrid__remoteCreate(const char *url, sidl_BaseInterface *_ex)
   struct sidl_BaseClass__object* s1;
 
   struct bHYPRE_StructGrid__remote* r_obj;
-  sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.StructGrid",
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance(
+    url, "bHYPRE.StructGrid", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_StructGrid__object*) malloc(
@@ -2019,7 +2048,7 @@ bHYPRE_StructGrid__remoteCreate(const char *url, sidl_BaseInterface *_ex)
 
   return self;
   EXIT:
-  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,
+  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance, 
     &_throwaway_exception); }
   return NULL;
 }
@@ -2036,8 +2065,8 @@ bHYPRE_StructGrid__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructGrid",
-      (void*)bHYPRE_StructGrid__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.StructGrid", (
+      void*)bHYPRE_StructGrid__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -2058,8 +2087,8 @@ bHYPRE_StructGrid__rmicast(
  */
 
 struct bHYPRE_StructGrid__object*
-bHYPRE_StructGrid__connectI(const char* url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex)
+bHYPRE_StructGrid__connectI(const char* url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex)
 {
   return bHYPRE_StructGrid__remoteConnect(url, ar, _ex);
 }

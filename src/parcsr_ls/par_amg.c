@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.52 $
+ * $Revision: 2.59 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -86,12 +73,14 @@ hypre_BoomerAMGCreate()
    int      smooth_num_levels;
    int      smooth_num_sweeps;
 
-   int      variant, overlap, domain_type;
+   int      variant, overlap, domain_type, schwarz_use_nonsymm;
    double   schwarz_rlx_weight;
    int	    level, sym;
+   int	    eu_level, eu_bj;
+   int	    max_nz_per_row;
    double   thresh, filter;
    double   drop_tol;
-   int	    max_nz_per_row;
+   double   eu_sparse_A;
    char    *euclidfile;
 
    int block_mode;
@@ -146,7 +135,8 @@ hypre_BoomerAMGCreate()
    smooth_num_sweeps = 1;
    smooth_num_levels = 0;
    smooth_type = 6;
-
+   schwarz_use_nonsymm = 0;
+   
    level = 1;
    sym = 0;
    thresh = 0.1;
@@ -154,6 +144,9 @@ hypre_BoomerAMGCreate()
    drop_tol = 0.0001;
    max_nz_per_row = 20;
    euclidfile = NULL;
+   eu_level = 0;
+   eu_sparse_A = 0.0;
+   eu_bj = 0;
 
    /* solve params */
    min_iter  = 0;
@@ -213,6 +206,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
+   hypre_BoomerAMGSetSchwarzUseNonSymm(amg_data, schwarz_use_nonsymm);
    hypre_BoomerAMGSetDomainType(amg_data, domain_type);
    hypre_BoomerAMGSetSym(amg_data, sym);
    hypre_BoomerAMGSetLevel(amg_data, level);
@@ -221,6 +215,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetDropTol(amg_data, drop_tol);
    hypre_BoomerAMGSetMaxNzPerRow(amg_data, max_nz_per_row);
    hypre_BoomerAMGSetEuclidFile(amg_data, euclidfile);
+   hypre_BoomerAMGSetEuLevel(amg_data, eu_level);
+   hypre_BoomerAMGSetEuSparseA(amg_data, eu_sparse_A);
+   hypre_BoomerAMGSetEuBJ(amg_data, eu_bj);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
@@ -2430,11 +2427,6 @@ hypre_BoomerAMGSetDofFunc( void     *data,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
-   if (!dof_func)
-   {
-      hypre_error_in_arg(2);
-      return hypre_error_flag;
-   } 
    hypre_TFree(hypre_ParAMGDataDofFunc(amg_data));
    hypre_ParAMGDataDofFunc(amg_data) = dof_func;
 
@@ -2697,6 +2689,23 @@ hypre_BoomerAMGGetSchwarzRlxWeight( void     *data,
 }
 
 int
+hypre_BoomerAMGSetSchwarzUseNonSymm( void     *data,
+                                     int use_nonsymm)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataSchwarzUseNonSymm(amg_data) = use_nonsymm;
+
+   return hypre_error_flag;
+}
+
+int
 hypre_BoomerAMGSetSym( void     *data,
                             int       sym)
 {
@@ -2816,6 +2825,57 @@ hypre_BoomerAMGSetEuclidFile( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataEuclidFile(amg_data) = euclidfile;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetEuLevel( void     *data,
+                            int      eu_level)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataEuLevel(amg_data) = eu_level;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetEuSparseA( void     *data,
+                             double    eu_sparse_A)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataEuSparseA(amg_data) = eu_sparse_A;
+
+   return hypre_error_flag;
+}
+
+int
+hypre_BoomerAMGSetEuBJ( void     *data,
+                        int       eu_bj)
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataEuBJ(amg_data) = eu_bj;
 
    return hypre_error_flag;
 }

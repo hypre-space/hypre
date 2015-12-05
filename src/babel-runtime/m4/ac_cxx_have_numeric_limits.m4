@@ -5,7 +5,7 @@ dnl @synopsis AC_CXX_HAVE_NUMERIC_LIMITS
 dnl
 dnl If the compiler has numeric_limits<T>, define HAVE_NUMERIC_LIMITS.
 dnl
-dnl @version $Id: ac_cxx_have_numeric_limits.m4,v 1.6 2006/08/29 22:29:23 painter Exp $
+dnl @version $Id: ac_cxx_have_numeric_limits.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_NUMERIC_LIMITS],

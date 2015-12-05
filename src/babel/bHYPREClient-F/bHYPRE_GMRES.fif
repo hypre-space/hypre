@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_GMRES_Impl.f
 C       Symbol:        bHYPRE.GMRES-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.GMRES
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -204,7 +204,7 @@ C       Method:  SetPreconditioner[]
 C       Set the preconditioner.
 C       
 
-        subroutine bHYPRE_GMRES_SetPreconditioner_f(self, s, retval,
+        subroutine bHYPRE_GMRES_SetPreconditioner_f(self, s, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -222,7 +222,7 @@ C
 C       Method:  GetPreconditioner[]
 C       
 
-        subroutine bHYPRE_GMRES_GetPreconditioner_f(self, s, retval,
+        subroutine bHYPRE_GMRES_GetPreconditioner_f(self, s, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -259,7 +259,7 @@ C       Set the operator for the linear system being solved.
 C       DEPRECATED.  use Create
 C       
 
-        subroutine bHYPRE_GMRES_SetOperator_f(self, A, retval,
+        subroutine bHYPRE_GMRES_SetOperator_f(self, A, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -279,7 +279,7 @@ C       (Optional) Set the convergence tolerance.
 C       DEPRECATED.  use SetDoubleParameter
 C       
 
-        subroutine bHYPRE_GMRES_SetTolerance_f(self, tolerance, retval,
+        subroutine bHYPRE_GMRES_SetTolerance_f(self, tolerance, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -323,7 +323,7 @@ C       and {\tt Apply}.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_GMRES_SetLogging_f(self, level, retval,
+        subroutine bHYPRE_GMRES_SetLogging_f(self, level, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -347,7 +347,7 @@ C       {\tt Setup} and {\tt Apply}.
 C       DEPRECATED   use SetIntParameter
 C       
 
-        subroutine bHYPRE_GMRES_SetPrintLevel_f(self, level, retval,
+        subroutine bHYPRE_GMRES_SetPrintLevel_f(self, level, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -405,7 +405,7 @@ C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       
 
-        subroutine bHYPRE_GMRES_SetCommunicator_f(self, mpi_comm,
+        subroutine bHYPRE_GMRES_SetCommunicator_f(self, mpi_comm, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -441,7 +441,7 @@ C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetIntParameter_f(self, name, value,
+        subroutine bHYPRE_GMRES_SetIntParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -462,7 +462,7 @@ C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetDoubleParameter_f(self, name, value,
+        subroutine bHYPRE_GMRES_SetDoubleParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -483,7 +483,7 @@ C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetStringParameter_f(self, name, value,
+        subroutine bHYPRE_GMRES_SetStringParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -504,7 +504,7 @@ C       Method:  SetIntArray1Parameter[]
 C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetIntArray1Parameter_f(self, name,
+        subroutine bHYPRE_GMRES_SetIntArray1Parameter_f(self, name, 
      &     value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -527,7 +527,7 @@ C       Method:  SetIntArray2Parameter[]
 C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetIntArray2Parameter_f(self, name,
+        subroutine bHYPRE_GMRES_SetIntArray2Parameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -548,7 +548,7 @@ C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetDoubleArray1Parameter_f(self, name,
+        subroutine bHYPRE_GMRES_SetDoubleArray1Parameter_f(self, name, 
      &     value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -571,7 +571,7 @@ C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_SetDoubleArray2Parameter_f(self, name,
+        subroutine bHYPRE_GMRES_SetDoubleArray2Parameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -613,7 +613,7 @@ C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_GMRES_GetDoubleValue_f(self, name, value,
+        subroutine bHYPRE_GMRES_GetDoubleValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -675,7 +675,7 @@ C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_GMRES_ApplyAdjoint_f(self, b, x, retval,
+        subroutine bHYPRE_GMRES_ApplyAdjoint_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.GMRES self
@@ -696,7 +696,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine bHYPRE_GMRES__exec_f(self, methodName, inArgs,
+        subroutine bHYPRE_GMRES__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in bHYPRE.GMRES self

@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.4 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -199,8 +186,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         Ai= hypre_CCBoxIndexRank(A_dbox, start);
                         AApd= 1.0/Ap[Ai];
 
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,bi,xi, kk
+#include "hypre_smp_forloop.h"
         		for (kk = 0; kk < nk; kk++)
                         {
                            for (jj = 0; jj < nj; jj++)
@@ -222,8 +209,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                          Ani = hypre_BoxSizeX(A_dbox);
                          Anj = hypre_BoxSizeY(A_dbox);
 
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,Ai,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
+#include "hypre_smp_forloop.h"
 		         for (kk = 0; kk < nk; kk++)
                          {
                             for (jj = 0; jj < nj; jj++)
@@ -351,8 +338,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         switch(stencil_size)
                         {
                            case 7:
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
+#include "hypre_smp_forloop.h"
                               for (kk = 0; kk < nk; kk++)
                               {
                                  for (jj = 0; jj < nj; jj++)
@@ -376,8 +363,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 5:
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
+#include "hypre_smp_forloop.h"
                               for (kk = 0; kk < nk; kk++)
                               {
                                  for (jj = 0; jj < nj; jj++)
@@ -399,8 +386,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 3:
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
+#include "hypre_smp_forloop.h"
                               for (kk = 0; kk < nk; kk++)
                               {
                                  for (jj = 0; jj < nj; jj++)
@@ -431,8 +418,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         switch(stencil_size)
                         {
                            case 7:
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,Ai,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
+#include "hypre_smp_forloop.h"
                            for (kk = 0; kk < nk; kk++)
                            {
                               for (jj = 0; jj < nj; jj++)
@@ -457,8 +444,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 5:
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,Ai,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
+#include "hypre_smp_forloop.h"
                            for (kk = 0; kk < nk; kk++)
                            {
                               for (jj = 0; jj < nj; jj++)
@@ -481,8 +468,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                            break;
 
                            case 3:
-#define HYPRE_BOX_SMP_PRIVATE ii,jj,Ai,bi,xi
-#include "hypre_box_smp_forloop.h"
+#define HYPRE_SMP_PRIVATE ii,jj,Ai,bi,xi,kk
+#include "hypre_smp_forloop.h"
                            for (kk = 0; kk < nk; kk++)
                            {
                               for (jj = 0; jj < nj; jj++)

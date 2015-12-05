@@ -1,8 +1,8 @@
 #
 # File:  sidlBaseException.py
 # Copyright (c) 2005 The Regents of the University of California
-# $Revision: 1.5 $
-# $Date: 2006/08/29 22:29:27 $
+# $Revision: 1.6 $
+# $Date: 2007/09/27 19:35:21 $
 #
 
 class sidlBaseException(Exception):

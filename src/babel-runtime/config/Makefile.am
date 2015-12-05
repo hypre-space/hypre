@@ -1,8 +1,8 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Revision:    $Revision: 1.12 $
-## Modified:    $Date: 2006/08/29 22:29:13 $
+## Revision:    $Revision: 1.13 $
+## Modified:    $Date: 2007/09/27 19:35:06 $
 ## Description: automake makefile to build the Babel config files
 ##
 ## Copyright (c) 2000-2001, The Regents of the University of Calfornia.

@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructGraph_IOR.c
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -63,8 +63,8 @@ static struct sidl_recursive_mutex_t bHYPRE_SStructGraph__mutex= SIDL_RECURSIVE_
  * Static variables to hold version of IOR
  */
 
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /*
  * Static variable to hold shared ClassInfo interface.
@@ -136,13 +136,12 @@ bHYPRE_SStructGraph_SetCommGrid__exec(
   sidl_BaseInterface _ex3   = NULL;
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
-  sidl_rmi_Call_unpackString( inArgs, "mpi_comm", &mpi_comm_str,
+  sidl_rmi_Call_unpackString( inArgs, "mpi_comm", &mpi_comm_str, 
     _ex);SIDL_CHECK(*_ex);
-  mpi_comm = 
-    skel_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(mpi_comm_str, TRUE,
-    _ex);SIDL_CHECK(*_ex);
+  mpi_comm = skel_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(
+    mpi_comm_str, TRUE, _ex);SIDL_CHECK(*_ex);
   sidl_rmi_Call_unpackString( inArgs, "grid", &grid_str, _ex);SIDL_CHECK(*_ex);
-  grid = skel_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(grid_str, TRUE,
+  grid = skel_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(grid_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -157,13 +156,13 @@ bHYPRE_SStructGraph_SetCommGrid__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(mpi_comm) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)mpi_comm,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)mpi_comm, _ex); SIDL_CHECK(
+      *_ex);
     if(mpi_comm_str) {free(mpi_comm_str);}
   }
   if(grid) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)grid,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)grid, _ex); SIDL_CHECK(
+      *_ex);
     if(grid_str) {free(grid_str);}
   }
   return;
@@ -200,8 +199,8 @@ bHYPRE_SStructGraph_SetStencil__exec(
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackInt( inArgs, "part", &part, _ex);SIDL_CHECK(*_ex);
   sidl_rmi_Call_unpackInt( inArgs, "var", &var, _ex);SIDL_CHECK(*_ex);
-  sidl_rmi_Call_unpackString( inArgs, "stencil", &stencil_str,
-    _ex);SIDL_CHECK(*_ex);
+  sidl_rmi_Call_unpackString( inArgs, "stencil", &stencil_str, _ex);SIDL_CHECK(
+    *_ex);
   stencil = skel_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructStencil(stencil_str,
     TRUE, _ex);SIDL_CHECK(*_ex);
 
@@ -218,8 +217,8 @@ bHYPRE_SStructGraph_SetStencil__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(stencil) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)stencil,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)stencil, _ex); SIDL_CHECK(
+      *_ex);
     if(stencil_str) {free(stencil_str);}
   }
   return;
@@ -426,7 +425,7 @@ bHYPRE_SStructGraph_isSame__exec(
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
   sidl_rmi_Call_unpackString( inArgs, "iobj", &iobj_str, _ex);SIDL_CHECK(*_ex);
-  iobj = skel_bHYPRE_SStructGraph_fconnect_sidl_BaseInterface(iobj_str, TRUE,
+  iobj = skel_bHYPRE_SStructGraph_fconnect_sidl_BaseInterface(iobj_str, TRUE, 
     _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
@@ -440,8 +439,8 @@ bHYPRE_SStructGraph_isSame__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(iobj) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)iobj, _ex); SIDL_CHECK(
+      *_ex);
     if(iobj_str) {free(iobj_str);}
   }
   return;
@@ -522,7 +521,7 @@ bHYPRE_SStructGraph_getClassInfo__exec(
 
   /* pack return value */
   if(_retval){
-    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval,
+    char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)_retval, 
       _ex);SIDL_CHECK(*_ex);
     sidl_rmi_Return_packString( outArgs, "_retval", _url, _ex);SIDL_CHECK(*_ex);
     free((void*)_url);
@@ -531,12 +530,12 @@ bHYPRE_SStructGraph_getClassInfo__exec(
   }
   /* pack out and inout argments */
   /* clean-up dangling references */
-  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval,
-    _ex)) {
+  if(_retval && sidl_BaseInterface__isRemote((sidl_BaseInterface)_retval, _ex)) 
+    {
     (*((sidl_BaseInterface)_retval)->d_epv->f__raddRef)(((
       sidl_BaseInterface)_retval)->d_object, _ex); SIDL_CHECK(*_ex);
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)_retval, _ex); SIDL_CHECK(
+      *_ex);
   }
   return;
 
@@ -568,11 +567,10 @@ bHYPRE_SStructGraph_SetCommunicator__exec(
   sidl_BaseInterface _ex3   = NULL;
   sidl_BaseException _SIDLex = NULL;
   /* unpack in and inout argments */
-  sidl_rmi_Call_unpackString( inArgs, "mpi_comm", &mpi_comm_str,
+  sidl_rmi_Call_unpackString( inArgs, "mpi_comm", &mpi_comm_str, 
     _ex);SIDL_CHECK(*_ex);
-  mpi_comm = 
-    skel_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(mpi_comm_str, TRUE,
-    _ex);SIDL_CHECK(*_ex);
+  mpi_comm = skel_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(
+    mpi_comm_str, TRUE, _ex);SIDL_CHECK(*_ex);
 
   /* make the call */
   _retval = (self->d_epv->f_SetCommunicator)(
@@ -585,8 +583,8 @@ bHYPRE_SStructGraph_SetCommunicator__exec(
   /* pack out and inout argments */
   /* clean-up dangling references */
   if(mpi_comm) {
-    sidl_BaseInterface_deleteRef((sidl_BaseInterface)mpi_comm,
-      _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface_deleteRef((sidl_BaseInterface)mpi_comm, _ex); SIDL_CHECK(
+      *_ex);
     if(mpi_comm_str) {free(mpi_comm_str);}
   }
   return;
@@ -743,14 +741,14 @@ static void* ior_bHYPRE_SStructGraph__cast(
   cmp0 = strcmp(name, "sidl.BaseClass");
   if (!cmp0) {
     (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-    cast = self;
+    cast = ((struct sidl_BaseClass__object*)self);
     return cast;
   }
   else if (cmp0 < 0) {
     cmp1 = strcmp(name, "bHYPRE.SStructGraph");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct bHYPRE_SStructGraph__object*)self);
       return cast;
     }
     else if (cmp1 < 0) {
@@ -807,8 +805,8 @@ static void ior_bHYPRE_SStructGraph__set_hooks(
  */
 
 static void ior_bHYPRE_SStructGraph__delete(
-  struct bHYPRE_SStructGraph__object* self,
-    struct sidl_BaseInterface__object **_ex)
+  struct bHYPRE_SStructGraph__object* self, struct sidl_BaseInterface__object 
+    **_ex)
 {
   *_ex = NULL; /* default to no exception */
   bHYPRE_SStructGraph__fini(self,_ex);
@@ -821,11 +819,10 @@ ior_bHYPRE_SStructGraph__getURL(
     struct bHYPRE_SStructGraph__object* self,
     struct sidl_BaseInterface__object **_ex) {
   char* ret = NULL;
-  char* objid = 
-    sidl_rmi_InstanceRegistry_getInstanceByClass((sidl_BaseClass)self,
-    _ex); SIDL_CHECK(*_ex);
+  char* objid = sidl_rmi_InstanceRegistry_getInstanceByClass((
+    sidl_BaseClass)self, _ex); SIDL_CHECK(*_ex);
   if(!objid) {
-    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self,
+    objid = sidl_rmi_InstanceRegistry_registerInstance((sidl_BaseClass)self, 
       _ex); SIDL_CHECK(*_ex);
   }
   ret = sidl_rmi_ServerRegistry_getServerURL(objid, _ex); SIDL_CHECK(*_ex);
@@ -948,20 +945,20 @@ static void bHYPRE_SStructGraph__init_epv(void)
   epv->f_AddEntries               = NULL;
   epv->f_SetObjectType            = NULL;
   epv->f_addRef                   = (void (*)(struct 
-    bHYPRE_SStructGraph__object*,
-    struct sidl_BaseInterface__object **)) s1->f_addRef;
+    bHYPRE_SStructGraph__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_addRef;
   epv->f_deleteRef                = (void (*)(struct 
-    bHYPRE_SStructGraph__object*,
-    struct sidl_BaseInterface__object **)) s1->f_deleteRef;
+    bHYPRE_SStructGraph__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_deleteRef;
   epv->f_isSame                   = (sidl_bool (*)(struct 
-    bHYPRE_SStructGraph__object*,struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) s1->f_isSame;
+    bHYPRE_SStructGraph__object*,struct sidl_BaseInterface__object*,struct 
+    sidl_BaseInterface__object **)) s1->f_isSame;
   epv->f_isType                   = (sidl_bool (*)(struct 
-    bHYPRE_SStructGraph__object*,const char*,
-    struct sidl_BaseInterface__object **)) s1->f_isType;
+    bHYPRE_SStructGraph__object*,const char*,struct sidl_BaseInterface__object 
+    **)) s1->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
-    bHYPRE_SStructGraph__object*,
-    struct sidl_BaseInterface__object **)) s1->f_getClassInfo;
+    bHYPRE_SStructGraph__object*,struct sidl_BaseInterface__object **)) 
+    s1->f_getClassInfo;
   epv->f_SetCommunicator          = NULL;
   epv->f_Destroy                  = NULL;
   epv->f_Initialize               = NULL;
@@ -970,94 +967,94 @@ static void bHYPRE_SStructGraph__init_epv(void)
   bHYPRE_SStructGraph__set_epv(epv);
 
   memcpy((void*)hepv, epv, sizeof(struct bHYPRE_SStructGraph__epv));
-  e0->f__cast               = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e0->f__delete             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e0->f__getURL             = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e0->f__raddRef            = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e0->f__isRemote           = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e0->f__exec               = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_SetCommunicator     = (int32_t (*)(void*,
-    struct bHYPRE_MPICommunicator__object*,
-    struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-  e0->f_Destroy             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_Destroy;
-  e0->f_Initialize          = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_Initialize;
-  e0->f_Assemble            = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_Assemble;
-  e0->f_addRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef           = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType              = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e0->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e0->f__cast               = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e0->f__delete             = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e0->f__getURL             = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e0->f__raddRef            = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e0->f__isRemote           = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e0->f__exec               = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_SetCommunicator     = (int32_t (*)(void*,struct 
+    bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_SetCommunicator;
+  e0->f_Destroy             = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_Destroy;
+  e0->f_Initialize          = (int32_t (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_Initialize;
+  e0->f_Assemble            = (int32_t (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_Assemble;
+  e0->f_addRef              = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_addRef;
+  e0->f_deleteRef           = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_deleteRef;
+  e0->f_isSame              = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e0->f_isType              = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e0->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he0, e0, sizeof(struct bHYPRE_ProblemDefinition__epv));
 
-  e1->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
-    const char*, struct sidl_BaseInterface__object**)) epv->f__cast;
-  e1->f__delete             = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e1->f__getURL             = (char* (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e1->f__raddRef            = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e1->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*,
+  e1->f__cast               = (void* (*)(struct sidl_BaseClass__object*,const 
+    char*, struct sidl_BaseInterface__object**)) epv->f__cast;
+  e1->f__delete             = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e1->f__getURL             = (char* (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e1->f__raddRef            = (void (*)(struct sidl_BaseClass__object*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e1->f__isRemote           = (sidl_bool (*)(struct sidl_BaseClass__object*, 
     struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e1->f__exec               = (void (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef              = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f__exec               = (void (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef              = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e1->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
   e1->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
+    struct sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
   e1->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
   memcpy((void*) he1, e1, sizeof(struct sidl_BaseClass__epv));
 
-  e2->f__cast               = (void* (*)(void*,const char*,
-    struct sidl_BaseInterface__object**)) epv->f__cast;
-  e2->f__delete             = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__delete;
-  e2->f__getURL             = (char* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__getURL;
-  e2->f__raddRef            = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__raddRef;
-  e2->f__isRemote           = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f__isRemote;
-  e2->f__exec               = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e2->f_addRef              = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef           = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e2->f_isSame              = (sidl_bool (*)(void*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType              = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e2->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e2->f__cast               = (void* (*)(void*,const char*, struct 
+    sidl_BaseInterface__object**)) epv->f__cast;
+  e2->f__delete             = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__delete;
+  e2->f__getURL             = (char* (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__getURL;
+  e2->f__raddRef            = (void (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__raddRef;
+  e2->f__isRemote           = (sidl_bool (*)(void*, struct 
+    sidl_BaseInterface__object **)) epv->f__isRemote;
+  e2->f__exec               = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f_addRef              = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_addRef;
+  e2->f_deleteRef           = (void (*)(void*,struct sidl_BaseInterface__object 
+    **)) epv->f_deleteRef;
+  e2->f_isSame              = (sidl_bool (*)(void*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e2->f_isType              = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   memcpy((void*) he2, e2, sizeof(struct sidl_BaseInterface__epv));
 
@@ -1095,13 +1092,13 @@ static void bHYPRE_SStructGraph__init_sepv(void)
 void bHYPRE_SStructGraph__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct bHYPRE_ProblemDefinition__epv **s_arg_epv__bhypre_problemdefinition,
   struct bHYPRE_ProblemDefinition__epv 
     **s_arg_epv_hooks__bhypre_problemdefinition,
-  struct bHYPRE_SStructGraph__epv **s_arg_epv__bhypre_sstructgraph,
-    struct bHYPRE_SStructGraph__epv **s_arg_epv_hooks__bhypre_sstructgraph)
+  struct bHYPRE_SStructGraph__epv **s_arg_epv__bhypre_sstructgraph,struct 
+    bHYPRE_SStructGraph__epv **s_arg_epv_hooks__bhypre_sstructgraph)
 {
   LOCK_STATIC_GLOBALS;
   if (!s_method_initialized) {
@@ -1157,7 +1154,7 @@ initClassInfo(sidl_ClassInfo *info, struct sidl_BaseInterface__object **_ex)
     s_classInfo = sidl_ClassInfo__cast(impl,_ex);
     if (impl) {
       sidl_ClassInfoI_setName(impl, "bHYPRE.SStructGraph",_ex);
-      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
+      sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION, 
         s_IOR_MINOR_VERSION,_ex);
       sidl_ClassInfoI_deleteRef(impl,_ex);
       sidl_atexit(sidl_deleteRef_atexit, &s_classInfo);
@@ -1182,8 +1179,8 @@ initMetadata(struct bHYPRE_SStructGraph__object* self, sidl_BaseInterface* _ex)
 {
   *_ex = 0; /* default no exception */
   if (self) {
-    struct sidl_BaseClass__data *data = (struct 
-      sidl_BaseClass__data*)((*self).d_sidl_baseclass.d_data);
+    struct sidl_BaseClass__data *data = (struct sidl_BaseClass__data*)((
+      *self).d_sidl_baseclass.d_data);
     if (data) {
       data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
       data->d_IOR_minor_version = s_IOR_MINOR_VERSION;
@@ -1294,8 +1291,8 @@ s_externalEntryPoints = {
   bHYPRE_SStructGraph__new,
   bHYPRE_SStructGraph__statics,
   bHYPRE_SStructGraph__super,
-  0, 
-  10
+  1, 
+  0
 };
 
 /*

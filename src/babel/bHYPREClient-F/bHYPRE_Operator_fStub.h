@@ -2,7 +2,7 @@
  * File:          bHYPRE_Operator_fStub.h
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,8 +45,8 @@ bHYPRE_Operator__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_Operator__object*
-bHYPRE_Operator__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_Operator__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

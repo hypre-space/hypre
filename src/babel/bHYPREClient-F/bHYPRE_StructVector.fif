@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_StructVector_Impl.f
 C       Symbol:        bHYPRE.StructVector-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.StructVector
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -65,7 +65,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_StructVector__cast2_f(self, name, retval,
+        subroutine bHYPRE_StructVector__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -84,7 +84,7 @@ C       Method:  Create[]
 C        This function is the preferred way to create a Struct Vector. 
 C       
 
-        subroutine bHYPRE_StructVector_Create_f(mpi_comm, grid, retval,
+        subroutine bHYPRE_StructVector_Create_f(mpi_comm, grid, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.MPICommunicator mpi_comm
@@ -147,7 +147,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_StructVector_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_StructVector_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -169,7 +169,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_StructVector_isType_f(self, name, retval,
+        subroutine bHYPRE_StructVector_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -188,7 +188,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_StructVector_getClassInfo_f(self, retval,
+        subroutine bHYPRE_StructVector_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -205,7 +205,7 @@ C       Method:  SetGrid[]
 C        Set the grid on which vectors are defined. 
 C       
 
-        subroutine bHYPRE_StructVector_SetGrid_f(self, grid, retval,
+        subroutine bHYPRE_StructVector_SetGrid_f(self, grid, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -226,7 +226,7 @@ C       for each dimension.
 C       "num_ghost" is an array of size "dim2", twice the number of dimensions. 
 C       
 
-        subroutine bHYPRE_StructVector_SetNumGhost_f(self, num_ghost,
+        subroutine bHYPRE_StructVector_SetNumGhost_f(self, num_ghost, 
      &     dim2, retval, exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -276,7 +276,7 @@ C       number of dimensions.  The "values" array has size "nvalues", which
 C       is the number of grid points in the box. 
 C       
 
-        subroutine bHYPRE_StructVector_SetBoxValues_f(self, ilower,
+        subroutine bHYPRE_StructVector_SetBoxValues_f(self, ilower, 
      &     iupper, dim, values, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -340,7 +340,7 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 
-        subroutine bHYPRE_StructVector_Initialize_f(self, retval,
+        subroutine bHYPRE_StructVector_Initialize_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -361,7 +361,7 @@ C       Initialize preceding Assemble. Values can only be set in
 C       between a call to Initialize and Assemble.
 C       
 
-        subroutine bHYPRE_StructVector_Assemble_f(self, retval,
+        subroutine bHYPRE_StructVector_Assemble_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -394,7 +394,7 @@ C       Method:  Copy[]
 C       Copy data from x into {\tt self}.
 C       
 
-        subroutine bHYPRE_StructVector_Copy_f(self, x, retval,
+        subroutine bHYPRE_StructVector_Copy_f(self, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -418,7 +418,7 @@ C       cloned {\tt Vector} object can be cast to an object with the
 C       inherited class type.
 C       
 
-        subroutine bHYPRE_StructVector_Clone_f(self, x, retval,
+        subroutine bHYPRE_StructVector_Clone_f(self, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -437,7 +437,7 @@ C       Method:  Scale[]
 C       Scale {\tt self} by {\tt a}.
 C       
 
-        subroutine bHYPRE_StructVector_Scale_f(self, a, retval,
+        subroutine bHYPRE_StructVector_Scale_f(self, a, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -456,7 +456,7 @@ C       Method:  Dot[]
 C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
 C       
 
-        subroutine bHYPRE_StructVector_Dot_f(self, x, d, retval,
+        subroutine bHYPRE_StructVector_Dot_f(self, x, d, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -477,7 +477,7 @@ C       Method:  Axpy[]
 C       Add {\tt a}{\tt x} to {\tt self}.
 C       
 
-        subroutine bHYPRE_StructVector_Axpy_f(self, a, x, retval,
+        subroutine bHYPRE_StructVector_Axpy_f(self, a, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -519,7 +519,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_StructVector__getURL_f(self, retval,
+        subroutine bHYPRE_StructVector__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -536,7 +536,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_StructVector__isRemote_f(self, retval,
+        subroutine bHYPRE_StructVector__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -553,7 +553,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_StructVector__isLocal_f(self, retval,
+        subroutine bHYPRE_StructVector__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructVector self
@@ -586,7 +586,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_StructVector__set_hooks_static_f(on,
+        subroutine bHYPRE_StructVector__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

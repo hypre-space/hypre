@@ -1,27 +1,13 @@
 dnl #BHEADER**********************************************************************
-dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
 dnl # Produced at the Lawrence Livermore National Laboratory.
-dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
-dnl # All rights reserved.
+dnl # This file is part of HYPRE.  See file COPYRIGHT for details.
 dnl #
-dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-dnl # disclaimer and the GNU Lesser General Public License.
-dnl #
-dnl # This program is free software; you can redistribute it and/or modify it
-dnl # under the terms of the GNU General Public License (as published by the Free
+dnl # HYPRE is free software; you can redistribute it and/or modify it under the
+dnl # terms of the GNU Lesser General Public License (as published by the Free
 dnl # Software Foundation) version 2.1 dated February 1999.
 dnl #
-dnl # This program is distributed in the hope that it will be useful, but WITHOUT
-dnl # ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
-dnl # FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
-dnl # GNU General Public License for more details.
-dnl #
-dnl # You should have received a copy of the GNU Lesser General Public License
-dnl # along with this program; if not, write to the Free Software Foundation,
-dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-dnl #
-dnl # $Revision: 1.16 $
+dnl # $Revision: 1.22 $
 dnl #EHEADER**********************************************************************
 
 dnl **********************************************************************
@@ -189,7 +175,7 @@ then
         CFLAGS="-O2"
         ;;
       icc)
-        CFLAGS="-O3 -tpp7"
+        CFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
@@ -203,7 +189,7 @@ then
       KCC|mpiKCC)
         CFLAGS="-fast +K3"
         ;;
-      cc|mpcc|mpiicc|xlc)
+      cc|mpcc|mpiicc|mpxlc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -O2"
@@ -237,6 +223,9 @@ then
             ;;
           *)
             CFLAGS="-O"
+            if test "$casc_using_openmp" = "yes" ; then
+               CFLAGS="$CFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -252,8 +241,8 @@ then
       gCC|mpiCC)
         CXXFLAGS="-O2"
         ;;
-      icc)
-        CXXFLAGS="-O3 -tpp7"
+      icpc|icc)
+        CXXFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
@@ -267,7 +256,7 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-fast +K3"
         ;;
-      CC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicpc|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
@@ -301,6 +290,9 @@ then
             ;;
           *)
             CXXFLAGS="-O"
+            if test "$casc_using_openmp" = "yes" ; then
+               CXXFLAGS="$CXXFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -317,7 +309,7 @@ then
         FFLAGS="-O"
         ;;
       ifort)
-        FFLAGS="-O3 -tpp7"
+        FFLAGS="-O3"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
@@ -365,6 +357,9 @@ then
             ;;
           *)
             FFLAGS="-O"
+            if test "$casc_using_openmp" = "yes" ; then
+               FFLAGS="$FFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -392,7 +387,7 @@ then
         CFLAGS="--c -g +K3"
         ;;
       icc)
-        CFLAGS="-g -tpp7"
+        CFLAGS="-g"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
@@ -403,7 +398,7 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|mpcc|mpiicc|xlc)
+      cc|mpcc|mpiicc|mpxlc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -g"
@@ -437,6 +432,9 @@ then
             ;;
           *)
             CFLAGS="-g"
+            if test "$casc_using_openmp" = "yes" ; then
+               CFLAGS="$CFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -455,8 +453,8 @@ then
       KCC|mpiKCC)
         CXXFLAGS="-g +K3"
         ;;
-      icc)
-        CXXFLAGS="-g -tpp7"
+      icpc|icc)
+        CXXFLAGS="-g"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
@@ -467,7 +465,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicpc|mpiicc|mpxlC|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
@@ -501,6 +499,9 @@ then
             ;;
           *)
             CXXFLAGS="-g"
+            if test "$casc_using_openmp" = "yes" ; then
+               CXXFLAGS="$CXXFLAGS -openmp"
+            fi
             ;;
         esac
         ;;
@@ -520,7 +521,7 @@ then
         FFLAGS="-g +K3"
         ;;
       ifort)
-        FFLAGS="-g -tpp7"
+        FFLAGS="-g"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
@@ -565,6 +566,9 @@ then
             ;;
           *)
             FFLAGS="-g"
+            if test "$casc_using_openmp" = "yes" ; then
+               FFLAGS="$FFLAGS -openmp"
+            fi
             ;;
         esac
         ;;

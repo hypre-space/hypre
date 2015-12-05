@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 1.43 $
+ ***********************************************************************EHEADER*/
+
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * This is the version which uses the Babel interface.
@@ -7,7 +19,6 @@
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
 /* As of October 2005, the solvers implemented are AMG, ParaSails, PCG, GMRES, diagonal
-   scaling, and combinations thereof.  The babel (bHYPRE) interface is used exclusively.
 */
 #include <stdlib.h>
 #include <stdio.h>

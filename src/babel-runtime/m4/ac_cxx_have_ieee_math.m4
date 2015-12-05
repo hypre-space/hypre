@@ -7,7 +7,7 @@ dnl If the compiler has the double math functions acosh,
 dnl asinh, atanh, expm1, erf, erfc, isnan, j0, j1, lgamma, logb,
 dnl log1p, rint, y0 and y1, define HAVE_IEEE_MATH.
 dnl
-dnl @version $Id: ac_cxx_have_ieee_math.m4,v 1.6 2006/08/29 22:29:23 painter Exp $
+dnl @version $Id: ac_cxx_have_ieee_math.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_IEEE_MATH],

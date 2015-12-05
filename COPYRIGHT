@@ -1,0 +1,35 @@
+
+COPYRIGHT
+
+The following copyright applies to each file in the HYPRE distribution, unless
+otherwise stated in the file:
+
+Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+Produced at the Lawrence Livermore National Laboratory under
+Contract No. DE-AC52-07NA27344 with the DOE.
+
+This file is part of HYPRE.
+
+
+LICENSE
+
+HYPRE is free software; you can redistribute it and/or modify it under the
+terms of the GNU Lesser General Public License (as published by the Free
+Software Foundation) version 2.1 dated February 1999.
+
+HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU Lesser
+General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along
+with this library (file COPYING.LESSER); if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+
+CONTACT INFORMATION
+
+The HYPRE team can be contacted at hypre-support@mail.llnl.gov.  The software is
+released under UCRL_CODE_222953.  Please see http://www.llnl.gov/CASC/hypre for
+more information and source code availability.
+

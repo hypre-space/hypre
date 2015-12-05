@@ -1,6 +1,8 @@
 
-
+#include <errno.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <unistd.h>
 #include "sidlx_common.h"
 #include "sidl_String.h"
 #include "sidl_rmi_NetworkException.h"
@@ -54,13 +56,57 @@ int s_accept( int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen,
   return n;
 }
 
+static int
+isRecoverable(int errval)
+{
+  switch(errval) {
+  case ENOMEM:
+  case ENOBUFS:
+  case ENFILE:
+  case EMFILE:
+  case ECONNABORTED:
+  case EAGAIN:
+  case EINTR:
+  case ETIMEDOUT:
+  case ETIME:
+    return 1;
+  }
+  return 0;
+}
 
-int s_connect( int sockfd, const struct sockaddr *servaddr, socklen_t addrlen,
-	      sidl_BaseInterface *_ex ) { 
-  int n;
+int
+s_connect( int sockfd, const struct sockaddr *servaddr, socklen_t addrlen,
+           sidl_BaseInterface *_ex ) { 
+  static long int s_connect_retries = 1;
+  static int s_env_check = 0;
+  unsigned long sleeptime = 512; /* around half a millisecond */
+  long int i;
+  int n = -1;
+  if (!s_env_check) {
+    char *val;
+    if ((val = getenv("SIDLX_CONNECT_MAX_RETRIES"))) {
+      long int newval = strtol(val, NULL, 0);
+      if ((newval != LONG_MIN) && (newval != LONG_MAX)) {
+        s_connect_retries = ((newval >= 0) ? newval : 0);
+      }
+    }
+    s_env_check = 1;
+  }
   
-  /* returns 0 if OK, -1 on error */
-  if ((n = connect( sockfd, servaddr, addrlen )) < 0 ) { 
+  for(i = 0; i <= s_connect_retries; ++i) {
+    /* returns 0 if OK, -1 on error */
+    if ((n = connect( sockfd, servaddr, addrlen )) == 0) break;
+    else if (isRecoverable(errno) && (i < s_connect_retries)) {
+      if (sleeptime >= 150000000UL) {
+        sleeptime = 300000000UL;  /* maximum sleep of 5 minutes! */
+      }
+      else {
+        sleeptime <<= 1;          /* double sleep */
+      }
+      usleep(sleeptime);
+    }
+  }
+  if (n < 0) {
     SIDL_THROW( *_ex, sidl_io_IOException, "connect() error");
   }
  EXIT:

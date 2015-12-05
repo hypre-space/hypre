@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_GenNetworkException_Skel.c
  * Symbol:        sidlx.rmi.GenNetworkException-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for sidlx.rmi.GenNetworkException
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -38,70 +38,70 @@ impl_sidlx_rmi_GenNetworkException__dtor(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseInterface(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_RuntimeException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_SIDLException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_SIDLException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_SIDLException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Deserializer__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Deserializer(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Deserializer__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_IOException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_IOException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_IOException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializable(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializer__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializer(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_NetworkException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_rmi_NetworkException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_GenNetworkException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidlx_rmi_GenNetworkException(
@@ -110,70 +110,70 @@ extern struct sidlx_rmi_GenNetworkException__object*
   impl_sidlx_rmi_GenNetworkException_fcast_sidlx_rmi_GenNetworkException(void* 
   bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(const char* url,
+  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseInterface(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_RuntimeException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_SIDLException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_SIDLException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_SIDLException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Deserializer__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Deserializer(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Deserializer__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_IOException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_IOException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_IOException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializable(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializer__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializer(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_NetworkException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidl_rmi_NetworkException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_NetworkException__object* 
-  impl_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(void* bi,
+  impl_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_GenNetworkException__object* 
   impl_sidlx_rmi_GenNetworkException_fconnect_sidlx_rmi_GenNetworkException(
@@ -207,14 +207,14 @@ void sidlx_rmi_GenNetworkException__call_load(void) {
   impl_sidlx_rmi_GenNetworkException__load(&_throwaway_exception);
 }
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(const char* url,
+  skel_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(url, ar,
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_BaseClass(url, ar, 
     _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseClass(bi, _ex);
 }
@@ -227,7 +227,7 @@ struct sidl_BaseException__object*
 }
 
 struct sidl_BaseException__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseException(bi, _ex);
 }
@@ -240,20 +240,20 @@ struct sidl_BaseInterface__object*
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(const char* url,
+  skel_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(url, ar,
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_ClassInfo(url, ar, 
     _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_ClassInfo(bi, _ex);
 }
@@ -261,14 +261,14 @@ struct sidl_ClassInfo__object*
 struct sidl_RuntimeException__object* 
   skel_sidlx_rmi_GenNetworkException_fconnect_sidl_RuntimeException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_RuntimeException(url,
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_RuntimeException(url, 
     ar, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(bi,
+  return impl_sidlx_rmi_GenNetworkException_fcast_sidl_RuntimeException(bi, 
     _ex);
 }
 
@@ -280,7 +280,7 @@ struct sidl_SIDLException__object*
 }
 
 struct sidl_SIDLException__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_SIDLException(bi, _ex);
 }
@@ -288,12 +288,12 @@ struct sidl_SIDLException__object*
 struct sidl_io_Deserializer__object* 
   skel_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Deserializer(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Deserializer(url,
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Deserializer(url, 
     ar, _ex);
 }
 
 struct sidl_io_Deserializer__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Deserializer(bi, _ex);
 }
@@ -301,12 +301,12 @@ struct sidl_io_Deserializer__object*
 struct sidl_io_IOException__object* 
   skel_sidlx_rmi_GenNetworkException_fconnect_sidl_io_IOException(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_IOException(url,
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_IOException(url, 
     ar, _ex);
 }
 
 struct sidl_io_IOException__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_IOException(bi, _ex);
 }
@@ -314,12 +314,12 @@ struct sidl_io_IOException__object*
 struct sidl_io_Serializable__object* 
   skel_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializable(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializable(url,
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_io_Serializable(url, 
     ar, _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializable(bi, _ex);
 }
@@ -332,7 +332,7 @@ struct sidl_io_Serializer__object*
 }
 
 struct sidl_io_Serializer__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_GenNetworkException_fcast_sidl_io_Serializer(bi, _ex);
 }
@@ -340,15 +340,14 @@ struct sidl_io_Serializer__object*
 struct sidl_rmi_NetworkException__object* 
   skel_sidlx_rmi_GenNetworkException_fconnect_sidl_rmi_NetworkException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return 
-    impl_sidlx_rmi_GenNetworkException_fconnect_sidl_rmi_NetworkException(url,
-    ar, _ex);
+  return impl_sidlx_rmi_GenNetworkException_fconnect_sidl_rmi_NetworkException(
+    url, ar, _ex);
 }
 
 struct sidl_rmi_NetworkException__object* 
-  skel_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(void* bi,
+  skel_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(void* bi, 
   sidl_BaseInterface *_ex) { 
-  return impl_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(bi,
+  return impl_sidlx_rmi_GenNetworkException_fcast_sidl_rmi_NetworkException(bi, 
     _ex);
 }
 
@@ -363,9 +362,8 @@ struct sidlx_rmi_GenNetworkException__object*
 struct sidlx_rmi_GenNetworkException__object* 
   skel_sidlx_rmi_GenNetworkException_fcast_sidlx_rmi_GenNetworkException(void* 
   bi, sidl_BaseInterface *_ex) { 
-  return 
-    impl_sidlx_rmi_GenNetworkException_fcast_sidlx_rmi_GenNetworkException(bi,
-    _ex);
+  return impl_sidlx_rmi_GenNetworkException_fcast_sidlx_rmi_GenNetworkException(
+    bi, _ex);
 }
 
 struct sidlx_rmi_GenNetworkException__data*

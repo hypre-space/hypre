@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.5 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -58,11 +45,6 @@ typedef struct hypre_StructVector_struct
                       
    int                   global_size;  /* Total number coefficients */
 
-   int                   OffProcAdd;   /* offproc addto value flag */
-
-   int                   add_num_ghost[6]; /* ghostlayers to scan for offproc 
-                                              add values */
-
    int                   ref_count;
 
 } hypre_StructVector;
@@ -80,8 +62,6 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
-#define hypre_StructVectorOffProcAdd(vector)    ((vector) -> OffProcAdd)
-#define hypre_StructVectorAddNumGhost(vector)   ((vector) -> add_num_ghost)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \

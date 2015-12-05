@@ -2,9 +2,9 @@
  * File:          sidl_ClassInfoI_IOR.h
  * Symbol:        sidl.ClassInfoI-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_ClassInfoI_IOR.h,v 1.5 2006/08/29 22:29:27 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_ClassInfoI_IOR.h,v 1.6 2007/09/27 19:35:21 painter Exp $
  * Description:   Intermediate Object Representation for sidl.ClassInfoI
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -214,61 +214,57 @@ extern struct sidl_ClassInfoI__object*
 sidl_ClassInfoI__new(void* ddata,struct sidl_BaseInterface__object ** _ex);
 
 extern void sidl_ClassInfoI__init(
-  struct sidl_ClassInfoI__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct sidl_ClassInfoI__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void sidl_ClassInfoI__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_ClassInfo__epv **s_arg_epv__sidl_classinfo,
   struct sidl_ClassInfo__epv **s_arg_epv_hooks__sidl_classinfo,
-  struct sidl_ClassInfoI__epv **s_arg_epv__sidl_classinfoi,
-    struct sidl_ClassInfoI__epv **s_arg_epv_hooks__sidl_classinfoi);
+  struct sidl_ClassInfoI__epv **s_arg_epv__sidl_classinfoi,struct 
+    sidl_ClassInfoI__epv **s_arg_epv_hooks__sidl_classinfoi);
   extern void sidl_ClassInfoI__fini(
-    struct sidl_ClassInfoI__object* self,
-      struct sidl_BaseInterface__object ** _ex);
+    struct sidl_ClassInfoI__object* self, struct sidl_BaseInterface__object ** 
+      _ex);
   extern void sidl_ClassInfoI__IOR_version(int32_t *major, int32_t *minor);
 
-  struct sidl_BaseClass__object* 
-    skel_sidl_ClassInfoI_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* skel_sidl_ClassInfoI_fconnect_sidl_BaseClass(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* skel_sidl_ClassInfoI_fcast_sidl_BaseClass(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_sidl_ClassInfoI_fconnect_sidl_BaseInterface(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+    skel_sidl_ClassInfoI_fconnect_sidl_BaseInterface(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_sidl_ClassInfoI_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_ClassInfoI_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
-  struct sidl_ClassInfo__object* 
-    skel_sidl_ClassInfoI_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* skel_sidl_ClassInfoI_fconnect_sidl_ClassInfo(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* skel_sidl_ClassInfoI_fcast_sidl_ClassInfo(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
-  struct sidl_ClassInfoI__object* 
-    skel_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
-  struct sidl_ClassInfoI__object* 
-    skel_sidl_ClassInfoI_fcast_sidl_ClassInfoI(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfoI__object* skel_sidl_ClassInfoI_fconnect_sidl_ClassInfoI(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfoI__object* skel_sidl_ClassInfoI_fcast_sidl_ClassInfoI(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_sidl_ClassInfoI_fconnect_sidl_RuntimeException(const char* url,
+    skel_sidl_ClassInfoI_fconnect_sidl_RuntimeException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_sidl_ClassInfoI_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_ClassInfoI_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfoI__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

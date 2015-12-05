@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_SStructVariable.inc
 C       Symbol:        bHYPRE.SStructVariable-v1.0.0
 C       Symbol Type:   enumeration
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side glue code for bHYPRE.SStructVariable
 C       
 C       WARNING: Automatically generated; changes will be lost

@@ -1,29 +1,4 @@
 #!/bin/sh
-#BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
-# Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team. UCRL-CODE-222953.
-# All rights reserved.
-#
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer, contact information and the GNU Lesser General Public License.
-#
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License (as published by the Free Software 
-# Foundation) version 2.1 dated February 1999.
-#
-# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-# Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# $Revision: 1.36 $
-#EHEADER**********************************************************************
 
 # global variables
 BatchMode=0
@@ -77,9 +52,6 @@ function MpirunString
       alc*) shift
          RunString="srun -p pdebug -n$*"
          ;;
-      mcr*) shift
-         RunString="srun -p pdebug -n$*"
-         ;;
       peng*) shift
          RunString="srun -p pdebug -n$*"
          ;;
@@ -107,8 +79,15 @@ function MpirunString
          shift
          shift
          MY_ARGS="$*"
-         RunString="poe $EXECFILE -rmpool pbatch -procs $POE_NUM_PROCS"
-         RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
+         # RunString="poe $EXECFILE -rmpool pbatch -procs $POE_NUM_PROCS"
+         # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
+         RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
+         ;;
+      zeus*) shift
+         RunString="srun -p pdebug -n$*"
+         ;;
+      atla*) shift
+         RunString="srun -p pdebug -n$*"
          ;;
       tux*) BatchMode=0
          MACHINES_FILE="hostname"
@@ -135,8 +114,6 @@ function CalcNodes
    case $HOST in
       alc*) CPUS_PER_NODE=2
          ;;
-      mcr*) CPUS_PER_NODE=2
-         ;;
       peng*) CPUS_PER_NODE=2
          ;;
       thun*) CPUS_PER_NODE=4
@@ -146,6 +123,8 @@ function CalcNodes
       up*) CPUS_PER_NODE=8
          ;;
       vert*) CPUS_PER_NODE=2
+         ;;
+      zeus*) CPUS_PER_NODE=8
          ;;
       *) CPUS_PER_NODE=1
          ;;
@@ -188,8 +167,6 @@ function CheckBatch
    case $HOST in
       alc*) BATCH_MODE=0
          ;;
-      mcr*) BATCH_MODE=0
-         ;;
       peng*) BATCH_MODE=0
          ;;
       thun*) BATCH_MODE=0
@@ -199,6 +176,8 @@ function CheckBatch
       up*) BATCH_MODE=0
          ;;
       vert*) BATCH_MODE=0
+         ;;
+      zeus*) BATCH_MODE=0
          ;;
       *) BATCH_MODE=0
          ;;
@@ -245,8 +224,6 @@ function PsubCmdStub
    case $HOST in
       alc*) PsubCmd="psub -c alc,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
-      mcr*) PsubCmd="psub -c mcr,pbatch -b casc -r $RunName -ln $NumProcs"
-         ;;
       peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       thun*) PsubCmd="psub -c thunder,pbatch -b casc -r $RunName -ln $NumNodes -g $NumProcs"
@@ -256,6 +233,8 @@ function PsubCmdStub
       up*) PsubCmd="psub -c up -pool pbatch -b a_casc -r $RunName -ln $NumProcs"
          ;;
       vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      zeus*) PsubCmd="psub -c zeus,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       *) PsubCmd="psub -b casc -r $RunName -ln $NumProcs"
          ;;
@@ -325,7 +304,6 @@ EOF
                if [ "$BatchFlag" -eq 0 ] ; then
                   BatchFile=`echo $OutFile | sed -e 's/\.out\./.batch./'`
                   cat > $BatchFile <<- EOF 
-#!/bin/sh
 cd `pwd`
 ${RunString}
 EOF
@@ -350,7 +328,6 @@ EOF
                      BatchFile=$InputFile.batch.$BatchCount
                      BatchCount=BatchCount+1
                      cat > $BatchFile <<- EOF
-#!/bin/sh
 cd `pwd`
 ${RunString}
 EOF
@@ -390,7 +367,7 @@ function ExecuteTest
    SavePWD=`pwd`
    cd $WorkingDir
    (cat $InputFile.err.* > $InputFile.err)
-   (./$InputFile.sh     >> $InputFile.err 2>&1 &) 
+   (./$InputFile.sh     >> $InputFile.err 2>> $InputFile.err)
    cd $SavePWD
 }
 
@@ -443,14 +420,8 @@ function StartCrunch
    CheckBatch
    BatchMode=$?
    ExecuteJobs "$@"
-   RtnCode=$?
-   if [ "$RtnCode" -eq 0 ] ; then
-      ExecuteTest "$@"
-      RtnCode=$?
-   fi
-   if [ "$RtnCode" -eq 0 ] ; then
-      PostProcess "$@"
-   fi
+   ExecuteTest "$@"
+   PostProcess "$@"
 }
 
 # main
@@ -521,3 +492,27 @@ done
 #
 #     remove exectutable files from TEST_* directories
 CleanUp $TestDirNames $ExecFileNames
+
+# Filter misleading error messages
+cat > runtest.filters <<EOF
+srun: job [0-9]* queued and waiting for resources
+srun: job [0-9]* has been allocated resources
+SLURMINFO: Job [0-9]* is pending allocation of resources.
+ATTENTION: [0-9\-]*  Couldn't create .*, job may not be checkpointable
+ATTENTION: [0-9\-]* Error opening file
+EOF
+for dir in $TestDirNames
+do
+  for errfile in $( find $dir -name "*.err" )
+  do
+    if (egrep -f runtest.filters $errfile > /dev/null) ; then
+        original=`dirname $errfile`/`basename $errfile .err`.fil
+	echo "This file contains the original copy of $errfile before filtering" > $original
+	cat $errfile >> $original
+	mv $errfile $errfile.tmp
+	egrep -v -f runtest.filters $errfile.tmp > $errfile
+	rm -f $errfile.tmp
+    fi
+  done
+done
+rm -f runtest.filters

@@ -2,9 +2,9 @@
  * File:          sidl_Resolve_fStub.c
  * Symbol:        sidl.Resolve-v0.9.15
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_Resolve_fStub.c,v 1.39 2006/12/29 21:24:28 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_Resolve_fStub.c,v 1.40 2007/09/27 19:56:34 painter Exp $
  * Description:   Client-side glue code for sidl.Resolve
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -232,7 +232,7 @@ SIDLFortran77Symbol(sidl_resolve__array_get_f,
    int32_t *result)
 {
   *result = 
-    sidl_int__array_get((const struct sidl_int__array *)(ptrdiff_t)*array,
+    sidl_int__array_get((const struct sidl_int__array *)(ptrdiff_t)*array, 
       indices);
 }
 
@@ -349,7 +349,7 @@ SIDLFortran77Symbol(sidl_resolve__array_set_f,
   int32_t indices[],
   int32_t *value)
 {
-  sidl_int__array_set((struct sidl_int__array *)(ptrdiff_t)*array, indices,
+  sidl_int__array_set((struct sidl_int__array *)(ptrdiff_t)*array, indices, 
     *value);
 }
 
@@ -418,8 +418,8 @@ SIDLFortran77Symbol(sidl_resolve__array_iscolumnorder_f,
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
-  *result = sidl_int__array_isColumnOrder((struct sidl_int__array 
-    *)(ptrdiff_t)*array);
+  *result = sidl_int__array_isColumnOrder((struct sidl_int__array *)(
+    ptrdiff_t)*array);
 }
 
 void
@@ -429,8 +429,8 @@ SIDLFortran77Symbol(sidl_resolve__array_isroworder_f,
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
-  *result = sidl_int__array_isRowOrder((struct sidl_int__array 
-    *)(ptrdiff_t)*array);
+  *result = sidl_int__array_isRowOrder((struct sidl_int__array *)(
+    ptrdiff_t)*array);
 }
 
 void

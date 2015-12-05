@@ -1,8 +1,8 @@
 <!--
    sidl Class List (SCL) DTD
    File: scl.dtd
-   Revision: @(#) $Revision: 1.4 $
-   Date:     $Date: 2006/08/29 22:29:48 $
+   Revision: @(#) $Revision: 1.5 $
+   Date:     $Date: 2007/09/27 19:35:42 $
    Copyright (c) 2003 The Regents of the University of California
    
 The SCL file describes libraries and the sidl classes each library

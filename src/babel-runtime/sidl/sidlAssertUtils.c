@@ -1,7 +1,7 @@
 /*
  * File:        sidlAssertUtils.c
- * Revision:    @(#) $Revision: 1.5 $
- * Date:        $Date: 2006/08/29 22:29:48 $
+ * Revision:    @(#) $Revision: 1.6 $
+ * Date:        $Date: 2007/09/27 19:35:42 $
  * Description: code for managing SIDL Assertions
  *
  * Copyright (c) 2004, The Regents of the University of Calfornia.

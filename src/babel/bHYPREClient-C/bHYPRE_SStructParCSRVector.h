@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructParCSRVector.h
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -81,8 +81,8 @@ bHYPRE_SStructParCSRVector__create(sidl_BaseInterface* _ex);
  * RMI constructor function for the class.
  */
 bHYPRE_SStructParCSRVector
-bHYPRE_SStructParCSRVector__createRemote(const char * url,
-  sidl_BaseInterface *_ex);
+bHYPRE_SStructParCSRVector__createRemote(const char * url, sidl_BaseInterface 
+  *_ex);
 
 /**
  * Wraps up the private data struct pointer (struct bHYPRE\_SStructParCSRVector\_\_data) passed in rather than running the constructor.
@@ -145,10 +145,12 @@ bHYPRE_SStructParCSRVector_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -163,10 +165,12 @@ bHYPRE_SStructParCSRVector_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -180,9 +184,11 @@ bHYPRE_SStructParCSRVector_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -200,10 +206,12 @@ bHYPRE_SStructParCSRVector_SetGrid(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetGrid)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetGrid)(
     self,
     grid,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -233,19 +241,24 @@ bHYPRE_SStructParCSRVector_SetValues(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
   struct sidl_int__array*index_tmp = &index_real;
   index_upper[0] = dim-1;
-  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper, 
     index_stride);
-  return (*self->d_epv->f_SetValues)(
+  _result = (*self->d_epv->f_SetValues)(
     self,
     part,
     index_tmp,
     var,
     value,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)index_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -298,19 +311,24 @@ bHYPRE_SStructParCSRVector_AddToValues(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
   struct sidl_int__array*index_tmp = &index_real;
   index_upper[0] = dim-1;
-  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper, 
     index_stride);
-  return (*self->d_epv->f_AddToValues)(
+  _result = (*self->d_epv->f_AddToValues)(
     self,
     part,
     index_tmp,
     var,
     value,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)index_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -350,9 +368,11 @@ bHYPRE_SStructParCSRVector_Gather(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Gather)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Gather)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -381,19 +401,24 @@ bHYPRE_SStructParCSRVector_GetValues(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
   struct sidl_int__array*index_tmp = &index_real;
   index_upper[0] = dim-1;
-  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper, 
     index_stride);
-  return (*self->d_epv->f_GetValues)(
+  _result = (*self->d_epv->f_GetValues)(
     self,
     part,
     index_tmp,
     var,
     value,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)index_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -432,9 +457,11 @@ bHYPRE_SStructParCSRVector_SetComplex(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetComplex)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetComplex)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -454,11 +481,13 @@ bHYPRE_SStructParCSRVector_Print(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Print)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Print)(
     self,
     filename,
     all,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -479,10 +508,12 @@ bHYPRE_SStructParCSRVector_GetObject(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetObject)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetObject)(
     self,
     A,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -500,10 +531,12 @@ bHYPRE_SStructParCSRVector_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -543,9 +576,11 @@ bHYPRE_SStructParCSRVector_Initialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Initialize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Initialize)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -566,9 +601,11 @@ bHYPRE_SStructParCSRVector_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -585,9 +622,11 @@ bHYPRE_SStructParCSRVector_Clear(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Clear)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Clear)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -605,10 +644,12 @@ bHYPRE_SStructParCSRVector_Copy(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Copy)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Copy)(
     self,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -631,10 +672,12 @@ bHYPRE_SStructParCSRVector_Clone(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Clone)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Clone)(
     self,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -652,10 +695,12 @@ bHYPRE_SStructParCSRVector_Scale(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Scale)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Scale)(
     self,
     a,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -674,11 +719,13 @@ bHYPRE_SStructParCSRVector_Dot(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Dot)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Dot)(
     self,
     x,
     d,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -697,11 +744,13 @@ bHYPRE_SStructParCSRVector_Axpy(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Axpy)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Axpy)(
     self,
     a,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -759,9 +808,11 @@ bHYPRE_SStructParCSRVector__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -795,9 +846,11 @@ bHYPRE_SStructParCSRVector__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1054,8 +1107,8 @@ bHYPRE_SStructParCSRVector__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructParCSRVector__object*
-bHYPRE_SStructParCSRVector__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructParCSRVector__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

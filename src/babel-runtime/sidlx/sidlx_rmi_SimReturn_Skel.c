@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimReturn_Skel.c
  * Symbol:        sidlx.rmi.SimReturn-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side glue code for sidlx.rmi.SimReturn
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -38,65 +38,65 @@ impl_sidlx_rmi_SimReturn__dtor(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseException(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_Return__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_Return__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidlx_rmi_SimReturn__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_SimReturn__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(void* bi, sidl_BaseInterface* 
+  _ex);
 extern
 void
 impl_sidlx_rmi_SimReturn_init(
@@ -345,65 +345,65 @@ impl_sidlx_rmi_SimReturn_packSerializableArray(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseException__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseException(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializable__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_Return__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_Return__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidlx_rmi_SimReturn__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(const char* url,
+  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_SimReturn__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(void* bi,
+  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(void* bi, sidl_BaseInterface* 
+  _ex);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -455,123 +455,118 @@ void sidlx_rmi_SimReturn__call_load(void) {
   sidl_BaseInterface _throwaway_exception = NULL;
   impl_sidlx_rmi_SimReturn__load(&_throwaway_exception);
 }
-struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
-struct sidl_BaseClass__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_BaseClass__object* skel_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseException__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(const char* url,
+  skel_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseException(url, ar, _ex);
 }
 
 struct sidl_BaseException__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_BaseException(void* bi,
+  skel_sidlx_rmi_SimReturn_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_BaseException(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(const char* url,
+  skel_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_BaseInterface(url, ar, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(void* bi,
+  skel_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_BaseInterface(bi, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
-struct sidl_ClassInfo__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_ClassInfo__object* skel_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(const char* url,
+  skel_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_RuntimeException(url, ar, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(void* bi,
+  skel_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_RuntimeException(bi, _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(const char* url,
+  skel_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializable(url, ar, _ex);
 }
 
 struct sidl_io_Serializable__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(void* bi,
+  skel_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializable(bi, _ex);
 }
 
 struct sidl_io_Serializer__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(const char* url,
+  skel_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_io_Serializer(url, ar, _ex);
 }
 
 struct sidl_io_Serializer__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(void* bi,
+  skel_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_io_Serializer(bi, _ex);
 }
 
 struct sidl_rmi_Return__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidl_rmi_Return(url, ar, _ex);
 }
 
-struct sidl_rmi_Return__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(void* bi,
-  sidl_BaseInterface *_ex) { 
+struct sidl_rmi_Return__object* skel_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(
+  void* bi, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidl_rmi_Return(bi, _ex);
 }
 
 struct sidlx_rmi_SimReturn__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(const char* url,
+  skel_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_SimReturn(url, ar, _ex);
 }
 
 struct sidlx_rmi_SimReturn__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(void* bi,
+  skel_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_SimReturn(bi, _ex);
 }
 
 struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) { 
+  skel_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) { 
   return impl_sidlx_rmi_SimReturn_fconnect_sidlx_rmi_Socket(url, ar, _ex);
 }
 
 struct sidlx_rmi_Socket__object* 
-  skel_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(void* bi,
-  sidl_BaseInterface *_ex) { 
+  skel_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(void* bi, sidl_BaseInterface 
+  *_ex) { 
   return impl_sidlx_rmi_SimReturn_fcast_sidlx_rmi_Socket(bi, _ex);
 }
 

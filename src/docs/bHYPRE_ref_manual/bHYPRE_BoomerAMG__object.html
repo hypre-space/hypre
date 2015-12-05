@@ -1,0 +1,78 @@
+<html><head><TITLE>bHYPRE_BoomerAMG__object</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  struct  bHYPRE_BoomerAMG__object  </H2><BLOCKQUOTE>
+
+Symbol "bHYPRE
+</BLOCKQUOTE>
+<A NAME="DOC.DOCU">
+<hr>
+ <h2> Documentation </h2>
+<BLOCKQUOTE>
+
+Symbol "bHYPRE.BoomerAMG" (version 1.0.0)<P>Algebraic multigrid solver, based on classical Ruge-Stueben.<P>BoomerAMG requires an IJParCSR matrix<P>The following optional parameters are available and may be set
+using the appropriate <TT>Parameter</tt> function (as indicated in
+parentheses):<P><DL><P><DT><B>MaxLevels</B><DD> (<TT>Int</tt>) - maximum number of multigrid
+levels.<P><DT><B>StrongThreshold</B><DD> (<TT>Double</tt>) - AMG strength threshold.<P><DT><B>MaxRowSum</B><DD> (<TT>Double</tt>) -<P><DT><B>CoarsenType</B><DD> (<TT>Int</tt>) - type of parallel coarsening
+algorithm used.<P><DT><B>MeasureType</B><DD> (<TT>Int</tt>) - type of measure used; local or
+global.<P><DT><B>CycleType</B><DD> (<TT>Int</tt>) - type of cycle used; a V-cycle
+(default) or a W-cycle.<P><DT><B>NumGridSweeps</B><DD> (<TT>IntArray 1D</tt>) - number of sweeps for
+fine and coarse grid, up and down cycle. DEPRECATED:
+Use NumSweeps or Cycle?NumSweeps instead.<P><DT><B>NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for fine grid, up and
+down cycle.<P><DT><B>Cycle1NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for down cycle<P><DT><B>Cycle2NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for up cycle<P><DT><B>Cycle3NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for coarse grid<P><DT><B>GridRelaxType</B><DD> (<TT>IntArray 1D</tt>) - type of smoother used on
+fine and coarse grid, up and down cycle. DEPRECATED:
+Use RelaxType or Cycle?RelaxType instead.<P><DT><B>RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for fine grid, up and
+down cycle.<P><DT><B>Cycle1RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for down cycle<P><DT><B>Cycle2RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for up cycle<P><DT><B>Cycle3RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for coarse grid<P><DT><B>GridRelaxPoints</B><DD> (<TT>IntArray 2D</tt>) - point ordering used in
+relaxation.  DEPRECATED.<P><DT><B>RelaxWeight</B><DD> (<TT>DoubleArray 1D</tt>) - relaxation weight for
+smoothed Jacobi and hybrid SOR.  DEPRECATED:
+Instead, use the RelaxWt parameter and the SetLevelRelaxWt function.<P><DT><B>RelaxWt</B><DD> (<TT>Int</tt>) - relaxation weight for all levels for
+smoothed Jacobi and hybrid SOR.<P><DT><B>TruncFactor</B><DD> (<TT>Double</tt>) - truncation factor for
+interpolation.<P><DT><B>JacobiTruncThreshold</B><DD> (<TT>Double</tt>) - threshold for truncation
+of Jacobi interpolation.<P><DT><B>SmoothType</B><DD> (<TT>Int</tt>) - more complex smoothers.<P><DT><B>SmoothNumLevels</B><DD> (<TT>Int</tt>) - number of levels for more
+complex smoothers.<P><DT><B>SmoothNumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for more
+complex smoothers.<P><DT><B>PrintFileName</B><DD> (<TT>String</tt>) - name of file printed to in
+association with <TT>SetPrintLevel</tt>.<P><DT><B>NumFunctions</B><DD> (<TT>Int</tt>) - size of the system of PDEs
+(when using the systems version).<P><DT><B>DOFFunc</B><DD> (<TT>IntArray 1D</tt>) - mapping that assigns the
+function to each variable (when using the systems version).<P><DT><B>Variant</B><DD> (<TT>Int</tt>) - variant of Schwarz used.<P><DT><B>Overlap</B><DD> (<TT>Int</tt>) - overlap for Schwarz.<P><DT><B>DomainType</B><DD> (<TT>Int</tt>) - type of domain used for Schwarz.<P><DT><B>SchwarzRlxWeight</B><DD> (<TT>Double</tt>) - the smoothing parameter
+for additive Schwarz.<P><DT><B>Tolerance</B><DD> (<TT>Double</tt>) - convergence tolerance, if this
+is used as a solver; ignored if this is used as a preconditioner<P><DT><B>DebugFlag</B><DD> (<TT>Int</tt>) -<P><DT><B>InterpType</B><DD> (<TT>Int</tt>) - Defines which parallel interpolation
+operator is used. There are the following options for interp_type: <P><TABLE BORDER>
+<TR><TD> </TD></TR><TR><TD>
+0 </TD><TD>	classical modified interpolation </TD></TR><TD>
+1 </TD><TD>	LS interpolation (for use with GSMG) </TD></TR><TD>
+2 </TD><TD>	classical modified interpolation for hyperbolic PDEs </TD></TR><TD>
+3 </TD><TD>	direct interpolation (with separation of weights) </TD></TR><TD>
+4 </TD><TD>	multipass interpolation </TD></TR><TD>
+5 </TD><TD>	multipass interpolation (with separation of weights) </TD></TR><TD>
+6 </TD><TD>  extended classical modified interpolation </TD></TR><TD>
+7 </TD><TD>  extended (if no common C neighbor) classical modified interpolation </TD></TR><TD>
+8 </TD><TD>	standard interpolation </TD></TR><TD>
+9 </TD><TD>	standard interpolation (with separation of weights) </TD></TR><TD>
+10 </TD><TD>	classical block interpolation (for use with nodal systems version only) </TD></TR><TD>
+11 </TD><TD>	classical block interpolation (for use with nodal systems version only) </TD></TR><TD>
+</TD><TD>	with diagonalized diagonal blocks </TD></TR><TD>
+12 </TD><TD>	FF interpolation </TD></TR><TD>
+13 </TD><TD>	FF1 interpolation </TD></TR><TD>
+</TD></TR><TR><TD>
+</TR></TABLE><P>The default is 0. <P><DT><B>NumSamples</B><DD> (<TT>Int</tt>) - Defines the number of sample vectors used
+in GSMG or LS interpolation.<P><DT><B>MaxIterations</B><DD> (<TT>Int</tt>) - maximum number of iterations<P><DT><B>Logging</B><DD> (<TT>Int</tt>) - Set the <IT>logging level</IT>, specifying the
+degree of additional informational data to be accumulated.  Does
+nothing by default (level = 0).  Other levels (if any) are
+implementation-specific.  Must be called before <TT>Setup</tt>
+and <TT>Apply</tt>.<P><DT><B>PrintLevel</B><DD> (<TT>Int</tt>) - Set the <IT>print level</IT>, specifying the
+degree of informational data to be printed either to the screen or
+to a file.  Does nothing by default (level=0).  Other levels
+(if any) are implementation-specific.  Must be called before
+<TT>Setup</tt> and <TT>Apply</tt>.<P></DL><P>The following function is specific to this class:<P><DL><P><DT><B>SetLevelRelxWeight</B><DD> (<TT>Double , \tt Int</tt>) -
+relaxation weight for one specified level of smoothed Jacobi and hybrid SOR.<P></DL><P>Objects of this type can be cast to Solver objects using the
+<TT>__cast</tt> methods.
+
+</BLOCKQUOTE>
+<DL>
+</DL>
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

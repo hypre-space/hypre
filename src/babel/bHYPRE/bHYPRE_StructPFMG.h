@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructPFMG.h
  * Symbol:        bHYPRE.StructPFMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.StructPFMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -147,10 +147,12 @@ bHYPRE_StructPFMG_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -165,10 +167,12 @@ bHYPRE_StructPFMG_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -182,9 +186,11 @@ bHYPRE_StructPFMG_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -203,10 +209,12 @@ bHYPRE_StructPFMG_SetOperator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetOperator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetOperator)(
     self,
     A,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -225,10 +233,12 @@ bHYPRE_StructPFMG_SetTolerance(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetTolerance)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetTolerance)(
     self,
     tolerance,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -247,10 +257,12 @@ bHYPRE_StructPFMG_SetMaxIterations(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetMaxIterations)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetMaxIterations)(
     self,
     max_iterations,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -273,10 +285,12 @@ bHYPRE_StructPFMG_SetLogging(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetLogging)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetLogging)(
     self,
     level,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -299,10 +313,12 @@ bHYPRE_StructPFMG_SetPrintLevel(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetPrintLevel)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetPrintLevel)(
     self,
     level,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -320,10 +336,12 @@ bHYPRE_StructPFMG_GetNumIterations(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetNumIterations)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetNumIterations)(
     self,
     num_iterations,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -341,10 +359,12 @@ bHYPRE_StructPFMG_GetRelResidualNorm(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetRelResidualNorm)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetRelResidualNorm)(
     self,
     norm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -363,10 +383,12 @@ bHYPRE_StructPFMG_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -407,11 +429,13 @@ bHYPRE_StructPFMG_SetIntParameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetIntParameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetIntParameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -430,11 +454,13 @@ bHYPRE_StructPFMG_SetDoubleParameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetDoubleParameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetDoubleParameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -453,11 +479,13 @@ bHYPRE_StructPFMG_SetStringParameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetStringParameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetStringParameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -477,17 +505,22 @@ bHYPRE_StructPFMG_SetIntArray1Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
   struct sidl_int__array value_real;
   struct sidl_int__array*value_tmp = &value_real;
   value_upper[0] = nvalues-1;
-  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper,
+  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper, 
     value_stride);
-  return (*self->d_epv->f_SetIntArray1Parameter)(
+  _result = (*self->d_epv->f_SetIntArray1Parameter)(
     self,
     name,
     value_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)value_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -506,11 +539,13 @@ bHYPRE_StructPFMG_SetIntArray2Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetIntArray2Parameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetIntArray2Parameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -530,17 +565,22 @@ bHYPRE_StructPFMG_SetDoubleArray1Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
   struct sidl_double__array value_real;
   struct sidl_double__array*value_tmp = &value_real;
   value_upper[0] = nvalues-1;
-  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper,
+  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper, 
     value_stride);
-  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+  _result = (*self->d_epv->f_SetDoubleArray1Parameter)(
     self,
     name,
     value_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)value_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -559,11 +599,13 @@ bHYPRE_StructPFMG_SetDoubleArray2Parameter(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetDoubleArray2Parameter)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetDoubleArray2Parameter)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -582,11 +624,13 @@ bHYPRE_StructPFMG_GetIntValue(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetIntValue)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetIntValue)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -605,11 +649,13 @@ bHYPRE_StructPFMG_GetDoubleValue(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetDoubleValue)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetDoubleValue)(
     self,
     name,
     value,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -629,11 +675,13 @@ bHYPRE_StructPFMG_Setup(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Setup)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Setup)(
     self,
     b,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -652,11 +700,13 @@ bHYPRE_StructPFMG_Apply(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Apply)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Apply)(
     self,
     b,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -675,11 +725,13 @@ bHYPRE_StructPFMG_ApplyAdjoint(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_ApplyAdjoint)(
+  int32_t _result;
+  _result = (*self->d_epv->f_ApplyAdjoint)(
     self,
     b,
     x,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -737,9 +789,11 @@ bHYPRE_StructPFMG__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -773,9 +827,11 @@ bHYPRE_StructPFMG__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -1032,8 +1088,8 @@ bHYPRE_StructPFMG__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_StructPFMG__object*
-bHYPRE_StructPFMG__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_StructPFMG__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -1,28 +1,18 @@
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team. UCRL-CODE-222953.
-# All rights reserved.
-#
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer, contact information and the GNU Lesser General Public License.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
 #
 # HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License (as published by the Free Software 
-# Foundation) version 2.1 dated February 1999.
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
 #
-# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-# Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# $Revision: 2.83 $
+# $Revision: 2.99 $
 #EHEADER**********************************************************************
+
+
+
+
 
 
 #=============================================================================
@@ -30,8 +20,91 @@
 # recent release.
 #=============================================================================
 
+#====================================
 
-Version 2.2.0b released, 2007/09/XX.
+Version 2.4.0b released XXXX/XX/XX
+
+- Fixed some Fortran interface bugs.
+
+- Added two additional Krylov solvers: Flexible GMRES and LGMRES
+
+- Added a fortran example: /examples/ex5f.f
+
+- Updated SuperLU to version 3.0
+
+- Improved relaxation options in AMS.
+
+- Changed 'make clean' to erase the hypre/ directory.
+
+#====================================
+
+Version 2.3.2a released, 2008/05/08.
+
+- Fixed a couple of bugs associated with SStructGridSetNeighborPart.
+
+- Added absolute convergence tolerance stopping criteria to GMRES, CG, and
+  BiCGStab (See HYPRE_GMRESSetAbsoluteTolerance, HYPRE_PCGSetAbsoluteTolerance,
+  or HYPRE_BiCGSTABSetAbsoluteTolerance in the reference manual for details).
+
+- Updated error checking for CG and BiCGStab.
+
+- Fixed a bug in AMG when the maximum number of levels is set to 1.
+
+- Added two new solver types to AMS: a Hiptmair-like smoother (type 0), and
+  one based on a block 4x4 coarse-grid matrix (type 20).
+
+#====================================
+
+Version 2.3.1a released, 2008/01/31.
+
+- A bug fix (uninitialized variables introduced when AMS was added to
+  the FEI preconditioner list).
+
+- Fixed a memory allocation bug in new SStruct SetNeighborPart feature.
+
+- Added a new option for the Schwarz smoothers
+  (HYPRE_BoomerAMGSetSchwarzUseNonSymm and HYPRE_SchwarzSetNonSymm) to use LU
+  instead of Cholesky LAPACK functions to invert the matrix blocks.
+
+- Fixed a bug with the Schwarz smoothers and the ESSL compile.
+
+#====================================
+
+Version 2.3.0a released, 2008/01/28.
+
+- Completed the implementation of SStructGridSetNeighborBox to work for all
+  variable types (not just cell-centered).  In the process, we discovered that
+  the interface design for this routine can result in ambiguous coordinate
+  transformations between parts, so the new SetNeighborPart routine (below)
+  should be used instead.
+
+- Introduced the SStructGridSetNeighborPart routine.  Users migrating from
+  SetNeighborBox to this new routine only need to change the name ("Box" to
+  "Part") and append an additional argument 'index_dir'.  See the reference
+  manual for details.
+
+- The SStructSplit solver can now be used as a standalone solver (before, it
+  could only be used as a preconditioner).  Added HYPRE_Jacobi as an option to
+  SetStructSolver.
+
+- Added Get(Box)Values routines for Struct/SStruct Matrix.
+
+- Added nodal interpolation schemes to BoomerAMG for systems problems.
+
+- Added capability to change Euclid runtime parameters using individual
+  functions.
+
+- Improved use of Euclid as smoother in BoomerAMG.
+
+- Fixed two potential bugs in BoomerAMG.
+
+- Fixed a major bug with the OpenMP code in hypre (beginning with v1.7.5b,
+  OpenMP support was effectively disabled in the code).  Also made several
+  additional OpenMP changes/fixes.
+
+#====================================
+
+Version 2.2.0b released, 2007/09/20.
 
 - Renovate the FEI block preconditioner which will be useful for ALE3D
   simulation of mixed variable type problem

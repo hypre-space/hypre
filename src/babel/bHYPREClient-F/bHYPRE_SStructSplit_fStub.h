@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructSplit_fStub.h
  * Symbol:        bHYPRE.SStructSplit-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.SStructSplit
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -43,8 +43,8 @@ bHYPRE_SStructSplit__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructSplit__object*
-bHYPRE_SStructSplit__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructSplit__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -2,9 +2,9 @@
  * File:          sidl_BaseClass_Impl.h
  * Symbol:        sidl.BaseClass-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_BaseClass_Impl.h,v 1.7 2006/08/29 22:29:49 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_BaseClass_Impl.h,v 1.8 2007/09/27 19:35:42 painter Exp $
  * Description:   Server-side implementation for sidl.BaseClass
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -127,27 +127,27 @@ impl_sidl_BaseClass__dtor(
  */
 
 extern struct sidl_BaseClass__object* 
-  impl_sidl_BaseClass_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_sidl_BaseClass_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_sidl_BaseClass_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_sidl_BaseClass_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidl_BaseClass_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_BaseClass_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidl_BaseClass_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_BaseClass_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_sidl_BaseClass_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_BaseClass_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidl_BaseClass_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_BaseClass_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidl_BaseClass_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex);
 extern
 void
 impl_sidl_BaseClass_addRef(
@@ -181,27 +181,27 @@ impl_sidl_BaseClass_getClassInfo(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidl_BaseClass_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  impl_sidl_BaseClass_fconnect_sidl_BaseClass(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_BaseClass__object* 
-  impl_sidl_BaseClass_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_BaseClass__object* impl_sidl_BaseClass_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidl_BaseClass_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
   sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_BaseClass_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidl_BaseClass_fcast_sidl_BaseInterface(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
-extern struct sidl_ClassInfo__object* 
-  impl_sidl_BaseClass_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* _ex);
+extern struct sidl_ClassInfo__object* impl_sidl_BaseClass_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_BaseClass_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidl_BaseClass_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_BaseClass_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_sidl_BaseClass_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex);
 #ifdef __cplusplus
 }
 #endif

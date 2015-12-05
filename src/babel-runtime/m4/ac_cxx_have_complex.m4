@@ -5,7 +5,7 @@ dnl @synopsis AC_CXX_HAVE_COMPLEX
 dnl
 dnl If the compiler has complex<T>, define HAVE_COMPLEX.
 dnl
-dnl @version $Id: ac_cxx_have_complex.m4,v 1.6 2006/08/29 22:29:23 painter Exp $
+dnl @version $Id: ac_cxx_have_complex.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_COMPLEX],

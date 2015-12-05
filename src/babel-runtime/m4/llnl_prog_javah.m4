@@ -7,7 +7,7 @@ dnl the full path of javah.  Unlike Luc's implementation, this doesn't
 dnl update CPPFLAGS.  Instead it defines JNI_INCLUDES.
 dnl
 dnl @author Luc Maisonobe
-dnl @version $Id: llnl_prog_javah.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: llnl_prog_javah.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl
 dnl It also creates JNI_LDFLAGS for wherever libjava and libjvm are
 dnl 
@@ -181,7 +181,7 @@ AC_CACHE_CHECK([for path to libjvm.{a,so} or client/libjvm.{a,so} ],
      ;;
    aix*)
      llnl_cv_lib_jvm=`find $javatopdir  \
-	-name "libjvm.*" -print2> /dev/null | head -n 1`
+	-name "libjvm.*" -print 2> /dev/null | head -n 1`
      if test -z "$llnl_cv_lib_jvm"; then
 	llnl_cv_lib_jvm=`find $javatopdir \
 	   -name "libkaffevm.*" -print 2> /dev/null | head -n 1`

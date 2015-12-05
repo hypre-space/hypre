@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.13 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
+
 
 
 #include "headers.h"
@@ -1035,7 +1022,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -1880,7 +1867,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -2952,7 +2939,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -3957,7 +3944,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)
@@ -4969,7 +4956,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
        P_marker[i] = col_map_offd_P[i];
 
      /* Check if sort actually changed anything */
-     if(ssort(col_map_offd_P,num_cols_P_offd))
+     if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
 	 for(j = 0; j < num_cols_P_offd; j++)

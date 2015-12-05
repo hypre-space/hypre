@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_StructMatrix_Impl.f
 C       Symbol:        bHYPRE.StructMatrix-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.StructMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -72,7 +72,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_StructMatrix__cast2_f(self, name, retval,
+        subroutine bHYPRE_StructMatrix__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -156,7 +156,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_StructMatrix_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_StructMatrix_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -178,7 +178,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_StructMatrix_isType_f(self, name, retval,
+        subroutine bHYPRE_StructMatrix_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -197,7 +197,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_StructMatrix_getClassInfo_f(self, retval,
+        subroutine bHYPRE_StructMatrix_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -215,7 +215,7 @@ C        Set the grid on which vectors are defined.  This and the stencil
 C       determine the matrix structure. 
 C       
 
-        subroutine bHYPRE_StructMatrix_SetGrid_f(self, grid, retval,
+        subroutine bHYPRE_StructMatrix_SetGrid_f(self, grid, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -234,7 +234,7 @@ C       Method:  SetStencil[]
 C        Set the stencil. This and the grid determine the matrix structure. 
 C       
 
-        subroutine bHYPRE_StructMatrix_SetStencil_f(self, stencil,
+        subroutine bHYPRE_StructMatrix_SetStencil_f(self, stencil, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -256,8 +256,8 @@ C       "index" is an array of size "dim"; and "stencil_indices" and "values"
 C       are arrays of size "num_stencil_indices".
 C       
 
-        subroutine bHYPRE_StructMatrix_SetValues_f(self, index, dim,
-     &     num_stencil_indices, stencil_indices, values, retval,
+        subroutine bHYPRE_StructMatrix_SetValues_f(self, index, dim, 
+     &     num_stencil_indices, stencil_indices, values, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -293,8 +293,8 @@ C       array of size "num_stencil_indices", and "values" is an array of size
 C       "nvalues". 
 C       
 
-        subroutine bHYPRE_StructMatrix_SetBoxValues_f(self, ilower,
-     &     iupper, dim, num_stencil_indices, stencil_indices, values,
+        subroutine bHYPRE_StructMatrix_SetBoxValues_f(self, ilower, 
+     &     iupper, dim, num_stencil_indices, stencil_indices, values, 
      &     nvalues, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -327,7 +327,7 @@ C       for each dimension.
 C       "num_ghost" is an array of size "dim2", twice the number of dimensions
 C       
 
-        subroutine bHYPRE_StructMatrix_SetNumGhost_f(self, num_ghost,
+        subroutine bHYPRE_StructMatrix_SetNumGhost_f(self, num_ghost, 
      &     dim2, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -349,7 +349,7 @@ C        Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage 
 C       available. 
 C       
 
-        subroutine bHYPRE_StructMatrix_SetSymmetric_f(self, symmetric,
+        subroutine bHYPRE_StructMatrix_SetSymmetric_f(self, symmetric, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -371,7 +371,7 @@ C       (ii) all (stencil_constant_points should include all stencil points)
 C       (iii) all entries but the diagonal. 
 C       
 
-        subroutine bHYPRE_StructMatrix_SetConstantEntries_f(self,
+        subroutine bHYPRE_StructMatrix_SetConstantEntries_f(self, 
      &     num_stencil_constant_points, stencil_constant_points, retval,
      &     exception)
         implicit none
@@ -384,8 +384,8 @@ C        out int retval
 C        out sidl.BaseInterface exception
         integer*8 exception
 C        in rarray<int> stencil_constant_points(num_stencil_constant_points)
-        integer*4 
-     &     stencil_constant_points(0:num_stencil_constant_points-1)
+        integer*4 stencil_constant_points(
+     &     0:num_stencil_constant_points-1)
         end
 
 
@@ -397,8 +397,8 @@ C       "stencil_indices" and "values" is each an array of length
 C       "num_stencil_indices" 
 C       
 
-        subroutine bHYPRE_StructMatrix_SetConstantValues_f(self,
-     &     num_stencil_indices, stencil_indices, values, retval,
+        subroutine bHYPRE_StructMatrix_SetConstantValues_f(self, 
+     &     num_stencil_indices, stencil_indices, values, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -458,7 +458,7 @@ C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
 
-        subroutine bHYPRE_StructMatrix_Initialize_f(self, retval,
+        subroutine bHYPRE_StructMatrix_Initialize_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -479,7 +479,7 @@ C       Initialize preceding Assemble. Values can only be set in
 C       between a call to Initialize and Assemble.
 C       
 
-        subroutine bHYPRE_StructMatrix_Assemble_f(self, retval,
+        subroutine bHYPRE_StructMatrix_Assemble_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -496,7 +496,7 @@ C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetIntParameter_f(self, name,
+        subroutine bHYPRE_StructMatrix_SetIntParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -517,7 +517,7 @@ C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetDoubleParameter_f(self, name,
+        subroutine bHYPRE_StructMatrix_SetDoubleParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -538,7 +538,7 @@ C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetStringParameter_f(self, name,
+        subroutine bHYPRE_StructMatrix_SetStringParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -559,7 +559,7 @@ C       Method:  SetIntArray1Parameter[]
 C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetIntArray1Parameter_f(self,
+        subroutine bHYPRE_StructMatrix_SetIntArray1Parameter_f(self, 
      &     name, value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -582,7 +582,7 @@ C       Method:  SetIntArray2Parameter[]
 C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetIntArray2Parameter_f(self,
+        subroutine bHYPRE_StructMatrix_SetIntArray2Parameter_f(self, 
      &     name, value, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -603,7 +603,7 @@ C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetDoubleArray1Parameter_f(self,
+        subroutine bHYPRE_StructMatrix_SetDoubleArray1Parameter_f(self, 
      &     name, value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -626,7 +626,7 @@ C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_SetDoubleArray2Parameter_f(self,
+        subroutine bHYPRE_StructMatrix_SetDoubleArray2Parameter_f(self, 
      &     name, value, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -647,7 +647,7 @@ C       Method:  GetIntValue[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_GetIntValue_f(self, name, value,
+        subroutine bHYPRE_StructMatrix_GetIntValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -668,7 +668,7 @@ C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_StructMatrix_GetDoubleValue_f(self, name,
+        subroutine bHYPRE_StructMatrix_GetDoubleValue_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -690,7 +690,7 @@ C       (Optional) Do any preprocessing that may be necessary in
 C       order to execute {\tt Apply}.
 C       
 
-        subroutine bHYPRE_StructMatrix_Setup_f(self, b, x, retval,
+        subroutine bHYPRE_StructMatrix_Setup_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -711,7 +711,7 @@ C       Method:  Apply[]
 C       Apply the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_StructMatrix_Apply_f(self, b, x, retval,
+        subroutine bHYPRE_StructMatrix_Apply_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -732,7 +732,7 @@ C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_StructMatrix_ApplyAdjoint_f(self, b, x,
+        subroutine bHYPRE_StructMatrix_ApplyAdjoint_f(self, b, x, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -774,7 +774,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_StructMatrix__getURL_f(self, retval,
+        subroutine bHYPRE_StructMatrix__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -791,7 +791,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_StructMatrix__isRemote_f(self, retval,
+        subroutine bHYPRE_StructMatrix__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -808,7 +808,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_StructMatrix__isLocal_f(self, retval,
+        subroutine bHYPRE_StructMatrix__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructMatrix self
@@ -841,7 +841,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_StructMatrix__set_hooks_static_f(on,
+        subroutine bHYPRE_StructMatrix__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

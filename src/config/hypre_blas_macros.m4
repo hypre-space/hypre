@@ -1,28 +1,15 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.4 $
- ***********************************************************************EHEADER*/
+dnl #*BHEADER********************************************************************
+dnl # Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+dnl # Produced at the Lawrence Livermore National Laboratory.
+dnl # This file is part of HYPRE.  See file COPYRIGHT for details.
+dnl #
+dnl # HYPRE is free software; you can redistribute it and/or modify it under the
+dnl # terms of the GNU Lesser General Public License (as published by the Free
+dnl # Software Foundation) version 2.1 dated February 1999.
+dnl #
+dnl # $Revision: 1.6 $
+dnl #EHEADER*********************************************************************
+
 
 
 
@@ -54,7 +41,7 @@ dnl to run it if it is not found.
 dnl
 dnl This macro requires autoconf 2.50 or later.
 dnl
-dnl @version $Id: hypre_blas_macros.m4,v 1.4 2006/09/22 22:05:59 hill66 Exp $
+dnl @version $Id: hypre_blas_macros.m4,v 1.6 2008/07/18 01:32:19 ulrikey Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 dnl
 AC_DEFUN([HYPRE_FIND_BLAS],

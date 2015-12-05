@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.4 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -47,6 +34,7 @@ HYPRE_ParCSRBiCGSTABCreate( MPI_Comm comm, HYPRE_Solver *solver )
          hypre_ParKrylovDestroyVector, hypre_ParKrylovMatvecCreate,
          hypre_ParKrylovMatvec, hypre_ParKrylovMatvecDestroy,
          hypre_ParKrylovInnerProd, hypre_ParKrylovCopyVector,
+         hypre_ParKrylovClearVector,
          hypre_ParKrylovScaleVector, hypre_ParKrylovAxpy,
          hypre_ParKrylovCommInfo,
          hypre_ParKrylovIdentitySetup, hypre_ParKrylovIdentity );
@@ -110,7 +98,16 @@ HYPRE_ParCSRBiCGSTABSetTol( HYPRE_Solver solver,
 {
    return( HYPRE_BiCGSTABSetTol( solver, tol ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSetAbsoluteTol
+ *--------------------------------------------------------------------------*/
 
+int
+HYPRE_ParCSRBiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
+                         double             a_tol    )
+{
+   return( HYPRE_BiCGSTABSetAbsoluteTol( solver, a_tol ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/

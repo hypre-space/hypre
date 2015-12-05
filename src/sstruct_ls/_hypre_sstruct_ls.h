@@ -1,29 +1,14 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
-
 
 #include <HYPRE_config.h>
 
@@ -44,30 +29,17 @@ extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -109,30 +81,17 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -154,30 +113,17 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -200,30 +146,17 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -239,30 +172,17 @@ typedef struct
 } hypre_PTopology;
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -366,30 +286,17 @@ typedef struct
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -495,6 +402,7 @@ int HYPRE_SStructBiCGSTABDestroy ( HYPRE_SStructSolver solver );
 int HYPRE_SStructBiCGSTABSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructBiCGSTABSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructBiCGSTABSetTol ( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructBiCGSTABSetAbsoluteTol ( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructBiCGSTABSetMinIter ( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructBiCGSTABSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructBiCGSTABSetStopCrit ( HYPRE_SStructSolver solver , int stop_crit );
@@ -505,6 +413,24 @@ int HYPRE_SStructBiCGSTABGetNumIterations ( HYPRE_SStructSolver solver , int *nu
 int HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
 int HYPRE_SStructBiCGSTABGetResidual ( HYPRE_SStructSolver solver , void **residual );
 
+/* HYPRE_sstruct_flexgmres.c */
+int HYPRE_SStructFlexGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
+int HYPRE_SStructFlexGMRESDestroy ( HYPRE_SStructSolver solver );
+int HYPRE_SStructFlexGMRESSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructFlexGMRESSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructFlexGMRESSetKDim ( HYPRE_SStructSolver solver , int k_dim );
+int HYPRE_SStructFlexGMRESSetTol ( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructFlexGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructFlexGMRESSetMinIter ( HYPRE_SStructSolver solver , int min_iter );
+int HYPRE_SStructFlexGMRESSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
+int HYPRE_SStructFlexGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
+int HYPRE_SStructFlexGMRESSetLogging ( HYPRE_SStructSolver solver , int logging );
+int HYPRE_SStructFlexGMRESSetPrintLevel ( HYPRE_SStructSolver solver , int level );
+int HYPRE_SStructFlexGMRESGetNumIterations ( HYPRE_SStructSolver solver , int *num_iterations );
+int HYPRE_SStructFlexGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
+int HYPRE_SStructFlexGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
+int HYPRE_SStructFlexGMRESSetModifyPC ( HYPRE_SStructSolver solver , HYPRE_PtrToModifyPCFcn modify_pc );
+
 /* HYPRE_sstruct_gmres.c */
 int HYPRE_SStructGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 int HYPRE_SStructGMRESDestroy ( HYPRE_SStructSolver solver );
@@ -512,6 +438,7 @@ int HYPRE_SStructGMRESSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A
 int HYPRE_SStructGMRESSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructGMRESSetKDim ( HYPRE_SStructSolver solver , int k_dim );
 int HYPRE_SStructGMRESSetTol ( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , double atol );
 int HYPRE_SStructGMRESSetMinIter ( HYPRE_SStructSolver solver , int min_iter );
 int HYPRE_SStructGMRESSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructGMRESSetStopCrit ( HYPRE_SStructSolver solver , int stop_crit );
@@ -556,6 +483,24 @@ int HYPRE_SStructFACSetLogging ( HYPRE_SStructSolver solver , int logging );
 int HYPRE_SStructFACGetNumIterations ( HYPRE_SStructSolver solver , int *num_iterations );
 int HYPRE_SStructFACGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
 
+/* HYPRE_sstruct_lgmres.c */
+int HYPRE_SStructLGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
+int HYPRE_SStructLGMRESDestroy ( HYPRE_SStructSolver solver );
+int HYPRE_SStructLGMRESSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructLGMRESSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
+int HYPRE_SStructLGMRESSetKDim ( HYPRE_SStructSolver solver , int k_dim );
+int HYPRE_SStructLGMRESSetAugDim ( HYPRE_SStructSolver solver , int aug_dim );
+int HYPRE_SStructLGMRESSetTol ( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructLGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , double atol );
+int HYPRE_SStructLGMRESSetMinIter ( HYPRE_SStructSolver solver , int min_iter );
+int HYPRE_SStructLGMRESSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
+int HYPRE_SStructLGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
+int HYPRE_SStructLGMRESSetLogging ( HYPRE_SStructSolver solver , int logging );
+int HYPRE_SStructLGMRESSetPrintLevel ( HYPRE_SStructSolver solver , int level );
+int HYPRE_SStructLGMRESGetNumIterations ( HYPRE_SStructSolver solver , int *num_iterations );
+int HYPRE_SStructLGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , double *norm );
+int HYPRE_SStructLGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
+
 /* HYPRE_sstruct_maxwell.c */
 int HYPRE_SStructMaxwellCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
 int HYPRE_SStructMaxwellDestroy ( HYPRE_SStructSolver solver );
@@ -586,6 +531,7 @@ int HYPRE_SStructPCGDestroy ( HYPRE_SStructSolver solver );
 int HYPRE_SStructPCGSetup ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructPCGSolve ( HYPRE_SStructSolver solver , HYPRE_SStructMatrix A , HYPRE_SStructVector b , HYPRE_SStructVector x );
 int HYPRE_SStructPCGSetTol ( HYPRE_SStructSolver solver , double tol );
+int HYPRE_SStructPCGSetAbsoluteTol ( HYPRE_SStructSolver solver , double tol );
 int HYPRE_SStructPCGSetMaxIter ( HYPRE_SStructSolver solver , int max_iter );
 int HYPRE_SStructPCGSetTwoNorm ( HYPRE_SStructSolver solver , int two_norm );
 int HYPRE_SStructPCGSetRelChange ( HYPRE_SStructSolver solver , int rel_change );

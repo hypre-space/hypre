@@ -2,7 +2,7 @@
  * File:          bHYPRE_PCG_IOR.h
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -337,13 +337,13 @@ extern struct bHYPRE_PCG__sepv*
 bHYPRE_PCG__statics(void);
 
 extern void bHYPRE_PCG__init(
-  struct bHYPRE_PCG__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct bHYPRE_PCG__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void bHYPRE_PCG__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct bHYPRE_Operator__epv **s_arg_epv__bhypre_operator,
   struct bHYPRE_Operator__epv **s_arg_epv_hooks__bhypre_operator,
   struct bHYPRE_PreconditionedSolver__epv 
@@ -352,77 +352,75 @@ extern void bHYPRE_PCG__getEPVs(
     **s_arg_epv_hooks__bhypre_preconditionedsolver,
   struct bHYPRE_Solver__epv **s_arg_epv__bhypre_solver,
   struct bHYPRE_Solver__epv **s_arg_epv_hooks__bhypre_solver,
-  struct bHYPRE_PCG__epv **s_arg_epv__bhypre_pcg,
-    struct bHYPRE_PCG__epv **s_arg_epv_hooks__bhypre_pcg);
+  struct bHYPRE_PCG__epv **s_arg_epv__bhypre_pcg,struct bHYPRE_PCG__epv 
+    **s_arg_epv_hooks__bhypre_pcg);
   extern void bHYPRE_PCG__fini(
     struct bHYPRE_PCG__object* self, struct sidl_BaseInterface__object ** _ex);
   extern void bHYPRE_PCG__IOR_version(int32_t *major, int32_t *minor);
 
   struct bHYPRE_MPICommunicator__object* 
-    skel_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_MPICommunicator__object* 
-    skel_bHYPRE_PCG_fcast_bHYPRE_MPICommunicator(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_PCG_fcast_bHYPRE_MPICommunicator(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
-  struct bHYPRE_Operator__object* 
-    skel_bHYPRE_PCG_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_Operator__object* skel_bHYPRE_PCG_fconnect_bHYPRE_Operator(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_Operator__object* skel_bHYPRE_PCG_fcast_bHYPRE_Operator(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_PCG__object* skel_bHYPRE_PCG_fconnect_bHYPRE_PCG(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct bHYPRE_PCG__object* skel_bHYPRE_PCG_fcast_bHYPRE_PCG(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_PCG__object* skel_bHYPRE_PCG_fcast_bHYPRE_PCG(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_PreconditionedSolver__object* 
-    skel_bHYPRE_PCG_fconnect_bHYPRE_PreconditionedSolver(const char* url,
+    skel_bHYPRE_PCG_fconnect_bHYPRE_PreconditionedSolver(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_PreconditionedSolver__object* 
-    skel_bHYPRE_PCG_fcast_bHYPRE_PreconditionedSolver(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_PCG_fcast_bHYPRE_PreconditionedSolver(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_Solver__object* skel_bHYPRE_PCG_fconnect_bHYPRE_Solver(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct bHYPRE_Solver__object* skel_bHYPRE_PCG_fcast_bHYPRE_Solver(void *bi,
+  struct bHYPRE_Solver__object* skel_bHYPRE_PCG_fcast_bHYPRE_Solver(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_Vector__object* skel_bHYPRE_PCG_fconnect_bHYPRE_Vector(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct bHYPRE_Vector__object* skel_bHYPRE_PCG_fcast_bHYPRE_Vector(void *bi,
+  struct bHYPRE_Vector__object* skel_bHYPRE_PCG_fcast_bHYPRE_Vector(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseClass__object* skel_bHYPRE_PCG_fconnect_sidl_BaseClass(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct sidl_BaseClass__object* skel_bHYPRE_PCG_fcast_sidl_BaseClass(void *bi,
+  struct sidl_BaseClass__object* skel_bHYPRE_PCG_fcast_sidl_BaseClass(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_PCG_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+    skel_bHYPRE_PCG_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
     struct sidl_BaseInterface__object **_ex);
-  struct sidl_BaseInterface__object* 
-    skel_bHYPRE_PCG_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseInterface__object* skel_bHYPRE_PCG_fcast_sidl_BaseInterface(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* skel_bHYPRE_PCG_fconnect_sidl_ClassInfo(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct sidl_ClassInfo__object* skel_bHYPRE_PCG_fcast_sidl_ClassInfo(void *bi,
+  struct sidl_ClassInfo__object* skel_bHYPRE_PCG_fcast_sidl_ClassInfo(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_PCG_fconnect_sidl_RuntimeException(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_PCG_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_PCG_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_PCG_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_PCG__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructDiagScale_Impl.c
  * Symbol:        bHYPRE.SStructDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.SStructDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -36,8 +36,8 @@
 
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -54,9 +54,9 @@ impl_bHYPRE_SStructDiagScale__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale._load) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._load) */
   }
 }
 /*
@@ -76,7 +76,7 @@ impl_bHYPRE_SStructDiagScale__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale._ctor) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale._ctor} (constructor method) */
 
    struct bHYPRE_SStructDiagScale__data * data;
@@ -86,7 +86,7 @@ impl_bHYPRE_SStructDiagScale__ctor(
    bHYPRE_SStructDiagScale__set_data( self, data );
    /* hypre diagonal scaling requires no constructor or setup. */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._ctor) */
   }
 }
 
@@ -136,7 +136,7 @@ impl_bHYPRE_SStructDiagScale__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale._dtor) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale._dtor} (destructor method) */
 
    struct bHYPRE_SStructDiagScale__data * data;
@@ -147,7 +147,7 @@ impl_bHYPRE_SStructDiagScale__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale._dtor) */
   }
 }
 
@@ -169,7 +169,7 @@ impl_bHYPRE_SStructDiagScale_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.Create} (Create method) */
 
    bHYPRE_SStructDiagScale solver = bHYPRE_SStructDiagScale__create(_ex); SIDL_CHECK(*_ex);
@@ -183,7 +183,7 @@ impl_bHYPRE_SStructDiagScale_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Create) */
   }
 }
 
@@ -206,7 +206,7 @@ impl_bHYPRE_SStructDiagScale_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetOperator) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetOperator} (SetOperator method) */
 
    int ierr = 0;
@@ -219,7 +219,7 @@ impl_bHYPRE_SStructDiagScale_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetOperator) */
   }
 }
 
@@ -242,12 +242,12 @@ impl_bHYPRE_SStructDiagScale_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetTolerance) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetTolerance} (SetTolerance method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetTolerance) */
   }
 }
 
@@ -270,12 +270,12 @@ impl_bHYPRE_SStructDiagScale_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetMaxIterations) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetMaxIterations} (SetMaxIterations method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetMaxIterations) */
   }
 }
 
@@ -302,12 +302,12 @@ impl_bHYPRE_SStructDiagScale_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetLogging) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetLogging} (SetLogging method) */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetLogging) */
   }
 }
 
@@ -334,12 +334,12 @@ impl_bHYPRE_SStructDiagScale_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetPrintLevel) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetPrintLevel} (SetPrintLevel method) */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetPrintLevel) */
   }
 }
 
@@ -361,12 +361,12 @@ impl_bHYPRE_SStructDiagScale_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetNumIterations) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.GetNumIterations} (GetNumIterations method) */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetNumIterations) */
   }
 }
 
@@ -388,12 +388,12 @@ impl_bHYPRE_SStructDiagScale_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetRelResidualNorm) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetRelResidualNorm) */
   }
 }
 
@@ -416,7 +416,7 @@ impl_bHYPRE_SStructDiagScale_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetCommunicator) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetCommunicator} (SetCommunicator method) */
 
    /* DEPRECATED   Use Create */
@@ -429,7 +429,7 @@ impl_bHYPRE_SStructDiagScale_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetCommunicator) */
   }
 }
 
@@ -480,12 +480,12 @@ impl_bHYPRE_SStructDiagScale_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetIntParameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetIntParameter} (SetIntParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetIntParameter) */
   }
 }
 
@@ -508,12 +508,12 @@ impl_bHYPRE_SStructDiagScale_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetDoubleParameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetDoubleParameter} (SetDoubleParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetDoubleParameter) */
   }
 }
 
@@ -536,12 +536,12 @@ impl_bHYPRE_SStructDiagScale_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetStringParameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetStringParameter) */
   }
 }
 
@@ -565,12 +565,12 @@ impl_bHYPRE_SStructDiagScale_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetIntArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetIntArray1Parameter} (SetIntArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetIntArray1Parameter) */
   }
 }
 
@@ -593,12 +593,12 @@ impl_bHYPRE_SStructDiagScale_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetIntArray2Parameter} (SetIntArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetIntArray2Parameter) */
   }
 }
 
@@ -622,12 +622,12 @@ impl_bHYPRE_SStructDiagScale_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetDoubleArray1Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetDoubleArray1Parameter) */
   }
 }
 
@@ -650,12 +650,12 @@ impl_bHYPRE_SStructDiagScale_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.SetDoubleArray2Parameter) */
   }
 }
 
@@ -678,12 +678,12 @@ impl_bHYPRE_SStructDiagScale_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetIntValue) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.GetIntValue} (GetIntValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetIntValue) */
   }
 }
 
@@ -706,12 +706,12 @@ impl_bHYPRE_SStructDiagScale_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.GetDoubleValue) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.GetDoubleValue} (GetDoubleValue method) */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.GetDoubleValue) */
   }
 }
 
@@ -735,12 +735,12 @@ impl_bHYPRE_SStructDiagScale_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Setup) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.Setup} (Setup method) */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Setup) */
   }
 }
 
@@ -763,7 +763,7 @@ impl_bHYPRE_SStructDiagScale_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.Apply) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.Apply} (Apply method) */
 
    int ierr = 0;
@@ -822,7 +822,7 @@ impl_bHYPRE_SStructDiagScale_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.Apply) */
   }
 }
 
@@ -845,7 +845,7 @@ impl_bHYPRE_SStructDiagScale_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.SStructDiagScale.ApplyAdjoint} (ApplyAdjoint method) */
 
    /* The adjoint of a (real) diagonal matrix is itself, so just call Apply: */
@@ -853,27 +853,27 @@ impl_bHYPRE_SStructDiagScale_ApplyAdjoint(
      return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Operator(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_Operator(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
@@ -883,67 +883,66 @@ struct bHYPRE_SStructDiagScale__object*
   return bHYPRE_SStructDiagScale__connectI(url, ar, _ex);
 }
 struct bHYPRE_SStructDiagScale__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_SStructDiagScale(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_SStructDiagScale(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_SStructDiagScale__cast(bi, _ex);
 }
 struct bHYPRE_Solver__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Solver(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Solver(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_Solver(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
 struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Vector(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Vector(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_SStructDiagScale_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_sidl_BaseClass(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_sidl_BaseClass(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_sidl_ClassInfo(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_sidl_ClassInfo(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructDiagScale_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_SStructDiagScale_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_SStructDiagScale_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_SStructDiagScale_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

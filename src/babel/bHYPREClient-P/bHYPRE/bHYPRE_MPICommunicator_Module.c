@@ -2,7 +2,7 @@
  * File:          bHYPRE_MPICommunicator_Module.c
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   implement a C extension type for a sidl extendable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -141,12 +141,12 @@ bHYPRE_MPICommunicator__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_MPICommunicator__object*
-bHYPRE_MPICommunicator__connectI(const char * url, sidl_bool ar,              \
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_MPICommunicator__connectI(const char * url, sidl_bool ar, struct       \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -171,14 +171,14 @@ static void* remote_bHYPRE_MPICommunicator__cast(
   cmp0 = strcmp(name, "sidl.BaseClass");
   if (!cmp0) {
     (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-    cast = self;
+    cast = ((struct sidl_BaseClass__object*)self);
     return cast;
   }
   else if (cmp0 < 0) {
     cmp1 = strcmp(name, "bHYPRE.MPICommunicator");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct bHYPRE_MPICommunicator__object*)self);
       return cast;
     }
   }
@@ -191,10 +191,10 @@ static void* remote_bHYPRE_MPICommunicator__cast(
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct                                                  \
       bHYPRE_MPICommunicator__remote*)self->d_data)->d_ih, _ex);
@@ -425,12 +425,12 @@ remote_bHYPRE_MPICommunicator_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -446,8 +446,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.MPICommunica
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -495,8 +495,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.MPICommunica
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -545,8 +545,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.MPICommunica
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -597,44 +597,44 @@ static void bHYPRE_MPICommunicator__init_remote_epv(void)
   e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,      \
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,  \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct      \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct   \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const    \
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct             \
-    sidl_BaseClass__object*,                                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **))            \
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e1->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
@@ -657,13 +657,13 @@ bHYPRE_MPICommunicator__remoteConnect(const char *url, sidl_bool ar,          \
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex); SIDL_CHECK(*_ex);
     return bHYPRE_MPICommunicator__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,                \
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex );         \
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_MPICommunicator__object*) malloc(
@@ -757,9 +757,8 @@ bHYPRE_MPICommunicator__remoteCreate(const char *url, sidl_BaseInterface *_ex)
   struct sidl_BaseClass__object* s1;
 
   struct bHYPRE_MPICommunicator__remote* r_obj;
-  sidl_rmi_InstanceHandle instance =                                          \
-    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.MPICommunicator",    \
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance( \
+    url, "bHYPRE.MPICommunicator", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct bHYPRE_MPICommunicator__object*) malloc(
@@ -810,8 +809,8 @@ bHYPRE_MPICommunicator__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.MPICommunicator",        \
-      (void*)bHYPRE_MPICommunicator__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.MPICommunicator", (      \
+      void*)bHYPRE_MPICommunicator__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -832,15 +831,15 @@ bHYPRE_MPICommunicator__rmicast(
  */
 
 struct bHYPRE_MPICommunicator__object*
-bHYPRE_MPICommunicator__connectI(const char* url, sidl_bool ar,               \
-  struct sidl_BaseInterface__object **_ex)
+bHYPRE_MPICommunicator__connectI(const char* url, sidl_bool ar, struct        \
+  sidl_BaseInterface__object **_ex)
 {
   return bHYPRE_MPICommunicator__remoteConnect(url, ar, _ex);
 }
 
 static PyObject *
-pStub_MPICommunicator__connect(PyObject *_ignored, PyObject *_args,           \
-  PyObject *_kwdict) {
+pStub_MPICommunicator__connect(PyObject *_ignored, PyObject *_args, PyObject  \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object* self = NULL;
   char* url = NULL;
@@ -863,14 +862,14 @@ pStub_MPICommunicator__connect(PyObject *_ignored, PyObject *_args,           \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -889,8 +888,8 @@ static struct bHYPRE_MPICommunicator__sepv *_sepv = NULL;
 static const struct bHYPRE_MPICommunicator__external *_implEPV = NULL;
 
 static PyObject *
-pStub_MPICommunicator_CreateC(PyObject *_ignored, PyObject *_args,            \
-  PyObject *_kwdict) {
+pStub_MPICommunicator_CreateC(PyObject *_ignored, PyObject *_args, PyObject   \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   void* mpi_comm = NULL;
   struct sidl_BaseInterface__object *_exception = NULL;
@@ -913,14 +912,14 @@ pStub_MPICommunicator_CreateC(PyObject *_ignored, PyObject *_args,            \
       sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
         PyErr_SetObject(sidl_RuntimeException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -933,8 +932,8 @@ pStub_MPICommunicator_CreateC(PyObject *_ignored, PyObject *_args,            \
 }
 
 static PyObject *
-pStub_MPICommunicator_CreateF(PyObject *_ignored, PyObject *_args,            \
-  PyObject *_kwdict) {
+pStub_MPICommunicator_CreateF(PyObject *_ignored, PyObject *_args, PyObject   \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   void* mpi_comm = NULL;
   struct sidl_BaseInterface__object *_exception = NULL;
@@ -957,14 +956,14 @@ pStub_MPICommunicator_CreateF(PyObject *_ignored, PyObject *_args,            \
       sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
         PyErr_SetObject(sidl_RuntimeException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -998,14 +997,14 @@ pStub_MPICommunicator_Create_MPICommWorld(PyObject *_ignored, PyObject *_args,\
       sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
         PyErr_SetObject(sidl_RuntimeException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1018,8 +1017,8 @@ pStub_MPICommunicator_Create_MPICommWorld(PyObject *_ignored, PyObject *_args,\
 }
 
 static PyObject *
-pStub_MPICommunicator_Destroy(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_MPICommunicator_Destroy(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object *_self_ior =
     ((struct bHYPRE_MPICommunicator__object *)
@@ -1042,14 +1041,14 @@ pStub_MPICommunicator_Destroy(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1070,8 +1069,86 @@ pStub_MPICommunicator_Destroy(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_MPICommunicator__exec(PyObject *_self, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_MPICommunicator_Finalize(PyObject *_ignored, PyObject *_args, PyObject  \
+  *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    NULL
+  };
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "", _kwlist);
+  if (_okay) {
+    (*(_sepv->f_Finalize))(&_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_eargs);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_MPICommunicator_Init(PyObject *_ignored, PyObject *_args, PyObject      \
+  *_kwdict) {
+  PyObject *_return_value = NULL;
+  struct sidl_BaseInterface__object *_exception = NULL;
+  static char *_kwlist[] = {
+    NULL
+  };
+  int _okay;
+  sidl_RuntimeException__import();
+  _okay = PyArg_ParseTupleAndKeywords(
+    _args, _kwdict, 
+    "", _kwlist);
+  if (_okay) {
+    (*(_sepv->f_Init))(&_exception);
+    if (_exception) {
+      struct sidl_RuntimeException__object *_ex0;
+      if ((_ex0 = (struct sidl_RuntimeException__object *)
+      sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
+        struct sidl_BaseInterface__object *throwaway_exception;
+        PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
+        PyErr_SetObject(sidl_RuntimeException__type, _obj);
+        Py_XDECREF(_obj);
+        (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
+          &throwaway_exception);
+        Py_XDECREF(_eargs);
+      }
+    }
+    else {
+      _return_value = Py_None;
+      Py_INCREF(_return_value);
+    }
+  }
+  return _return_value;
+}
+
+static PyObject *
+pStub_MPICommunicator__exec(PyObject *_self, PyObject *_args, PyObject        \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object *_self_ior =
     ((struct bHYPRE_MPICommunicator__object *)
@@ -1106,14 +1183,14 @@ pStub_MPICommunicator__exec(PyObject *_self, PyObject *_args,                 \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1136,8 +1213,8 @@ pStub_MPICommunicator__exec(PyObject *_self, PyObject *_args,                 \
 }
 
 static PyObject *
-pStub_MPICommunicator__getURL(PyObject *_self, PyObject *_args,               \
-  PyObject *_kwdict) {
+pStub_MPICommunicator__getURL(PyObject *_self, PyObject *_args, PyObject      \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object *_self_ior =
     ((struct bHYPRE_MPICommunicator__object *)
@@ -1161,22 +1238,22 @@ pStub_MPICommunicator__getURL(PyObject *_self, PyObject *_args,               \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -1191,8 +1268,8 @@ pStub_MPICommunicator__getURL(PyObject *_self, PyObject *_args,               \
 }
 
 static PyObject *
-pStub_MPICommunicator__isLocal(PyObject *_self, PyObject *_args,              \
-  PyObject *_kwdict) {
+pStub_MPICommunicator__isLocal(PyObject *_self, PyObject *_args, PyObject     \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object *_self_ior =
     ((struct bHYPRE_MPICommunicator__object *)
@@ -1218,14 +1295,14 @@ pStub_MPICommunicator__isLocal(PyObject *_self, PyObject *_args,              \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1247,8 +1324,8 @@ pStub_MPICommunicator__isLocal(PyObject *_self, PyObject *_args,              \
 }
 
 static PyObject *
-pStub_MPICommunicator__isRemote(PyObject *_self, PyObject *_args,             \
-  PyObject *_kwdict) {
+pStub_MPICommunicator__isRemote(PyObject *_self, PyObject *_args, PyObject    \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object *_self_ior =
     ((struct bHYPRE_MPICommunicator__object *)
@@ -1274,14 +1351,14 @@ pStub_MPICommunicator__isRemote(PyObject *_self, PyObject *_args,             \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1303,8 +1380,8 @@ pStub_MPICommunicator__isRemote(PyObject *_self, PyObject *_args,             \
 }
 
 static PyObject *
-pStub_MPICommunicator__set_hooks(PyObject *_self, PyObject *_args,            \
-  PyObject *_kwdict) {
+pStub_MPICommunicator__set_hooks(PyObject *_self, PyObject *_args, PyObject   \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct bHYPRE_MPICommunicator__object *_self_ior =
     ((struct bHYPRE_MPICommunicator__object *)
@@ -1332,14 +1409,14 @@ pStub_MPICommunicator__set_hooks(PyObject *_self, PyObject *_args,            \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1385,14 +1462,14 @@ pStub_MPICommunicator__set_hooks_static(PyObject *_ignored, PyObject *_args,  \
       sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
         PyErr_SetObject(sidl_RuntimeException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1407,14 +1484,14 @@ pStub_MPICommunicator__set_hooks_static(PyObject *_ignored, PyObject *_args,  \
 }
 
 static int
-bHYPRE_MPICommunicator_createCast(PyObject *self, PyObject *args,             \
-  PyObject *kwds) {
+bHYPRE_MPICommunicator_createCast(PyObject *self, PyObject *args, PyObject    \
+  *kwds) {
   struct bHYPRE_MPICommunicator__object *optarg = NULL;
   char* url = NULL;
   PyObject * implObj = NULL;
   static char *_kwlist[] = {"sobj",  "url", "impl", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist,       \
-    (void *)bHYPRE_MPICommunicator__convert, &optarg, &url, &implObj);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist, (void \
+    *)bHYPRE_MPICommunicator__convert, &optarg, &url, &implObj);
   if (_okay) {
     if (!optarg && !url && !implObj) {
       struct sidl_BaseInterface__object *_exception;
@@ -1427,14 +1504,14 @@ bHYPRE_MPICommunicator_createCast(PyObject *self, PyObject *args,             \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1452,14 +1529,14 @@ bHYPRE_MPICommunicator_createCast(PyObject *self, PyObject *args,             \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1475,14 +1552,14 @@ bHYPRE_MPICommunicator_createCast(PyObject *self, PyObject *args,             \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
       return -1;
     }
@@ -1526,8 +1603,8 @@ RAISES\n\
 \
  Create an MPICommunicator object from Fortran code. "
    },
-  { "Create_MPICommWorld",                                                    \
-    (PyCFunction)pStub_MPICommunicator_Create_MPICommWorld,
+  { "Create_MPICommWorld", (                                                  \
+    PyCFunction)pStub_MPICommunicator_Create_MPICommWorld,
   (METH_VARARGS | METH_KEYWORDS),
 "\
 Create_MPICommWorld()\n\
@@ -1538,6 +1615,29 @@ RAISES\n\
 \n\
 \
  Create an MPICommunicator object which represents MPI_Comm_World. "
+   },
+  { "Finalize", (PyCFunction)pStub_MPICommunicator_Finalize,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+Finalize()\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+"
+   },
+  { "Init", (PyCFunction)pStub_MPICommunicator_Init,
+  (METH_VARARGS | METH_KEYWORDS),
+"\
+Init()\n\
+RETURNS\n\
+    None\n\
+RAISES\n\
+    sidl.RuntimeException\n\
+\n\
+\
+ Init and Finalize are to help debug MPI interfaces;\n\
+you should normally use the MPI library more directly:"
    },
   { "_connect", (PyCFunction)pStub_MPICommunicator__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1914,28 +2014,28 @@ CreateF if called from Fortran code.\n\
 MPI_Comm_World, and can be called from any language."
   );
   dict = PyModule_GetDict(module);
-  ExternalAPI[bHYPRE_MPICommunicator__wrap_NUM] =                             \
-    (void*)bHYPRE_MPICommunicator__wrap;
-  ExternalAPI[bHYPRE_MPICommunicator__convert_NUM] =                          \
-    (void*)bHYPRE_MPICommunicator__convert;
-  ExternalAPI[bHYPRE_MPICommunicator__convert_python_array_NUM] =             \
-    (void*)bHYPRE_MPICommunicator__convert_python_array;
-  ExternalAPI[bHYPRE_MPICommunicator__convert_sidl_array_NUM] =               \
-    (void*)bHYPRE_MPICommunicator__convert_sidl_array;
-  ExternalAPI[bHYPRE_MPICommunicator__weakRef_NUM] =                          \
-    (void*)bHYPRE_MPICommunicator__weakRef;
-  ExternalAPI[bHYPRE_MPICommunicator_deref_NUM] =                             \
-    (void*)bHYPRE_MPICommunicator_deref;
-  ExternalAPI[bHYPRE_MPICommunicator__newRef_NUM] =                           \
-    (void*)bHYPRE_MPICommunicator__newRef;
-  ExternalAPI[bHYPRE_MPICommunicator__addRef_NUM] =                           \
-    (void*)bHYPRE_MPICommunicator__addRef;
-  ExternalAPI[bHYPRE_MPICommunicator_PyType_NUM] =                            \
-    (void*)bHYPRE_MPICommunicator_PyType;
-  ExternalAPI[bHYPRE_MPICommunicator__connectI_NUM] =                         \
-    (void*)bHYPRE_MPICommunicator__connectI;
-  ExternalAPI[bHYPRE_MPICommunicator__rmicast_NUM] =                          \
-    (void*)bHYPRE_MPICommunicator__rmicast;
+  ExternalAPI[bHYPRE_MPICommunicator__wrap_NUM] = (                           \
+    void*)bHYPRE_MPICommunicator__wrap;
+  ExternalAPI[bHYPRE_MPICommunicator__convert_NUM] = (                        \
+    void*)bHYPRE_MPICommunicator__convert;
+  ExternalAPI[bHYPRE_MPICommunicator__convert_python_array_NUM] = (           \
+    void*)bHYPRE_MPICommunicator__convert_python_array;
+  ExternalAPI[bHYPRE_MPICommunicator__convert_sidl_array_NUM] = (             \
+    void*)bHYPRE_MPICommunicator__convert_sidl_array;
+  ExternalAPI[bHYPRE_MPICommunicator__weakRef_NUM] = (                        \
+    void*)bHYPRE_MPICommunicator__weakRef;
+  ExternalAPI[bHYPRE_MPICommunicator_deref_NUM] = (                           \
+    void*)bHYPRE_MPICommunicator_deref;
+  ExternalAPI[bHYPRE_MPICommunicator__newRef_NUM] = (                         \
+    void*)bHYPRE_MPICommunicator__newRef;
+  ExternalAPI[bHYPRE_MPICommunicator__addRef_NUM] = (                         \
+    void*)bHYPRE_MPICommunicator__addRef;
+  ExternalAPI[bHYPRE_MPICommunicator_PyType_NUM] = (                          \
+    void*)bHYPRE_MPICommunicator_PyType;
+  ExternalAPI[bHYPRE_MPICommunicator__connectI_NUM] = (                       \
+    void*)bHYPRE_MPICommunicator__connectI;
+  ExternalAPI[bHYPRE_MPICommunicator__rmicast_NUM] = (                        \
+    void*)bHYPRE_MPICommunicator__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -1954,16 +2054,16 @@ MPI_Comm_World, and can be called from any language."
   sidl_BaseClass__import();
   _bHYPRE_MPICommunicatorType.tp_base = sidl_BaseClass_PyType();
   _bHYPRE_MPICommunicatorType.tp_bases = PyTuple_New(1);
-  PyTuple_SetItem(_bHYPRE_MPICommunicatorType.tp_bases,0,                     \
-    (PyObject *)sidl_BaseClass_PyType());
+  PyTuple_SetItem(_bHYPRE_MPICommunicatorType.tp_bases,0, (PyObject           \
+    *)sidl_BaseClass_PyType());
   if (PyType_Ready(&_bHYPRE_MPICommunicatorType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on bHYPRE.MPICommunicator failed.\n");
     return;
   }
   Py_INCREF(&_bHYPRE_MPICommunicatorType);
-  PyDict_SetItemString(dict, "MPICommunicator",                               \
-    (PyObject *)&_bHYPRE_MPICommunicatorType);
+  PyDict_SetItemString(dict, "MPICommunicator", (PyObject                     \
+    *)&_bHYPRE_MPICommunicatorType);
   /* Load the implementation after initializing the module. */
   /* Try search global namespace first */
   dll = sidl_DLL__create(&throwaway_exception);
@@ -2003,6 +2103,6 @@ MPI_Comm_World, and can be called from any language."
       bHYPRE.MPICommunicator");
   }
 
-  sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.MPICommunicator",          \
-    (void*)bHYPRE_MPICommunicator__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.MPICommunicator", (        \
+    void*)bHYPRE_MPICommunicator__IHConnect, &throwaway_exception);
 }

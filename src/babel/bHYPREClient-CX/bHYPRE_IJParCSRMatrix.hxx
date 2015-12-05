@@ -2,7 +2,7 @@
 // File:          bHYPRE_IJParCSRMatrix.hxx
 // Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -88,9 +88,9 @@ namespace bHYPRE {
    * Objects of this type can be cast to IJMatrixView, Operator, or
    * CoefficientAccess objects using the {\tt \_\_cast} methods.
    */
-  class IJParCSRMatrix: public virtual ::bHYPRE::CoefficientAccess,
-    public virtual ::bHYPRE::IJMatrixView, public virtual ::bHYPRE::Operator,
-    public virtual ::sidl::BaseClass {
+  class IJParCSRMatrix: public virtual ::bHYPRE::CoefficientAccess, public 
+    virtual ::bHYPRE::IJMatrixView, public virtual ::bHYPRE::Operator, public 
+    virtual ::sidl::BaseClass {
 
     //////////////////////////////////////////////////
     // 
@@ -725,7 +725,8 @@ namespace bHYPRE {
     typedef struct bHYPRE_IJParCSRMatrix__sepv sepv_t;
 
     // default constructor
-    IJParCSRMatrix() { }
+    IJParCSRMatrix() { 
+    }
 
     // static constructor
     static ::bHYPRE::IJParCSRMatrix _create();
@@ -740,7 +741,7 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::IJParCSRMatrix _connect( /*in*/ const std::string& url,
+    static ::bHYPRE::IJParCSRMatrix _connect( /*in*/ const std::string& url, 
       /*in*/ const bool ar  );
 
     // default destructor
@@ -767,13 +768,13 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     IJParCSRMatrix ( IJParCSRMatrix::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -857,9 +858,9 @@ namespace bHYPRE {
 extern "C" {
 
 
-  #pragma weak bHYPRE_IJParCSRMatrix__connectI
+#pragma weak bHYPRE_IJParCSRMatrix__connectI
 
-  #pragma weak bHYPRE_IJParCSRMatrix__rmicast
+#pragma weak bHYPRE_IJParCSRMatrix__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -872,8 +873,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_IJParCSRMatrix__object*
-  bHYPRE_IJParCSRMatrix__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_IJParCSRMatrix__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

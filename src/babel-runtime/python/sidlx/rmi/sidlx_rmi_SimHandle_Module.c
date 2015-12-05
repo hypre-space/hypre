@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_SimHandle_Module.c
  * Symbol:        sidlx.rmi.SimHandle-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   implement a C extension type for a sidl extendable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -143,12 +143,12 @@ sidlx_rmi_SimHandle__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct sidlx_rmi_SimHandle__object*
-sidlx_rmi_SimHandle__connectI(const char * url, sidl_bool ar,                 \
-  struct sidl_BaseInterface__object **_ex);
+sidlx_rmi_SimHandle__connectI(const char * url, sidl_bool ar, struct          \
+  sidl_BaseInterface__object **_ex);
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -190,7 +190,7 @@ static void* remote_sidlx_rmi_SimHandle__cast(
       cmp2 = strcmp(name, "sidl.BaseClass");
       if (!cmp2) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct sidl_BaseClass__object*)self);
         return cast;
       }
     }
@@ -199,15 +199,15 @@ static void* remote_sidlx_rmi_SimHandle__cast(
     cmp1 = strcmp(name, "sidlx.rmi.SimHandle");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidlx_rmi_SimHandle__object*)self);
       return cast;
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,                    \
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,                     \
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct             \
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct              \
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct sidlx_rmi_SimHandle__remote*)self->d_data)->d_ih,\
       _ex);
@@ -396,12 +396,12 @@ remote_sidlx_rmi_SimHandle_isSame(
     if(iobj){
       char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,       \
         _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "iobj", _url,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(    \
+        *_ex);
       free((void*)_url);
     } else {
-      sidl_rmi_Invocation_packString( _inv, "iobj", NULL,                     \
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(    \
+        *_ex);
     }
 
     /* send actual RMI request */
@@ -417,8 +417,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimHandle
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -466,8 +466,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimHandle
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -516,8 +516,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimHandle
     /* extract return value */
     sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,           \
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,                    \
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(   \
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -568,8 +568,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimHandle
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -619,8 +619,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimHandle
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -912,8 +912,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidlx.rmi.SimHandle
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,                 \
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(\
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -972,88 +972,88 @@ static void sidlx_rmi_SimHandle__init_remote_epv(void)
   e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,      \
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,  \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,              \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,         \
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct      \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct        \
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct   \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const    \
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct             \
-    sidl_BaseClass__object*,                                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **))            \
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,                          \
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*))     \
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,                               \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,                           \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e1->f_isSame       = (sidl_bool (*)(void*,                                  \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,                      \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,             \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*))             \
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*))         \
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct                     \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) \
+    epv->f_deleteRef;
+  e1->f_isSame       = (sidl_bool (*)(void*,struct                            \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct                \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct       \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
-  e2->f__cast            = (void* (*)(void*,const char*,                      \
-    sidl_BaseInterface*)) epv->f__cast;
-  e2->f__delete          = (void (*)(void*,                                   \
-    sidl_BaseInterface*)) epv->f__delete;
-  e2->f__getURL          = (char* (*)(void*,                                  \
-    sidl_BaseInterface*)) epv->f__getURL;
-  e2->f__raddRef         = (void (*)(void*,                                   \
-    sidl_BaseInterface*)) epv->f__raddRef;
-  e2->f__isRemote        = (sidl_bool (*)(void*,                              \
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e2->f__set_hooks       = (void (*)(void*,int32_t,                           \
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e2->f__exec            = (void (*)(void*,const char*,                       \
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,            \
-    struct sidl_BaseInterface__object **)) epv->f__exec;
+  e2->f__cast            = (void* (*)(void*,const char*,sidl_BaseInterface*)) \
+    epv->f__cast;
+  e2->f__delete          = (void (*)(void*,sidl_BaseInterface*))              \
+    epv->f__delete;
+  e2->f__getURL          = (char* (*)(void*,sidl_BaseInterface*))             \
+    epv->f__getURL;
+  e2->f__raddRef         = (void (*)(void*,sidl_BaseInterface*))              \
+    epv->f__raddRef;
+  e2->f__isRemote        = (sidl_bool (*)(void*,sidl_BaseInterface*))         \
+    epv->f__isRemote;
+  e2->f__set_hooks       = (void (*)(void*,int32_t, sidl_BaseInterface*))     \
+    epv->f__set_hooks;
+  e2->f__exec            = (void (*)(void*,const char*,struct                 \
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct             \
+    sidl_BaseInterface__object **)) epv->f__exec;
   e2->f_initCreate       = (sidl_bool (*)(void*,const char*,const char*,      \
     struct sidl_BaseInterface__object **)) epv->f_initCreate;
-  e2->f_initConnect      = (sidl_bool (*)(void*,const char*,sidl_bool,        \
-    struct sidl_BaseInterface__object **)) epv->f_initConnect;
+  e2->f_initConnect      = (sidl_bool (*)(void*,const char*,sidl_bool,struct  \
+    sidl_BaseInterface__object **)) epv->f_initConnect;
   e2->f_initUnserialize  = (struct sidl_io_Serializable__object* (*)(void*,   \
     const char*,struct sidl_BaseInterface__object **)) epv->f_initUnserialize;
-  e2->f_getProtocol      = (char* (*)(void*,                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getProtocol;
-  e2->f_getObjectID      = (char* (*)(void*,                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getObjectID;
-  e2->f_getObjectURL     = (char* (*)(void*,                                  \
-    struct sidl_BaseInterface__object **)) epv->f_getObjectURL;
+  e2->f_getProtocol      = (char* (*)(void*,struct sidl_BaseInterface__object \
+    **)) epv->f_getProtocol;
+  e2->f_getObjectID      = (char* (*)(void*,struct sidl_BaseInterface__object \
+    **)) epv->f_getObjectID;
+  e2->f_getObjectURL     = (char* (*)(void*,struct sidl_BaseInterface__object \
+    **)) epv->f_getObjectURL;
   e2->f_createInvocation = (struct sidl_rmi_Invocation__object* (*)(void*,    \
-    const char*,                                                              \
-    struct sidl_BaseInterface__object **)) epv->f_createInvocation;
-  e2->f_close            = (sidl_bool (*)(void*,                              \
-    struct sidl_BaseInterface__object **)) epv->f_close;
-  e2->f_addRef           = (void (*)(void*,                                   \
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e2->f_deleteRef        = (void (*)(void*,                                   \
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e2->f_isSame           = (sidl_bool (*)(void*,                              \
-    struct sidl_BaseInterface__object*,                                       \
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e2->f_isType           = (sidl_bool (*)(void*,const char*,                  \
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e2->f_getClassInfo     = (struct sidl_ClassInfo__object* (*)(void*,         \
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    const char*,struct sidl_BaseInterface__object **))                        \
+    epv->f_createInvocation;
+  e2->f_close            = (sidl_bool (*)(void*,struct                        \
+    sidl_BaseInterface__object **)) epv->f_close;
+  e2->f_addRef           = (void (*)(void*,struct sidl_BaseInterface__object  \
+    **)) epv->f_addRef;
+  e2->f_deleteRef        = (void (*)(void*,struct sidl_BaseInterface__object  \
+    **)) epv->f_deleteRef;
+  e2->f_isSame           = (sidl_bool (*)(void*,struct                        \
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **))        \
+    epv->f_isSame;
+  e2->f_isType           = (sidl_bool (*)(void*,const char*,struct            \
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e2->f_getClassInfo     = (struct sidl_ClassInfo__object* (*)(void*,struct   \
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
@@ -1076,13 +1076,13 @@ sidlx_rmi_SimHandle__remoteConnect(const char *url, sidl_bool ar,             \
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi =                                                   \
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(      \
+    sidl_BaseInterface bi = (                                                 \
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(       \
       objectID, _ex); SIDL_CHECK(*_ex);
     return sidlx_rmi_SimHandle__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,                \
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex );         \
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_SimHandle__object*) malloc(
@@ -1184,9 +1184,8 @@ sidlx_rmi_SimHandle__remoteCreate(const char *url, sidl_BaseInterface *_ex)
   struct sidl_BaseClass__object* s1;
 
   struct sidlx_rmi_SimHandle__remote* r_obj;
-  sidl_rmi_InstanceHandle instance =                                          \
-    sidl_rmi_ProtocolFactory_createInstance(url, "sidlx.rmi.SimHandle",       \
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance( \
+    url, "sidlx.rmi.SimHandle", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidlx_rmi_SimHandle__object*) malloc(
@@ -1241,8 +1240,8 @@ sidlx_rmi_SimHandle__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimHandle",           \
-      (void*)sidlx_rmi_SimHandle__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimHandle", (         \
+      void*)sidlx_rmi_SimHandle__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -1263,15 +1262,15 @@ sidlx_rmi_SimHandle__rmicast(
  */
 
 struct sidlx_rmi_SimHandle__object*
-sidlx_rmi_SimHandle__connectI(const char* url, sidl_bool ar,                  \
-  struct sidl_BaseInterface__object **_ex)
+sidlx_rmi_SimHandle__connectI(const char* url, sidl_bool ar, struct           \
+  sidl_BaseInterface__object **_ex)
 {
   return sidlx_rmi_SimHandle__remoteConnect(url, ar, _ex);
 }
 
 static PyObject *
-pStub_SimHandle__connect(PyObject *_ignored, PyObject *_args,                 \
-  PyObject *_kwdict) {
+pStub_SimHandle__connect(PyObject *_ignored, PyObject *_args, PyObject        \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimHandle__object* self = NULL;
   char* url = NULL;
@@ -1294,14 +1293,14 @@ pStub_SimHandle__connect(PyObject *_ignored, PyObject *_args,                 \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
     }
     else {
@@ -1353,14 +1352,14 @@ pStub_SimHandle__exec(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1407,22 +1406,22 @@ pStub_SimHandle__getURL(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
         _return_value = Py_BuildValue(
           "z",
           _return);
+        free((void *)_return);
       }
-      free((void *)_return);
     }
     {
       struct sidl_BaseInterface__object *throwaway_exception;
@@ -1437,8 +1436,8 @@ pStub_SimHandle__getURL(PyObject *_self, PyObject *_args, PyObject *_kwdict) {
 }
 
 static PyObject *
-pStub_SimHandle__isLocal(PyObject *_self, PyObject *_args,                    \
-  PyObject *_kwdict) {
+pStub_SimHandle__isLocal(PyObject *_self, PyObject *_args, PyObject *_kwdict) \
+  {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimHandle__object *_self_ior =
     ((struct sidlx_rmi_SimHandle__object *)
@@ -1464,14 +1463,14 @@ pStub_SimHandle__isLocal(PyObject *_self, PyObject *_args,                    \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1493,8 +1492,8 @@ pStub_SimHandle__isLocal(PyObject *_self, PyObject *_args,                    \
 }
 
 static PyObject *
-pStub_SimHandle__isRemote(PyObject *_self, PyObject *_args,                   \
-  PyObject *_kwdict) {
+pStub_SimHandle__isRemote(PyObject *_self, PyObject *_args, PyObject          \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimHandle__object *_self_ior =
     ((struct sidlx_rmi_SimHandle__object *)
@@ -1520,14 +1519,14 @@ pStub_SimHandle__isRemote(PyObject *_self, PyObject *_args,                   \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1549,8 +1548,8 @@ pStub_SimHandle__isRemote(PyObject *_self, PyObject *_args,                   \
 }
 
 static PyObject *
-pStub_SimHandle__set_hooks(PyObject *_self, PyObject *_args,                  \
-  PyObject *_kwdict) {
+pStub_SimHandle__set_hooks(PyObject *_self, PyObject *_args, PyObject         \
+  *_kwdict) {
   PyObject *_return_value = NULL;
   struct sidlx_rmi_SimHandle__object *_self_ior =
     ((struct sidlx_rmi_SimHandle__object *)
@@ -1578,14 +1577,14 @@ pStub_SimHandle__set_hooks(PyObject *_self, PyObject *_args,                  \
         sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
           struct sidl_BaseInterface__object *throwaway_exception;
           PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-          PyObject *_args = PyTuple_New(1);
-          PyTuple_SetItem(_args, 0, _obj);
-          _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+          PyObject *_eargs = PyTuple_New(1);
+          PyTuple_SetItem(_eargs, 0, _obj);
+          _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
           PyErr_SetObject(sidl_RuntimeException__type, _obj);
           Py_XDECREF(_obj);
           (*(_exception->d_epv->f_deleteRef))(_exception->d_object,           \
             &throwaway_exception);
-          Py_XDECREF(_args);
+          Py_XDECREF(_eargs);
         }
       }
       else {
@@ -1606,14 +1605,14 @@ pStub_SimHandle__set_hooks(PyObject *_self, PyObject *_args,                  \
 }
 
 static int
-sidlx_rmi_SimHandle_createCast(PyObject *self, PyObject *args,                \
-  PyObject *kwds) {
+sidlx_rmi_SimHandle_createCast(PyObject *self, PyObject *args, PyObject       \
+  *kwds) {
   struct sidlx_rmi_SimHandle__object *optarg = NULL;
   char* url = NULL;
   PyObject * implObj = NULL;
   static char *_kwlist[] = {"sobj",  "url", "impl", NULL };
-  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist,       \
-    (void *)sidlx_rmi_SimHandle__convert, &optarg, &url, &implObj);
+  int _okay = PyArg_ParseTupleAndKeywords(args, kwds, "|O&zO", _kwlist, (void \
+    *)sidlx_rmi_SimHandle__convert, &optarg, &url, &implObj);
   if (_okay) {
     if (!optarg && !url && !implObj) {
       struct sidl_BaseInterface__object *_exception;
@@ -1626,14 +1625,14 @@ sidlx_rmi_SimHandle_createCast(PyObject *self, PyObject *args,                \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1651,14 +1650,14 @@ sidlx_rmi_SimHandle_createCast(PyObject *self, PyObject *args,                \
           sidl_PyExceptionCast(_exception, "sidl.RuntimeException"))) {
             struct sidl_BaseInterface__object *throwaway_exception;
             PyObject *_obj = sidl_RuntimeException__wrap(_ex0);
-            PyObject *_args = PyTuple_New(1);
-            PyTuple_SetItem(_args, 0, _obj);
-            _obj = PyObject_CallObject(sidl_RuntimeException__type, _args);
+            PyObject *_eargs = PyTuple_New(1);
+            PyTuple_SetItem(_eargs, 0, _obj);
+            _obj = PyObject_CallObject(sidl_RuntimeException__type, _eargs);
             PyErr_SetObject(sidl_RuntimeException__type, _obj);
             Py_XDECREF(_obj);
             (*(_exception->d_epv->f_deleteRef))(_exception->d_object,         \
               &throwaway_exception);
-            Py_XDECREF(_args);
+            Py_XDECREF(_eargs);
           }
           return -1;
         }
@@ -1674,14 +1673,14 @@ sidlx_rmi_SimHandle_createCast(PyObject *self, PyObject *args,                \
       sidl_PyExceptionCast(_exception, "sidl.rmi.NetworkException"))) {
         struct sidl_BaseInterface__object *throwaway_exception;
         PyObject *_obj = sidl_rmi_NetworkException__wrap(_ex0);
-        PyObject *_args = PyTuple_New(1);
-        PyTuple_SetItem(_args, 0, _obj);
-        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _args);
+        PyObject *_eargs = PyTuple_New(1);
+        PyTuple_SetItem(_eargs, 0, _obj);
+        _obj = PyObject_CallObject(sidl_rmi_NetworkException__type, _eargs);
         PyErr_SetObject(sidl_rmi_NetworkException__type, _obj);
         Py_XDECREF(_obj);
         (*(_exception->d_epv->f_deleteRef))(_exception->d_object,             \
           &throwaway_exception);
-        Py_XDECREF(_args);
+        Py_XDECREF(_eargs);
       }
       return -1;
     }
@@ -2041,28 +2040,28 @@ initSimHandle(void) {
 implementation of InstanceHandle using the Simhandle Protocol (written by Jim)"
   );
   dict = PyModule_GetDict(module);
-  ExternalAPI[sidlx_rmi_SimHandle__wrap_NUM] =                                \
-    (void*)sidlx_rmi_SimHandle__wrap;
-  ExternalAPI[sidlx_rmi_SimHandle__convert_NUM] =                             \
-    (void*)sidlx_rmi_SimHandle__convert;
-  ExternalAPI[sidlx_rmi_SimHandle__convert_python_array_NUM] =                \
-    (void*)sidlx_rmi_SimHandle__convert_python_array;
-  ExternalAPI[sidlx_rmi_SimHandle__convert_sidl_array_NUM] =                  \
-    (void*)sidlx_rmi_SimHandle__convert_sidl_array;
-  ExternalAPI[sidlx_rmi_SimHandle__weakRef_NUM] =                             \
-    (void*)sidlx_rmi_SimHandle__weakRef;
-  ExternalAPI[sidlx_rmi_SimHandle_deref_NUM] =                                \
-    (void*)sidlx_rmi_SimHandle_deref;
-  ExternalAPI[sidlx_rmi_SimHandle__newRef_NUM] =                              \
-    (void*)sidlx_rmi_SimHandle__newRef;
-  ExternalAPI[sidlx_rmi_SimHandle__addRef_NUM] =                              \
-    (void*)sidlx_rmi_SimHandle__addRef;
-  ExternalAPI[sidlx_rmi_SimHandle_PyType_NUM] =                               \
-    (void*)sidlx_rmi_SimHandle_PyType;
-  ExternalAPI[sidlx_rmi_SimHandle__connectI_NUM] =                            \
-    (void*)sidlx_rmi_SimHandle__connectI;
-  ExternalAPI[sidlx_rmi_SimHandle__rmicast_NUM] =                             \
-    (void*)sidlx_rmi_SimHandle__rmicast;
+  ExternalAPI[sidlx_rmi_SimHandle__wrap_NUM] = (                              \
+    void*)sidlx_rmi_SimHandle__wrap;
+  ExternalAPI[sidlx_rmi_SimHandle__convert_NUM] = (                           \
+    void*)sidlx_rmi_SimHandle__convert;
+  ExternalAPI[sidlx_rmi_SimHandle__convert_python_array_NUM] = (              \
+    void*)sidlx_rmi_SimHandle__convert_python_array;
+  ExternalAPI[sidlx_rmi_SimHandle__convert_sidl_array_NUM] = (                \
+    void*)sidlx_rmi_SimHandle__convert_sidl_array;
+  ExternalAPI[sidlx_rmi_SimHandle__weakRef_NUM] = (                           \
+    void*)sidlx_rmi_SimHandle__weakRef;
+  ExternalAPI[sidlx_rmi_SimHandle_deref_NUM] = (                              \
+    void*)sidlx_rmi_SimHandle_deref;
+  ExternalAPI[sidlx_rmi_SimHandle__newRef_NUM] = (                            \
+    void*)sidlx_rmi_SimHandle__newRef;
+  ExternalAPI[sidlx_rmi_SimHandle__addRef_NUM] = (                            \
+    void*)sidlx_rmi_SimHandle__addRef;
+  ExternalAPI[sidlx_rmi_SimHandle_PyType_NUM] = (                             \
+    void*)sidlx_rmi_SimHandle_PyType;
+  ExternalAPI[sidlx_rmi_SimHandle__connectI_NUM] = (                          \
+    void*)sidlx_rmi_SimHandle__connectI;
+  ExternalAPI[sidlx_rmi_SimHandle__rmicast_NUM] = (                           \
+    void*)sidlx_rmi_SimHandle__rmicast;
   import_SIDLObjA();
   if (PyErr_Occurred()) {
     Py_FatalError("Error importing sidlObjA module.");
@@ -2082,18 +2081,18 @@ implementation of InstanceHandle using the Simhandle Protocol (written by Jim)"
   sidl_rmi_InstanceHandle__import();
   _sidlx_rmi_SimHandleType.tp_base = sidl_BaseClass_PyType();
   _sidlx_rmi_SimHandleType.tp_bases = PyTuple_New(2);
-  PyTuple_SetItem(_sidlx_rmi_SimHandleType.tp_bases,0,                        \
-    (PyObject *)sidl_BaseClass_PyType());
-  PyTuple_SetItem(_sidlx_rmi_SimHandleType.tp_bases,1,                        \
-    (PyObject *)sidl_rmi_InstanceHandle_PyType());
+  PyTuple_SetItem(_sidlx_rmi_SimHandleType.tp_bases,0, (PyObject              \
+    *)sidl_BaseClass_PyType());
+  PyTuple_SetItem(_sidlx_rmi_SimHandleType.tp_bases,1, (PyObject              \
+    *)sidl_rmi_InstanceHandle_PyType());
   if (PyType_Ready(&_sidlx_rmi_SimHandleType) < 0) {
     PyErr_Print();
     fprintf(stderr, "PyType_Ready on sidlx.rmi.SimHandle failed.\n");
     return;
   }
   Py_INCREF(&_sidlx_rmi_SimHandleType);
-  PyDict_SetItemString(dict, "SimHandle",                                     \
-    (PyObject *)&_sidlx_rmi_SimHandleType);
+  PyDict_SetItemString(dict, "SimHandle", (PyObject                           \
+    *)&_sidlx_rmi_SimHandleType);
   /* Load the implementation after initializing the module. */
   /* Try search global namespace first */
   dll = sidl_DLL__create(&throwaway_exception);
@@ -2126,6 +2125,6 @@ implementation of InstanceHandle using the Simhandle Protocol (written by Jim)"
       sidlx.rmi.SimHandle");
   }
 
-  sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimHandle",             \
-    (void*)sidlx_rmi_SimHandle__IHConnect, &throwaway_exception);
+  sidl_rmi_ConnectRegistry_registerConnect("sidlx.rmi.SimHandle", (           \
+    void*)sidlx_rmi_SimHandle__IHConnect, &throwaway_exception);
 }

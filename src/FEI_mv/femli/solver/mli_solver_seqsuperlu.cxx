@@ -1,31 +1,14 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.12 $
+ * $Revision: 1.15 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /* **************************************************************************** 
  * -- SuperLU routine (version 1.1) --
@@ -128,10 +111,11 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
    int      irow, icol, *rowArray, *countArray, colNum, index, nSubRows;
    int      *etree, permcSpec, lwork, panelSize, relax, info, rowCnt;
    double   *csrAA, *cscAA, diagPivotThresh, dropTol;
-   char     refact[1];
-   hypre_ParCSRMatrix   *hypreA;
-   hypre_CSRMatrix      *ADiag;
-   SuperMatrix          AC, superLU_Amat;
+   hypre_ParCSRMatrix  *hypreA;
+   hypre_CSRMatrix     *ADiag;
+   SuperMatrix         AC, superLU_Amat;
+   superlu_options_t   slu_options;
+   SuperLUStat_t       slu_stat;
 
    /* ---------------------------------------------------------------
     * fetch matrix
@@ -288,27 +272,28 @@ fclose(fp);
             cscJA[icol] = nnz;
          }
          dCreate_CompCol_Matrix(&superLU_Amat, nSubRows, nSubRows, 
-                  cscJA[nSubRows], cscAA, cscIA, cscJA, NC, D_D, GE);
-         *refact = 'N';
+                  cscJA[nSubRows], cscAA, cscIA, cscJA, SLU_NC, SLU_D, SLU_GE);
          etree   = new int[nSubRows];
          permCs_[iP]  = new int[nSubRows];
          permRs_[iP]  = new int[nSubRows];
          permcSpec = 0;
          get_perm_c(permcSpec, &superLU_Amat, permCs_[iP]);
-         sp_preorder(refact, &superLU_Amat, permCs_[iP], etree, &AC);
+         slu_options.Fact = DOFACT;
+         slu_options.SymmetricMode = NO;
+         sp_preorder(&slu_options, &superLU_Amat, permCs_[iP], etree, &AC);
          diagPivotThresh = 1.0;
          dropTol = 0.0;
          panelSize = sp_ienv(1);
          relax = sp_ienv(2);
-         StatInit(panelSize, relax);
+         StatInit(&slu_stat);
          lwork = 0;
-         dgstrf(refact, &AC, diagPivotThresh, dropTol, relax, panelSize,
-                etree,NULL,lwork,permRs_[iP],permCs_[iP],
-                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&info);
+         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+                etree,NULL,lwork,permCs_[iP],permRs_[iP],
+                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&slu_stat,&info);
          Destroy_CompCol_Permuted(&AC);
          Destroy_CompCol_Matrix(&superLU_Amat);
          delete [] etree;
-         StatFree();
+         StatFree(&slu_stat);
       }
       else
       {
@@ -358,27 +343,28 @@ fclose(fp);
             cscJA[icol] = nnz;
          }
          dCreate_CompCol_Matrix(&superLU_Amat, nrows, nrows, cscJA[nrows], 
-                                cscAA, cscIA, cscJA, NC, D_D, GE);
-         *refact = 'N';
+                                cscAA, cscIA, cscJA, SLU_NC, SLU_D, SLU_GE);
          etree = new int[nrows];
          permCs_[iP]  = new int[nrows];
          permRs_[iP]  = new int[nrows];
          permcSpec = 0;
          get_perm_c(permcSpec, &superLU_Amat, permCs_[iP]);
-         sp_preorder(refact, &superLU_Amat, permCs_[iP], etree, &AC);
+         slu_options.Fact = DOFACT;
+         slu_options.SymmetricMode = NO;
+         sp_preorder(&slu_options, &superLU_Amat, permCs_[iP], etree, &AC);
          diagPivotThresh = 1.0;
          dropTol = 0.0;
          panelSize = sp_ienv(1);
          relax = sp_ienv(2);
-         StatInit(panelSize, relax);
+         StatInit(&slu_stat);
          lwork = 0;
-         dgstrf(refact, &AC, diagPivotThresh, dropTol, relax, panelSize,
+         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
                 etree,NULL,lwork,permRs_[iP],permCs_[iP],&(superLU_Lmats[iP]),
-                &(superLU_Umats[iP]),&info);
+                &(superLU_Umats[iP]),&slu_stat,&info);
          Destroy_CompCol_Permuted(&AC);
          Destroy_CompCol_Matrix(&superLU_Amat);
          delete [] etree;
-         StatFree();
+         StatFree(&slu_stat);
       }
    }
    factorized_ = 1;
@@ -399,9 +385,10 @@ int MLI_Solver_SeqSuperLU::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    int    *ADiagI, *ADiagJ, rlength, offset, length;
    double *uData, *fData, *subUData, *sBuffer, *rBuffer, res, *AOffdA;
    double *ADiagA, *f2Data, *u2Data, one=1.0, zero=0.0;
-   char   trans[1];
    MPI_Comm    comm;
    SuperMatrix B;
+   trans_t     trans;
+   SuperLUStat_t   slu_stat;
    hypre_ParVector *f, *u, *f2;
    hypre_CSRMatrix *ADiag, *AOffd;
    hypre_ParCSRMatrix  *A, *P;
@@ -506,23 +493,27 @@ int MLI_Solver_SeqSuperLU::solve(MLI_Vector *fIn, MLI_Vector *uIn)
          if ( nRecvs_ > 0 ) delete [] mpiRequests;
          length = nrows - rlength;
          for ( irow = 0; irow < length; irow++ ) u2Data[irow] = fData[irow];
-         dCreate_Dense_Matrix(&B, nrows, 1, u2Data, nrows, DN, D_D, GE);
-         *trans  = 'N';
-         dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permRs_[0], 
-                 permCs_[0], &B, &info);
+         dCreate_Dense_Matrix(&B, nrows, 1, u2Data, nrows, SLU_DN, SLU_D, SLU_GE);
+         StatInit(&slu_stat);
+         trans = NOTRANS;
+         dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permCs_[0], 
+                 permRs_[0], &B, &slu_stat, &info);
          Destroy_SuperMatrix_Store(&B);
          for ( irow = 0; irow < length; irow++ ) uData[irow] = u2Data[irow];
          //delete [] u2Data;
+         StatFree(&slu_stat);
          return info;
       }
       else
       {
          for ( irow = 0; irow < nrows; irow++ ) uData[irow] = fData[irow];
-         dCreate_Dense_Matrix(&B, nrows, 1, uData, nrows, DN, D_D, GE);
-         *trans  = 'N';
-         dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permRs_[0], 
-                 permCs_[0], &B, &info);
+         dCreate_Dense_Matrix(&B, nrows, 1, uData, nrows, SLU_DN, SLU_D, SLU_GE);
+         trans = NOTRANS;
+         StatInit(&slu_stat);
+         dgstrs (trans, &(superLU_Lmats[0]), &(superLU_Umats[0]), permCs_[0], 
+                 permRs_[0], &B, &slu_stat, &info);
          Destroy_SuperMatrix_Store(&B);
+         StatFree(&slu_stat);
          return info;
       }
    }
@@ -564,10 +555,10 @@ int MLI_Solver_SeqSuperLU::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                subUData[irow] = res;
             }
             nSubRows = subProblemRowSizes_[iP];
-            dCreate_Dense_Matrix(&B,nSubRows,1,subUData,nSubRows,DN,D_D,GE);
-            *trans  = 'N';
+            dCreate_Dense_Matrix(&B,nSubRows,1,subUData,nSubRows,SLU_DN,SLU_D,SLU_GE);
+            trans = NOTRANS;
             dgstrs(trans,&(superLU_Lmats[iP]),&(superLU_Umats[iP]),
-                   permRs_[iP],permCs_[iP],&B,&info);
+                   permCs_[iP],permRs_[iP],&B,&slu_stat,&info);
             Destroy_SuperMatrix_Store(&B);
             for ( irow = 0; irow < nSubRows; irow++ ) 
                uData[subProblemRowIndices_[iP][irow]] += subUData[irow];

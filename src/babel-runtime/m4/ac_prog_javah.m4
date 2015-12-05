@@ -8,7 +8,7 @@ dnl and looks for the jni.h header file. If available, JAVAH is set to
 dnl the full path of javah and CPPFLAGS is updated accordingly.
 dnl
 dnl @author Luc Maisonobe
-dnl @version $Id: ac_prog_javah.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: ac_prog_javah.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl
 AC_DEFUN([AC_PROG_JAVAH],[
 AC_REQUIRE([AC_CANONICAL_TARGET([])])dnl

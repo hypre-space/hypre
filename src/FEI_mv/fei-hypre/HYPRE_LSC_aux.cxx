@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.38 $
+ * $Revision: 2.43 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -84,8 +71,8 @@
 //---------------------------------------------------------------------------
 
 #ifdef HAVE_SUPERLU
-#include "dsp_defs.h"
-#include "superlu_util.h"
+#include "SRC/slu_ddefs.h"
+#include "SRC/slu_util.h"
 #endif
 
 //---------------------------------------------------------------------------
@@ -381,6 +368,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters truncThresh = %e\n",
                    truncThresh_);
+      }
+
+      //----------------------------------------------------------------
+      // turn on fetching diagonal
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "set_mixed_diag") )
+      {
+         FEI_mixedDiagFlag_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters set mixed diagonal\n");
       }
 
       //----------------------------------------------------------------
@@ -2457,8 +2455,18 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
            break;
 
       case HYAMS :
-           printf("GMRES : AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                          HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
            break;
 
       case HYSYSPDE :
@@ -2696,8 +2704,37 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
            break;
 
       case HYAMS :
-           printf("FGMRES: AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                           HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRFGMRESSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("FGMRES : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -2900,8 +2937,37 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            break;
 
       case HYAMS :
-           printf("BiCGSTAB : AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                             HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                             HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					     HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					     HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGSTAB : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -3105,8 +3171,37 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            break;
 
       case HYAMS :
-           printf("BiCGSTABL : AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                              HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                              HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					      HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					      HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGSTABL : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -3306,8 +3401,37 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            break;
 
       case HYAMS :
-           printf("TFQMR : AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                          HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+                                          HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("TFQMR : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -3507,8 +3631,37 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            break;
 
       case HYAMS :
-           printf("BiCGS : AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                          HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					  HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					  HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("BiCGS : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -3688,8 +3841,37 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
            break;
 
       case HYAMS :
-           printf("SymQMR : AMS preconditioning not available.\n");
-           exit(1);
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRSymQMRSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                           HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconAMS();
+              HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                           HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+           break;
+
+      case HYSYSPDE :
+#ifdef HY_SYSPDE
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("SysPDe preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconSysPDE();
+              HYPRE_ParCSRSymQMRSetPrecond(HYSolver_, HYPRE_ParCSRSysPDESolve,
+					   HYPRE_ParCSRSysPDESetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("SymQMR : SysPDe preconditioning not available.\n");
+#endif
            break;
    }
    return;
@@ -4207,13 +4389,13 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
 // this function solve the incoming linear system using SuperLU
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
+double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 {
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                nz_ptr, *partition, start_row, end_row;
-   double             *colVal, *new_a, rnorm;
+   double             *colVal, *new_a, rnorm=-1.0;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
    HYPRE_ParVector    b_csr;
@@ -4222,7 +4404,8 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    int                info=0, panel_size, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
-   mem_usage_t        mem_usage;
+   superlu_options_t  slu_options;
+   SuperLUStat_t      slu_stat;
    SuperMatrix        A2, B, L, U;
    NRformat           *Ustore;
    SCformat           *Lstore;
@@ -4235,7 +4418,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    {
       printf("solveUsingSuperLU ERROR - too many processors.\n");
       status = -1;
-      return;
+      return rnorm;
    }
 
    //-------------------------------------------------------------------
@@ -4247,7 +4430,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    {
       printf("solveUsingSuperLU ERROR - row does not start at 1\n");
       status = -1;
-      return;
+      return rnorm;
    }
 
    //-------------------------------------------------------------------
@@ -4279,7 +4462,8 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    // set up SuperLU CSR matrix and the corresponding rhs
    //-------------------------------------------------------------------
 
-   dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,D_D,GE);
+   dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,
+                          SLU_NR,SLU_D,SLU_GE);
    ind_array = new int[nrows];
    for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
    rhs = new double[nrows];
@@ -4287,7 +4471,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
 
    assert(!ierr);
-   dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, D_D, GE);
+   dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, SLU_DN, SLU_D, SLU_GE);
 
    //-------------------------------------------------------------------
    // set up the rest and solve (permc_spec=0 : natural ordering)
@@ -4300,7 +4484,10 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    panel_size = sp_ienv(1);
    for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
 
-   dgssv(&A2, perm_c, perm_r, &L, &U, &B, &info);
+   slu_options.ColPerm = MY_PERMC;
+   slu_options.Fact = DOFACT;
+   StatInit(&slu_stat);
+   dgssv(&slu_options, &A2, perm_c, perm_r, &L, &U, &B, &slu_stat, &info);
 
    //-------------------------------------------------------------------
    // postprocessing of the return status information
@@ -4308,29 +4495,20 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 
    if ( info == 0 ) 
    {
-       status = 1;
-       Lstore = (SCformat *) L.Store;
-       Ustore = (NRformat *) U.Store;
-       printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
-       printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
-       printf("SuperLU : NNZ in L+U = %d\n",Lstore->nnz+Ustore->nnz-nrows);
-
-       dQuerySpace(&L, &U, panel_size, &mem_usage);
-       printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-              mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-              mem_usage.expansions);
-
-   } 
+      status = 1;
+      Lstore = (SCformat *) L.Store;
+      Ustore = (NRformat *) U.Store;
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      {
+         printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
+         printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
+         printf("SuperLU : NNZ in L+U = %d\n",Lstore->nnz+Ustore->nnz-nrows);
+      } 
+   }
    else 
    {
-       status = 0;
-       printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
-       if ( info <= nrows ) { /* factorization completes */
-           dQuerySpace(&L, &U, panel_size, &mem_usage);
-           printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-                  mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-                  mem_usage.expansions);
-       }
+      status = 0;
+      printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
    }
 
    //-------------------------------------------------------------------
@@ -4376,10 +4554,12 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    SUPERLU_FREE( ((NRformat *) U.Store)->rowptr);
    SUPERLU_FREE( ((NRformat *) U.Store)->nzval);
    SUPERLU_FREE( U.Store );
+   StatFree(&slu_stat);
 #else
    status = -1;
    printf("HYPRE_LSC::solveUsingSuperLU : not available.\n");
 #endif
+   return rnorm;
 }
 
 //***************************************************************************
@@ -4387,32 +4567,33 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 // using expert mode
 //---------------------------------------------------------------------------
 
-void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
+double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 {
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                j, nz_ptr, *colLengths, maxRowSize;
    int                *partition, start_row, end_row;
-   double             *colVal, *new_a, rnorm;
+   double             *colVal, *new_a, rnorm=-1.0;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info, panel_size, permc_spec;
+   int                info, permc_spec, panel_size;
    int                *perm_r, *perm_c, *etree, lwork;
    double             *rhs, *soln;
    double             *R, *C;
    double             *ferr, *berr;
    double             rpg, rcond;
-   char               fact[1], equed[1], trans[1], refact[1];
    void               *work=NULL;
+   char               equed[1];
    mem_usage_t        mem_usage;
+   superlu_options_t  slu_options;
+   SuperLUStat_t      slu_stat;
    SuperMatrix        A2, B, X, L, U;
    NRformat           *Ustore;
    SCformat           *Lstore;
-   factor_param_t     iparam;
 
    //-------------------------------------------------------------------
    // available for sequential processing only for now
@@ -4422,7 +4603,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    {
       printf("solveUsingSuperLUX ERROR - too many processors.\n");
       status = -1;
-      return;
+      return rnorm;
    }
 
    //-------------------------------------------------------------------
@@ -4434,7 +4615,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    {
       printf("solveUsingSuperLUX ERROR - row not start at 1\n");
       status = -1;
-      return;
+      return rnorm;
    }
 
    //-------------------------------------------------------------------
@@ -4473,17 +4654,18 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    // set up SuperLU CSR matrix and the corresponding rhs
    //-------------------------------------------------------------------
 
-   dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,NR,D_D,GE);
+   dCreate_CompRow_Matrix(&A2,nrows,nrows,nnz,new_a,new_ja,new_ia,SLU_NR,
+                          SLU_D,SLU_GE);
    ind_array = new int[nrows];
    for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
    rhs = new double[nrows];
 
    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
    assert(!ierr);
-   dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, D_D, GE);
+   dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, SLU_DN, SLU_D, SLU_GE);
    soln = new double[nrows];
    for ( i = 0; i < nrows; i++ ) soln[i] = 0.0;
-   dCreate_Dense_Matrix(&X, nrows, 1, soln, nrows, DN, D_D, GE);
+   dCreate_Dense_Matrix(&X, nrows, 1, soln, nrows, SLU_DN, SLU_D, SLU_GE);
 
    //-------------------------------------------------------------------
    // set up the other parameters (permc_spec=0 : natural ordering)
@@ -4494,16 +4676,14 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    etree  = new int[nrows];
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
-   panel_size               = sp_ienv(1);
-   iparam.panel_size        = panel_size;
-   iparam.relax             = sp_ienv(2);
-   iparam.diag_pivot_thresh = 1.0;
-   iparam.drop_tol          = -1;
    lwork                    = 0;
-   *fact                    = 'N';
-   *equed                   = 'N';
-   *trans                   = 'N';
-   *refact                  = 'N';
+   slu_options.Equil        = NO;
+   slu_options.Trans        = NOTRANS;
+   slu_options.Fact         = DOFACT;
+   slu_options.IterRefine   = DOUBLE;
+   slu_options.DiagPivotThresh = 1.0;
+   StatInit(&slu_stat);
+   *equed = 'N';
    R    = (double *) SUPERLU_MALLOC(A2.nrow * sizeof(double));
    C    = (double *) SUPERLU_MALLOC(A2.ncol * sizeof(double));
    ferr = (double *) SUPERLU_MALLOC(sizeof(double));
@@ -4513,9 +4693,9 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    // solve
    //-------------------------------------------------------------------
 
-   dgssvx(fact, trans, refact, &A2, &iparam, perm_c, perm_r, etree,
-          equed, R, C, &L, &U, work, lwork, &B, &X, &rpg, &rcond,
-          ferr, berr, &mem_usage, &info);
+   dgssvx(&slu_options, &A2, perm_r, perm_c, etree,
+          equed, R, C, &L, &U, work, lwork, &B, &X, 
+          &rpg, &rcond, ferr, berr, &mem_usage, &slu_stat, &info);
 
    //-------------------------------------------------------------------
    // print SuperLU internal information at the first step
@@ -4526,7 +4706,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
       status = 1;
       Lstore = (SCformat *) L.Store;
       Ustore = (NRformat *) U.Store;
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       {
          printf("Recip. pivot growth = %e\n", rpg);
          printf("%8s%16s%16s\n", "rhs", "FERR", "BERR");
@@ -4538,10 +4718,7 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
          printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
          printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
          printf("SuperLUX : NNZ in L+U = %d\n", Lstore->nnz+Ustore->nnz-nrows);
-         dQuerySpace(&L, &U, panel_size, &mem_usage);
-         printf("L\\U MB %.3f\ttotal MB needed %.3f\texpansions %d\n",
-                mem_usage.for_lu/1e6, mem_usage.total_needed/1e6,
-                mem_usage.expansions);
+         panel_size = sp_ienv(1);
       }
    } 
    else 
@@ -4599,10 +4776,12 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    SUPERLU_FREE (C);
    SUPERLU_FREE (ferr);
    SUPERLU_FREE (berr);
+   StatFree(&slu_stat);
 #else
    status = -1;
    printf("HYPRE_LSC::solveUsingSuperLUX : not available.\n");
 #endif
+   return rnorm;
 }
 
 //***************************************************************************

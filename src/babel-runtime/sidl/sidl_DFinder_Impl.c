@@ -2,9 +2,9 @@
  * File:          sidl_DFinder_Impl.c
  * Symbol:        sidl.DFinder-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_DFinder_Impl.c,v 1.5 2006/08/29 22:29:49 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_DFinder_Impl.c,v 1.6 2007/09/27 19:35:43 painter Exp $
  * Description:   Server-side implementation for sidl.DFinder
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -164,8 +164,8 @@ loadLibraryFromSCL(struct sidl_scl_entry *scl,
 
 /* DO-NOT-DELETE splicer.end(sidl.DFinder._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -415,25 +415,24 @@ struct sidl_BaseClass__object* impl_sidl_DFinder_fconnect_sidl_BaseClass(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* impl_sidl_DFinder_fcast_sidl_BaseClass(void* bi,
+struct sidl_BaseClass__object* impl_sidl_DFinder_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidl_DFinder_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+  impl_sidl_DFinder_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_sidl_DFinder_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_sidl_DFinder_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* impl_sidl_DFinder_fconnect_sidl_ClassInfo(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* impl_sidl_DFinder_fcast_sidl_ClassInfo(void* bi,
+struct sidl_ClassInfo__object* impl_sidl_DFinder_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
@@ -441,15 +440,15 @@ struct sidl_DFinder__object* impl_sidl_DFinder_fconnect_sidl_DFinder(const
   char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_DFinder__connectI(url, ar, _ex);
 }
-struct sidl_DFinder__object* impl_sidl_DFinder_fcast_sidl_DFinder(void* bi,
+struct sidl_DFinder__object* impl_sidl_DFinder_fcast_sidl_DFinder(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_DFinder__cast(bi, _ex);
 }
-struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(const char* url,
+struct sidl_DLL__object* impl_sidl_DFinder_fconnect_sidl_DLL(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_DLL__connectI(url, ar, _ex);
 }
-struct sidl_DLL__object* impl_sidl_DFinder_fcast_sidl_DLL(void* bi,
+struct sidl_DLL__object* impl_sidl_DFinder_fcast_sidl_DLL(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_DLL__cast(bi, _ex);
 }
@@ -457,17 +456,17 @@ struct sidl_Finder__object* impl_sidl_DFinder_fconnect_sidl_Finder(const char*
   url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_Finder__connectI(url, ar, _ex);
 }
-struct sidl_Finder__object* impl_sidl_DFinder_fcast_sidl_Finder(void* bi,
+struct sidl_Finder__object* impl_sidl_DFinder_fcast_sidl_Finder(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_Finder__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_DFinder_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_sidl_DFinder_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_DFinder_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_sidl_DFinder_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

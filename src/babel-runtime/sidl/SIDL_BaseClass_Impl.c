@@ -2,9 +2,9 @@
  * File:          sidl_BaseClass_Impl.c
  * Symbol:        sidl.BaseClass-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_BaseClass_Impl.c,v 1.7 2006/08/29 22:29:49 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_BaseClass_Impl.c,v 1.8 2007/09/27 19:35:42 painter Exp $
  * Description:   Server-side implementation for sidl.BaseClass
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -98,14 +98,14 @@ sidl_report_objects(void *ignored)
 	  char* str = NULL;
 	  s_b_e = sidl_BaseException__cast(ex, &throwaway);
 	  if(throwaway != NULL) {
-	    fprintf(stderr, "babel: Exception occured and was uncatchable\n");
+	    fprintf(stderr, "babel: Exception occurred and was uncatchable\n");
 	    if (type) free((void *)type);
 	    ptr = ptr->d_next;
 	    continue;
 	  }
 	  str = sidl_BaseException_getNote(s_b_e, &throwaway);
 	  if(throwaway != NULL) {
-	    fprintf(stderr, "babel: Exception occured and was uncatchable unprintable\n");
+	    fprintf(stderr, "babel: Exception occurred and was uncatchable unprintable\n");
 	    if (type) free((void *)type);
 	    ptr = ptr->d_next;
 	    continue;
@@ -121,6 +121,11 @@ sidl_report_objects(void *ignored)
       if (type) free((void *)type);
       ptr = ptr->d_next;
     } while (ptr);
+    while (s_object_list) {
+      ptr = s_object_list->d_next;
+      free((void *)s_object_list);
+      s_object_list = ptr;
+    }
   }
   else {
     fprintf(stderr, "babel: no objects leaked\n");
@@ -148,6 +153,11 @@ sidl_add_object(sidl_BaseClass cls)
     ptr->d_next = s_object_list;
     ptr->d_obj = cls;
     s_object_list = ptr;
+    {
+      struct sidl_BaseClass__data *data = sidl_BaseClass__get_data(cls);
+      fprintf(stderr, "babel: create object %p initial count %d\n",
+              cls, data->d_refcount);
+    }
   }
 }
 
@@ -182,8 +192,8 @@ sidl_remove_object(sidl_BaseClass cls)
 #endif /* SIDL_DEBUG_REFCOUNT */
 /* DO-NOT-DELETE splicer.end(sidl.BaseClass._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -512,9 +522,8 @@ impl_sidl_BaseClass_getClassInfo(
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
-struct sidl_BaseClass__object* 
-  impl_sidl_BaseClass_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_BaseClass__object* impl_sidl_BaseClass_fconnect_sidl_BaseClass(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
 struct sidl_BaseClass__object* impl_sidl_BaseClass_fcast_sidl_BaseClass(void* 
@@ -526,14 +535,12 @@ struct sidl_BaseInterface__object*
   sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
-struct sidl_BaseInterface__object* 
-  impl_sidl_BaseClass_fcast_sidl_BaseInterface(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseInterface__object* impl_sidl_BaseClass_fcast_sidl_BaseInterface(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-  sidl_BaseInterface *_ex) {
+struct sidl_ClassInfo__object* impl_sidl_BaseClass_fconnect_sidl_ClassInfo(
+  const char* url, sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
 struct sidl_ClassInfo__object* impl_sidl_BaseClass_fcast_sidl_ClassInfo(void* 
@@ -541,12 +548,12 @@ struct sidl_ClassInfo__object* impl_sidl_BaseClass_fcast_sidl_ClassInfo(void*
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_BaseClass_fconnect_sidl_RuntimeException(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_sidl_BaseClass_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidl_BaseClass_fcast_sidl_RuntimeException(void* bi,
-  sidl_BaseInterface* _ex) {
+  impl_sidl_BaseClass_fcast_sidl_RuntimeException(void* bi, sidl_BaseInterface* 
+  _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }

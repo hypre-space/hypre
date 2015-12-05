@@ -1,8 +1,8 @@
 /*
  * File:        sidlPyArrays.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.5 $
- * Date:        $Date: 2006/08/29 22:29:27 $
+ * Revision:    @(#) $Revision: 1.6 $
+ * Date:        $Date: 2007/09/27 19:35:21 $
  * Description: Runtime support for routines to convert arrays to/from Python
  *
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.

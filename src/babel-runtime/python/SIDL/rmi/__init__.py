@@ -2,9 +2,9 @@
 # File:          __init__.py
 # Symbol:        sidl.rmi-v0.9.15
 # Symbol Type:   package
-# Babel Version: 1.0.0
-# Release:       $Name: V2-2-0b $
-# Revision:      @(#) $Id: __init__.py,v 1.4 2006/08/29 22:29:38 painter Exp $
+# Babel Version: 1.0.4
+# Release:       $Name: V2-4-0b $
+# Revision:      @(#) $Id: __init__.py,v 1.5 2007/09/27 19:35:32 painter Exp $
 # Description:   package initialization code
 # 
 # Copyright (c) 2000-2002, The Regents of the University of California.

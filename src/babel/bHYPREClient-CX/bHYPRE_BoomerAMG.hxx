@@ -2,7 +2,7 @@
 // File:          bHYPRE_BoomerAMG.hxx
 // Symbol:        bHYPRE.BoomerAMG-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.BoomerAMG
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -241,8 +241,8 @@ namespace bHYPRE {
    * Objects of this type can be cast to Solver objects using the
    * {\tt \_\_cast} methods.
    */
-  class BoomerAMG: public virtual ::bHYPRE::Solver,
-    public virtual ::sidl::BaseClass {
+  class BoomerAMG: public virtual ::bHYPRE::Solver, public virtual 
+    ::sidl::BaseClass {
 
     //////////////////////////////////////////////////
     // 
@@ -294,8 +294,8 @@ namespace bHYPRE {
     InitGridRelaxation (
       /* out array<int,column-major> */::sidl::array<int32_t>& num_grid_sweeps,
       /* out array<int,column-major> */::sidl::array<int32_t>& grid_relax_type,
-      /* out array<int,2,
-        column-major> */::sidl::array<int32_t>& grid_relax_points,
+      /* out array<int,2,column-major> */::sidl::array<int32_t>& 
+        grid_relax_points,
       /* in */int32_t coarsen_type,
       /* out array<double,column-major> */::sidl::array<double>& relax_weights,
       /* in */int32_t max_levels
@@ -600,7 +600,8 @@ namespace bHYPRE {
     typedef struct bHYPRE_BoomerAMG__sepv sepv_t;
 
     // default constructor
-    BoomerAMG() { }
+    BoomerAMG() { 
+    }
 
     // static constructor
     static ::bHYPRE::BoomerAMG _create();
@@ -615,8 +616,8 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::BoomerAMG _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::bHYPRE::BoomerAMG _connect( /*in*/ const std::string& url, /*in*/ 
+      const bool ar  );
 
     // default destructor
     virtual ~BoomerAMG () { }
@@ -642,13 +643,13 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     BoomerAMG ( BoomerAMG::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -732,9 +733,9 @@ namespace bHYPRE {
 extern "C" {
 
 
-  #pragma weak bHYPRE_BoomerAMG__connectI
+#pragma weak bHYPRE_BoomerAMG__connectI
 
-  #pragma weak bHYPRE_BoomerAMG__rmicast
+#pragma weak bHYPRE_BoomerAMG__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -747,8 +748,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_BoomerAMG__object*
-  bHYPRE_BoomerAMG__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_BoomerAMG__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

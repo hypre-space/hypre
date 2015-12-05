@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_Operator_Impl.f
 C       Symbol:        bHYPRE.Operator-v1.0.0
 C       Symbol Type:   interface
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.Operator
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -44,7 +44,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_Operator__cast2_f(self, name, retval,
+        subroutine bHYPRE_Operator__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -64,7 +64,7 @@ C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       
 
-        subroutine bHYPRE_Operator_SetCommunicator_f(self, mpi_comm,
+        subroutine bHYPRE_Operator_SetCommunicator_f(self, mpi_comm, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -100,7 +100,7 @@ C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetIntParameter_f(self, name, value,
+        subroutine bHYPRE_Operator_SetIntParameter_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -121,7 +121,7 @@ C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetDoubleParameter_f(self, name,
+        subroutine bHYPRE_Operator_SetDoubleParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -142,7 +142,7 @@ C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetStringParameter_f(self, name,
+        subroutine bHYPRE_Operator_SetStringParameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -163,7 +163,7 @@ C       Method:  SetIntArray1Parameter[]
 C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetIntArray1Parameter_f(self, name,
+        subroutine bHYPRE_Operator_SetIntArray1Parameter_f(self, name, 
      &     value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -186,7 +186,7 @@ C       Method:  SetIntArray2Parameter[]
 C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetIntArray2Parameter_f(self, name,
+        subroutine bHYPRE_Operator_SetIntArray2Parameter_f(self, name, 
      &     value, retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -207,7 +207,7 @@ C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetDoubleArray1Parameter_f(self,
+        subroutine bHYPRE_Operator_SetDoubleArray1Parameter_f(self, 
      &     name, value, nvalues, retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -230,7 +230,7 @@ C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_SetDoubleArray2Parameter_f(self,
+        subroutine bHYPRE_Operator_SetDoubleArray2Parameter_f(self, 
      &     name, value, retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -251,7 +251,7 @@ C       Method:  GetIntValue[]
 C       Set the int parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_GetIntValue_f(self, name, value,
+        subroutine bHYPRE_Operator_GetIntValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -272,7 +272,7 @@ C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
 
-        subroutine bHYPRE_Operator_GetDoubleValue_f(self, name, value,
+        subroutine bHYPRE_Operator_GetDoubleValue_f(self, name, value, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -294,7 +294,7 @@ C       (Optional) Do any preprocessing that may be necessary in
 C       order to execute {\tt Apply}.
 C       
 
-        subroutine bHYPRE_Operator_Setup_f(self, b, x, retval,
+        subroutine bHYPRE_Operator_Setup_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -315,7 +315,7 @@ C       Method:  Apply[]
 C       Apply the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_Operator_Apply_f(self, b, x, retval,
+        subroutine bHYPRE_Operator_Apply_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -336,7 +336,7 @@ C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 
-        subroutine bHYPRE_Operator_ApplyAdjoint_f(self, b, x, retval,
+        subroutine bHYPRE_Operator_ApplyAdjoint_f(self, b, x, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -401,7 +401,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_Operator_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_Operator_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -423,7 +423,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_Operator_isType_f(self, name, retval,
+        subroutine bHYPRE_Operator_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -442,7 +442,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_Operator_getClassInfo_f(self, retval,
+        subroutine bHYPRE_Operator_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.Operator self
@@ -459,7 +459,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine bHYPRE_Operator__exec_f(self, methodName, inArgs,
+        subroutine bHYPRE_Operator__exec_f(self, methodName, inArgs, 
      &     outArgs, exception)
         implicit none
 C        in bHYPRE.Operator self

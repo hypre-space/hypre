@@ -1,7 +1,7 @@
 //
 // File:        sidl.sidl
-// Revision:    @(#) $Revision: 1.10 $
-// Date:        $Date: 2006/08/29 22:29:48 $
+// Revision:    @(#) $Revision: 1.11 $
+// Date:        $Date: 2007/09/27 19:35:42 $
 // Description: sidl interface description for the basic sidl run-time library
 // 
 // Copyright (c) 2001, The Regents of the University of Calfornia.

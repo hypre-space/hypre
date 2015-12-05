@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.50 $
+ * $Revision: 1.53 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -1163,7 +1150,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
 {
     /* prototype */
 #if 0
-    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, integer *, 
+    void hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, integer *, 
         integer *, doublereal *, int *, doublereal *, doublereal *, integer *, 
         doublereal *, integer *, doublereal *, integer *, integer *);
 #endif
@@ -1176,7 +1163,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int info;
     info = -1;
 #else
-    extern int hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
+    extern int hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, int *, 
         int *, double *, int *, double *, double *, int *, 
         double *, int *, double *, int *, int *);
 
@@ -1185,7 +1172,7 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int  dim = MIN(m,n);
     int  info;
 
-    hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
+    hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
         &m, sArray, (double *) NULL, &m, vtArray, &dim, workArray, 
         &workLen, &info);
 #endif
@@ -1210,11 +1197,11 @@ int MLI_Utils_singular_vectors(int n, double *uArray)
     double *sArray = (double *) malloc(n*sizeof(double));
     int workLen = 5*n;
     double *workArray = (double *) malloc(workLen*sizeof(double));
-    extern int hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
+    extern int hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, int *,
         int *, double *, int *, double *, double *, int *,
         double *, int *, double *, int *, int *);
 
-    hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
+    hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
         &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
 
     free(workArray);

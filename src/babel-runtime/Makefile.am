@@ -1,8 +1,8 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Revision:    $Revision: 1.11 $
-## Modified:    $Date: 2006/08/29 22:29:05 $
+## Revision:    $Revision: 1.12 $
+## Modified:    $Date: 2007/09/27 19:34:59 $
 ## Description: automake makefile to build the runtime library
 ##
 ## Copyright (c) 2000-2002, The Regents of the University of Calfornia.

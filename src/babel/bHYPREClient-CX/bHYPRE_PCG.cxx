@@ -2,7 +2,7 @@
 // File:          bHYPRE_PCG.cxx
 // Symbol:        bHYPRE.PCG-v1.0.0
 // Symbol Type:   class
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.PCG
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -133,8 +133,8 @@ static struct sidl_recursive_mutex_t bHYPRE_PCG__mutex= SIDL_RECURSIVE_MUTEX_INI
 #endif
 
   // Static variables to hold version of IOR
-  static const int32_t s_IOR_MAJOR_VERSION = 0;
-  static const int32_t s_IOR_MINOR_VERSION = 10;
+  static const int32_t s_IOR_MAJOR_VERSION = 1;
+  static const int32_t s_IOR_MINOR_VERSION = 0;
 
   // Static variables for managing EPV initialization.
   static int s_remote_initialized = 0;
@@ -174,7 +174,7 @@ static struct sidl_recursive_mutex_t bHYPRE_PCG__mutex= SIDL_RECURSIVE_MUTEX_INI
       cmp1 = strcmp(name, "bHYPRE.PCG");
       if (!cmp1) {
         (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-        cast = self;
+        cast = ((struct bHYPRE_PCG__object*)self);
         return cast;
       }
       else if (cmp1 < 0) {
@@ -205,16 +205,16 @@ static struct sidl_recursive_mutex_t bHYPRE_PCG__mutex= SIDL_RECURSIVE_MUTEX_INI
         cmp2 = strcmp(name, "sidl.BaseClass");
         if (!cmp2) {
           (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-          cast = self;
+          cast = ((struct sidl_BaseClass__object*)self);
           return cast;
         }
       }
     }
     if ((*self->d_epv->f_isType)(self,name, _ex)) {
-      void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**) = 
-        (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-          struct sidl_BaseInterface__object**)) 
+      void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**) = 
+        (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+          sidl_BaseInterface__object**)) 
         sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
       cast =  (*func)(((struct bHYPRE_PCG__remote*)self->d_data)->d_ih, _ex);
     }
@@ -256,7 +256,7 @@ static struct sidl_recursive_mutex_t bHYPRE_PCG__mutex= SIDL_RECURSIVE_MUTEX_INI
     struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
       bHYPRE_PCG__remote*)self->d_data)->d_ih;
     sidl_rmi_Response _rsvp = NULL;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "addRef", _ex ); SIDL_CHECK(*_ex);
     // send actual RMI request
     _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -400,14 +400,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG._set_hoo
 
       // pack in and inout arguments
       if(iobj){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "iobj", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "iobj", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "iobj", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -423,8 +423,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.isSame."
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -472,8 +472,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.isType."
       }
 
       // extract return value
-      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -520,10 +520,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.getClass
       }
 
       // extract return value
-      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+      sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
         _ex);SIDL_CHECK(*_ex);
-      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -557,7 +557,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.getClass
 
       // pack in and inout arguments
       if(s){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)s,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)s, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "s", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -578,8 +578,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetPreco
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -627,8 +627,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetPreco
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
       sidl_rmi_Response_unpackString( _rsvp, "s", &s_str, _ex);SIDL_CHECK(*_ex);
@@ -678,13 +678,13 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Clone.",
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
       sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex);SIDL_CHECK(*_ex);
-      *x = bHYPRE_PreconditionedSolver__connectI(x_str, FALSE,
-        _ex);SIDL_CHECK(*_ex);
+      *x = bHYPRE_PreconditionedSolver__connectI(x_str, FALSE, _ex);SIDL_CHECK(
+        *_ex);
 
       // cleanup and return
       EXIT:
@@ -716,7 +716,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Clone.",
 
       // pack in and inout arguments
       if(A){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)A,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)A, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "A", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -737,8 +737,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetOpera
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -771,7 +771,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetOpera
         _conn, "SetTolerance", _ex ); SIDL_CHECK(*_ex);
 
       // pack in and inout arguments
-      sidl_rmi_Invocation_packDouble( _inv, "tolerance", tolerance,
+      sidl_rmi_Invocation_packDouble( _inv, "tolerance", tolerance, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -787,8 +787,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetToler
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -821,7 +821,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetToler
         _conn, "SetMaxIterations", _ex ); SIDL_CHECK(*_ex);
 
       // pack in and inout arguments
-      sidl_rmi_Invocation_packInt( _inv, "max_iterations", max_iterations,
+      sidl_rmi_Invocation_packInt( _inv, "max_iterations", max_iterations, 
         _ex);SIDL_CHECK(*_ex);
 
       // send actual RMI request
@@ -837,8 +837,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetMaxIt
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -886,8 +886,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetLoggi
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -935,8 +935,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetPrint
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -983,11 +983,11 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetNumIt
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
-      sidl_rmi_Response_unpackInt( _rsvp, "num_iterations", num_iterations,
+      sidl_rmi_Response_unpackInt( _rsvp, "num_iterations", num_iterations, 
         _ex);SIDL_CHECK(*_ex);
 
       // cleanup and return
@@ -1033,12 +1033,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetRelRe
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
-      sidl_rmi_Response_unpackDouble( _rsvp, "norm", norm,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackDouble( _rsvp, "norm", norm, _ex);SIDL_CHECK(
+        *_ex);
 
       // cleanup and return
       EXIT:
@@ -1070,14 +1070,14 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetRelRe
 
       // pack in and inout arguments
       if(mpi_comm){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)mpi_comm,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)mpi_comm, 
           _ex);SIDL_CHECK(*_ex);
-        sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "mpi_comm", _url, _ex);SIDL_CHECK(
+          *_ex);
         free((void*)_url);
       } else {
-        sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL,
-          _ex);SIDL_CHECK(*_ex);
+        sidl_rmi_Invocation_packString( _inv, "mpi_comm", NULL, _ex);SIDL_CHECK(
+          *_ex);
       }
 
       // send actual RMI request
@@ -1093,8 +1093,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetCommu
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1186,8 +1186,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetIntPa
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1222,8 +1222,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetIntPa
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "name", name, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packDouble( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1238,8 +1238,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetDoubl
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1274,8 +1274,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetDoubl
 
       // pack in and inout arguments
       sidl_rmi_Invocation_packString( _inv, "name", name, _ex);SIDL_CHECK(*_ex);
-      sidl_rmi_Invocation_packString( _inv, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Invocation_packString( _inv, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // send actual RMI request
       _rsvp = sidl_rmi_Invocation_invokeMethod(_inv, _ex);SIDL_CHECK(*_ex);
@@ -1290,8 +1290,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetStrin
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1342,8 +1342,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetIntAr
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1394,8 +1394,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetIntAr
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1446,8 +1446,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetDoubl
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1498,8 +1498,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.SetDoubl
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1548,8 +1548,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetIntVa
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
       sidl_rmi_Response_unpackInt( _rsvp, "value", value, _ex);SIDL_CHECK(*_ex);
@@ -1599,12 +1599,12 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetDoubl
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
-      sidl_rmi_Response_unpackDouble( _rsvp, "value", value,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackDouble( _rsvp, "value", value, _ex);SIDL_CHECK(
+        *_ex);
 
       // cleanup and return
       EXIT:
@@ -1637,7 +1637,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetDoubl
 
       // pack in and inout arguments
       if(b){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)b,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)b, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "b", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -1645,7 +1645,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.GetDoubl
         sidl_rmi_Invocation_packString( _inv, "b", NULL, _ex);SIDL_CHECK(*_ex);
       }
       if(x){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)x,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)x, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "x", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -1666,8 +1666,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Setup.",
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
 
@@ -1703,7 +1703,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Setup.",
 
       // pack in and inout arguments
       if(b){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)b,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)b, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "b", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -1711,7 +1711,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Setup.",
         sidl_rmi_Invocation_packString( _inv, "b", NULL, _ex);SIDL_CHECK(*_ex);
       }
       if(*x){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)*x,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)*x, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "x", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -1723,8 +1723,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Setup.",
         SIDL_CHECK(*_ex);
         (*((sidl_BaseInterface)*x)->d_epv->f__raddRef)(((
           sidl_BaseInterface)*x)->d_object, _ex);SIDL_CHECK(*_ex);
-        sidl_BaseInterface_deleteRef((sidl_BaseInterface)*x,
-          _ex);SIDL_CHECK(*_ex); 
+        sidl_BaseInterface_deleteRef((sidl_BaseInterface)*x, _ex);SIDL_CHECK(
+          *_ex); 
       }
 
       // send actual RMI request
@@ -1740,8 +1740,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Apply.",
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
       sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex);SIDL_CHECK(*_ex);
@@ -1779,7 +1779,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Apply.",
 
       // pack in and inout arguments
       if(b){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)b,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)b, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "b", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -1787,7 +1787,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Apply.",
         sidl_rmi_Invocation_packString( _inv, "b", NULL, _ex);SIDL_CHECK(*_ex);
       }
       if(*x){
-        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)*x,
+        char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)*x, 
           _ex);SIDL_CHECK(*_ex);
         sidl_rmi_Invocation_packString( _inv, "x", _url, _ex);SIDL_CHECK(*_ex);
         free((void*)_url);
@@ -1799,8 +1799,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.Apply.",
         SIDL_CHECK(*_ex);
         (*((sidl_BaseInterface)*x)->d_epv->f__raddRef)(((
           sidl_BaseInterface)*x)->d_object, _ex);SIDL_CHECK(*_ex);
-        sidl_BaseInterface_deleteRef((sidl_BaseInterface)*x,
-          _ex);SIDL_CHECK(*_ex); 
+        sidl_BaseInterface_deleteRef((sidl_BaseInterface)*x, _ex);SIDL_CHECK(
+          *_ex); 
       }
 
       // send actual RMI request
@@ -1816,8 +1816,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
       }
 
       // extract return value
-      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval,
-        _ex);SIDL_CHECK(*_ex);
+      sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+        *_ex);
 
       // unpack out and inout arguments
       sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex);SIDL_CHECK(*_ex);
@@ -1890,229 +1890,229 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
 
     e0->f__cast                    = (void* (*)(void*,const char*,
       sidl_BaseInterface*)) epv->f__cast;
-    e0->f__delete                  = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__delete;
-    e0->f__getURL                  = (char* (*)(void*,
-      sidl_BaseInterface*)) epv->f__getURL;
-    e0->f__raddRef                 = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__raddRef;
-    e0->f__isRemote                = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e0->f__set_hooks               = (void (*)(void*,int32_t,
+    e0->f__delete                  = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__delete;
+    e0->f__getURL                  = (char* (*)(void*,sidl_BaseInterface*)) 
+      epv->f__getURL;
+    e0->f__raddRef                 = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__raddRef;
+    e0->f__isRemote                = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e0->f__set_hooks               = (void (*)(void*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
-    e0->f__exec                    = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e0->f_SetCommunicator          = (int32_t (*)(void*,
-      struct bHYPRE_MPICommunicator__object*,
-      struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-    e0->f_Destroy                  = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_Destroy;
+    e0->f__exec                    = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e0->f_SetCommunicator          = (int32_t (*)(void*,struct 
+      bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetCommunicator;
+    e0->f_Destroy                  = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_Destroy;
     e0->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
       struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
     e0->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
       struct sidl_BaseInterface__object **)) epv->f_SetDoubleParameter;
     e0->f_SetStringParameter       = (int32_t (*)(void*,const char*,const char*,
       struct sidl_BaseInterface__object **)) epv->f_SetStringParameter;
-    e0->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
-      struct sidl_int__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetIntArray1Parameter;
-    e0->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
-      struct sidl_int__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetIntArray2Parameter;
-    e0->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
-      struct sidl_double__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetDoubleArray1Parameter;
-    e0->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
-      struct sidl_double__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetDoubleArray2Parameter;
+    e0->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,struct 
+      sidl_int__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetIntArray1Parameter;
+    e0->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,struct 
+      sidl_int__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetIntArray2Parameter;
+    e0->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,struct 
+      sidl_double__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetDoubleArray1Parameter;
+    e0->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,struct 
+      sidl_double__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetDoubleArray2Parameter;
     e0->f_GetIntValue              = (int32_t (*)(void*,const char*,int32_t*,
       struct sidl_BaseInterface__object **)) epv->f_GetIntValue;
     e0->f_GetDoubleValue           = (int32_t (*)(void*,const char*,double*,
       struct sidl_BaseInterface__object **)) epv->f_GetDoubleValue;
-    e0->f_Setup                    = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*,
-      struct sidl_BaseInterface__object **)) epv->f_Setup;
-    e0->f_Apply                    = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,
-      struct sidl_BaseInterface__object **)) epv->f_Apply;
-    e0->f_ApplyAdjoint             = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,
-      struct sidl_BaseInterface__object **)) epv->f_ApplyAdjoint;
-    e0->f_addRef                   = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e0->f_deleteRef                = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e0->f_isSame                   = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e0->f_isType                   = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
+    e0->f_Setup                    = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object*,struct 
+      sidl_BaseInterface__object **)) epv->f_Setup;
+    e0->f_Apply                    = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,struct 
+      sidl_BaseInterface__object **)) epv->f_Apply;
+    e0->f_ApplyAdjoint             = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,struct 
+      sidl_BaseInterface__object **)) epv->f_ApplyAdjoint;
+    e0->f_addRef                   = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e0->f_deleteRef                = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e0->f_isSame                   = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e0->f_isType                   = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
     e0->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
     e1->f__cast                    = (void* (*)(void*,const char*,
       sidl_BaseInterface*)) epv->f__cast;
-    e1->f__delete                  = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__delete;
-    e1->f__getURL                  = (char* (*)(void*,
-      sidl_BaseInterface*)) epv->f__getURL;
-    e1->f__raddRef                 = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__raddRef;
-    e1->f__isRemote                = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e1->f__set_hooks               = (void (*)(void*,int32_t,
+    e1->f__delete                  = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__delete;
+    e1->f__getURL                  = (char* (*)(void*,sidl_BaseInterface*)) 
+      epv->f__getURL;
+    e1->f__raddRef                 = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__raddRef;
+    e1->f__isRemote                = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e1->f__set_hooks               = (void (*)(void*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
-    e1->f__exec                    = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e1->f_SetPreconditioner        = (int32_t (*)(void*,
-      struct bHYPRE_Solver__object*,
-      struct sidl_BaseInterface__object **)) epv->f_SetPreconditioner;
-    e1->f_GetPreconditioner        = (int32_t (*)(void*,
-      struct bHYPRE_Solver__object**,
-      struct sidl_BaseInterface__object **)) epv->f_GetPreconditioner;
-    e1->f_Clone                    = (int32_t (*)(void*,
-      struct bHYPRE_PreconditionedSolver__object**,
-      struct sidl_BaseInterface__object **)) epv->f_Clone;
-    e1->f_SetOperator              = (int32_t (*)(void*,
-      struct bHYPRE_Operator__object*,
-      struct sidl_BaseInterface__object **)) epv->f_SetOperator;
-    e1->f_SetTolerance             = (int32_t (*)(void*,double,
-      struct sidl_BaseInterface__object **)) epv->f_SetTolerance;
-    e1->f_SetMaxIterations         = (int32_t (*)(void*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_SetMaxIterations;
-    e1->f_SetLogging               = (int32_t (*)(void*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_SetLogging;
-    e1->f_SetPrintLevel            = (int32_t (*)(void*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_SetPrintLevel;
-    e1->f_GetNumIterations         = (int32_t (*)(void*,int32_t*,
-      struct sidl_BaseInterface__object **)) epv->f_GetNumIterations;
-    e1->f_GetRelResidualNorm       = (int32_t (*)(void*,double*,
-      struct sidl_BaseInterface__object **)) epv->f_GetRelResidualNorm;
-    e1->f_SetCommunicator          = (int32_t (*)(void*,
-      struct bHYPRE_MPICommunicator__object*,
-      struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-    e1->f_Destroy                  = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_Destroy;
+    e1->f__exec                    = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e1->f_SetPreconditioner        = (int32_t (*)(void*,struct 
+      bHYPRE_Solver__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetPreconditioner;
+    e1->f_GetPreconditioner        = (int32_t (*)(void*,struct 
+      bHYPRE_Solver__object**,struct sidl_BaseInterface__object **)) 
+      epv->f_GetPreconditioner;
+    e1->f_Clone                    = (int32_t (*)(void*,struct 
+      bHYPRE_PreconditionedSolver__object**,struct sidl_BaseInterface__object 
+      **)) epv->f_Clone;
+    e1->f_SetOperator              = (int32_t (*)(void*,struct 
+      bHYPRE_Operator__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetOperator;
+    e1->f_SetTolerance             = (int32_t (*)(void*,double,struct 
+      sidl_BaseInterface__object **)) epv->f_SetTolerance;
+    e1->f_SetMaxIterations         = (int32_t (*)(void*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_SetMaxIterations;
+    e1->f_SetLogging               = (int32_t (*)(void*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_SetLogging;
+    e1->f_SetPrintLevel            = (int32_t (*)(void*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_SetPrintLevel;
+    e1->f_GetNumIterations         = (int32_t (*)(void*,int32_t*,struct 
+      sidl_BaseInterface__object **)) epv->f_GetNumIterations;
+    e1->f_GetRelResidualNorm       = (int32_t (*)(void*,double*,struct 
+      sidl_BaseInterface__object **)) epv->f_GetRelResidualNorm;
+    e1->f_SetCommunicator          = (int32_t (*)(void*,struct 
+      bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetCommunicator;
+    e1->f_Destroy                  = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_Destroy;
     e1->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
       struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
     e1->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
       struct sidl_BaseInterface__object **)) epv->f_SetDoubleParameter;
     e1->f_SetStringParameter       = (int32_t (*)(void*,const char*,const char*,
       struct sidl_BaseInterface__object **)) epv->f_SetStringParameter;
-    e1->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
-      struct sidl_int__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetIntArray1Parameter;
-    e1->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
-      struct sidl_int__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetIntArray2Parameter;
-    e1->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
-      struct sidl_double__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetDoubleArray1Parameter;
-    e1->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
-      struct sidl_double__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetDoubleArray2Parameter;
+    e1->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,struct 
+      sidl_int__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetIntArray1Parameter;
+    e1->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,struct 
+      sidl_int__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetIntArray2Parameter;
+    e1->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,struct 
+      sidl_double__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetDoubleArray1Parameter;
+    e1->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,struct 
+      sidl_double__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetDoubleArray2Parameter;
     e1->f_GetIntValue              = (int32_t (*)(void*,const char*,int32_t*,
       struct sidl_BaseInterface__object **)) epv->f_GetIntValue;
     e1->f_GetDoubleValue           = (int32_t (*)(void*,const char*,double*,
       struct sidl_BaseInterface__object **)) epv->f_GetDoubleValue;
-    e1->f_Setup                    = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*,
-      struct sidl_BaseInterface__object **)) epv->f_Setup;
-    e1->f_Apply                    = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,
-      struct sidl_BaseInterface__object **)) epv->f_Apply;
-    e1->f_ApplyAdjoint             = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,
-      struct sidl_BaseInterface__object **)) epv->f_ApplyAdjoint;
-    e1->f_addRef                   = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e1->f_deleteRef                = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e1->f_isSame                   = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e1->f_isType                   = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
+    e1->f_Setup                    = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object*,struct 
+      sidl_BaseInterface__object **)) epv->f_Setup;
+    e1->f_Apply                    = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,struct 
+      sidl_BaseInterface__object **)) epv->f_Apply;
+    e1->f_ApplyAdjoint             = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,struct 
+      sidl_BaseInterface__object **)) epv->f_ApplyAdjoint;
+    e1->f_addRef                   = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e1->f_deleteRef                = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e1->f_isSame                   = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e1->f_isType                   = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
     e1->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
     e2->f__cast                    = (void* (*)(void*,const char*,
       sidl_BaseInterface*)) epv->f__cast;
-    e2->f__delete                  = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__delete;
-    e2->f__getURL                  = (char* (*)(void*,
-      sidl_BaseInterface*)) epv->f__getURL;
-    e2->f__raddRef                 = (void (*)(void*,
-      sidl_BaseInterface*)) epv->f__raddRef;
-    e2->f__isRemote                = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e2->f__set_hooks               = (void (*)(void*,int32_t,
+    e2->f__delete                  = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__delete;
+    e2->f__getURL                  = (char* (*)(void*,sidl_BaseInterface*)) 
+      epv->f__getURL;
+    e2->f__raddRef                 = (void (*)(void*,sidl_BaseInterface*)) 
+      epv->f__raddRef;
+    e2->f__isRemote                = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e2->f__set_hooks               = (void (*)(void*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
-    e2->f__exec                    = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e2->f_SetOperator              = (int32_t (*)(void*,
-      struct bHYPRE_Operator__object*,
-      struct sidl_BaseInterface__object **)) epv->f_SetOperator;
-    e2->f_SetTolerance             = (int32_t (*)(void*,double,
-      struct sidl_BaseInterface__object **)) epv->f_SetTolerance;
-    e2->f_SetMaxIterations         = (int32_t (*)(void*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_SetMaxIterations;
-    e2->f_SetLogging               = (int32_t (*)(void*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_SetLogging;
-    e2->f_SetPrintLevel            = (int32_t (*)(void*,int32_t,
-      struct sidl_BaseInterface__object **)) epv->f_SetPrintLevel;
-    e2->f_GetNumIterations         = (int32_t (*)(void*,int32_t*,
-      struct sidl_BaseInterface__object **)) epv->f_GetNumIterations;
-    e2->f_GetRelResidualNorm       = (int32_t (*)(void*,double*,
-      struct sidl_BaseInterface__object **)) epv->f_GetRelResidualNorm;
-    e2->f_SetCommunicator          = (int32_t (*)(void*,
-      struct bHYPRE_MPICommunicator__object*,
-      struct sidl_BaseInterface__object **)) epv->f_SetCommunicator;
-    e2->f_Destroy                  = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_Destroy;
+    e2->f__exec                    = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e2->f_SetOperator              = (int32_t (*)(void*,struct 
+      bHYPRE_Operator__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetOperator;
+    e2->f_SetTolerance             = (int32_t (*)(void*,double,struct 
+      sidl_BaseInterface__object **)) epv->f_SetTolerance;
+    e2->f_SetMaxIterations         = (int32_t (*)(void*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_SetMaxIterations;
+    e2->f_SetLogging               = (int32_t (*)(void*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_SetLogging;
+    e2->f_SetPrintLevel            = (int32_t (*)(void*,int32_t,struct 
+      sidl_BaseInterface__object **)) epv->f_SetPrintLevel;
+    e2->f_GetNumIterations         = (int32_t (*)(void*,int32_t*,struct 
+      sidl_BaseInterface__object **)) epv->f_GetNumIterations;
+    e2->f_GetRelResidualNorm       = (int32_t (*)(void*,double*,struct 
+      sidl_BaseInterface__object **)) epv->f_GetRelResidualNorm;
+    e2->f_SetCommunicator          = (int32_t (*)(void*,struct 
+      bHYPRE_MPICommunicator__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetCommunicator;
+    e2->f_Destroy                  = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_Destroy;
     e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,int32_t,
       struct sidl_BaseInterface__object **)) epv->f_SetIntParameter;
     e2->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,double,
       struct sidl_BaseInterface__object **)) epv->f_SetDoubleParameter;
     e2->f_SetStringParameter       = (int32_t (*)(void*,const char*,const char*,
       struct sidl_BaseInterface__object **)) epv->f_SetStringParameter;
-    e2->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
-      struct sidl_int__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetIntArray1Parameter;
-    e2->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
-      struct sidl_int__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetIntArray2Parameter;
-    e2->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
-      struct sidl_double__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetDoubleArray1Parameter;
-    e2->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
-      struct sidl_double__array*,
-      struct sidl_BaseInterface__object **)) epv->f_SetDoubleArray2Parameter;
+    e2->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,struct 
+      sidl_int__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetIntArray1Parameter;
+    e2->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,struct 
+      sidl_int__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetIntArray2Parameter;
+    e2->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,struct 
+      sidl_double__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetDoubleArray1Parameter;
+    e2->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,struct 
+      sidl_double__array*,struct sidl_BaseInterface__object **)) 
+      epv->f_SetDoubleArray2Parameter;
     e2->f_GetIntValue              = (int32_t (*)(void*,const char*,int32_t*,
       struct sidl_BaseInterface__object **)) epv->f_GetIntValue;
     e2->f_GetDoubleValue           = (int32_t (*)(void*,const char*,double*,
       struct sidl_BaseInterface__object **)) epv->f_GetDoubleValue;
-    e2->f_Setup                    = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*,
-      struct sidl_BaseInterface__object **)) epv->f_Setup;
-    e2->f_Apply                    = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,
-      struct sidl_BaseInterface__object **)) epv->f_Apply;
-    e2->f_ApplyAdjoint             = (int32_t (*)(void*,
-      struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,
-      struct sidl_BaseInterface__object **)) epv->f_ApplyAdjoint;
-    e2->f_addRef                   = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e2->f_deleteRef                = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e2->f_isSame                   = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e2->f_isType                   = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
+    e2->f_Setup                    = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object*,struct 
+      sidl_BaseInterface__object **)) epv->f_Setup;
+    e2->f_Apply                    = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,struct 
+      sidl_BaseInterface__object **)) epv->f_Apply;
+    e2->f_ApplyAdjoint             = (int32_t (*)(void*,struct 
+      bHYPRE_Vector__object*,struct bHYPRE_Vector__object**,struct 
+      sidl_BaseInterface__object **)) epv->f_ApplyAdjoint;
+    e2->f_addRef                   = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e2->f_deleteRef                = (void (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e2->f_isSame                   = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e2->f_isType                   = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
     e2->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*,
       struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
@@ -2126,55 +2126,55 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
       sidl_BaseInterface*)) epv->f__raddRef;
     e3->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,
       sidl_BaseInterface*)) epv->f__isRemote;
-    e3->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,
+    e3->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t, 
       sidl_BaseInterface*)) epv->f__set_hooks;
     e3->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e3->f_addRef       = (void (*)(struct sidl_BaseClass__object*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e3->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e3->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e3->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-      const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e3->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct 
+      sidl_BaseInterface__object **)) epv->f_addRef;
+    e3->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct 
+      sidl_BaseInterface__object **)) epv->f_deleteRef;
+    e3->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e3->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const 
+      char*,struct sidl_BaseInterface__object **)) epv->f_isType;
     e3->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-      sidl_BaseClass__object*,
-      struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+      sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_getClassInfo;
 
-    e4->f__cast        = (void* (*)(void*,const char*,
-      sidl_BaseInterface*)) epv->f__cast;
+    e4->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+      epv->f__cast;
     e4->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
     e4->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
     e4->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-    e4->f__isRemote    = (sidl_bool (*)(void*,
-      sidl_BaseInterface*)) epv->f__isRemote;
-    e4->f__set_hooks   = (void (*)(void*,int32_t,
-      sidl_BaseInterface*)) epv->f__set_hooks;
-    e4->f__exec        = (void (*)(void*,const char*,
-      struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-      struct sidl_BaseInterface__object **)) epv->f__exec;
-    e4->f_addRef       = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_addRef;
-    e4->f_deleteRef    = (void (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-    e4->f_isSame       = (sidl_bool (*)(void*,
-      struct sidl_BaseInterface__object*,
-      struct sidl_BaseInterface__object **)) epv->f_isSame;
-    e4->f_isType       = (sidl_bool (*)(void*,const char*,
-      struct sidl_BaseInterface__object **)) epv->f_isType;
-    e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-      struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    e4->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+      epv->f__isRemote;
+    e4->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+      epv->f__set_hooks;
+    e4->f__exec        = (void (*)(void*,const char*,struct 
+      sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+      sidl_BaseInterface__object **)) epv->f__exec;
+    e4->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_addRef;
+    e4->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+      epv->f_deleteRef;
+    e4->f_isSame       = (sidl_bool (*)(void*,struct 
+      sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+      epv->f_isSame;
+    e4->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+      sidl_BaseInterface__object **)) epv->f_isType;
+    e4->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+      sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
     s_remote_initialized = 1;
   }
 
   // Create an instance that connects to an existing remote object.
   static struct bHYPRE_PCG__object*
-  bHYPRE_PCG__remoteConnect(const char *url, sidl_bool ar,
-    sidl_BaseInterface *_ex)
+  bHYPRE_PCG__remoteConnect(const char *url, sidl_bool ar, sidl_BaseInterface 
+    *_ex)
   {
     struct bHYPRE_PCG__object* self;
 
@@ -2189,13 +2189,13 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
     if(url == NULL) {return NULL;}
     objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
     if(objectID) {
-      sidl_BaseInterface bi = 
-        (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
+      sidl_BaseInterface bi = (
+        sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
         objectID, _ex); SIDL_CHECK(*_ex);
       return bHYPRE_PCG__rmicast(bi,_ex);SIDL_CHECK(*_ex);
     }
-    instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,
-      _ex ); SIDL_CHECK(*_ex);
+    instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex ); 
+      SIDL_CHECK(*_ex);
     if ( instance == NULL) { return NULL; }
     self =
       (struct bHYPRE_PCG__object*) malloc(
@@ -2244,8 +2244,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
   // Create an instance that uses an already existing 
   // InstanceHandle to connect to an existing remote object.
   static struct bHYPRE_PCG__object*
-  bHYPRE_PCG__IHConnect(sidl_rmi_InstanceHandle instance,
-    sidl_BaseInterface *_ex)
+  bHYPRE_PCG__IHConnect(sidl_rmi_InstanceHandle instance, sidl_BaseInterface 
+    *_ex)
   {
     struct bHYPRE_PCG__object* self;
 
@@ -2309,9 +2309,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
     struct sidl_BaseClass__object* s1;
 
     struct bHYPRE_PCG__remote* r_obj;
-    sidl_rmi_InstanceHandle instance = 
-      sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.PCG",
-      _ex ); SIDL_CHECK(*_ex);
+    sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance(
+      url, "bHYPRE.PCG", _ex ); SIDL_CHECK(*_ex);
     if ( instance == NULL) { return NULL; }
     self =
       (struct bHYPRE_PCG__object*) malloc(
@@ -2355,7 +2354,7 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
 
     return self;
     EXIT:
-    if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,
+    if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance, 
       &_throwaway_exception); }
     return NULL;
   }
@@ -2371,8 +2370,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
 
     *_ex = NULL;
     if(!connect_loaded) {
-      sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.PCG",
-        (void*)bHYPRE_PCG__IHConnect, _ex);
+      sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.PCG", (
+        void*)bHYPRE_PCG__IHConnect, _ex);
       connect_loaded = 1;
     }
     if (obj != NULL) {
@@ -2392,8 +2391,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from bHYPRE.PCG.ApplyAdj
   // RMI connector function for the class.
   // 
   struct bHYPRE_PCG__object*
-  bHYPRE_PCG__connectI(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex)
+  bHYPRE_PCG__connectI(const char* url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex)
   {
     return bHYPRE_PCG__remoteConnect(url, ar, _ex);
   }
@@ -2414,11 +2413,11 @@ bHYPRE::PCG::throwException0(
   void * _p = 0;
   struct sidl_BaseInterface__object *throwaway_exception;
 
-  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object,
+  if ( (_p=(*(_exception->d_epv->f__cast))(_exception->d_object, 
     "sidl.RuntimeException", &throwaway_exception)) != 0 ) {
     struct sidl_RuntimeException__object * _realtype = reinterpret_cast< struct 
       sidl_RuntimeException__object*>(_p);
-    (*_exception->d_epv->f_deleteRef)(_exception->d_object,
+    (*_exception->d_epv->f_deleteRef)(_exception->d_object, 
       &throwaway_exception);
     // Note: alternate constructor does not increment refcount.
     ::sidl::RuntimeException _resolved_exception = ::sidl::RuntimeException( 
@@ -2444,25 +2443,24 @@ bHYPRE::PCG::throwException0(
  *  This function is the preferred way to create a PCG solver. 
  */
 ::bHYPRE::PCG
-bHYPRE::PCG::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,
-  /* in */::bHYPRE::Operator A )
+bHYPRE::PCG::Create( /* in */::bHYPRE::MPICommunicator mpi_comm, /* in 
+  */::bHYPRE::Operator A )
 
 {
   ::bHYPRE::PCG _result;
-  struct bHYPRE_MPICommunicator__object* _local_mpi_comm = mpi_comm._get_ior();
+  struct bHYPRE_MPICommunicator__object* _local_mpi_comm = (struct 
+    bHYPRE_MPICommunicator__object*) 
+    mpi_comm.::bHYPRE::MPICommunicator::_get_ior();
   struct bHYPRE_Operator__object* _local_A = (struct bHYPRE_Operator__object*) 
-    ::bHYPRE::Operator::_cast((void*)(A._get_ior()));
+    A.::bHYPRE::Operator::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = ::bHYPRE::PCG( ( _get_sepv()->f_Create)( /* in */ _local_mpi_comm,
+  _result = ::bHYPRE::PCG( ( _get_sepv()->f_Create)( /* in */ _local_mpi_comm, 
     /* in */ _local_A, &_exception ), false);
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
-  }
-  if (_local_A) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_A->d_epv->f_deleteRef)(_local_A->d_object, &throwaway_exception);
   }
   /*unpack results and cleanup*/
   return _result;
@@ -2478,20 +2476,18 @@ bHYPRE::PCG::SetPreconditioner( /* in */::bHYPRE::Solver s )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_Solver__object* _local_s = (struct bHYPRE_Solver__object*) 
-    ::bHYPRE::Solver::_cast((void*)(s._get_ior()));
+    s.::bHYPRE::Solver::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetPreconditioner))(loc_self,
-    /* in */ _local_s, &_exception );
+  _result = (*(loc_self->d_epv->f_SetPreconditioner))(loc_self, /* in */ 
+    _local_s, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
-  }
-  if (_local_s) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_s->d_epv->f_deleteRef)(_local_s->d_object, &throwaway_exception);
   }
   /*unpack results and cleanup*/
   return _result;
@@ -2506,14 +2502,16 @@ bHYPRE::PCG::GetPreconditioner( /* out */::bHYPRE::Solver& s )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_Solver__object* _local_s;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_GetPreconditioner))(loc_self,
-    /* out */ &_local_s, &_exception );
+  _result = (*(loc_self->d_epv->f_GetPreconditioner))(loc_self, /* out */ 
+    &_local_s, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if ( s._not_nil() ) {
@@ -2533,14 +2531,16 @@ bHYPRE::PCG::Clone( /* out */::bHYPRE::PreconditionedSolver& x )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_PreconditionedSolver__object* _local_x;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_Clone))(loc_self, /* out */ &_local_x,
+  _result = (*(loc_self->d_epv->f_Clone))(loc_self, /* out */ &_local_x, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if ( x._not_nil() ) {
@@ -2562,20 +2562,18 @@ bHYPRE::PCG::SetOperator( /* in */::bHYPRE::Operator A )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_Operator__object* _local_A = (struct bHYPRE_Operator__object*) 
-    ::bHYPRE::Operator::_cast((void*)(A._get_ior()));
+    A.::bHYPRE::Operator::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetOperator))(loc_self, /* in */ _local_A,
+  _result = (*(loc_self->d_epv->f_SetOperator))(loc_self, /* in */ _local_A, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
-  }
-  if (_local_A) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_A->d_epv->f_deleteRef)(_local_A->d_object, &throwaway_exception);
   }
   /*unpack results and cleanup*/
   return _result;
@@ -2592,13 +2590,15 @@ bHYPRE::PCG::SetTolerance( /* in */double tolerance )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetTolerance))(loc_self, /* in */ tolerance,
+  _result = (*(loc_self->d_epv->f_SetTolerance))(loc_self, /* in */ tolerance, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2616,13 +2616,15 @@ bHYPRE::PCG::SetMaxIterations( /* in */int32_t max_iterations )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetMaxIterations))(loc_self,
-    /* in */ max_iterations, &_exception );
+  _result = (*(loc_self->d_epv->f_SetMaxIterations))(loc_self, /* in */ 
+    max_iterations, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2644,13 +2646,15 @@ bHYPRE::PCG::SetLogging( /* in */int32_t level )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetLogging))(loc_self, /* in */ level,
+  _result = (*(loc_self->d_epv->f_SetLogging))(loc_self, /* in */ level, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2672,13 +2676,15 @@ bHYPRE::PCG::SetPrintLevel( /* in */int32_t level )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetPrintLevel))(loc_self, /* in */ level,
+  _result = (*(loc_self->d_epv->f_SetPrintLevel))(loc_self, /* in */ level, 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2695,13 +2701,15 @@ bHYPRE::PCG::GetNumIterations( /* out */int32_t& num_iterations )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_GetNumIterations))(loc_self,
-    /* out */ &num_iterations, &_exception );
+  _result = (*(loc_self->d_epv->f_GetNumIterations))(loc_self, /* out */ 
+    &num_iterations, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2718,13 +2726,15 @@ bHYPRE::PCG::GetRelResidualNorm( /* out */double& norm )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_GetRelResidualNorm))(loc_self,
-    /* out */ &norm, &_exception );
+  _result = (*(loc_self->d_epv->f_GetRelResidualNorm))(loc_self, /* out */ 
+    &norm, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2742,14 +2752,18 @@ bHYPRE::PCG::SetCommunicator( /* in */::bHYPRE::MPICommunicator mpi_comm )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
-  struct bHYPRE_MPICommunicator__object* _local_mpi_comm = mpi_comm._get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
+  struct bHYPRE_MPICommunicator__object* _local_mpi_comm = (struct 
+    bHYPRE_MPICommunicator__object*) 
+    mpi_comm.::bHYPRE::MPICommunicator::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetCommunicator))(loc_self,
-    /* in */ _local_mpi_comm, &_exception );
+  _result = (*(loc_self->d_epv->f_SetCommunicator))(loc_self, /* in */ 
+    _local_mpi_comm, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2769,12 +2783,14 @@ bHYPRE::PCG::Destroy(  )
 
 {
 
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
   (*(loc_self->d_epv->f_Destroy))(loc_self, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2786,18 +2802,20 @@ bHYPRE::PCG::Destroy(  )
  * Set the int parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetIntParameter( /* in */const ::std::string& name,
-  /* in */int32_t value )
+bHYPRE::PCG::SetIntParameter( /* in */const ::std::string& name, /* in 
+  */int32_t value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetIntParameter))(loc_self,
-    /* in */ name.c_str(), /* in */ value, &_exception );
+  _result = (*(loc_self->d_epv->f_SetIntParameter))(loc_self, /* in */ 
+    name.c_str(), /* in */ value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2810,18 +2828,20 @@ bHYPRE::PCG::SetIntParameter( /* in */const ::std::string& name,
  * Set the double parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetDoubleParameter( /* in */const ::std::string& name,
-  /* in */double value )
+bHYPRE::PCG::SetDoubleParameter( /* in */const ::std::string& name, /* in 
+  */double value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetDoubleParameter))(loc_self,
-    /* in */ name.c_str(), /* in */ value, &_exception );
+  _result = (*(loc_self->d_epv->f_SetDoubleParameter))(loc_self, /* in */ 
+    name.c_str(), /* in */ value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2834,18 +2854,20 @@ bHYPRE::PCG::SetDoubleParameter( /* in */const ::std::string& name,
  * Set the string parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetStringParameter( /* in */const ::std::string& name,
-  /* in */const ::std::string& value )
+bHYPRE::PCG::SetStringParameter( /* in */const ::std::string& name, /* in 
+  */const ::std::string& value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetStringParameter))(loc_self,
-    /* in */ name.c_str(), /* in */ value.c_str(), &_exception );
+  _result = (*(loc_self->d_epv->f_SetStringParameter))(loc_self, /* in */ 
+    name.c_str(), /* in */ value.c_str(), &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2858,26 +2880,30 @@ bHYPRE::PCG::SetStringParameter( /* in */const ::std::string& name,
  * Set the int 1-D array parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetIntArray1Parameter( /* in */const ::std::string& name,
-  /* in rarray[nvalues] */int32_t* value, /* in */int32_t nvalues )
+bHYPRE::PCG::SetIntArray1Parameter( /* in */const ::std::string& name, /* in 
+  rarray[nvalues] */int32_t* value, /* in */int32_t nvalues )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   int32_t value_lower[1], value_upper[1], value_stride[1];
   struct sidl_int__array value_real;
   struct sidl_int__array *value_tmp = &value_real;
   value_upper[0] = nvalues-1;
-  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper,
+  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper, 
     value_stride);
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetIntArray1Parameter))(loc_self,
-    /* in */ name.c_str(), /* in rarray[nvalues] */ value_tmp, &_exception );
+  _result = (*(loc_self->d_epv->f_SetIntArray1Parameter))(loc_self, /* in */ 
+    name.c_str(), /* in rarray[nvalues] */ value_tmp, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+    sidl__array_deleteRef((struct sidl__array *)value_tmp);
+
     throwException0(_exception);
   }
+  sidl__array_deleteRef((struct sidl__array *)value_tmp);
   /*unpack results and cleanup*/
   return _result;
 }
@@ -2888,19 +2914,20 @@ bHYPRE::PCG::SetIntArray1Parameter( /* in */const ::std::string& name,
  * Set the int 1-D array parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetIntArray1Parameter( /* in */const ::std::string& name,
-  /* in rarray[nvalues] */::sidl::array<int32_t> value )
+bHYPRE::PCG::SetIntArray1Parameter( /* in */const ::std::string& name, /* in 
+  rarray[nvalues] */::sidl::array<int32_t> value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetIntArray1Parameter))(loc_self,
-    /* in */ name.c_str(), /* in rarray[nvalues] */ value._get_ior(),
-    &_exception );
+  _result = (*(loc_self->d_epv->f_SetIntArray1Parameter))(loc_self, /* in */ 
+    name.c_str(), /* in rarray[nvalues] */ value._get_ior(), &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2913,19 +2940,21 @@ bHYPRE::PCG::SetIntArray1Parameter( /* in */const ::std::string& name,
  * Set the int 2-D array parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetIntArray2Parameter( /* in */const ::std::string& name,
-  /* in array<int,2,column-major> */::sidl::array<int32_t> value )
+bHYPRE::PCG::SetIntArray2Parameter( /* in */const ::std::string& name, /* in 
+  array<int,2,column-major> */::sidl::array<int32_t> value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetIntArray2Parameter))(loc_self,
-    /* in */ name.c_str(), /* in array<int,2,column-major> */ value._get_ior(),
+  _result = (*(loc_self->d_epv->f_SetIntArray2Parameter))(loc_self, /* in */ 
+    name.c_str(), /* in array<int,2,column-major> */ value._get_ior(), 
     &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2938,26 +2967,30 @@ bHYPRE::PCG::SetIntArray2Parameter( /* in */const ::std::string& name,
  * Set the double 1-D array parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetDoubleArray1Parameter( /* in */const ::std::string& name,
-  /* in rarray[nvalues] */double* value, /* in */int32_t nvalues )
+bHYPRE::PCG::SetDoubleArray1Parameter( /* in */const ::std::string& name, /* in 
+  rarray[nvalues] */double* value, /* in */int32_t nvalues )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   int32_t value_lower[1], value_upper[1], value_stride[1];
   struct sidl_double__array value_real;
   struct sidl_double__array *value_tmp = &value_real;
   value_upper[0] = nvalues-1;
-  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper,
+  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper, 
     value_stride);
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetDoubleArray1Parameter))(loc_self,
-    /* in */ name.c_str(), /* in rarray[nvalues] */ value_tmp, &_exception );
+  _result = (*(loc_self->d_epv->f_SetDoubleArray1Parameter))(loc_self, /* in */ 
+    name.c_str(), /* in rarray[nvalues] */ value_tmp, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+    sidl__array_deleteRef((struct sidl__array *)value_tmp);
+
     throwException0(_exception);
   }
+  sidl__array_deleteRef((struct sidl__array *)value_tmp);
   /*unpack results and cleanup*/
   return _result;
 }
@@ -2968,19 +3001,20 @@ bHYPRE::PCG::SetDoubleArray1Parameter( /* in */const ::std::string& name,
  * Set the double 1-D array parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetDoubleArray1Parameter( /* in */const ::std::string& name,
-  /* in rarray[nvalues] */::sidl::array<double> value )
+bHYPRE::PCG::SetDoubleArray1Parameter( /* in */const ::std::string& name, /* in 
+  rarray[nvalues] */::sidl::array<double> value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetDoubleArray1Parameter))(loc_self,
-    /* in */ name.c_str(), /* in rarray[nvalues] */ value._get_ior(),
-    &_exception );
+  _result = (*(loc_self->d_epv->f_SetDoubleArray1Parameter))(loc_self, /* in */ 
+    name.c_str(), /* in rarray[nvalues] */ value._get_ior(), &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -2993,19 +3027,21 @@ bHYPRE::PCG::SetDoubleArray1Parameter( /* in */const ::std::string& name,
  * Set the double 2-D array parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::SetDoubleArray2Parameter( /* in */const ::std::string& name,
-  /* in array<double,2,column-major> */::sidl::array<double> value )
+bHYPRE::PCG::SetDoubleArray2Parameter( /* in */const ::std::string& name, /* in 
+  array<double,2,column-major> */::sidl::array<double> value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_SetDoubleArray2Parameter))(loc_self,
-    /* in */ name.c_str(), /* in array<double,2,
-    column-major> */ value._get_ior(), &_exception );
+  _result = (*(loc_self->d_epv->f_SetDoubleArray2Parameter))(loc_self, /* in */ 
+    name.c_str(), /* in array<double,2,column-major> */ value._get_ior(), 
+    &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -3018,18 +3054,20 @@ bHYPRE::PCG::SetDoubleArray2Parameter( /* in */const ::std::string& name,
  * Set the int parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::GetIntValue( /* in */const ::std::string& name,
-  /* out */int32_t& value )
+bHYPRE::PCG::GetIntValue( /* in */const ::std::string& name, /* out */int32_t& 
+  value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
   _result = (*(loc_self->d_epv->f_GetIntValue))(loc_self, /* in */ name.c_str(),
     /* out */ &value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -3042,18 +3080,20 @@ bHYPRE::PCG::GetIntValue( /* in */const ::std::string& name,
  * Get the double parameter associated with {\tt name}.
  */
 int32_t
-bHYPRE::PCG::GetDoubleValue( /* in */const ::std::string& name,
-  /* out */double& value )
+bHYPRE::PCG::GetDoubleValue( /* in */const ::std::string& name, /* out 
+  */double& value )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_GetDoubleValue))(loc_self,
-    /* in */ name.c_str(), /* out */ &value, &_exception );
+  _result = (*(loc_self->d_epv->f_GetDoubleValue))(loc_self, /* in */ 
+    name.c_str(), /* out */ &value, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -3071,26 +3111,20 @@ bHYPRE::PCG::Setup( /* in */::bHYPRE::Vector b, /* in */::bHYPRE::Vector x )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_Vector__object* _local_b = (struct bHYPRE_Vector__object*) 
-    ::bHYPRE::Vector::_cast((void*)(b._get_ior()));
+    b.::bHYPRE::Vector::_get_ior();
   struct bHYPRE_Vector__object* _local_x = (struct bHYPRE_Vector__object*) 
-    ::bHYPRE::Vector::_cast((void*)(x._get_ior()));
+    x.::bHYPRE::Vector::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_Setup))(loc_self, /* in */ _local_b,
-    /* in */ _local_x, &_exception );
+  _result = (*(loc_self->d_epv->f_Setup))(loc_self, /* in */ _local_b, /* in */ 
+    _local_x, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
-  }
-  if (_local_b) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_b->d_epv->f_deleteRef)(_local_b->d_object, &throwaway_exception);
-  }
-  if (_local_x) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_x->d_epv->f_deleteRef)(_local_x->d_object, &throwaway_exception);
   }
   /*unpack results and cleanup*/
   return _result;
@@ -3106,23 +3140,20 @@ bHYPRE::PCG::Apply( /* in */::bHYPRE::Vector b, /* inout */::bHYPRE::Vector& x )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_Vector__object* _local_b = (struct bHYPRE_Vector__object*) 
-    ::bHYPRE::Vector::_cast((void*)(b._get_ior()));
+    b.::bHYPRE::Vector::_get_ior();
   struct bHYPRE_Vector__object* _local_x = (struct bHYPRE_Vector__object*) 
-    ::bHYPRE::Vector::_cast((void*)(x._get_ior()));
-  if (x._not_nil()) { x.deleteRef(); }
+    x.::bHYPRE::Vector::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_Apply))(loc_self, /* in */ _local_b,
-    /* inout */ &_local_x, &_exception );
+  _result = (*(loc_self->d_epv->f_Apply))(loc_self, /* in */ _local_b, /* inout 
+    */ &_local_x, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
-  }
-  if (_local_b) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_b->d_epv->f_deleteRef)(_local_b->d_object, &throwaway_exception);
   }
   x._set_ior( _local_x);
   /*unpack results and cleanup*/
@@ -3135,28 +3166,25 @@ bHYPRE::PCG::Apply( /* in */::bHYPRE::Vector b, /* inout */::bHYPRE::Vector& x )
  * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
  */
 int32_t
-bHYPRE::PCG::ApplyAdjoint( /* in */::bHYPRE::Vector b,
-  /* inout */::bHYPRE::Vector& x )
+bHYPRE::PCG::ApplyAdjoint( /* in */::bHYPRE::Vector b, /* inout 
+  */::bHYPRE::Vector& x )
 
 {
   int32_t _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   struct bHYPRE_Vector__object* _local_b = (struct bHYPRE_Vector__object*) 
-    ::bHYPRE::Vector::_cast((void*)(b._get_ior()));
+    b.::bHYPRE::Vector::_get_ior();
   struct bHYPRE_Vector__object* _local_x = (struct bHYPRE_Vector__object*) 
-    ::bHYPRE::Vector::_cast((void*)(x._get_ior()));
-  if (x._not_nil()) { x.deleteRef(); }
+    x.::bHYPRE::Vector::_get_ior();
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  _result = (*(loc_self->d_epv->f_ApplyAdjoint))(loc_self, /* in */ _local_b,
+  _result = (*(loc_self->d_epv->f_ApplyAdjoint))(loc_self, /* in */ _local_b, 
     /* inout */ &_local_x, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
-  }
-  if (_local_b) {
-    struct sidl_BaseInterface__object *throwaway_exception;  
-    (_local_b->d_epv->f_deleteRef)(_local_b->d_object, &throwaway_exception);
   }
   x._set_ior( _local_x);
   /*unpack results and cleanup*/
@@ -3175,56 +3203,65 @@ bHYPRE::PCG::ApplyAdjoint( /* in */::bHYPRE::Vector b,
 // static constructor
 ::bHYPRE::PCG
 bHYPRE::PCG::_create() {
-  struct sidl_BaseInterface__object * _exception, *_throwaway;
+  struct sidl_BaseInterface__object * _exception;
   ::bHYPRE::PCG self( (*_get_ext()->createObject)(NULL,&_exception), false );
   if (_exception) {
-    void *_p;
-    if ( (_p = (*(_exception->d_epv->f__cast))(_exception->d_object,
-      "sidl.RuntimeException", &_throwaway)) != 0) {
-    ::sidl::RuntimeException _resolved(reinterpret_cast< struct 
-      sidl_RuntimeException__object * >(_p), false);
-    (*(_exception->d_epv->f_deleteRef))(_exception->d_object, &_throwaway);
-    _resolved.add(__FILE__,__LINE__,"C++ ctor.");
-    throw _resolved;
+    throwException0(_exception);
   }
-}
-return self;
+  return self;
 }
 
 // Internal data wrapping method
 ::bHYPRE::PCG::ior_t*
 bHYPRE::PCG::_wrapObj(void* private_data) {
-  struct sidl_BaseInterface__object *throwaway_exception;
-  return (*_get_ext()->createObject)(private_data,&throwaway_exception);
+  struct sidl_BaseInterface__object *_exception;
+  ::bHYPRE::PCG::ior_t* returnValue = (*_get_ext()->createObject)(private_data,
+    &_exception);
+  if (_exception) {
+    throwException0(_exception);
+  }
+  return returnValue;
 }
 
 // remote constructor
 ::bHYPRE::PCG
 bHYPRE::PCG::_create(const std::string& url) {
   ior_t* ior_self;
-  sidl_BaseInterface__object* _ex = 0;
-  ior_self = bHYPRE_PCG__remoteCreate( url.c_str(), &_ex );
-  if (_ex != 0 ) {
-    ; //TODO: handle exception
+  struct sidl_BaseInterface__object *_exception;
+  ior_self = bHYPRE_PCG__remoteCreate( url.c_str(), &_exception );
+  if (_exception != 0 ) {
+    throwException0(_exception);
   }
   return ::bHYPRE::PCG( ior_self, false );
 }
 
-// remote connector 2
+// remote connector
 ::bHYPRE::PCG
 bHYPRE::PCG::_connect(const std::string& url, const bool ar ) {
   ior_t* ior_self;
-  sidl_BaseInterface__object* _ex = 0;
-  ior_self = bHYPRE_PCG__remoteConnect( url.c_str(), ar?TRUE:FALSE, &_ex );
-  if (_ex != 0 ) {
-    ; //TODO: handle exception
+  struct sidl_BaseInterface__object *_exception;
+  ior_self = bHYPRE_PCG__remoteConnect( url.c_str(), ar?TRUE:FALSE, &_exception 
+    );
+  if (_exception != 0 ) {
+    throwException0(_exception);
   }
   return ::bHYPRE::PCG( ior_self, false );
 }
 
 // copy constructor
 bHYPRE::PCG::PCG ( const ::bHYPRE::PCG& original ) {
-  d_self = ::bHYPRE::PCG::_cast(original._get_ior());
+  d_self = (struct bHYPRE_PCG__object*) original.::bHYPRE::PCG::_get_ior();
+  if(d_self) {
+
+    bHYPRE_Solver_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_solver);
+    bHYPRE_Operator_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_operator);
+    bHYPRE_PreconditionedSolver_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_preconditionedsolver);
+
+    addRef();
+  }
   d_weak_reference = false;
 }
 
@@ -3235,8 +3272,18 @@ bHYPRE::PCG::operator=( const ::bHYPRE::PCG& rhs ) {
     if ( d_self != 0 ) {
       deleteRef();
     }
-    d_self = ::bHYPRE::PCG::_cast(rhs._get_ior());
-    // note _cast incremements the reference count
+    d_self = (struct bHYPRE_PCG__object*) rhs.::bHYPRE::PCG::_get_ior();
+    if(d_self) {
+
+      bHYPRE_Solver_IORCache = &((*reinterpret_cast< ior_t*>(
+        d_self)).d_bhypre_solver);
+      bHYPRE_Operator_IORCache = &((*reinterpret_cast< ior_t*>(
+        d_self)).d_bhypre_operator);
+      bHYPRE_PreconditionedSolver_IORCache = &((*reinterpret_cast< ior_t*>(
+        d_self)).d_bhypre_preconditionedsolver);
+
+      addRef();
+    }
     d_weak_reference = false;
   }
   return *this;
@@ -3244,13 +3291,34 @@ bHYPRE::PCG::operator=( const ::bHYPRE::PCG& rhs ) {
 
 // conversion from ior to C++ class
 bHYPRE::PCG::PCG ( ::bHYPRE::PCG::ior_t* ior ) 
-   : StubBase(reinterpret_cast< void*>(ior)) { }
+   : StubBase(reinterpret_cast< void*>(ior)) { 
+  if(d_self) {
+
+    bHYPRE_Solver_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_solver);
+    bHYPRE_Operator_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_operator);
+    bHYPRE_PreconditionedSolver_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_preconditionedsolver);
+
+  }
+}
 
 // Alternate constructor: does not call addRef()
 // (sets d_weak_reference=isWeak)
 // For internal use by Impls (fixes bug#275)
 bHYPRE::PCG::PCG ( ::bHYPRE::PCG::ior_t* ior, bool isWeak ) : 
 StubBase(reinterpret_cast< void*>(ior), isWeak){ 
+  if(d_self) {
+
+    bHYPRE_Solver_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_solver);
+    bHYPRE_Operator_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_operator);
+    bHYPRE_PreconditionedSolver_IORCache = &((*reinterpret_cast< ior_t*>(
+      d_self)).d_bhypre_preconditionedsolver);
+
+  }
 }
 
 // exec has special argument passing to avoid #include circularities
@@ -3277,13 +3345,15 @@ bHYPRE::PCG::_getURL(  )
 
 {
   ::std::string _result;
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   char * _local_result;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
   _local_result = (*(loc_self->d_epv->f__getURL))(loc_self, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   if (_local_result) {
@@ -3305,14 +3375,16 @@ bHYPRE::PCG::_set_hooks( /* in */bool on )
 
 {
 
-  ior_t* const loc_self = _get_ior();
+  ior_t* const loc_self = (struct bHYPRE_PCG__object*) ::bHYPRE::PCG::_get_ior(
+    );
   sidl_bool _local_on = on;
   sidl_BaseInterface__object * _exception;
   /*pack args to dispatch to ior*/
-  (*(loc_self->d_epv->f__set_hooks))(loc_self, /* in */ _local_on,
-    &_exception );
+  (*(loc_self->d_epv->f__set_hooks))(loc_self, /* in */ _local_on, &_exception 
+    );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -3335,6 +3407,7 @@ bHYPRE::PCG::_set_hooks_static( /* in */bool on )
   ( _get_sepv()->f__set_hooks_static)( /* in */ _local_on, &_exception );
   /*dispatch to ior*/
   if (_exception != 0 ) {
+
     throwException0(_exception);
   }
   /*unpack results and cleanup*/
@@ -3347,8 +3420,8 @@ struct bHYPRE_PCG__object* bHYPRE::PCG::_cast(const void* src)
 
   if(!connect_loaded) {
     struct sidl_BaseInterface__object *throwaway_exception;
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.PCG",
-      (void*)bHYPRE_PCG__IHConnect, &throwaway_exception);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.PCG", (
+      void*)bHYPRE_PCG__IHConnect, &throwaway_exception);
     connect_loaded = 1;
   }
   if ( src != 0 ) {
@@ -3357,7 +3430,7 @@ struct bHYPRE_PCG__object* bHYPRE::PCG::_cast(const void* src)
     struct sidl_BaseInterface__object *throwaway_exception;
     struct sidl_BaseInterface__object * base = reinterpret_cast< struct 
       sidl_BaseInterface__object *>(tmp);
-    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object,
+    cast = reinterpret_cast< ior_t*>((*base->d_epv->f__cast)(base->d_object, 
       "bHYPRE.PCG", &throwaway_exception));
   }
   return cast;
@@ -3378,8 +3451,8 @@ bHYPRE::PCG::_get_ext()
     s_ext = (struct bHYPRE_PCG__external*)sidl_dynamicLoadIOR("bHYPRE.PCG",
       "bHYPRE_PCG__externals") ;
 #endif
-    sidl_checkIORVersion("bHYPRE.PCG", s_ext->d_ior_major_version,
-      s_ext->d_ior_minor_version, 0, 10);
+    sidl_checkIORVersion("bHYPRE.PCG", s_ext->d_ior_major_version, 
+      s_ext->d_ior_minor_version, 1, 0);
   }
   return s_ext;
 }

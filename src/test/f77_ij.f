@@ -1,3 +1,14 @@
+cBHEADER**********************************************************************
+c Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+c Produced at the Lawrence Livermore National Laboratory.
+c This file is part of HYPRE.  See file COPYRIGHT for details.
+c
+c HYPRE is free software; you can redistribute it and/or modify it under the
+c terms of the GNU Lesser General Public License (as published by the Free
+c Software Foundation) version 2.1 dated February 1999.
+c
+c $Revision: 1.5 $
+cEHEADER**********************************************************************
 c-----------------------------------------------------------------------
 c Test driver for unstructured matrix interface (structured storage)
 c-----------------------------------------------------------------------
@@ -85,6 +96,8 @@ c parameters for ParaSails
       integer             first_local_col, last_local_col
       integer             indices(MAXZONS)
       double precision    vals(MAXZONS)
+
+      integer             dof_func(1000), j
 
 c-----------------------------------------------------------------------
 c     Initialize MPI
@@ -441,29 +454,40 @@ c Set defaults for BoomerAMG
         call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
         call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
         call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
-        call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                      grid_relax_type,
-     &                                      grid_relax_points,
-     &                                      coarsen_type,
-     &                                      relax_weights,
-     &                                      MAXLEVELS,ierr)
-        num_grid_sweeps2(1) = 1
-        num_grid_sweeps2(2) = 1
-        num_grid_sweeps2(3) = 1
-        num_grid_sweeps2(4) = 1
-        call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-     &                                       num_grid_sweeps2, ierr)
-        call HYPRE_BoomerAMGSetGridRelaxType(solver,
-     &                                       grid_relax_type, ierr)
-        call HYPRE_BoomerAMGSetRelaxWeight(solver,
-     &                                     relax_weights, ierr)
+
+c RDF: Used this to test the fortran interface for SetDofFunc
+c        do i = 1, 1000/2
+c           j = 2*i-1
+c           dof_func(j) = 0
+c           j = j + 1
+c           dof_func(j) = 1
+c        enddo
+c        call HYPRE_BoomerAMGSetNumFunctions(solver, 2, ierr)
+c        call HYPRE_BoomerAMGSetDofFunc(solver, dof_func, ierr)
+
+c        call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
+c     &                                      grid_relax_type,
+c     &                                      grid_relax_points,
+c     &                                      coarsen_type,
+c     &                                      relax_weights,
+c     &                                      MAXLEVELS,ierr)
+c        num_grid_sweeps2(1) = 1
+c        num_grid_sweeps2(2) = 1
+c        num_grid_sweeps2(3) = 1
+c        num_grid_sweeps2(4) = 1
+c        call HYPRE_BoomerAMGSetNumGridSweeps(solver,
+c     &                                       num_grid_sweeps2, ierr)
+c        call HYPRE_BoomerAMGSetGridRelaxType(solver,
+c     &                                       grid_relax_type, ierr)
+c        call HYPRE_BoomerAMGSetRelaxWeight(solver,
+c     &                                     relax_weights, ierr)
 c       call HYPRE_BoomerAMGSetSmoothOption(solver, smooth_option,
 c    &                                      ierr)
 c       call HYPRE_BoomerAMGSetSmoothNumSwp(solver, smooth_num_sweep,
 c    &                                      ierr)
-        call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
-     &                                       grid_relax_points,
-     &                                       ierr)
+c        call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
+c     &                                       grid_relax_points,
+c     &                                       ierr)
         call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
         call HYPRE_BoomerAMGSetMaxRowSum(solver, max_row_sum,
      &                                   ierr)

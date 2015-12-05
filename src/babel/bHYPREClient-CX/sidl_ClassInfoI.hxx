@@ -2,9 +2,9 @@
 // File:          sidl_ClassInfoI.hxx
 // Symbol:        sidl.ClassInfoI-v0.9.15
 // Symbol Type:   class
-// Babel Version: 1.0.0
-// Release:       $Name: V2-2-0b $
-// Revision:      @(#) $Id: sidl_ClassInfoI.hxx,v 1.3 2006/12/29 21:24:48 painter Exp $
+// Babel Version: 1.0.4
+// Release:       $Name: V2-4-0b $
+// Revision:      @(#) $Id: sidl_ClassInfoI.hxx,v 1.4 2007/09/27 19:55:45 painter Exp $
 // Description:   Client-side glue code for sidl.ClassInfoI
 // 
 // Copyright (c) 2000-2002, The Regents of the University of California.
@@ -92,8 +92,8 @@ namespace sidl {
    * provides methods to set all the attributes that are read-only in
    * the <code>ClassInfo</code> interface.
    */
-  class ClassInfoI: public virtual ::sidl::BaseClass,
-    public virtual ::sidl::ClassInfo {
+  class ClassInfoI: public virtual ::sidl::BaseClass, public virtual 
+    ::sidl::ClassInfo {
 
     //////////////////////////////////////////////////
     // 
@@ -167,7 +167,8 @@ namespace sidl {
     typedef struct sidl_ClassInfoI__sepv sepv_t;
 
     // default constructor
-    ClassInfoI() { }
+    ClassInfoI() { 
+    }
 
     // static constructor
     static ::sidl::ClassInfoI _create();
@@ -182,8 +183,8 @@ namespace sidl {
     }
 
     // RMI connect 2
-    static ::sidl::ClassInfoI _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::sidl::ClassInfoI _connect( /*in*/ const std::string& url, /*in*/ 
+      const bool ar  );
 
     // default destructor
     virtual ~ClassInfoI () { }
@@ -202,13 +203,13 @@ namespace sidl {
     // For internal use by Impls (fixes bug#275)
     ClassInfoI ( ClassInfoI::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      return reinterpret_cast< ior_t*>(d_self);
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -270,9 +271,9 @@ namespace sidl {
 extern "C" {
 
 
-  #pragma weak sidl_ClassInfoI__connectI
+#pragma weak sidl_ClassInfoI__connectI
 
-  #pragma weak sidl_ClassInfoI__rmicast
+#pragma weak sidl_ClassInfoI__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -285,8 +286,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct sidl_ClassInfoI__object*
-  sidl_ClassInfoI__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  sidl_ClassInfoI__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

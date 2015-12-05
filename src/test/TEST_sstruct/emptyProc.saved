@@ -63,8 +63,8 @@ Iterations = 14
 Final Relative Residual Norm = 6.421347e-07
 
 # Output file: emptyProc.out.18
-Iterations = 4
-Final Relative Residual Norm = 3.455682e-08
+Iterations = 2
+Final Relative Residual Norm = 6.547049e-08
 
 # Output file: emptyProc.out.20
 Iterations = 8
@@ -123,8 +123,8 @@ Iterations = 20
 Final Relative Residual Norm = 7.280287e-07
 
 # Output file: emptyProc.out.34
-Iterations = 50
-Final Relative Residual Norm = 1.501413e-05
+Iterations = 64
+Final Relative Residual Norm = 9.962554e-07
 
 # Output file: emptyProc.out.35
 Iterations = 2

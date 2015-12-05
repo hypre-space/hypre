@@ -1,8 +1,8 @@
 /*
  * File:        sidl_Exception.h
  * Copyright:   (c) 2001-2003 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:49 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:43 $
  * Description: convenience C macros for managing sidl exceptions
  *
  * These macros help to manage sidl exceptions in C.  The caller is

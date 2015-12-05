@@ -3,7 +3,7 @@
  * Symbol:        sidl.Finder-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
+ * Release:       $Name: V2-4-0b $
  * Revision:      @(#) $Id: sidl_Finder_fStub.h,v 1.1 2007/02/06 01:23:06 painter Exp $
  * Description:   Client-side documentation text for sidl.Finder
  * 

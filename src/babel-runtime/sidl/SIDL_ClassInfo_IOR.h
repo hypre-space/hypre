@@ -2,9 +2,9 @@
  * File:          sidl_ClassInfo_IOR.h
  * Symbol:        sidl.ClassInfo-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_ClassInfo_IOR.h,v 1.6 2006/08/29 22:29:49 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_ClassInfo_IOR.h,v 1.7 2007/09/27 19:35:43 painter Exp $
  * Description:   Intermediate Object Representation for sidl.ClassInfo
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.

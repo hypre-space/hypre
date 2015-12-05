@@ -2,9 +2,9 @@
  * File:          sidl_rmi_ServerRegistry_Stub.c
  * Symbol:        sidl.rmi.ServerRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_ServerRegistry_Stub.c,v 1.1 2006/08/29 23:31:44 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_ServerRegistry_Stub.c,v 1.2 2007/09/27 19:35:48 painter Exp $
  * Description:   Client-side glue code for sidl.rmi.ServerRegistry
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -120,7 +120,7 @@ sidl_rmi_ServerRegistry__createRemote(const char* url, sidl_BaseInterface *_ex)
 }
 
 static struct sidl_rmi_ServerRegistry__object* 
-  sidl_rmi_ServerRegistry__remoteConnect(const char* url, sidl_bool ar,
+  sidl_rmi_ServerRegistry__remoteConnect(const char* url, sidl_bool ar, 
   sidl_BaseInterface *_ex);
 static struct sidl_rmi_ServerRegistry__object* 
   sidl_rmi_ServerRegistry__IHConnect(struct sidl_rmi_InstanceHandle__object* 
@@ -159,9 +159,11 @@ sidl_rmi_ServerRegistry_getServerURL(
   /* in */ const char* objID,
   /* out */ sidl_BaseInterface *_ex)
 {
-  return (_getSEPV()->f_getServerURL)(
+  char* _result;
+  _result = (_getSEPV()->f_getServerURL)(
     objID,
     _ex);
+  return _result;
 }
 
 /*
@@ -175,9 +177,11 @@ sidl_rmi_ServerRegistry_isLocalObject(
   /* in */ const char* url,
   /* out */ sidl_BaseInterface *_ex)
 {
-  return (_getSEPV()->f_isLocalObject)(
+  char* _result;
+  _result = (_getSEPV()->f_isLocalObject)(
     url,
     _ex);
+  return _result;
 }
 
 /*
@@ -192,8 +196,10 @@ struct sidl_io_Serializable__array*
 sidl_rmi_ServerRegistry_getExceptions(
   /* out */ sidl_BaseInterface *_ex)
 {
-  return (_getSEPV()->f_getExceptions)(
+  struct sidl_io_Serializable__array* _result;
+  _result = (_getSEPV()->f_getExceptions)(
     _ex);
+  return _result;
 }
 
 /*
@@ -262,10 +268,12 @@ sidl_rmi_ServerRegistry_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -286,10 +294,12 @@ sidl_rmi_ServerRegistry_isType(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -306,9 +316,11 @@ sidl_rmi_ServerRegistry_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -327,8 +339,8 @@ sidl_rmi_ServerRegistry__cast(
 
   if(!connect_loaded) {
     connect_loaded = 1;
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.ServerRegistry",
-      (void*)sidl_rmi_ServerRegistry__IHConnect,_ex);SIDL_CHECK(*_ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.ServerRegistry", (
+      void*)sidl_rmi_ServerRegistry__IHConnect,_ex);SIDL_CHECK(*_ex);
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
@@ -398,9 +410,11 @@ sidl_rmi_ServerRegistry__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -473,9 +487,11 @@ sidl_rmi_ServerRegistry__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #if SIDL_C_INLINE_REPEAT_DEFN
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else /* ISO C 1999 inline semantics */
 ;
@@ -508,7 +524,7 @@ sidl_rmi_ServerRegistry__array_createCol(
   const int32_t upper[])
 {
   return (struct 
-    sidl_rmi_ServerRegistry__array*)sidl_interface__array_createCol(dimen,
+    sidl_rmi_ServerRegistry__array*)sidl_interface__array_createCol(dimen, 
     lower, upper);
 }
 
@@ -526,7 +542,7 @@ sidl_rmi_ServerRegistry__array_createRow(
   const int32_t upper[])
 {
   return (struct 
-    sidl_rmi_ServerRegistry__array*)sidl_interface__array_createRow(dimen,
+    sidl_rmi_ServerRegistry__array*)sidl_interface__array_createRow(dimen, 
     lower, upper);
 }
 
@@ -540,8 +556,8 @@ sidl_rmi_ServerRegistry__array_createRow(
 struct sidl_rmi_ServerRegistry__array*
 sidl_rmi_ServerRegistry__array_create1d(int32_t len)
 {
-  return (struct 
-    sidl_rmi_ServerRegistry__array*)sidl_interface__array_create1d(len);
+  return (struct sidl_rmi_ServerRegistry__array*)sidl_interface__array_create1d(
+    len);
 }
 
 /**
@@ -558,8 +574,8 @@ sidl_rmi_ServerRegistry__array_create1dInit(
   sidl_rmi_ServerRegistry* data)
 {
   return (struct 
-    sidl_rmi_ServerRegistry__array*)sidl_interface__array_create1dInit(len,
-    (struct sidl_BaseInterface__object **)data);
+    sidl_rmi_ServerRegistry__array*)sidl_interface__array_create1dInit(len, (
+    struct sidl_BaseInterface__object **)data);
 }
 
 /**
@@ -774,7 +790,7 @@ sidl_rmi_ServerRegistry__array_get(
   const int32_t indices[])
 {
   return (sidl_rmi_ServerRegistry)
-    sidl_interface__array_get((const struct sidl_interface__array *)array,
+    sidl_interface__array_get((const struct sidl_interface__array *)array, 
       indices);
 }
 
@@ -900,8 +916,8 @@ sidl_rmi_ServerRegistry__array_set(
   const int32_t indices[],
   sidl_rmi_ServerRegistry const value)
 {
-  sidl_interface__array_set((struct sidl_interface__array *)array, indices,
-    (struct sidl_BaseInterface__object *)value);
+  sidl_interface__array_set((struct sidl_interface__array *)array, indices, (
+    struct sidl_BaseInterface__object *)value);
 }
 
 /**
@@ -925,7 +941,7 @@ sidl_rmi_ServerRegistry__array_lower(
   const struct sidl_rmi_ServerRegistry__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_lower((struct sidl_interface__array *)array,
+  return sidl_interface__array_lower((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -939,7 +955,7 @@ sidl_rmi_ServerRegistry__array_upper(
   const struct sidl_rmi_ServerRegistry__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_upper((struct sidl_interface__array *)array,
+  return sidl_interface__array_upper((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -953,7 +969,7 @@ sidl_rmi_ServerRegistry__array_length(
   const struct sidl_rmi_ServerRegistry__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_length((struct sidl_interface__array *)array,
+  return sidl_interface__array_length((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -967,7 +983,7 @@ sidl_rmi_ServerRegistry__array_stride(
   const struct sidl_rmi_ServerRegistry__array* array,
   const int32_t ind)
 {
-  return sidl_interface__array_stride((struct sidl_interface__array *)array,
+  return sidl_interface__array_stride((struct sidl_interface__array *)array, 
     ind);
 }
 
@@ -1133,7 +1149,7 @@ sidl_rmi_ServerRegistry__array_ensure(
   int     ordering)
 {
   return (struct sidl_rmi_ServerRegistry__array*)
-    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
+    sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen, 
       ordering);
 }
 
@@ -1188,8 +1204,8 @@ static struct sidl_recursive_mutex_t sidl_rmi_ServerRegistry__mutex= SIDL_RECURS
 #endif
 
 /* Static variables to hold version of IOR */
-static const int32_t s_IOR_MAJOR_VERSION = 0;
-static const int32_t s_IOR_MINOR_VERSION = 10;
+static const int32_t s_IOR_MAJOR_VERSION = 1;
+static const int32_t s_IOR_MINOR_VERSION = 0;
 
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
@@ -1221,7 +1237,7 @@ static void* remote_sidl_rmi_ServerRegistry__cast(
     cmp1 = strcmp(name, "sidl.BaseClass");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidl_BaseClass__object*)self);
       return cast;
     }
   }
@@ -1229,15 +1245,15 @@ static void* remote_sidl_rmi_ServerRegistry__cast(
     cmp1 = strcmp(name, "sidl.rmi.ServerRegistry");
     if (!cmp1) {
       (*self->d_epv->f_addRef)(self, _ex); SIDL_CHECK(*_ex);
-      cast = self;
+      cast = ((struct sidl_rmi_ServerRegistry__object*)self);
       return cast;
     }
   }
   if ((*self->d_epv->f_isType)(self,name, _ex)) {
-    void* (*func)(struct sidl_rmi_InstanceHandle__object*,
-      struct sidl_BaseInterface__object**) = 
-      (void* (*)(struct sidl_rmi_InstanceHandle__object*,
-        struct sidl_BaseInterface__object**)) 
+    void* (*func)(struct sidl_rmi_InstanceHandle__object*, struct 
+      sidl_BaseInterface__object**) = 
+      (void* (*)(struct sidl_rmi_InstanceHandle__object*, struct 
+        sidl_BaseInterface__object**)) 
       sidl_rmi_ConnectRegistry_getConnect(name, _ex);SIDL_CHECK(*_ex);
     cast =  (*func)(((struct 
       sidl_rmi_ServerRegistry__remote*)self->d_data)->d_ih, _ex);
@@ -1280,7 +1296,7 @@ static void remote_sidl_rmi_ServerRegistry__raddRef(
   struct sidl_rmi_InstanceHandle__object *_conn = ((struct 
     sidl_rmi_ServerRegistry__remote*)self->d_data)->d_ih;
   sidl_rmi_Response _rsvp = NULL;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
     "addRef", _ex ); SIDL_CHECK(*_ex);
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex);SIDL_CHECK(*_ex);
@@ -1325,7 +1341,7 @@ remote_sidl_rmi_ServerRegistry__set_hooks(
     sidl_rmi_Response _rsvp = NULL;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidl_rmi_ServerRegistry__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "_set_hooks", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1419,12 +1435,12 @@ remote_sidl_rmi_ServerRegistry_isSame(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidl_rmi_ServerRegistry__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isSame", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
     if(iobj){
-      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj,
+      char* _url = sidl_BaseInterface__getURL((sidl_BaseInterface)iobj, 
         _ex);SIDL_CHECK(*_ex);
       sidl_rmi_Invocation_packString( _inv, "iobj", _url, _ex);SIDL_CHECK(*_ex);
       free((void*)_url);
@@ -1445,8 +1461,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi.ServerRegi
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1475,7 +1491,7 @@ remote_sidl_rmi_ServerRegistry_isType(
     sidl_bool _retval = FALSE;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidl_rmi_ServerRegistry__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "isType", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1494,8 +1510,8 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi.ServerRegi
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval,
-      _ex);SIDL_CHECK(*_ex);
+    sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1524,7 +1540,7 @@ remote_sidl_rmi_ServerRegistry_getClassInfo(
     struct sidl_ClassInfo__object* _retval = 0;
     struct sidl_rmi_InstanceHandle__object * _conn = ((struct 
       sidl_rmi_ServerRegistry__remote*)self->d_data)->d_ih;
-    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn, 
       "getClassInfo", _ex ); SIDL_CHECK(*_ex);
 
     /* pack in and inout arguments */
@@ -1542,10 +1558,10 @@ sidl_BaseException_addLine(_be, "Exception unserialized from sidl.rmi.ServerRegi
     }
 
     /* extract return value */
-    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str,
+    sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, 
       _ex);SIDL_CHECK(*_ex);
-    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE,
-      _ex);SIDL_CHECK(*_ex);
+    _retval = sidl_ClassInfo__connectI(_retval_str, FALSE, _ex);SIDL_CHECK(
+      *_ex);
 
     /* unpack out and inout arguments */
 
@@ -1592,53 +1608,53 @@ static void sidl_rmi_ServerRegistry__init_remote_epv(void)
     sidl_BaseInterface*)) epv->f__raddRef;
   e0->f__isRemote    = (sidl_bool (*)(struct sidl_BaseClass__object*,
     sidl_BaseInterface*)) epv->f__isRemote;
-  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t,
+  e0->f__set_hooks   = (void (*)(struct sidl_BaseClass__object*,int32_t, 
     sidl_BaseInterface*)) epv->f__set_hooks;
   e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
-  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object*,
-    struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
-    const char*,struct sidl_BaseInterface__object **)) epv->f_isType;
+    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,struct 
+    sidl_BaseInterface__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_isSame;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,const 
+    char*,struct sidl_BaseInterface__object **)) epv->f_isType;
   e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
-    sidl_BaseClass__object*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+    sidl_BaseClass__object*,struct sidl_BaseInterface__object **)) 
+    epv->f_getClassInfo;
 
-  e1->f__cast        = (void* (*)(void*,const char*,
-    sidl_BaseInterface*)) epv->f__cast;
+  e1->f__cast        = (void* (*)(void*,const char*,sidl_BaseInterface*)) 
+    epv->f__cast;
   e1->f__delete      = (void (*)(void*,sidl_BaseInterface*)) epv->f__delete;
   e1->f__getURL      = (char* (*)(void*,sidl_BaseInterface*)) epv->f__getURL;
   e1->f__raddRef     = (void (*)(void*,sidl_BaseInterface*)) epv->f__raddRef;
-  e1->f__isRemote    = (sidl_bool (*)(void*,
-    sidl_BaseInterface*)) epv->f__isRemote;
-  e1->f__set_hooks   = (void (*)(void*,int32_t,
-    sidl_BaseInterface*)) epv->f__set_hooks;
-  e1->f__exec        = (void (*)(void*,const char*,
-    struct sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,
-    struct sidl_BaseInterface__object **)) epv->f__exec;
-  e1->f_addRef       = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_addRef;
-  e1->f_deleteRef    = (void (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_deleteRef;
+  e1->f__isRemote    = (sidl_bool (*)(void*,sidl_BaseInterface*)) 
+    epv->f__isRemote;
+  e1->f__set_hooks   = (void (*)(void*,int32_t, sidl_BaseInterface*)) 
+    epv->f__set_hooks;
+  e1->f__exec        = (void (*)(void*,const char*,struct 
+    sidl_rmi_Call__object*,struct sidl_rmi_Return__object*,struct 
+    sidl_BaseInterface__object **)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*,struct sidl_BaseInterface__object **)) 
+    epv->f_deleteRef;
   e1->f_isSame       = (sidl_bool (*)(void*,struct sidl_BaseInterface__object*,
     struct sidl_BaseInterface__object **)) epv->f_isSame;
-  e1->f_isType       = (sidl_bool (*)(void*,const char*,
-    struct sidl_BaseInterface__object **)) epv->f_isType;
-  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,
-    struct sidl_BaseInterface__object **)) epv->f_getClassInfo;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*,struct 
+    sidl_BaseInterface__object **)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*,struct 
+    sidl_BaseInterface__object **)) epv->f_getClassInfo;
 
   s_remote_initialized = 1;
 }
 
 /* Create an instance that connects to an existing remote object. */
 static struct sidl_rmi_ServerRegistry__object*
-sidl_rmi_ServerRegistry__remoteConnect(const char *url, sidl_bool ar,
+sidl_rmi_ServerRegistry__remoteConnect(const char *url, sidl_bool ar, 
   sidl_BaseInterface *_ex)
 {
   struct sidl_rmi_ServerRegistry__object* self;
@@ -1654,13 +1670,13 @@ sidl_rmi_ServerRegistry__remoteConnect(const char *url, sidl_bool ar,
   if(url == NULL) {return NULL;}
   objectID = sidl_rmi_ServerRegistry_isLocalObject(url, _ex);
   if(objectID) {
-    sidl_BaseInterface bi = 
-      (sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(
-      objectID, _ex); SIDL_CHECK(*_ex);
+    sidl_BaseInterface bi = (
+      sidl_BaseInterface)sidl_rmi_InstanceRegistry_getInstanceByString(objectID,
+      _ex); SIDL_CHECK(*_ex);
     return sidl_rmi_ServerRegistry__rmicast(bi,_ex);SIDL_CHECK(*_ex);
   }
-  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar,
-    _ex ); SIDL_CHECK(*_ex);
+  instance = sidl_rmi_ProtocolFactory_connectInstance(url, ar, _ex ); 
+    SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidl_rmi_ServerRegistry__object*) malloc(
@@ -1699,7 +1715,7 @@ sidl_rmi_ServerRegistry__remoteConnect(const char *url, sidl_bool ar,
 /* Create an instance that uses an already existing  */
 /* InstanceHandle to connect to an existing remote object. */
 static struct sidl_rmi_ServerRegistry__object*
-sidl_rmi_ServerRegistry__IHConnect(sidl_rmi_InstanceHandle instance,
+sidl_rmi_ServerRegistry__IHConnect(sidl_rmi_InstanceHandle instance, 
   sidl_BaseInterface *_ex)
 {
   struct sidl_rmi_ServerRegistry__object* self;
@@ -1754,9 +1770,8 @@ sidl_rmi_ServerRegistry__remoteCreate(const char *url, sidl_BaseInterface *_ex)
   struct sidl_BaseClass__object* s1;
 
   struct sidl_rmi_ServerRegistry__remote* r_obj;
-  sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_createInstance(url, "sidl.rmi.ServerRegistry",
-    _ex ); SIDL_CHECK(*_ex);
+  sidl_rmi_InstanceHandle instance = sidl_rmi_ProtocolFactory_createInstance(
+    url, "sidl.rmi.ServerRegistry", _ex ); SIDL_CHECK(*_ex);
   if ( instance == NULL) { return NULL; }
   self =
     (struct sidl_rmi_ServerRegistry__object*) malloc(
@@ -1790,7 +1805,7 @@ sidl_rmi_ServerRegistry__remoteCreate(const char *url, sidl_BaseInterface *_ex)
 
   return self;
   EXIT:
-  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance,
+  if(instance) { sidl_rmi_InstanceHandle_deleteRef(instance, 
     &_throwaway_exception); }
   return NULL;
 }
@@ -1807,8 +1822,8 @@ sidl_rmi_ServerRegistry__rmicast(
 
   *_ex = NULL;
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.ServerRegistry",
-      (void*)sidl_rmi_ServerRegistry__IHConnect, _ex);
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.rmi.ServerRegistry", (
+      void*)sidl_rmi_ServerRegistry__IHConnect, _ex);
     connect_loaded = 1;
   }
   if (obj != NULL) {
@@ -1829,8 +1844,8 @@ sidl_rmi_ServerRegistry__rmicast(
  */
 
 struct sidl_rmi_ServerRegistry__object*
-sidl_rmi_ServerRegistry__connectI(const char* url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex)
+sidl_rmi_ServerRegistry__connectI(const char* url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex)
 {
   return sidl_rmi_ServerRegistry__remoteConnect(url, ar, _ex);
 }

@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.13 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -353,3 +340,81 @@ HYPRE_EuclidSetParamsFromFile(HYPRE_Solver solver,
   END_FUNC_VAL(0)
 }
 
+int
+HYPRE_EuclidSetLevel(HYPRE_Solver solver, 
+				int level)
+{
+  char str_level[8];
+  START_FUNC_DH
+  sprintf(str_level,"%d",level);
+  Parser_dhInsert(parser_dh, "-level", str_level); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetBJ(HYPRE_Solver solver, 
+				int bj)
+{
+  char str_bj[8];
+  START_FUNC_DH
+  sprintf(str_bj,"%d",bj);
+  Parser_dhInsert(parser_dh, "-bj", str_bj); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetStats(HYPRE_Solver solver, 
+				int eu_stats)
+{
+  char str_eu_stats[8];
+  START_FUNC_DH
+  sprintf(str_eu_stats,"%d",eu_stats);
+  Parser_dhInsert(parser_dh, "-eu_stats", str_eu_stats); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetMem(HYPRE_Solver solver, 
+				int eu_mem)
+{
+  char str_eu_mem[8];
+  START_FUNC_DH
+  sprintf(str_eu_mem,"%d",eu_mem);
+  Parser_dhInsert(parser_dh, "-eu_mem", str_eu_mem); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetILUT(HYPRE_Solver solver, 
+				double ilut)
+{
+  char str_ilut[256];
+  START_FUNC_DH
+  sprintf(str_ilut,"%f",ilut);
+  Parser_dhInsert(parser_dh, "-ilut", str_ilut); HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetSparseA(HYPRE_Solver solver, 
+				double sparse_A)
+{
+  char str_sparse_A[256];
+  START_FUNC_DH
+  sprintf(str_sparse_A,"%f",sparse_A);
+  Parser_dhInsert(parser_dh, "-sparseA", str_sparse_A); 
+  HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}
+
+int
+HYPRE_EuclidSetRowScale(HYPRE_Solver solver, 
+				int row_scale)
+{
+  char str_row_scale[8];
+  START_FUNC_DH
+  sprintf(str_row_scale,"%d",row_scale);
+  Parser_dhInsert(parser_dh, "-rowScale", str_row_scale); 
+  HYPRE_EUCLID_ERRCHKA;
+  END_FUNC_VAL(0)
+}

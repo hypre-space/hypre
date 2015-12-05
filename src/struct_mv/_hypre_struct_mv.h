@@ -1,27 +1,13 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -36,31 +22,7 @@
 extern "C" {
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -656,31 +618,7 @@ if (hypre__num_blocks > 1)\
 #endif  /* ifndef HYPRE_USE_PTHREADS */
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -1068,31 +1006,7 @@ int  kinc = (hypre_IndexZ(stride)*\
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -1149,6 +1063,7 @@ typedef struct
 #define hypre_StructAssumedPartMyPartitionProcId(apart, i) ((apart)->my_partition_proc_ids[i])
 #define hypre_StructAssumedPartMyPartitionBoxnum(apart, i) ((apart)->my_partition_boxnums[i])
 #endif
+
 #ifndef hypre_BOX_MANAGER_HEADER
 #define hypre_BOX_MANAGER_HEADER
 
@@ -1355,31 +1270,7 @@ typedef struct
 
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -1465,31 +1356,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
 #endif
 
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -1531,31 +1398,7 @@ typedef struct hypre_StructStencil_struct
 hypre_StructStencilShape(stencil)[i]
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 
@@ -1564,19 +1407,37 @@ hypre_StructStencilShape(stencil)[i]
 
 /*--------------------------------------------------------------------------
  * hypre_CommInfo:
+ *
+ * For "reverse" communication, the following are not needed (may be NULL)
+ *    send_rboxnums, send_rboxes, send_transforms
+ *
+ * For "forward" communication, the following are not needed (may be NULL)
+ *    recv_rboxnums, recv_rboxes, recv_transforms
+ *
  *--------------------------------------------------------------------------*/
 
 typedef struct hypre_CommInfo_struct
 {
    hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
    hypre_Index            send_stride;
-   hypre_Index            recv_stride;
    int                  **send_processes;
-   int                  **recv_processes;
    int                  **send_rboxnums;
-   int                  **recv_rboxnums; /* required for "inverse" communication */
-   hypre_BoxArrayArray   *send_rboxes;
+   hypre_BoxArrayArray   *send_rboxes;  /* send_boxes, some with periodic shift */
+
+   hypre_BoxArrayArray   *recv_boxes;
+   hypre_Index            recv_stride;
+   int                  **recv_processes;
+   int                  **recv_rboxnums;
+   hypre_BoxArrayArray   *recv_rboxes;  /* recv_boxes, some with periodic shift */
+
+   int                    num_transforms;  /* may be 0    = identity transform */
+   hypre_Index           *coords;          /* may be NULL = identity transform */
+   hypre_Index           *dirs;            /* may be NULL = identity transform */
+   int                  **send_transforms; /* may be NULL = identity transform */
+   int                  **recv_transforms; /* may be NULL = identity transform */
+
+   int                    boxes_match;  /* true (>0) if each send box has a
+                                         * matching box on the recv processor */
 
 } hypre_CommInfo;
 
@@ -1588,8 +1449,9 @@ typedef struct hypre_CommEntryType_struct
 {
    int  offset;           /* offset for the data */
    int  dim;              /* dimension of the communication */
-   int  length_array[4];
+   int  length_array[3];  /* 4th dimension has length 'num_values' */
    int  stride_array[4];
+   int *order;            /* order of 4th dimension values */
 
 } hypre_CommEntryType;
 
@@ -1604,9 +1466,8 @@ typedef struct hypre_CommType_struct
    int                   num_entries;
    hypre_CommEntryType  *entries;
 
-   int                  *loc_boxnums; /* entry local box numbers */
+   /* this is only needed until first send buffer prefix is packed */
    int                  *rem_boxnums; /* entry remote box numbers */
-   hypre_Box            *loc_boxes;   /* entry local boxes */
    hypre_Box            *rem_boxes;   /* entry remote boxes */
 
 } hypre_CommType;
@@ -1620,8 +1481,7 @@ typedef struct hypre_CommPkg_struct
 {
    MPI_Comm          comm;
 
-   int               first_send; /* is this the first send? */
-   int               first_recv; /* is this the first recv? */
+   int               first_comm; /* is this the first communication? */
                    
    int               num_values;
    hypre_Index       send_stride;
@@ -1637,8 +1497,15 @@ typedef struct hypre_CommPkg_struct
    hypre_CommType   *copy_from_type;
    hypre_CommType   *copy_to_type;
 
+   int               num_orders;
+   int             **orders;            /* num_orders x num_values */
+
    int              *recv_data_offsets; /* offsets into recv data (by box) */
    hypre_BoxArray   *recv_data_space;   /* recv data dimensions (by box) */
+
+   hypre_Index       identity_coord;
+   hypre_Index       identity_dir;
+   int              *identity_order;
 
 } hypre_CommPkg;
 
@@ -1659,21 +1526,34 @@ typedef struct hypre_CommHandle_struct
    double        **send_buffers;
    double        **recv_buffers;
 
+   /* set = 0, add = 1 */
+   int             action;
+
 } hypre_CommHandle;
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommInto
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommInfoSendBoxes(info)     (info -> send_boxes)
-#define hypre_CommInfoRecvBoxes(info)     (info -> recv_boxes)
-#define hypre_CommInfoSendStride(info)    (info -> send_stride)
-#define hypre_CommInfoRecvStride(info)    (info -> recv_stride)
-#define hypre_CommInfoSendProcesses(info) (info -> send_processes)
-#define hypre_CommInfoRecvProcesses(info) (info -> recv_processes)
-#define hypre_CommInfoSendRBoxnums(info)  (info -> send_rboxnums)
-#define hypre_CommInfoRecvRBoxnums(info)  (info -> recv_rboxnums)
-#define hypre_CommInfoSendRBoxes(info)    (info -> send_rboxes)
+#define hypre_CommInfoSendBoxes(info)      (info -> send_boxes)
+#define hypre_CommInfoSendStride(info)     (info -> send_stride)
+#define hypre_CommInfoSendProcesses(info)  (info -> send_processes)
+#define hypre_CommInfoSendRBoxnums(info)   (info -> send_rboxnums)
+#define hypre_CommInfoSendRBoxes(info)     (info -> send_rboxes)
+                                           
+#define hypre_CommInfoRecvBoxes(info)      (info -> recv_boxes)
+#define hypre_CommInfoRecvStride(info)     (info -> recv_stride)
+#define hypre_CommInfoRecvProcesses(info)  (info -> recv_processes)
+#define hypre_CommInfoRecvRBoxnums(info)   (info -> recv_rboxnums)
+#define hypre_CommInfoRecvRBoxes(info)     (info -> recv_rboxes)
+                                           
+#define hypre_CommInfoNumTransforms(info)  (info -> num_transforms)
+#define hypre_CommInfoCoords(info)         (info -> coords)
+#define hypre_CommInfoDirs(info)           (info -> dirs)
+#define hypre_CommInfoSendTransforms(info) (info -> send_transforms)
+#define hypre_CommInfoRecvTransforms(info) (info -> recv_transforms)
+                                           
+#define hypre_CommInfoBoxesMatch(info)     (info -> boxes_match)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommEntryType
@@ -1683,6 +1563,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommEntryTypeDim(entry)          (entry -> dim)
 #define hypre_CommEntryTypeLengthArray(entry)  (entry -> length_array)
 #define hypre_CommEntryTypeStrideArray(entry)  (entry -> stride_array)
+#define hypre_CommEntryTypeOrder(entry)        (entry -> order)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommType
@@ -1693,12 +1574,9 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommTypeNumEntries(type)    (type -> num_entries)
 #define hypre_CommTypeEntries(type)       (type -> entries)
 #define hypre_CommTypeEntry(type, i)     &(type -> entries[i])
-#define hypre_CommTypeLocBoxnums(type)    (type -> loc_boxnums)
-#define hypre_CommTypeLocBoxnum(type, i)  (type -> loc_boxnums[i])
+
 #define hypre_CommTypeRemBoxnums(type)    (type -> rem_boxnums)
 #define hypre_CommTypeRemBoxnum(type, i)  (type -> rem_boxnums[i])
-#define hypre_CommTypeLocBoxes(type)      (type -> loc_boxes)
-#define hypre_CommTypeLocBox(type, i)    &(type -> loc_boxes[i])
 #define hypre_CommTypeRemBoxes(type)      (type -> rem_boxes)
 #define hypre_CommTypeRemBox(type, i)    &(type -> rem_boxes[i])
 
@@ -1708,8 +1586,7 @@ typedef struct hypre_CommHandle_struct
  
 #define hypre_CommPkgComm(comm_pkg)            (comm_pkg -> comm)
 
-#define hypre_CommPkgFirstSend(comm_pkg)       (comm_pkg -> first_send)
-#define hypre_CommPkgFirstRecv(comm_pkg)       (comm_pkg -> first_recv)
+#define hypre_CommPkgFirstComm(comm_pkg)       (comm_pkg -> first_comm)
 
 #define hypre_CommPkgNumValues(comm_pkg)       (comm_pkg -> num_values)
 #define hypre_CommPkgSendStride(comm_pkg)      (comm_pkg -> send_stride)
@@ -1727,8 +1604,15 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommPkgCopyFromType(comm_pkg)    (comm_pkg -> copy_from_type)
 #define hypre_CommPkgCopyToType(comm_pkg)      (comm_pkg -> copy_to_type)
 
+#define hypre_CommPkgNumOrders(comm_pkg)       (comm_pkg -> num_orders)
+#define hypre_CommPkgOrders(comm_pkg)          (comm_pkg -> orders)
+
 #define hypre_CommPkgRecvDataOffsets(comm_pkg) (comm_pkg -> recv_data_offsets)
 #define hypre_CommPkgRecvDataSpace(comm_pkg)   (comm_pkg -> recv_data_space)
+
+#define hypre_CommPkgIdentityCoord(comm_pkg)   (comm_pkg -> identity_coord)
+#define hypre_CommPkgIdentityDir(comm_pkg)     (comm_pkg -> identity_dir)
+#define hypre_CommPkgIdentityOrder(comm_pkg)   (comm_pkg -> identity_order)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_CommHandle
@@ -1742,33 +1626,10 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleStatus(comm_handle)      (comm_handle -> status)
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
+#define hypre_CommHandleAction(comm_handle)      (comm_handle -> action)
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -1837,31 +1698,7 @@ typedef struct hypre_ComputePkg_struct
 #define hypre_ComputePkgNumValues(compute_pkg)    (compute_pkg -> num_values)
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -1909,11 +1746,6 @@ typedef struct hypre_StructMatrix_struct
                       
    int                   global_size;  /* Total number of nonzero coeffs */
 
-   int                   OffProcAdd;   /* offproc set values flag */
-
-   int                   add_num_ghost[6]; /* ghostlayers to scan for offproc
-                                              add values */
-
    hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
 
    int                   ref_count;
@@ -1939,8 +1771,6 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixSymmElements(matrix)  ((matrix) -> symm_elements)
 #define hypre_StructMatrixNumGhost(matrix)      ((matrix) -> num_ghost)
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
-#define hypre_StructMatrixOffProcAdd(matrix)    ((matrix) -> OffProcAdd)
-#define hypre_StructMatrixAddNumGhost(matrix)   ((matrix) -> add_num_ghost)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
 
@@ -1959,31 +1789,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  hypre_CCBoxIndexRank(hypre_StructMatrixBox(matrix, b), index))
 
 #endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.6 $
- ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -2019,11 +1825,6 @@ typedef struct hypre_StructVector_struct
                       
    int                   global_size;  /* Total number coefficients */
 
-   int                   OffProcAdd;   /* offproc addto value flag */
-
-   int                   add_num_ghost[6]; /* ghostlayers to scan for offproc 
-                                              add values */
-
    int                   ref_count;
 
 } hypre_StructVector;
@@ -2041,8 +1842,6 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
-#define hypre_StructVectorOffProcAdd(vector)    ((vector) -> OffProcAdd)
-#define hypre_StructVectorAddNumGhost(vector)   ((vector) -> add_num_ghost)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  
 #define hypre_StructVectorBox(vector, b) \
@@ -2069,7 +1868,6 @@ int hypre_StructAssumedPartitionDestroy ( hypre_StructAssumedPart *assumed_part 
 int hypre_APFillResponseStructAssumedPart ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 int hypre_StructAssumedPartitionGetRegionsFromProc ( hypre_StructAssumedPart *assumed_part , int proc_id , hypre_BoxArray *assumed_regions );
 int hypre_StructAssumedPartitionGetProcsFromBox ( hypre_StructAssumedPart *assumed_part , hypre_Box *box , int *num_proc_array , int *size_alloc_proc_array , int **p_proc_array );
-int hypre_StructCoarsenAP ( hypre_StructAssumedPart *ap , hypre_Index index , hypre_Index stride , hypre_StructAssumedPart **new_ap_ptr );
 
 /* box_algebra.c */
 int hypre_IntersectBoxes ( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
@@ -2148,7 +1946,9 @@ void hypre_entryqsort2 ( int *v , hypre_BoxManEntry **ent , int left , int right
 void hypre_entryswap2 ( int *v , hypre_BoxManEntry **ent , int i , int j );
 
 /* communication_info.c */
-int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , int **send_procs , int **recv_procs , int **send_rboxnums , int **recv_rboxnums , hypre_BoxArrayArray *send_rboxes , hypre_CommInfo **comm_info_ptr );
+int hypre_CommInfoCreate ( hypre_BoxArrayArray *send_boxes , hypre_BoxArrayArray *recv_boxes , int **send_procs , int **recv_procs , int **send_rboxnums , int **recv_rboxnums , hypre_BoxArrayArray *send_rboxes , hypre_BoxArrayArray *recv_rboxes , int boxes_match , hypre_CommInfo **comm_info_ptr );
+int hypre_CommInfoSetTransforms ( hypre_CommInfo *comm_info , int num_transforms , hypre_Index *coords , hypre_Index *dirs , int **send_transforms , int **recv_transforms );
+int hypre_CommInfoGetTransforms ( hypre_CommInfo *comm_info , int *num_transforms , hypre_Index **coords , hypre_Index **dirs );
 int hypre_CommInfoProjectSend ( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
 int hypre_CommInfoProjectRecv ( hypre_CommInfo *comm_info , hypre_Index index , hypre_Index stride );
 int hypre_CommInfoDestroy ( hypre_CommInfo *comm_info );
@@ -2185,6 +1985,7 @@ int HYPRE_StructMatrixCreate ( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_Str
 int HYPRE_StructMatrixDestroy ( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixInitialize ( HYPRE_StructMatrix matrix );
 int HYPRE_StructMatrixSetValues ( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
+int HYPRE_StructMatrixGetValues ( HYPRE_StructMatrix matrix , int *grid_index , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixSetBoxValues ( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixGetBoxValues ( HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values );
 int HYPRE_StructMatrixSetConstantValues ( HYPRE_StructMatrix matrix , int num_stencil_indices , int *stencil_indices , double *values );
@@ -2208,13 +2009,12 @@ int HYPRE_StructStencilDestroy ( HYPRE_StructStencil stencil );
 int HYPRE_StructVectorCreate ( MPI_Comm comm , HYPRE_StructGrid grid , HYPRE_StructVector *vector );
 int HYPRE_StructVectorDestroy ( HYPRE_StructVector struct_vector );
 int HYPRE_StructVectorInitialize ( HYPRE_StructVector vector );
-int HYPRE_StructVectorClearGhostValues ( HYPRE_StructVector vector );
 int HYPRE_StructVectorSetValues ( HYPRE_StructVector vector , int *grid_index , double values );
 int HYPRE_StructVectorSetBoxValues ( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
 int HYPRE_StructVectorAddToValues ( HYPRE_StructVector vector , int *grid_index , double values );
 int HYPRE_StructVectorAddToBoxValues ( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
 int HYPRE_StructVectorScaleValues ( HYPRE_StructVector vector , double factor );
-int HYPRE_StructVectorGetValues ( HYPRE_StructVector vector , int *grid_index , double *values_ptr );
+int HYPRE_StructVectorGetValues ( HYPRE_StructVector vector , int *grid_index , double *values );
 int HYPRE_StructVectorGetBoxValues ( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
 int HYPRE_StructVectorAssemble ( HYPRE_StructVector vector );
 int HYPRE_StructVectorPrint ( const char *filename , HYPRE_StructVector vector , int all );
@@ -2234,12 +2034,12 @@ int hypre_ProjectBoxArrayArray ( hypre_BoxArrayArray *box_array_array , hypre_In
 int hypre_StructAxpy ( double alpha , hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_communication.c */
-int hypre_CommPkgCreate ( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
-int hypre_CommTypeSetEntries ( hypre_CommType *comm_type , int *boxnums , hypre_Box *boxes , hypre_Index stride , int num_values , hypre_BoxArray *data_space , int *data_offsets );
-int hypre_CommTypeSetEntry ( hypre_Box *box , hypre_Index stride , hypre_Box *data_box , int num_values , int data_box_offset , hypre_CommEntryType *comm_entry );
-int hypre_InitializeCommunication ( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , hypre_CommHandle **comm_handle_ptr );
+int hypre_CommPkgCreate ( hypre_CommInfo *comm_info , hypre_BoxArray *send_data_space , hypre_BoxArray *recv_data_space , int num_values , int **orders , int reverse , MPI_Comm comm , hypre_CommPkg **comm_pkg_ptr );
+int hypre_CommTypeSetEntries ( hypre_CommType *comm_type , int *boxnums , hypre_Box *boxes , hypre_Index stride , hypre_Index coord , hypre_Index dir , int *order , hypre_BoxArray *data_space , int *data_offsets );
+int hypre_CommTypeSetEntry ( hypre_Box *box , hypre_Index stride , hypre_Index coord , hypre_Index dir , int *order , hypre_Box *data_box , int data_box_offset , hypre_CommEntryType *comm_entry );
+int hypre_InitializeCommunication ( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , int action , int tag , hypre_CommHandle **comm_handle_ptr );
 int hypre_FinalizeCommunication ( hypre_CommHandle *comm_handle );
-int hypre_ExchangeLocalData ( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data );
+int hypre_ExchangeLocalData ( hypre_CommPkg *comm_pkg , double *send_data , double *recv_data , int action );
 int hypre_CommPkgDestroy ( hypre_CommPkg *comm_pkg );
 
 /* struct_copy.c */
@@ -2282,13 +2082,16 @@ int hypre_StructMatrixDestroy ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , double *data );
 int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
-int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int action );
-int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , double *values , int action , int boxnum , int outside );
+int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix , hypre_Box *set_box , hypre_Box *value_box , int num_stencil_indices , int *stencil_indices , double *values , int action , int boxnum , int outside );
 int hypre_StructMatrixSetConstantValues ( hypre_StructMatrix *matrix , int num_stencil_indices , int *stencil_indices , double *values , int action );
+int hypre_StructMatrixClearValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , int num_stencil_indices , int *stencil_indices , int boxnum , int outside );
+int hypre_StructMatrixClearBoxValues ( hypre_StructMatrix *matrix , hypre_Box *clear_box , int num_stencil_indices , int *stencil_indices , int boxnum , int outside );
 int hypre_StructMatrixAssemble ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixSetNumGhost ( hypre_StructMatrix *matrix , int *num_ghost );
 int hypre_StructMatrixSetConstantCoefficient ( hypre_StructMatrix *matrix , int constant_coefficient );
 int hypre_StructMatrixSetConstantEntries ( hypre_StructMatrix *matrix , int nentries , int *entries );
+int hypre_StructMatrixClearGhostValues ( hypre_StructMatrix *matrix );
 int hypre_StructMatrixPrint ( const char *filename , hypre_StructMatrix *matrix , int all );
 int hypre_StructMatrixMigrate ( hypre_StructMatrix *from_matrix , hypre_StructMatrix *to_matrix );
 hypre_StructMatrix *hypre_StructMatrixRead ( MPI_Comm comm , const char *filename , int *num_ghost );
@@ -2326,10 +2129,10 @@ int hypre_StructVectorDestroy ( hypre_StructVector *vector );
 int hypre_StructVectorInitializeShell ( hypre_StructVector *vector );
 int hypre_StructVectorInitializeData ( hypre_StructVector *vector , double *data );
 int hypre_StructVectorInitialize ( hypre_StructVector *vector );
-int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index grid_index , double values , int add_to );
-int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *value_box , double *values , int add_to );
-int hypre_StructVectorGetValues ( hypre_StructVector *vector , hypre_Index grid_index , double *values_ptr );
-int hypre_StructVectorGetBoxValues ( hypre_StructVector *vector , hypre_Box *value_box , double *values );
+int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index grid_index , double *values , int action , int boxnum , int outside );
+int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *set_box , hypre_Box *value_box , double *values , int action , int boxnum , int outside );
+int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Index grid_index , int boxnum , int outside );
+int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , int boxnum , int outside );
 int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , int *num_ghost );
 int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );

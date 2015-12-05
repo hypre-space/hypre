@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_IPv4Socket_Impl.c
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -52,6 +52,7 @@
 #include "sidl_Exception.h"
 #include "sidl_io_IOException.h"
 #include "sidlx_common.h"
+
 /* this is a utility function that makes sure a char array is
    1-D, packed, and has a minimum length. */
 void ensure1DPackedChar( const int32_t minlen, 
@@ -185,8 +186,8 @@ int32_t writen2( int filedes, const int32_t nbytes, const char * data,
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -867,62 +868,60 @@ impl_sidlx_rmi_IPv4Socket_test(
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_sidlx_rmi_IPv4Socket_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_sidlx_rmi_IPv4Socket_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_sidlx_rmi_IPv4Socket_fcast_sidl_BaseInterface(void* bi,
+  impl_sidlx_rmi_IPv4Socket_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_sidlx_rmi_IPv4Socket_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_sidlx_rmi_IPv4Socket_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidlx_rmi_IPv4Socket_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_sidlx_rmi_IPv4Socket_fcast_sidl_RuntimeException(void* bi,
+  impl_sidlx_rmi_IPv4Socket_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
 struct sidlx_rmi_IPv4Socket__object* 
-  impl_sidlx_rmi_IPv4Socket_fconnect_sidlx_rmi_IPv4Socket(const char* url,
+  impl_sidlx_rmi_IPv4Socket_fconnect_sidlx_rmi_IPv4Socket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidlx_rmi_IPv4Socket__connectI(url, ar, _ex);
 }
 struct sidlx_rmi_IPv4Socket__object* 
-  impl_sidlx_rmi_IPv4Socket_fcast_sidlx_rmi_IPv4Socket(void* bi,
+  impl_sidlx_rmi_IPv4Socket_fcast_sidlx_rmi_IPv4Socket(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidlx_rmi_IPv4Socket__cast(bi, _ex);
 }
 struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_IPv4Socket_fconnect_sidlx_rmi_Socket(const char* url,
+  impl_sidlx_rmi_IPv4Socket_fconnect_sidlx_rmi_Socket(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidlx_rmi_Socket__connectI(url, ar, _ex);
 }
 struct sidlx_rmi_Socket__object* 
-  impl_sidlx_rmi_IPv4Socket_fcast_sidlx_rmi_Socket(void* bi,
+  impl_sidlx_rmi_IPv4Socket_fcast_sidlx_rmi_Socket(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidlx_rmi_Socket__cast(bi, _ex);
 }

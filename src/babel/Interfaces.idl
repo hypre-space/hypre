@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.51 $
+ * $Revision: 2.55 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -984,6 +971,12 @@ package bHYPRE version 1.0.0
        * destroy the object if the reference count goes to zero.
        **/
       void Destroy();
+
+      /** Init and Finalize are to help debug MPI interfaces;
+       * you should normally use the MPI library more directly:
+       **/
+      static void Init();
+      static void Finalize();
    }
 
    /**
@@ -1635,6 +1628,18 @@ package bHYPRE version 1.0.0
     * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
     * for additive Schwarz.
     *
+    * \item[SchwarzUseNonSymm] ({\tt Int}) - defines whether to use a nonsymmetric
+    * Schwarz smoother. Default:0 (symmetric smoother)
+    *
+    * \item[EuLevel] ({\tt Int}) - defines number of levels for ILU(k) smoother.
+    *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+    *
+    * \item[EuSparseA] ({\tt Double}) - defines drop tolerance for ILU(k) smoother
+    *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+    *
+    * \item[EuBJ] ({\tt Int}) - defines use of block Jacobi ILUT smoother.
+    *  To be used with SmoothType 9 and SmoothNumLevels > 0. Default:0
+    *
     * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
     * is used as a solver; ignored if this is used as a preconditioner
     *
@@ -1663,6 +1668,15 @@ package bHYPRE version 1.0.0
     * \end{tabular}
     * 
     * The default is 0. 
+    *
+    * \item[PMaxElmts] ({\tt Int}) - Defines the maximal number of nonzero entries
+    * allowed in interpolation. Default: 0 (i.e. no limit)
+    *
+    * \item[AggNumLevels] ({\tt Int}) - Defines the number of levels
+    * of aggressive coarsening performed. Default:0
+    *
+    * \item[NumPaths] ({\tt Int}) - Defines the number of paths used for
+    * aggressive coarsening. Default:1
     *
     * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
     * in GSMG or LS interpolation.

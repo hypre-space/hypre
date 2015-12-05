@@ -2,9 +2,9 @@
  * File:          sidl_rmi_TimeOutException_IOR.h
  * Symbol:        sidl.rmi.TimeOutException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_TimeOutException_IOR.h,v 1.1 2006/08/29 23:39:47 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_TimeOutException_IOR.h,v 1.2 2007/09/27 19:35:23 painter Exp $
  * Description:   Intermediate Object Representation for sidl.rmi.TimeOutException
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -232,27 +232,27 @@ const struct sidl_rmi_TimeOutException__external*
 sidl_rmi_TimeOutException__externals(void);
 
 extern struct sidl_rmi_TimeOutException__object*
-sidl_rmi_TimeOutException__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex);
+sidl_rmi_TimeOutException__new(void* ddata,struct sidl_BaseInterface__object ** 
+  _ex);
 
 extern void sidl_rmi_TimeOutException__init(
-  struct sidl_rmi_TimeOutException__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct sidl_rmi_TimeOutException__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void sidl_rmi_TimeOutException__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_BaseException__epv **s_arg_epv__sidl_baseexception,
   struct sidl_BaseException__epv **s_arg_epv_hooks__sidl_baseexception,
   struct sidl_io_Serializable__epv **s_arg_epv__sidl_io_serializable,
   struct sidl_io_Serializable__epv **s_arg_epv_hooks__sidl_io_serializable,
-  struct sidl_SIDLException__epv **s_arg_epv__sidl_sidlexception,
-    struct sidl_SIDLException__epv **s_arg_epv_hooks__sidl_sidlexception,
+  struct sidl_SIDLException__epv **s_arg_epv__sidl_sidlexception,struct 
+    sidl_SIDLException__epv **s_arg_epv_hooks__sidl_sidlexception,
   struct sidl_RuntimeException__epv **s_arg_epv__sidl_runtimeexception,
   struct sidl_RuntimeException__epv **s_arg_epv_hooks__sidl_runtimeexception,
-  struct sidl_io_IOException__epv **s_arg_epv__sidl_io_ioexception,
-    struct sidl_io_IOException__epv **s_arg_epv_hooks__sidl_io_ioexception,
+  struct sidl_io_IOException__epv **s_arg_epv__sidl_io_ioexception,struct 
+    sidl_io_IOException__epv **s_arg_epv_hooks__sidl_io_ioexception,
   struct sidl_rmi_NetworkException__epv **s_arg_epv__sidl_rmi_networkexception,
     struct sidl_rmi_NetworkException__epv 
     **s_arg_epv_hooks__sidl_rmi_networkexception,
@@ -260,93 +260,93 @@ extern void sidl_rmi_TimeOutException__getEPVs(
     struct sidl_rmi_TimeOutException__epv 
     **s_arg_epv_hooks__sidl_rmi_timeoutexception);
   extern void sidl_rmi_TimeOutException__fini(
-    struct sidl_rmi_TimeOutException__object* self,
-      struct sidl_BaseInterface__object ** _ex);
-  extern void sidl_rmi_TimeOutException__IOR_version(int32_t *major,
-    int32_t *minor);
+    struct sidl_rmi_TimeOutException__object* self, struct 
+      sidl_BaseInterface__object ** _ex);
+  extern void sidl_rmi_TimeOutException__IOR_version(int32_t *major, int32_t 
+    *minor);
 
   struct sidl_BaseClass__object* 
-    skel_sidl_rmi_TimeOutException_fconnect_sidl_BaseClass(const char* url,
+    skel_sidl_rmi_TimeOutException_fconnect_sidl_BaseClass(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_BaseClass(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_BaseClass(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseException__object* 
-    skel_sidl_rmi_TimeOutException_fconnect_sidl_BaseException(const char* url,
+    skel_sidl_rmi_TimeOutException_fconnect_sidl_BaseException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseException__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_BaseException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_BaseException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_sidl_rmi_TimeOutException_fconnect_sidl_BaseInterface(const char* url,
+    skel_sidl_rmi_TimeOutException_fconnect_sidl_BaseInterface(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* 
-    skel_sidl_rmi_TimeOutException_fconnect_sidl_ClassInfo(const char* url,
+    skel_sidl_rmi_TimeOutException_fconnect_sidl_ClassInfo(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_ClassInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_ClassInfo(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
     skel_sidl_rmi_TimeOutException_fconnect_sidl_RuntimeException(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_SIDLException__object* 
-    skel_sidl_rmi_TimeOutException_fconnect_sidl_SIDLException(const char* url,
+    skel_sidl_rmi_TimeOutException_fconnect_sidl_SIDLException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_SIDLException__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_SIDLException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_SIDLException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Deserializer__object* 
     skel_sidl_rmi_TimeOutException_fconnect_sidl_io_Deserializer(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Deserializer__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_io_Deserializer(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_io_Deserializer(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_IOException__object* 
     skel_sidl_rmi_TimeOutException_fconnect_sidl_io_IOException(const char* url,
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_IOException__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_io_IOException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_io_IOException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Serializable__object* 
     skel_sidl_rmi_TimeOutException_fconnect_sidl_io_Serializable(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Serializable__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_io_Serializable(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_io_Serializable(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Serializer__object* 
-    skel_sidl_rmi_TimeOutException_fconnect_sidl_io_Serializer(const char* url,
+    skel_sidl_rmi_TimeOutException_fconnect_sidl_io_Serializer(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Serializer__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_io_Serializer(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_rmi_TimeOutException_fcast_sidl_io_Serializer(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_NetworkException__object* 
     skel_sidl_rmi_TimeOutException_fconnect_sidl_rmi_NetworkException(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_NetworkException__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_rmi_NetworkException(void *bi,
+    skel_sidl_rmi_TimeOutException_fcast_sidl_rmi_NetworkException(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_TimeOutException__object* 
     skel_sidl_rmi_TimeOutException_fconnect_sidl_rmi_TimeOutException(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_TimeOutException__object* 
-    skel_sidl_rmi_TimeOutException_fcast_sidl_rmi_TimeOutException(void *bi,
+    skel_sidl_rmi_TimeOutException_fcast_sidl_rmi_TimeOutException(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_TimeOutException__remote{
@@ -354,7 +354,7 @@ extern void sidl_rmi_TimeOutException__getEPVs(
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_NoServerException_IOR.h
  * Symbol:        sidlx.rmi.NoServerException-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for sidlx.rmi.NoServerException
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -206,115 +206,115 @@ const struct sidlx_rmi_NoServerException__external*
 sidlx_rmi_NoServerException__externals(void);
 
 extern struct sidlx_rmi_NoServerException__object*
-sidlx_rmi_NoServerException__new(void* ddata,
-  struct sidl_BaseInterface__object ** _ex);
+sidlx_rmi_NoServerException__new(void* ddata,struct sidl_BaseInterface__object 
+  ** _ex);
 
 extern void sidlx_rmi_NoServerException__init(
-  struct sidlx_rmi_NoServerException__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct sidlx_rmi_NoServerException__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void sidlx_rmi_NoServerException__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct sidl_BaseException__epv **s_arg_epv__sidl_baseexception,
   struct sidl_BaseException__epv **s_arg_epv_hooks__sidl_baseexception,
   struct sidl_io_Serializable__epv **s_arg_epv__sidl_io_serializable,
   struct sidl_io_Serializable__epv **s_arg_epv_hooks__sidl_io_serializable,
-  struct sidl_SIDLException__epv **s_arg_epv__sidl_sidlexception,
-    struct sidl_SIDLException__epv **s_arg_epv_hooks__sidl_sidlexception,
+  struct sidl_SIDLException__epv **s_arg_epv__sidl_sidlexception,struct 
+    sidl_SIDLException__epv **s_arg_epv_hooks__sidl_sidlexception,
   struct sidl_RuntimeException__epv **s_arg_epv__sidl_runtimeexception,
   struct sidl_RuntimeException__epv **s_arg_epv_hooks__sidl_runtimeexception,
-  struct sidl_io_IOException__epv **s_arg_epv__sidl_io_ioexception,
-    struct sidl_io_IOException__epv **s_arg_epv_hooks__sidl_io_ioexception,
+  struct sidl_io_IOException__epv **s_arg_epv__sidl_io_ioexception,struct 
+    sidl_io_IOException__epv **s_arg_epv_hooks__sidl_io_ioexception,
   struct sidl_rmi_NetworkException__epv **s_arg_epv__sidl_rmi_networkexception,
     struct sidl_rmi_NetworkException__epv 
     **s_arg_epv_hooks__sidl_rmi_networkexception,
   struct sidlx_rmi_NoServerException__epv 
-    **s_arg_epv__sidlx_rmi_noserverexception,
-    struct sidlx_rmi_NoServerException__epv 
+    **s_arg_epv__sidlx_rmi_noserverexception,struct 
+    sidlx_rmi_NoServerException__epv 
     **s_arg_epv_hooks__sidlx_rmi_noserverexception);
   extern void sidlx_rmi_NoServerException__fini(
-    struct sidlx_rmi_NoServerException__object* self,
-      struct sidl_BaseInterface__object ** _ex);
-  extern void sidlx_rmi_NoServerException__IOR_version(int32_t *major,
-    int32_t *minor);
+    struct sidlx_rmi_NoServerException__object* self, struct 
+      sidl_BaseInterface__object ** _ex);
+  extern void sidlx_rmi_NoServerException__IOR_version(int32_t *major, int32_t 
+    *minor);
 
   struct sidl_BaseClass__object* 
-    skel_sidlx_rmi_NoServerException_fconnect_sidl_BaseClass(const char* url,
+    skel_sidlx_rmi_NoServerException_fconnect_sidl_BaseClass(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseClass__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_BaseClass(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_BaseClass(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseException__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_BaseException(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseException__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_BaseException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_BaseException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_BaseInterface(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* 
-    skel_sidlx_rmi_NoServerException_fconnect_sidl_ClassInfo(const char* url,
+    skel_sidlx_rmi_NoServerException_fconnect_sidl_ClassInfo(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_ClassInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_ClassInfo(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_RuntimeException(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_RuntimeException(void *bi,
+    skel_sidlx_rmi_NoServerException_fcast_sidl_RuntimeException(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_SIDLException__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_SIDLException(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_SIDLException__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_SIDLException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_SIDLException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Deserializer__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_io_Deserializer(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Deserializer__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_io_Deserializer(void *bi,
+    skel_sidlx_rmi_NoServerException_fcast_sidl_io_Deserializer(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_io_IOException__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_io_IOException(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_IOException__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_io_IOException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_io_IOException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Serializable__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_io_Serializable(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Serializable__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_io_Serializable(void *bi,
+    skel_sidlx_rmi_NoServerException_fcast_sidl_io_Serializable(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_io_Serializer__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_io_Serializer(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_io_Serializer__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_io_Serializer(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidlx_rmi_NoServerException_fcast_sidl_io_Serializer(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_rmi_NetworkException__object* 
     skel_sidlx_rmi_NoServerException_fconnect_sidl_rmi_NetworkException(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_rmi_NetworkException__object* 
-    skel_sidlx_rmi_NoServerException_fcast_sidl_rmi_NetworkException(void *bi,
+    skel_sidlx_rmi_NoServerException_fcast_sidl_rmi_NetworkException(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidlx_rmi_NoServerException__object* 
@@ -329,7 +329,7 @@ extern void sidlx_rmi_NoServerException__getEPVs(
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

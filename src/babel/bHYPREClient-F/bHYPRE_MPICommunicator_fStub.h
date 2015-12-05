@@ -2,7 +2,7 @@
  * File:          bHYPRE_MPICommunicator_fStub.h
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side documentation text for bHYPRE.MPICommunicator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -46,8 +46,8 @@ bHYPRE_MPICommunicator__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_MPICommunicator__object*
-bHYPRE_MPICommunicator__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_MPICommunicator__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructVariable_Stub.c
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -45,22 +45,21 @@ bHYPRE_SStructVariable__array_create1dInit(
   int32_t len, 
   int32_t* data)
 {
-  return (struct 
-    bHYPRE_SStructVariable__array*)sidl_int__array_create1dInit(len,
-    (int32_t*)data);
+  return (struct bHYPRE_SStructVariable__array*)sidl_int__array_create1dInit(
+    len, (int32_t*)data);
 }
 
 struct bHYPRE_SStructVariable__array*
 bHYPRE_SStructVariable__array_create2dCol(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_SStructVariable__array*)sidl_int__array_create2dCol(m,
+  return (struct bHYPRE_SStructVariable__array*)sidl_int__array_create2dCol(m, 
     n);
 }
 
 struct bHYPRE_SStructVariable__array*
 bHYPRE_SStructVariable__array_create2dRow(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_SStructVariable__array*)sidl_int__array_create2dRow(m,
+  return (struct bHYPRE_SStructVariable__array*)sidl_int__array_create2dRow(m, 
     n);
 }
 

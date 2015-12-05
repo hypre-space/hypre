@@ -25,7 +25,7 @@ dnl The general documentation of those macros, as well as the sample
 dnl configure.in, is included in the AC_PROG_JAVA macro.
 dnl
 dnl @author Egon Willighagen <egonw@sci.kun.nl>
-dnl @version $Id: ac_prog_javadoc.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: ac_prog_javadoc.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl
 AC_DEFUN([AC_PROG_JAVADOC],[
 AC_REQUIRE([AC_EXEEXT])dnl

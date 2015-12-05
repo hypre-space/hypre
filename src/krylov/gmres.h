@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.8 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -70,7 +57,7 @@
 
 typedef struct
 {
-   char * (*CAlloc)        ( int count, int elt_size );
+   char * (*CAlloc)        ( size_t count, size_t elt_size );
    int    (*Free)          ( char *ptr );
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
    void * (*CreateVector)  ( void *vector );
@@ -95,12 +82,6 @@ typedef struct
  * The {\tt hypre\_GMRESData} object ...
  **/
 
-/* rel_change!=0 means: if pass the other stopping criteria,
- also check the relative change in the solution x.
-   stop_crit!=0 means: absolute error tolerance rather than
- the usual relative error tolerance on the residual.  Never
- applies if rel_change!=0.
-*/
 
 typedef struct
 {
@@ -112,6 +93,7 @@ typedef struct
    int      converged;
    double   tol;
    double   cf_tol;
+   double   a_tol;
    double   rel_residual_norm;
 
    void  *A;
@@ -154,7 +136,7 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char * (*CAlloc)        ( int count, int elt_size ),
+   char * (*CAlloc)        ( size_t count, size_t elt_size ),
    int    (*Free)          ( char *ptr ),
    int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),

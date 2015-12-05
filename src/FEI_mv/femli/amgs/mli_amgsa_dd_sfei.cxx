@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.23 $
+ * $Revision: 1.26 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -2166,7 +2153,7 @@ int MLI_Method_AMGSA::coarsenSelective(hypre_ParCSRMatrix *hypreG,
    int       localNRows, naggr=0, *node2aggr, *aggrSizes, nUndone;
    int       irow, jcol, colNum, rowLeng, *cols, globalNRows;
    int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
-   int       *GDiagI, *GDiagJ, *GOffdI;
+   int       *GDiagI, *GDiagJ;
    double    maxVal, *vals, *GDiagA;
    hypre_CSRMatrix *GDiag, *GOffd;
 #ifdef MLI_DEBUG_DETAILED
@@ -2197,7 +2184,6 @@ int MLI_Method_AMGSA::coarsenSelective(hypre_ParCSRMatrix *hypreG,
    GDiagJ = hypre_CSRMatrixJ(GDiag);
    GDiagA = hypre_CSRMatrixData(GDiag);
    GOffd  = hypre_ParCSRMatrixOffd(hypreG);
-   GOffdI = hypre_CSRMatrixI(GOffd);
 
    /*-----------------------------------------------------------------
     * allocate status arrays 
@@ -2669,10 +2655,10 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp2(MLI *mli)
    /* --------------------------------------------------------------- */
 
    MLI_Matrix         *mli_AExt;
-   hypre_ParCSRMatrix *hypreAExt;
+   //hypre_ParCSRMatrix *hypreAExt;
 
    MLI_Matrix_ComputePtAP(mli_QExt, mli_Amat, &mli_AExt);
-   hypreAExt = (hypre_ParCSRMatrix *) mli_AExt->getMatrix();
+   //hypreAExt = (hypre_ParCSRMatrix *) mli_AExt->getMatrix();
    delete mli_QExt;
    HYPRE_IJMatrixDestroy(IJ_QExt);
 

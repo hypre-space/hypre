@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructSMG_IOR.h
  * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -322,98 +322,90 @@ extern struct bHYPRE_StructSMG__sepv*
 bHYPRE_StructSMG__statics(void);
 
 extern void bHYPRE_StructSMG__init(
-  struct bHYPRE_StructSMG__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct bHYPRE_StructSMG__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void bHYPRE_StructSMG__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
   struct bHYPRE_Operator__epv **s_arg_epv__bhypre_operator,
   struct bHYPRE_Operator__epv **s_arg_epv_hooks__bhypre_operator,
   struct bHYPRE_Solver__epv **s_arg_epv__bhypre_solver,
   struct bHYPRE_Solver__epv **s_arg_epv_hooks__bhypre_solver,
-  struct bHYPRE_StructSMG__epv **s_arg_epv__bhypre_structsmg,
-    struct bHYPRE_StructSMG__epv **s_arg_epv_hooks__bhypre_structsmg);
+  struct bHYPRE_StructSMG__epv **s_arg_epv__bhypre_structsmg,struct 
+    bHYPRE_StructSMG__epv **s_arg_epv_hooks__bhypre_structsmg);
   extern void bHYPRE_StructSMG__fini(
-    struct bHYPRE_StructSMG__object* self,
-      struct sidl_BaseInterface__object ** _ex);
+    struct bHYPRE_StructSMG__object* self, struct sidl_BaseInterface__object ** 
+      _ex);
   extern void bHYPRE_StructSMG__IOR_version(int32_t *major, int32_t *minor);
 
   struct bHYPRE_MPICommunicator__object* 
-    skel_bHYPRE_StructSMG_fconnect_bHYPRE_MPICommunicator(const char* url,
+    skel_bHYPRE_StructSMG_fconnect_bHYPRE_MPICommunicator(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_MPICommunicator__object* 
-    skel_bHYPRE_StructSMG_fcast_bHYPRE_MPICommunicator(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_StructSMG_fcast_bHYPRE_MPICommunicator(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_Operator__object* 
-    skel_bHYPRE_StructSMG_fconnect_bHYPRE_Operator(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct bHYPRE_Operator__object* 
-    skel_bHYPRE_StructSMG_fcast_bHYPRE_Operator(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_StructSMG_fconnect_bHYPRE_Operator(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_Operator__object* skel_bHYPRE_StructSMG_fcast_bHYPRE_Operator(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
-  struct bHYPRE_Solver__object* 
-    skel_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_Solver__object* skel_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_Solver__object* skel_bHYPRE_StructSMG_fcast_bHYPRE_Solver(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_StructMatrix__object* 
-    skel_bHYPRE_StructSMG_fconnect_bHYPRE_StructMatrix(const char* url,
+    skel_bHYPRE_StructSMG_fconnect_bHYPRE_StructMatrix(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_StructMatrix__object* 
-    skel_bHYPRE_StructSMG_fcast_bHYPRE_StructMatrix(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_StructSMG_fcast_bHYPRE_StructMatrix(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_StructSMG__object* 
-    skel_bHYPRE_StructSMG_fconnect_bHYPRE_StructSMG(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct bHYPRE_StructSMG__object* 
-    skel_bHYPRE_StructSMG_fcast_bHYPRE_StructSMG(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_StructSMG_fconnect_bHYPRE_StructSMG(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_StructSMG__object* skel_bHYPRE_StructSMG_fcast_bHYPRE_StructSMG(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
-  struct bHYPRE_Vector__object* 
-    skel_bHYPRE_StructSMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  struct bHYPRE_Vector__object* skel_bHYPRE_StructSMG_fconnect_bHYPRE_Vector(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct bHYPRE_Vector__object* skel_bHYPRE_StructSMG_fcast_bHYPRE_Vector(void 
     *bi, struct sidl_BaseInterface__object **_ex);
 
-  struct sidl_BaseClass__object* 
-    skel_bHYPRE_StructSMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
-  struct sidl_BaseClass__object* 
-    skel_bHYPRE_StructSMG_fcast_sidl_BaseClass(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* skel_bHYPRE_StructSMG_fconnect_sidl_BaseClass(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* skel_bHYPRE_StructSMG_fcast_sidl_BaseClass(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_StructSMG_fconnect_sidl_BaseInterface(const char* url,
+    skel_bHYPRE_StructSMG_fconnect_sidl_BaseInterface(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_BaseInterface__object* 
-    skel_bHYPRE_StructSMG_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_StructSMG_fcast_sidl_BaseInterface(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
-  struct sidl_ClassInfo__object* 
-    skel_bHYPRE_StructSMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
-  struct sidl_ClassInfo__object* 
-    skel_bHYPRE_StructSMG_fcast_sidl_ClassInfo(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* skel_bHYPRE_StructSMG_fconnect_sidl_ClassInfo(
+    const char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* skel_bHYPRE_StructSMG_fcast_sidl_ClassInfo(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_StructSMG_fconnect_sidl_RuntimeException(const char* url,
+    skel_bHYPRE_StructSMG_fconnect_sidl_RuntimeException(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_bHYPRE_StructSMG_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_bHYPRE_StructSMG_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct bHYPRE_StructSMG__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

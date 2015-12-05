@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructMatrixView.h
  * Symbol:        bHYPRE.SStructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -81,10 +81,12 @@ bHYPRE_SStructMatrixView_SetGraph(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetGraph)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetGraph)(
     self->d_object,
     graph,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -234,13 +236,15 @@ bHYPRE_SStructMatrixView_SetSymmetric(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetSymmetric)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetSymmetric)(
     self->d_object,
     part,
     var,
     to_var,
     symmetric,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -259,10 +263,12 @@ bHYPRE_SStructMatrixView_SetNSSymmetric(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetNSSymmetric)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetNSSymmetric)(
     self->d_object,
     symmetric,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -279,9 +285,11 @@ bHYPRE_SStructMatrixView_SetComplex(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetComplex)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetComplex)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -301,11 +309,13 @@ bHYPRE_SStructMatrixView_Print(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Print)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Print)(
     self->d_object,
     filename,
     all,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -320,10 +330,12 @@ bHYPRE_SStructMatrixView_GetObject(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_GetObject)(
+  int32_t _result;
+  _result = (*self->d_epv->f_GetObject)(
     self->d_object,
     A,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -338,10 +350,12 @@ bHYPRE_SStructMatrixView_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self->d_object,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -371,9 +385,11 @@ bHYPRE_SStructMatrixView_Initialize(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Initialize)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Initialize)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -387,9 +403,11 @@ bHYPRE_SStructMatrixView_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -436,10 +454,12 @@ bHYPRE_SStructMatrixView_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self->d_object,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -454,10 +474,12 @@ bHYPRE_SStructMatrixView_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self->d_object,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -471,9 +493,11 @@ bHYPRE_SStructMatrixView_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -531,9 +555,11 @@ bHYPRE_SStructMatrixView__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -567,9 +593,11 @@ bHYPRE_SStructMatrixView__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self->d_object,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -826,8 +854,8 @@ bHYPRE_SStructMatrixView__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructMatrixView__object*
-bHYPRE_SStructMatrixView__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructMatrixView__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

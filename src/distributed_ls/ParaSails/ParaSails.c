@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -58,10 +45,10 @@
 #ifdef ESSL
 #include <essl.h>
 #else
-int hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
-int hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
+int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, int *, double *, int *, int *);
+int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
   double *, int *, int *);
-int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, int *,
+int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, int *, int *, int *, double *, int *,
   double *, int *, double *, int *, int *);
 #endif
 
@@ -1153,7 +1140,7 @@ static int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         dpps(ahat, len, val, 1);
 #else
         /* Solve local linear system - factor phase */
-        hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(&uplo, &len, ahat, &len, &info);
+        hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
 #if 0
@@ -1167,7 +1154,7 @@ static int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         }
 
         /* Solve local linear system - solve phase */
-        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &len, &one, ahat, &len, val, &len, 
+        hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(&uplo, &len, &one, ahat, &len, val, &len, 
           &info);
         if (info != 0)
         {
@@ -1341,7 +1328,7 @@ static int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             &info, work, work_size);
 #else
         /* rhs in bhat, and put solution in bhat */
-        hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &npat, &len, &one, ahat, &npat,
+        hypre_F90_NAME_LAPACK(dgels, DGELS)(&trans, &npat, &len, &one, ahat, &npat,
             bhat, &npat, work, &work_size, &info);
 
         if (info != 0)

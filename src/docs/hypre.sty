@@ -1,0 +1,149 @@
+%=====================================================================
+%=====================================================================
+%
+% This file contains various definitions and environments that may
+% be used to write HYPRE documentation.
+%
+% (C) 2007  Lawrence Livermore National Security, LLC.
+%
+% $Revision: 2.4 $
+%
+%=====================================================================
+%=====================================================================
+
+%---------------------------------------------------------------------
+% Commands: beginspec, endspec
+%   These commands are used to define "verbatim" like environments.
+%   All special characters are turned off, except for
+%     { } \
+%---------------------------------------------------------------------
+
+\def\beginspec{\begingroup
+\catcode`\#=12
+\catcode`\$=12
+\catcode`\%=12
+\catcode`\&=12
+\catcode`\_=12
+\catcode`\~=12
+\catcode`\^=12
+}
+\def\endspec{\endgroup}
+
+%---------------------------------------------------------------------
+% Various verbatim-like text commands:
+%
+% Note: These work well as stand alone commands, but they cannot be
+% used as arguments to most commands.
+%
+% The following special characters are handled verbatim
+%     # & ~ _ ^
+%
+% The following special characters are NOT handled verbatim
+%     $ % \ { }
+%
+% These special characters may be printed by escaping with a `\'
+%     $ %
+%
+% These special characters may also be printed by escaping with a `\'
+%     # & _
+%
+%---------------------------------------------------------------------
+
+\def\textx#1{\mbox{#1}\endspec}
+
+\def\code{\beginspec \tt \textx}
+\def\file{\beginspec \tt \textx}
+\def\kbd{\beginspec \tt \textx}
+
+%---------------------------------------------------------------------
+% Commands: hypre
+%
+% Note: your life will be much easier if you invoke this macro
+% with a trailing open/close pair of squirly brackets.  i.e.
+% 
+%   \hypre{}
+%
+%---------------------------------------------------------------------
+
+\def\hypre{{\sl hypre}}
+
+%=====================================================================
+%=====================================================================
+%
+% Title Page and Copyright Page definitions:
+%
+%=====================================================================
+%=====================================================================
+
+%---------------------------------------------------------------------
+% Environment: TitlePage
+%---------------------------------------------------------------------
+
+\def\TitlePage{\begin{titlepage}%
+\setlength{\parindent}{0in}\vspace*{1.0in}
+}
+\def\endTitlePage{\vspace*{0.5in}\end{titlepage}}
+
+%---------------------------------------------------------------------
+% Command: Title
+%---------------------------------------------------------------------
+
+\def\Title#1{%
+\makebox[\textwidth][l]{\LARGE\bf #1}
+\rule{\textwidth}{2mm}
+}
+
+%---------------------------------------------------------------------
+% Command: SubTitle
+%---------------------------------------------------------------------
+
+\def\SubTitle#1{\makebox[\textwidth][r]{#1}}
+
+%---------------------------------------------------------------------
+% Command: Author
+%---------------------------------------------------------------------
+
+\def\Author#1{%
+\vfill
+\noindent
+{\large\bf #1}
+\newline
+\rule{\textwidth}{1mm}
+}
+
+%---------------------------------------------------------------------
+% Environment: CopyrightPage
+%---------------------------------------------------------------------
+
+\def\CopyrightPage{%
+\clearpage
+\pagestyle{empty}
+\setlength{\parindent}{0in}\setlength{\parskip}{2ex}\vspace*{1.0in}
+}
+\def\endCopyrightPage{\clearpage}
+
+%=====================================================================
+%=====================================================================
+%
+% Miscellaneous commands and environments:
+%
+%=====================================================================
+%=====================================================================
+
+%---------------------------------------------------------------------
+% Environment: display
+%   This environment is an indented "display" mode, with no
+%   paragraph indentation.  A `verbatim' environment may be
+%   used within it to create "example" displays, as in the
+%   Texinfo `@example' environment.
+%---------------------------------------------------------------------
+
+\def\display{%
+\begin{list}{}{\setlength{\listparindent}{0in}}
+\item
+}
+\def\enddisplay{\end{list}}
+
+
+
+

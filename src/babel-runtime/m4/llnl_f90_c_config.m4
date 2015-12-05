@@ -11,9 +11,6 @@ AC_REQUIRE([AC_CANONICAL_TARGET])dnl
 AC_REQUIRE([AC_PROG_FC])dnl
 AC_REQUIRE([AC_FC_WRAPPERS])dnl
 dnl set some resonable defaults
-sidl_cv_f90_str="str" dnl can also be "struct"
-sidl_cv_f90_str_len="far" dnl can also be "near", only meaningful if $sidl_cv_str="str"
-sidl_cv_f90_str_struct="str_len" dnl can also be "len_str", only meaningful if $sidl_cv_str="struct"
 sidl_cv_f90_char="as_string"
 dnl sidl_cv_f90_true=1
 dnl sidl_cv_f90_false=0
@@ -82,33 +79,11 @@ else
    fi  
    AC_DEFINE(SIDL_F90_LOWER_CASE,,[Fortran 90 symbols are lower case])
 fi;
-dnl strings
-if test "$sidl_cv_f90_str" = "struct"; then 
-   if test "$sidl_cv_f90_str_struct" = "len_str"; then
-      AC_DEFINE(SIDL_F90_STR_STRUCT_LEN_STR,,[Fortran 90 strings as length-char* structs])
-   else 
-      if test "$sidl_cv_f90_str_struct" != "str_len"; then
-         AC_MSG_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
-      fi;
-      AC_DEFINE(SIDL_F90_STR_STRUCT_STR_LEN,,[Fortran 90 strings as char*-length structs])
-   fi;
-else
-   if test "$sidl_cv_f90_str" != "str"; then 
-      AC_MSG_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
-   fi;
-   if test "$sidl_cv_f90_str_len" = "near"; then
-      AC_DEFINE(SIDL_F90_STR_LEN_NEAR,,[Fortran 90 strings lengths at end])
-   else
-      if test "$sidl_cv_f90_str_len" != "far"; then
-         AC_MSG_WARN([string length immediately following char* or at end undetermined, assuming at end])
-      fi
-      AC_DEFINE(SIDL_F90_STR_LEN_FAR,,[Fortran 90 strings lengths immediately follow string])
-   fi;
-fi;
+AC_DEFINE_UNQUOTED(SIDL_F90_TRUE,$sidl_cv_f90_true,[Fortran 90 logical true value])
+AC_DEFINE_UNQUOTED(SIDL_F90_FALSE,$sidl_cv_f90_false,[Fortran 90 logical false value])
+LLNL_FORTRAN_STRING_TEST(Fortran,F90,$FCLIBS)
 if test "$sidl_cv_f90_char" = "as_string"; then
    AC_DEFINE(SIDL_F90_CHAR_AS_STRING,,[Fortran 90 char args are strings])
 fi; 
-AC_DEFINE_UNQUOTED(SIDL_F90_TRUE,$sidl_cv_f90_true,[Fortran 90 logical true value])
-AC_DEFINE_UNQUOTED(SIDL_F90_FALSE,$sidl_cv_f90_false,[Fortran 90 logical false value])
 AC_DEFINE_UNQUOTED(SIDL_F90_STR_MINSIZE,$sidl_cv_f90_str_minsize,[Minimum size for out strings])
 ])

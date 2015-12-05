@@ -1,7 +1,7 @@
 /*
  * File:        sidl_Python.c
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:50 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:44 $
  * Description: Initialize a Python language interpretter
  *
  */

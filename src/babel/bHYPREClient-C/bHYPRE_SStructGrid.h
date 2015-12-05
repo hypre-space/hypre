@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructGrid.h
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -111,11 +111,13 @@ bHYPRE_SStructGrid_SetNumDimParts(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetNumDimParts)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetNumDimParts)(
     self,
     ndim,
     nparts,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -133,10 +135,12 @@ bHYPRE_SStructGrid_SetCommunicator(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetCommunicator)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -194,13 +198,15 @@ bHYPRE_SStructGrid_SetVariable(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_SetVariable)(
+  int32_t _result;
+  _result = (*self->d_epv->f_SetVariable)(
     self,
     part,
     var,
     nvars,
     vartype,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -225,19 +231,24 @@ bHYPRE_SStructGrid_AddVariable(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
   struct sidl_int__array*index_tmp = &index_real;
   index_upper[0] = dim-1;
-  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper, 
     index_stride);
-  return (*self->d_epv->f_AddVariable)(
+  _result = (*self->d_epv->f_AddVariable)(
     self,
     part,
     index_tmp,
     var,
     vartype,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)index_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -300,11 +311,13 @@ bHYPRE_SStructGrid_AddUnstructuredPart(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_AddUnstructuredPart)(
+  int32_t _result;
+  _result = (*self->d_epv->f_AddUnstructuredPart)(
     self,
     ilower,
     iupper,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -324,17 +337,22 @@ bHYPRE_SStructGrid_SetPeriodic(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1]; 
   struct sidl_int__array periodic_real;
   struct sidl_int__array*periodic_tmp = &periodic_real;
   periodic_upper[0] = dim-1;
-  sidl_int__array_init(periodic, periodic_tmp, 1, periodic_lower,
+  sidl_int__array_init(periodic, periodic_tmp, 1, periodic_lower, 
     periodic_upper, periodic_stride);
-  return (*self->d_epv->f_SetPeriodic)(
+  _result = (*self->d_epv->f_SetPeriodic)(
     self,
     part,
     periodic_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)periodic_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -353,16 +371,21 @@ bHYPRE_SStructGrid_SetNumGhost(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
+  int32_t _result;
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
   struct sidl_int__array num_ghost_real;
   struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
   num_ghost_upper[0] = dim2-1;
-  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower, 
     num_ghost_upper, num_ghost_stride);
-  return (*self->d_epv->f_SetNumGhost)(
+  _result = (*self->d_epv->f_SetNumGhost)(
     self,
     num_ghost_tmp,
     _ex);
+#ifdef SIDL_DEBUG_REFCOUNT
+  sidl__array_deleteRef((struct sidl__array*)num_ghost_tmp);
+#endif /* SIDL_DEBUG_REFCOUNT */
+  return _result;
 }
 #else
 ;
@@ -379,9 +402,11 @@ bHYPRE_SStructGrid_Assemble(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_Assemble)(
+  int32_t _result;
+  _result = (*self->d_epv->f_Assemble)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -428,10 +453,12 @@ bHYPRE_SStructGrid_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -446,10 +473,12 @@ bHYPRE_SStructGrid_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -463,9 +492,11 @@ bHYPRE_SStructGrid_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -523,9 +554,11 @@ bHYPRE_SStructGrid__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -559,9 +592,11 @@ bHYPRE_SStructGrid__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -818,8 +853,8 @@ bHYPRE_SStructGrid__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_SStructGrid__object*
-bHYPRE_SStructGrid__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_SStructGrid__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

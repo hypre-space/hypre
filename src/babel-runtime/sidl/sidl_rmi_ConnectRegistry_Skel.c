@@ -2,9 +2,9 @@
  * File:          sidl_rmi_ConnectRegistry_Skel.c
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_ConnectRegistry_Skel.c,v 1.5 2006/08/29 22:29:51 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_ConnectRegistry_Skel.c,v 1.6 2007/09/27 19:35:46 painter Exp $
  * Description:   Server-side glue code for sidl.rmi.ConnectRegistry
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -82,64 +82,64 @@ impl_sidl_rmi_ConnectRegistry_removeConnect(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ConnectRegistry__object* 
   impl_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ConnectRegistry__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url,
+  impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ConnectRegistry__object* 
   impl_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ConnectRegistry__object* 
-  impl_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi,
+  impl_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi, 
   sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 extern "C" {
@@ -181,51 +181,51 @@ void sidl_rmi_ConnectRegistry__call_load(void) {
   impl_sidl_rmi_ConnectRegistry__load(&_throwaway_exception);
 }
 struct sidl_BaseClass__object* 
-  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url,
+  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseClass(url, ar, _ex);
 }
 
 struct sidl_BaseClass__object* 
-  skel_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi,
+  skel_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseClass(bi, _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url,
+  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(url, ar,
+  return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_BaseInterface(url, ar, 
     _ex);
 }
 
 struct sidl_BaseInterface__object* 
-  skel_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi,
+  skel_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fcast_sidl_BaseInterface(bi, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url,
+  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_ClassInfo(url, ar, _ex);
 }
 
 struct sidl_ClassInfo__object* 
-  skel_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi,
+  skel_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fcast_sidl_ClassInfo(bi, _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url,
+  skel_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(url, ar,
+  return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_RuntimeException(url, ar, 
     _ex);
 }
 
 struct sidl_RuntimeException__object* 
-  skel_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi,
+  skel_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fcast_sidl_RuntimeException(bi, _ex);
 }
@@ -233,12 +233,12 @@ struct sidl_RuntimeException__object*
 struct sidl_rmi_ConnectRegistry__object* 
   skel_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex) { 
-  return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(url,
+  return impl_sidl_rmi_ConnectRegistry_fconnect_sidl_rmi_ConnectRegistry(url, 
     ar, _ex);
 }
 
 struct sidl_rmi_ConnectRegistry__object* 
-  skel_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi,
+  skel_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(void* bi, 
   sidl_BaseInterface *_ex) { 
   return impl_sidl_rmi_ConnectRegistry_fcast_sidl_rmi_ConnectRegistry(bi, _ex);
 }

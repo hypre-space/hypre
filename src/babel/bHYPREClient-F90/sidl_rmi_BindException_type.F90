@@ -3,7 +3,7 @@
 ! Symbol:        sidl.rmi.BindException-v0.9.15
 ! Symbol Type:   class
 ! Babel Version: 1.0.0
-! Release:       $Name: V2-2-0b $
+! Release:       $Name: V2-4-0b $
 ! Revision:      @(#) $Id: sidl_rmi_BindException_type.F90,v 1.1 2007/02/06 01:23:10 painter Exp $
 ! Description:   Client-side module for sidl.rmi.BindException
 ! 

@@ -2,7 +2,7 @@
  * File:          bHYPRE_MPICommunicator.h
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.MPICommunicator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -132,6 +132,21 @@ bHYPRE_MPICommunicator_Destroy(
 #endif /* SIDL_C_HAS_INLINE */
 
 
+/**
+ *  Init and Finalize are to help debug MPI interfaces;
+ * you should normally use the MPI library more directly:
+ */
+void
+bHYPRE_MPICommunicator_Init(
+  /* out */ sidl_BaseInterface *_ex);
+
+/**
+ * Method:  Finalize[]
+ */
+void
+bHYPRE_MPICommunicator_Finalize(
+  /* out */ sidl_BaseInterface *_ex);
+
 SIDL_C_INLINE_DECL
 void
 bHYPRE_MPICommunicator_addRef(
@@ -172,10 +187,12 @@ bHYPRE_MPICommunicator_isSame(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isSame)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isSame)(
     self,
     iobj,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -190,10 +207,12 @@ bHYPRE_MPICommunicator_isType(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_isType)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f_isType)(
     self,
     name,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -207,9 +226,11 @@ bHYPRE_MPICommunicator_getClassInfo(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f_getClassInfo)(
+  sidl_ClassInfo _result;
+  _result = (*self->d_epv->f_getClassInfo)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -267,9 +288,11 @@ bHYPRE_MPICommunicator__getURL(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__getURL)(
+  char* _result;
+  _result = (*self->d_epv->f__getURL)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -303,9 +326,11 @@ bHYPRE_MPICommunicator__isRemote(
   /* out */ sidl_BaseInterface *_ex)
 #ifdef SIDL_C_HAS_INLINE
 {
-  return (*self->d_epv->f__isRemote)(
+  sidl_bool _result;
+  _result = (*self->d_epv->f__isRemote)(
     self,
     _ex);
+  return _result;
 }
 #else
 ;
@@ -562,8 +587,8 @@ bHYPRE_MPICommunicator__rmicast(
  * RMI connector function for the class. (no addref)
  */
 struct bHYPRE_MPICommunicator__object*
-bHYPRE_MPICommunicator__connectI(const char * url, sidl_bool ar,
-  struct sidl_BaseInterface__object **_ex);
+bHYPRE_MPICommunicator__connectI(const char * url, sidl_bool ar, struct 
+  sidl_BaseInterface__object **_ex);
 
 #ifdef __cplusplus
 }

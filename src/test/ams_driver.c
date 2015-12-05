@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 1.10 $
+ ***********************************************************************EHEADER*/
+
 /*
    This test driver performs the following operations:
 
@@ -29,7 +41,8 @@ int main (int argc, char *argv[])
 
    int solver_id;
    int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
-   int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
+   double rlx_weight, rlx_omega;
+   int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
    int h1_method, singular_problem, coordinates;
    double tol, theta;
    int blockSize;
@@ -54,12 +67,14 @@ int main (int argc, char *argv[])
    h1_method = 0;
    singular_problem = 0;
    rlx_type = 2; rlx_sweeps = 1;
-   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 3;       /* HMIS-1 */
+   rlx_weight = 1.0; rlx_omega = 1.0;
+   cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 1; amg_rlx_type = 6;       /* HMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 10; amg_agg_levels = 0; amg_rlx_type = 3; */ /* HMIS-0 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
    /* cycle_type = 7; amg_coarsen_type = 6; amg_agg_levels = 0; amg_rlx_type = 6;  */ /* Falgout-0 */
-   amg_interp_type = 0; amg_Pmax = 0;
+   amg_interp_type = 6; amg_Pmax = 4; amg_agg_npaths = 1;        /* long-range interpolation */
+   /* amg_interp_type = 0; amg_Pmax = 0; amg_agg_npaths = 1; */  /* standard interpolation */
    theta = 0.25;
    blockSize = 5;
 
@@ -100,6 +115,16 @@ int main (int argc, char *argv[])
             arg_index++;
             rlx_sweeps = atoi(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-rlxw") == 0 )
+         {
+            arg_index++;
+            rlx_weight = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-rlxo") == 0 )
+         {
+            arg_index++;
+            rlx_omega = atof(argv[arg_index++]);
+         }
          else if ( strcmp(argv[arg_index], "-ctype") == 0 )
          {
             arg_index++;
@@ -114,6 +139,11 @@ int main (int argc, char *argv[])
          {
             arg_index++;
             amg_agg_levels = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-aggnp") == 0 )
+         {
+            arg_index++;
+            amg_agg_npaths = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-itype") == 0 )
          {
@@ -166,6 +196,9 @@ int main (int argc, char *argv[])
          }
       }
 
+      if (argc == 1)
+         print_usage = 1;
+
       if ((print_usage) && (myid == 0))
       {
          printf("\n");
@@ -173,12 +206,12 @@ int main (int argc, char *argv[])
          printf("\n");
          printf("  Hypre solvers options:                                       \n");
          printf("    -solver <ID>         : solver ID                           \n");
-         printf("                           0 - AMG                             \n");
-         printf("                           1 - AMG-PCG                         \n");
-         printf("                           2 - AMS                             \n");
-         printf("                           3 - AMS-PCG (default)               \n");
-         printf("                           4 - DS-PCG                          \n");
-         printf("                           5 - AME                             \n");
+         printf("                           0  - AMG                            \n");
+         printf("                           1  - AMG-PCG                        \n");
+         printf("                           2  - AMS                            \n");
+         printf("                           3  - AMS-PCG (default)              \n");
+         printf("                           4  - DS-PCG                         \n");
+         printf("                           5  - AME eigensolver                \n");
          printf("    -maxit <num>         : maximum number of iterations (100)  \n");
          printf("    -tol <num>           : convergence tolerance (1e-6)        \n");
          printf("\n");
@@ -188,11 +221,14 @@ int main (int argc, char *argv[])
          printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
          printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
          printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");
+         printf("    -aggnp <num>         : Number of paths in agg. coarsening  \n");
          printf("    -amgrlx <num>        : BoomerAMG relaxation type           \n");
          printf("    -itype <num>         : BoomerAMG interpolation type        \n");
          printf("    -pmax <num>          : BoomerAMG interpolation truncation  \n");
          printf("    -rlx <num>           : relaxation type                     \n");
          printf("    -rlxn <num>          : number of relaxation sweeps         \n");
+         printf("    -rlxw <num>          : damping parameter (usually <=1)     \n");
+         printf("    -rlxo <num>          : SOR parameter (usuallyin (0,2))     \n");
          printf("    -coord               : use coordinate vectors              \n");
          printf("    -h1                  : use block-diag Poisson solves       \n");
          printf("    -sing                : curl-curl only (singular) problem   \n");
@@ -354,7 +390,7 @@ int main (int argc, char *argv[])
          HYPRE_AMSSetBetaPoissonMatrix(solver, NULL);
 
       /* Smoothing and AMG options */
-      HYPRE_AMSSetSmoothingOptions(solver, rlx_type, rlx_sweeps, 1.0, 1.0);
+      HYPRE_AMSSetSmoothingOptions(solver, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
       HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
       HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
 
@@ -459,7 +495,7 @@ int main (int argc, char *argv[])
             HYPRE_AMSSetBetaPoissonMatrix(precond, NULL);
 
          /* Smoothing and AMG options */
-         HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, 1.0, 1.0);
+         HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
          HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
          HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
 
@@ -564,7 +600,7 @@ int main (int argc, char *argv[])
       HYPRE_AMSSetup(precond, A, b, x0);
 
       /* Smoothing and AMG options */
-      HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, 1.0, 1.0);
+      HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, rlx_weight, rlx_omega);
       HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
       HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
 

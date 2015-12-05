@@ -49,10 +49,10 @@ DSCG_Iterations = 2
 Final Relative Residual Norm = 5.456956e-09
 
 # Output file: solvers.out.11
-Iterations = 7
-PCG_Iterations = 4
+Iterations = 5
+PCG_Iterations = 2
 DSCG_Iterations = 3
-Final Relative Residual Norm = 5.193610e-09
+Final Relative Residual Norm = 3.235996e-09
 
 # Output file: solvers.out.1.lobpcg
 Iterations = 4
@@ -174,4 +174,20 @@ Residual   9.97062890745149e-07
      Complexity:    grid = 1.677000
                 operator = 3.616175
                    cycle = 7.232052
+
+# Output file: solvers.out.101
+LGMRES Iterations = 83
+Final LGMRES Relative Residual Norm = 8.591967e-09
+
+# Output file: solvers.out.102
+LGMRES Iterations = 4
+Final LGMRES Relative Residual Norm = 5.456956e-09
+
+# Output file: solvers.out.103
+FlexGMRES Iterations = 93
+Final FlexGMRES Relative Residual Norm = 8.225662e-09
+
+# Output file: solvers.out.104
+FlexGMRES Iterations = 4
+Final FlexGMRES Relative Residual Norm = 5.456956e-09
 

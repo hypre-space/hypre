@@ -2,9 +2,9 @@
  * File:          sidl_rmi_NoServerException_Module.h
  * Symbol:        sidl.rmi.NoServerException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_NoServerException_Module.h,v 1.1 2006/08/29 23:39:46 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_NoServerException_Module.h,v 1.2 2007/09/27 19:35:23 painter Exp $
  * Description:   expose a constructor for the Python wrapper
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.

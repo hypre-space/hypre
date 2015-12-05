@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructVariable_IOR.h
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -68,7 +68,6 @@ struct bHYPRE_SStructVariable__array;
  * different processes, variables may be owned by multiple
  * processes because they may be associated with multiple cells.
  */
-
 
 enum bHYPRE_SStructVariable__enum {
   bHYPRE_SStructVariable_UNDEFINED = -1,

@@ -2,8 +2,8 @@
 ## File:        copy.sh
 ## Package:     Babel binary
 ## Copyright:   (c) 2000-2001 The Regents of the University of California
-## Revision:    $Revision: 1.10 $
-## Modified:    $Date: 2006/08/29 22:29:10 $
+## Revision:    $Revision: 1.11 $
+## Modified:    $Date: 2007/09/27 19:35:04 $
 ## Description: copy files for build: copy.sh SRCDIR DSTDIR files...
 
 srcdir=$1 ; shift

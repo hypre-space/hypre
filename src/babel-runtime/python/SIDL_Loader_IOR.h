@@ -2,9 +2,9 @@
  * File:          sidl_Loader_IOR.h
  * Symbol:        sidl.Loader-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_Loader_IOR.h,v 1.5 2006/08/29 22:29:27 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_Loader_IOR.h,v 1.6 2007/09/27 19:35:22 painter Exp $
  * Description:   Intermediate Object Representation for sidl.Loader
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -277,15 +277,15 @@ extern struct sidl_Loader__sepv*
 sidl_Loader__statics(void);
 
 extern void sidl_Loader__init(
-  struct sidl_Loader__object* self, void* ddata,
-    struct sidl_BaseInterface__object ** _ex);
+  struct sidl_Loader__object* self, void* ddata, struct 
+    sidl_BaseInterface__object ** _ex);
 extern void sidl_Loader__getEPVs(
   struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
   struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
-  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
-    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
-  struct sidl_Loader__epv **s_arg_epv__sidl_loader,
-    struct sidl_Loader__epv **s_arg_epv_hooks__sidl_loader);
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,struct 
+    sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_Loader__epv **s_arg_epv__sidl_loader,struct sidl_Loader__epv 
+    **s_arg_epv_hooks__sidl_loader);
   extern void sidl_Loader__fini(
     struct sidl_Loader__object* self, struct sidl_BaseInterface__object ** _ex);
   extern void sidl_Loader__IOR_version(int32_t *major, int32_t *minor);
@@ -296,45 +296,44 @@ extern void sidl_Loader__getEPVs(
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_BaseInterface__object* 
-    skel_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+    skel_sidl_Loader_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar, 
     struct sidl_BaseInterface__object **_ex);
-  struct sidl_BaseInterface__object* 
-    skel_sidl_Loader_fcast_sidl_BaseInterface(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseInterface__object* skel_sidl_Loader_fcast_sidl_BaseInterface(
+    void *bi, struct sidl_BaseInterface__object **_ex);
 
   struct sidl_ClassInfo__object* skel_sidl_Loader_fconnect_sidl_ClassInfo(const 
     char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_ClassInfo__object* skel_sidl_Loader_fcast_sidl_ClassInfo(void *bi,
     struct sidl_BaseInterface__object **_ex);
 
-  struct sidl_DLL__object* skel_sidl_Loader_fconnect_sidl_DLL(const char* url,
+  struct sidl_DLL__object* skel_sidl_Loader_fconnect_sidl_DLL(const char* url, 
     sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct sidl_DLL__object* skel_sidl_Loader_fcast_sidl_DLL(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+  struct sidl_DLL__object* skel_sidl_Loader_fcast_sidl_DLL(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_Finder__object* skel_sidl_Loader_fconnect_sidl_Finder(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct sidl_Finder__object* skel_sidl_Loader_fcast_sidl_Finder(void *bi,
+  struct sidl_Finder__object* skel_sidl_Loader_fcast_sidl_Finder(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_Loader__object* skel_sidl_Loader_fconnect_sidl_Loader(const char* 
     url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
-  struct sidl_Loader__object* skel_sidl_Loader_fcast_sidl_Loader(void *bi,
+  struct sidl_Loader__object* skel_sidl_Loader_fcast_sidl_Loader(void *bi, 
     struct sidl_BaseInterface__object **_ex);
 
   struct sidl_RuntimeException__object* 
-    skel_sidl_Loader_fconnect_sidl_RuntimeException(const char* url,
-    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+    skel_sidl_Loader_fconnect_sidl_RuntimeException(const char* url, sidl_bool 
+    ar, struct sidl_BaseInterface__object **_ex);
   struct sidl_RuntimeException__object* 
-    skel_sidl_Loader_fcast_sidl_RuntimeException(void *bi,
-    struct sidl_BaseInterface__object **_ex);
+    skel_sidl_Loader_fcast_sidl_RuntimeException(void *bi, struct 
+    sidl_BaseInterface__object **_ex);
 
   struct sidl_Loader__remote{
     int d_refcount;
     struct sidl_rmi_InstanceHandle__object *d_ih;
   };
 
-  #ifdef __cplusplus
+#ifdef __cplusplus
   }
-  #endif
-  #endif
+#endif
+#endif

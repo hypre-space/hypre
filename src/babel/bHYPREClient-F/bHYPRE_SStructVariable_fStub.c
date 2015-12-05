@@ -2,7 +2,7 @@
  * File:          bHYPRE_SStructVariable_fStub.c
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Client-side glue code for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -207,7 +207,7 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_get_f,
    int32_t *result)
 {
   *result = 
-    sidl_int__array_get((const struct sidl_int__array *)(ptrdiff_t)*array,
+    sidl_int__array_get((const struct sidl_int__array *)(ptrdiff_t)*array, 
       indices);
 }
 
@@ -324,7 +324,7 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_set_f,
   int32_t indices[],
   int32_t *value)
 {
-  sidl_int__array_set((struct sidl_int__array *)(ptrdiff_t)*array, indices,
+  sidl_int__array_set((struct sidl_int__array *)(ptrdiff_t)*array, indices, 
     *value);
 }
 
@@ -393,8 +393,8 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_iscolumnorder_f,
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
-  *result = sidl_int__array_isColumnOrder((struct sidl_int__array 
-    *)(ptrdiff_t)*array);
+  *result = sidl_int__array_isColumnOrder((struct sidl_int__array *)(
+    ptrdiff_t)*array);
 }
 
 void
@@ -404,8 +404,8 @@ SIDLFortran77Symbol(bhypre_sstructvariable__array_isroworder_f,
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
-  *result = sidl_int__array_isRowOrder((struct sidl_int__array 
-    *)(ptrdiff_t)*array);
+  *result = sidl_int__array_isRowOrder((struct sidl_int__array *)(
+    ptrdiff_t)*array);
 }
 
 void

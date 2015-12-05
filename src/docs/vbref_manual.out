@@ -1,0 +1,458 @@
+\BOOKMARK [1][]{section*.1}{1 Matrix and Vector Views \(Conceptual Interfaces\)}{}
+\BOOKMARK [2][-]{section*.3}{1.1 IJ Matrix View}{section*.1}
+\BOOKMARK [3][-]{section*.5}{1.1.1 bHYPRE\137IJMatrixView\137\137object}{section*.3}
+\BOOKMARK [3][-]{section*.6}{1.1.2 bHYPRE\137IJMatrixView\137\137connect}{section*.3}
+\BOOKMARK [3][-]{section*.7}{1.1.3 bHYPRE\137IJMatrixView\137SetLocalRange}{section*.3}
+\BOOKMARK [3][-]{section*.8}{1.1.4 bHYPRE\137IJMatrixView\137SetValues}{section*.3}
+\BOOKMARK [3][-]{section*.9}{1.1.5 bHYPRE\137IJMatrixView\137AddToValues}{section*.3}
+\BOOKMARK [3][-]{section*.10}{1.1.6 bHYPRE\137IJMatrixView\137GetValues}{section*.3}
+\BOOKMARK [3][-]{section*.11}{1.1.7 bHYPRE\137IJMatrixView\137SetRowSizes}{section*.3}
+\BOOKMARK [3][-]{section*.12}{1.1.8 bHYPRE\137IJMatrixView\137Print}{section*.3}
+\BOOKMARK [3][-]{section*.13}{1.1.9 bHYPRE\137IJMatrixView\137Read}{section*.3}
+\BOOKMARK [3][-]{section*.14}{1.1.10 **\137ex}{section*.3}
+\BOOKMARK [2][-]{section*.15}{1.2 IJ Vector View}{section*.1}
+\BOOKMARK [3][-]{section*.17}{1.2.1 bHYPRE\137IJVectorView\137\137object}{section*.15}
+\BOOKMARK [3][-]{section*.18}{1.2.2 bHYPRE\137IJVectorView\137\137connect}{section*.15}
+\BOOKMARK [3][-]{section*.19}{1.2.3 bHYPRE\137IJVectorView\137SetLocalRange}{section*.15}
+\BOOKMARK [3][-]{section*.20}{1.2.4 bHYPRE\137IJVectorView\137SetValues}{section*.15}
+\BOOKMARK [3][-]{section*.21}{1.2.5 bHYPRE\137IJVectorView\137AddToValues}{section*.15}
+\BOOKMARK [3][-]{section*.22}{1.2.6 bHYPRE\137IJVectorView\137GetValues}{section*.15}
+\BOOKMARK [3][-]{section*.23}{1.2.7 bHYPRE\137IJVectorView\137Print}{section*.15}
+\BOOKMARK [3][-]{section*.24}{1.2.8 bHYPRE\137IJVectorView\137Read}{section*.15}
+\BOOKMARK [3][-]{section*.25}{1.2.9 **\137ex}{section*.15}
+\BOOKMARK [2][-]{section*.26}{1.3 Struct Matrix View}{section*.1}
+\BOOKMARK [3][-]{section*.28}{1.3.1 bHYPRE\137StructMatrixView\137\137object}{section*.26}
+\BOOKMARK [3][-]{section*.29}{1.3.2 bHYPRE\137StructMatrixView\137\137connect}{section*.26}
+\BOOKMARK [3][-]{section*.30}{1.3.3 bHYPRE\137StructMatrixView\137SetGrid}{section*.26}
+\BOOKMARK [3][-]{section*.31}{1.3.4 bHYPRE\137StructMatrixView\137SetStencil}{section*.26}
+\BOOKMARK [3][-]{section*.32}{1.3.5 bHYPRE\137StructMatrixView\137SetValues}{section*.26}
+\BOOKMARK [3][-]{section*.33}{1.3.6 bHYPRE\137StructMatrixView\137SetBoxValues}{section*.26}
+\BOOKMARK [3][-]{section*.34}{1.3.7 bHYPRE\137StructMatrixView\137SetNumGhost}{section*.26}
+\BOOKMARK [3][-]{section*.35}{1.3.8 bHYPRE\137StructMatrixView\137SetConstantEntries}{section*.26}
+\BOOKMARK [3][-]{section*.36}{1.3.9 bHYPRE\137StructMatrixView\137SetConstantValues}{section*.26}
+\BOOKMARK [3][-]{section*.37}{1.3.10 **\137ex}{section*.26}
+\BOOKMARK [2][-]{section*.38}{1.4 Struct Vector View}{section*.1}
+\BOOKMARK [3][-]{section*.40}{1.4.1 bHYPRE\137StructVectorView\137\137object}{section*.38}
+\BOOKMARK [3][-]{section*.41}{1.4.2 bHYPRE\137StructVectorView\137\137connect}{section*.38}
+\BOOKMARK [3][-]{section*.42}{1.4.3 bHYPRE\137StructVectorView\137SetNumGhost}{section*.38}
+\BOOKMARK [3][-]{section*.43}{1.4.4 bHYPRE\137StructVectorView\137SetValue}{section*.38}
+\BOOKMARK [3][-]{section*.44}{1.4.5 bHYPRE\137StructVectorView\137SetBoxValues}{section*.38}
+\BOOKMARK [3][-]{section*.45}{1.4.6 **\137ex}{section*.38}
+\BOOKMARK [2][-]{section*.46}{1.5 SemiStructured Matrix View}{section*.1}
+\BOOKMARK [3][-]{section*.48}{1.5.1 bHYPRE\137SStructMatrixView\137\137object}{section*.46}
+\BOOKMARK [3][-]{section*.49}{1.5.2 bHYPRE\137SStructMatrixView\137\137connect}{section*.46}
+\BOOKMARK [3][-]{section*.50}{1.5.3 bHYPRE\137SStructMatrixView\137SetGraph}{section*.46}
+\BOOKMARK [3][-]{section*.51}{1.5.4 bHYPRE\137SStructMatrixView\137SetValues}{section*.46}
+\BOOKMARK [3][-]{section*.52}{1.5.5 bHYPRE\137SStructMatrixView\137SetBoxValues}{section*.46}
+\BOOKMARK [3][-]{section*.53}{1.5.6 bHYPRE\137SStructMatrixView\137AddToValues}{section*.46}
+\BOOKMARK [3][-]{section*.54}{1.5.7 bHYPRE\137SStructMatrixView\137AddToBoxValues}{section*.46}
+\BOOKMARK [3][-]{section*.55}{1.5.8 bHYPRE\137SStructMatrixView\137SetSymmetric}{section*.46}
+\BOOKMARK [3][-]{section*.56}{1.5.9 bHYPRE\137SStructMatrixView\137Print}{section*.46}
+\BOOKMARK [3][-]{section*.57}{1.5.10 **\137ex}{section*.46}
+\BOOKMARK [2][-]{section*.58}{1.6 SemiStructured Vector View}{section*.1}
+\BOOKMARK [3][-]{section*.60}{1.6.1 bHYPRE\137SStructVectorView\137\137object}{section*.58}
+\BOOKMARK [3][-]{section*.61}{1.6.2 bHYPRE\137SStructVectorView\137\137connect}{section*.58}
+\BOOKMARK [3][-]{section*.62}{1.6.3 bHYPRE\137SStructVectorView\137SetValues}{section*.58}
+\BOOKMARK [3][-]{section*.63}{1.6.4 bHYPRE\137SStructVectorView\137SetBoxValues}{section*.58}
+\BOOKMARK [3][-]{section*.64}{1.6.5 bHYPRE\137SStructVectorView\137AddToValues}{section*.58}
+\BOOKMARK [3][-]{section*.65}{1.6.6 bHYPRE\137SStructVectorView\137AddToBoxValues}{section*.58}
+\BOOKMARK [3][-]{section*.66}{1.6.7 bHYPRE\137SStructVectorView\137GetValues}{section*.58}
+\BOOKMARK [3][-]{section*.67}{1.6.8 bHYPRE\137SStructVectorView\137GetBoxValues}{section*.58}
+\BOOKMARK [3][-]{section*.68}{1.6.9 bHYPRE\137SStructVectorView\137Print}{section*.58}
+\BOOKMARK [3][-]{section*.69}{1.6.10 **\137ex}{section*.58}
+\BOOKMARK [1][]{section*.70}{2 Operator Interface}{}
+\BOOKMARK [2][-]{section*.72}{2.1 bHYPRE\137Operator\137\137object}{section*.70}
+\BOOKMARK [2][-]{section*.73}{2.2 bHYPRE\137Operator\137\137connect}{section*.70}
+\BOOKMARK [2][-]{section*.74}{2.3 bHYPRE\137Operator\137SetCommunicator}{section*.70}
+\BOOKMARK [2][-]{section*.75}{2.4 bHYPRE\137Operator\137Destroy}{section*.70}
+\BOOKMARK [2][-]{section*.76}{2.5 **\137ex}{section*.70}
+\BOOKMARK [1][]{section*.77}{3 Vector Interface}{}
+\BOOKMARK [2][-]{section*.79}{3.1 bHYPRE\137Vector\137\137object}{section*.77}
+\BOOKMARK [2][-]{section*.80}{3.2 bHYPRE\137Vector\137\137connect}{section*.77}
+\BOOKMARK [2][-]{section*.81}{3.3 bHYPRE\137Vector\137Clone}{section*.77}
+\BOOKMARK [2][-]{section*.82}{3.4 **\137ex}{section*.77}
+\BOOKMARK [1][]{section*.83}{4 Matrices and Vectors}{}
+\BOOKMARK [2][-]{section*.85}{4.1 IJParCSR Matrix}{section*.83}
+\BOOKMARK [3][-]{section*.87}{4.1.1 bHYPRE\137IJParCSRMatrix\137\137object}{section*.85}
+\BOOKMARK [3][-]{section*.88}{4.1.2 bHYPRE\137IJParCSRMatrix\137\137connect}{section*.85}
+\BOOKMARK [3][-]{section*.89}{4.1.3 bHYPRE\137IJParCSRMatrix\137SetDiagOffdSizes}{section*.85}
+\BOOKMARK [3][-]{section*.90}{4.1.4 bHYPRE\137IJParCSRMatrix\137SetLocalRange}{section*.85}
+\BOOKMARK [3][-]{section*.91}{4.1.5 bHYPRE\137IJParCSRMatrix\137SetValues}{section*.85}
+\BOOKMARK [3][-]{section*.92}{4.1.6 bHYPRE\137IJParCSRMatrix\137AddToValues}{section*.85}
+\BOOKMARK [3][-]{section*.93}{4.1.7 bHYPRE\137IJParCSRMatrix\137GetValues}{section*.85}
+\BOOKMARK [3][-]{section*.94}{4.1.8 bHYPRE\137IJParCSRMatrix\137SetRowSizes}{section*.85}
+\BOOKMARK [3][-]{section*.95}{4.1.9 bHYPRE\137IJParCSRMatrix\137Print}{section*.85}
+\BOOKMARK [3][-]{section*.96}{4.1.10 bHYPRE\137IJParCSRMatrix\137Read}{section*.85}
+\BOOKMARK [3][-]{section*.97}{4.1.11 bHYPRE\137IJParCSRMatrix\137SetCommunicator}{section*.85}
+\BOOKMARK [3][-]{section*.98}{4.1.12 bHYPRE\137IJParCSRMatrix\137Destroy}{section*.85}
+\BOOKMARK [3][-]{section*.99}{4.1.13 bHYPRE\137IJParCSRMatrix\137Assemble}{section*.85}
+\BOOKMARK [3][-]{section*.100}{4.1.14 bHYPRE\137IJParCSRMatrix\137GetRow}{section*.85}
+\BOOKMARK [3][-]{section*.101}{4.1.15 **\137ex}{section*.85}
+\BOOKMARK [2][-]{section*.102}{4.2 IJParCSR Vector}{section*.83}
+\BOOKMARK [3][-]{section*.104}{4.2.1 bHYPRE\137IJParCSRVector\137\137object}{section*.102}
+\BOOKMARK [3][-]{section*.105}{4.2.2 bHYPRE\137IJParCSRVector\137\137connect}{section*.102}
+\BOOKMARK [3][-]{section*.106}{4.2.3 bHYPRE\137IJParCSRVector\137SetLocalRange}{section*.102}
+\BOOKMARK [3][-]{section*.107}{4.2.4 bHYPRE\137IJParCSRVector\137SetValues}{section*.102}
+\BOOKMARK [3][-]{section*.108}{4.2.5 bHYPRE\137IJParCSRVector\137AddToValues}{section*.102}
+\BOOKMARK [3][-]{section*.109}{4.2.6 bHYPRE\137IJParCSRVector\137GetValues}{section*.102}
+\BOOKMARK [3][-]{section*.110}{4.2.7 bHYPRE\137IJParCSRVector\137Print}{section*.102}
+\BOOKMARK [3][-]{section*.111}{4.2.8 bHYPRE\137IJParCSRVector\137Read}{section*.102}
+\BOOKMARK [3][-]{section*.112}{4.2.9 bHYPRE\137IJParCSRVector\137SetCommunicator}{section*.102}
+\BOOKMARK [3][-]{section*.113}{4.2.10 bHYPRE\137IJParCSRVector\137Destroy}{section*.102}
+\BOOKMARK [3][-]{section*.114}{4.2.11 bHYPRE\137IJParCSRVector\137Assemble}{section*.102}
+\BOOKMARK [3][-]{section*.115}{4.2.12 bHYPRE\137IJParCSRVector\137Clone}{section*.102}
+\BOOKMARK [3][-]{section*.116}{4.2.13 **\137ex}{section*.102}
+\BOOKMARK [2][-]{section*.117}{4.3 Struct Matrix}{section*.83}
+\BOOKMARK [3][-]{section*.119}{4.3.1 bHYPRE\137StructMatrix\137\137object}{section*.117}
+\BOOKMARK [3][-]{section*.120}{4.3.2 bHYPRE\137StructMatrix\137\137connect}{section*.117}
+\BOOKMARK [3][-]{section*.121}{4.3.3 bHYPRE\137StructMatrix\137SetGrid}{section*.117}
+\BOOKMARK [3][-]{section*.122}{4.3.4 bHYPRE\137StructMatrix\137SetStencil}{section*.117}
+\BOOKMARK [3][-]{section*.123}{4.3.5 bHYPRE\137StructMatrix\137SetValues}{section*.117}
+\BOOKMARK [3][-]{section*.124}{4.3.6 bHYPRE\137StructMatrix\137SetBoxValues}{section*.117}
+\BOOKMARK [3][-]{section*.125}{4.3.7 bHYPRE\137StructMatrix\137SetNumGhost}{section*.117}
+\BOOKMARK [3][-]{section*.126}{4.3.8 bHYPRE\137StructMatrix\137SetConstantEntries}{section*.117}
+\BOOKMARK [3][-]{section*.127}{4.3.9 bHYPRE\137StructMatrix\137SetConstantValues}{section*.117}
+\BOOKMARK [3][-]{section*.128}{4.3.10 bHYPRE\137StructMatrix\137SetCommunicator}{section*.117}
+\BOOKMARK [3][-]{section*.129}{4.3.11 bHYPRE\137StructMatrix\137Destroy}{section*.117}
+\BOOKMARK [3][-]{section*.130}{4.3.12 bHYPRE\137StructMatrix\137Assemble}{section*.117}
+\BOOKMARK [3][-]{section*.131}{4.3.13 **\137ex}{section*.117}
+\BOOKMARK [2][-]{section*.132}{4.4 Struct Vector}{section*.83}
+\BOOKMARK [3][-]{section*.134}{4.4.1 bHYPRE\137StructVector\137\137object}{section*.132}
+\BOOKMARK [3][-]{section*.135}{4.4.2 bHYPRE\137StructVector\137\137connect}{section*.132}
+\BOOKMARK [3][-]{section*.136}{4.4.3 bHYPRE\137StructVector\137SetNumGhost}{section*.132}
+\BOOKMARK [3][-]{section*.137}{4.4.4 bHYPRE\137StructVector\137SetValue}{section*.132}
+\BOOKMARK [3][-]{section*.138}{4.4.5 bHYPRE\137StructVector\137SetBoxValues}{section*.132}
+\BOOKMARK [3][-]{section*.139}{4.4.6 bHYPRE\137StructVector\137SetCommunicator}{section*.132}
+\BOOKMARK [3][-]{section*.140}{4.4.7 bHYPRE\137StructVector\137Destroy}{section*.132}
+\BOOKMARK [3][-]{section*.141}{4.4.8 bHYPRE\137StructVector\137Assemble}{section*.132}
+\BOOKMARK [3][-]{section*.142}{4.4.9 bHYPRE\137StructVector\137Clone}{section*.132}
+\BOOKMARK [3][-]{section*.143}{4.4.10 **\137ex}{section*.132}
+\BOOKMARK [2][-]{section*.144}{4.5 SemiStructured Matrix}{section*.83}
+\BOOKMARK [3][-]{section*.146}{4.5.1 bHYPRE\137SStructMatrix\137\137object}{section*.144}
+\BOOKMARK [3][-]{section*.147}{4.5.2 bHYPRE\137SStructMatrix\137\137connect}{section*.144}
+\BOOKMARK [3][-]{section*.148}{4.5.3 bHYPRE\137SStructMatrix\137SetGraph}{section*.144}
+\BOOKMARK [3][-]{section*.149}{4.5.4 bHYPRE\137SStructMatrix\137SetValues}{section*.144}
+\BOOKMARK [3][-]{section*.150}{4.5.5 bHYPRE\137SStructMatrix\137SetBoxValues}{section*.144}
+\BOOKMARK [3][-]{section*.151}{4.5.6 bHYPRE\137SStructMatrix\137AddToValues}{section*.144}
+\BOOKMARK [3][-]{section*.152}{4.5.7 bHYPRE\137SStructMatrix\137AddToBoxValues}{section*.144}
+\BOOKMARK [3][-]{section*.153}{4.5.8 bHYPRE\137SStructMatrix\137SetSymmetric}{section*.144}
+\BOOKMARK [3][-]{section*.154}{4.5.9 bHYPRE\137SStructMatrix\137Print}{section*.144}
+\BOOKMARK [3][-]{section*.155}{4.5.10 bHYPRE\137SStructMatrix\137GetObject}{section*.144}
+\BOOKMARK [3][-]{section*.156}{4.5.11 bHYPRE\137SStructMatrix\137SetCommunicator}{section*.144}
+\BOOKMARK [3][-]{section*.157}{4.5.12 bHYPRE\137SStructMatrix\137Destroy}{section*.144}
+\BOOKMARK [3][-]{section*.158}{4.5.13 bHYPRE\137SStructMatrix\137Assemble}{section*.144}
+\BOOKMARK [3][-]{section*.159}{4.5.14 **\137ex}{section*.144}
+\BOOKMARK [2][-]{section*.160}{4.6 SemiStructured Vector}{section*.83}
+\BOOKMARK [3][-]{section*.162}{4.6.1 bHYPRE\137SStructVector\137\137object}{section*.160}
+\BOOKMARK [3][-]{section*.163}{4.6.2 bHYPRE\137SStructVector\137\137connect}{section*.160}
+\BOOKMARK [3][-]{section*.164}{4.6.3 bHYPRE\137SStructVector\137SetValues}{section*.160}
+\BOOKMARK [3][-]{section*.165}{4.6.4 bHYPRE\137SStructVector\137SetBoxValues}{section*.160}
+\BOOKMARK [3][-]{section*.166}{4.6.5 bHYPRE\137SStructVector\137AddToValues}{section*.160}
+\BOOKMARK [3][-]{section*.167}{4.6.6 bHYPRE\137SStructVector\137AddToBoxValues}{section*.160}
+\BOOKMARK [3][-]{section*.168}{4.6.7 bHYPRE\137SStructVector\137GetValues}{section*.160}
+\BOOKMARK [3][-]{section*.169}{4.6.8 bHYPRE\137SStructVector\137GetBoxValues}{section*.160}
+\BOOKMARK [3][-]{section*.170}{4.6.9 bHYPRE\137SStructVector\137Print}{section*.160}
+\BOOKMARK [3][-]{section*.171}{4.6.10 bHYPRE\137SStructVector\137GetObject}{section*.160}
+\BOOKMARK [3][-]{section*.172}{4.6.11 bHYPRE\137SStructVector\137SetCommunicator}{section*.160}
+\BOOKMARK [3][-]{section*.173}{4.6.12 bHYPRE\137SStructVector\137Destroy}{section*.160}
+\BOOKMARK [3][-]{section*.174}{4.6.13 bHYPRE\137SStructVector\137Assemble}{section*.160}
+\BOOKMARK [3][-]{section*.175}{4.6.14 bHYPRE\137SStructVector\137Clone}{section*.160}
+\BOOKMARK [3][-]{section*.176}{4.6.15 **\137ex}{section*.160}
+\BOOKMARK [2][-]{section*.177}{4.7 SemiStructured ParCSR Matrix}{section*.83}
+\BOOKMARK [3][-]{section*.179}{4.7.1 bHYPRE\137SStructParCSRMatrix\137\137object}{section*.177}
+\BOOKMARK [3][-]{section*.180}{4.7.2 bHYPRE\137SStructParCSRMatrix\137\137connect}{section*.177}
+\BOOKMARK [3][-]{section*.181}{4.7.3 bHYPRE\137SStructParCSRMatrix\137SetGraph}{section*.177}
+\BOOKMARK [3][-]{section*.182}{4.7.4 bHYPRE\137SStructParCSRMatrix\137SetValues}{section*.177}
+\BOOKMARK [3][-]{section*.183}{4.7.5 bHYPRE\137SStructParCSRMatrix\137SetBoxValues}{section*.177}
+\BOOKMARK [3][-]{section*.184}{4.7.6 bHYPRE\137SStructParCSRMatrix\137AddToValues}{section*.177}
+\BOOKMARK [3][-]{section*.185}{4.7.7 bHYPRE\137SStructParCSRMatrix\137AddToBoxValues}{section*.177}
+\BOOKMARK [3][-]{section*.186}{4.7.8 bHYPRE\137SStructParCSRMatrix\137SetSymmetric}{section*.177}
+\BOOKMARK [3][-]{section*.187}{4.7.9 bHYPRE\137SStructParCSRMatrix\137Print}{section*.177}
+\BOOKMARK [3][-]{section*.188}{4.7.10 bHYPRE\137SStructParCSRMatrix\137GetObject}{section*.177}
+\BOOKMARK [3][-]{section*.189}{4.7.11 bHYPRE\137SStructParCSRMatrix\137SetCommunicator}{section*.177}
+\BOOKMARK [3][-]{section*.190}{4.7.12 bHYPRE\137SStructParCSRMatrix\137Destroy}{section*.177}
+\BOOKMARK [3][-]{section*.191}{4.7.13 bHYPRE\137SStructParCSRMatrix\137Assemble}{section*.177}
+\BOOKMARK [3][-]{section*.192}{4.7.14 **\137ex}{section*.177}
+\BOOKMARK [2][-]{section*.193}{4.8 SemiStructured ParCSR Vector}{section*.83}
+\BOOKMARK [3][-]{section*.195}{4.8.1 bHYPRE\137SStructParCSRVector\137\137object}{section*.193}
+\BOOKMARK [3][-]{section*.196}{4.8.2 bHYPRE\137SStructParCSRVector\137\137connect}{section*.193}
+\BOOKMARK [3][-]{section*.197}{4.8.3 bHYPRE\137SStructParCSRVector\137SetValues}{section*.193}
+\BOOKMARK [3][-]{section*.198}{4.8.4 bHYPRE\137SStructParCSRVector\137SetBoxValues}{section*.193}
+\BOOKMARK [3][-]{section*.199}{4.8.5 bHYPRE\137SStructParCSRVector\137AddToValues}{section*.193}
+\BOOKMARK [3][-]{section*.200}{4.8.6 bHYPRE\137SStructParCSRVector\137AddToBoxValues}{section*.193}
+\BOOKMARK [3][-]{section*.201}{4.8.7 bHYPRE\137SStructParCSRVector\137GetValues}{section*.193}
+\BOOKMARK [3][-]{section*.202}{4.8.8 bHYPRE\137SStructParCSRVector\137GetBoxValues}{section*.193}
+\BOOKMARK [3][-]{section*.203}{4.8.9 bHYPRE\137SStructParCSRVector\137Print}{section*.193}
+\BOOKMARK [3][-]{section*.204}{4.8.10 bHYPRE\137SStructParCSRVector\137GetObject}{section*.193}
+\BOOKMARK [3][-]{section*.205}{4.8.11 bHYPRE\137SStructParCSRVector\137SetCommunicator}{section*.193}
+\BOOKMARK [3][-]{section*.206}{4.8.12 bHYPRE\137SStructParCSRVector\137Destroy}{section*.193}
+\BOOKMARK [3][-]{section*.207}{4.8.13 bHYPRE\137SStructParCSRVector\137Assemble}{section*.193}
+\BOOKMARK [3][-]{section*.208}{4.8.14 bHYPRE\137SStructParCSRVector\137Clone}{section*.193}
+\BOOKMARK [3][-]{section*.209}{4.8.15 **\137ex}{section*.193}
+\BOOKMARK [1][]{section*.210}{5 Solver Interface}{}
+\BOOKMARK [2][-]{section*.212}{5.1 bHYPRE\137Solver\137\137object}{section*.210}
+\BOOKMARK [2][-]{section*.213}{5.2 bHYPRE\137Solver\137\137connect}{section*.210}
+\BOOKMARK [2][-]{section*.214}{5.3 bHYPRE\137Solver\137SetOperator}{section*.210}
+\BOOKMARK [2][-]{section*.215}{5.4 bHYPRE\137Solver\137SetTolerance}{section*.210}
+\BOOKMARK [2][-]{section*.216}{5.5 bHYPRE\137Solver\137SetMaxIterations}{section*.210}
+\BOOKMARK [2][-]{section*.217}{5.6 bHYPRE\137Solver\137SetLogging}{section*.210}
+\BOOKMARK [2][-]{section*.218}{5.7 bHYPRE\137Solver\137SetPrintLevel}{section*.210}
+\BOOKMARK [2][-]{section*.219}{5.8 **\137ex}{section*.210}
+\BOOKMARK [2][-]{section*.220}{5.9 Identity Solver \(does nothing\)}{section*.210}
+\BOOKMARK [3][-]{section*.222}{5.9.1 bHYPRE\137IdentitySolver\137\137object}{section*.220}
+\BOOKMARK [3][-]{section*.223}{5.9.2 bHYPRE\137IdentitySolver\137\137connect}{section*.220}
+\BOOKMARK [3][-]{section*.224}{5.9.3 bHYPRE\137IdentitySolver\137SetOperator}{section*.220}
+\BOOKMARK [3][-]{section*.225}{5.9.4 bHYPRE\137IdentitySolver\137SetTolerance}{section*.220}
+\BOOKMARK [3][-]{section*.226}{5.9.5 bHYPRE\137IdentitySolver\137SetMaxIterations}{section*.220}
+\BOOKMARK [3][-]{section*.227}{5.9.6 bHYPRE\137IdentitySolver\137SetLogging}{section*.220}
+\BOOKMARK [3][-]{section*.228}{5.9.7 bHYPRE\137IdentitySolver\137SetPrintLevel}{section*.220}
+\BOOKMARK [3][-]{section*.229}{5.9.8 bHYPRE\137IdentitySolver\137SetCommunicator}{section*.220}
+\BOOKMARK [3][-]{section*.230}{5.9.9 bHYPRE\137IdentitySolver\137Destroy}{section*.220}
+\BOOKMARK [3][-]{section*.231}{5.9.10 **\137ex}{section*.220}
+\BOOKMARK [2][-]{section*.232}{5.10 Hybrid Solver}{section*.210}
+\BOOKMARK [3][-]{section*.234}{5.10.1 bHYPRE\137Hybrid\137\137object}{section*.232}
+\BOOKMARK [3][-]{section*.235}{5.10.2 bHYPRE\137Hybrid\137\137connect}{section*.232}
+\BOOKMARK [3][-]{section*.236}{5.10.3 bHYPRE\137Hybrid\137SetOperator}{section*.232}
+\BOOKMARK [3][-]{section*.237}{5.10.4 bHYPRE\137Hybrid\137SetTolerance}{section*.232}
+\BOOKMARK [3][-]{section*.238}{5.10.5 bHYPRE\137Hybrid\137SetMaxIterations}{section*.232}
+\BOOKMARK [3][-]{section*.239}{5.10.6 bHYPRE\137Hybrid\137SetLogging}{section*.232}
+\BOOKMARK [3][-]{section*.240}{5.10.7 bHYPRE\137Hybrid\137SetPrintLevel}{section*.232}
+\BOOKMARK [3][-]{section*.241}{5.10.8 bHYPRE\137Hybrid\137SetCommunicator}{section*.232}
+\BOOKMARK [3][-]{section*.242}{5.10.9 bHYPRE\137Hybrid\137Destroy}{section*.232}
+\BOOKMARK [3][-]{section*.243}{5.10.10 **\137ex}{section*.232}
+\BOOKMARK [1][]{section*.244}{6 ParCSR Matrix Solvers}{}
+\BOOKMARK [2][-]{section*.246}{6.1 ParCSRDiagScale Solver}{section*.244}
+\BOOKMARK [3][-]{section*.248}{6.1.1 bHYPRE\137ParCSRDiagScale\137\137object}{section*.246}
+\BOOKMARK [3][-]{section*.249}{6.1.2 bHYPRE\137ParCSRDiagScale\137\137connect}{section*.246}
+\BOOKMARK [3][-]{section*.250}{6.1.3 bHYPRE\137ParCSRDiagScale\137SetOperator}{section*.246}
+\BOOKMARK [3][-]{section*.251}{6.1.4 bHYPRE\137ParCSRDiagScale\137SetTolerance}{section*.246}
+\BOOKMARK [3][-]{section*.252}{6.1.5 bHYPRE\137ParCSRDiagScale\137SetMaxIterations}{section*.246}
+\BOOKMARK [3][-]{section*.253}{6.1.6 bHYPRE\137ParCSRDiagScale\137SetLogging}{section*.246}
+\BOOKMARK [3][-]{section*.254}{6.1.7 bHYPRE\137ParCSRDiagScale\137SetPrintLevel}{section*.246}
+\BOOKMARK [3][-]{section*.255}{6.1.8 bHYPRE\137ParCSRDiagScale\137SetCommunicator}{section*.246}
+\BOOKMARK [3][-]{section*.256}{6.1.9 bHYPRE\137ParCSRDiagScale\137Destroy}{section*.246}
+\BOOKMARK [3][-]{section*.257}{6.1.10 **\137ex}{section*.246}
+\BOOKMARK [2][-]{section*.258}{6.2 ParCSR BoomerAMG Solver}{section*.244}
+\BOOKMARK [3][-]{section*.260}{6.2.1 bHYPRE\137BoomerAMG\137\137object}{section*.258}
+\BOOKMARK [3][-]{section*.261}{6.2.2 bHYPRE\137BoomerAMG\137\137connect}{section*.258}
+\BOOKMARK [3][-]{section*.262}{6.2.3 bHYPRE\137BoomerAMG\137SetOperator}{section*.258}
+\BOOKMARK [3][-]{section*.263}{6.2.4 bHYPRE\137BoomerAMG\137SetTolerance}{section*.258}
+\BOOKMARK [3][-]{section*.264}{6.2.5 bHYPRE\137BoomerAMG\137SetMaxIterations}{section*.258}
+\BOOKMARK [3][-]{section*.265}{6.2.6 bHYPRE\137BoomerAMG\137SetLogging}{section*.258}
+\BOOKMARK [3][-]{section*.266}{6.2.7 bHYPRE\137BoomerAMG\137SetPrintLevel}{section*.258}
+\BOOKMARK [3][-]{section*.267}{6.2.8 bHYPRE\137BoomerAMG\137SetCommunicator}{section*.258}
+\BOOKMARK [3][-]{section*.268}{6.2.9 bHYPRE\137BoomerAMG\137Destroy}{section*.258}
+\BOOKMARK [3][-]{section*.269}{6.2.10 **\137ex}{section*.258}
+\BOOKMARK [2][-]{section*.270}{6.3 ParCSR Euclid Solver}{section*.244}
+\BOOKMARK [3][-]{section*.272}{6.3.1 bHYPRE\137Euclid\137\137object}{section*.270}
+\BOOKMARK [3][-]{section*.273}{6.3.2 bHYPRE\137Euclid\137\137connect}{section*.270}
+\BOOKMARK [3][-]{section*.274}{6.3.3 bHYPRE\137Euclid\137SetOperator}{section*.270}
+\BOOKMARK [3][-]{section*.275}{6.3.4 bHYPRE\137Euclid\137SetTolerance}{section*.270}
+\BOOKMARK [3][-]{section*.276}{6.3.5 bHYPRE\137Euclid\137SetMaxIterations}{section*.270}
+\BOOKMARK [3][-]{section*.277}{6.3.6 bHYPRE\137Euclid\137SetLogging}{section*.270}
+\BOOKMARK [3][-]{section*.278}{6.3.7 bHYPRE\137Euclid\137SetPrintLevel}{section*.270}
+\BOOKMARK [3][-]{section*.279}{6.3.8 bHYPRE\137Euclid\137SetCommunicator}{section*.270}
+\BOOKMARK [3][-]{section*.280}{6.3.9 bHYPRE\137Euclid\137Destroy}{section*.270}
+\BOOKMARK [3][-]{section*.281}{6.3.10 **\137ex}{section*.270}
+\BOOKMARK [2][-]{section*.282}{6.4 ParCSR Schwarz Solver}{section*.244}
+\BOOKMARK [3][-]{section*.284}{6.4.1 bHYPRE\137Schwarz\137\137object}{section*.282}
+\BOOKMARK [3][-]{section*.285}{6.4.2 bHYPRE\137Schwarz\137\137connect}{section*.282}
+\BOOKMARK [3][-]{section*.286}{6.4.3 bHYPRE\137Schwarz\137SetOperator}{section*.282}
+\BOOKMARK [3][-]{section*.287}{6.4.4 bHYPRE\137Schwarz\137SetTolerance}{section*.282}
+\BOOKMARK [3][-]{section*.288}{6.4.5 bHYPRE\137Schwarz\137SetMaxIterations}{section*.282}
+\BOOKMARK [3][-]{section*.289}{6.4.6 bHYPRE\137Schwarz\137SetLogging}{section*.282}
+\BOOKMARK [3][-]{section*.290}{6.4.7 bHYPRE\137Schwarz\137SetPrintLevel}{section*.282}
+\BOOKMARK [3][-]{section*.291}{6.4.8 bHYPRE\137Schwarz\137SetCommunicator}{section*.282}
+\BOOKMARK [3][-]{section*.292}{6.4.9 bHYPRE\137Schwarz\137Destroy}{section*.282}
+\BOOKMARK [3][-]{section*.293}{6.4.10 **\137ex}{section*.282}
+\BOOKMARK [2][-]{section*.294}{6.5 ParCSR ParaSails Solver}{section*.244}
+\BOOKMARK [3][-]{section*.296}{6.5.1 bHYPRE\137ParaSails\137\137object}{section*.294}
+\BOOKMARK [3][-]{section*.297}{6.5.2 bHYPRE\137ParaSails\137\137connect}{section*.294}
+\BOOKMARK [3][-]{section*.298}{6.5.3 bHYPRE\137ParaSails\137SetOperator}{section*.294}
+\BOOKMARK [3][-]{section*.299}{6.5.4 bHYPRE\137ParaSails\137SetTolerance}{section*.294}
+\BOOKMARK [3][-]{section*.300}{6.5.5 bHYPRE\137ParaSails\137SetMaxIterations}{section*.294}
+\BOOKMARK [3][-]{section*.301}{6.5.6 bHYPRE\137ParaSails\137SetLogging}{section*.294}
+\BOOKMARK [3][-]{section*.302}{6.5.7 bHYPRE\137ParaSails\137SetPrintLevel}{section*.294}
+\BOOKMARK [3][-]{section*.303}{6.5.8 bHYPRE\137ParaSails\137SetCommunicator}{section*.294}
+\BOOKMARK [3][-]{section*.304}{6.5.9 bHYPRE\137ParaSails\137Destroy}{section*.294}
+\BOOKMARK [3][-]{section*.305}{6.5.10 **\137ex}{section*.294}
+\BOOKMARK [2][-]{section*.306}{6.6 ParCSR Pilut Solver}{section*.244}
+\BOOKMARK [3][-]{section*.308}{6.6.1 bHYPRE\137Pilut\137\137object}{section*.306}
+\BOOKMARK [3][-]{section*.309}{6.6.2 bHYPRE\137Pilut\137\137connect}{section*.306}
+\BOOKMARK [3][-]{section*.310}{6.6.3 bHYPRE\137Pilut\137SetOperator}{section*.306}
+\BOOKMARK [3][-]{section*.311}{6.6.4 bHYPRE\137Pilut\137SetTolerance}{section*.306}
+\BOOKMARK [3][-]{section*.312}{6.6.5 bHYPRE\137Pilut\137SetMaxIterations}{section*.306}
+\BOOKMARK [3][-]{section*.313}{6.6.6 bHYPRE\137Pilut\137SetLogging}{section*.306}
+\BOOKMARK [3][-]{section*.314}{6.6.7 bHYPRE\137Pilut\137SetPrintLevel}{section*.306}
+\BOOKMARK [3][-]{section*.315}{6.6.8 bHYPRE\137Pilut\137SetCommunicator}{section*.306}
+\BOOKMARK [3][-]{section*.316}{6.6.9 bHYPRE\137Pilut\137Destroy}{section*.306}
+\BOOKMARK [3][-]{section*.317}{6.6.10 **\137ex}{section*.306}
+\BOOKMARK [1][]{section*.318}{7 Structured Matrix Solvers}{}
+\BOOKMARK [2][-]{section*.320}{7.1 StructDiagScale Solver}{section*.318}
+\BOOKMARK [3][-]{section*.322}{7.1.1 bHYPRE\137StructDiagScale\137\137object}{section*.320}
+\BOOKMARK [3][-]{section*.323}{7.1.2 bHYPRE\137StructDiagScale\137\137connect}{section*.320}
+\BOOKMARK [3][-]{section*.324}{7.1.3 bHYPRE\137StructDiagScale\137SetOperator}{section*.320}
+\BOOKMARK [3][-]{section*.325}{7.1.4 bHYPRE\137StructDiagScale\137SetTolerance}{section*.320}
+\BOOKMARK [3][-]{section*.326}{7.1.5 bHYPRE\137StructDiagScale\137SetMaxIterations}{section*.320}
+\BOOKMARK [3][-]{section*.327}{7.1.6 bHYPRE\137StructDiagScale\137SetLogging}{section*.320}
+\BOOKMARK [3][-]{section*.328}{7.1.7 bHYPRE\137StructDiagScale\137SetPrintLevel}{section*.320}
+\BOOKMARK [3][-]{section*.329}{7.1.8 bHYPRE\137StructDiagScale\137SetCommunicator}{section*.320}
+\BOOKMARK [3][-]{section*.330}{7.1.9 bHYPRE\137StructDiagScale\137Destroy}{section*.320}
+\BOOKMARK [3][-]{section*.331}{7.1.10 **\137ex}{section*.320}
+\BOOKMARK [2][-]{section*.332}{7.2 Struct Jacobi Solver}{section*.318}
+\BOOKMARK [3][-]{section*.334}{7.2.1 bHYPRE\137StructJacobi\137\137object}{section*.332}
+\BOOKMARK [3][-]{section*.335}{7.2.2 bHYPRE\137StructJacobi\137\137connect}{section*.332}
+\BOOKMARK [3][-]{section*.336}{7.2.3 bHYPRE\137StructJacobi\137SetOperator}{section*.332}
+\BOOKMARK [3][-]{section*.337}{7.2.4 bHYPRE\137StructJacobi\137SetTolerance}{section*.332}
+\BOOKMARK [3][-]{section*.338}{7.2.5 bHYPRE\137StructJacobi\137SetMaxIterations}{section*.332}
+\BOOKMARK [3][-]{section*.339}{7.2.6 bHYPRE\137StructJacobi\137SetLogging}{section*.332}
+\BOOKMARK [3][-]{section*.340}{7.2.7 bHYPRE\137StructJacobi\137SetPrintLevel}{section*.332}
+\BOOKMARK [3][-]{section*.341}{7.2.8 bHYPRE\137StructJacobi\137SetCommunicator}{section*.332}
+\BOOKMARK [3][-]{section*.342}{7.2.9 bHYPRE\137StructJacobi\137Destroy}{section*.332}
+\BOOKMARK [3][-]{section*.343}{7.2.10 **\137ex}{section*.332}
+\BOOKMARK [2][-]{section*.344}{7.3 Struct PFMG Solver}{section*.318}
+\BOOKMARK [3][-]{section*.346}{7.3.1 bHYPRE\137StructPFMG\137\137object}{section*.344}
+\BOOKMARK [3][-]{section*.347}{7.3.2 bHYPRE\137StructPFMG\137\137connect}{section*.344}
+\BOOKMARK [3][-]{section*.348}{7.3.3 bHYPRE\137StructPFMG\137SetOperator}{section*.344}
+\BOOKMARK [3][-]{section*.349}{7.3.4 bHYPRE\137StructPFMG\137SetTolerance}{section*.344}
+\BOOKMARK [3][-]{section*.350}{7.3.5 bHYPRE\137StructPFMG\137SetMaxIterations}{section*.344}
+\BOOKMARK [3][-]{section*.351}{7.3.6 bHYPRE\137StructPFMG\137SetLogging}{section*.344}
+\BOOKMARK [3][-]{section*.352}{7.3.7 bHYPRE\137StructPFMG\137SetPrintLevel}{section*.344}
+\BOOKMARK [3][-]{section*.353}{7.3.8 bHYPRE\137StructPFMG\137SetCommunicator}{section*.344}
+\BOOKMARK [3][-]{section*.354}{7.3.9 bHYPRE\137StructPFMG\137Destroy}{section*.344}
+\BOOKMARK [3][-]{section*.355}{7.3.10 **\137ex}{section*.344}
+\BOOKMARK [2][-]{section*.356}{7.4 Struct SMG Solver}{section*.318}
+\BOOKMARK [3][-]{section*.358}{7.4.1 bHYPRE\137StructSMG\137\137object}{section*.356}
+\BOOKMARK [3][-]{section*.359}{7.4.2 bHYPRE\137StructSMG\137\137connect}{section*.356}
+\BOOKMARK [3][-]{section*.360}{7.4.3 bHYPRE\137StructSMG\137SetOperator}{section*.356}
+\BOOKMARK [3][-]{section*.361}{7.4.4 bHYPRE\137StructSMG\137SetTolerance}{section*.356}
+\BOOKMARK [3][-]{section*.362}{7.4.5 bHYPRE\137StructSMG\137SetMaxIterations}{section*.356}
+\BOOKMARK [3][-]{section*.363}{7.4.6 bHYPRE\137StructSMG\137SetLogging}{section*.356}
+\BOOKMARK [3][-]{section*.364}{7.4.7 bHYPRE\137StructSMG\137SetPrintLevel}{section*.356}
+\BOOKMARK [3][-]{section*.365}{7.4.8 bHYPRE\137StructSMG\137SetCommunicator}{section*.356}
+\BOOKMARK [3][-]{section*.366}{7.4.9 bHYPRE\137StructSMG\137Destroy}{section*.356}
+\BOOKMARK [3][-]{section*.367}{7.4.10 **\137ex}{section*.356}
+\BOOKMARK [1][]{section*.368}{8 SemiStructured Matrix Solvers}{}
+\BOOKMARK [2][-]{section*.370}{8.1 SemiStruct DiagScale Solver}{section*.368}
+\BOOKMARK [3][-]{section*.372}{8.1.1 bHYPRE\137SStructDiagScale\137\137object}{section*.370}
+\BOOKMARK [3][-]{section*.373}{8.1.2 bHYPRE\137SStructDiagScale\137\137connect}{section*.370}
+\BOOKMARK [3][-]{section*.374}{8.1.3 bHYPRE\137SStructDiagScale\137SetOperator}{section*.370}
+\BOOKMARK [3][-]{section*.375}{8.1.4 bHYPRE\137SStructDiagScale\137SetTolerance}{section*.370}
+\BOOKMARK [3][-]{section*.376}{8.1.5 bHYPRE\137SStructDiagScale\137SetMaxIterations}{section*.370}
+\BOOKMARK [3][-]{section*.377}{8.1.6 bHYPRE\137SStructDiagScale\137SetLogging}{section*.370}
+\BOOKMARK [3][-]{section*.378}{8.1.7 bHYPRE\137SStructDiagScale\137SetPrintLevel}{section*.370}
+\BOOKMARK [3][-]{section*.379}{8.1.8 bHYPRE\137SStructDiagScale\137SetCommunicator}{section*.370}
+\BOOKMARK [3][-]{section*.380}{8.1.9 bHYPRE\137SStructDiagScale\137Destroy}{section*.370}
+\BOOKMARK [3][-]{section*.381}{8.1.10 **\137ex}{section*.370}
+\BOOKMARK [2][-]{section*.382}{8.2 Struct Split Solver}{section*.368}
+\BOOKMARK [3][-]{section*.384}{8.2.1 bHYPRE\137SStructSplit\137\137object}{section*.382}
+\BOOKMARK [3][-]{section*.385}{8.2.2 bHYPRE\137SStructSplit\137\137connect}{section*.382}
+\BOOKMARK [3][-]{section*.386}{8.2.3 bHYPRE\137SStructSplit\137SetOperator}{section*.382}
+\BOOKMARK [3][-]{section*.387}{8.2.4 bHYPRE\137SStructSplit\137SetTolerance}{section*.382}
+\BOOKMARK [3][-]{section*.388}{8.2.5 bHYPRE\137SStructSplit\137SetMaxIterations}{section*.382}
+\BOOKMARK [3][-]{section*.389}{8.2.6 bHYPRE\137SStructSplit\137SetLogging}{section*.382}
+\BOOKMARK [3][-]{section*.390}{8.2.7 bHYPRE\137SStructSplit\137SetPrintLevel}{section*.382}
+\BOOKMARK [3][-]{section*.391}{8.2.8 bHYPRE\137SStructSplit\137SetCommunicator}{section*.382}
+\BOOKMARK [3][-]{section*.392}{8.2.9 bHYPRE\137SStructSplit\137Destroy}{section*.382}
+\BOOKMARK [3][-]{section*.393}{8.2.10 **\137ex}{section*.382}
+\BOOKMARK [1][]{section*.394}{9 PreconditionedSolver Interface}{}
+\BOOKMARK [2][-]{section*.396}{9.1 bHYPRE\137PreconditionedSolver\137\137object}{section*.394}
+\BOOKMARK [2][-]{section*.397}{9.2 bHYPRE\137PreconditionedSolver\137\137connect}{section*.394}
+\BOOKMARK [2][-]{section*.398}{9.3 **\137ex}{section*.394}
+\BOOKMARK [1][]{section*.399}{10 Preconditioned Solvers}{}
+\BOOKMARK [2][-]{section*.401}{10.1 PCG Preconditioned Solver}{section*.399}
+\BOOKMARK [3][-]{section*.403}{10.1.1 bHYPRE\137PCG\137\137object}{section*.401}
+\BOOKMARK [3][-]{section*.404}{10.1.2 bHYPRE\137PCG\137\137connect}{section*.401}
+\BOOKMARK [3][-]{section*.405}{10.1.3 bHYPRE\137PCG\137SetOperator}{section*.401}
+\BOOKMARK [3][-]{section*.406}{10.1.4 bHYPRE\137PCG\137SetTolerance}{section*.401}
+\BOOKMARK [3][-]{section*.407}{10.1.5 bHYPRE\137PCG\137SetMaxIterations}{section*.401}
+\BOOKMARK [3][-]{section*.408}{10.1.6 bHYPRE\137PCG\137SetLogging}{section*.401}
+\BOOKMARK [3][-]{section*.409}{10.1.7 bHYPRE\137PCG\137SetPrintLevel}{section*.401}
+\BOOKMARK [3][-]{section*.410}{10.1.8 bHYPRE\137PCG\137SetCommunicator}{section*.401}
+\BOOKMARK [3][-]{section*.411}{10.1.9 bHYPRE\137PCG\137Destroy}{section*.401}
+\BOOKMARK [3][-]{section*.412}{10.1.10 **\137ex}{section*.401}
+\BOOKMARK [2][-]{section*.413}{10.2 GMRES Preconditioned Solver}{section*.399}
+\BOOKMARK [3][-]{section*.415}{10.2.1 bHYPRE\137GMRES\137\137object}{section*.413}
+\BOOKMARK [3][-]{section*.416}{10.2.2 bHYPRE\137GMRES\137\137connect}{section*.413}
+\BOOKMARK [3][-]{section*.417}{10.2.3 bHYPRE\137GMRES\137SetOperator}{section*.413}
+\BOOKMARK [3][-]{section*.418}{10.2.4 bHYPRE\137GMRES\137SetTolerance}{section*.413}
+\BOOKMARK [3][-]{section*.419}{10.2.5 bHYPRE\137GMRES\137SetMaxIterations}{section*.413}
+\BOOKMARK [3][-]{section*.420}{10.2.6 bHYPRE\137GMRES\137SetLogging}{section*.413}
+\BOOKMARK [3][-]{section*.421}{10.2.7 bHYPRE\137GMRES\137SetPrintLevel}{section*.413}
+\BOOKMARK [3][-]{section*.422}{10.2.8 bHYPRE\137GMRES\137SetCommunicator}{section*.413}
+\BOOKMARK [3][-]{section*.423}{10.2.9 bHYPRE\137GMRES\137Destroy}{section*.413}
+\BOOKMARK [3][-]{section*.424}{10.2.10 **\137ex}{section*.413}
+\BOOKMARK [2][-]{section*.425}{10.3 BiCGSTAB Preconditioned Solver}{section*.399}
+\BOOKMARK [3][-]{section*.427}{10.3.1 bHYPRE\137BiCGSTAB\137\137object}{section*.425}
+\BOOKMARK [3][-]{section*.428}{10.3.2 bHYPRE\137BiCGSTAB\137\137connect}{section*.425}
+\BOOKMARK [3][-]{section*.429}{10.3.3 bHYPRE\137BiCGSTAB\137SetOperator}{section*.425}
+\BOOKMARK [3][-]{section*.430}{10.3.4 bHYPRE\137BiCGSTAB\137SetTolerance}{section*.425}
+\BOOKMARK [3][-]{section*.431}{10.3.5 bHYPRE\137BiCGSTAB\137SetMaxIterations}{section*.425}
+\BOOKMARK [3][-]{section*.432}{10.3.6 bHYPRE\137BiCGSTAB\137SetLogging}{section*.425}
+\BOOKMARK [3][-]{section*.433}{10.3.7 bHYPRE\137BiCGSTAB\137SetPrintLevel}{section*.425}
+\BOOKMARK [3][-]{section*.434}{10.3.8 bHYPRE\137BiCGSTAB\137SetCommunicator}{section*.425}
+\BOOKMARK [3][-]{section*.435}{10.3.9 bHYPRE\137BiCGSTAB\137Destroy}{section*.425}
+\BOOKMARK [3][-]{section*.436}{10.3.10 **\137ex}{section*.425}
+\BOOKMARK [2][-]{section*.437}{10.4 CGNR Preconditioned Solver}{section*.399}
+\BOOKMARK [3][-]{section*.439}{10.4.1 bHYPRE\137CGNR\137\137object}{section*.437}
+\BOOKMARK [3][-]{section*.440}{10.4.2 bHYPRE\137CGNR\137\137connect}{section*.437}
+\BOOKMARK [3][-]{section*.441}{10.4.3 bHYPRE\137CGNR\137SetOperator}{section*.437}
+\BOOKMARK [3][-]{section*.442}{10.4.4 bHYPRE\137CGNR\137SetTolerance}{section*.437}
+\BOOKMARK [3][-]{section*.443}{10.4.5 bHYPRE\137CGNR\137SetMaxIterations}{section*.437}
+\BOOKMARK [3][-]{section*.444}{10.4.6 bHYPRE\137CGNR\137SetLogging}{section*.437}
+\BOOKMARK [3][-]{section*.445}{10.4.7 bHYPRE\137CGNR\137SetPrintLevel}{section*.437}
+\BOOKMARK [3][-]{section*.446}{10.4.8 bHYPRE\137CGNR\137SetCommunicator}{section*.437}
+\BOOKMARK [3][-]{section*.447}{10.4.9 bHYPRE\137CGNR\137Destroy}{section*.437}
+\BOOKMARK [3][-]{section*.448}{10.4.10 **\137ex}{section*.437}
+\BOOKMARK [1][]{section*.449}{11 Other}{}
+\BOOKMARK [2][-]{section*.451}{11.1 MPI Communicator}{section*.449}
+\BOOKMARK [3][-]{section*.453}{11.1.1 bHYPRE\137MPICommunicator\137\137object}{section*.451}
+\BOOKMARK [3][-]{section*.454}{11.1.2 bHYPRE\137MPICommunicator\137\137connect}{section*.451}
+\BOOKMARK [3][-]{section*.455}{11.1.3 bHYPRE\137MPICommunicator\137Destroy}{section*.451}
+\BOOKMARK [3][-]{section*.456}{11.1.4 **\137ex}{section*.451}
+\BOOKMARK [1][]{section*.457}{12 Struct Grid, etc.}{}
+\BOOKMARK [2][-]{section*.459}{12.1 Struct Grid}{section*.457}
+\BOOKMARK [3][-]{section*.461}{12.1.1 bHYPRE\137StructGrid\137\137object}{section*.459}
+\BOOKMARK [3][-]{section*.462}{12.1.2 bHYPRE\137StructGrid\137\137connect}{section*.459}
+\BOOKMARK [3][-]{section*.463}{12.1.3 bHYPRE\137StructGrid\137SetCommunicator}{section*.459}
+\BOOKMARK [3][-]{section*.464}{12.1.4 bHYPRE\137StructGrid\137Destroy}{section*.459}
+\BOOKMARK [3][-]{section*.465}{12.1.5 bHYPRE\137StructGrid\137SetExtents}{section*.459}
+\BOOKMARK [3][-]{section*.466}{12.1.6 bHYPRE\137StructGrid\137SetPeriodic}{section*.459}
+\BOOKMARK [3][-]{section*.467}{12.1.7 bHYPRE\137StructGrid\137SetNumGhost}{section*.459}
+\BOOKMARK [3][-]{section*.468}{12.1.8 **\137ex}{section*.459}
+\BOOKMARK [2][-]{section*.469}{12.2 Struct Stencil}{section*.457}
+\BOOKMARK [3][-]{section*.471}{12.2.1 bHYPRE\137StructStencil\137\137object}{section*.469}
+\BOOKMARK [3][-]{section*.472}{12.2.2 bHYPRE\137StructStencil\137\137connect}{section*.469}
+\BOOKMARK [3][-]{section*.473}{12.2.3 bHYPRE\137StructStencil\137Create}{section*.469}
+\BOOKMARK [3][-]{section*.474}{12.2.4 bHYPRE\137StructStencil\137Destroy}{section*.469}
+\BOOKMARK [3][-]{section*.475}{12.2.5 bHYPRE\137StructStencil\137SetDimension}{section*.469}
+\BOOKMARK [3][-]{section*.476}{12.2.6 bHYPRE\137StructStencil\137SetSize}{section*.469}
+\BOOKMARK [3][-]{section*.477}{12.2.7 bHYPRE\137StructStencil\137SetElement}{section*.469}
+\BOOKMARK [3][-]{section*.478}{12.2.8 **\137ex}{section*.469}
+\BOOKMARK [1][]{section*.479}{13 Semi-Structured Grid, etc.}{}
+\BOOKMARK [2][-]{section*.481}{13.1 Semi-Structured Graph}{section*.479}
+\BOOKMARK [3][-]{section*.483}{13.1.1 bHYPRE\137SStructGraph\137\137object}{section*.481}
+\BOOKMARK [3][-]{section*.484}{13.1.2 bHYPRE\137SStructGraph\137\137connect}{section*.481}
+\BOOKMARK [3][-]{section*.485}{13.1.3 bHYPRE\137SStructGraph\137SetCommGrid}{section*.481}
+\BOOKMARK [3][-]{section*.486}{13.1.4 bHYPRE\137SStructGraph\137AddEntries}{section*.481}
+\BOOKMARK [3][-]{section*.487}{13.1.5 bHYPRE\137SStructGraph\137SetCommunicator}{section*.481}
+\BOOKMARK [3][-]{section*.488}{13.1.6 bHYPRE\137SStructGraph\137Destroy}{section*.481}
+\BOOKMARK [3][-]{section*.489}{13.1.7 bHYPRE\137SStructGraph\137Assemble}{section*.481}
+\BOOKMARK [3][-]{section*.490}{13.1.8 **\137ex}{section*.481}
+\BOOKMARK [2][-]{section*.491}{13.2 Semi-Structured Grid}{section*.479}
+\BOOKMARK [3][-]{section*.493}{13.2.1 bHYPRE\137SStructGrid\137\137object}{section*.491}
+\BOOKMARK [3][-]{section*.494}{13.2.2 bHYPRE\137SStructGrid\137\137connect}{section*.491}
+\BOOKMARK [3][-]{section*.495}{13.2.3 bHYPRE\137SStructGrid\137Destroy}{section*.491}
+\BOOKMARK [3][-]{section*.496}{13.2.4 bHYPRE\137SStructGrid\137SetVariable}{section*.491}
+\BOOKMARK [3][-]{section*.497}{13.2.5 bHYPRE\137SStructGrid\137AddVariable}{section*.491}
+\BOOKMARK [3][-]{section*.498}{13.2.6 bHYPRE\137SStructGrid\137SetNeighborBox}{section*.491}
+\BOOKMARK [3][-]{section*.499}{13.2.7 bHYPRE\137SStructGrid\137AddUnstructuredPart}{section*.491}
+\BOOKMARK [3][-]{section*.500}{13.2.8 **\137ex}{section*.491}
+\BOOKMARK [2][-]{section*.501}{13.3 Semi-Structured Stencil}{section*.479}
+\BOOKMARK [3][-]{section*.503}{13.3.1 bHYPRE\137SStructStencil\137\137object}{section*.501}
+\BOOKMARK [3][-]{section*.504}{13.3.2 bHYPRE\137SStructStencil\137\137connect}{section*.501}
+\BOOKMARK [3][-]{section*.505}{13.3.3 bHYPRE\137SStructStencil\137Destroy}{section*.501}
+\BOOKMARK [3][-]{section*.506}{13.3.4 bHYPRE\137SStructStencil\137SetNumDimSize}{section*.501}
+\BOOKMARK [3][-]{section*.507}{13.3.5 **\137ex}{section*.501}
+\BOOKMARK [2][-]{section*.508}{13.4 Semi-Structured Variable}{section*.479}
+\BOOKMARK [3][-]{section*.510}{13.4.1 bHYPRE\137SStructVariable\137\137enum}{section*.508}

@@ -66,7 +66,7 @@ dnl    AC_CONFIG_FILES([Makefile])
 dnl    AC_OUTPUT
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id: llnl_prog_java.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: llnl_prog_java.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl
 AC_DEFUN([LLNL_PROG_JAVA],[
 AC_REQUIRE([AC_EXEEXT])dnl
@@ -97,7 +97,7 @@ dnl The general documentation, as well as the sample configure.in, is
 dnl included in the LLNL_PROG_JAVA macro.
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
-dnl @version $Id: llnl_prog_java.m4,v 1.6 2006/08/29 22:29:24 painter Exp $
+dnl @version $Id: llnl_prog_java.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl 
 dnl Additional Mods by Gary Kumfert
 dnl

@@ -5,7 +5,7 @@ dnl @synopsis AC_CXX_HAVE_STL
 dnl
 dnl If the compiler supports the Standard Template Library, define HAVE_STL.
 dnl
-dnl @version $Id: ac_cxx_have_stl.m4,v 1.6 2006/08/29 22:29:23 painter Exp $
+dnl @version $Id: ac_cxx_have_stl.m4,v 1.7 2007/09/27 19:35:18 painter Exp $
 dnl @author Luc Maisonobe
 dnl
 AC_DEFUN([AC_CXX_HAVE_STL],

@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
  * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.65 $
+ * $Revision: 2.71 $
  ***********************************************************************EHEADER*/
+
 
 //***************************************************************************
 // system includes
@@ -264,6 +251,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgSchwarzDomainType_ = 2;  // domain through agglomeration
    amgUseGSMG_         = 0;
    amgGSMGNSamples_    = 0;
+   amgAggLevels_       = 0;
+   amgInterpType_      = 0;
+   amgPmax_            = 0;
+
    for (int i = 0; i < 25; i++) amgRelaxWeight_[i] = 1.0; 
    for (int j = 0; j < 25; j++) amgRelaxOmega_[j] = 1.0; 
 
@@ -355,6 +346,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsBetaAggLevels_ = 1;
    amsBetaRelaxType_ = 3;
    amsBetaStrengthThresh_ = 0.25;
+   FEI_mixedDiagFlag_ = 0;
+   FEI_mixedDiag_ = NULL;
    sysPDEMethod_ = -1;
    sysPDEFormat_ = -1;
    sysPDETol_ = 0.0;
@@ -599,6 +592,7 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if (AMSData_.EdgeNodeList_ != NULL) delete [] AMSData_.EdgeNodeList_;
    if (AMSData_.NodeNumbers_  != NULL) delete [] AMSData_.NodeNumbers_;
    if (AMSData_.NodalCoord_   != NULL) delete [] AMSData_.NodalCoord_;
+   if (FEI_mixedDiag_ != NULL) delete [] FEI_mixedDiag_;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1562,6 +1556,12 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
       printf("sumIntoSystemMatrix ERROR : matrix already assembled\n");
       exit(1);
    }
+   if (FEI_mixedDiagFlag_ && FEI_mixedDiag_ == NULL)
+   {
+      FEI_mixedDiag_ = new double[localEndRow_-localStartRow_+1];
+      for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
+         FEI_mixedDiag_[i] = 0.0;
+   }
 
    //-------------------------------------------------------------------
    // load the local matrix
@@ -1619,6 +1619,9 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
             colIndex = storedIndices_[auxStoredIndices_[j]] + 1;
          else
             colIndex = ptCols[j] + 1;
+
+         if (FEI_mixedDiag_ && ptRows[i] == ptCols[j] && numPtRows > 1)
+            FEI_mixedDiag_[ptCols[numPtCols-1]-localStartRow_+1] += auxValues[j]; 
 
          while ( index < rowLeng && indptr[index] < colIndex ) index++; 
          if ( index >= rowLeng )
@@ -2165,6 +2168,15 @@ int HYPRE_LinSysCore::matrixLoadComplete()
          MPI_Barrier(comm_);
       }
       if ( HYOutputLevel_ & HYFEI_STOPAFTERPRINT ) exit(1);
+   }
+   if (FEI_mixedDiagFlag_)
+   {
+      for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
+      {
+         FEI_mixedDiag_[i] *= 0.125;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+            printf("Mixed diag %5d = %e\n", i, FEI_mixedDiag_[i]);
+      }
    }
 
    //-------------------------------------------------------------------
@@ -4353,6 +4365,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
            HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
            HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
+           HYPRE_PCGSetRecomputeResidual(HYSolver_, 1);
            if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
            else                    HYPRE_ParCSRPCGSetStopCrit(HYSolver_,1);
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
@@ -5036,7 +5049,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* SuperLU (sequential) solver \n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingSuperLU(status);
+           rnorm = solveUsingSuperLU(status);
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
@@ -5056,7 +5069,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* SuperLU (sequential) solver with refinement \n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingSuperLUX(status);
+           rnorm = solveUsingSuperLUX(status);
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      

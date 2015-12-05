@@ -2,7 +2,7 @@
  * File:          bHYPRE_ParCSRDiagScale_Impl.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -42,8 +42,8 @@
 #include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
 
-#define SIDL_IOR_MAJOR_VERSION 0
-#define SIDL_IOR_MINOR_VERSION 10
+#define SIDL_IOR_MAJOR_VERSION 1
+#define SIDL_IOR_MINOR_VERSION 0
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
  */
@@ -60,9 +60,9 @@ impl_bHYPRE_ParCSRDiagScale__load(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._load) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._load) */
   /* Insert-Code-Here {bHYPRE.ParCSRDiagScale._load} (static class initializer method) */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._load) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._load) */
   }
 }
 /*
@@ -82,7 +82,7 @@ impl_bHYPRE_ParCSRDiagScale__ctor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._ctor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
@@ -95,7 +95,7 @@ impl_bHYPRE_ParCSRDiagScale__ctor(
    /* hypre diagonal scaling requires no constructor or setup. cf
     * parcsr/HYPRE_parcsr_pcg.c, function HYPRE_ParCSRDiagScale */
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._ctor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._ctor) */
   }
 }
 
@@ -145,7 +145,7 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._dtor) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._dtor) */
   /* Insert the implementation of the destructor method here... */
 
    struct bHYPRE_ParCSRDiagScale__data * data;
@@ -156,7 +156,7 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
    hypre_TFree( data );
 
    return; hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._dtor) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._dtor) */
   }
 }
 
@@ -178,7 +178,7 @@ impl_bHYPRE_ParCSRDiagScale_Create(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Create) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.ParCSRDiagScale.Create} (Create method) */
 
    bHYPRE_ParCSRDiagScale solver = bHYPRE_ParCSRDiagScale__create(_ex); SIDL_CHECK(*_ex);
@@ -191,7 +191,7 @@ impl_bHYPRE_ParCSRDiagScale_Create(
    return solver;
 
    hypre_babel_exception_no_return(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Create) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Create) */
   }
 }
 
@@ -214,7 +214,7 @@ impl_bHYPRE_ParCSRDiagScale_SetOperator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetOperator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
 
    int ierr = 0;
@@ -232,7 +232,7 @@ impl_bHYPRE_ParCSRDiagScale_SetOperator(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetOperator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetOperator) */
   }
 }
 
@@ -255,12 +255,12 @@ impl_bHYPRE_ParCSRDiagScale_SetTolerance(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetTolerance) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetTolerance) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetTolerance) */
   }
 }
 
@@ -283,12 +283,12 @@ impl_bHYPRE_ParCSRDiagScale_SetMaxIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
   }
 }
 
@@ -315,12 +315,12 @@ impl_bHYPRE_ParCSRDiagScale_SetLogging(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetLogging) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetLogging) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetLogging) */
   }
 }
 
@@ -347,12 +347,12 @@ impl_bHYPRE_ParCSRDiagScale_SetPrintLevel(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetPrintLevel) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetPrintLevel) */
   }
 }
 
@@ -374,14 +374,14 @@ impl_bHYPRE_ParCSRDiagScale_GetNumIterations(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
 
    /* diagonal scaling is like 1 step of Jacobi */
    *num_iterations = 1;
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetNumIterations) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetNumIterations) */
   }
 }
 
@@ -403,12 +403,12 @@ impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
   }
 }
 
@@ -431,7 +431,7 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
 
    /* DEPRECATED   Use Create */
@@ -444,7 +444,7 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetCommunicator) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetCommunicator) */
   }
 }
 
@@ -495,12 +495,12 @@ impl_bHYPRE_ParCSRDiagScale_SetIntParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntParameter) */
   }
 }
 
@@ -523,12 +523,12 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleParameter) */
   }
 }
 
@@ -551,12 +551,12 @@ impl_bHYPRE_ParCSRDiagScale_SetStringParameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetStringParameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetStringParameter) */
   }
 }
 
@@ -580,11 +580,10 @@ impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) 
-    */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) */
   }
 }
 
@@ -607,11 +606,10 @@ impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) 
-    */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) */
   }
 }
 
@@ -635,10 +633,10 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
   }
 }
 
@@ -661,10 +659,10 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
    return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
   }
 }
 
@@ -687,12 +685,12 @@ impl_bHYPRE_ParCSRDiagScale_GetIntValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetIntValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetIntValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetIntValue) */
   }
 }
 
@@ -715,12 +713,12 @@ impl_bHYPRE_ParCSRDiagScale_GetDoubleValue(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
    return 1;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetDoubleValue) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetDoubleValue) */
   }
 }
 
@@ -744,12 +742,12 @@ impl_bHYPRE_ParCSRDiagScale_Setup(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Setup) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Setup) */
   /* Insert the implementation of the Setup method here... */
 
    return 0;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Setup) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Setup) */
   }
 }
 
@@ -772,7 +770,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Apply) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Apply) */
   /* Insert the implementation of the Apply method here... */
 
    int ierr = 0;
@@ -841,7 +839,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    return ierr;
 
    hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Apply) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Apply) */
   }
 }
 
@@ -864,7 +862,7 @@ impl_bHYPRE_ParCSRDiagScale_ApplyAdjoint(
 {
   *_ex = 0;
   {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.ApplyAdjoint) */
   /* Insert-Code-Here {bHYPRE.ParCSRDiagScale.ApplyAdjoint} (ApplyAdjoint method) */
 
    /* The adjoint of a (real) diagonal matrix is itself, so just call Apply: */
@@ -872,107 +870,104 @@ impl_bHYPRE_ParCSRDiagScale_ApplyAdjoint(
      return ierr;
 
      hypre_babel_exception_return_error(_ex);
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.ApplyAdjoint) */
+    /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.ApplyAdjoint) */
   }
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_IJParCSRMatrix(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_IJParCSRMatrix(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_IJParCSRMatrix__connectI(url, ar, _ex);
 }
 struct bHYPRE_IJParCSRMatrix__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_IJParCSRMatrix(void* bi,
+  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_IJParCSRMatrix(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_IJParCSRMatrix__cast(bi, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_MPICommunicator(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_MPICommunicator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
 }
 struct bHYPRE_MPICommunicator__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_MPICommunicator(void* bi,
+  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_MPICommunicator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_MPICommunicator__cast(bi, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Operator__connectI(url, ar, _ex);
 }
 struct bHYPRE_Operator__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_Operator(void* bi,
+  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_Operator(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_Operator__cast(bi, _ex);
 }
 struct bHYPRE_ParCSRDiagScale__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return bHYPRE_ParCSRDiagScale__connectI(url, ar, _ex);
 }
 struct bHYPRE_ParCSRDiagScale__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_ParCSRDiagScale(void* bi,
+  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_ParCSRDiagScale(void* bi, 
   sidl_BaseInterface* _ex) {
   return bHYPRE_ParCSRDiagScale__cast(bi, _ex);
 }
 struct bHYPRE_Solver__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Solver__connectI(url, ar, _ex);
 }
-struct bHYPRE_Solver__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_Solver(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Solver__object* impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_Solver(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Solver__cast(bi, _ex);
 }
 struct bHYPRE_Vector__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex) {
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex) {
   return bHYPRE_Vector__connectI(url, ar, _ex);
 }
-struct bHYPRE_Vector__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_Vector(void* bi,
-  sidl_BaseInterface* _ex) {
+struct bHYPRE_Vector__object* impl_bHYPRE_ParCSRDiagScale_fcast_bHYPRE_Vector(
+  void* bi, sidl_BaseInterface* _ex) {
   return bHYPRE_Vector__cast(bi, _ex);
 }
 struct sidl_BaseClass__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseClass__connectI(url, ar, _ex);
 }
-struct sidl_BaseClass__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_BaseClass__object* impl_bHYPRE_ParCSRDiagScale_fcast_sidl_BaseClass(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_BaseClass__cast(bi, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_BaseInterface__connectI(url, ar, _ex);
 }
 struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_ParCSRDiagScale_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_BaseInterface__cast(bi, _ex);
 }
 struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_ClassInfo__connectI(url, ar, _ex);
 }
-struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex) {
+struct sidl_ClassInfo__object* impl_bHYPRE_ParCSRDiagScale_fcast_sidl_ClassInfo(
+  void* bi, sidl_BaseInterface* _ex) {
   return sidl_ClassInfo__cast(bi, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex) {
   return sidl_RuntimeException__connectI(url, ar, _ex);
 }
 struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ParCSRDiagScale_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_ParCSRDiagScale_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex) {
   return sidl_RuntimeException__cast(bi, _ex);
 }
+

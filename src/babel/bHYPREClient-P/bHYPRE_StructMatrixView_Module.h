@@ -2,7 +2,7 @@
  * File:          bHYPRE_StructMatrixView_Module.h
  * Symbol:        bHYPRE.StructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   expose a constructor for the Python wrapper
  * 
  * WARNING: Automatically generated; only changes within splicers preserved

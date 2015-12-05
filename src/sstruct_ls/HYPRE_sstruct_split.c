@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -66,6 +53,8 @@ typedef struct hypre_SStructSolver_struct
    double                   rel_norm;
    int                      ssolver;
 
+   void                    *matvec_data;
+
 } hypre_SStructSolver;
 
 /*--------------------------------------------------------------------------
@@ -75,7 +64,6 @@ int
 HYPRE_SStructSplitCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver_ptr )
 {
-   int ierr = 0;
    hypre_SStructSolver *solver;
 
    solver = hypre_TAlloc(hypre_SStructSolver, 1);
@@ -93,10 +81,11 @@ HYPRE_SStructSplitCreate( MPI_Comm             comm,
    (solver -> num_iterations)  = 0;
    (solver -> rel_norm)        = 0;
    (solver -> ssolver)         = HYPRE_SMG;
+   (solver -> matvec_data)     = NULL;
 
    *solver_ptr = solver;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -105,8 +94,6 @@ HYPRE_SStructSplitCreate( MPI_Comm             comm,
 int 
 HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
 {
-   int ierr = 0;
-
    hypre_SStructVector     *y;
    int                      nparts;
    int                     *nvars;
@@ -157,10 +144,11 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
       hypre_TFree(ssolver_solve);
       hypre_TFree(ssolver_destroy);
       hypre_TFree(ssolver_data);
+      hypre_SStructMatvecDestroy(solver -> matvec_data);
       hypre_TFree(solver);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -172,8 +160,6 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   int ierr = 0;
-
    hypre_SStructVector     *y;
    int                      nparts;
    int                     *nvars;
@@ -248,12 +234,27 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
          syH = (HYPRE_StructVector) sy;
          switch(ssolver)
          {
+            case HYPRE_Jacobi:
+               HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);
+               HYPRE_StructJacobiSetMaxIter(sdata, 1);
+               HYPRE_StructJacobiSetTol(sdata, 0.0);
+               if (solver -> zero_guess)
+               {
+                  HYPRE_StructJacobiSetZeroGuess(sdata);
+               }
+               HYPRE_StructJacobiSetup(sdata, sAH, syH, sxH);
+               ssolve = HYPRE_StructJacobiSolve;
+               sdestroy = HYPRE_StructJacobiDestroy;
+               break;
             case HYPRE_SMG:
                HYPRE_StructSMGCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructSMGSetMemoryUse(sdata, 0);
                HYPRE_StructSMGSetMaxIter(sdata, 1);
                HYPRE_StructSMGSetTol(sdata, 0.0);
-               HYPRE_StructSMGSetZeroGuess(sdata);
+               if (solver -> zero_guess)
+               {
+                  HYPRE_StructSMGSetZeroGuess(sdata);
+               }
                HYPRE_StructSMGSetNumPreRelax(sdata, 1);
                HYPRE_StructSMGSetNumPostRelax(sdata, 1);
                HYPRE_StructSMGSetLogging(sdata, 0);
@@ -266,7 +267,10 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                HYPRE_StructPFMGCreate(comm, (HYPRE_StructSolver *)&sdata);
                HYPRE_StructPFMGSetMaxIter(sdata, 1);
                HYPRE_StructPFMGSetTol(sdata, 0.0);
-               HYPRE_StructPFMGSetZeroGuess(sdata);
+               if (solver -> zero_guess)
+               {
+                  HYPRE_StructPFMGSetZeroGuess(sdata);
+               }
                HYPRE_StructPFMGSetRelaxType(sdata, 1);
                HYPRE_StructPFMGSetNumPreRelax(sdata, 1);
                HYPRE_StructPFMGSetNumPostRelax(sdata, 1);
@@ -290,8 +294,13 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
    (solver -> ssolver_solve)   = ssolver_solve;
    (solver -> ssolver_destroy) = ssolver_destroy;
    (solver -> ssolver_data)    = ssolver_data;
+   if ((solver -> tol) > 0.0)
+   {
+      hypre_SStructMatvecCreate(&(solver -> matvec_data));
+      hypre_SStructMatvecSetup((solver -> matvec_data), A, x);
+   }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -303,16 +312,16 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
                          HYPRE_SStructVector b,
                          HYPRE_SStructVector x )
 {
-   int ierr = 0;
-
    hypre_SStructVector     *y                = (solver -> y);
    int                      nparts           = (solver -> nparts);
    int                     *nvars            = (solver -> nvars);
    void                 ****smatvec_data     = (solver -> smatvec_data);
    int                  (***ssolver_solve)() = (solver -> ssolver_solve);
    void                  ***ssolver_data     = (solver -> ssolver_data);
+   double                   tol              = (solver -> tol);
    int                      max_iter         = (solver -> max_iter);
    int                      zero_guess       = (solver -> zero_guess);
+   void                    *matvec_data      = (solver -> matvec_data);
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;
@@ -327,14 +336,48 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_ParVector         *pary;
 
    int                      iter, part, vi, vj;
+   double                   b_dot_b, r_dot_r;
+
+
+
+   /* part of convergence check */
+   if (tol > 0.0)
+   {
+      /* eps = (tol^2) */
+      hypre_SStructInnerProd(b, b, &b_dot_b);
+
+      /* if rhs is zero, return a zero solution */
+      if (b_dot_b == 0.0)
+      {
+         hypre_SStructVectorSetConstantValues(x, 0.0);
+         (solver -> rel_norm) = 0.0;
+
+         return hypre_error_flag;
+      }
+   }
 
    for (iter = 0; iter < max_iter; iter++)
    {
+      /* convergence check */
+      if (tol > 0.0)
+      {
+         /* compute fine grid residual (b - Ax) */
+         hypre_SStructCopy(b, y);
+         hypre_SStructMatvecCompute(matvec_data, -1.0, A, x, 1.0, y);
+         hypre_SStructInnerProd(y, y, &r_dot_r);
+         (solver -> rel_norm) = sqrt(r_dot_r/b_dot_b);
+
+         if ((solver -> rel_norm) < tol)
+         {
+            break;
+         }
+      }
+
       /* copy b into y */
       hypre_SStructCopy(b, y);
 
       /* compute y = y + Nx */
-      if (!zero_guess)
+      if (!zero_guess || (iter > 0))
       {
          for (part = 0; part < nparts; part++)
          {
@@ -384,7 +427,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
 
    (solver -> num_iterations) = iter;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -394,9 +437,8 @@ int
 HYPRE_SStructSplitSetTol( HYPRE_SStructSolver solver,
                           double              tol )
 {
-   int ierr = 0;
    (solver -> tol) = tol;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -406,9 +448,8 @@ int
 HYPRE_SStructSplitSetMaxIter( HYPRE_SStructSolver solver,
                               int                 max_iter )
 {
-   int ierr = 0;
    (solver -> max_iter) = max_iter;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -417,9 +458,8 @@ HYPRE_SStructSplitSetMaxIter( HYPRE_SStructSolver solver,
 int
 HYPRE_SStructSplitSetZeroGuess( HYPRE_SStructSolver solver )
 {
-   int ierr = 0;
    (solver -> zero_guess) = 1;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -428,9 +468,8 @@ HYPRE_SStructSplitSetZeroGuess( HYPRE_SStructSolver solver )
 int
 HYPRE_SStructSplitSetNonZeroGuess( HYPRE_SStructSolver solver )
 {
-   int ierr = 0;
    (solver -> zero_guess) = 0;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -440,9 +479,8 @@ int
 HYPRE_SStructSplitSetStructSolver( HYPRE_SStructSolver solver,
                                    int                 ssolver )
 {
-   int ierr = 0;
    (solver -> ssolver) = ssolver;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -452,9 +490,8 @@ int
 HYPRE_SStructSplitGetNumIterations( HYPRE_SStructSolver  solver,
                                     int                 *num_iterations )
 {
-   int ierr = 0;
    *num_iterations = (solver -> num_iterations);
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -464,6 +501,6 @@ int
 HYPRE_SStructSplitGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 double              *norm )
 {
-   int ierr = 0;
-   return ierr;
+   *norm = (solver -> rel_norm);
+   return hypre_error_flag;
 }

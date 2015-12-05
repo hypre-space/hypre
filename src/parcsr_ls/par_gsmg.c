@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.36 $
+ * $Revision: 2.40 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -44,7 +31,7 @@
 #include <essl.h>
 #else
 #include "fortran.h"
-int hypre_F90_NAME_BLAS(dgels, DGELS)(char *, int *, int *, int *, double *, 
+int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, int *, int *, int *, double *, 
   int *, double *, int *, double *, int *, int *);
 #endif
 
@@ -724,7 +711,7 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V,
    {
    char trans = 'N';
    int  one   = 1;
-   hypre_F90_NAME_BLAS(dgels, DGELS)(&trans, &num, &nc, &one, a, &num,
+   hypre_F90_NAME_LAPACK(dgels, DGELS)(&trans, &num, &nc, &one, a, &num,
       b, &temp, work, &work_size, &info);
 
    if (info != 0)
@@ -1113,7 +1100,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
     *  Loop over fine grid points.
     *-----------------------------------------------------------------------*/
     
-#define HYPRE_SMP_PRIVATE i,j,jl,i1,i2,jj,jj1,ns,ne,size,rest,sum,distribute,P_marker,P_marker_offd,jj_counter,jj_counter_offd,c_num,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd
+#define HYPRE_SMP_PRIVATE i,j,jl,i1,jj,ns,ne,size,rest,P_marker,jj_counter,jj_counter_offd
 #include "../utilities/hypre_smp_forloop.h"
    for (jl = 0; jl < num_threads; jl++)
    {

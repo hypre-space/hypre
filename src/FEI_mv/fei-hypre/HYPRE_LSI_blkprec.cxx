@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.14 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -88,10 +75,6 @@ extern "C" {
    int HYPRE_LSI_MLSetPostSmoother( HYPRE_Solver, int );
    int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver, int );
 }
-#endif
-#ifdef HAVE_SUPERLU
-#include "dsp_defs.h"
-#include "superlu_util.h"
 #endif
 
 //******************************************************************************
@@ -413,9 +396,10 @@ int HYPRE_LSI_BlockP::setParams(char *params)
    if ( !strcmp(param2, "help") )
    {
       printf("Available options for blockP are : \n");
-      printf("      blockD \n");
-      printf("      blockT \n");
-      printf("      blockLU \n");
+      printf("      blockD (block diagonal)\n");
+      printf("      blockS (block diagonal with Schur complement\n");
+      printf("      blockT (block tridiagonal)\n");
+      printf("      blockLU (block LU) \n");
       printf("      outputLevel <d> \n");
       printf("      block1FieldID <d> (-3 : special for implicitHydro)\n");
       printf("      block2FieldID <d> (-3 : special for implicitHydro)\n");
@@ -423,7 +407,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      lumpedMassScheme <diag,ainv> \n");
       printf("      invA11PSNlevels <d> \n");
       printf("      invA11PSThresh <f> \n");
-      printf("      A11Solver <cg,gmres,boomeramg,diag> \n");
+      printf("      A11Solver <cg,gmres,boomeramg,diag,identity> \n");
       printf("      A11Tolerance <f> \n");
       printf("      A11MaxIterations <d> \n");
       printf("      A11Precon <pilut,boomeramg,euclid,parasails,ddilut,mli>\n");
@@ -446,7 +430,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A11PreconMLIPweight <f> \n");
       printf("      A11PreconMLINodeDOF <d> \n");
       printf("      A11PreconMLINullDim <d> \n");
-      printf("      A22Solver <cg,gmres,boomeramg,diag \n");
+      printf("      A22Solver <cg,gmres,boomeramg,diag,identity>\n");
       printf("      A22Tolerance <f> \n");
       printf("      A22MaxIterations <d> \n");
       printf("      A22Precon <pilut,boomeramg,euclid,parasails,ddilut,mli>\n");
@@ -475,6 +459,12 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       scheme_ = HYPRE_INCFLOW_BDIAG;
       if ( outputLevel_ > 0 ) 
          printf("HYPRE_LSI_BlockP::select block diagonal.\n");
+   }
+   else if ( !strcmp(param2, "blockS") )
+   {
+      scheme_ = HYPRE_INCFLOW_SDIAG;
+      if ( outputLevel_ > 0 ) 
+         printf("HYPRE_LSI_BlockP::select block diagonal with Schur.\n");
    }
    else if ( !strcmp(param2, "blockT") )
    {
@@ -561,6 +551,15 @@ int HYPRE_LSI_BlockP::setParams(char *params)
          A11Params_.SolverID_ = 3;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11 solver = diag\n");
       }
+      else if ( !strcmp(param3, "identity") ) 
+      {
+         A11Params_.SolverID_ = 9;
+         if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11 solver = identity\n");
+      }
+      else
+      {
+         printf("HYPRE_LSI_BlockP::invalid A11 solver %s.\n",param3);
+      }
    }
    else if ( !strcmp(param2, "A22Solver") )
    {
@@ -584,6 +583,15 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       {
          A22Params_.SolverID_ = 3;
          if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22 solver = diag\n");
+      }
+      else if ( !strcmp(param3, "identity") ) 
+      {
+         A22Params_.SolverID_ = 9;
+         if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22 solver = identity\n");
+      }
+      else
+      {
+         printf("HYPRE_LSI_BlockP::invalid A22 solver %s.\n",param3);
       }
    }
    else if ( !strcmp(param2, "A11Tolerance") )
@@ -1026,7 +1034,7 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    MPI_Comm mpi_comm;
    HYPRE_IJMatrix     Mmat, B22mat;
    HYPRE_ParCSRMatrix Cmat_csr, Mmat_csr, Smat_csr, A22mat_csr, B22mat_csr;
-   HYPRE_ParCSRMatrix A11_csr;
+   HYPRE_ParCSRMatrix A11mat_csr;
    HYPRE_Solver       parasails;
 
    //------------------------------------------------------------------
@@ -1039,11 +1047,20 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    // build the blocks A11, A12, and the A22 block, if any
    //------------------------------------------------------------------
 
+   Mmat = NULL;
+   Mmat_csr = NULL;
+   B22mat = NULL;
+   B22mat_csr = NULL;
+   Cmat_csr = NULL;
+   Smat_csr = NULL;
+   A11mat_csr = NULL;
+   A22mat_csr = NULL;
    Amat_ = Amat;
    computeBlockInfo();
    buildBlocks();
 
    //------------------------------------------------------------------
+   // If no approximate Schur complement needed, create zero matrix.
    // Extract the velocity mass matrix in HYPRE_ParCSRMatrix format :
    // the mass matrix comes either from user (lumpedMassDiag_) or 
    // extracted from the diagonal of the A(1,1) matrix => mass_v
@@ -1056,14 +1073,15 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    AEnd   = APartition_[mypid+1] - 1;
    ANRows = AEnd - AStart + 1;
 
-   if ( lumpedMassScheme_ == 1 )
+   if (lumpedMassScheme_ == 1)
    {
       HYPRE_ParaSailsCreate(mpi_comm, &parasails);
-      HYPRE_ParaSailsSetParams(parasails, lumpedMassThresh_, lumpedMassNlevels_);
+      HYPRE_ParaSailsSetParams(parasails,lumpedMassThresh_,
+                               lumpedMassNlevels_);
       HYPRE_ParaSailsSetFilter(parasails, 0.1);
       HYPRE_ParaSailsSetLogging(parasails, 1);
-      HYPRE_IJMatrixGetObject(A11mat_, (void **) &A11_csr);
-      HYPRE_ParaSailsSetup(parasails, A11_csr, NULL, NULL);
+      HYPRE_IJMatrixGetObject(A11mat_, (void **) &A11mat_csr);
+      HYPRE_ParaSailsSetup(parasails, A11mat_csr, NULL, NULL);
       HYPRE_ParaSailsBuildIJMatrix(parasails, &Mmat);
    }
    else
@@ -1073,9 +1091,8 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
          checkZeros = 1;
          for ( i = 0; i < lumpedMassLength_; i++ )
             if ( lumpedMassDiag_[i] == 0.0 ) {checkZeros = 0; break;}
-      } 
+      }
       else checkZeros = 0;
-   
       MNRows    = ANRows - P22Size_;
       MStartRow = AStart - P22Offsets_[mypid];
       MRowLengs = new int[MNRows];
@@ -1098,9 +1115,11 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
                HYPRE_ParCSRMatrixGetRow(Amat_,irow,&rowSize,&colInd,&colVal);
                for ( j = 0; j < rowSize; j++ ) 
                   if ( colInd[j] == irow ) { dtemp = colVal[j]; break;}
-               HYPRE_ParCSRMatrixRestoreRow(Amat_,irow,&rowSize,&colInd,&colVal);
+               HYPRE_ParCSRMatrixRestoreRow(Amat_,irow,&rowSize,&colInd,
+                                            &colVal);
             }
             dtemp = 1.0 / dtemp;
+            if (scheme_ == HYPRE_INCFLOW_BDIAG) dtemp = 0.0;
             HYPRE_IJMatrixSetValues(Mmat, 1, &one, (const int *) &newRow, 
                           (const int *) &newRow, (const double *) &dtemp);
             newRow++;
@@ -1115,15 +1134,15 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    // create Pressure Poisson matrix (S = C^T M^{-1} C)
    //------------------------------------------------------------------
    
-   if (outputLevel_ >= 1) printf("BlockPrecond setup : C^T M^{-1} C begins\n");
+   if (outputLevel_ >= 1) printf("BlockPrecond setup: C^T M^{-1}C begins\n");
 
    HYPRE_IJMatrixGetObject(A12mat_, (void **) &Cmat_csr);
-   hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) Cmat_csr,
-                                       (hypre_ParCSRMatrix *) Mmat_csr,
-                                       (hypre_ParCSRMatrix *) Cmat_csr,
-                                       (hypre_ParCSRMatrix **) &Smat_csr);
+   hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) Cmat_csr,
+                                      (hypre_ParCSRMatrix *) Mmat_csr,
+                                      (hypre_ParCSRMatrix *) Cmat_csr,
+                                      (hypre_ParCSRMatrix **) &Smat_csr);
 
-   if (outputLevel_ >= 1) printf("BlockPrecond setup : C^T M^{-1} C ends\n");
+   if (outputLevel_ >= 1) printf("BlockPrecond setup: C^T M^{-1} C ends\n");
 
    //------------------------------------------------------------------
    // construct new A22 = A22 - S
@@ -1151,10 +1170,26 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
       if ( B22mat != NULL )
       {
          HYPRE_ParCSRMatrixGetRow(B22mat_csr,irow,&rowSize2,&colInd2,NULL);
+#if 1
+         //==========================================
+         // extract the whole S
+         //------------------------------------------
          newRowSize += rowSize2;
          newColInd = new int[newRowSize];
          for (j = 0; j < rowSize;  j++) newColInd[j] = colInd[j];
          for (j = 0; j < rowSize2; j++) newColInd[j+rowSize] = colInd2[j];
+#else
+         //==========================================
+         // extract only the diagonal from S
+         //------------------------------------------
+         //newRowSize++;
+         //newColInd = new int[newRowSize];
+         //for (j = 0; j < rowSize;  j++)
+         //   if (colInd[j] == irow) {newColInd[0] = colInd[j]; break;}
+         //if (j == rowSize) printf("ERROR : diagonal of S not found.\n"); 
+         //for (j = 0; j < rowSize2; j++) newColInd[j+1] = colInd2[j];
+         //==========================================
+#endif
          qsort0(newColInd, 0, newRowSize-1);
          count = 0;
          for ( j = 1; j < newRowSize; j++ )
@@ -1183,31 +1218,82 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
       HYPRE_ParCSRMatrixGetRow(Smat_csr,irow,&rowSize,&colInd,&colVal);
       if ( B22mat == NULL )
       {
+#if 1
+         //==========================================
+         // extract the whole S
+         //------------------------------------------
          newRowSize = rowSize;
          newColInd  = new int[newRowSize];
          newColVal  = new double[newRowSize];
          for (j = 0; j < rowSize; j++) 
          {
             newColInd[j] = colInd[j];
-            newColVal[j] = colVal[j];
+            newColVal[j] = - colVal[j];
          }
+#else
+         //==========================================
+         // extract only the diagonal from S
+         //------------------------------------------
+         //newRowSize = 1;
+         //newColInd  = new int[newRowSize];
+         //newColVal  = new double[newRowSize];
+         //for (j = 0; j < rowSize; j++) 
+         //{
+         //   if (colInd[j] == irow)
+         //   {
+         //      newColInd[0] = colInd[j];
+         //      newColVal[0] = - colVal[j];
+         //      break;
+         //   }
+         //}
+         //if (j == rowSize) printf("ERROR : diagonal of S not found.\n"); 
+         //==========================================
+#endif
       }
       else
       {
          HYPRE_ParCSRMatrixGetRow(B22mat_csr,irow,&rowSize2,&colInd2,&colVal2);
+#if 1
+         //==========================================
+         // extract the whole S
+         //------------------------------------------
          newRowSize = rowSize + rowSize2;
          newColInd = new int[newRowSize];
          newColVal = new double[newRowSize];
          for (j = 0; j < rowSize; j++) 
          {
             newColInd[j] = colInd[j];
-            newColVal[j] = colVal[j];
+            newColVal[j] = - colVal[j];
          }
          for (j = 0; j < rowSize2; j++) 
          {
             newColInd[j+rowSize] = colInd2[j];
-            newColVal[j+rowSize] = - colVal2[j];
+            newColVal[j+rowSize] = colVal2[j];
          }
+#else
+         //==========================================
+         // extract only the diagonal from S
+         //------------------------------------------
+         //newRowSize = rowSize2 + 1;
+         //newColInd = new int[newRowSize];
+         //newColVal = new double[newRowSize];
+         //for (j = 0; j < rowSize; j++) 
+         //{
+         //   if (colInd[j] == irow)
+         //   {
+         //      newColInd[0] = colInd[j];
+         //      newColVal[0] = - colVal[j] * 1000;
+         //      break;
+         //   }
+         //}
+         //if (j == rowSize) printf("ERROR : diagonal of S not found.\n"); 
+         //for (j = 0; j < rowSize2; j++) 
+         //{
+         //   newColInd[j+1] = colInd2[j];
+         //   newColVal[j+1] = colVal2[j];
+         //}
+#endif
+
          qsort1(newColInd, newColVal, 0, newRowSize-1);
          count = 0;
          for ( j = 1; j < newRowSize; j++ )
@@ -1234,6 +1320,8 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
    HYPRE_IJMatrixAssemble(A22mat_);
    HYPRE_IJMatrixGetObject(A22mat_, (void **) &A22mat_csr);
    if ( B22mat != NULL ) HYPRE_IJMatrixDestroy(B22mat);
+   if ( Mmat != NULL ) HYPRE_IJMatrixDestroy(Mmat);
+   if ( Smat_csr != NULL ) HYPRE_ParCSRMatrixDestroy(Smat_csr);
 
    if ( outputLevel_ > 2 && A22mat_csr != NULL )
    {
@@ -1365,10 +1453,15 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
       HYPRE_ParCSRPCGSetTol( A11Solver_, A11Params_.Tol_ );
    else if ( A11Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSetTol( A11Solver_, A11Params_.Tol_);
+   else if ( A11Params_.SolverID_ == 2 )
+      HYPRE_BoomerAMGSetTol( A11Solver_, A11Params_.Tol_);
 
    switch (scheme_)
    {
       case HYPRE_INCFLOW_BDIAG : solveBDSolve(X1vec_, X2vec_, F1vec_, F2vec_);
+                                 break;
+
+      case HYPRE_INCFLOW_SDIAG : solveBDSolve(X1vec_, X2vec_, F1vec_, F2vec_);
                                  break;
 
       case HYPRE_INCFLOW_BTRI :  solveBTSolve(X1vec_, X2vec_, F1vec_, F2vec_);
@@ -1478,6 +1571,7 @@ int HYPRE_LSI_BlockP::print()
          case 6 : printf("* A22 preconditioner    = ddilut\n"); break;
          case 7 : printf("* A22 preconditioner    = ml\n"); break;
          case 8 : printf("* A22 preconditioner    = mli\n"); break;
+         case 9 : printf("* A22 preconditioner    = identity\n"); break;
       }
       printf("* A22 solver tol        = %e\n", A22Params_.Tol_);
       printf("* A22 solver maxiter    = %d\n", A22Params_.MaxIter_);
@@ -1520,7 +1614,7 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
    {
       if      (A22Params_.SolverID_ == 0) HYPRE_ParCSRPCGDestroy(A22Solver_);
       else if (A22Params_.SolverID_ == 1) HYPRE_ParCSRGMRESDestroy(A22Solver_);
-      else if (A11Params_.SolverID_ == 2) HYPRE_BoomerAMGDestroy(A22Solver_);
+      else if (A22Params_.SolverID_ == 2) HYPRE_BoomerAMGDestroy(A22Solver_);
    }
    if ( A11Precond_ != NULL ) 
    {
@@ -1564,9 +1658,9 @@ int HYPRE_LSI_BlockP::destroySolverPrecond()
 
 int HYPRE_LSI_BlockP::computeBlockInfo()
 {
-   int      mypid, nprocs, start_row, end_row, irow;
-   int      j, row_size, *col_ind, *disp_array;
-   int      field_id, jcol, zero_diag;
+   int      mypid, nprocs, start_row, end_row, irow, nblks, *elem_blk_ids;
+   int      j, row_size, *col_ind, *disp_array, interleave, lumping, elemDOF;
+   int      field_id, jcol, zero_diag, nElems, nNodes, nEqns;
    double   *col_val;
    MPI_Comm mpi_comm;
 
@@ -1622,7 +1716,15 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
    }
    else if ( block1FieldID_ == -7 )
    {
-      P22Size_ = block2FieldID_; 
+      nblks = lookup_->getNumElemBlocks();
+      elem_blk_ids = (int *) lookup_->getElemBlockIDs();
+      P22Size_ = 0;
+      for ( irow = 0; irow < nblks; irow++ )
+      {
+         lookup_->getElemBlockInfo(elem_blk_ids[irow], interleave, lumping, 
+                                   elemDOF, nElems, nNodes, nEqns);
+         P22Size_ += nElems;
+      }
    }
    else
    {
@@ -1678,7 +1780,7 @@ int HYPRE_LSI_BlockP::computeBlockInfo()
 
    MPI_Allreduce(&P22Size_, &P22GSize_, 1, MPI_INT, MPI_SUM, mpi_comm);
 
-   if ( outputLevel_ > 0 )
+   if (outputLevel_ > 0)
    {
       if ( P22GSize_ == 0 && mypid == 0 )
          printf("computeBlockInfo WARNING : P22Size = 0 on all processors.\n");
@@ -2028,7 +2130,7 @@ int HYPRE_LSI_BlockP::buildBlocks()
 int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
                                   HYPRE_LSI_BLOCKP_PARAMS param_ptr)
 {
-   int                i, *nsweeps, *relaxType;
+   int                i, nprocs, *nsweeps, *relaxType;
    char               **targv;
 #ifdef HAVE_MLI
    char               paramString[100];
@@ -2042,6 +2144,7 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
 
    HYPRE_IJMatrixGetObject( Amat, (void **) &Amat_csr );
    HYPRE_ParCSRMatrixGetComm( Amat_csr, &mpi_comm );
+   MPI_Comm_size(mpi_comm, &nprocs);
    precon = NULL;
 
    //------------------------------------------------------------------
@@ -2075,6 +2178,12 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           relaxType = hypre_CTAlloc(int,4);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*precon, relaxType);
+          //double relax_wt[25];
+          //if (nprocs > 1)
+          //{
+          //   for ( i = 0; i < 25; i++ ) relax_wt[i] = -10.0;
+          //   HYPRE_BoomerAMGSetRelaxOmega(*precon, relax_wt);
+          //}
           break;
       case 4 :
           HYPRE_ParCSRPilutCreate( mpi_comm, precon );
@@ -2156,7 +2265,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
                                   HYPRE_Solver precon, 
                                   HYPRE_LSI_BLOCKP_PARAMS param_ptr)
 {
-   int                i, *nsweeps, *relaxType;
+   int                i, nprocs, *nsweeps, *relaxType;
    MPI_Comm           mpi_comm;
    HYPRE_ParCSRMatrix Amat_csr;
    HYPRE_ParVector    f_csr, x_csr;
@@ -2169,6 +2278,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
    HYPRE_IJVectorGetObject( fvec, (void **) &f_csr );
    HYPRE_IJVectorGetObject( xvec, (void **) &x_csr );
    HYPRE_ParCSRMatrixGetComm( Amat_csr, &mpi_comm );
+   MPI_Comm_size(mpi_comm, &nprocs);
 
    //------------------------------------------------------------------
    // create solver context
@@ -2233,7 +2343,7 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
 
       case 1 :
           HYPRE_ParCSRGMRESCreate(mpi_comm, solver);
-          HYPRE_ParCSRGMRESSetMaxIter(*solver, param_ptr.MaxIter_ );
+          HYPRE_ParCSRGMRESSetMaxIter(*solver, param_ptr.MaxIter_);
           HYPRE_ParCSRGMRESSetTol(*solver, param_ptr.Tol_);
           HYPRE_ParCSRGMRESSetLogging(*solver, outputLevel_);
           HYPRE_ParCSRGMRESSetKDim(*solver, 50);
@@ -2287,9 +2397,9 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
 
       case 2 :
           HYPRE_BoomerAMGCreate(solver);
-          HYPRE_BoomerAMGSetMaxIter(*solver, 1);
+          HYPRE_BoomerAMGSetMaxIter(*solver, param_ptr.MaxIter_);
           HYPRE_BoomerAMGSetCycleType(*solver, 1);
-          HYPRE_BoomerAMGSetTol(*solver, 1.0e-20);
+          //HYPRE_BoomerAMGSetTol(*solver, 1.0e-20);
           HYPRE_BoomerAMGSetPrintLevel(*solver, outputLevel_);
           HYPRE_BoomerAMGSetMaxLevels(*solver, 25);
           HYPRE_BoomerAMGSetMeasureType(*solver, 0);
@@ -2303,8 +2413,14 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
           relaxType = hypre_CTAlloc(int,4);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*solver, relaxType);
-          HYPRE_BoomerAMGSetup(*solver, Amat_csr, f_csr, x_csr);
+          //double relax_wt[25];
+          //if (nprocs > 1)
+          //{
+          //   for ( i = 0; i < 25; i++ ) relax_wt[i] = -10.0;
+          //   HYPRE_BoomerAMGSetRelaxOmega(*solver, relax_wt);
+          //}
           precon = NULL;
+          HYPRE_BoomerAMGSetup(*solver, Amat_csr, f_csr, x_csr);
           break;
 
       case 3 :
@@ -2352,6 +2468,9 @@ int HYPRE_LSI_BlockP::solveBDSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGSolve( A22Solver_, A22mat_csr, f2_csr, x2_csr );
    else if ( A22Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A22Solver_, A22mat_csr, f2_csr, x2_csr );
+   else if ( A22Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f2_csr, 
+                                        (hypre_ParVector *) x2_csr);
    else 
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A22 solver.\n");
@@ -2366,6 +2485,9 @@ int HYPRE_LSI_BlockP::solveBDSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGSolve( A11Solver_, A11mat_csr, f1_csr, x1_csr );
    else if ( A11Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A11Solver_, A11mat_csr, f1_csr, x1_csr );
+   else if ( A11Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f1_csr, 
+                                        (hypre_ParVector *) x1_csr);
    else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");
@@ -2414,6 +2536,9 @@ int HYPRE_LSI_BlockP::solveBTSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGSolve( A22Solver_, A22mat_csr, f2_csr, x2_csr );
    else if ( A22Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A22Solver_, A22mat_csr, f2_csr, x2_csr );
+   else if ( A22Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f2_csr, 
+                                        (hypre_ParVector *) x2_csr);
    else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A22 solver.\n");
@@ -2428,6 +2553,9 @@ int HYPRE_LSI_BlockP::solveBTSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGSolve( A11Solver_, A11mat_csr, f1_csr, x1_csr );
    else if ( A11Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A11Solver_, A11mat_csr, f1_csr, x1_csr );
+   else if ( A11Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f1_csr, 
+                                        (hypre_ParVector *) x1_csr);
    else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");
@@ -2476,6 +2604,9 @@ int HYPRE_LSI_BlockP::solveBLUSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGSolve( A11Solver_, A11mat_csr, f1_csr, x1_csr );
    else if ( A11Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A11Solver_, A11mat_csr, f1_csr, x1_csr );
+   else if ( A11Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f1_csr, 
+                                        (hypre_ParVector *) x1_csr);
    else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");
@@ -2484,12 +2615,15 @@ int HYPRE_LSI_BlockP::solveBLUSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
    HYPRE_ParCSRMatrixMatvecT(1.0, A12mat_csr, y1_csr, -1.0, f2_csr);
    if ( A22Params_.SolverID_ == 0 )
       HYPRE_ParCSRPCGSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
-   else if ( A11Params_.SolverID_ == 1 )
+   else if ( A22Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
    else if ( A22Params_.SolverID_ == 2 )
       HYPRE_BoomerAMGSolve( A22Solver_, A22mat_csr, f2_csr, x2_csr );
    else if ( A22Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A22Solver_, A22mat_csr, f2_csr, x2_csr );
+   else if ( A22Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f2_csr, 
+                                        (hypre_ParVector *) x2_csr);
    else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A22 solver.\n");
@@ -2504,6 +2638,9 @@ int HYPRE_LSI_BlockP::solveBLUSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_BoomerAMGSolve( A11Solver_, A11mat_csr, f1_csr, x1_csr );
    else if ( A11Params_.SolverID_ == 3 )
       HYPRE_ParCSRDiagScale( A11Solver_, A11mat_csr, f1_csr, x1_csr );
+   else if ( A11Params_.SolverID_ == 9 )
+      hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) f1_csr, 
+                                        (hypre_ParVector *) x1_csr);
    else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A11 solver.\n");

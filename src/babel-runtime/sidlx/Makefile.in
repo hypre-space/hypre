@@ -84,6 +84,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/m4/llnl_confirm_babel_python_support.m4 \
 	$(top_srcdir)/m4/llnl_cxx_library_ldflags.m4 \
 	$(top_srcdir)/m4/llnl_cxx_old_header_suffix.m4 \
+	$(top_srcdir)/m4/llnl_fortran_string_test.m4 \
 	$(top_srcdir)/m4/llnl_f77_c_config.m4 \
 	$(top_srcdir)/m4/llnl_f77_dummy_main.m4 \
 	$(top_srcdir)/m4/llnl_f77_library_ldflags.m4 \

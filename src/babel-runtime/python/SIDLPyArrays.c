@@ -1,8 +1,8 @@
 /*
  * File:        sidlPyArrays.c
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.5 $
- * Date:        $Date: 2006/08/29 22:29:27 $
+ * Revision:    @(#) $Revision: 1.6 $
+ * Date:        $Date: 2007/09/27 19:35:21 $
  * Description: Runtime support routines to convert sidl arrays to/from Python
  *
  * This file provides functions to convert sidl arrays to Python with or
@@ -77,6 +77,7 @@ void sidl_python_## sidlType ##_destroy(struct sidl__array *array)      \
     struct sidl_python_## sidlType ##_array *parray =                   \
       (struct sidl_python_## sidlType ##_array *)array;                 \
     Py_XDECREF(parray->d_numarray);                                     \
+    sidl__array_remove(array);                                          \
     free((void *)array);                                                \
   }                                                                     \
 }                                                                       \
@@ -125,6 +126,7 @@ sidl_python_## sidlType ##_create(const int32_t dimen,                  \
     memcpy(result->d_array.d_metadata.d_stride,                         \
            stride,sizeof(int32_t)*dimen);                               \
     result->d_array.d_firstElement = first;                             \
+    sidl__array_add((struct sidl__array*)&(result->d_array));           \
     Py_XINCREF(pyobj);                                                  \
     result->d_numarray = pyobj;                                         \
   }                                                                     \

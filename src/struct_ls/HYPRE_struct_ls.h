@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.14 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -73,6 +60,22 @@ typedef int (*HYPRE_PtrToStructSolverFcn)(HYPRE_StructSolver,
                                           HYPRE_StructMatrix,
                                           HYPRE_StructVector,
                                           HYPRE_StructVector);
+
+
+#ifndef HYPRE_MODIFYPC
+#define HYPRE_MODIFYPC
+/* if pc not defined, then may need HYPRE_SOLVER also */
+
+ #ifndef HYPRE_SOLVER_STRUCT
+ #define HYPRE_SOLVER_STRUCT
+ struct hypre_Solver_struct;
+ typedef struct hypre_Solver_struct *HYPRE_Solver;
+ #endif
+
+typedef int (*HYPRE_PtrToModifyPCFcn)(HYPRE_Solver,
+                                         int,
+                                         double);
+#endif
 
 /*@}*/
 
@@ -479,6 +482,18 @@ int HYPRE_StructPCGSetTol(HYPRE_StructSolver solver,
                           double             tol);
 
 /**
+ * (Optional) Set the absolute convergence tolerance (default is
+ * 0). If one desires the convergence test to check the absolute
+ * convergence tolerance {\it only}, then set the relative convergence
+ * tolerance to 0.0.  (The default convergence test is $ <C*r,r> \leq$
+ * max(relative$\_$tolerance$^{2} \ast <C*b, b>$, absolute$\_$tolerance$^2$).)
+ **/
+int HYPRE_StructPCGSetAbsoluteTol(HYPRE_StructSolver solver,
+                                  double             tol);
+
+
+
+/**
  * (Optional) Set maximum number of iterations.
  **/
 int HYPRE_StructPCGSetMaxIter(HYPRE_StructSolver solver,
@@ -598,11 +613,22 @@ HYPRE_StructGMRESSolve( HYPRE_StructSolver solver,
 
 
 /**
- * (Optional) Set the convergence tolerance.
+ * (Optional) Set the relative convergence tolerance.
  **/
 int
 HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
                          double             tol    );
+
+/**
+ * (Optional) Set the absolute convergence tolerance  (default: 0).
+ *  If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
+ **/
+int
+HYPRE_StructGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
+                                 double             tol    );
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -610,6 +636,12 @@ HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
 int
 HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
                              int                max_iter );
+/**
+ * (Optional) Set the dimension of the Krylov subspace
+ **/
+int
+HYPRE_StructGMRESSetKDim( HYPRE_StructSolver solver,
+                             int              k_dim );
 
 
 /**
@@ -655,6 +687,268 @@ HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
  **/
 int
 HYPRE_StructGMRESGetResidual( HYPRE_StructSolver  solver,
+                             void   **residual);
+/*@}*/
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Struct FlexGMRES Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int
+HYPRE_StructFlexGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver );
+
+
+/**
+ * Destroy a solver object.
+ **/
+int 
+HYPRE_StructFlexGMRESDestroy( HYPRE_StructSolver solver );
+
+
+/**
+ * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * ignored here, but information about the layout of the data may be used.
+ **/
+int 
+HYPRE_StructFlexGMRESSetup( HYPRE_StructSolver solver,
+                        HYPRE_StructMatrix A,
+                        HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * Solve the system.
+ **/
+int 
+HYPRE_StructFlexGMRESSolve( HYPRE_StructSolver solver,
+                        HYPRE_StructMatrix A,
+                        HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int
+HYPRE_StructFlexGMRESSetTol( HYPRE_StructSolver solver,
+                         double             tol    );
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default: 0).
+ *  If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
+ **/
+int
+HYPRE_StructFlexGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
+                                     double             tol    );
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int
+HYPRE_StructFlexGMRESSetMaxIter( HYPRE_StructSolver solver,
+                             int                max_iter );
+
+/**
+ * (Optional) Set the dimension of the Krylov subspace
+ **/
+int
+HYPRE_StructFlexGMRESSetKDim( HYPRE_StructSolver solver,
+                             int              k_dim );
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int
+HYPRE_StructFlexGMRESSetPrecond( HYPRE_StructSolver         solver,
+                             HYPRE_PtrToStructSolverFcn precond,
+                             HYPRE_PtrToStructSolverFcn precond_setup,
+                             HYPRE_StructSolver         precond_solver );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int
+HYPRE_StructFlexGMRESSetLogging( HYPRE_StructSolver solver,
+                             int                logging );
+
+
+/**
+ * (Optional) Set the amount of printing to do to the screen.
+ **/
+int
+HYPRE_StructFlexGMRESSetPrintLevel( HYPRE_StructSolver solver,
+                             int                level );
+
+/**
+ * Return the number of iterations taken.
+ **/
+int
+HYPRE_StructFlexGMRESGetNumIterations( HYPRE_StructSolver  solver,
+                                   int                *num_iterations );
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int
+HYPRE_StructFlexGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                               double             *norm   );
+
+/**
+ * Return the residual.
+ **/
+int
+HYPRE_StructFlexGMRESGetResidual( HYPRE_StructSolver  solver,
+                             void   **residual);
+
+/**
+ * Set a user-defined function to modify solve-time preconditioner attributes.
+ **/
+
+int HYPRE_StructFlexGMRESSetModifyPC( HYPRE_StructSolver  solver,
+                                      HYPRE_PtrToModifyPCFcn modify_pc);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Struct LGMRES Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int
+HYPRE_StructLGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver );
+
+
+/**
+ * Destroy a solver object.
+ **/
+int 
+HYPRE_StructLGMRESDestroy( HYPRE_StructSolver solver );
+
+
+/**
+ * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * ignored here, but information about the layout of the data may be used.
+ **/
+int 
+HYPRE_StructLGMRESSetup( HYPRE_StructSolver solver,
+                        HYPRE_StructMatrix A,
+                        HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * Solve the system. Details on LGMRES may be found in A. H. Baker,
+ * E.R. Jessup, and T.A. Manteuffel. A technique for accelerating the
+ * convergence of restarted GMRES. SIAM Journal on Matrix Analysis and
+ * Applications, 26 (2005), pp. 962-984. LGMRES(m,k) in the paper
+ * corresponds to LGMRES(Kdim+AugDim, AugDim).
+ **/
+int 
+HYPRE_StructLGMRESSolve( HYPRE_StructSolver solver,
+                        HYPRE_StructMatrix A,
+                        HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int
+HYPRE_StructLGMRESSetTol( HYPRE_StructSolver solver,
+                         double             tol    );
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default: 0) .
+ *  If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
+ **/
+int
+HYPRE_StructLGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
+                                  double             tol    );
+   
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int
+HYPRE_StructLGMRESSetMaxIter( HYPRE_StructSolver solver,
+                             int                max_iter );
+
+/**
+ * (Optional) Set the dimension of the approximation subspace.
+ **/
+int
+HYPRE_StructLGMRESSetKDim( HYPRE_StructSolver solver,
+                             int              k_dim );
+
+/**
+ * (Optional) Set the number of augmentation vectors  (default: 2).
+ **/
+int
+HYPRE_StructLGMRESSetAugDim( HYPRE_StructSolver solver,
+                             int              aug_dim );
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int
+HYPRE_StructLGMRESSetPrecond( HYPRE_StructSolver         solver,
+                             HYPRE_PtrToStructSolverFcn precond,
+                             HYPRE_PtrToStructSolverFcn precond_setup,
+                             HYPRE_StructSolver         precond_solver );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int
+HYPRE_StructLGMRESSetLogging( HYPRE_StructSolver solver,
+                             int                logging );
+
+
+/**
+ * (Optional) Set the amount of printing to do to the screen.
+ **/
+int
+HYPRE_StructLGMRESSetPrintLevel( HYPRE_StructSolver solver,
+                             int                level );
+
+/**
+ * Return the number of iterations taken.
+ **/
+int
+HYPRE_StructLGMRESGetNumIterations( HYPRE_StructSolver  solver,
+                                   int                *num_iterations );
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int
+HYPRE_StructLGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                               double             *norm   );
+
+/**
+ * Return the residual.
+ **/
+int
+HYPRE_StructLGMRESGetResidual( HYPRE_StructSolver  solver,
                              void   **residual);
 /*@}*/
 
@@ -707,6 +1001,19 @@ HYPRE_StructBiCGSTABSolve( HYPRE_StructSolver solver,
 int
 HYPRE_StructBiCGSTABSetTol( HYPRE_StructSolver solver,
                             double             tol    );
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance $\ast \|b\|$, absolute$\_$tolerance).)
+ *
+ **/
+int
+HYPRE_StructBiCGSTABSetAbsoluteTol( HYPRE_StructSolver solver,
+                                    double             tol    );
+
 
 /**
  * (Optional) Set maximum number of iterations.

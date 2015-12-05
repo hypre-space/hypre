@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.6 $
+ ***********************************************************************EHEADER*/
+
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
@@ -8,30 +20,17 @@ extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 /******************************************************************************
  *
@@ -59,30 +58,17 @@ extern "C" {
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 /******************************************************************************
  *
@@ -279,30 +265,17 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 /******************************************************************************
  *
@@ -312,6 +285,9 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 
 #ifndef hypre_MEMORY_HEADER
 #define hypre_MEMORY_HEADER
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -352,13 +328,13 @@ extern "C" {
 #define hypre_FinalizeMemoryDebug()  
 
 #define hypre_TAlloc(type, count) \
-( (type *)hypre_MAlloc((unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
 
 #define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAlloc((unsigned int)(count), (unsigned int)sizeof(type)) )
+( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type)) )
 
 #define hypre_TReAlloc(ptr, type, count) \
-( (type *)hypre_ReAlloc((char *)ptr, (unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count))) )
 
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
@@ -369,16 +345,16 @@ extern "C" {
 #ifdef HYPRE_USE_PTHREADS
 
 #define hypre_SharedTAlloc(type, count) \
-( (type *)hypre_SharedMAlloc((unsigned int)(sizeof(type) * (count))) )
+( (type *)hypre_SharedMAlloc((size_t)(sizeof(type) * (count))) )
 
 
 #define hypre_SharedCTAlloc(type, count) \
-( (type *)hypre_SharedCAlloc((unsigned int)(count),\
-                             (unsigned int)sizeof(type)) )
+( (type *)hypre_SharedCAlloc((size_t)(count),\
+                             (size_t)sizeof(type)) )
 
 #define hypre_SharedTReAlloc(ptr, type, count) \
 ( (type *)hypre_SharedReAlloc((char *)ptr,\
-                              (unsigned int)(sizeof(type) * (count))) )
+                              (size_t)(sizeof(type) * (count))) )
 
 #define hypre_SharedTFree(ptr) \
 ( hypre_SharedFree((char *)ptr), ptr = NULL )
@@ -397,16 +373,16 @@ extern "C" {
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
-int hypre_OutOfMemory( int size );
-char *hypre_MAlloc( int size );
-char *hypre_CAlloc( int count , int elt_size );
-char *hypre_ReAlloc( char *ptr , int size );
-void hypre_Free( char *ptr );
-char *hypre_SharedMAlloc( int size );
-char *hypre_SharedCAlloc( int count , int elt_size );
-char *hypre_SharedReAlloc( char *ptr , int size );
-void hypre_SharedFree( char *ptr );
-double *hypre_IncrementSharedDataPtr( double *ptr , int size );
+int hypre_OutOfMemory ( size_t size );
+char *hypre_MAlloc ( size_t size );
+char *hypre_CAlloc ( size_t count , size_t elt_size );
+char *hypre_ReAlloc ( char *ptr , size_t size );
+void hypre_Free ( char *ptr );
+char *hypre_SharedMAlloc ( size_t size );
+char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
+char *hypre_SharedReAlloc ( char *ptr , size_t size );
+void hypre_SharedFree ( char *ptr );
+double *hypre_IncrementSharedDataPtr ( double *ptr , size_t size );
 
 /* memory_dmalloc.c */
 int hypre_InitMemoryDebugDML( int id );
@@ -421,35 +397,18 @@ void hypre_FreeDML( char *ptr , char *file , int line );
 #endif
 
 #endif
-
-/* random.c */
-void hypre_SeedRand ( int seed );
-double hypre_Rand ( void );
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 /******************************************************************************
  *
@@ -553,30 +512,17 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 
 #ifndef hypre_THREADING_HEADER
@@ -652,30 +598,17 @@ extern int hypre_NumThreads;
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -800,30 +733,17 @@ int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 
 /******************************************************************************
@@ -864,30 +784,17 @@ typedef hypre_ListElement  *hypre_LinkList;
 
 #endif
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 #ifndef hypre_EXCHANGE_DATA_HEADER
 #define hypre_EXCHANGE_DATA_HEADER
@@ -944,69 +851,22 @@ int hypre_DataExchangeList(int num_contacts,
 
 
 #endif /* end of header */
-
-/* amg_linklist.c */
-void dispose_elt ( hypre_LinkList element_ptr );
-void remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
-hypre_LinkList create_elt ( int Item );
-void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
-
-/* binsearch.c */
-int hypre_BinarySearch ( int *list , int value , int list_length );
-int hypre_BinarySearch2 ( int *list , int value , int low , int high , int *spot );
-
-/* qsplit.c */
-int hypre_DoubleQuickSplit ( double *values , int *indices , int list_length , int NumberKept );
-
-/* hypre_qsort.c */
-void swap ( int *v , int i , int j );
-void swap2 ( int *v , double *w , int i , int j );
-void hypre_swap2i ( int *v , int *w , int i , int j );
-void hypre_swap3i ( int *v , int *w , int *z , int i , int j );
-void qsort0 ( int *v , int left , int right );
-void qsort1 ( int *v , double *w , int left , int right );
-void hypre_qsort2i ( int *v , int *w , int left , int right );
-void hypre_qsort2 ( int *v , double *w , int left , int right );
-void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team, UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer and the GNU Lesser General Public License.
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License (as published by the Free
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
-
-/*--------------------------------------------------------------------------
- * HYPRE error codes
- *--------------------------------------------------------------------------*/
-
-#define HYPRE_ERROR_GENERIC         1   /* generic error */
-#define HYPRE_ERROR_MEMORY          2   /* unable to allocate memory */
-#define HYPRE_ERROR_ARG             4   /* argument error */
-/* bits 4-8 are reserved for the index of the argument error */
-#define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
 
 /*--------------------------------------------------------------------------
  * Global variable used in hypre error checking
@@ -1029,6 +889,34 @@ void hypre_error_handler(char *filename, int line, int ierr);
 #endif
 
 #endif
+
+/* amg_linklist.c */
+void dispose_elt ( hypre_LinkList element_ptr );
+void remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
+hypre_LinkList create_elt ( int Item );
+void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
+
+/* binsearch.c */
+int hypre_BinarySearch ( int *list , int value , int list_length );
+int hypre_BinarySearch2 ( int *list , int value , int low , int high , int *spot );
+
+/* hypre_qsort.c */
+void swap ( int *v , int i , int j );
+void swap2 ( int *v , double *w , int i , int j );
+void hypre_swap2i ( int *v , int *w , int i , int j );
+void hypre_swap3i ( int *v , int *w , int *z , int i , int j );
+void qsort0 ( int *v , int left , int right );
+void qsort1 ( int *v , double *w , int left , int right );
+void hypre_qsort2i ( int *v , int *w , int left , int right );
+void hypre_qsort2 ( int *v , double *w , int left , int right );
+void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
+
+/* qsplit.c */
+int hypre_DoubleQuickSplit ( double *values , int *indices , int list_length , int NumberKept );
+
+/* random.c */
+void hypre_SeedRand ( int seed );
+double hypre_Rand ( void );
 
 #ifdef __cplusplus
 }

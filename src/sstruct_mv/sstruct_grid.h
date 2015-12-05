@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -89,10 +76,9 @@ typedef struct
 {
    hypre_Box    box;
    int          part;
-   hypre_Index  ilower;
-   hypre_Index  coord;
-   hypre_Index  dir;
-   int          primary;
+   hypre_Index  ilower; /* box ilower, but on the neighbor index-space */
+   hypre_Index  coord;  /* lives on local index-space */
+   hypre_Index  dir;    /* lives on local index-space */
 
 } hypre_SStructNeighbor;
 
@@ -107,9 +93,8 @@ typedef struct
    int  type;
    int  proc;
    int  offset;
-   int  box;
-  /* GEC0902 ghost offset   */
-   int  ghoffset;
+   int  boxnum;
+   int  ghoffset; /* GEC0902 ghost offset   */
 
 } hypre_SStructMapInfo;
 
@@ -117,17 +102,27 @@ typedef struct
 {
    int          type;
    int          proc;
-   int          offset;  /* minimum offset for this box */
-   int          box;
-   int          ghoffset;  /* GEC0902 minimum offset ghost for this box */
-   int          part;    /* part the box lives on */
-   hypre_Index  ilower;  /* local ilower on neighbor index-space */
-   hypre_Index  coord;   /* lives on local index-space */
-   hypre_Index  dir;     /* lives on neighbor index-space */
-   hypre_Index  stride;  /* lives on local index-space */
+   int          offset;   /* minimum offset for this box */
+   int          boxnum;
+   int          ghoffset; /* GEC0902 minimum offset ghost for this box */
+   int          part;     /* part the box lives on */
+   hypre_Index  ilower;   /* box ilower, but on the neighbor index-space */
+   hypre_Index  coord;    /* lives on local index-space */
+   hypre_Index  dir;      /* lives on local index-space */
+   hypre_Index  stride;   /* lives on local index-space */
    hypre_Index  ghstride; /* GEC1002 the ghost equivalent of strides */ 
 
 } hypre_SStructNMapInfo;
+
+typedef struct
+{
+   hypre_CommInfo  *comm_info;
+   int              send_part;
+   int              recv_part;
+   int              send_var;
+   int              recv_var;
+   
+} hypre_SStructCommInfo;
 
 typedef struct hypre_SStructGrid_struct
 {
@@ -143,6 +138,8 @@ typedef struct hypre_SStructGrid_struct
    hypre_SStructNeighbor    **neighbors;
    int                      **nvneighbors;
    hypre_SStructNeighbor   ***vneighbors;
+   hypre_SStructCommInfo    **vnbor_comm_info; /* for updating shared data */
+   int                        vnbor_ncomms;
 
    /* u-variables info: During construction, array entries are consecutive.
     * After 'Assemble', entries are referenced via local cell rank. */
@@ -180,6 +177,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridNeighbors(grid)      ((grid) -> neighbors)
 #define hypre_SStructGridNVNeighbors(grid)    ((grid) -> nvneighbors)
 #define hypre_SStructGridVNeighbors(grid)     ((grid) -> vneighbors)
+#define hypre_SStructGridVNborCommInfo(grid)  ((grid) -> vnbor_comm_info)
+#define hypre_SStructGridVNborNComms(grid)    ((grid) -> vnbor_ncomms)
 #define hypre_SStructGridNUCVars(grid)        ((grid) -> nucvars)
 #define hypre_SStructGridUCVars(grid)         ((grid) -> ucvars)
 #define hypre_SStructGridUCVar(grid, i)       ((grid) -> ucvars[i])
@@ -233,7 +232,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructMapInfoType(info)            ((info) -> type)
 #define hypre_SStructMapInfoProc(info)            ((info) -> proc)
 #define hypre_SStructMapInfoOffset(info)          ((info) -> offset)
-#define hypre_SStructMapInfoBox(info)             ((info) -> box)
+#define hypre_SStructMapInfoBoxnum(info)          ((info) -> boxnum)
 #define hypre_SStructMapInfoGhoffset(info)        ((info) -> ghoffset)
 
 /*--------------------------------------------------------------------------
@@ -258,7 +257,16 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNeighborILower(neighbor)  ((neighbor) -> ilower)
 #define hypre_SStructNeighborCoord(neighbor)   ((neighbor) -> coord)
 #define hypre_SStructNeighborDir(neighbor)     ((neighbor) -> dir)
-#define hypre_SStructNeighborPrimary(neighbor) ((neighbor) -> primary)
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_SStructCommInfo
+ *--------------------------------------------------------------------------*/
+
+#define hypre_SStructCommInfoCommInfo(cinfo)  ((cinfo) -> comm_info)
+#define hypre_SStructCommInfoSendPart(cinfo)  ((cinfo) -> send_part)
+#define hypre_SStructCommInfoRecvPart(cinfo)  ((cinfo) -> recv_part)
+#define hypre_SStructCommInfoSendVar(cinfo)   ((cinfo) -> send_var)
+#define hypre_SStructCommInfoRecvVar(cinfo)   ((cinfo) -> recv_var)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUCVar

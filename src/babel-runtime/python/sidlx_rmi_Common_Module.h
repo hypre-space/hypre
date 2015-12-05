@@ -2,7 +2,7 @@
  * File:          sidlx_rmi_Common_Module.h
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   expose a constructor for the Python wrapper
  * 
  * WARNING: Automatically generated; only changes within splicers preserved

@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.31 $
+ * $Revision: 2.35 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -115,16 +102,20 @@ typedef struct
    int                  smooth_type;
    HYPRE_Solver        *smoother;
    int			smooth_num_sweeps;
-   int                  variant;
-   int                  overlap;
-   int                  domain_type;
+   int                  schw_variant;
+   int                  schw_overlap;
+   int                  schw_domain_type;
    double		schwarz_rlx_weight;
-   int			sym;
-   int			level;
-   int			max_nz_per_row;
-   double		threshold;
-   double		filter;
-   double		drop_tol;
+   int                  schwarz_use_nonsymm;
+   int			ps_sym;
+   int			ps_level;
+   int			pi_max_nz_per_row;
+   int			eu_level;
+   int			eu_bj;
+   double		ps_threshold;
+   double		ps_filter;
+   double		pi_drop_tol;
+   double		eu_sparse_A;
    char		       *euclidfile;
 
    /* data generated in the solve phase */
@@ -237,18 +228,23 @@ typedef struct
 #define hypre_ParAMGDataSmoothNumSweeps(amg_data) \
 ((amg_data)->smooth_num_sweeps)	
 #define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
-#define hypre_ParAMGDataVariant(amg_data) ((amg_data)->variant)	
-#define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->overlap)	
-#define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->domain_type)	
+#define hypre_ParAMGDataVariant(amg_data) ((amg_data)->schw_variant)	
+#define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->schw_overlap)	
+#define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->schw_domain_type)	
 #define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
 ((amg_data)->schwarz_rlx_weight)
-#define hypre_ParAMGDataSym(amg_data) ((amg_data)->sym)	
-#define hypre_ParAMGDataLevel(amg_data) ((amg_data)->level)	
-#define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->max_nz_per_row)
-#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->threshold)	
-#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->filter)	
-#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->drop_tol)	
+#define hypre_ParAMGDataSchwarzUseNonSymm(amg_data) \
+((amg_data)->schwarz_use_nonsymm)
+#define hypre_ParAMGDataSym(amg_data) ((amg_data)->ps_sym)	
+#define hypre_ParAMGDataLevel(amg_data) ((amg_data)->ps_level)	
+#define hypre_ParAMGDataMaxNzPerRow(amg_data) ((amg_data)->pi_max_nz_per_row)
+#define hypre_ParAMGDataThreshold(amg_data) ((amg_data)->ps_threshold)	
+#define hypre_ParAMGDataFilter(amg_data) ((amg_data)->ps_filter)	
+#define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->pi_drop_tol)	
 #define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)	
+#define hypre_ParAMGDataEuLevel(amg_data) ((amg_data)->eu_level)	
+#define hypre_ParAMGDataEuSparseA(amg_data) ((amg_data)->eu_sparse_A)
+#define hypre_ParAMGDataEuBJ(amg_data) ((amg_data)->eu_bj)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

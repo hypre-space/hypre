@@ -1,28 +1,15 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.3 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
+
 
 
 
@@ -179,6 +166,29 @@ HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
 {
    return( HYPRE_GMRESSetTol( (HYPRE_Solver) solver, tol ) );
 }
+/*==========================================================================*/
+/*==========================================================================*/
+/** (Optional) Set the absolute stopping tolerance.
+
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param solver [IN/OUT]
+  solver structure
+@param tol [IN]
+  GMRES solver tolerance
+
+@see HYPRE_StructGMRESSolve, HYPRE_StructGMRESSetup   */
+/*--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
+                       double             atol    )
+{
+   return( HYPRE_GMRESSetAbsoluteTol( (HYPRE_Solver) solver, atol ) );
+}
 
 /*==========================================================================*/
 /*==========================================================================*/
@@ -204,10 +214,32 @@ HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
    return( HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
 
+/*==========================================================================*/
+/*==========================================================================*/
+/** (Optional) Sets the dimension of the Krylov subspace.
 
+{\bf Input files:}
+headers.h
+
+@return Error code.
+
+@param solver [IN/OUT]
+  solver structure
+@param k_dim [IN]
+  GMRES dimension of the Krylov subspace
+
+@see HYPRE_StructGMRESSolve, HYPRE_StructGMRESSetup */
+/*--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructGMRESSetKDim( HYPRE_StructSolver solver,
+                           int                k_dim )
+{
+   return( HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
+}
 /*==========================================================================*/
 /*==========================================================================*/
-/** (Optional) Sets the precondioner to use in GMRES.  The Default is no
+/** (Optional) Sets the preconditioner to use in GMRES.  The Default is no
 preconditioner, i.e. the solver is just conjugate gradients (CG).
 
 {\bf Input files:}

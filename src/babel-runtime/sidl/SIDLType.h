@@ -1,8 +1,8 @@
 /*
  * File:        sidlType.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:48 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:42 $
  * Description: Define the fundamental types for sidl
  *
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.

@@ -1,31 +1,14 @@
 /*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
  *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
  *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.5 $
+ * $Revision: 1.8 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /* **************************************************************************** 
  * -- SuperLU routine (version 1.1) --
@@ -60,7 +43,6 @@ MLI_Solver_SuperLU::~MLI_Solver_SuperLU()
    {
       Destroy_SuperNode_Matrix(&superLU_Lmat);
       Destroy_CompCol_Matrix(&superLU_Umat);
-      StatFree();
    }
    if ( permR_ != NULL ) delete [] permR_;
    if ( permC_ != NULL ) delete [] permC_;
@@ -78,10 +60,11 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    int      *dispArray, itemp, *cntArray, icol, colNum, index;
    int      *etree, permcSpec, lwork, panel_size, relax, info, mypid, nprocs;
    double   *vals, *csrAA, *gcsrAA, *gcscAA, diagPivotThresh, dropTol;
-   char     refact[1];
    MPI_Comm mpiComm;
-   hypre_ParCSRMatrix   *hypreA;
-   SuperMatrix          AC;
+   hypre_ParCSRMatrix *hypreA;
+   SuperMatrix        AC;
+   superlu_options_t  slu_options;
+   SuperLUStat_t      slu_stat;
 
    /* ---------------------------------------------------------------
     * fetch matrix
@@ -239,26 +222,32 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    
    dCreate_CompCol_Matrix(&superLU_Amat, globalNRows, globalNRows, 
                           gcscJA[globalNRows], gcscAA, gcscIA, gcscJA,
-                          NC, D_D, GE);
-   *refact = 'N';
+                          SLU_NC, SLU_D, SLU_GE);
    etree   = new int[globalNRows];
    permC_  = new int[globalNRows];
    permR_  = new int[globalNRows];
    permcSpec = 0;
    get_perm_c(permcSpec, &superLU_Amat, permC_);
-   sp_preorder(refact, &superLU_Amat, permC_, etree, &AC);
+   slu_options.Fact = DOFACT;
+   slu_options.SymmetricMode = NO;
+   sp_preorder(&slu_options, &superLU_Amat, permC_, etree, &AC);
    diagPivotThresh = 1.0;
    dropTol = 0.0;
    panel_size = sp_ienv(1);
    relax = sp_ienv(2);
-   StatInit(panel_size, relax);
+   StatInit(&slu_stat);
    lwork = 0;
-   dgstrf(refact, &AC, diagPivotThresh, dropTol, relax, panel_size,
-          etree,NULL,lwork,permR_,permC_,&superLU_Lmat,&superLU_Umat,&info);
+   slu_options.ColPerm = MY_PERMC;
+   slu_options.DiagPivotThresh = diagPivotThresh;
+
+   dgstrf(&slu_options, &AC, dropTol, relax, panel_size,
+          etree, NULL, lwork, permC_, permR_, &superLU_Lmat,
+          &superLU_Umat, &slu_stat, &info);
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;
    factorized_ = 1;
+   StatFree(&slu_stat);
    return 0;
 }
 
@@ -272,12 +261,13 @@ int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
    int             globalNRows, localNRows, startRow, *recvCntArray;
    int             i, irow, nprocs, *dispArray, info;
    double          *fGlobal;
-   char            trans[1];
    hypre_ParVector *f, *u;
    double          *uData, *fData;
    SuperMatrix     B;
    MPI_Comm        mpiComm;
    hypre_ParCSRMatrix *hypreA;
+   SuperLUStat_t      slu_stat;
+   trans_t            trans;
 
    /* -------------------------------------------------------------
     * check that the factorization has been called
@@ -318,14 +308,17 @@ int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
        dispArray[i] = dispArray[i-1] + recvCntArray[i-1];
    MPI_Allgatherv(fData, localNRows, MPI_DOUBLE, fGlobal, recvCntArray, 
                   dispArray, MPI_DOUBLE, mpiComm);
-   dCreate_Dense_Matrix(&B, globalNRows,1,fGlobal,globalNRows,DN,D_D,GE);
+   dCreate_Dense_Matrix(&B, globalNRows,1,fGlobal,globalNRows,SLU_DN,
+                        SLU_D,SLU_GE);
 
    /* -------------------------------------------------------------
     * solve the problem
     * -----------------------------------------------------------*/
 
-   *trans  = 'N';
-   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permR_, permC_, &B, &info);
+   trans = NOTRANS;
+   StatInit(&slu_stat);
+   dgstrs (trans, &superLU_Lmat, &superLU_Umat, permC_, permR_, &B, 
+           &slu_stat, &info);
 
    /* -------------------------------------------------------------
     * fetch the solution
@@ -342,6 +335,7 @@ int MLI_Solver_SuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
    delete [] recvCntArray;
    delete [] dispArray;
    Destroy_SuperMatrix_Store(&B);
+   StatFree(&slu_stat);
 
    return info;
 }

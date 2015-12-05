@@ -3,8 +3,8 @@
 // File:	Enum.java
 // Package:	sidl
 // Copyright:	(c) 2000-2001 The Regents of the University of California
-// Revision:	$Revision: 1.5 $
-// Modified:	$Date: 2006/08/29 22:29:21 $
+// Revision:	$Revision: 1.6 $
+// Modified:	$Date: 2007/09/27 19:35:14 $
 // Description:	holder and array classes for built-in data types
 //
 // Copyright (c) 2000-2001, The Regents of the University of Calfornia.
@@ -1795,4 +1795,5 @@ public class Enum extends sidl.Integer {
   }
 
 }
+
 

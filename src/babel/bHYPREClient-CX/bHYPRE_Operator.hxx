@@ -2,7 +2,7 @@
 // File:          bHYPRE_Operator.hxx
 // Symbol:        bHYPRE.Operator-v1.0.0
 // Symbol Type:   interface
-// Babel Version: 1.0.0
+// Babel Version: 1.0.4
 // Description:   Client-side glue code for bHYPRE.Operator
 // 
 // WARNING: Automatically generated; changes will be lost
@@ -303,7 +303,9 @@ namespace bHYPRE {
     typedef struct bHYPRE_Operator__sepv sepv_t;
 
     // default constructor
-    Operator() { }
+    Operator() { 
+      bHYPRE_Operator_IORCache = NULL;
+    }
 
     // RMI connect
     static inline ::bHYPRE::Operator _connect( /*in*/ const std::string& url ) 
@@ -312,8 +314,8 @@ namespace bHYPRE {
     }
 
     // RMI connect 2
-    static ::bHYPRE::Operator _connect( /*in*/ const std::string& url,
-      /*in*/ const bool ar  );
+    static ::bHYPRE::Operator _connect( /*in*/ const std::string& url, /*in*/ 
+      const bool ar  );
 
     // default destructor
     virtual ~Operator () { }
@@ -332,13 +334,21 @@ namespace bHYPRE {
     // For internal use by Impls (fixes bug#275)
     Operator ( Operator::ior_t* ior, bool isWeak );
 
-    ior_t* _get_ior() throw() { return reinterpret_cast< ior_t*>(d_self); }
+    inline ior_t* _get_ior() const throw() {
+      if(!bHYPRE_Operator_IORCache) { 
+        bHYPRE_Operator_IORCache = ::bHYPRE::Operator::_cast((void*)d_self);
+        if (bHYPRE_Operator_IORCache) {
+          struct sidl_BaseInterface__object *throwaway_exception;
+          (bHYPRE_Operator_IORCache->d_epv->f_deleteRef)(
+            bHYPRE_Operator_IORCache->d_object, &throwaway_exception);  
+        }  
+      }
+      return bHYPRE_Operator_IORCache;
+    }
 
-    const ior_t* _get_ior() const throw () { return reinterpret_cast< 
-      ior_t*>(d_self); }
-
-    void _set_ior( ior_t* ptr ) throw () { d_self = reinterpret_cast< 
-      void*>(ptr); }
+    void _set_ior( ior_t* ptr ) throw () { 
+      d_self = reinterpret_cast< void*>(ptr);
+    }
 
     bool _is_nil() const throw () { return (d_self==0); }
 
@@ -394,15 +404,23 @@ namespace bHYPRE {
   public:
     static const ext_t * _get_ext() throw ( ::sidl::NullIORException );
 
+
+    //////////////////////////////////////////////////
+    // 
+    // Locally Cached IOR pointer
+    // 
+
+  protected:
+    mutable ior_t* bHYPRE_Operator_IORCache;
   }; // end class Operator
 } // end namespace bHYPRE
 
 extern "C" {
 
 
-  #pragma weak bHYPRE_Operator__connectI
+#pragma weak bHYPRE_Operator__connectI
 
-  #pragma weak bHYPRE_Operator__rmicast
+#pragma weak bHYPRE_Operator__rmicast
 
   /**
    * Cast method for interface and class type conversions.
@@ -415,8 +433,8 @@ extern "C" {
    * RMI connector function for the class. (no addref)
    */
   struct bHYPRE_Operator__object*
-  bHYPRE_Operator__connectI(const char * url, sidl_bool ar,
-    struct sidl_BaseInterface__object **_ex);
+  bHYPRE_Operator__connectI(const char * url, sidl_bool ar, struct 
+    sidl_BaseInterface__object **_ex);
 
 
 } // end extern "C"

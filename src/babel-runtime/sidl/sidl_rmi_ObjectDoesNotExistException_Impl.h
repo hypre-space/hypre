@@ -2,9 +2,9 @@
  * File:          sidl_rmi_ObjectDoesNotExistException_Impl.h
  * Symbol:        sidl.rmi.ObjectDoesNotExistException-v0.9.15
  * Symbol Type:   class
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_rmi_ObjectDoesNotExistException_Impl.h,v 1.1 2006/08/29 23:25:28 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_rmi_ObjectDoesNotExistException_Impl.h,v 1.2 2007/09/27 19:35:47 painter Exp $
  * Description:   Server-side implementation for sidl.rmi.ObjectDoesNotExistException
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -141,25 +141,25 @@ extern struct sidl_BaseClass__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_BaseClass(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseException__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_BaseException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseException(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_BaseInterface(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_ClassInfo(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_RuntimeException(
@@ -171,7 +171,7 @@ extern struct sidl_SIDLException__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_SIDLException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_SIDLException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_SIDLException(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_SIDLException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Deserializer__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_Deserializer(const 
@@ -183,7 +183,7 @@ extern struct sidl_io_IOException__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_IOException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_IOException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_IOException(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_IOException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_Serializable(const 
@@ -195,7 +195,7 @@ extern struct sidl_io_Serializer__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_Serializer(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_Serializer(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_NetworkException__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_rmi_NetworkException(
@@ -204,32 +204,34 @@ extern struct sidl_rmi_NetworkException__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_rmi_NetworkException(
   void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ObjectDoesNotExistException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_rmi_ObjectDoesNotExistException(const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_rmi_ObjectDoesNotExistException
+  (const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ObjectDoesNotExistException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_rmi_ObjectDoesNotExistException(void* bi, sidl_BaseInterface* _ex);
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_rmi_ObjectDoesNotExistException
+  (void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_BaseClass(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseClass(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseClass(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseException__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_BaseException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseException(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseInterface__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_BaseInterface(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseInterface(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_ClassInfo(const char* 
   url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_ClassInfo(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_ClassInfo(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_RuntimeException__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_RuntimeException(
@@ -241,7 +243,7 @@ extern struct sidl_SIDLException__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_SIDLException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_SIDLException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_SIDLException(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_SIDLException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Deserializer__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_Deserializer(const 
@@ -253,7 +255,7 @@ extern struct sidl_io_IOException__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_IOException(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_IOException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_IOException(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_IOException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_io_Serializable__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_Serializable(const 
@@ -265,7 +267,7 @@ extern struct sidl_io_Serializer__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_io_Serializer(const 
   char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_io_Serializer__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_Serializer(void* bi,
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_io_Serializer(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_rmi_NetworkException__object* 
   impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_rmi_NetworkException(
@@ -274,9 +276,11 @@ extern struct sidl_rmi_NetworkException__object*
   impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_rmi_NetworkException(
   void* bi, sidl_BaseInterface* _ex);
 extern struct sidl_rmi_ObjectDoesNotExistException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_rmi_ObjectDoesNotExistException(const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_sidl_rmi_ObjectDoesNotExistException_fconnect_sidl_rmi_ObjectDoesNotExistException
+  (const char* url, sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_rmi_ObjectDoesNotExistException__object* 
-  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_rmi_ObjectDoesNotExistException(void* bi, sidl_BaseInterface* _ex);
+  impl_sidl_rmi_ObjectDoesNotExistException_fcast_sidl_rmi_ObjectDoesNotExistException
+  (void* bi, sidl_BaseInterface* _ex);
 #ifdef __cplusplus
 }
 #endif

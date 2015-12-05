@@ -2,7 +2,7 @@ C
 C       File:          bHYPRE_StructStencil_Impl.f
 C       Symbol:        bHYPRE.StructStencil-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 1.0.0
+C       Babel Version: 1.0.4
 C       Description:   Client-side documentation text for bHYPRE.StructStencil
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -70,7 +70,7 @@ C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_StructStencil__cast2_f(self, name, retval,
+        subroutine bHYPRE_StructStencil__cast2_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -91,7 +91,7 @@ C       You provide the number of spatial dimensions and the number of
 C       stencil entries.  
 C       
 
-        subroutine bHYPRE_StructStencil_Create_f(ndim, size, retval,
+        subroutine bHYPRE_StructStencil_Create_f(ndim, size, retval, 
      &     exception)
         implicit none
 C        in int ndim
@@ -127,7 +127,7 @@ C       Method:  SetDimension[]
 C        Set the number of dimensions.  DEPRECATED, use StructStencilCreate 
 C       
 
-        subroutine bHYPRE_StructStencil_SetDimension_f(self, dim,
+        subroutine bHYPRE_StructStencil_SetDimension_f(self, dim, 
      &     retval, exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -147,7 +147,7 @@ C        Set the number of stencil entries.
 C       DEPRECATED, use StructStencilCreate 
 C       
 
-        subroutine bHYPRE_StructStencil_SetSize_f(self, size, retval,
+        subroutine bHYPRE_StructStencil_SetSize_f(self, size, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -168,7 +168,7 @@ C       offsets.  "offset" is an array of length "dim", the number of spatial
 C       dimensions. 
 C       
 
-        subroutine bHYPRE_StructStencil_SetElement_f(self, index,
+        subroutine bHYPRE_StructStencil_SetElement_f(self, index, 
      &     offset, dim, retval, exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -235,7 +235,7 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_StructStencil_isSame_f(self, iobj, retval,
+        subroutine bHYPRE_StructStencil_isSame_f(self, iobj, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -257,7 +257,7 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_StructStencil_isType_f(self, name, retval,
+        subroutine bHYPRE_StructStencil_isType_f(self, name, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -276,7 +276,7 @@ C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_StructStencil_getClassInfo_f(self, retval,
+        subroutine bHYPRE_StructStencil_getClassInfo_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -293,7 +293,7 @@ C       Method:  _exec[]
 C       Select and execute a method by name
 C       
 
-        subroutine bHYPRE_StructStencil__exec_f(self, methodName,
+        subroutine bHYPRE_StructStencil__exec_f(self, methodName, 
      &     inArgs, outArgs, exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -314,7 +314,7 @@ C       Method:  _getURL[]
 C       Get the URL of the Implementation of this object (for RMI)
 C       
 
-        subroutine bHYPRE_StructStencil__getURL_f(self, retval,
+        subroutine bHYPRE_StructStencil__getURL_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -331,7 +331,7 @@ C       Method:  _isRemote[]
 C       TRUE if this object is remote, false if local
 C       
 
-        subroutine bHYPRE_StructStencil__isRemote_f(self, retval,
+        subroutine bHYPRE_StructStencil__isRemote_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -348,7 +348,7 @@ C       Method:  _isLocal[]
 C       TRUE if this object is local, false if remote
 C       
 
-        subroutine bHYPRE_StructStencil__isLocal_f(self, retval,
+        subroutine bHYPRE_StructStencil__isLocal_f(self, retval, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -365,7 +365,7 @@ C       Method:  _set_hooks[]
 C       Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_StructStencil__set_hooks_f(self, on,
+        subroutine bHYPRE_StructStencil__set_hooks_f(self, on, 
      &     exception)
         implicit none
 C        in bHYPRE.StructStencil self
@@ -382,7 +382,7 @@ C       Method:  _set_hooks_static[]
 C       Static Method to set whether or not method hooks should be invoked.
 C       
 
-        subroutine bHYPRE_StructStencil__set_hooks_static_f(on,
+        subroutine bHYPRE_StructStencil__set_hooks_static_f(on, 
      &     exception)
         implicit none
 C        in bool on

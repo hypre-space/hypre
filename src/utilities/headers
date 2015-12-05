@@ -1,29 +1,17 @@
 #!/bin/sh
 #BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team, UCRL-CODE-222953.
-# All rights reserved.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
 #
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer and the GNU Lesser General Public License.
-#
-# This program is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License (as published by the Free
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# This program is distributed in the hope that it will be useful, but WITHOUT
-# ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
-# FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# $Revision: 2.13 $
+# $Revision: 2.16 $
 #EHEADER**********************************************************************
+
+
 
 
 INTERNAL_HEADER=_hypre_utilities.h
@@ -32,7 +20,9 @@ INTERNAL_HEADER=_hypre_utilities.h
 # Include guards and other includes
 #===========================================================================
 
-cat > $INTERNAL_HEADER <<@
+cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
+cat >> $INTERNAL_HEADER <<@
+
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
@@ -49,32 +39,19 @@ extern "C" {
 #===========================================================================
 
 cat general.h                  >> $INTERNAL_HEADER
-
 cat mpistubs.h                 >> $INTERNAL_HEADER
-
 cat hypre_memory.h             >> $INTERNAL_HEADER
-
-./protos random.c              >> $INTERNAL_HEADER
-
 cat thread_mpistubs.h          >> $INTERNAL_HEADER
-
 cat threading.h                >> $INTERNAL_HEADER		          
-
 cat timing.h                   >> $INTERNAL_HEADER
-
 cat amg_linklist.h             >> $INTERNAL_HEADER
-
 cat exchange_data.h            >> $INTERNAL_HEADER
-
-./protos amg_linklist.c        >> $INTERNAL_HEADER
-		          
-./protos binsearch.c           >> $INTERNAL_HEADER
-		          
-./protos qsplit.c              >> $INTERNAL_HEADER
-		          
-./protos hypre_qsort.c         >> $INTERNAL_HEADER
-		          
 cat hypre_error.h              >> $INTERNAL_HEADER
+./protos amg_linklist.c        >> $INTERNAL_HEADER
+./protos binsearch.c           >> $INTERNAL_HEADER
+./protos hypre_qsort.c         >> $INTERNAL_HEADER
+./protos qsplit.c              >> $INTERNAL_HEADER
+./protos random.c              >> $INTERNAL_HEADER
 		          
 #===========================================================================
 # Include guards

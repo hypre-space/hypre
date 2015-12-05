@@ -1,118 +1,73 @@
-#BHEADER**********************************************************************
-# Copyright (c) 2006   The Regents of the University of California.
-# Produced at the Lawrence Livermore National Laboratory.
-# Written by the HYPRE team. UCRL-CODE-222953.
-# All rights reserved.
+############################################################################
 #
-# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
-# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
-# disclaimer, contact information and the GNU Lesser General Public License.
+#  Program:         SuperLU
 #
-# HYPRE is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License (as published by the Free Software 
-# Foundation) version 2.1 dated February 1999.
+#  Module:          Makefile
 #
-# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
-# Public License for more details.
+#  Purpose:         Top-level Makefile
 #
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#  Creation date:   October 2, 1995
 #
-# $Revision: 1.11 $
-#EHEADER**********************************************************************
+#  Modified:        February 4, 1997  Version 1.0
+#		    November 15, 1997 Version 1.1
+#		    September 1, 1999 Version 2.0
+#		    October 15, 2003 Version 3.0
+#
+############################################################################
 
+############################
+# for hypre
+############################
+all:
+	( cd SRC; $(MAKE) all)
 
-
-
-include ../../config/Makefile.config
-
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-
-C_COMPILE_FLAGS = \
- -I$(srcdir)\
- -I$(srcdir)/../../\
- -I$(srcdir)/../../utilities\
- ${CINCLUDES}
-
-HEADERS =\
- Cnames.h\
- colamd.h\
- dsp_defs.h\
- superlu_util.h\
- supermatrix.h
-
-FILES =\
- colamd.c \
- dcolumn_bmod.c \
- dcolumn_dfs.c \
- dcopy_to_ucol.c \
- dgscon.c \
- dgsequ.c \
- dgsrfs.c \
- dgssv.c \
- dgssvx.c \
- dgstrf.c \
- dgstrs.c \
- dlacon.c \
- dlangs.c \
- dlaqgs.c \
- dmemory.c \
- dpanel_bmod.c \
- dpanel_dfs.c \
- dpivotgrowth.c \
- dpivotL.c \
- dpruneL.c \
- dreadhb.c \
- dsnode_bmod.c \
- dsnode_dfs.c \
- dsp_blas2.c \
- dsp_blas3.c \
- dutil.c \
- get_perm_c.c \
- mmd.c \
- relax_snode.c \
- sp_coletree.c \
- sp_ienv.c \
- sp_preorder.c \
- superlu_memory.c \
- superlu_timer.c \
- superlu_util.c
-
-OBJS = ${FILES:.c=.o}
-
-##################################################################
-# Targets
-##################################################################
-
-all: libHYPRE_superlu${HYPRE_LIB_SUFFIX}
-	cp -fp *.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
-
-install: libHYPRE_superlu${HYPRE_LIB_SUFFIX}
-	cp -f *.h $(HYPRE_INC_INSTALL)
-	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
-	@echo  " "
+install:
+	( cd SRC; $(MAKE) install)
 
 clean:
-	rm -f *.o libHYPRE*
-	rm -rf pchdir tca.map *inslog*
+	( cd SRC; $(MAKE) clean)
 
 distclean: clean
 
-##################################################################
-# Rules
-##################################################################
+############################
 
-libHYPRE_superlu.a: ${OBJS}
-	@echo  "Building $@ ... "
-	${AR} $@ ${OBJS}
-	${RANLIB} $@
+#include make.inc
 
-libHYPRE_superlu.so: ${OBJS}
-	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+#all: install lib testing
 
-${OBJS}: ${HEADERS}
+#lib: superlulib tmglib
+
+#clean: cleanlib cleantesting
+
+#install:
+#	( cd INSTALL; $(MAKE) )
+#	( cd INSTALL; cp lsame.c ../SRC/; \
+#	  cp dlamch.c ../SRC/; cp slamch.c ../SRC/ )
+
+blaslib:
+	( cd CBLAS; $(MAKE) )
+
+superlulib:
+	( cd SRC; $(MAKE) )
+
+tmglib:
+	( cd TESTING/MATGEN; $(MAKE) )
+
+matlabmex:
+	( cd MATLAB; $(MAKE) )
+
+testing:
+	( cd TESTING ; $(MAKE) )
+
+cleanlib:
+	( cd SRC; $(MAKE) clean )
+	( cd TESTING/MATGEN; $(MAKE) clean )
+	( cd CBLAS; $(MAKE) clean )
+
+cleantesting:
+	( cd INSTALL; $(MAKE) clean )
+	( cd TESTING; $(MAKE) clean )
+	( cd MATLAB;  $(MAKE) clean )
+	( cd EXAMPLE; $(MAKE) clean )
+	( cd FORTRAN; $(MAKE) clean )
+

@@ -1,10 +1,10 @@
 /*
  * File:        sidlfortran.h
- * Revision:    @(#) $Revision: 1.7 $
- * Date:        $Date: 2006/08/29 22:29:52 $
+ * Revision:    @(#) $Revision: 1.8 $
+ * Date:        $Date: 2007/09/27 19:35:48 $
  * Description: Macros for FORTRAN interoperability
  *
- * Copyright (c) 2000-2002, The Regents of the University of Calfornia.
+ * Copyright (c) 2000-2006, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
  * Written by the Components Team <components@llnl.gov>
  * UCRL-CODE-2002-054
@@ -41,6 +41,12 @@
 #endif
 #endif
 
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#else
+#include <sys/types.h>
+#endif
+#include <stddef.h>
 
 #ifndef FORTRAN77_DISABLED
 /*
@@ -85,6 +91,7 @@
 /*
  * String handling
  */
+typedef SIDL_F77_STR_INT_SIZE SIDL_F77_String_Len;
 #if defined(SIDL_F77_STR_LEN_NEAR) || defined(SIDL_F77_STR_LEN_FAR)
 typedef char *SIDL_F77_String;
 #define SIDL_F77_STR(strvar) (strvar)
@@ -94,22 +101,22 @@ typedef char *SIDL_F77_String;
 #define SIDL_F77_STR_LEN(strvar) strvar ## _len
 #define SIDL_F77_STR_LOCAL(strvar) \
 SIDL_F77_String strvar = NULL;\
-int SIDL_F77_STR_LOCAL_LEN(strvar) = 0
+SIDL_F77_String_Len SIDL_F77_STR_LOCAL_LEN(strvar) = 0
 #ifdef SIDL_F77_STR_LEN_NEAR
-#define SIDL_F77_STR_NEAR_LEN_DECL(strvar) , int SIDL_F77_STR_LEN(strvar)
+#define SIDL_F77_STR_NEAR_LEN_DECL(strvar) , SIDL_F77_String_Len SIDL_F77_STR_LEN(strvar)
 #define SIDL_F77_STR_NEAR_LEN(strvar) , SIDL_F77_STR_LOCAL_LEN(strvar)
 #define SIDL_F77_STR_FAR_LEN_DECL(strvar) 
 #define SIDL_F77_STR_FAR_LEN(strvar)
 #else
 #define SIDL_F77_STR_NEAR_LEN_DECL(strvar)
 #define SIDL_F77_STR_NEAR_LEN(strvar)
-#define SIDL_F77_STR_FAR_LEN_DECL(strvar) , int SIDL_F77_STR_LEN(strvar)
+#define SIDL_F77_STR_FAR_LEN_DECL(strvar) , SIDL_F77_String_Len SIDL_F77_STR_LEN(strvar)
 #define SIDL_F77_STR_FAR_LEN(strvar) , SIDL_F77_STR_LOCAL_LEN(strvar)
 #endif
 #else
 #if defined(SIDL_F77_STR_STRUCT_STR_LEN) || defined(SIDL_F77_STR_STRUCT_LEN_STR)
 struct SIDL_F77_String_t;
-typdef struct SIDL_F77_String_t *SIDL_F77_String;
+typedef struct SIDL_F77_String_t *SIDL_F77_String;
 #define SIDL_F77_STR(strvar) ((*strvar).str)
 #define SIDL_F77_STR_LOCAL(strvar) struct SIDL_F77_String_t strvar = \
   { NULL, 0 }
@@ -123,20 +130,20 @@ typdef struct SIDL_F77_String_t *SIDL_F77_String;
 #ifdef SIDL_F77_STR_STRUCT_STR_LEN
 struct SIDL_F77_String_t {
   char *str;
-  int  len;
+  SIDL_F77_String_Len  len;
 };
 #else
 struct SIDL_F77_String_t {
-  int  len;
+  SIDL_F77_String_Len  len;
   char *str;
 };
 #endif
 #endif
 #endif
 #define SIDL_F77_STR_COPY(localvar,argvar,minsize) \
-  sidl_copy_ior_str(&(SIDL_F77_STR_LOCAL_STR(localvar)), \
-                    &(SIDL_F77_STR_LOCAL_LEN(localvar)), \
-                    (argvar), (minsize))
+  sidl_f77_copy_ior_str(&(SIDL_F77_STR_LOCAL_STR(localvar)), \
+                        &(SIDL_F77_STR_LOCAL_LEN(localvar)), \
+                        (argvar), (minsize))
 
 #ifndef SIDL_F77_STR_MINSIZE
 #define SIDL_F77_STR_MINSIZE 512
@@ -196,6 +203,7 @@ typedef int SIDL_F77_Bool;
 /*
  * String handling
  */
+typedef SIDL_F90_STR_INT_SIZE SIDL_F90_String_Len;
 #if defined(SIDL_F90_STR_LEN_NEAR) || defined(SIDL_F90_STR_LEN_FAR)
 typedef char *SIDL_F90_String;
 #define SIDL_F90_STR(strvar) (strvar)
@@ -205,16 +213,16 @@ typedef char *SIDL_F90_String;
 #define SIDL_F90_STR_LEN(strvar) strvar ## _len
 #define SIDL_F90_STR_LOCAL(strvar) \
 SIDL_F90_String strvar = NULL;\
-int SIDL_F90_STR_LOCAL_LEN(strvar) = 0
+SIDL_F90_String_Len SIDL_F90_STR_LOCAL_LEN(strvar) = 0
 #ifdef SIDL_F90_STR_LEN_NEAR
-#define SIDL_F90_STR_NEAR_LEN_DECL(strvar) , int SIDL_F90_STR_LEN(strvar)
+#define SIDL_F90_STR_NEAR_LEN_DECL(strvar) , SIDL_F90_String_Len SIDL_F90_STR_LEN(strvar)
 #define SIDL_F90_STR_NEAR_LEN(strvar) , SIDL_F90_STR_LOCAL_LEN(strvar)
 #define SIDL_F90_STR_FAR_LEN_DECL(strvar) 
 #define SIDL_F90_STR_FAR_LEN(strvar)
 #else
 #define SIDL_F90_STR_NEAR_LEN_DECL(strvar)
 #define SIDL_F90_STR_NEAR_LEN(strvar)
-#define SIDL_F90_STR_FAR_LEN_DECL(strvar) , int SIDL_F90_STR_LEN(strvar)
+#define SIDL_F90_STR_FAR_LEN_DECL(strvar) , SIDL_F90_String_Len SIDL_F90_STR_LEN(strvar)
 #define SIDL_F90_STR_FAR_LEN(strvar) , SIDL_F90_STR_LOCAL_LEN(strvar)
 #endif
 #else
@@ -233,21 +241,21 @@ typdef struct SIDL_F90_String_t *SIDL_F90_String;
 #else
 #ifdef SIDL_F90_STR_STRUCT_STR_LEN
 struct SIDL_F90_String_t {
-  char *str;
-  int  len;
+  char               *str;
+  SIDL_F90_String_Len len;
 };
 #else
 struct SIDL_F90_String_t {
-  int  len;
-  char *str;
+  SIDL_F90_String_Len len;
+  char               *str;
 };
 #endif
 #endif
 #endif
 #define SIDL_F90_STR_COPY(localvar,argvar,minsize) \
-  sidl_copy_ior_str(&(SIDL_F90_STR_LOCAL_STR(localvar)), \
-                    &(SIDL_F90_STR_LOCAL_LEN(localvar)), \
-                    (argvar), (minsize))
+  sidl_f90_copy_ior_str(&(SIDL_F90_STR_LOCAL_STR(localvar)), \
+                        &(SIDL_F90_STR_LOCAL_LEN(localvar)), \
+                        (argvar), (minsize))
 
 #ifndef SIDL_F90_STR_MINSIZE
 #define SIDL_F90_STR_MINSIZE 512
@@ -276,7 +284,7 @@ extern "C" { /*}*/
  */
 char *
 sidl_copy_fortran_str(const char *fstr,
-                      int         flen);
+                      ptrdiff_t   flen);
 
 /*
  * Convert a C string into a FORTRAN string.  If the C string is
@@ -286,11 +294,12 @@ sidl_copy_fortran_str(const char *fstr,
  */
 void
 sidl_copy_c_str(char       *fstr,
-                int         flen,
+                size_t      flen,
                 const char *cstr);
 
+#ifndef FORTRAN77_DISABLED
 /*
- * Provide a block of memory and the length for a FORTRAN string.
+ * Provide a block of memory and the length for a FORTRAN 77 string.
  * This will dynamically allocate a string with max(strlen(iorstr),
  * minsize)+1 characters.  The last character in the buffer is
  * initialized to '\0'.
@@ -300,14 +309,37 @@ sidl_copy_c_str(char       *fstr,
  * are copied into the allocated space.  Any uninitialized characters in
  * *newfstr are initialized to space characters.
  *
- * The intent is that the FORTRAN client will only use characters 0 through
+ * The intent is that the FORTRAN 77 client will only use characters 0 through
  * minsize - 1 leaving the nul character untouched.
  */
 void
-sidl_copy_ior_str(char      **newfstr, 
-                  int        *newflen,
-                  const char *iorstr,
-                  const int   minsize);
+sidl_f77_copy_ior_str(char               **newfstr, 
+                      SIDL_F77_String_Len *newflen,
+                      const char          *iorstr,
+                      const size_t         minsize);
+#endif
+
+#ifndef FORTRAN90_DISABLED
+/*
+ * Provide a block of memory and the length for a Fortran 90 string.
+ * This will dynamically allocate a string with max(strlen(iorstr),
+ * minsize)+1 characters.  The last character in the buffer is
+ * initialized to '\0'.
+ * 
+ * The pointer to the allocated space is stored in *newfstr, and the length
+ * of the space is stored in *newflen.  If iorstr is not null, the contents
+ * are copied into the allocated space.  Any uninitialized characters in
+ * *newfstr are initialized to space characters.
+ *
+ * The intent is that the Fortran 90 client will only use characters 0 through
+ * minsize - 1 leaving the nul character untouched.
+ */
+void
+sidl_f90_copy_ior_str(char               **newfstr, 
+                      SIDL_F90_String_Len *newflen,
+                      const char          *iorstr,
+                      const size_t         minsize);
+#endif
 
 /*
  * Remove trailing space characters.  This
@@ -319,7 +351,7 @@ sidl_copy_ior_str(char      **newfstr,
  */
 char *
 sidl_trim_trailing_space(char *buffer,
-                         int   buflen);
+                         ptrdiff_t  buflen);
 
 #ifdef __cplusplus
 }

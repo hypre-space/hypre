@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 1.31 $
+ ***********************************************************************EHEADER*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -519,6 +531,7 @@ main( int   argc,
       printf("                        2  - SparseMSG\n");
       printf("                        3  - PFMG constant coefficients\n");
       printf("                        4  - PFMG constant coefficients variable diagonal\n");
+      printf("                        8  - Jacobi\n");
       printf("                        10 - CG with SMG precond\n");
       printf("                        11 - CG with PFMG precond\n");
       printf("                        12 - CG with SparseMSG precond\n");
@@ -1470,6 +1483,40 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
+    * Solve the system using Jacobi
+    *-----------------------------------------------------------*/
+
+   else if ( solver_id == 8 )
+   {
+      time_index = hypre_InitializeTiming("Jacobi Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructJacobiSetMaxIter(solver, 100);
+      HYPRE_StructJacobiSetTol(solver, 1.0e-06);
+      HYPRE_StructJacobiSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("Jacobi Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructJacobiSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      HYPRE_StructJacobiGetNumIterations(solver, &num_iterations);
+      HYPRE_StructJacobiGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      HYPRE_StructJacobiDestroy(solver);
+   }
+
+   /*-----------------------------------------------------------
     * Solve the system using CG
     *-----------------------------------------------------------*/
 
@@ -1479,7 +1526,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_PCGSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
       HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
@@ -2116,7 +2163,7 @@ main( int   argc,
 
       HYPRE_StructHybridCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
-      HYPRE_StructHybridSetPCGMaxIter(solver, 50);
+      HYPRE_StructHybridSetPCGMaxIter(solver, 100);
       HYPRE_StructHybridSetTol(solver, 1.0e-06);
       /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(solver, 1.0e-200);*/
       HYPRE_StructHybridSetConvergenceTol(solver, cf_tol);
@@ -2242,7 +2289,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
       HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
@@ -2395,7 +2442,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructBiCGSTABCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, 50 );
+      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, 1 );
       HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)solver, 1 );

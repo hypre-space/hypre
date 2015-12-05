@@ -2,9 +2,9 @@
  * File:          sidl_io_Serializer_IOR.h
  * Symbol:        sidl.io.Serializer-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 1.0.0
- * Release:       $Name: V2-2-0b $
- * Revision:      @(#) $Id: sidl_io_Serializer_IOR.h,v 1.5 2006/08/29 22:29:51 painter Exp $
+ * Babel Version: 1.0.4
+ * Release:       $Name: V2-4-0b $
+ * Revision:      @(#) $Id: sidl_io_Serializer_IOR.h,v 1.6 2007/09/27 19:35:45 painter Exp $
  * Description:   Intermediate Object Representation for sidl.io.Serializer
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.

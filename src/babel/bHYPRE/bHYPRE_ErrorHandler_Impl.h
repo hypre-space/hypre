@@ -2,7 +2,7 @@
  * File:          bHYPRE_ErrorHandler_Impl.h
  * Symbol:        bHYPRE.ErrorHandler-v1.0.0
  * Symbol Type:   class
- * Babel Version: 1.0.0
+ * Babel Version: 1.0.4
  * Description:   Server-side implementation for bHYPRE.ErrorHandler
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -106,65 +106,66 @@ impl_bHYPRE_ErrorHandler_Describe(
   /* out */ sidl_BaseInterface *_ex);
 
 extern struct bHYPRE_ErrorHandler__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_bHYPRE_ErrorHandler(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_bHYPRE_ErrorHandler(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_ErrorHandler__object* 
-  impl_bHYPRE_ErrorHandler_fcast_bHYPRE_ErrorHandler(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_bHYPRE_ErrorHandler(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_ErrorHandler_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct bHYPRE_ErrorHandler__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_bHYPRE_ErrorHandler(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_bHYPRE_ErrorHandler(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct bHYPRE_ErrorHandler__object* 
-  impl_bHYPRE_ErrorHandler_fcast_bHYPRE_ErrorHandler(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_bHYPRE_ErrorHandler(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseClass(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseClass(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseClass__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseClass(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseClass(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseInterface(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_BaseInterface(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_BaseInterface__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseInterface(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_sidl_BaseInterface(void* bi, 
   sidl_BaseInterface* _ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_ClassInfo(const char* url,
-  sidl_bool ar, sidl_BaseInterface *_ex);
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_ClassInfo(const char* url, sidl_bool 
+  ar, sidl_BaseInterface *_ex);
 extern struct sidl_ClassInfo__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_ClassInfo(void* bi,
-  sidl_BaseInterface* _ex);
+  impl_bHYPRE_ErrorHandler_fcast_sidl_ClassInfo(void* bi, sidl_BaseInterface* 
+  _ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ErrorHandler_fconnect_sidl_RuntimeException(const char* url,
+  impl_bHYPRE_ErrorHandler_fconnect_sidl_RuntimeException(const char* url, 
   sidl_bool ar, sidl_BaseInterface *_ex);
 extern struct sidl_RuntimeException__object* 
-  impl_bHYPRE_ErrorHandler_fcast_sidl_RuntimeException(void* bi,
+  impl_bHYPRE_ErrorHandler_fcast_sidl_RuntimeException(void* bi, 
   sidl_BaseInterface* _ex);
+
 #ifdef __cplusplus
 }
 #endif
