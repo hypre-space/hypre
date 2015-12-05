@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,7 +26,7 @@
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_AMGSetup( void            *amg_vdata,
                 hypre_CSRMatrix *A,
                 hypre_Vector    *f,
@@ -43,36 +43,36 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_CSRMatrix **P_array;
    hypre_BCSRMatrix **PB_array;
 
-   int             **dof_func_array;
-   int              *dof_func;
-   int              *coarse_dof_func;   int              *domain_i;
-   int              *domain_j;
+   HYPRE_Int             **dof_func_array;
+   HYPRE_Int              *dof_func;
+   HYPRE_Int              *coarse_dof_func;   HYPRE_Int              *domain_i;
+   HYPRE_Int              *domain_j;
 
-   int             **CF_marker_array;   
+   HYPRE_Int             **CF_marker_array;   
    double           *relax_weight;
    double           *unit_vector;
    double            strong_threshold;
    double            A_trunc_factor;
    double            P_trunc_factor;
 
-   int      num_variables;
-   int      max_levels; 
-   int      A_max_elmts;
-   int      P_max_elmts;
-   int      amg_ioutdat;
-   int      interp_type;
-   int      num_functions;
-   int      agg_levels;
-   int      agg_coarsen_type;
-   int      agg_interp_type;
-   int      num_jacs;
-   int      main_coarsen_type;
-   int      main_interp_type;
-   int use_block_flag;
+   HYPRE_Int      num_variables;
+   HYPRE_Int      max_levels; 
+   HYPRE_Int      A_max_elmts;
+   HYPRE_Int      P_max_elmts;
+   HYPRE_Int      amg_ioutdat;
+   HYPRE_Int      interp_type;
+   HYPRE_Int      num_functions;
+   HYPRE_Int      agg_levels;
+   HYPRE_Int      agg_coarsen_type;
+   HYPRE_Int      agg_interp_type;
+   HYPRE_Int      num_jacs;
+   HYPRE_Int      main_coarsen_type;
+   HYPRE_Int      main_interp_type;
+   HYPRE_Int use_block_flag;
  
    /* Local variables */
-   int              *CF_marker;
-   int              *new_CF_marker;
+   HYPRE_Int              *CF_marker;
+   HYPRE_Int              *new_CF_marker;
    hypre_CSRMatrix  *S;
    hypre_CSRMatrix  *S2;
 /*   hypre_CSRMatrix  *S3;*/
@@ -82,29 +82,29 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_BCSRMatrix *B;
    hypre_BCSRMatrix *PB;
 /*   double *S2_data; */
-/*   int       num_nz; */
+/*   HYPRE_Int       num_nz; */
 
-   int       num_levels;
-   int       level;
-   int       coarse_size;
-   int       first_coarse_size;
-   int       fine_size;
-   int       not_finished_coarsening = 1;
-   int       Setup_err_flag;
-   int       coarse_threshold = 9;
-   int       i, j;
-   int	     coarsen_type;
-   int	    *grid_relax_type;
-   int	     relax_type;
-   int	     num_relax_steps;
-   int	    *schwarz_option;
-   int       mode, S_mode;
-   int       num_domains;
-   int      *i_domain_dof;
-   int      *j_domain_dof;
+   HYPRE_Int       num_levels;
+   HYPRE_Int       level;
+   HYPRE_Int       coarse_size;
+   HYPRE_Int       first_coarse_size;
+   HYPRE_Int       fine_size;
+   HYPRE_Int       not_finished_coarsening = 1;
+   HYPRE_Int       Setup_err_flag;
+   HYPRE_Int       coarse_threshold = 9;
+   HYPRE_Int       i, j;
+   HYPRE_Int	     coarsen_type;
+   HYPRE_Int	    *grid_relax_type;
+   HYPRE_Int	     relax_type;
+   HYPRE_Int	     num_relax_steps;
+   HYPRE_Int	    *schwarz_option;
+   HYPRE_Int       mode, S_mode;
+   HYPRE_Int       num_domains;
+   HYPRE_Int      *i_domain_dof;
+   HYPRE_Int      *j_domain_dof;
    double   *domain_matrixinverse;
 
-   int* fake_dof_func;
+   HYPRE_Int* fake_dof_func;
 
 /*   char f_name[256];
      FILE* f_out; */
@@ -132,15 +132,15 @@ hypre_AMGSetup( void            *amg_vdata,
    B_array = hypre_CTAlloc(hypre_BCSRMatrix*, max_levels);
    P_array = hypre_CTAlloc(hypre_CSRMatrix*, max_levels-1);
    PB_array = hypre_CTAlloc(hypre_BCSRMatrix*, max_levels-1);
-   CF_marker_array = hypre_CTAlloc(int*, max_levels);
-   dof_func_array = hypre_CTAlloc(int*, max_levels);
+   CF_marker_array = hypre_CTAlloc(HYPRE_Int*, max_levels);
+   dof_func_array = hypre_CTAlloc(HYPRE_Int*, max_levels);
    coarse_dof_func = NULL;
 
    if (schwarz_option[0] > -1)
    {
-      hypre_AMGDataNumDomains(amg_data) = hypre_CTAlloc(int, max_levels);
-      hypre_AMGDataIDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
-      hypre_AMGDataJDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
+      hypre_AMGDataNumDomains(amg_data) = hypre_CTAlloc(HYPRE_Int, max_levels);
+      hypre_AMGDataIDomainDof(amg_data) = hypre_CTAlloc(HYPRE_Int*, max_levels);
+      hypre_AMGDataJDomainDof(amg_data) = hypre_CTAlloc(HYPRE_Int*, max_levels);
       hypre_AMGDataDomainMatrixInverse(amg_data) = 
 				hypre_CTAlloc(double*, max_levels);
       for (i=0; i < max_levels; i++)
@@ -216,7 +216,7 @@ hypre_AMGSetup( void            *amg_vdata,
       if(use_block_flag) {
 	A_tilde = hypre_BCSRMatrixCompress(B_array[level]);
 	fine_size = hypre_CSRMatrixNumRows(A_tilde);
-	fake_dof_func = hypre_CTAlloc(int, fine_size); 
+	fake_dof_func = hypre_CTAlloc(HYPRE_Int, fine_size); 
 	hypre_AMGCreateS(A_tilde, strong_threshold, S_mode, fake_dof_func, &S);
 	/* hypre_AMGCoarsen(A_tilde, strong_threshold, A_tilde,*/
 	hypre_AMGCoarsen(A_tilde, strong_threshold, S,
@@ -239,7 +239,7 @@ hypre_AMGSetup( void            *amg_vdata,
 #if 0 /* for debugging */
         {  
            char new_file[80];
-           sprintf(new_file,"%s.level.%d","P.out" ,level);
+           hypre_sprintf(new_file,"%s.level.%d","P.out" ,level);
            hypre_CSRMatrixPrint(P_array[level],  new_file);
         }
 #endif
@@ -262,7 +262,7 @@ hypre_AMGSetup( void            *amg_vdata,
         {
            hypre_CSRMatrix *A_no_zeros = NULL;
            char new_file[80];
-           sprintf(new_file,"%s.level.%d","RAP.out" ,level+1);
+           hypre_sprintf(new_file,"%s.level.%d","RAP.out" ,level+1);
            A_no_zeros = hypre_CSRMatrixDeleteZeros(A_array[level+1], 1e-14);
            if (A_no_zeros)
            {
@@ -314,7 +314,7 @@ hypre_AMGSetup( void            *amg_vdata,
 	 if (relax_weight[level] != 0.0)
             relax_weight[level] = (4.0/3.0)/relax_weight[level];
          else
-           printf (" Warning ! Matrix norm is zero !!!");
+           hypre_printf (" Warning ! Matrix norm is zero !!!");
       }
 
       if (schwarz_option[level] > -1)
@@ -600,7 +600,7 @@ hypre_AMGSetup( void            *amg_vdata,
       if (P_trunc_factor > 0 || P_max_elmts > 0)
          hypre_AMGTruncation(P,P_trunc_factor,P_max_elmts);
 
-      /*printf("END computing level %d interpolation matrix; =======\n", level);
+      /*hypre_printf("END computing level %d interpolation matrix; =======\n", level);
       */
 
       dof_func_array[level+1] = coarse_dof_func;
@@ -675,7 +675,7 @@ hypre_AMGSetup( void            *amg_vdata,
   *-----------------------------------------------------------------------*/
    {
       hypre_Vector *y1, *y2, *x;
-      int row_size, col_size;
+      HYPRE_Int row_size, col_size;
       
 
       row_size = hypre_CSRMatrixNumRows(P_array[0]);
@@ -717,18 +717,18 @@ hypre_AMGSetup( void            *amg_vdata,
    {  
       char     fnam[255];
 
-      int j;
+      HYPRE_Int j;
 
       for (j = 0; j < level+1; j++)
       {
-         sprintf(fnam,"SP_A_%d.ysmp",j);
+         hypre_sprintf(fnam,"SP_A_%d.ysmp",j);
          hypre_CSRMatrixPrint(A_array[j],fnam);
 
       }                         
 
       for (j = 0; j < level; j++)
       { 
-         sprintf(fnam,"SP_P_%d.ysmp",j);
+         hypre_sprintf(fnam,"SP_P_%d.ysmp",j);
          hypre_CSRMatrixPrint(P_array[j],fnam);
       }   
    } 

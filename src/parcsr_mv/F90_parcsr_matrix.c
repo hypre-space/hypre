@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -27,12 +24,14 @@
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)( long int *matrix,
-                                                  int      *num_rows,
-                                                  int      *ierr      )
+hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Int *num_rows,
+     hypre_F90_Int *ierr      )
 {
-   *num_rows = (int) ( hypre_ParCSRMatrixGlobalNumRows
-                          ( (hypre_ParCSRMatrix *) *matrix ) );
+   *num_rows = (hypre_F90_Int)
+      ( hypre_ParCSRMatrixGlobalNumRows(
+           (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }
@@ -42,12 +41,14 @@ hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows, HYPRE_PARCSRMATRIXGLOBALNUMROWS
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)( long int *matrix,
-                                              long int *row_starts,
-                                              int      *ierr      )
+hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Obj *row_starts,
+     hypre_F90_Int *ierr      )
 {
-   *row_starts = (long int) ( hypre_ParCSRMatrixRowStarts
-                                 ( (hypre_ParCSRMatrix *) *matrix ) );
+   *row_starts = (hypre_F90_Obj)
+      ( hypre_ParCSRMatrixRowStarts(
+           (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }

@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -28,10 +25,13 @@
 
 void 
 hypre_F90_IFACE(hypre_euclidcreate, HYPRE_EUCLIDCREATE)
-               (int *comm, long int *solver, int *ierr)
+   (hypre_F90_Comm *comm,
+    hypre_F90_Obj *solver,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidCreate( (MPI_Comm)      *comm,
-                                     (HYPRE_Solver *) solver );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidCreate(
+      hypre_F90_PassComm (comm),
+      hypre_F90_PassObjRef (HYPRE_Solver, solver) );
 }
 
 /*--------------------------------------------------------------------------
@@ -40,9 +40,11 @@ hypre_F90_IFACE(hypre_euclidcreate, HYPRE_EUCLIDCREATE)
 
 void 
 hypre_F90_IFACE(hypre_eucliddestroy, HYPRE_EUCLIDDESTROY)
-               (long int *solver, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidDestroy( (HYPRE_Solver) *solver );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidDestroy(
+      hypre_F90_PassObj (HYPRE_Solver, solver) );
 }
 
 /*--------------------------------------------------------------------------
@@ -51,12 +53,17 @@ hypre_F90_IFACE(hypre_eucliddestroy, HYPRE_EUCLIDDESTROY)
 
 void 
 hypre_F90_IFACE(hypre_euclidsetup, HYPRE_EUCLIDSETUP)
-               (long int *solver, long int *A, long int *b, long int *x, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Obj *A,
+    hypre_F90_Obj *b,
+    hypre_F90_Obj *x,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSetup( (HYPRE_Solver)       *solver,
-                                    (HYPRE_ParCSRMatrix) *A,
-                                    (HYPRE_ParVector)    *b,
-                                    (HYPRE_ParVector)    *x   );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetup(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+      hypre_F90_PassObj (HYPRE_ParVector, b),
+      hypre_F90_PassObj (HYPRE_ParVector, x)   );
 }
 
 /*--------------------------------------------------------------------------
@@ -65,12 +72,17 @@ hypre_F90_IFACE(hypre_euclidsetup, HYPRE_EUCLIDSETUP)
 
 void 
 hypre_F90_IFACE(hypre_euclidsolve, HYPRE_EUCLIDSOLVE)
-               (long int *solver, long int *A, long int *b, long int *x, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Obj *A,
+    hypre_F90_Obj *b,
+    hypre_F90_Obj *x,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSolve( (HYPRE_Solver)       *solver,
-                                    (HYPRE_ParCSRMatrix) *A,
-                                    (HYPRE_ParVector)    *b,
-                                    (HYPRE_ParVector)    *x  );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSolve(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+      hypre_F90_PassObj (HYPRE_ParVector, b),
+      hypre_F90_PassObj (HYPRE_ParVector, x)  );
 }
 
 /*--------------------------------------------------------------------------
@@ -79,11 +91,15 @@ hypre_F90_IFACE(hypre_euclidsolve, HYPRE_EUCLIDSOLVE)
 
 void 
 hypre_F90_IFACE(hypre_euclidsetparams, HYPRE_EUCLIDSETPARAMS)
-               (long int *solver, int *argc, char **argv, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *argc,
+    char **argv,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSetParams( (HYPRE_Solver) *solver, 
-                                        (int)          *argc,
-                                        (char **)       argv );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetParams(
+      hypre_F90_PassObj (HYPRE_Solver, solver), 
+      hypre_F90_PassInt (argc),
+      (char **)       argv );
 }
 
 /*--------------------------------------------------------------------------
@@ -92,23 +108,27 @@ hypre_F90_IFACE(hypre_euclidsetparams, HYPRE_EUCLIDSETPARAMS)
 
 void 
 hypre_F90_IFACE(hypre_euclidsetparamsfromfile, HYPRE_EUCLIDSETPARAMSFROMFILE)
-               (long int *solver, char *filename, int *ierr)
+   (hypre_F90_Obj *solver,
+    char *filename,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_EuclidSetParamsFromFile( (HYPRE_Solver) *solver, 
-                                                (char *)        filename );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetParamsFromFile(
+      hypre_F90_PassObj (HYPRE_Solver, solver), 
+      (char *)        filename );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_EuclidSetLevel
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)(
-   long int *solver,
-   int      *eu_level,
-   int      *ierr     )
+hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *eu_level,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_EuclidSetLevel( (HYPRE_Solver) *solver,
-                                         (int)          *eu_level ) );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetLevel(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (eu_level) );
 }
 
 
@@ -117,13 +137,14 @@ hypre_F90_IFACE(hypre_euclidsetlevel, HYPRE_EUCLIDSETLEVEL)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)(
-   long int *solver,
-   int      *bj,
-   int      *ierr     )
+hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *bj,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_EuclidSetBJ( (HYPRE_Solver) *solver,
-                                         (int)          *bj ) );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetBJ(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (bj) );
 }
 
 /*--------------------------------------------------------------------------
@@ -131,11 +152,12 @@ hypre_F90_IFACE(hypre_euclidsetbj, HYPRE_EUCLIDSETBJ)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_euclidsetsparsea, HYPRE_EUCLIDSETSPARSEA)(
-   long int *solver,
-   double   *spa,
-   int      *ierr     )
+hypre_F90_IFACE(hypre_euclidsetsparsea, HYPRE_EUCLIDSETSPARSEA)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Dbl *spa,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_EuclidSetSparseA( (HYPRE_Solver) *solver,
-                                           (double)          *spa ) );
+   *ierr = (hypre_F90_Int) HYPRE_EuclidSetSparseA(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassDbl (spa) );
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -58,23 +58,23 @@
 
 typedef struct
 {
-   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
+   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id, HYPRE_Int   *num_procs );
    void * (*CreateVector)  ( void *vector );
-   int    (*DestroyVector) ( void *vector );
+   HYPRE_Int    (*DestroyVector) ( void *vector );
    void * (*MatvecCreate)  ( void *A, void *x );
-   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+   HYPRE_Int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
                              void *x, double beta, void *y );
-   int    (*MatvecT)       ( void *matvec_data, double alpha, void *A,
+   HYPRE_Int    (*MatvecT)       ( void *matvec_data, double alpha, void *A,
                              void *x, double beta, void *y );
-   int    (*MatvecDestroy) ( void *matvec_data );
+   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
    double (*InnerProd)     ( void *x, void *y );
-   int    (*CopyVector)    ( void *x, void *y );
-   int    (*ClearVector)   ( void *x );
-   int    (*ScaleVector)   ( double alpha, void *x );
-   int    (*Axpy)          ( double alpha, void *x, void *y );
-   int    (*precond_setup) ( void *vdata, void *A, void *b, void *x );
-   int    (*precond)       ( void *vdata, void *A, void *b, void *x );
-   int    (*precondT)       ( void *vdata, void *A, void *b, void *x );
+   HYPRE_Int    (*CopyVector)    ( void *x, void *y );
+   HYPRE_Int    (*ClearVector)   ( void *x );
+   HYPRE_Int    (*ScaleVector)   ( double alpha, void *x );
+   HYPRE_Int    (*Axpy)          ( double alpha, void *x, void *y );
+   HYPRE_Int    (*precond_setup) ( void *vdata, void *A, void *b, void *x );
+   HYPRE_Int    (*precond)       ( void *vdata, void *A, void *b, void *x );
+   HYPRE_Int    (*precondT)       ( void *vdata, void *A, void *b, void *x );
 } hypre_CGNRFunctions;
 
 /**
@@ -85,9 +85,9 @@ typedef struct
 {
    double   tol;
    double   rel_residual_norm;
-   int      min_iter;
-   int      max_iter;
-   int      stop_crit;
+   HYPRE_Int      min_iter;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      stop_crit;
 
    void    *A;
    void    *p;
@@ -101,10 +101,10 @@ typedef struct
    hypre_CGNRFunctions * functions;
 
    /* log info (always logged) */
-   int      num_iterations;
+   HYPRE_Int      num_iterations;
 
    /* additional log info (logged when `logging' > 0) */
-   int      logging;
+   HYPRE_Int      logging;
    double  *norms;
    char    *log_file_name;
 
@@ -131,23 +131,23 @@ extern "C" {
  **/
 hypre_CGNRFunctions *
 hypre_CGNRFunctionsCreate(
-   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
+   HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id, HYPRE_Int   *num_procs ),
    void * (*CreateVector)  ( void *vector ),
-   int    (*DestroyVector) ( void *vector ),
+   HYPRE_Int    (*DestroyVector) ( void *vector ),
    void * (*MatvecCreate)  ( void *A, void *x ),
-   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+   HYPRE_Int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
                              void *x, double beta, void *y ),
-   int    (*MatvecT)        ( void *matvec_data, double alpha, void *A,
+   HYPRE_Int    (*MatvecT)        ( void *matvec_data, double alpha, void *A,
                              void *x, double beta, void *y ),
-   int    (*MatvecDestroy) ( void *matvec_data ),
+   HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
    double (*InnerProd)     ( void *x, void *y ),
-   int    (*CopyVector)    ( void *x, void *y ),
-   int    (*ClearVector)   ( void *x ),
-   int    (*ScaleVector)   ( double alpha, void *x ),
-   int    (*Axpy)          ( double alpha, void *x, void *y ),
-   int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
-   int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
-   int    (*PrecondT)       ( void *vdata, void *A, void *b, void *x )
+   HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
+   HYPRE_Int    (*ClearVector)   ( void *x ),
+   HYPRE_Int    (*ScaleVector)   ( double alpha, void *x ),
+   HYPRE_Int    (*Axpy)          ( double alpha, void *x, void *y ),
+   HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
+   HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
+   HYPRE_Int    (*PrecondT)       ( void *vdata, void *A, void *b, void *x )
    );
 
 /**

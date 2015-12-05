@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -45,26 +45,26 @@ typedef struct hypre_Solver_struct *HYPRE_Solver;
 
 /* HYPRE_amg.c */
 HYPRE_Solver HYPRE_AMGInitialize( void );
-int HYPRE_AMGFinalize( HYPRE_Solver solver );
-int HYPRE_AMGSetup( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_AMGSolve( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x );
-int HYPRE_AMGSetMaxLevels( HYPRE_Solver solver , int max_levels );
-int HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver , double strong_threshold );
-int HYPRE_AMGSetCoarsenType( HYPRE_Solver solver , int coarsen_type );
-int HYPRE_AMGSetInterpType( HYPRE_Solver solver , int interp_type );
-int HYPRE_AMGSetMaxIter( HYPRE_Solver solver , int max_iter );
-int HYPRE_AMGSetCycleType( HYPRE_Solver solver , int cycle_type );
-int HYPRE_AMGSetTol( HYPRE_Solver solver , double tol );
-int HYPRE_AMGSetNumGridSweeps( HYPRE_Solver solver , int *num_grid_sweeps );
-int HYPRE_AMGSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type );
-int HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
-int HYPRE_AMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
-int HYPRE_AMGSetIOutDat( HYPRE_Solver solver , int ioutdat );
-int HYPRE_AMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
-int HYPRE_AMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_file_name );
-int HYPRE_AMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
-int HYPRE_AMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
-int HYPRE_AMGSetUseBlockFlag( HYPRE_Solver solver , int use_block_flag );
+HYPRE_Int HYPRE_AMGFinalize( HYPRE_Solver solver );
+HYPRE_Int HYPRE_AMGSetup( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x );
+HYPRE_Int HYPRE_AMGSolve( HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x );
+HYPRE_Int HYPRE_AMGSetMaxLevels( HYPRE_Solver solver , HYPRE_Int max_levels );
+HYPRE_Int HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver , double strong_threshold );
+HYPRE_Int HYPRE_AMGSetCoarsenType( HYPRE_Solver solver , HYPRE_Int coarsen_type );
+HYPRE_Int HYPRE_AMGSetInterpType( HYPRE_Solver solver , HYPRE_Int interp_type );
+HYPRE_Int HYPRE_AMGSetMaxIter( HYPRE_Solver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_AMGSetCycleType( HYPRE_Solver solver , HYPRE_Int cycle_type );
+HYPRE_Int HYPRE_AMGSetTol( HYPRE_Solver solver , double tol );
+HYPRE_Int HYPRE_AMGSetNumGridSweeps( HYPRE_Solver solver , HYPRE_Int *num_grid_sweeps );
+HYPRE_Int HYPRE_AMGSetGridRelaxType( HYPRE_Solver solver , HYPRE_Int *grid_relax_type );
+HYPRE_Int HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver solver , HYPRE_Int **grid_relax_points );
+HYPRE_Int HYPRE_AMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
+HYPRE_Int HYPRE_AMGSetIOutDat( HYPRE_Solver solver , HYPRE_Int ioutdat );
+HYPRE_Int HYPRE_AMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
+HYPRE_Int HYPRE_AMGSetLogging( HYPRE_Solver solver , HYPRE_Int ioutdat , char *log_file_name );
+HYPRE_Int HYPRE_AMGSetNumFunctions( HYPRE_Solver solver , HYPRE_Int num_functions );
+HYPRE_Int HYPRE_AMGSetDofFunc( HYPRE_Solver solver , HYPRE_Int *dof_func );
+HYPRE_Int HYPRE_AMGSetUseBlockFlag( HYPRE_Solver solver , HYPRE_Int use_block_flag );
 
 #ifdef __cplusplus
 }

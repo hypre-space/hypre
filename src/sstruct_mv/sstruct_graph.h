@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,12 +26,12 @@
 
 typedef struct
 {
-   int           part;
+   HYPRE_Int     part;
    hypre_Index   index;
-   int           var;
-   int           to_part;     
+   HYPRE_Int     var;
+   HYPRE_Int     to_part;     
    hypre_Index   to_index;
-   int           to_var;
+   HYPRE_Int     to_var;
 
 } hypre_SStructGraphEntry;
 
@@ -39,22 +39,22 @@ typedef struct
 
 typedef struct
 {
-   int           to_part;
+   HYPRE_Int     to_part;
    hypre_Index   to_index;
-   int           to_var;
-   int           to_boxnum;      /* local box number */
-   int           to_proc;
-   int           rank;
+   HYPRE_Int     to_var;
+   HYPRE_Int     to_boxnum;      /* local box number */
+   HYPRE_Int     to_proc;
+   HYPRE_Int     rank;
 
 } hypre_SStructUEntry;
 
 typedef struct
 {
-   int                  part;
+   HYPRE_Int            part;
    hypre_Index          index;
-   int                  var;
-   int                  boxnum;  /* local box number */
-   int                  nUentries;
+   HYPRE_Int            var;
+   HYPRE_Int            boxnum;  /* local box number */
+   HYPRE_Int            nUentries;
    hypre_SStructUEntry *Uentries;
 
 } hypre_SStructUVEntry;
@@ -62,37 +62,37 @@ typedef struct
 typedef struct hypre_SStructGraph_struct
 {
    MPI_Comm                comm;
-   int                     ndim;
+   HYPRE_Int               ndim;
    hypre_SStructGrid      *grid;
    hypre_SStructGrid      *domain_grid; /* same as grid by default */
-   int                     nparts;
+   HYPRE_Int               nparts;
    hypre_SStructPGrid    **pgrids;
    hypre_SStructStencil ***stencils; /* each (part, var) has a stencil */
 
    /* info for fem-based user input */
-   int                    *fem_nsparse;
-   int                   **fem_sparse_i;
-   int                   **fem_sparse_j;
-   int                   **fem_entries;
+   HYPRE_Int              *fem_nsparse;
+   HYPRE_Int             **fem_sparse_i;
+   HYPRE_Int             **fem_sparse_j;
+   HYPRE_Int             **fem_entries;
 
    /* U-graph info: Entries are referenced via local grid-variable rank. */
-   int                     nUventries;  /* number of iUventries */
-   int                     aUventries;  /* alloc size of iUventries */
-   int                    *iUventries;
+   HYPRE_Int               nUventries;  /* number of iUventries */
+   HYPRE_Int               aUventries;  /* alloc size of iUventries */
+   HYPRE_Int              *iUventries;
 
    hypre_SStructUVEntry  **Uventries;
-   int                     totUentries;
+   HYPRE_Int               totUentries;
 
-   int                     ref_count;
+   HYPRE_Int               ref_count;
 
-   int                     type;    /* GEC0203 */
+   HYPRE_Int               type;    /* GEC0203 */
 
    hypre_SStructGraphEntry **graph_entries; /* these are stored from
                                              * the AddGraphEntries calls
                                              * and then deleted in the
                                              * GraphAssemble */
-   int                     n_graph_entries; /* number graph entries */
-   int                     a_graph_entries; /* alloced graph entries */
+   HYPRE_Int               n_graph_entries; /* number graph entries */
+   HYPRE_Int               a_graph_entries; /* alloced graph entries */
    
 
 

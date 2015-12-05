@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,10 +22,10 @@
 
 typedef struct 
 {
-   int                   size;
+   HYPRE_Int             size;
 
    hypre_BoxArrayArray  *recv_boxes;
-   int                 **recv_procs;
+   HYPRE_Int           **recv_procs;
 
 } hypre_SStructRecvInfoData;
 

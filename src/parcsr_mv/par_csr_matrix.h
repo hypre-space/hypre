@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,25 +33,25 @@ typedef struct
 {
    MPI_Comm		comm;
 
-   int     		global_num_rows;
-   int     		global_num_cols;
-   int			first_row_index;
-   int			first_col_diag;
+   HYPRE_Int     		global_num_rows;
+   HYPRE_Int     		global_num_cols;
+   HYPRE_Int			first_row_index;
+   HYPRE_Int			first_col_diag;
    /* need to know entire local range in case row_starts and col_starts 
       are null  (i.e., bgl) AHB 6/05*/
-   int                  last_row_index;
-   int                  last_col_diag;
+   HYPRE_Int                  last_row_index;
+   HYPRE_Int                  last_col_diag;
 
    hypre_CSRMatrix	*diag;
    hypre_CSRMatrix	*offd;
-   int			*col_map_offd; 
+   HYPRE_Int			*col_map_offd; 
 	/* maps columns of offd to global columns */
-   int 			*row_starts; 
+   HYPRE_Int 			*row_starts; 
 	/* array of length num_procs+1, row_starts[i] contains the 
 	   global number of the first row on proc i,  
 	   first_row_index = row_starts[my_id],
 	   row_starts[num_procs] = global_num_rows */
-   int 			*col_starts;
+   HYPRE_Int 			*col_starts;
 	/* array of length num_procs+1, col_starts[i] contains the 
 	   global number of the first column of diag on proc i,  
 	   first_col_diag = col_starts[my_id],
@@ -61,18 +61,18 @@ typedef struct
    hypre_ParCSRCommPkg	*comm_pkgT;
    
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
-   int      owns_data;
+   HYPRE_Int      owns_data;
    /* Does the ParCSRMatrix create/destroy `row_starts', `col_starts'? */
-   int      owns_row_starts;
-   int      owns_col_starts;
+   HYPRE_Int      owns_row_starts;
+   HYPRE_Int      owns_col_starts;
 
-   int      num_nonzeros;
+   HYPRE_Int      num_nonzeros;
    double   d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
-   int     *rowindices;
+   HYPRE_Int     *rowindices;
    double  *rowvalues;
-   int      getrowactive;
+   HYPRE_Int      getrowactive;
 
    hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
                                               is used (compile-time option)*/
@@ -121,25 +121,25 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 typedef struct
 {
    MPI_Comm              comm;
-   int                   global_num_rows;
-   int                   global_num_cols;
-   int                   first_row_index;
-   int                   first_col_diag;
-   int                   last_row_index;
-   int                   last_col_diag;
+   HYPRE_Int                   global_num_rows;
+   HYPRE_Int                   global_num_cols;
+   HYPRE_Int                   first_row_index;
+   HYPRE_Int                   first_col_diag;
+   HYPRE_Int                   last_row_index;
+   HYPRE_Int                   last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
-   int	                *col_map_offd; 
-   int 	                *row_starts; 
-   int 	                *col_starts;
+   HYPRE_Int	                *col_map_offd; 
+   HYPRE_Int 	                *row_starts; 
+   HYPRE_Int 	                *col_starts;
    hypre_ParCSRCommPkg  *comm_pkg;
    hypre_ParCSRCommPkg  *comm_pkgT;
-   int                   owns_data;
-   int                   owns_row_starts;
-   int                   owns_col_starts;
-   int                   num_nonzeros;
-   int                  *rowindices;
-   int                   getrowactive;
+   HYPRE_Int                   owns_data;
+   HYPRE_Int                   owns_row_starts;
+   HYPRE_Int                   owns_col_starts;
+   HYPRE_Int                   num_nonzeros;
+   HYPRE_Int                  *rowindices;
+   HYPRE_Int                   getrowactive;
 
 } hypre_ParCSRBooleanMatrix;
 

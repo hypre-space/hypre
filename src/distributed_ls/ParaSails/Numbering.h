@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,22 +29,22 @@
 
 struct numbering
 {
-    int   size;    /* max number of indices that can be stored */
-    int   beg_row;
-    int   end_row;
-    int   num_loc; /* number of local indices */
-    int   num_ind; /* number of indices */
+    HYPRE_Int   size;    /* max number of indices that can be stored */
+    HYPRE_Int   beg_row;
+    HYPRE_Int   end_row;
+    HYPRE_Int   num_loc; /* number of local indices */
+    HYPRE_Int   num_ind; /* number of indices */
 
-    int  *local_to_global;
+    HYPRE_Int  *local_to_global;
     Hash *hash;
 };
 
 typedef struct numbering Numbering;
 
-Numbering *NumberingCreate(Matrix *m, int size);
+Numbering *NumberingCreate(Matrix *m, HYPRE_Int size);
 Numbering *NumberingCreateCopy(Numbering *orig);
 void NumberingDestroy(Numbering *numb);
-void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global);
-void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local);
+void NumberingLocalToGlobal(Numbering *numb, HYPRE_Int len, HYPRE_Int *local, HYPRE_Int *global);
+void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, HYPRE_Int *local);
 
 #endif /* _NUMBERING_H */

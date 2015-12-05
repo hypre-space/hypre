@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.23 $
+# $Revision: 2.25 $
 #EHEADER**********************************************************************
 
 
@@ -126,6 +126,8 @@ HYPRE_ref_manual.pdf: version.tex vref_manual.tex
 
 vref_manual.tex: vref_manual.dxx
 	doc++ -t -o vref_manual.tex vref_manual.dxx
+	mv vref_manual.tex vref_manual.tmp
+	sed 's/HYPRE\\_Int\([^a-zA-Z_0-9]\)/int\1/g' vref_manual.tmp > vref_manual.tex
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
@@ -155,4 +157,4 @@ vbref_manual.dxx: bref_manual.dxx
 version.tex:
 	@ \
 	echo "\def\HYPREVersion{$(HYPRE_RELEASE_VERSION)}" > version.tex; \
-	echo "\def\HYPREVersionDate{$(HYPRE_RELEASE_DATETIME)}" >> version.tex
+	echo "\def\HYPREVersionDate{$(HYPRE_RELEASE_DATE)}" >> version.tex

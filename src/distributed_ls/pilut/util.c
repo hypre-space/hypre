@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * Started 9/28/95
  * George
  *
- * $Id: util.c,v 2.5 2008/07/18 01:32:40 ulrikey Exp $
+ * $Id: util.c,v 2.6 2010/12/20 19:27:34 falgout Exp $
  */
 
 #include "ilu.h"
@@ -31,9 +31,9 @@
 * This function finds the minimum value in the array removes it and
 * returns it. It decreases the size of the array.
 **************************************************************************/
-int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
+HYPRE_Int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
 {
-  int i, j=0 ;
+  HYPRE_Int i, j=0 ;
 
   for (i=1; i<lastlr; i++) {
     if (lr[i] < lr[j])
@@ -53,11 +53,11 @@ int hypre_ExtractMinLR( hypre_PilutSolverGlobals *globals )
 /*************************************************************************
 * This function sort an (idx,val) array in increasing idx values
 **************************************************************************/
-void hypre_IdxIncSort(int n, int *idx, double *val)
+void hypre_IdxIncSort(HYPRE_Int n, HYPRE_Int *idx, double *val)
 {
-  int i, j, min;
+  HYPRE_Int i, j, min;
   double tmpval;
-  int tmpidx;
+  HYPRE_Int tmpidx;
 
   for (i=0; i<n; i++) {
     min = i;
@@ -78,10 +78,10 @@ void hypre_IdxIncSort(int n, int *idx, double *val)
 /*************************************************************************
 * This function sort an (idx,val) array in decreasing abs val 
 **************************************************************************/
-void hypre_ValDecSort(int n, int *idx, double *val)
+void hypre_ValDecSort(HYPRE_Int n, HYPRE_Int *idx, double *val)
 {
-  int i, j, max;
-  int tmpidx;
+  HYPRE_Int i, j, max;
+  HYPRE_Int tmpidx;
   double tmpval;
 
   for (i=0; i<n; i++) {
@@ -106,9 +106,9 @@ void hypre_ValDecSort(int n, int *idx, double *val)
 * This function takes an (idx, val) array and compacts it so that every 
 * entry with idx[] = -1, gets removed. It returns the new count
 **************************************************************************/
-int hypre_CompactIdx(int n, int *idx, double *val)
+HYPRE_Int hypre_CompactIdx(HYPRE_Int n, HYPRE_Int *idx, double *val)
 {
-  int i, j;
+  HYPRE_Int i, j;
 
   j = n-1;
   for (i=0; i<n; i++) {
@@ -137,14 +137,14 @@ int hypre_CompactIdx(int n, int *idx, double *val)
 /*************************************************************************
 * This function prints an (idx, val) pair
 **************************************************************************/
-void hypre_PrintIdxVal(int n, int *idx, double *val)
+void hypre_PrintIdxVal(HYPRE_Int n, HYPRE_Int *idx, double *val)
 {
-  int i;
+  HYPRE_Int i;
 
-  printf("%3d ", n);
+  hypre_printf("%3d ", n);
   for (i=0; i<n; i++) 
-    printf("(%3d, %3.1e) ", idx[i], val[i]);
-  printf("\n");
+    hypre_printf("(%3d, %3.1e) ", idx[i], val[i]);
+  hypre_printf("\n");
 
 }
 
@@ -153,7 +153,7 @@ void hypre_PrintIdxVal(int n, int *idx, double *val)
 /*************************************************************************
 * This function compares 2 KeyValueType variables for sorting in inc order
 **************************************************************************/
-int hypre_DecKeyValueCmp(const void *v1, const void *v2)
+HYPRE_Int hypre_DecKeyValueCmp(const void *v1, const void *v2)
 {
   KeyValueType *n1, *n2;
 
@@ -168,7 +168,7 @@ int hypre_DecKeyValueCmp(const void *v1, const void *v2)
 /*************************************************************************
 * This function sorts an array of type KeyValueType in increasing order
 **************************************************************************/
-void hypre_SortKeyValueNodesDec(KeyValueType *nodes, int n)
+void hypre_SortKeyValueNodesDec(KeyValueType *nodes, HYPRE_Int n)
 {
   tex_qsort((void *)nodes, (size_t)n, (size_t)sizeof(KeyValueType), hypre_DecKeyValueCmp);
 }
@@ -177,10 +177,10 @@ void hypre_SortKeyValueNodesDec(KeyValueType *nodes, int n)
 /*************************************************************************
 * This function sums the entries in an array
 **************************************************************************/
-int hypre_sasum(int n, int *x)
+HYPRE_Int hypre_sasum(HYPRE_Int n, HYPRE_Int *x)
 {
-  int sum = 0;
-  int i;
+  HYPRE_Int sum = 0;
+  HYPRE_Int i;
 
   for (i=0; i<n; i++)
     sum += x[i];
@@ -192,31 +192,31 @@ int hypre_sasum(int n, int *x)
 /*************************************************************************
 * This function compares 2 ints for sorting in inc order
 **************************************************************************/
-static int incshort(const void *v1, const void *v2)
+static HYPRE_Int incshort(const void *v1, const void *v2)
 {
-  return (*((int *)v1) - *((int *)v2));
+  return (*((HYPRE_Int *)v1) - *((HYPRE_Int *)v2));
 }
 
 /*************************************************************************
 * This function compares 2 ints for sorting in dec order
 **************************************************************************/
-static int decshort(const void *v1, const void *v2)
+static HYPRE_Int decshort(const void *v1, const void *v2)
 {
-  return (*((int *)v2) - *((int *)v1));
+  return (*((HYPRE_Int *)v2) - *((HYPRE_Int *)v1));
 }
 
 /*************************************************************************
 * These functions sorts an array of XXX
 **************************************************************************/
-void hypre_sincsort(int n, int *a)
+void hypre_sincsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(int), incshort);
+  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), incshort);
 }
 
 
-void sdecsort(int n, int *a)
+void sdecsort(HYPRE_Int n, HYPRE_Int *a)
 {
-  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(int), decshort);
+  tex_qsort((void *)a, (size_t)n, (size_t)sizeof(HYPRE_Int), decshort);
 }
 
 

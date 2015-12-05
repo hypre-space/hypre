@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,14 +38,14 @@ typedef struct
    HYPRE_Solver B2_G;
 
    /* Eigensystem for A x = lambda M x, G^t x = 0 */
-   int block_size;
+   HYPRE_Int block_size;
    void *eigenvectors;
    double *eigenvalues;
 
    /* Eigensolver (LOBPCG) options */
-   int maxit;
+   HYPRE_Int maxit;
    double tol;
-   int print_level;
+   HYPRE_Int print_level;
 
    /* Matrix-vector interface interpreter */
    void *interpreter;
@@ -57,8 +57,8 @@ typedef struct
 
 #include "fortran.h"
 
-int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, int *, double *, int *, int *);
-int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(int *, char *, char *, int *, double *, int *,
-                                       double *, int *, double *, double *, int *, int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(HYPRE_Int *, char *, char *, HYPRE_Int *, double *, HYPRE_Int *,
+                                       double *, HYPRE_Int *, double *, double *, HYPRE_Int *, HYPRE_Int *);
 
 #endif

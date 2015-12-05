@@ -6,25 +6,25 @@
                    cycle = 2.816445
 
 # Output file: coarsening.out.1
- Average Convergence Factor = 0.055759
+ Average Convergence Factor = 0.056033
 
-     Complexity:    grid = 1.198667
-                operator = 1.302461
-                   cycle = 2.604439
+     Complexity:    grid = 1.190222
+                operator = 1.269219
+                   cycle = 2.538129
 
 # Output file: coarsening.out.2
- Average Convergence Factor = 0.053512
+ Average Convergence Factor = 0.053501
 
-     Complexity:    grid = 1.241333
-                operator = 1.400699
-                   cycle = 2.800162
+     Complexity:    grid = 1.236444
+                operator = 1.378931
+                   cycle = 2.756625
 
 # Output file: coarsening.out.3
- Average Convergence Factor = 0.045000
+ Average Convergence Factor = 0.044811
 
-     Complexity:    grid = 1.196444
-                operator = 1.301437
-                   cycle = 2.602565
+     Complexity:    grid = 1.204889
+                operator = 1.315634
+                   cycle = 2.631094
 
 # Output file: coarsening.out.4
  Average Convergence Factor = 0.200231
@@ -42,7 +42,7 @@
 
 # Output file: coarsening.out.6
 Iterations = 12
-Final Relative Residual Norm = 4.205739e-09
+Final Relative Residual Norm = 4.035601e-09
 
 # Output file: coarsening.out.7
 Iterations = 12

@@ -32,7 +32,7 @@
 <a name="line25"> 25</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;HYPRE_parcsr_ls.h&quot;</font></strong></font>
 <a name="line26"> 26</a> 
 <a name="line27"> 27</a> 
-<a name="line28"> 28</a> <strong>int</strong> <font color="#2040a0">hypre_FlexGMRESModifyPCAMGExample</font><font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="#2040a0">precond_data</font>, <strong>int</strong> <font color="#2040a0">iterations</font>, 
+<a name="line28"> 28</a> <strong>int</strong> <font color="#2040a0">hypre_FlexGMRESModifyPCAMGExample</font><font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="#2040a0">precond_data</font>, <strong>int</strong> <font color="#2040a0">iterations</font>,
 <a name="line29"> 29</a>                                       <strong>double</strong> <font color="#2040a0">rel_residual_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line30"> 30</a> 
 <a name="line31"> 31</a> 
@@ -69,7 +69,7 @@
 <a name="line62"> 62</a>    <font color="#2040a0">solver_id</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
 <a name="line63"> 63</a>    <font color="#2040a0">print_solution</font>  <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
 <a name="line64"> 64</a>    <font color="#2040a0">print_system</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line65"> 65</a>    
+<a name="line65"> 65</a> 
 <a name="line66"> 66</a> 
 <a name="line67"> 67</a>    <font color="#444444">/* Parse command line */</font>
 <a name="line68"> 68</a>    <font color="4444FF"><strong>{</strong></font>
@@ -189,9 +189,9 @@
 <a name="line182">182</a>          <font color="#444444">/* The left identity block:position i-n */</font>
 <a name="line183">183</a>          <strong>if</strong> <font color="4444FF">(</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font><font color="4444FF">)</font><font color="4444FF">&gt;</font><font color="4444FF">=</font><font color="#FF0000">0</font><font color="4444FF">)</font>
 <a name="line184">184</a>          <font color="4444FF"><strong>{</strong></font>
-<a name="line185">185</a> 	    <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font><font color="4444FF">;</font>
-<a name="line186">186</a> 	    <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
-<a name="line187">187</a> 	    <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line185">185</a>             <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font><font color="4444FF">;</font>
+<a name="line186">186</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line187">187</a>             <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
 <a name="line188">188</a>          <font color="4444FF"><strong>}</strong></font>
 <a name="line189">189</a> 
 <a name="line190">190</a>          <font color="#444444">/* The left -1: position i-1 */</font>
@@ -232,17 +232,17 @@
 <a name="line225">225</a>    <font color="#2040a0">HYPRE_IJMatrixAssemble</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line226">226</a> 
 <a name="line227">227</a>    <font color="#444444">/* Note: for the testing of small problems, one may wish to read
-<a name="line228">228</a>       in a matrix in IJ format (for the format, see the output files 
+<a name="line228">228</a>       in a matrix in IJ format (for the format, see the output files
 <a name="line229">229</a>       from the -print_system option).
-<a name="line230">230</a>       In this case, one would use the following routine:  
+<a name="line230">230</a>       In this case, one would use the following routine:
 <a name="line231">231</a>       HYPRE_IJMatrixRead( &lt;filename&gt;, MPI_COMM_WORLD,
 <a name="line232">232</a>                           HYPRE_PARCSR, &amp;A );
 <a name="line233">233</a>       &lt;filename&gt;  = IJ.A.out to read in what has been printed out
 <a name="line234">234</a>       by -print_system (processor numbers are omitted).
-<a name="line235">235</a>       A call to HYPRE_IJMatrixRead is an *alternative* to the 
-<a name="line236">236</a>       following sequence of HYPRE_IJMatrix calls: 
+<a name="line235">235</a>       A call to HYPRE_IJMatrixRead is an *alternative* to the
+<a name="line236">236</a>       following sequence of HYPRE_IJMatrix calls:
 <a name="line237">237</a>       Create, SetObjectType, Initialize, SetValues, and Assemble
-<a name="line238">238</a>    */</font>                     
+<a name="line238">238</a>    */</font>
 <a name="line239">239</a> 
 <a name="line240">240</a> 
 <a name="line241">241</a>    <font color="#444444">/* Get the parcsr matrix object to use */</font>
@@ -285,10 +285,10 @@
 <a name="line278">278</a> 
 <a name="line279">279</a>    <font color="#2040a0">HYPRE_IJVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line280">280</a>    <font color="#444444">/*  As with the matrix, for testing purposes, one may wish to read in a rhs:
-<a name="line281">281</a>        HYPRE_IJVectorRead( &lt;filename&gt;, MPI_COMM_WORLD, 
-<a name="line282">282</a>                                  HYPRE_PARCSR, &amp;b ); 
-<a name="line283">283</a>        as an alternative to the 
-<a name="line284">284</a>        following sequence of HYPRE_IJVectors calls: 
+<a name="line281">281</a>        HYPRE_IJVectorRead( &lt;filename&gt;, MPI_COMM_WORLD,
+<a name="line282">282</a>                                  HYPRE_PARCSR, &amp;b );
+<a name="line283">283</a>        as an alternative to the
+<a name="line284">284</a>        following sequence of HYPRE_IJVectors calls:
 <a name="line285">285</a>        Create, SetObjectType, Initialize, SetValues, and Assemble
 <a name="line286">286</a>    */</font>
 <a name="line287">287</a>    <font color="#2040a0">HYPRE_IJVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">par_b</font><font color="4444FF">)</font><font color="4444FF">;</font>
@@ -296,7 +296,7 @@
 <a name="line289">289</a>    <font color="#2040a0">HYPRE_IJVectorAssemble</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line290">290</a>    <font color="#2040a0">HYPRE_IJVectorGetObject</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line291">291</a> 
-<a name="line292">292</a>  
+<a name="line292">292</a> 
 <a name="line293">293</a>   <font color="#444444">/*  Print out the system  - files names will be IJ.out.A.XXXXX
 <a name="line294">294</a>        and IJ.out.b.XXXXX, where XXXXX = processor id */</font>
 <a name="line295">295</a>    <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">print_system</font><font color="4444FF">)</font>
@@ -397,7 +397,7 @@
 <a name="line390">390</a>       <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line391">391</a>       <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* print amg solution info */</font>
 <a name="line392">392</a>       <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line393">393</a>       <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Sym G.S./Jacobi hybrid */</font> 
+<a name="line393">393</a>       <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Sym G.S./Jacobi hybrid */</font>
 <a name="line394">394</a>       <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line395">395</a>       <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.0</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* conv. tolerance zero */</font>
 <a name="line396">396</a>       <font color="#2040a0">HYPRE_BoomerAMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* do only one iteration! */</font>
@@ -486,7 +486,7 @@
 <a name="line479">479</a>       <strong>double</strong> <font color="#2040a0">final_res_norm</font><font color="4444FF">;</font>
 <a name="line480">480</a>       <strong>int</strong>    <font color="#2040a0">restart</font> <font color="4444FF">=</font> <font color="#FF0000">30</font><font color="4444FF">;</font>
 <a name="line481">481</a>       <strong>int</strong>    <font color="#2040a0">modify</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
-<a name="line482">482</a>       
+<a name="line482">482</a> 
 <a name="line483">483</a> 
 <a name="line484">484</a>       <font color="#444444">/* Create solver */</font>
 <a name="line485">485</a>       <font color="#2040a0">HYPRE_ParCSRFlexGMRESCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
@@ -503,7 +503,7 @@
 <a name="line496">496</a>       <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line497">497</a>       <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* print amg solution info */</font>
 <a name="line498">498</a>       <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line499">499</a>       <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Sym G.S./Jacobi hybrid */</font> 
+<a name="line499">499</a>       <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Sym G.S./Jacobi hybrid */</font>
 <a name="line500">500</a>       <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line501">501</a>       <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.0</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* conv. tolerance zero */</font>
 <a name="line502">502</a>       <font color="#2040a0">HYPRE_BoomerAMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* do only one iteration! */</font>
@@ -517,7 +517,7 @@
 <a name="line510">510</a>       <font color="#444444">/* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
 <a name="line511">511</a>          is used - which does nothing.  Otherwise, you can define your own, similar to
 <a name="line512">512</a>          the one used here */</font>
-<a name="line513">513</a>          <font color="#2040a0">HYPRE_FlexGMRESSetModifyPC</font><font color="4444FF">(</font> <font color="#2040a0">solver</font>, 
+<a name="line513">513</a>          <font color="#2040a0">HYPRE_FlexGMRESSetModifyPC</font><font color="4444FF">(</font> <font color="#2040a0">solver</font>,
 <a name="line514">514</a>                                      <font color="4444FF">(</font><font color="#2040a0">HYPRE_PtrToModifyPCFcn</font><font color="4444FF">)</font> <font color="#2040a0">hypre_FlexGMRESModifyPCAMGExample</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line515">515</a> 
 <a name="line516">516</a> 
@@ -539,7 +539,7 @@
 <a name="line532">532</a>       <font color="#444444">/* Destory solver and preconditioner */</font>
 <a name="line533">533</a>       <font color="#2040a0">HYPRE_ParCSRFlexGMRESDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line534">534</a>       <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line535">535</a>       
+<a name="line535">535</a> 
 <a name="line536">536</a>    <font color="4444FF"><strong>}</strong></font>
 <a name="line537">537</a>    <strong>else</strong>
 <a name="line538">538</a>    <font color="4444FF"><strong>{</strong></font>
@@ -562,16 +562,16 @@
 <a name="line555">555</a> <font color="4444FF"><strong>}</strong></font>
 <a name="line556">556</a> 
 <a name="line557">557</a> <font color="#444444">/*--------------------------------------------------------------------------
-<a name="line558">558</a>    hypre_FlexGMRESModifyPCAMGExample - 
+<a name="line558">558</a>    hypre_FlexGMRESModifyPCAMGExample -
 <a name="line559">559</a> 
-<a name="line560">560</a>     This is an example (not recommended) 
+<a name="line560">560</a>     This is an example (not recommended)
 <a name="line561">561</a>    of how we can modify things about AMG that
 <a name="line562">562</a>    affect the solve phase based on how FlexGMRES is doing...For
 <a name="line563">563</a>    another preconditioner it may make sense to modify the tolerance..
 <a name="line564">564</a> 
 <a name="line565">565</a>  *--------------------------------------------------------------------------*/</font>
-<a name="line566">566</a>  
-<a name="line567">567</a> <strong>int</strong> <font color="#2040a0">hypre_FlexGMRESModifyPCAMGExample</font><font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="#2040a0">precond_data</font>, <strong>int</strong> <font color="#2040a0">iterations</font>, 
+<a name="line566">566</a> 
+<a name="line567">567</a> <strong>int</strong> <font color="#2040a0">hypre_FlexGMRESModifyPCAMGExample</font><font color="4444FF">(</font><strong>void</strong> <font color="4444FF">*</font><font color="#2040a0">precond_data</font>, <strong>int</strong> <font color="#2040a0">iterations</font>,
 <a name="line568">568</a>                                    <strong>double</strong> <font color="#2040a0">rel_residual_norm</font><font color="4444FF">)</font>
 <a name="line569">569</a> <font color="4444FF"><strong>{</strong></font>
 <a name="line570">570</a> 
@@ -584,10 +584,10 @@
 <a name="line577">577</a>    <font color="4444FF"><strong>{</strong></font>
 <a name="line578">578</a>       <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond_data</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line579">579</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line580">580</a>    
-<a name="line581">581</a>    
+<a name="line580">580</a> 
+<a name="line581">581</a> 
 <a name="line582">582</a>    <strong>return</strong> <font color="#FF0000">0</font><font color="4444FF">;</font>
-<a name="line583">583</a> <font color="4444FF"><strong>}</strong></font> 
+<a name="line583">583</a> <font color="4444FF"><strong>}</strong></font>
 
 </pre>
 <hr>

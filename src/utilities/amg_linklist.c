@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -47,10 +47,10 @@ void dispose_elt ( hypre_LinkList element_ptr )
 void 
 remove_point(hypre_LinkList   *LoL_head_ptr, 
              hypre_LinkList   *LoL_tail_ptr, 
-             int                 measure,
-             int                 index, 
-             int                *lists, 
-             int                *where)
+             HYPRE_Int                 measure,
+             HYPRE_Int                 index, 
+             HYPRE_Int                *lists, 
+             HYPRE_Int                *where)
 
 {
    hypre_LinkList   LoL_head = *LoL_head_ptr;
@@ -133,7 +133,7 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
       list_ptr = list_ptr -> next_elt;
    } while (list_ptr != NULL);
    
-   printf("No such list!\n");
+   hypre_printf("No such list!\n");
    return;
 }
 
@@ -142,7 +142,7 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
  * create_elt() : Create an element using Item for its data field
  *
  *****************************************************************/
-hypre_LinkList create_elt( int Item )
+hypre_LinkList create_elt( HYPRE_Int Item )
 {
     hypre_LinkList   new_elt_ptr;
  
@@ -152,7 +152,7 @@ hypre_LinkList create_elt( int Item )
 
     if ( (new_elt_ptr = (hypre_LinkList) malloc (sizeof(hypre_ListElement))) == NULL)
     {
-       printf("\n create_elt: malloc failed \n\n");
+       hypre_printf("\n create_elt: malloc failed \n\n");
     }
     else 
 
@@ -177,10 +177,10 @@ hypre_LinkList create_elt( int Item )
 void 
 enter_on_lists(hypre_LinkList   *LoL_head_ptr, 
                hypre_LinkList   *LoL_tail_ptr, 
-               int                 measure,
-               int                 index, 
-               int                *lists, 
-               int                *where)
+               HYPRE_Int                 measure,
+               HYPRE_Int                 index, 
+               HYPRE_Int                *lists, 
+               HYPRE_Int                *where)
 {
    hypre_LinkList   LoL_head = *LoL_head_ptr;
    hypre_LinkList   LoL_tail = *LoL_tail_ptr;
@@ -188,7 +188,7 @@ enter_on_lists(hypre_LinkList   *LoL_head_ptr,
    hypre_LinkList   list_ptr;
    hypre_LinkList   new_ptr;
 
-   int         old_tail;
+   HYPRE_Int         old_tail;
 
    list_ptr =  LoL_head;
 

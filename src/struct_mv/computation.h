@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -50,7 +50,7 @@ typedef struct hypre_ComputePkg_struct
 
    hypre_StructGrid      *grid;
    hypre_BoxArray        *data_space;
-   int                    num_values;
+   HYPRE_Int              num_values;
 
 } hypre_ComputePkg;
 

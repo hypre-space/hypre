@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.20 $
+ * $Revision: 1.21 $
  ***********************************************************************EHEADER*/
 
 
@@ -45,6 +45,9 @@
 
 /* Define to 1 for IRIX64 platforms */
 #undef HYPRE_IRIX64
+
+/* Define to 1 if using long long int for HYPRE_Int */
+#undef HYPRE_BIGINT
 
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI

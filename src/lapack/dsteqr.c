@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dsteqr_(char *compz, integer *n, doublereal *d__, 
+/* Subroutine */ HYPRE_Int dsteqr_(char *compz, integer *n, doublereal *d__, 
 	doublereal *e, doublereal *z__, integer *ldz, doublereal *work, 
 	integer *info)
 {
@@ -92,19 +92,19 @@
     double sqrt(doublereal), d_sign(doublereal *, doublereal *);
     /* Local variables */
     static integer lend, jtot;
-    extern /* Subroutine */ int dlae2_(doublereal *, doublereal *, doublereal 
+    extern /* Subroutine */ HYPRE_Int dlae2_(doublereal *, doublereal *, doublereal 
 	    *, doublereal *, doublereal *);
     static doublereal b, c__, f, g;
     static integer i__, j, k, l, m;
     static doublereal p, r__, s;
     extern logical lsame_(char *, char *);
-    extern /* Subroutine */ int dlasr_(char *, char *, char *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlasr_(char *, char *, char *, integer *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *);
     static doublereal anorm;
-    extern /* Subroutine */ int dswap_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dswap_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static integer l1;
-    extern /* Subroutine */ int dlaev2_(doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlaev2_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *);
     static integer lendm1, lendp1;
@@ -112,17 +112,17 @@
     static integer ii;
     extern doublereal dlamch_(char *);
     static integer mm, iscale;
-    extern /* Subroutine */ int dlascl_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *), dlaset_(char *, integer *, integer 
 	    *, doublereal *, doublereal *, doublereal *, integer *);
     static doublereal safmin;
-    extern /* Subroutine */ int dlartg_(doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlartg_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *);
     static doublereal safmax;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     extern doublereal dlanst_(char *, integer *, doublereal *, doublereal *);
-    extern /* Subroutine */ int dlasrt_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlasrt_(char *, integer *, doublereal *, 
 	    integer *);
     static integer lendsv;
     static doublereal ssfmin;

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,13 +27,13 @@
 typedef struct
 {
    hypre_StructMatrix *P;
-   int                 P_stored_as_transpose;
+   HYPRE_Int           P_stored_as_transpose;
    hypre_ComputePkg   *compute_pkg;
    hypre_Index         cindex;
    hypre_Index         findex;
    hypre_Index         stride;
 
-   int                 time_index;
+   HYPRE_Int           time_index;
 
 } hypre_SemiInterpData;
 
@@ -56,10 +56,10 @@ hypre_SemiInterpCreate( )
  * hypre_SemiInterpSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SemiInterpSetup( void               *interp_vdata,
                        hypre_StructMatrix *P,
-                       int                 P_stored_as_transpose,
+                       HYPRE_Int           P_stored_as_transpose,
                        hypre_StructVector *xc,
                        hypre_StructVector *e,
                        hypre_Index         cindex,
@@ -74,7 +74,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
-   int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -108,27 +108,27 @@ hypre_SemiInterpSetup( void               *interp_vdata,
  * hypre_SemiInterp:
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SemiInterp( void               *interp_vdata,
                   hypre_StructMatrix *P,
                   hypre_StructVector *xc,
                   hypre_StructVector *e            )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SemiInterpData   *interp_data = interp_vdata;
 
-   int                     P_stored_as_transpose;
+   HYPRE_Int               P_stored_as_transpose;
    hypre_ComputePkg       *compute_pkg;
    hypre_IndexRef          cindex;
    hypre_IndexRef          findex;
    hypre_IndexRef          stride;
 
    hypre_StructGrid       *fgrid;
-   int                    *fgrid_ids;
+   HYPRE_Int              *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   int                    *cgrid_ids;
+   HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -140,10 +140,10 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
                        
-   int                     Pi;
-   int                     xci;
-   int                     ei;
-   int                     constant_coefficient;
+   HYPRE_Int               Pi;
+   HYPRE_Int               xci;
+   HYPRE_Int               ei;
+   HYPRE_Int               constant_coefficient;
                          
    double                 *Pp0, *Pp1;
    double                 *xcp;
@@ -157,8 +157,8 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   int                     compute_i, fi, ci, j;
-   int                     loopi, loopj, loopk;
+   HYPRE_Int               compute_i, fi, ci, j;
+   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -178,6 +178,8 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
    /* ... constant_coefficient==2 for P shouldn't happen, see
       hypre_PFMGCreateInterpOp in pfmg_setup_interp.c */
+
+   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -334,10 +336,10 @@ hypre_SemiInterp( void               *interp_vdata,
  * hypre_SemiInterpDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SemiInterpDestroy( void *interp_vdata )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SemiInterpData *interp_data = interp_vdata;
 

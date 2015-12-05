@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,13 +19,13 @@
 #include "temp_multivector.h"
 
 
-int 
-hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, int seed )
+HYPRE_Int 
+hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, HYPRE_Int seed )
 {
-   int ierr = 0;
-   int                 nvars = hypre_SStructPVectorNVars(pvector);
+   HYPRE_Int ierr = 0;
+   HYPRE_Int           nvars = hypre_SStructPVectorNVars(pvector);
    hypre_StructVector *svector;
-   int                 var;
+   HYPRE_Int           var;
 
    srand( seed );
 
@@ -39,13 +39,13 @@ hypre_SStructPVectorSetRandomValues( hypre_SStructPVector *pvector, int seed )
    return ierr;
 }
 
-int 
-hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, int seed )
+HYPRE_Int 
+hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, HYPRE_Int seed )
 {
-   int ierr = 0;
-   int                   nparts = hypre_SStructVectorNParts(vector);
+   HYPRE_Int ierr = 0;
+   HYPRE_Int             nparts = hypre_SStructVectorNParts(vector);
    hypre_SStructPVector *pvector;
-   int                   part;
+   HYPRE_Int             part;
 
    srand( seed );
 
@@ -59,13 +59,13 @@ hypre_SStructVectorSetRandomValues( hypre_SStructVector *vector, int seed )
    return ierr;
 }
 
-int
-hypre_SStructSetRandomValues( void* v, int seed ) {
+HYPRE_Int
+hypre_SStructSetRandomValues( void* v, HYPRE_Int seed ) {
 
   return hypre_SStructVectorSetRandomValues( (hypre_SStructVector*)v, seed );
 }
 
-int
+HYPRE_Int
 HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
   i->CreateVector = hypre_SStructKrylovCreateVector;
@@ -98,7 +98,7 @@ HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i )
   return 0;
 }
 
-int
+HYPRE_Int
 HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions * mv)
 {
   mv->MatvecCreate = hypre_SStructKrylovMatvecCreate;

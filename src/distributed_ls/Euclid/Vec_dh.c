@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -41,7 +41,7 @@ void Vec_dhDestroy(Vec_dh v)
 
 #undef __FUNC__
 #define __FUNC__ "Vec_dhInit"
-void Vec_dhInit(Vec_dh v, int size)
+void Vec_dhInit(Vec_dh v, HYPRE_Int size)
 {
   START_FUNC_DH
   v->n = size;
@@ -68,7 +68,7 @@ void Vec_dhDuplicate(Vec_dh v, Vec_dh *out)
 {
   START_FUNC_DH
   Vec_dh tmp; 
-  int size = v->n;
+  HYPRE_Int size = v->n;
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
   Vec_dhCreate(out); CHECK_V_ERROR;
   tmp = *out;
@@ -82,7 +82,7 @@ void Vec_dhDuplicate(Vec_dh v, Vec_dh *out)
 void Vec_dhSet(Vec_dh v, double value)
 {
   START_FUNC_DH
-  int i, m = v->n;
+  HYPRE_Int i, m = v->n;
   double *vals = v->vals;
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
   for (i=0; i<m; ++i) vals[i] = value;
@@ -94,17 +94,13 @@ void Vec_dhSet(Vec_dh v, double value)
 void Vec_dhSetRand(Vec_dh v)
 {
   START_FUNC_DH
-  int i, m = v->n;
+  HYPRE_Int i, m = v->n;
   double max = 0.0;
   double *vals = v->vals;
 
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
 
-#ifdef WIN32
   for (i=0; i<m; ++i) vals[i] = rand();
-#else
-  for (i=0; i<m; ++i) vals[i] = random();
-#endif
 
   /* find largest value in vector, and scale vector,
    * so all values are in [0.0,1.0]
@@ -121,7 +117,7 @@ void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
 {
   START_FUNC_DH
   double *vals = v->vals;
-  int pe, i, m = v->n;
+  HYPRE_Int pe, i, m = v->n;
   FILE *fp;
 
   if (v->vals == NULL) SET_V_ERROR("v->vals is NULL");
@@ -131,7 +127,7 @@ void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
    *--------------------------------------------------------*/
   if (sg == NULL) {
     for (pe=0; pe<np_dh; ++pe) {
-      MPI_Barrier(comm_dh);
+      hypre_MPI_Barrier(comm_dh);
       if (pe == myid_dh) {
         if (pe == 0) {
           fp=openFile_dh(filename, "w"); CHECK_V_ERROR;
@@ -139,7 +135,7 @@ void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
           fp=openFile_dh(filename, "a"); CHECK_V_ERROR;
         }
 
-        for (i=0; i<m; ++i) fprintf(fp, "%g\n", vals[i]);
+        for (i=0; i<m; ++i) hypre_fprintf(fp, "%g\n", vals[i]);
 
         closeFile_dh(fp); CHECK_V_ERROR;
       }
@@ -150,20 +146,20 @@ void Vec_dhPrint(Vec_dh v, SubdomainGraph_dh sg, char *filename)
    * case 2: single mpi task, multiple subdomains
    *--------------------------------------------------------*/
   else if (np_dh == 1) {
-    int i, j;
+    HYPRE_Int i, j;
 
     fp=openFile_dh(filename, "w"); CHECK_V_ERROR;
 
     for (i=0; i<sg->blocks; ++i) {
-      int oldBlock = sg->n2o_sub[i];
-      int beg_row = sg->beg_rowP[oldBlock];
-      int end_row = beg_row + sg->row_count[oldBlock];
+      HYPRE_Int oldBlock = sg->n2o_sub[i];
+      HYPRE_Int beg_row = sg->beg_rowP[oldBlock];
+      HYPRE_Int end_row = beg_row + sg->row_count[oldBlock];
 
-printf("seq: block= %i  beg= %i  end= %i\n", oldBlock, beg_row, end_row);
+hypre_printf("seq: block= %i  beg= %i  end= %i\n", oldBlock, beg_row, end_row);
 
 
       for (j=beg_row; j<end_row; ++j) {
-        fprintf(fp, "%g\n", vals[j]);
+        hypre_fprintf(fp, "%g\n", vals[j]);
       }
     }
   }
@@ -172,9 +168,9 @@ printf("seq: block= %i  beg= %i  end= %i\n", oldBlock, beg_row, end_row);
    * case 3: multiple mpi tasks, one subdomain per task
    *--------------------------------------------------------*/
   else {
-    int id = sg->o2n_sub[myid_dh];
+    HYPRE_Int id = sg->o2n_sub[myid_dh];
     for (pe=0; pe<np_dh; ++pe) {
-      MPI_Barrier(comm_dh);
+      hypre_MPI_Barrier(comm_dh);
       if (id == pe) {
         if (pe == 0) {
           fp=openFile_dh(filename, "w"); CHECK_V_ERROR;
@@ -183,10 +179,10 @@ printf("seq: block= %i  beg= %i  end= %i\n", oldBlock, beg_row, end_row);
           fp=openFile_dh(filename, "a"); CHECK_V_ERROR;
         }
 
-fprintf(stderr, "par: block= %i\n", id);
+hypre_fprintf(stderr, "par: block= %i\n", id);
 
         for (i=0; i<m; ++i) {
-          fprintf(fp, "%g\n", vals[i]);
+          hypre_fprintf(fp, "%g\n", vals[i]);
         }
 
         closeFile_dh(fp); CHECK_V_ERROR;
@@ -218,12 +214,12 @@ void Vec_dhPrintBIN(Vec_dh v, SubdomainGraph_dh sg, char *filename)
 
 #undef __FUNC__
 #define __FUNC__ "Vec_dhRead"
-void Vec_dhRead(Vec_dh *vout, int ignore, char *filename)
+void Vec_dhRead(Vec_dh *vout, HYPRE_Int ignore, char *filename)
 {
   START_FUNC_DH
   Vec_dh tmp;
   FILE *fp;
-  int items, n, i;
+  HYPRE_Int items, n, i;
   double *v, w;
   char junk[MAX_JUNK];
   
@@ -238,26 +234,26 @@ void Vec_dhRead(Vec_dh *vout, int ignore, char *filename)
 
   /* skip over file lines */
   if (ignore) {
-    printf("Vec_dhRead:: ignoring following header lines:\n");
-    printf("--------------------------------------------------------------\n");
+    hypre_printf("Vec_dhRead:: ignoring following header lines:\n");
+    hypre_printf("--------------------------------------------------------------\n");
     for (i=0; i<ignore; ++i) {
       fgets(junk, MAX_JUNK, fp);
-      printf("%s", junk);
+      hypre_printf("%s", junk);
     }
-    printf("--------------------------------------------------------------\n");
+    hypre_printf("--------------------------------------------------------------\n");
   }
 
   /* count floating point entries in file */
   n = 0;
   while (!feof(fp)) {
-    items = fscanf(fp,"%lg", &w);
+    items = hypre_fscanf(fp,"%lg", &w);
     if (items != 1) {
       break;
     }
     ++n;
   }
 
-  printf("Vec_dhRead:: n= %i\n", n);
+  hypre_printf("Vec_dhRead:: n= %i\n", n);
 
   /* allocate storage */
   tmp->n = n;
@@ -272,9 +268,9 @@ void Vec_dhRead(Vec_dh *vout, int ignore, char *filename)
 
   /* read values */
   for (i=0; i<n;  ++i) {
-    items = fscanf(fp,"%lg", v+i);
+    items = hypre_fscanf(fp,"%lg", v+i);
     if (items != 1) {
-      sprintf(msgBuf_dh, "failed to read value %i of %i", i+1, n);
+      hypre_sprintf(msgBuf_dh, "failed to read value %i of %i", i+1, n);
     }
   }
 

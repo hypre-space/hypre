@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -28,20 +28,20 @@
 hypre_StructMatrix *
 hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
                           hypre_StructGrid   *cgrid,
-                          int                 cdir,
-                          int                 rap_type )
+                          HYPRE_Int           cdir,
+                          HYPRE_Int           rap_type )
 {
    hypre_StructMatrix   *P;
 
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
-   int                   stencil_size;
-   int                   stencil_dim;
+   HYPRE_Int             stencil_size;
+   HYPRE_Int             stencil_dim;
                        
-   int                   num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
                        
-   int                   i;
-   int                   constant_coefficient;
+   HYPRE_Int             i;
+   HYPRE_Int             constant_coefficient;
 
    /* set up stencil */
    stencil_size = 2;
@@ -88,13 +88,13 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
  * hypre_PFMGSetupInterpOp
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
-                         int                 cdir,
+                         HYPRE_Int           cdir,
                          hypre_Index         findex,
                          hypre_Index         stride,
                          hypre_StructMatrix *P,
-                         int                 rap_type )
+                         HYPRE_Int           rap_type )
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -103,26 +103,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    hypre_Box             *P_dbox;
                         
    double                *Pp0, *Pp1;
-   int                    constant_coefficient;
+   HYPRE_Int              constant_coefficient;
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   int                    stencil_size;
+   HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
                         
-   int                    Pstenc0, Pstenc1;
+   HYPRE_Int              Pstenc0, Pstenc1;
                         
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
                         
-   int                    i, si;
+   HYPRE_Int              i, si;
 
-   int                    si0, si1;
-   int                    mrk0, mrk1;
-   int                    d;
+   HYPRE_Int              si0, si1;
+   HYPRE_Int              mrk0, mrk1;
+   HYPRE_Int              d;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -227,37 +227,37 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    return hypre_error_flag;
 }
 
-int
+HYPRE_Int
 hypre_PFMGSetupInterpOp_CC0
-( int                 i, /* box index */
+( HYPRE_Int           i, /* box index */
   hypre_StructMatrix *A,
   hypre_Box          *A_dbox,
-  int                 cdir,
+  HYPRE_Int           cdir,
   hypre_Index         stride,
   hypre_Index         stridec,
   hypre_Index         start,
   hypre_IndexRef      startc,
   hypre_Index         loop_size,
   hypre_Box          *P_dbox,
-  int                 Pstenc0,
-  int                 Pstenc1,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
   double             *Pp0,
   double             *Pp1,
-  int                 rap_type,
-  int                 si0,
-  int                 si1 )
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
 {
-   int                    si;
-   int                    Ai, Pi;
+   HYPRE_Int              si;
+   HYPRE_Int              Ai, Pi;
    double                *Ap;
    double                 center;
-   int                    Astenc;
-   int                    loopi, loopj, loopk;
-   int                    mrk0, mrk1;
+   HYPRE_Int              Astenc;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   int                    stencil_size = hypre_StructStencilSize(stencil);
-   int                    warning_cnt= 0;
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              warning_cnt= 0;
 
    hypre_BoxLoop2Begin(loop_size,
                        A_dbox, start, stride, Ai,
@@ -322,41 +322,41 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_BoxLoop2End(Ai, Pi);
   
    if (warning_cnt)
-      printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
 
    return hypre_error_flag;
 }
 
-int
+HYPRE_Int
 hypre_PFMGSetupInterpOp_CC1
-( int                 i, /* box index, doesn't matter */
+( HYPRE_Int           i, /* box index, doesn't matter */
   hypre_StructMatrix *A,
   hypre_Box          *A_dbox,
-  int                 cdir,
+  HYPRE_Int           cdir,
   hypre_Index         stride,
   hypre_Index         stridec,
   hypre_Index         start,
   hypre_IndexRef      startc,
   hypre_Index         loop_size,
   hypre_Box          *P_dbox,
-  int                 Pstenc0,
-  int                 Pstenc1,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
   double             *Pp0,
   double             *Pp1,
-  int                 rap_type,
-  int                 si0,
-  int                 si1 )
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
 {
-   int                    si;
-   int                    Ai, Pi;
+   HYPRE_Int              si;
+   HYPRE_Int              Ai, Pi;
    double                *Ap;
    double                 center;
-   int                    Astenc;
-   int                    mrk0, mrk1;
+   HYPRE_Int              Astenc;
+   HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   int                    stencil_size = hypre_StructStencilSize(stencil);
-   int                    warning_cnt= 0;
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              warning_cnt= 0;
 
    Ai = hypre_CCBoxIndexRank(A_dbox,start );
    Pi = hypre_CCBoxIndexRank(P_dbox,startc);
@@ -419,46 +419,46 @@ hypre_PFMGSetupInterpOp_CC1
       Pp1[Pi] = 0.0;
 
    if (warning_cnt)
-      printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
 
    return hypre_error_flag;
 }
 
-int
+HYPRE_Int
 hypre_PFMGSetupInterpOp_CC2
-( int                 i, /* box index */
+( HYPRE_Int           i, /* box index */
   hypre_StructMatrix *A,
   hypre_Box          *A_dbox,
-  int                 cdir,
+  HYPRE_Int           cdir,
   hypre_Index         stride,
   hypre_Index         stridec,
   hypre_Index         start,
   hypre_IndexRef      startc,
   hypre_Index         loop_size,
   hypre_Box          *P_dbox,
-  int                 Pstenc0,
-  int                 Pstenc1,
+  HYPRE_Int           Pstenc0,
+  HYPRE_Int           Pstenc1,
   double             *Pp0,
   double             *Pp1,
-  int                 rap_type,
-  int                 si0,
-  int                 si1 )
+  HYPRE_Int           rap_type,
+  HYPRE_Int           si0,
+  HYPRE_Int           si1 )
 {
-   int                    si;
-   int                    Ai;
-   int                    Pi;
+   HYPRE_Int              si;
+   HYPRE_Int              Ai;
+   HYPRE_Int              Pi;
    double                *Ap;
    double                 P0, P1;
    double                 center, center_offd;
-   int                    Astenc;
-   int                    loopi, loopj, loopk;
-   int                    mrk0, mrk1, mrk0_offd, mrk1_offd;
+   HYPRE_Int              Astenc;
+   HYPRE_Int              loopi, loopj, loopk;
+   HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
-   int                    stencil_size = hypre_StructStencilSize(stencil);
+   HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    hypre_Index            diag_index;
-   int                    diag_rank;
-   int                    warning_cnt= 0;
+   HYPRE_Int              diag_rank;
+   HYPRE_Int              warning_cnt= 0;
 
    hypre_SetIndex(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
@@ -516,7 +516,7 @@ hypre_PFMGSetupInterpOp_CC2
       hypre_BoxLoop2Begin(loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
       hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
          {
@@ -530,22 +530,6 @@ hypre_PFMGSetupInterpOp_CC2
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
             hypre_assert( Astenc==0 );
             center += Ap[Ai];
-#if 0
-            if (Astenc == 0)
-            {
-               /* expected to be the only case, the rest is left in
-                for now in case I missed something. */
-               center += Ap[Ai];
-            }
-            else if (Astenc == Pstenc0)
-            {
-               Pp0[Pi] -= Ap[Ai];
-            }
-            else if (Astenc == Pstenc1)
-            {
-               Pp1[Pi] -= Ap[Ai];
-            }
-#endif
 
             if (si == si0 && Ap[Ai] == 0.0)
                mrk0++;
@@ -580,7 +564,7 @@ hypre_PFMGSetupInterpOp_CC2
    }
 
    if (warning_cnt)
-      printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
+      hypre_printf("warning 0 center in interpolation. Setting interp= 0.0 \n");
 
    return hypre_error_flag;
 }

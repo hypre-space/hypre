@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,7 +34,7 @@
  * 1/13 AJC
  * - Modified code with macros to allow both 0 and 1-based indexing
  *
- * $Id: serilut.c,v 2.6 2008/07/18 01:32:40 ulrikey Exp $
+ * $Id: serilut.c,v 2.7 2010/12/20 19:27:34 falgout Exp $
  *
  */
 
@@ -45,19 +45,19 @@
 /*************************************************************************
 * This function takes a matrix and performs an hypre_ILUT of the internal nodes
 **************************************************************************/
-int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
+HYPRE_Int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
              FactorMatType *ldu,
-	     ReduceMatType *rmat, int maxnz, double tol, 
+	     ReduceMatType *rmat, HYPRE_Int maxnz, double tol, 
              hypre_PilutSolverGlobals *globals)
 {
-  int i, ii, j, k, kk, l, m, ierr, diag_present;
-  int *perm, *iperm, 
+  HYPRE_Int i, ii, j, k, kk, l, m, ierr, diag_present;
+  HYPRE_Int *perm, *iperm, 
           *usrowptr, *uerowptr, *ucolind;
-  int row_size, *col_ind;
+  HYPRE_Int row_size, *col_ind;
   double *values, *uvalues, *dvalues, *nrm2s;
-  int nlocal, nbnd;
+  HYPRE_Int nlocal, nbnd;
   double mult, rtol;
-  int *structural_union;
+  HYPRE_Int *structural_union;
 
 
   nrows    = ddist->ddist_nrows;
@@ -88,7 +88,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
 #ifdef HYPRE_TIMING
 {
-   int           FSUtimer;
+   HYPRE_Int           FSUtimer;
    FSUtimer = hypre_InitializeTiming( "FindStructuralUnion");
    hypre_BeginTiming( FSUtimer );
 #endif
@@ -110,7 +110,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   /* Select the rows to be factored */
 #ifdef HYPRE_TIMING
   {
-   int           SItimer;
+   HYPRE_Int           SItimer;
    SItimer = hypre_InitializeTiming( "hypre_SelectInterior");
    hypre_BeginTiming( SItimer );
 #endif
@@ -127,7 +127,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
   nbnd = lnrows - nlocal ;
 #ifdef HYPRE_DEBUG
-  printf("nbnd = %d, lnrows=%d, nlocal=%d\n", nbnd, lnrows, nlocal );
+  hypre_printf("nbnd = %d, lnrows=%d, nlocal=%d\n", nbnd, lnrows, nlocal );
 #endif
 
   ldu->nnodes[0] = nlocal;
@@ -141,7 +141,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 
 #ifdef HYPRE_TIMING
   {
-   int           LFtimer;
+   HYPRE_Int           LFtimer;
    LFtimer = hypre_InitializeTiming( "Local factorization computational stage");
    hypre_BeginTiming( LFtimer );
 #endif
@@ -233,7 +233,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 #endif
 #ifdef HYPRE_TIMING
   {
-   int           FRtimer;
+   HYPRE_Int           FRtimer;
    FRtimer = hypre_InitializeTiming( "Local factorization Schur complement stage");
    hypre_BeginTiming( FRtimer );
 #endif
@@ -244,7 +244,7 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
   /* Allocate memory for the reduced matrix */
     rmat->rmat_rnz     = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rnz"    );
   rmat->rmat_rrowlen   = hypre_idx_malloc(nbnd, "hypre_SerILUT: rmat->rmat_rrowlen");
-    rmat->rmat_rcolind = (int **)hypre_mymalloc(sizeof(int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
+    rmat->rmat_rcolind = (HYPRE_Int **)hypre_mymalloc(sizeof(HYPRE_Int *)*nbnd, "hypre_SerILUT: rmat->rmat_rcolind");
     rmat->rmat_rvalues =  (double **)hypre_mymalloc(sizeof(double *)*nbnd, "hypre_SerILUT: rmat->rmat_rvalues");
   rmat->rmat_ndone = nlocal;
   rmat->rmat_ntogo = nbnd;
@@ -351,15 +351,15 @@ int hypre_SerILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix,
 * It takes a vector that marks rows as being forced to not be in the interior.
 * For full generality this would also mark them in the map, but it doesn't.
 **************************************************************************/
-int hypre_SelectInterior( int local_num_rows, 
+HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows, 
                     HYPRE_DistributedMatrix matrix, 
-                    int *external_rows,
-		    int *newperm, int *newiperm, 
+                    HYPRE_Int *external_rows,
+		    HYPRE_Int *newperm, HYPRE_Int *newiperm, 
                     hypre_PilutSolverGlobals *globals )
 {
-  int nbnd, nlocal, i, j, ierr;
-  int break_loop; /* marks finding an element making this row exterior. -AC */
-  int row_size, *col_ind;
+  HYPRE_Int nbnd, nlocal, i, j, ierr;
+  HYPRE_Int break_loop; /* marks finding an element making this row exterior. -AC */
+  HYPRE_Int row_size, *col_ind;
   double *values;
 
   /* Determine which vertices are in the boundary,
@@ -411,14 +411,14 @@ int hypre_SelectInterior( int local_num_rows,
 *   Produces a vector of length n that marks the union of the nonzero
 *   structure of all locally stored rows, not including locally stored columns.
 **************************************************************************/
-int FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
-                    int **structural_union,
+HYPRE_Int FindStructuralUnion( HYPRE_DistributedMatrix matrix, 
+                    HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
-  int ierr=0, i, j, row_size, *col_ind;
+  HYPRE_Int ierr=0, i, j, row_size, *col_ind;
 
   /* Allocate and clear structural_union vector */
-  *structural_union = hypre_CTAlloc( int, nrows );
+  *structural_union = hypre_CTAlloc( HYPRE_Int, nrows );
 
   /* Loop through rows */
   for ( i=0; i< lnrows; i++ )
@@ -456,21 +456,21 @@ int FindStructuralUnion( HYPRE_DistributedMatrix matrix,
 *   to each row. This is used to determine if a local row might have to
 *   update an off-processor row.
 **************************************************************************/
-int ExchangeStructuralUnions( DataDistType *ddist,
-                    int **structural_union,
+HYPRE_Int ExchangeStructuralUnions( DataDistType *ddist,
+                    HYPRE_Int **structural_union,
                     hypre_PilutSolverGlobals *globals )
 { 
-  int ierr=0, *recv_unions;
+  HYPRE_Int ierr=0, *recv_unions;
 
   /* allocate space for receiving unions */
-  recv_unions = hypre_CTAlloc( int, nrows );
+  recv_unions = hypre_CTAlloc( HYPRE_Int, nrows );
 
-  MPI_Allreduce( *structural_union, recv_unions, nrows, 
-                 MPI_INT, MPI_LOR, pilut_comm );
+  hypre_MPI_Allreduce( *structural_union, recv_unions, nrows, 
+                 HYPRE_MPI_INT, hypre_MPI_LOR, pilut_comm );
 
   /* free and reallocate structural union so that is of local size */
   hypre_TFree( *structural_union );
-  *structural_union = hypre_TAlloc( int, lnrows );
+  *structural_union = hypre_TAlloc( HYPRE_Int, lnrows );
 
   hypre_memcpy_int( *structural_union, &recv_unions[firstrow], lnrows );
 
@@ -485,13 +485,13 @@ int ExchangeStructuralUnions( DataDistType *ddist,
 * This function applies the second droping rule where maxnz elements 
 * greater than tol are kept. The elements are stored into LDU.
 **************************************************************************/
-void hypre_SecondDrop(int maxnz, double tol, int row,
-		int *perm, int *iperm,
+void hypre_SecondDrop(HYPRE_Int maxnz, double tol, HYPRE_Int row,
+		HYPRE_Int *perm, HYPRE_Int *iperm,
 		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
-  int i, j, ierr;
-  int diag, lrow;
-  int first, last, itmp;
+  HYPRE_Int i, j, ierr;
+  HYPRE_Int diag, lrow;
+  HYPRE_Int first, last, itmp;
   double dtmp;
 
   /* Reset the jr array, it is not needed any more */
@@ -506,7 +506,7 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
   if (w[0] != 0.0) 
     ldu->dvalues[lrow] = 1.0/w[0];
   else { /* zero pivot */
-    printf("Zero pivot in row %d, adding e to proceed!\n", row);
+    hypre_printf("Zero pivot in row %d, adding e to proceed!\n", row);
     ldu->dvalues[lrow] = 1.0/tol;
   }
   jw[0] = jw[--lastjr];
@@ -639,16 +639,16 @@ void hypre_SecondDrop(int maxnz, double tol, int row,
 * greater than tol are kept. The elements are stored into L and the Rmat.
 * This version keeps only maxnzkeep 
 **************************************************************************/
-void hypre_SecondDropUpdate(int maxnz, int maxnzkeep, double tol, int row,
-		      int nlocal, int *perm, int *iperm, 
+void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, double tol, HYPRE_Int row,
+		      HYPRE_Int nlocal, HYPRE_Int *perm, HYPRE_Int *iperm, 
 		      FactorMatType *ldu, ReduceMatType *rmat,
                       hypre_PilutSolverGlobals *globals )
 {
-  int i, j, nl;
-  int max, nz, lrow, rrow;
-  int last, first, itmp;
+  HYPRE_Int i, j, nl;
+  HYPRE_Int max, nz, lrow, rrow;
+  HYPRE_Int last, first, itmp;
   double dtmp;
-  int ierr=0;
+  HYPRE_Int ierr=0;
 
 
   /* Reset the jr array, it is not needed any more */

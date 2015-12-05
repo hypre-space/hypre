@@ -8,11 +8,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.11 $
+# $Revision: 1.13 $
 #EHEADER**********************************************************************
-
-
-
 
 
 TNAME=`basename $0 .sh`
@@ -34,6 +31,39 @@ tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
 diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
+# Check SysPFMG for power-of-two and non-power-of-two systems
+#=============================================================================
+
+tail -3 ${TNAME}.out.40 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.41 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.42 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+tail -3 ${TNAME}.out.50 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.51 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.52 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
+# Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
+#=============================================================================
+
+# First check that sstruct and struct are the same here
+tail -3 ${TNAME}.out.60 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.61 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+tail -3 ${TNAME}.out.62 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.63 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+# Also check that PFMG and SysPFMG are the same
+tail -3 ${TNAME}.out.66 > ${TNAME}.testdata
+tail -3 ${TNAME}.out.67 > ${TNAME}.testdata.temp
+diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+
+#=============================================================================
 # compare with baseline case
 #=============================================================================
 
@@ -42,6 +72,19 @@ FILES="\
  ${TNAME}.out.21\
  ${TNAME}.out.30\
  ${TNAME}.out.31\
+ ${TNAME}.out.40\
+ ${TNAME}.out.41\
+ ${TNAME}.out.42\
+ ${TNAME}.out.50\
+ ${TNAME}.out.51\
+ ${TNAME}.out.52\
+ ${TNAME}.out.60\
+ ${TNAME}.out.61\
+ ${TNAME}.out.62\
+ ${TNAME}.out.63\
+ ${TNAME}.out.65\
+ ${TNAME}.out.66\
+ ${TNAME}.out.67\
 "
 
 for i in $FILES

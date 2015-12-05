@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -28,7 +28,7 @@
  *--------------------------------------------------------------------*/
 
 
-int
+HYPRE_Int
 hypre_AMGSolve( void            *amg_vdata,
                 hypre_CSRMatrix *A,
                 hypre_Vector    *f,
@@ -38,12 +38,12 @@ hypre_AMGSolve( void            *amg_vdata,
    
    /* Data Structure variables */
 
-   int      amg_ioutdat;
-   int     *num_coeffs;
-   int     *num_variables;
-   /* int      cycle_op_count; */
-   int      num_levels;
-   /* int      num_functions; */
+   HYPRE_Int      amg_ioutdat;
+   HYPRE_Int     *num_coeffs;
+   HYPRE_Int     *num_variables;
+   /* HYPRE_Int      cycle_op_count; */
+   HYPRE_Int      num_levels;
+   /* HYPRE_Int      num_functions; */
    double   tol;
    /* char    *file_name; */
    hypre_CSRMatrix **A_array;
@@ -52,12 +52,12 @@ hypre_AMGSolve( void            *amg_vdata,
 
    /*  Local variables  */
 
-   int      j;
-   int      Solve_err_flag;
-   int      max_iter;
-   int      cycle_count;
-   int      total_coeffs;
-   int      total_variables;
+   HYPRE_Int      j;
+   HYPRE_Int      Solve_err_flag;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      cycle_count;
+   HYPRE_Int      total_coeffs;
+   HYPRE_Int      total_variables;
 
    double   alpha = 1.0;
    double   beta = -1.0;
@@ -84,8 +84,8 @@ hypre_AMGSolve( void            *amg_vdata,
    tol           = hypre_AMGDataTol(amg_data);
    max_iter      = hypre_AMGDataMaxIter(amg_data);
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
-   num_variables = hypre_CTAlloc(int, num_levels);
+   num_coeffs = hypre_CTAlloc(HYPRE_Int, num_levels);
+   num_variables = hypre_CTAlloc(HYPRE_Int, num_levels);
    num_coeffs[0]    = hypre_CSRMatrixNumNonzeros(A_array[0]);
    num_variables[0] = hypre_CSRMatrixNumRows(A_array[0]);
  
@@ -130,7 +130,7 @@ hypre_AMGSolve( void            *amg_vdata,
    if (amg_ioutdat > 1)
    { 
 
-      printf("\n\nAMG SOLUTION INFO:\n");
+      hypre_printf("\n\nAMG SOLUTION INFO:\n");
 
    }
 
@@ -157,10 +157,10 @@ hypre_AMGSolve( void            *amg_vdata,
 
    if (amg_ioutdat == 2 || amg_ioutdat == 3)
    {     
-      printf("                                            relative\n");
-      printf("               residual        factor       residual\n");
-      printf("               --------        ------       --------\n");
-      printf("    Initial    %e                 %e\n",resid_nrm_init,
+      hypre_printf("                                            relative\n");
+      hypre_printf("               residual        factor       residual\n");
+      hypre_printf("               --------        ------       --------\n");
+      hypre_printf("    Initial    %e                 %e\n",resid_nrm_init,
               relative_resid);
    }
 
@@ -201,7 +201,7 @@ hypre_AMGSolve( void            *amg_vdata,
 
       if (amg_ioutdat == 2 || amg_ioutdat == 3)
       { 
-         printf("    Cycle %2d   %e    %f     %e \n",cycle_count,
+         hypre_printf("    Cycle %2d   %e    %f     %e \n",cycle_count,
                  resid_nrm,conv_factor,relative_resid);
       }
    }
@@ -231,15 +231,15 @@ hypre_AMGSolve( void            *amg_vdata,
    {
       if (Solve_err_flag == 1)
       {
-         printf("\n\n==============================================");
-         printf("\n NOTE: Convergence tolerance was not achieved\n");
-         printf("      within the allowed %d V-cycles\n",max_iter);
-         printf("==============================================");
+         hypre_printf("\n\n==============================================");
+         hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
+         hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+         hypre_printf("==============================================");
       }
-      printf("\n\n Average Convergence Factor = %f",conv_factor);
-      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      printf("                operator = %f\n",operat_cmplxty);
-      /*  printf("                   cycle = %f\n\n",cycle_cmplxty); */
+      hypre_printf("\n\n Average Convergence Factor = %f",conv_factor);
+      hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      hypre_printf("                operator = %f\n",operat_cmplxty);
+      /*  hypre_printf("                   cycle = %f\n\n",cycle_cmplxty); */
    }
 
    /*----------------------------------------------------------

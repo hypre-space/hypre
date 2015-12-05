@@ -477,7 +477,7 @@ there could be better choices than the two suggested ones.
 \section{AMS}
 \label{AMS}
 
-AMS (Auxiliary space Maxwell Solver) is a parallel unstructured Maxwell
+AMS (the Auxiliary-space Maxwell Solver) is a parallel unstructured Maxwell
 solver for edge finite element discretizations of the variational problem
 \begin{equation} \label{ams-maxwell}
 \mbox{Find } {\mathbf u} \in {\mathbf V}_h \>:\qquad
@@ -552,6 +552,7 @@ with $G$, in which case the solver is a two-level method.
 AMS can be used either as a solver or as a preconditioner.
 Below we list the sequence of \hypre{} calls
 needed to create and use it as a solver.
+See example code \file{ex15.c} for a complete implementation.
 We start with the allocation of the \code{HYPRE_Solver} object:
 \begin{display}\begin{verbatim}
 HYPRE_Solver solver;
@@ -629,7 +630,7 @@ Here we use the following convention for the
 three subspace correction methods:
 $0$ refers to smoothing, $1$ stands for BoomerAMG based on $B_G$, and
 $2$ refers to a call to BoomerAMG for ${\mathbf B}_{{\mathbf \Pi}}$.
-The values $3$, $4$ and $5$ refer to the scalar subspaspaces
+The values $3$, $4$ and $5$ refer to the scalar subspaces
 corresponding to the $x$, $y$ and $z$ components of $\mathbf \Pi$.
 
 The abbreviation $xyyz$  for $x,y,z \in \{0,1,2,3,4,5\}$
@@ -642,7 +643,7 @@ In our experience the choices \code{cycle_type=1,5,8,11,13} often produced
 fastest solution times, while \code{cycle_type=7} resulted in smallest
 number of iterations.
 
-Additional solver parameters, as the maximum number of iterations,
+Additional solver parameters, such as the maximum number of iterations,
 the convergence tolerance and the output level, can be set with
 \begin{display}\begin{verbatim}
 HYPRE_AMSSetMaxIter(solver, maxit);     /* default value: 20 */
@@ -665,9 +666,26 @@ To allow for this simplification, use the following \hypre{} call
 \begin{display}\begin{verbatim}
 HYPRE_AMSSetBetaPoissonMatrix(solver, NULL);
 \end{verbatim}\end{display}
-If $\beta$ is zero only in parts of the domain, the problem is still
-singular, but the AMS solver will try to detect this and construct
-a non-singular preconditioner.
+
+If $\beta$ is zero only in parts of the domain, the problem is still singular,
+but the AMS solver will try to detect this and construct a non-singular
+preconditioner. Though this often works well in practice, AMS also provides a
+more robust version for solving such singular problems to very low convergence
+tolerances. This version takes advantage of additional information: the list of
+nodes which are interior to a zero-conductivity region provided by the function
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetInteriorNodes(solver, HYPRE_ParVector interior_nodes);
+\end{verbatim}\end{display}
+Based on the \code{interior_nodes} variable, a restricted discrete gradient
+operator $G_0$ is constructed, and AMS is then defined based on the matrix
+${\mathbf A}+\delta G_0^TG_0$ which is non-singular, and a small $\delta>0$ perturbation of
+${\mathbf A}$. When iterating with this preconditioner, it is advantageous to project on
+the compatible subspace $Ker(G_0^T)$. This can be done periodically, or manually
+through the functions
+\begin{display}\begin{verbatim}
+HYPRE_AMSSetProjectionFrequency(solver, int projection_frequency);
+HYPRE_AMSProjectOutGradients(solver, HYPRE_ParVector x);
+\end{verbatim}\end{display}
 
 Two additional matrices are constructed in the setup of the
 AMS method---one corresponding to the coefficient $\alpha$
@@ -692,7 +710,7 @@ Note the following regarding these functions:
 the diagonal entries of the input matrix corresponding to eliminated
 degrees of freedom (due to essential boundary conditions)
 are penalized.
-\item It is assumed that thei essential boundary conditions of
+\item It is assumed that their essential boundary conditions of
 ${\mathbf A}$, \code{Abeta} and \code{Aalpha} are on the same
 part of the boundary.
 \item \code{HYPRE_AMSSetAlphaPoissonMatrix} forces the

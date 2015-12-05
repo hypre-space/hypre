@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,7 +25,7 @@
  * HYPRE_ParCSRGMRESCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    hypre_GMRESFunctions * gmres_functions =
@@ -50,7 +50,7 @@ HYPRE_ParCSRGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_GMRESDestroy( (void *) solver ) );
@@ -60,7 +60,7 @@ HYPRE_ParCSRGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRGMRESSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRGMRESSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -76,7 +76,7 @@ HYPRE_ParCSRGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -92,9 +92,9 @@ HYPRE_ParCSRGMRESSolve( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetKDim( HYPRE_Solver solver,
-                          int             k_dim    )
+                          HYPRE_Int             k_dim    )
 {
    return( HYPRE_GMRESSetKDim( solver, k_dim ) );
 }
@@ -103,7 +103,7 @@ HYPRE_ParCSRGMRESSetKDim( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -113,7 +113,7 @@ HYPRE_ParCSRGMRESSetTol( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetAbsoluteTol( HYPRE_Solver solver,
                          double             a_tol    )
 {
@@ -124,9 +124,9 @@ HYPRE_ParCSRGMRESSetAbsoluteTol( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetMinIter( HYPRE_Solver solver,
-                             int          min_iter )
+                             HYPRE_Int          min_iter )
 {
    return( HYPRE_GMRESSetMinIter( solver, min_iter ) );
 }
@@ -135,9 +135,9 @@ HYPRE_ParCSRGMRESSetMinIter( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver,
-                             int          max_iter )
+                             HYPRE_Int          max_iter )
 {
    return( HYPRE_GMRESSetMaxIter( solver, max_iter ) );
 }
@@ -146,9 +146,9 @@ HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetStopCrit - OBSOLETE
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetStopCrit( HYPRE_Solver solver,
-                              int          stop_crit )
+                              HYPRE_Int          stop_crit )
 {
    return( HYPRE_GMRESSetStopCrit( solver, stop_crit ) );
 }
@@ -157,7 +157,7 @@ HYPRE_ParCSRGMRESSetStopCrit( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  precond,
                              HYPRE_PtrToParSolverFcn  precond_setup,
@@ -173,7 +173,7 @@ HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver          solver,
  * HYPRE_ParCSRGMRESGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
@@ -184,9 +184,9 @@ HYPRE_ParCSRGMRESGetPrecond( HYPRE_Solver  solver,
  * HYPRE_ParCSRGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( HYPRE_GMRESSetLogging( solver, logging ) );
 }
@@ -195,9 +195,9 @@ HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESSetPrintLevel( HYPRE_Solver solver,
-                             int print_level)
+                             HYPRE_Int print_level)
 {
    return( HYPRE_GMRESSetPrintLevel( solver, print_level ) );
 }
@@ -206,9 +206,9 @@ HYPRE_ParCSRGMRESSetPrintLevel( HYPRE_Solver solver,
  * HYPRE_ParCSRGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( HYPRE_GMRESGetNumIterations( solver, num_iterations ) );
 }
@@ -217,7 +217,7 @@ HYPRE_ParCSRGMRESGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {

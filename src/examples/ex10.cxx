@@ -22,10 +22,12 @@
 */
 
 #include <math.h>
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include "_hypre_utilities.h"
 #include "LLNL_FEI_Impl.h"
+
+using namespace std;
 
 int main(int argc, char *argv[])
 {

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -28,25 +28,25 @@
  * hypre_CSRMatrixMultiMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
                            hypre_Multivector *x, double beta,
                            hypre_Multivector *y)
 {
    double *A_data   = hypre_CSRMatrixData(A);
-   int    *A_i      = hypre_CSRMatrixI(A);
-   int    *A_j      = hypre_CSRMatrixJ(A);
-   int    num_rows = hypre_CSRMatrixNumRows(A);
-   int    num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int    *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int    *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int    num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int    num_cols = hypre_CSRMatrixNumCols(A);
    double *x_data = hypre_MultivectorData(x);
    double *y_data = hypre_MultivectorData(y);
-   int    x_size = hypre_MultivectorSize(x);
-   int    y_size = hypre_MultivectorSize(y);
-   int    num_vectors = hypre_MultivectorNumVectors(x);
-   int    *x_active_ind= x->active_indices;
-   int    *y_active_ind= y->active_indices;
-   int    num_active_vectors = x->num_active_vectors;
-   int    i, j, jj, m, ierr = 0, optimize;
+   HYPRE_Int    x_size = hypre_MultivectorSize(x);
+   HYPRE_Int    y_size = hypre_MultivectorSize(y);
+   HYPRE_Int    num_vectors = hypre_MultivectorNumVectors(x);
+   HYPRE_Int    *x_active_ind= x->active_indices;
+   HYPRE_Int    *y_active_ind= y->active_indices;
+   HYPRE_Int    num_active_vectors = x->num_active_vectors;
+   HYPRE_Int    i, j, jj, m, ierr = 0, optimize;
    double temp, tempx, xpar=0.7, *xptr, *yptr;
    
    /*---------------------------------------------------------------------
@@ -184,26 +184,26 @@ hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
  *   From Van Henson's modification of hypre_CSRMatrixMatvec.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixMatMultivecT(double alpha, hypre_CSRMatrix *A,
                             hypre_Multivector *x, double beta,
                             hypre_Multivector *y)
 {
    double *A_data    = hypre_CSRMatrixData(A);
-   int    *A_i       = hypre_CSRMatrixI(A);
-   int    *A_j       = hypre_CSRMatrixJ(A);
-   int    num_rows  = hypre_CSRMatrixNumRows(A);
-   int    num_cols  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int    *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int    *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Int    num_rows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int    num_cols  = hypre_CSRMatrixNumCols(A);
    double *x_data = hypre_MultivectorData(x);
    double *y_data = hypre_MultivectorData(y);
-   int    x_size = hypre_MultivectorSize(x);
-   int    y_size = hypre_MultivectorSize(y);
-   int    num_vectors = hypre_MultivectorNumVectors(x);
-   int    *x_active_ind= x->active_indices;
-   int    *y_active_ind= y->active_indices;
-   int    num_active_vectors = x->num_active_vectors;
+   HYPRE_Int    x_size = hypre_MultivectorSize(x);
+   HYPRE_Int    y_size = hypre_MultivectorSize(y);
+   HYPRE_Int    num_vectors = hypre_MultivectorNumVectors(x);
+   HYPRE_Int    *x_active_ind= x->active_indices;
+   HYPRE_Int    *y_active_ind= y->active_indices;
+   HYPRE_Int    num_active_vectors = x->num_active_vectors;
    double temp;
-   int    i, jv, jj, size, ierr = 0;
+   HYPRE_Int    i, jv, jj, size, ierr = 0;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if

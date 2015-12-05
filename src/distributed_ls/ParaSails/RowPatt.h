@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,22 +26,22 @@
 
 typedef struct
 {
-    int  maxlen;
-    int  len;
-    int  prev_len;
-    int *ind;
-    int *mark;
-    int *buffer; /* buffer used for outputting indices */
-    int  buflen; /* length of this buffer */
+    HYPRE_Int  maxlen;
+    HYPRE_Int  len;
+    HYPRE_Int  prev_len;
+    HYPRE_Int *ind;
+    HYPRE_Int *mark;
+    HYPRE_Int *buffer; /* buffer used for outputting indices */
+    HYPRE_Int  buflen; /* length of this buffer */
 }
 RowPatt;
 
-RowPatt *RowPattCreate(int maxlen);
+RowPatt *RowPattCreate(HYPRE_Int maxlen);
 void RowPattDestroy(RowPatt *p);
 void RowPattReset(RowPatt *p);
-void RowPattMerge(RowPatt *p, int len, int *ind);
-void RowPattMergeExt(RowPatt *p, int len, int *ind, int num_loc);
-void RowPattGet(RowPatt *p, int *lenp, int **indp);
-void RowPattPrevLevel(RowPatt *p, int *lenp, int **indp);
+void RowPattMerge(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind);
+void RowPattMergeExt(RowPatt *p, HYPRE_Int len, HYPRE_Int *ind, HYPRE_Int num_loc);
+void RowPattGet(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp);
+void RowPattPrevLevel(RowPatt *p, HYPRE_Int *lenp, HYPRE_Int **indp);
 
 #endif /* _ROWPATT_H */

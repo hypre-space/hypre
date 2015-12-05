@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlarfg_(integer *n, doublereal *alpha, doublereal *x, 
+/* Subroutine */ HYPRE_Int dlarfg_(integer *n, doublereal *alpha, doublereal *x, 
 	integer *incx, doublereal *tau)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -68,7 +68,7 @@
     static doublereal beta;
     extern doublereal dnrm2_(integer *, doublereal *, integer *);
     static integer j;
-    extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal xnorm;
     extern doublereal dlapy2_(doublereal *, doublereal *), dlamch_(char *);

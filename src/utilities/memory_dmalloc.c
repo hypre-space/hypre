@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,17 +31,17 @@ char dmalloc_logpath_memory[256];
  * hypre_InitMemoryDebugDML
  *--------------------------------------------------------------------------*/
 
-int
-hypre_InitMemoryDebugDML( int id  )
+HYPRE_Int
+hypre_InitMemoryDebugDML( HYPRE_Int id  )
 {
-   int  *iptr;
+   HYPRE_Int  *iptr;
 
    /* do this to get the Debug Malloc Library started/initialized */
-   iptr = hypre_TAlloc(int, 1);
+   iptr = hypre_TAlloc(HYPRE_Int, 1);
    hypre_TFree(iptr);
 
    dmalloc_logpath = dmalloc_logpath_memory;
-   sprintf(dmalloc_logpath, "dmalloc.log.%04d", id);
+   hypre_sprintf(dmalloc_logpath, "dmalloc.log.%04d", id);
 
    return 0;
 }
@@ -50,7 +50,7 @@ hypre_InitMemoryDebugDML( int id  )
  * hypre_FinalizeMemoryDebugDML
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FinalizeMemoryDebugDML( )
 {
    dmalloc_verify(NULL);
@@ -63,9 +63,9 @@ hypre_FinalizeMemoryDebugDML( )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_MAllocDML( int   size,
+hypre_MAllocDML( HYPRE_Int   size,
                  char *file,
-                 int   line )
+                 HYPRE_Int   line )
 {
    char *ptr;
 
@@ -82,13 +82,13 @@ hypre_MAllocDML( int   size,
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_CAllocDML( int   count,
-                 int   elt_size,
+hypre_CAllocDML( HYPRE_Int   count,
+                 HYPRE_Int   elt_size,
                  char *file,
-                 int   line    )
+                 HYPRE_Int   line    )
 {
    char *ptr;
-   int   size = count*elt_size;
+   HYPRE_Int   size = count*elt_size;
 
    if (size > 0)
    {
@@ -108,9 +108,9 @@ hypre_CAllocDML( int   count,
 
 char *
 hypre_ReAllocDML( char *ptr,
-                  int   size,
+                  HYPRE_Int   size,
                   char *file,
-                  int   line )
+                  HYPRE_Int   line )
 {
    ptr = _realloc_leap(file, line, ptr, size);
 
@@ -124,7 +124,7 @@ hypre_ReAllocDML( char *ptr,
 void
 hypre_FreeDML( char *ptr,
                char *file,
-               int   line )
+               HYPRE_Int   line )
 {
    if (ptr)
    {
@@ -135,6 +135,6 @@ hypre_FreeDML( char *ptr,
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty1;
+double hypre_memory_dmalloc_empty;
 
 #endif

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 
@@ -60,8 +60,8 @@ typedef struct hypre_StructGrid_struct *HYPRE_StructGrid;
 /**
  * Create an {\tt ndim}-dimensional grid object.
  **/
-int HYPRE_StructGridCreate(MPI_Comm          comm,
-                           int               ndim,
+HYPRE_Int HYPRE_StructGridCreate(MPI_Comm          comm,
+                           HYPRE_Int         ndim,
                            HYPRE_StructGrid *grid);
 
 /**
@@ -72,19 +72,19 @@ int HYPRE_StructGridCreate(MPI_Comm          comm,
  * internal package references to the object.  The object will then be destroyed
  * when all internal reference counts go to zero.
  **/
-int HYPRE_StructGridDestroy(HYPRE_StructGrid grid);
+HYPRE_Int HYPRE_StructGridDestroy(HYPRE_StructGrid grid);
 
 /**
  * Set the extents for a box on the grid.
  **/
-int HYPRE_StructGridSetExtents(HYPRE_StructGrid  grid,
-                               int              *ilower,
-                               int              *iupper);
+HYPRE_Int HYPRE_StructGridSetExtents(HYPRE_StructGrid  grid,
+                               HYPRE_Int        *ilower,
+                               HYPRE_Int        *iupper);
 
 /**
  * Finalize the construction of the grid before using.
  **/
-int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
+HYPRE_Int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
 
 /**
  * Set the periodicity for the grid.
@@ -98,14 +98,14 @@ int HYPRE_StructGridAssemble(HYPRE_StructGrid grid);
  * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
  * of the periodic dimensions.
  **/
-int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
-                                int              *periodic);
+HYPRE_Int HYPRE_StructGridSetPeriodic(HYPRE_StructGrid  grid,
+                                HYPRE_Int        *periodic);
 
 /**
  * Set the ghost layer in the grid object
  **/
-int HYPRE_StructGridSetNumGhost(HYPRE_StructGrid  grid,
-                                int              *num_ghost);
+HYPRE_Int HYPRE_StructGridSetNumGhost(HYPRE_StructGrid  grid,
+                                HYPRE_Int        *num_ghost);
 
 /*@}*/
 
@@ -127,14 +127,14 @@ typedef struct hypre_StructStencil_struct *HYPRE_StructStencil;
  * Create a stencil object for the specified number of spatial dimensions and
  * stencil entries.
  **/
-int HYPRE_StructStencilCreate(int                  ndim,
-                              int                  size,
+HYPRE_Int HYPRE_StructStencilCreate(HYPRE_Int            ndim,
+                              HYPRE_Int            size,
                               HYPRE_StructStencil *stencil);
 
 /**
  * Destroy a stencil object.
  **/
-int HYPRE_StructStencilDestroy(HYPRE_StructStencil stencil);
+HYPRE_Int HYPRE_StructStencilDestroy(HYPRE_StructStencil stencil);
 
 /**
  * Set a stencil entry.
@@ -142,9 +142,9 @@ int HYPRE_StructStencilDestroy(HYPRE_StructStencil stencil);
  * NOTE: The name of this routine will eventually be changed to {\tt
  * HYPRE\_StructStencilSetEntry}.
  **/
-int HYPRE_StructStencilSetElement(HYPRE_StructStencil  stencil,
-                                  int                  entry,
-                                  int                 *offset);
+HYPRE_Int HYPRE_StructStencilSetElement(HYPRE_StructStencil  stencil,
+                                  HYPRE_Int            entry,
+                                  HYPRE_Int           *offset);
 
 /*@}*/
 
@@ -165,7 +165,7 @@ typedef struct hypre_StructMatrix_struct *HYPRE_StructMatrix;
 /**
  * Create a matrix object.
  **/
-int HYPRE_StructMatrixCreate(MPI_Comm             comm,
+HYPRE_Int HYPRE_StructMatrixCreate(MPI_Comm             comm,
                              HYPRE_StructGrid     grid,
                              HYPRE_StructStencil  stencil,
                              HYPRE_StructMatrix  *matrix);
@@ -173,12 +173,12 @@ int HYPRE_StructMatrixCreate(MPI_Comm             comm,
 /**
  * Destroy a matrix object.
  **/
-int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
+HYPRE_Int HYPRE_StructMatrixDestroy(HYPRE_StructMatrix matrix);
 
 /**
  * Prepare a matrix object for setting coefficient values.
  **/
-int HYPRE_StructMatrixInitialize(HYPRE_StructMatrix matrix);
+HYPRE_Int HYPRE_StructMatrixInitialize(HYPRE_StructMatrix matrix);
 
 /**
  * Set matrix coefficients index by index.  The {\tt values} array is of length
@@ -187,10 +187,10 @@ int HYPRE_StructMatrixInitialize(HYPRE_StructMatrix matrix);
  * NOTE: For better efficiency, use \Ref{HYPRE_StructMatrixSetBoxValues} to set
  * coefficients a box at a time.
  **/
-int HYPRE_StructMatrixSetValues(HYPRE_StructMatrix  matrix,
-                                int                *index,
-                                int                 nentries,
-                                int                *entries,
+HYPRE_Int HYPRE_StructMatrixSetValues(HYPRE_StructMatrix  matrix,
+                                HYPRE_Int          *index,
+                                HYPRE_Int           nentries,
+                                HYPRE_Int          *entries,
                                 double             *values);
 
 /**
@@ -200,27 +200,27 @@ int HYPRE_StructMatrixSetValues(HYPRE_StructMatrix  matrix,
  * NOTE: For better efficiency, use \Ref{HYPRE_StructMatrixAddToBoxValues} to
  * set coefficients a box at a time.
  **/
-int HYPRE_StructMatrixAddToValues(HYPRE_StructMatrix  matrix,
-                                  int                *index,
-                                  int                 nentries,
-                                  int                *entries,
+HYPRE_Int HYPRE_StructMatrixAddToValues(HYPRE_StructMatrix  matrix,
+                                  HYPRE_Int          *index,
+                                  HYPRE_Int           nentries,
+                                  HYPRE_Int          *entries,
                                   double             *values);
 
 /**
  * Set matrix coefficients which are constant over the grid.  The {\tt values}
  * array is of length {\tt nentries}.
  **/
-int HYPRE_StructMatrixSetConstantValues(HYPRE_StructMatrix  matrix,
-                                   int                 nentries,
-                                   int                *entries,
+HYPRE_Int HYPRE_StructMatrixSetConstantValues(HYPRE_StructMatrix  matrix,
+                                   HYPRE_Int           nentries,
+                                   HYPRE_Int          *entries,
                                    double             *values);
 /**
  * Add to matrix coefficients which are constant over the grid.  The {\tt
  * values} array is of length {\tt nentries}.
  **/
-int HYPRE_StructMatrixAddToConstantValues(HYPRE_StructMatrix  matrix,
-                                     int                 nentries,
-                                     int                *entries,
+HYPRE_Int HYPRE_StructMatrixAddToConstantValues(HYPRE_StructMatrix  matrix,
+                                     HYPRE_Int           nentries,
+                                     HYPRE_Int          *entries,
                                      double             *values);
 
 /**
@@ -239,27 +239,27 @@ int HYPRE_StructMatrixAddToConstantValues(HYPRE_StructMatrix  matrix,
             }
    \end{verbatim}
  **/
-int HYPRE_StructMatrixSetBoxValues(HYPRE_StructMatrix  matrix,
-                                   int                *ilower,
-                                   int                *iupper,
-                                   int                 nentries,
-                                   int                *entries,
+HYPRE_Int HYPRE_StructMatrixSetBoxValues(HYPRE_StructMatrix  matrix,
+                                   HYPRE_Int          *ilower,
+                                   HYPRE_Int          *iupper,
+                                   HYPRE_Int           nentries,
+                                   HYPRE_Int          *entries,
                                    double             *values);
 /**
  * Add to matrix coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_StructMatrixSetBoxValues}.
  **/
-int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
-                                     int                *ilower,
-                                     int                *iupper,
-                                     int                 nentries,
-                                     int                *entries,
+HYPRE_Int HYPRE_StructMatrixAddToBoxValues(HYPRE_StructMatrix  matrix,
+                                     HYPRE_Int          *ilower,
+                                     HYPRE_Int          *iupper,
+                                     HYPRE_Int           nentries,
+                                     HYPRE_Int          *entries,
                                      double             *values);
 
 /**
  * Finalize the construction of the matrix before using.
  **/
-int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
+HYPRE_Int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
 
 /**
  * Get matrix coefficients index by index.  The {\tt values} array is of length
@@ -268,21 +268,21 @@ int HYPRE_StructMatrixAssemble(HYPRE_StructMatrix matrix);
  * NOTE: For better efficiency, use \Ref{HYPRE_StructMatrixGetBoxValues} to get
  * coefficients a box at a time.
  **/
-int HYPRE_StructMatrixGetValues(HYPRE_StructMatrix  matrix,
-                                int                *index,
-                                int                 nentries,
-                                int                *entries,
+HYPRE_Int HYPRE_StructMatrixGetValues(HYPRE_StructMatrix  matrix,
+                                HYPRE_Int          *index,
+                                HYPRE_Int           nentries,
+                                HYPRE_Int          *entries,
                                 double             *values);
 
 /**
  * Get matrix coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_StructMatrixSetBoxValues}.
  **/
-int HYPRE_StructMatrixGetBoxValues(HYPRE_StructMatrix  matrix,
-                                   int                *ilower,
-                                   int                *iupper,
-                                   int                 nentries,
-                                   int                *entries,
+HYPRE_Int HYPRE_StructMatrixGetBoxValues(HYPRE_StructMatrix  matrix,
+                                   HYPRE_Int          *ilower,
+                                   HYPRE_Int          *iupper,
+                                   HYPRE_Int           nentries,
+                                   HYPRE_Int          *entries,
                                    double             *values);
 
 /**
@@ -290,8 +290,8 @@ int HYPRE_StructMatrixGetBoxValues(HYPRE_StructMatrix  matrix,
  * to be nonsymmetric.  Significant storage savings can be made if the matrix is
  * symmetric.
  **/
-int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
-                                   int                 symmetric);
+HYPRE_Int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
+                                   HYPRE_Int           symmetric);
 
 /**
  * Specify which stencil entries are constant over the grid.  Declaring entries
@@ -306,30 +306,30 @@ int HYPRE_StructMatrixSetSymmetric(HYPRE_StructMatrix  matrix,
  * \item all but the diagonal entry constant
  * \end{itemize}
  **/
-int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
-                                          int                nentries,
-                                          int               *entries );
+HYPRE_Int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix,
+                                          HYPRE_Int          nentries,
+                                          HYPRE_Int         *entries );
 
 /**
  * Set the ghost layer in the matrix 
  **/
-int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
-                                  int                *num_ghost);
+HYPRE_Int HYPRE_StructMatrixSetNumGhost(HYPRE_StructMatrix  matrix,
+                                  HYPRE_Int          *num_ghost);
 
 
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_StructMatrixPrint(const char         *filename,
+HYPRE_Int HYPRE_StructMatrixPrint(const char         *filename,
                             HYPRE_StructMatrix  matrix,
-                            int                 all);
+                            HYPRE_Int           all);
 
 /**
  * Matvec operator.  This operation is  $y = \alpha A x + \beta y$ .
  * Note that you can do a simple matrix-vector multiply by setting
  * $\alpha=1$ and $\beta=0$.
  **/
-int HYPRE_StructMatrixMatvec ( double alpha,
+HYPRE_Int HYPRE_StructMatrixMatvec ( double alpha,
                                HYPRE_StructMatrix A,
                                HYPRE_StructVector x,
                                double beta,
@@ -356,19 +356,19 @@ typedef struct hypre_StructVector_struct *HYPRE_StructVector;
 /**
  * Create a vector object.
  **/
-int HYPRE_StructVectorCreate(MPI_Comm            comm,
+HYPRE_Int HYPRE_StructVectorCreate(MPI_Comm            comm,
                              HYPRE_StructGrid    grid,
                              HYPRE_StructVector *vector);
 
 /**
  * Destroy a vector object.
  **/
-int HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
+HYPRE_Int HYPRE_StructVectorDestroy(HYPRE_StructVector vector);
 
 /**
  * Prepare a vector object for setting coefficient values.
  **/
-int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
+HYPRE_Int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
 
 /**
  * Set vector coefficients index by index.
@@ -376,8 +376,8 @@ int HYPRE_StructVectorInitialize(HYPRE_StructVector vector);
  * NOTE: For better efficiency, use \Ref{HYPRE_StructVectorSetBoxValues} to set
  * coefficients a box at a time.
  **/
-int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
-                                int                *index,
+HYPRE_Int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
+                                HYPRE_Int          *index,
                                 double              value);
 
 /**
@@ -386,8 +386,8 @@ int HYPRE_StructVectorSetValues(HYPRE_StructVector  vector,
  * NOTE: For better efficiency, use \Ref{HYPRE_StructVectorAddToBoxValues} to
  * set coefficients a box at a time.
  **/
-int HYPRE_StructVectorAddToValues(HYPRE_StructVector  vector,
-                                  int                *index,
+HYPRE_Int HYPRE_StructVectorAddToValues(HYPRE_StructVector  vector,
+                                  HYPRE_Int          *index,
                                   double              value);
 
 /**
@@ -405,23 +405,23 @@ int HYPRE_StructVectorAddToValues(HYPRE_StructVector  vector,
          }
    \end{verbatim}
  **/
-int HYPRE_StructVectorSetBoxValues(HYPRE_StructVector  vector,
-                                   int                *ilower,
-                                   int                *iupper,
+HYPRE_Int HYPRE_StructVectorSetBoxValues(HYPRE_StructVector  vector,
+                                   HYPRE_Int          *ilower,
+                                   HYPRE_Int          *iupper,
                                    double             *values);
 /**
  * Add to vector coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_StructVectorSetBoxValues}.
  **/
-int HYPRE_StructVectorAddToBoxValues(HYPRE_StructVector  vector,
-                                     int                *ilower,
-                                     int                *iupper,
+HYPRE_Int HYPRE_StructVectorAddToBoxValues(HYPRE_StructVector  vector,
+                                     HYPRE_Int          *ilower,
+                                     HYPRE_Int          *iupper,
                                      double             *values);
 
 /**
  * Finalize the construction of the vector before using.
  **/
-int HYPRE_StructVectorAssemble(HYPRE_StructVector vector);
+HYPRE_Int HYPRE_StructVectorAssemble(HYPRE_StructVector vector);
 
 /**
  * Get vector coefficients index by index.
@@ -429,25 +429,25 @@ int HYPRE_StructVectorAssemble(HYPRE_StructVector vector);
  * NOTE: For better efficiency, use \Ref{HYPRE_StructVectorGetBoxValues} to get
  * coefficients a box at a time.
  **/
-int HYPRE_StructVectorGetValues(HYPRE_StructVector  vector,
-                                int                *index,
+HYPRE_Int HYPRE_StructVectorGetValues(HYPRE_StructVector  vector,
+                                HYPRE_Int          *index,
                                 double             *value);
 
 /**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
  * as in \Ref{HYPRE_StructVectorSetBoxValues}.
  **/
-int HYPRE_StructVectorGetBoxValues(HYPRE_StructVector  vector,
-                                   int                *ilower,
-                                   int                *iupper,
+HYPRE_Int HYPRE_StructVectorGetBoxValues(HYPRE_StructVector  vector,
+                                   HYPRE_Int          *ilower,
+                                   HYPRE_Int          *iupper,
                                    double             *values);
 
 /**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_StructVectorPrint(const char         *filename,
+HYPRE_Int HYPRE_StructVectorPrint(const char         *filename,
                             HYPRE_StructVector  vector,
-                            int                 all);
+                            HYPRE_Int           all);
 
 /*@}*/
 /*@}*/
@@ -456,27 +456,27 @@ int HYPRE_StructVectorPrint(const char         *filename,
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/
 
-int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
+HYPRE_Int HYPRE_StructMatrixGetGrid(HYPRE_StructMatrix  matrix,
                               HYPRE_StructGrid   *grid);
 
 struct hypre_CommPkg_struct;
 typedef struct hypre_CommPkg_struct *HYPRE_CommPkg;
 
-int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
-                                  int                *num_ghost);
+HYPRE_Int HYPRE_StructVectorSetNumGhost(HYPRE_StructVector  vector,
+                                  HYPRE_Int          *num_ghost);
 
-int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
+HYPRE_Int HYPRE_StructVectorSetConstantValues(HYPRE_StructVector vector,
                                         double             values);
 
-int HYPRE_StructVectorGetMigrateCommPkg(HYPRE_StructVector  from_vector,
+HYPRE_Int HYPRE_StructVectorGetMigrateCommPkg(HYPRE_StructVector  from_vector,
                                         HYPRE_StructVector  to_vector,
                                         HYPRE_CommPkg      *comm_pkg);
 
-int HYPRE_StructVectorMigrate(HYPRE_CommPkg      comm_pkg,
+HYPRE_Int HYPRE_StructVectorMigrate(HYPRE_CommPkg      comm_pkg,
                               HYPRE_StructVector from_vector,
                               HYPRE_StructVector to_vector);
 
-int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
+HYPRE_Int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/

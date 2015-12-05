@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.27 $
+# $Revision: 2.29 $
 #EHEADER**********************************************************************
 
 
@@ -44,6 +44,8 @@ FILES =\
  binsearch.c\
  exchange_data.c\
  fortran_matrix.c\
+ hypre_ap.c\
+ hypre_printf.c\
  hypre_memory.c\
  hypre_qsort.c\
  memory_dmalloc.c\

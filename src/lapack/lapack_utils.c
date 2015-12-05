@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -96,15 +96,15 @@ return(pow(*ap, *bp) );
 #include "f2c.h"
 
 #ifdef KR_headers
-int s_cat(lp, rpp, rnp, np, ll) char *lp, *rpp[]; ftnlen rnp[], *np, ll;
+HYPRE_Int s_cat(lp, rpp, rnp, np, ll) char *lp, *rpp[]; ftnlen rnp[], *np, ll;
 #else
-int s_cat(char *lp, char *rpp[], ftnlen rnp[], ftnlen *np, ftnlen ll)
+HYPRE_Int s_cat(char *lp, char *rpp[], ftnlen rnp[], ftnlen *np, ftnlen ll)
 #endif
 {
 ftnlen i, n, nc;
 char *f__rp;
 
-n = (int)*np;
+n = (HYPRE_Int)*np;
 for(i = 0 ; i < n ; ++i)
 	{
 	nc = ll;

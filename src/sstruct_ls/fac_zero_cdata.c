@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,7 +29,7 @@
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FacZeroCData( void                 *fac_vdata,
                     hypre_SStructMatrix  *A )
 {
@@ -44,33 +44,33 @@ hypre_FacZeroCData( void                 *fac_vdata,
 
    hypre_BoxManager      *fboxman;
    hypre_BoxManEntry    **boxman_entries;
-   int                    nboxman_entries;
+   HYPRE_Int              nboxman_entries;
 
    hypre_Box              scaled_box;
    hypre_Box              intersect_box;
 
    hypre_SStructPMatrix  *level_pmatrix;
    hypre_StructStencil   *stencils;
-   int                    stencil_size;
+   HYPRE_Int              stencil_size;
 
    hypre_Index           *refine_factors;
    hypre_Index            temp_index;
    hypre_Index            ilower, iupper;
   
-   int                    max_level     =  fac_data -> max_levels;
-   int                   *level_to_part =  fac_data -> level_to_part;
+   HYPRE_Int              max_level     =  fac_data -> max_levels;
+   HYPRE_Int             *level_to_part =  fac_data -> level_to_part;
 
-   int                    ndim          =  hypre_SStructMatrixNDim(A);
-   int                    part_crse     =  0;
-   int                    part_fine     =  1;
-   int                    level;
-   int                    nvars, var;
+   HYPRE_Int              ndim          =  hypre_SStructMatrixNDim(A);
+   HYPRE_Int              part_crse     =  0;
+   HYPRE_Int              part_fine     =  1;
+   HYPRE_Int              level;
+   HYPRE_Int              nvars, var;
 
-   int                    ci, i, j, rem, intersect_size;
+   HYPRE_Int              ci, i, j, rem, intersect_size;
 
    double                *values;
  
-   int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    for (level= max_level; level> 0; level--)
    {

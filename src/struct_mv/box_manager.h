@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_BOX_MANAGER_HEADER
@@ -24,11 +24,11 @@ typedef struct hypre_BoxManEntry_struct
    hypre_Index  imin; /*extents of box */
    hypre_Index  imax;
 
-   int proc; /*this is a two-part unique id: (proc, id) */
-   int id;
-   int num_ghost[6];
+   HYPRE_Int proc; /*this is a two-part unique id: (proc, id) */
+   HYPRE_Int id;
+   HYPRE_Int num_ghost[6];
 
-   int position; /* this indicates the location of the entry in the
+   HYPRE_Int position; /* this indicates the location of the entry in the
                   * the box manager entries array and is used for
                   * pairing with the info object (populated in addentry) */
    
@@ -51,11 +51,11 @@ typedef struct
 
    MPI_Comm            comm;
 
-   int                 max_nentries;  /* storage in entries allocated to this 
+   HYPRE_Int           max_nentries;  /* storage in entries allocated to this 
                                          amount */
 
     
-   int                 is_gather_called; /* boolean to indicate  whether GatherEntries
+   HYPRE_Int           is_gather_called; /* boolean to indicate  whether GatherEntries
                                             function has been called  (prior to 
                                             assemble) - may not want this (can tell
                                             by the size of gather_regions array) */
@@ -66,56 +66,56 @@ typedef struct
                                           deleted after the assemble */
    
 
-   int                 all_global_known; /* Boolean to say that every
+   HYPRE_Int           all_global_known; /* Boolean to say that every
                                             processor already has all
                                             of the global data for
                                             this manager (this could be
                                             acessed by a coarsening routine, 
                                             for example) */
    
-   int                 is_entries_sort;     /* Boolean to say that entries were 
+   HYPRE_Int           is_entries_sort;     /* Boolean to say that entries were 
                                             added in sorted order (id, proc)
                                             (this could be
                                             acessed by a coarsening routine, 
                                             for example) */
 
 
-   int                 entry_info_size;  /* in bytes, the (max) size of the info 
+   HYPRE_Int           entry_info_size;  /* in bytes, the (max) size of the info 
                                             object for the entries */ 
 
-   int                 is_assembled;        /* flag to indicate if the box manager has been 
+   HYPRE_Int           is_assembled;        /* flag to indicate if the box manager has been 
                                             assembled (use to control whether or not
                                             functions can be used prior to assemble)*/
    
 
    /* storing the entries */
-   int                 nentries;     /* number of entries stored */
+   HYPRE_Int           nentries;     /* number of entries stored */
    hypre_BoxManEntry  *entries;      /* These are the actual box manager entries - these
                                       are sorted by (proc, id) at the end of the assemble)*/  
 
-   int                *procs_sort;    /* the sorted procs corresponding to entries */
-   int                *ids_sort;      /* sorted ids corresponding to the entries */
+   HYPRE_Int          *procs_sort;    /* the sorted procs corresponding to entries */
+   HYPRE_Int          *ids_sort;      /* sorted ids corresponding to the entries */
  
-   int                num_procs_sort; /* number of distinct procs in *entries */
-   int                *procs_sort_offsets;  /* offsets for procs into the 
+   HYPRE_Int          num_procs_sort; /* number of distinct procs in *entries */
+   HYPRE_Int          *procs_sort_offsets;  /* offsets for procs into the 
                                              *entry_sort array */
-   int                first_local;      /* position of local infomation in entries*/  
-   int                local_proc_offset;  /*position of local information in offsets */
+   HYPRE_Int          first_local;      /* position of local infomation in entries*/  
+   HYPRE_Int          local_proc_offset;  /*position of local information in offsets */
 
    /* here is the table  that organizes the entries spatially (by index)*/
    hypre_BoxManEntry **index_table; /* this points into 'entries' array  
                                             and corresponds to the index arays*/
 
-   int                *indexes[3]; /* here we have the x,y,z indexes (ordered) 
+   HYPRE_Int          *indexes[3]; /* here we have the x,y,z indexes (ordered) 
                                       for the imin and imax
                                       of each box in the entries array*/
-   int                 size[3];    /* how many indexes we have in each direction 
+   HYPRE_Int           size[3];    /* how many indexes we have in each direction 
                                       - x,y,z */ 
 
-   int                 last_index[3]; /* the last index used in the indexes map */
+   HYPRE_Int           last_index[3]; /* the last index used in the indexes map */
 
-   int                 num_my_entries; /* number of entries with proc_id = myid */
-   int                 *my_ids;        /* an array of ids corresponding to my entries */ 
+   HYPRE_Int           num_my_entries; /* number of entries with proc_id = myid */
+   HYPRE_Int           *my_ids;        /* an array of ids corresponding to my entries */ 
    hypre_BoxManEntry   **my_entries;   /* points into *entries that are mine & corresponds to
                                           my_ids array.  This is destroyed in the assemble */
    
@@ -125,17 +125,17 @@ typedef struct
 
    hypre_StructAssumedPart *assumed_partition; /* the assumed partition object  - for now this is only
                                                   used during the assemble (where it is created)*/
-   int                 dim;           /* problem dimension (known in the grid) */
+   HYPRE_Int           dim;           /* problem dimension (known in the grid) */
 
    hypre_Box           *bounding_box;  /* bounding box - from associated grid */
    
 
-   int                 next_id; /* counter to indicate the next id 
+   HYPRE_Int           next_id; /* counter to indicate the next id 
                                    that would be unique (regardless of proc id) */  
 
    /* ghost stuff  */
 
-   int                num_ghost[6]; 
+   HYPRE_Int          num_ghost[6]; 
 
 
 

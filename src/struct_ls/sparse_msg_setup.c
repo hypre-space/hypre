@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -46,7 +46,7 @@
  * hypre_SparseMSGSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SparseMSGSetup( void               *smsg_vdata,
                       hypre_StructMatrix *A,
                       hypre_StructVector *b,
@@ -56,14 +56,14 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
 
    MPI_Comm              comm = (smsg_data -> comm);
                      
-   int                   max_iter;
-   int                   jump       = (smsg_data -> jump);
-   int                   relax_type = (smsg_data -> relax_type);
-   int                   usr_jacobi_weight= (smsg_data -> usr_jacobi_weight);
+   HYPRE_Int             max_iter;
+   HYPRE_Int             jump       = (smsg_data -> jump);
+   HYPRE_Int             relax_type = (smsg_data -> relax_type);
+   HYPRE_Int             usr_jacobi_weight= (smsg_data -> usr_jacobi_weight);
    double                jacobi_weight    = (smsg_data -> jacobi_weight);
-   int                  *num_grids  = (smsg_data -> num_grids);
-   int                   num_all_grids;
-   int                   num_levels;
+   HYPRE_Int            *num_grids  = (smsg_data -> num_grids);
+   HYPRE_Int             num_all_grids;
+   HYPRE_Int             num_levels;
 
    hypre_StructGrid    **grid_a;
    hypre_StructGrid    **Px_grid_a;
@@ -72,7 +72,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                     
    double               *data;
    double               *tdata;
-   int                   data_size = 0;
+   HYPRE_Int             data_size = 0;
    hypre_StructMatrix  **A_a;
    hypre_StructMatrix  **Px_a;
    hypre_StructMatrix  **Py_a;
@@ -91,7 +91,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_StructVector  **visitx_a;
    hypre_StructVector  **visity_a;
    hypre_StructVector  **visitz_a;
-   int                  *grid_on;
+   HYPRE_Int            *grid_on;
 
    void                **relax_a;
    void                **matvec_a;
@@ -108,16 +108,16 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    hypre_Index           stridePR;
 
    hypre_StructGrid     *grid;
-   int                   dim;
+   HYPRE_Int             dim;
    hypre_Box            *cbox;   
 
-   int                   d, l, lx, ly, lz;
-   int                   fi, ci;
+   HYPRE_Int             d, l, lx, ly, lz;
+   HYPRE_Int             fi, ci;
                        
-   int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-   int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -289,7 +289,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    visitx_a = hypre_CTAlloc(hypre_StructVector *, num_all_grids);
    visity_a = hypre_CTAlloc(hypre_StructVector *, num_all_grids);
    visitz_a = hypre_CTAlloc(hypre_StructVector *, num_all_grids);
-   grid_on  = hypre_CTAlloc(int, num_all_grids);
+   grid_on  = hypre_CTAlloc(HYPRE_Int, num_all_grids);
 
 
    A_a[0] = hypre_StructMatrixRef(A);
@@ -802,14 +802,14 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
             {
                hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
 
-               sprintf(filename, "zoutSMSG_A.%d.%d.%d", lx, ly, lz);
+               hypre_sprintf(filename, "zoutSMSG_A.%d.%d.%d", lx, ly, lz);
                hypre_StructMatrixPrint(filename, A_a[fi], 0);
 
-               sprintf(filename, "zoutSMSG_visitx.%d.%d.%d", lx, ly, lz);
+               hypre_sprintf(filename, "zoutSMSG_visitx.%d.%d.%d", lx, ly, lz);
                hypre_StructVectorPrint(filename, visitx_a[fi], 0);
-               sprintf(filename, "zoutSMSG_visity.%d.%d.%d", lx, ly, lz);
+               hypre_sprintf(filename, "zoutSMSG_visity.%d.%d.%d", lx, ly, lz);
                hypre_StructVectorPrint(filename, visity_a[fi], 0);
-               sprintf(filename, "zoutSMSG_visitz.%d.%d.%d", lx, ly, lz);
+               hypre_sprintf(filename, "zoutSMSG_visitz.%d.%d.%d", lx, ly, lz);
                hypre_StructVectorPrint(filename, visitz_a[fi], 0);
             }
          }
@@ -817,17 +817,17 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
    }
    for (lx = 0; lx < num_grids[0] - 1; lx++)
    {
-      sprintf(filename, "zoutSMSG_Px.%d", lx);
+      hypre_sprintf(filename, "zoutSMSG_Px.%d", lx);
       hypre_StructMatrixPrint(filename, Px_a[lx], 0);
    }
    for (ly = 0; ly < num_grids[1] - 1; ly++)
    {
-      sprintf(filename, "zoutSMSG_Py.%d", ly);
+      hypre_sprintf(filename, "zoutSMSG_Py.%d", ly);
       hypre_StructMatrixPrint(filename, Py_a[ly], 0);
    }
    for (lz = 0; lz < num_grids[2] - 1; lz++)
    {
-      sprintf(filename, "zoutSMSG_Pz.%d", lz);
+      hypre_sprintf(filename, "zoutSMSG_Pz.%d", lz);
       hypre_StructMatrixPrint(filename, Pz_a[lz], 0);
    }
 #endif

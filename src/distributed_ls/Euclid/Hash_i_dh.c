@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,7 +30,7 @@ static void rehash_private(Hash_i_dh h);
 
 #define HASH_2(k,size,idxOut)      \
           {  \
-            int r = k % (size-13); \
+            HYPRE_Int r = k % (size-13); \
             r = (r % 2) ? r : r+1; \
             *idxOut = r;           \
           }
@@ -42,16 +42,16 @@ static void rehash_private(Hash_i_dh h);
 typedef struct _hash_i_node_private Hash_i_Record;
 
 struct _hash_i_node_private {
-  int  key;
-  int  mark;
-  int  data;
+  HYPRE_Int  key;
+  HYPRE_Int  mark;
+  HYPRE_Int  data;
 };
 
 
 struct _hash_i_dh {
-  int         size;   /* total slots in table */
-  int         count;  /* number of items inserted in table */
-  int         curMark;/* used by Reset */
+  HYPRE_Int         size;   /* total slots in table */
+  HYPRE_Int         count;  /* number of items inserted in table */
+  HYPRE_Int         curMark;/* used by Reset */
   Hash_i_Record *data;
 };
 
@@ -62,10 +62,10 @@ struct _hash_i_dh {
 
 #undef __FUNC__
 #define __FUNC__ "Hash_i_dhCreate"
-void Hash_i_dhCreate(Hash_i_dh *h, int sizeIN)
+void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int sizeIN)
 {
   START_FUNC_DH
-  int i, size;
+  HYPRE_Int i, size;
   Hash_i_Record *tmp2;
   struct _hash_i_dh* tmp;
 
@@ -126,25 +126,25 @@ void Hash_i_dhReset(Hash_i_dh h)
 
 #undef __FUNC__
 #define __FUNC__ "Hash_i_dhLookup"
-int Hash_i_dhLookup(Hash_i_dh h, int key)
+HYPRE_Int Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key)
 {
   START_FUNC_DH
-  int idx, inc, i, start;
-  int curMark = h->curMark;
-  int size = h->size;
-  int retval = -1;
+  HYPRE_Int idx, inc, i, start;
+  HYPRE_Int curMark = h->curMark;
+  HYPRE_Int size = h->size;
+  HYPRE_Int retval = -1;
   Hash_i_Record *data = h->data;
 
   HASH_1(key, size, &start)
   HASH_2(key, size, &inc)
 
-/*printf("Hash_i_dhLookup:: key: %i  tableSize: %i start: %i  inc: %i\n", key, size, start, inc);
+/*hypre_printf("Hash_i_dhLookup:: key: %i  tableSize: %i start: %i  inc: %i\n", key, size, start, inc);
 */
 
   for (i=0; i<size; ++i) {
     idx = (start + i*inc) % size;
 
-/* printf("   idx= %i\n", idx); */
+/* hypre_printf("   idx= %i\n", idx); */
 
     if (data[idx].mark != curMark) {
       break;  /* key wasn't found */
@@ -161,16 +161,16 @@ int Hash_i_dhLookup(Hash_i_dh h, int key)
 
 #undef __FUNC__
 #define __FUNC__ "Hash_i_dhInsert"
-void Hash_i_dhInsert(Hash_i_dh h, int key, int dataIN)
+void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int dataIN)
 {
   START_FUNC_DH
-  int i, idx, inc, start, size;
-  int curMark = h->curMark;
+  HYPRE_Int i, idx, inc, start, size;
+  HYPRE_Int curMark = h->curMark;
   Hash_i_Record *data;
   bool success = false;
 
   if (dataIN < 0) {
-    sprintf(msgBuf_dh, "data = %i must be >= 0", dataIN);
+    hypre_sprintf(msgBuf_dh, "data = %i must be >= 0", dataIN);
     SET_V_ERROR(msgBuf_dh);
   }
 
@@ -188,17 +188,17 @@ void Hash_i_dhInsert(Hash_i_dh h, int key, int dataIN)
 
 
 
-/*printf("Hash_i_dhInsert::  tableSize= %i  start= %i  inc= %i\n", size, start, inc);
+/*hypre_printf("Hash_i_dhInsert::  tableSize= %i  start= %i  inc= %i\n", size, start, inc);
 */
   for (i=0; i<size; ++i) {
     idx = (start + i*inc) % size;
 
-/* printf("   idx= %i\n", idx);
+/* hypre_printf("   idx= %i\n", idx);
 */
 
     /* check for previous insertion */
     if (data[idx].mark == curMark  &&  data[idx].key == key) {
-      sprintf(msgBuf_dh, "key,data= <%i, %i> already inserted", key, dataIN);
+      hypre_sprintf(msgBuf_dh, "key,data= <%i, %i> already inserted", key, dataIN);
       SET_V_ERROR(msgBuf_dh);
     }
 
@@ -212,7 +212,7 @@ void Hash_i_dhInsert(Hash_i_dh h, int key, int dataIN)
   }
 
   if (! success) {  /* should be impossible to be here, I think . . . */
-    sprintf(msgBuf_dh, "Failed to insert key= %i, data= %i", key, dataIN);
+    hypre_sprintf(msgBuf_dh, "Failed to insert key= %i, data= %i", key, dataIN);
   }
   END_FUNC_DH
 }
@@ -223,14 +223,14 @@ void Hash_i_dhInsert(Hash_i_dh h, int key, int dataIN)
 void rehash_private(Hash_i_dh h)
 {
   START_FUNC_DH
-  int i, 
+  HYPRE_Int i, 
       old_size = h->size, 
       new_size = old_size*2,
       oldCurMark = h->curMark;
   Hash_i_Record *oldData = h->data, 
                  *newData;
 
-  sprintf(msgBuf_dh, "rehashing; old_size= %i, new_size= %i", old_size, new_size);
+  hypre_sprintf(msgBuf_dh, "rehashing; old_size= %i, new_size= %i", old_size, new_size);
   SET_INFO(msgBuf_dh);
 
   /* allocate new data table, and install it in the Hash_i_dh object;

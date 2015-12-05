@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -71,14 +71,14 @@ Then in the matvec, no reordering of the data is needed.
 void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 {
   START_FUNC_DH
-  int       i, len, *cval = mat->cval;
-  int       num_ext, num_extLo, num_extHi;
-  int       m = mat->m, size;
+  HYPRE_Int       i, len, *cval = mat->cval;
+  HYPRE_Int       num_ext, num_extLo, num_extHi;
+  HYPRE_Int       m = mat->m, size;
   Hash_i_dh global_to_local_hash;
-  int       first = mat->beg_row, last  = first+m;
-  int       *idx_ext;
-  int       data;
-/*  int       debug = false; */
+  HYPRE_Int       first = mat->beg_row, last  = first+m;
+  HYPRE_Int       *idx_ext;
+  HYPRE_Int       data;
+/*  HYPRE_Int       debug = false; */
 
 /*   if (logFile != NULL && numb->debug) debug = true; */
 
@@ -92,7 +92,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
   Hash_i_dhCreate(&(numb->global_to_local), m); CHECK_V_ERROR;
 
   global_to_local_hash = numb->global_to_local;
-  idx_ext = numb->idx_ext = (int*)MALLOC_DH(size*sizeof(int)); CHECK_V_ERROR;
+  idx_ext = numb->idx_ext = (HYPRE_Int*)MALLOC_DH(size*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   
   /* find all external indices; at the end of this block, 
      idx_ext[] will contain an unsorted list of external indices.
@@ -100,7 +100,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
   len = mat->rp[m];
   num_ext = num_extLo = num_extHi = 0;
   for (i=0; i<len; i++) {       /* for each nonzero "index" in the matrix */
-    int index = cval[i];
+    HYPRE_Int index = cval[i];
 
     /* Only interested in external indices */
     if (index < first || index >= last) {
@@ -115,8 +115,8 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
            to be enlarged, but the hash object will take care of that.
          */
         if (m+num_ext >= size) {
-          int newSize = size*1.5;  /* heuristic */
-          int *tmp = (int*)MALLOC_DH(newSize*sizeof(int)); CHECK_V_ERROR;
+          HYPRE_Int newSize = size*1.5;  /* heuristic */
+          HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(newSize*sizeof(HYPRE_Int)); CHECK_V_ERROR;
           memcpy(tmp, idx_ext, size*sizeof(size));
           FREE_DH(idx_ext); CHECK_V_ERROR;
           size = numb->size = newSize;
@@ -156,25 +156,25 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
 
 #undef __FUNC__
 #define __FUNC__ "Numbering_dhGlobalToLocal"
-void Numbering_dhGlobalToLocal(Numbering_dh numb, int len, 
-                                      int *global, int *local)
+void Numbering_dhGlobalToLocal(Numbering_dh numb, HYPRE_Int len, 
+                                      HYPRE_Int *global, HYPRE_Int *local)
 {
   START_FUNC_DH
-  int i;
-  int first = numb->first;
-  int last = first + numb->m;
-  int data;
+  HYPRE_Int i;
+  HYPRE_Int first = numb->first;
+  HYPRE_Int last = first + numb->m;
+  HYPRE_Int data;
   Hash_i_dh  global_to_local = numb->global_to_local;
 
   for (i=0; i<len; i++) {
-    int idxGlobal = global[i];
+    HYPRE_Int idxGlobal = global[i];
     if (idxGlobal >= first && idxGlobal < last) {
       local[i] = idxGlobal - first;
        /* note: for matvec setup, numb->num_extLo = 0. */
     } else {
       data = Hash_i_dhLookup(global_to_local, idxGlobal); CHECK_V_ERROR;
       if (data == -1) {
-        sprintf(msgBuf_dh, "global index %i not found in map\n", idxGlobal);
+        hypre_sprintf(msgBuf_dh, "global index %i not found in map\n", idxGlobal);
         SET_V_ERROR(msgBuf_dh);
       } else {
         local[i] = data;

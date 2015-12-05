@@ -3,7 +3,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlarft_(char *direct, char *storev, integer *n, integer *
+/* Subroutine */ HYPRE_Int dlarft_(char *direct, char *storev, integer *n, integer *
 	k, doublereal *v, integer *ldv, doublereal *tau, doublereal *t, 
 	integer *ldt)
 {
@@ -117,7 +117,7 @@
     /* Local variables */
     static integer i__, j;
     extern logical lsame_(char *, char *);
-    extern /* Subroutine */ int dgemv_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dgemv_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), dtrmv_(char *, 
 	    char *, char *, integer *, doublereal *, integer *, doublereal *, 

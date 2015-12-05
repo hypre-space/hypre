@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,16 +27,16 @@
 
 typedef struct
 {
-    int  pe;
-    int  beg_row;
-    int  end_row;
-    int *buffer;
+    HYPRE_Int  pe;
+    HYPRE_Int  beg_row;
+    HYPRE_Int  end_row;
+    HYPRE_Int *buffer;
 }
 DonorData;
 
 typedef struct
 {
-    int     pe;
+    HYPRE_Int     pe;
     Matrix *mat;
     double *buffer;
 }
@@ -44,11 +44,11 @@ RecipData;
 
 typedef struct
 {
-    int         num_given;
-    int         num_taken;
+    HYPRE_Int         num_given;
+    HYPRE_Int         num_taken;
     DonorData  *donor_data;
     RecipData  *recip_data;
-    int         beg_row;    /* local beginning row, after all donated rows */
+    HYPRE_Int         beg_row;    /* local beginning row, after all donated rows */
 }
 LoadBal;
 

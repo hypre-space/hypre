@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,7 +38,7 @@
   */
 
 #ifdef USING_MPI
-#define EUCLID_EXIT MPI_Abort(comm_dh, -1)
+#define EUCLID_EXIT hypre_MPI_Abort(comm_dh, -1)
 #else
 #define EUCLID_EXIT exit(-1);
 #endif
@@ -72,11 +72,11 @@
       setError_dh("", __FUNC__, __FILE__, __LINE__); \
       if (logFile != NULL) {  \
         printErrorMsg(logFile);  \
-        fprintf(logFile, "\n[%i] ierr = %i, errFlag_dh = %i\n", myid_dh, ierr, errFlag_dh); \
+        hypre_fprintf(logFile, "\n[%i] ierr = %i, errFlag_dh = %i\n", myid_dh, ierr, errFlag_dh); \
         closeLogfile_dh();  \
       } \
       printErrorMsg(stderr);  \
-      fprintf(stderr, "\n[%i] ierr = %i, errFlag_dh = %i\n", myid_dh, ierr, errFlag_dh); \
+      hypre_fprintf(stderr, "\n[%i] ierr = %i, errFlag_dh = %i\n", myid_dh, ierr, errFlag_dh); \
       CHKERRA(ierr); \
     } 
 

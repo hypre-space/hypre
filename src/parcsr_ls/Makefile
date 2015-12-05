@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.33 $
+# $Revision: 2.35 $
 #EHEADER**********************************************************************
 
 
@@ -108,11 +108,14 @@ FILES =\
  par_rotate_7pt.c\
  par_vardifconv.c\
  par_relax.c\
+ par_relax_more.c\
  par_relax_interface.c\
  par_scaled_matnorm.c\
  par_schwarz.c\
  par_stats.c\
  par_strength.c\
+ par_sv_interp.c\
+ par_sv_interp_ln.c\
  partial.c\
  pcg_par.c\
  schwarz.c\

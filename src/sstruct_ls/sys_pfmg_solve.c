@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,7 +27,7 @@
  * hypre_SysPFMGSolve
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
                     hypre_SStructMatrix  *A_in,
                     hypre_SStructVector  *b_in,
@@ -40,12 +40,12 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    hypre_SStructPVector *x;
 
    double                tol             = (sys_pfmg_data -> tol);
-   int                   max_iter        = (sys_pfmg_data -> max_iter);
-   int                   rel_change      = (sys_pfmg_data -> rel_change);
-   int                   zero_guess      = (sys_pfmg_data -> zero_guess);
-   int                   num_pre_relax   = (sys_pfmg_data -> num_pre_relax);
-   int                   num_post_relax  = (sys_pfmg_data -> num_post_relax);
-   int                   num_levels      = (sys_pfmg_data -> num_levels);
+   HYPRE_Int             max_iter        = (sys_pfmg_data -> max_iter);
+   HYPRE_Int             rel_change      = (sys_pfmg_data -> rel_change);
+   HYPRE_Int             zero_guess      = (sys_pfmg_data -> zero_guess);
+   HYPRE_Int             num_pre_relax   = (sys_pfmg_data -> num_pre_relax);
+   HYPRE_Int             num_post_relax  = (sys_pfmg_data -> num_post_relax);
+   HYPRE_Int             num_levels      = (sys_pfmg_data -> num_levels);
    hypre_SStructPMatrix  **A_l           = (sys_pfmg_data -> A_l);
    hypre_SStructPMatrix  **P_l           = (sys_pfmg_data -> P_l);
    hypre_SStructPMatrix  **RT_l          = (sys_pfmg_data -> RT_l);
@@ -57,17 +57,17 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
    void                **matvec_data_l   = (sys_pfmg_data -> matvec_data_l);
    void                **restrict_data_l = (sys_pfmg_data -> restrict_data_l);
    void                **interp_data_l   = (sys_pfmg_data -> interp_data_l);
-   int                   logging         = (sys_pfmg_data -> logging);
+   HYPRE_Int             logging         = (sys_pfmg_data -> logging);
    double               *norms           = (sys_pfmg_data -> norms);
    double               *rel_norms       = (sys_pfmg_data -> rel_norms);
-   int                  *active_l        = (sys_pfmg_data -> active_l);
+   HYPRE_Int            *active_l        = (sys_pfmg_data -> active_l);
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   int                   i, l;
+   HYPRE_Int             i, l;
                     
-   int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -189,11 +189,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          /* restrict fine grid residual */
          hypre_SysSemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
 #if DEBUG
-         sprintf(filename, "zout_xdown.%02d", 0);
+         hypre_sprintf(filename, "zout_xdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
-         sprintf(filename, "zout_rdown.%02d", 0);
+         hypre_sprintf(filename, "zout_rdown.%02d", 0);
          hypre_SStructPVectorPrint(filename, r_l[0], 0);
-         sprintf(filename, "zout_b.%02d", 1);
+         hypre_sprintf(filename, "zout_b.%02d", 1);
          hypre_SStructPVectorPrint(filename, b_l[1], 0);
 #endif
          for (l = 1; l <= (num_levels - 2); l++)
@@ -222,11 +222,11 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SysSemiRestrict(restrict_data_l[l],
                                    RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-            sprintf(filename, "zout_xdown.%02d", l);
+            hypre_sprintf(filename, "zout_xdown.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
-            sprintf(filename, "zout_rdown.%02d", l);
+            hypre_sprintf(filename, "zout_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
-            sprintf(filename, "zout_b.%02d", l+1);
+            hypre_sprintf(filename, "zout_b.%02d", l+1);
             hypre_SStructPVectorPrint(filename, b_l[l+1], 0);
 #endif
          }
@@ -238,7 +238,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SysPFMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SysPFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
-         sprintf(filename, "zout_xbottom.%02d", l);
+         hypre_sprintf(filename, "zout_xbottom.%02d", l);
          hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
 
@@ -252,9 +252,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SysSemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_SStructPAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            sprintf(filename, "zout_eup.%02d", l);
+            hypre_sprintf(filename, "zout_eup.%02d", l);
             hypre_SStructPVectorPrint(filename, e_l[l], 0);
-            sprintf(filename, "zout_xup.%02d", l);
+            hypre_sprintf(filename, "zout_xup.%02d", l);
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
 #endif
             if (active_l[l])
@@ -271,9 +271,9 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
          hypre_SysSemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_SStructPAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG
-         sprintf(filename, "zout_eup.%02d", 0);
+         hypre_sprintf(filename, "zout_eup.%02d", 0);
          hypre_SStructPVectorPrint(filename, e_l[0], 0);
-         sprintf(filename, "zout_xup.%02d", 0);
+         hypre_sprintf(filename, "zout_xup.%02d", 0);
          hypre_SStructPVectorPrint(filename, x_l[0], 0);
 #endif
       }

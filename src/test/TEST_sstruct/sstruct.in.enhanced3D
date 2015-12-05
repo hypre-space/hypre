@@ -1,0 +1,138 @@
+
+###########################################################
+# This example came from Rob Rieben and has both reduced and enhanced
+# connectivity points.  The k,z axis points "into the page".
+#
+#   -------------------------------
+#   |                    /        /|
+#   |     part 3        /        / |
+#   |                  /        /  |
+#   |                 /  part  /   | 
+#   | j              /    4   /    |
+#   | |             /        /     |
+#   | ---i         /        /      | 
+#   --------------/        /       |
+#   |             |       /   part |
+#   |   part 1    | j  i /     5   |
+#   |             | | / /         /|
+#   |             | |/ /         / |
+#   |             |   /         /  |
+#   | j           |  /       i /   | 
+#   | |           | /       / /    | 
+#   | ---i        |/   j---/ /     |
+#   ------------------------| part | 
+#   |             |         |  6   |
+#   |   part 0    |  part 2 |      |
+#   |             |         |      | 
+#   | j           | j       | j    |
+#   | |           | |       | |    |
+#   | ---i        | ---i    | ---i |
+#   --------------------------------
+#
+###########################################################
+
+# GridCreate: ndim nparts
+GridCreate: 3 7
+
+# GridSetExtents: part ilower(ndim) iupper(ndim)
+GridSetExtents: 0 (2- 2- 2-) (8+ 8+ 8+)
+GridSetExtents: 1 (2- 2- 2-) (8+ 8+ 8+)
+GridSetExtents: 2 (2- 2- 2-) (8+ 8+ 8+)
+GridSetExtents: 3 (2- 2- 2-) (8+ 8+ 8+)
+GridSetExtents: 4 (2- 2- 2-) (8+ 8+ 8+)
+GridSetExtents: 5 (2- 2- 2-) (8+ 8+ 8+)
+GridSetExtents: 6 (2- 2- 2-) (8+ 8+ 8+)
+
+# GridSetVariables: part nvars vartypes[nvars]
+# NODE  = 1
+# XFACE = 2
+# YFACE = 3
+GridSetVariables: 0 1 [1]
+GridSetVariables: 1 1 [1]
+GridSetVariables: 2 1 [1]
+GridSetVariables: 3 1 [1]
+GridSetVariables: 4 1 [1]
+GridSetVariables: 5 1 [1]
+GridSetVariables: 6 1 [1]
+
+# GridSetSharedPart: part  ilower(ndim)  iupper(ndim)  offset[ndim] \
+#                    spart silower(ndim) siupper(ndim) soffset[ndim] \
+#                    index_map[ndim] index_dir[ndim]
+GridSetSharedPart: 0 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] 1 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 0 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0] 2 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 0 (8+ 8+ 2-) (8+ 8+ 8+) [1 1 0] 4 (2- 2- 2-) (2- 2- 8+) [-1 -1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 0 (8+ 8+ 2-) (8+ 8+ 8+) [1 1 0] 5 (2- 8+ 2-) (2- 8+ 8+) [-1 1 0] [1 0 2] [-1 1 1]
+
+GridSetSharedPart: 1 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] 0 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 1 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0]  3 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 1 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0]  4 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 1 (8+ 2- 2-) (8+ 2- 8+) [1 -1 0] 2 (2- 8- 2-) (2- 8+ 8+) [-1 1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 1 (8+ 2- 2-) (8+ 2- 8+) [1 -1 0] 5 (2- 8- 2-) (2- 8+ 8+) [-1 1 0] [0 1 2] [1 1 1]
+
+GridSetSharedPart: 2 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] 0 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 2 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0]  6 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 2 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0]  5 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] [1 0 2] [-1 1 1]
+GridSetSharedPart: 2 (2- 8- 2-) (2- 8+ 8+) [-1 1 0] 1 (8+ 2- 2-) (8+ 2- 8+) [1 -1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 2 (2- 8- 2-) (2- 8+ 8+) [-1 1 0] 4 (2- 2- 2-) (2- 2- 8+) [-1 -1 0] [1 0 2] [-1 1 1]
+
+GridSetSharedPart: 3 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] 1 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 3 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0]  4 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] [1 0 2] [-1 1 1]
+
+GridSetSharedPart: 4 (2- 2- 2-) (2- 8+ 8+) [-1 0 0]  1 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 4 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0]   3 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0] [1 0 2] [1 -1 1]
+GridSetSharedPart: 4 (2- 2- 2-) (8+ 2- 8+) [0 -1 0]  5 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 4 (2- 2- 2-) (2- 2- 8+) [-1 -1 0] 0 (8+ 8+ 2-) (8+ 8+ 8+) [1 1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 4 (2- 2- 2-) (2- 2- 8+) [-1 -1 0] 2 (2- 8- 2-) (2- 8+ 8+) [-1 1 0] [1 0 2] [1 -1 1]
+
+GridSetSharedPart: 5 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] 2 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] [1 0 2] [1 -1 1]
+GridSetSharedPart: 5 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0]  4 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 5 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] 6 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 5 (2- 8+ 2-) (2- 8+ 8+) [-1 1 0] 0 (8+ 8+ 2-) (8+ 8+ 8+) [1 1 0] [1 0 2] [1 -1 1]
+GridSetSharedPart: 5 (2- 8- 2-) (2- 8+ 8+) [-1 1 0] 1 (8+ 2- 2-) (8+ 2- 8+) [1 -1 0] [0 1 2] [1 1 1]
+
+GridSetSharedPart: 6 (2- 2- 2-) (2- 8+ 8+) [-1 0 0] 2 (8+ 2- 2-) (8+ 8+ 8+) [1 0 0] [0 1 2] [1 1 1]
+GridSetSharedPart: 6 (2- 8+ 2-) (8+ 8+ 8+) [0 1 0]  5 (2- 2- 2-) (8+ 2- 8+) [0 -1 0] [0 1 2] [1 1 1]
+
+###########################################################
+
+# FEMStencilCreate: size
+FEMStencilCreate: 8
+
+# FEMStencilSetRow: row offset[ndim] var values[size]
+FEMStencilSetRow:  0 [-1 -1 -1] 0 [  4 -1 -1  0 -1  0  0  0  ]
+FEMStencilSetRow:  1 [ 0 -1 -1] 0 [ -1  4  0 -1  0 -1  0  0  ]
+FEMStencilSetRow:  2 [-1  0 -1] 0 [ -1  0  4 -1  0  0 -1  0  ]
+FEMStencilSetRow:  3 [ 0  0 -1] 0 [  0 -1 -1  4  0  0  0 -1  ]
+FEMStencilSetRow:  4 [-1 -1  0] 0 [ -1  0  0  0  4 -1 -1  0  ]
+FEMStencilSetRow:  5 [ 0 -1  0] 0 [  0 -1  0  0 -1  4  0 -1  ]
+FEMStencilSetRow:  6 [-1  0  0] 0 [  0  0 -1  0 -1  0  4 -1  ]
+FEMStencilSetRow:  7 [ 0  0  0] 0 [  0  0  0 -1  0 -1 -1  4  ]
+
+###########################################################
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 1
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 0 1
+ProcessPoolSetPart: 0 2
+ProcessPoolSetPart: 0 3
+ProcessPoolSetPart: 0 4
+ProcessPoolSetPart: 0 5
+ProcessPoolSetPart: 0 6
+
+# ProcessPoolCreate: num_pools
+ProcessPoolCreate: 7
+
+# ProcessPoolSetPart: pool part
+ProcessPoolSetPart: 0 0
+ProcessPoolSetPart: 1 1
+ProcessPoolSetPart: 2 2
+ProcessPoolSetPart: 3 3
+ProcessPoolSetPart: 4 4
+ProcessPoolSetPart: 5 5
+ProcessPoolSetPart: 6 6
+
+###########################################################
+

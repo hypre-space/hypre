@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,11 +34,11 @@ extern "C" {
 
 struct double_linked_list
 {
-       int                        data;
+       HYPRE_Int                        data;
        struct double_linked_list *next_elt;
        struct double_linked_list *prev_elt;
-       int                        head;
-       int                        tail;
+       HYPRE_Int                        head;
+       HYPRE_Int                        tail;
 };
 
 typedef struct double_linked_list hypre_ListElement;

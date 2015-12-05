@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.17 $
+ * $Revision: 2.18 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,7 +27,7 @@
  * hypre_BoomerAMGSolve
  *--------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoomerAMGSolve( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
@@ -40,14 +40,14 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    /* Data Structure variables */
 
-   int      amg_print_level;
-   int      amg_logging;
-   int      cycle_count;
-   int      num_levels;
-   /* int      num_unknowns; */
+   HYPRE_Int      amg_print_level;
+   HYPRE_Int      amg_logging;
+   HYPRE_Int      cycle_count;
+   HYPRE_Int      num_levels;
+   /* HYPRE_Int      num_unknowns; */
    double   tol;
 
-   int block_mode;
+   HYPRE_Int block_mode;
    
 
    hypre_ParCSRMatrix **A_array;
@@ -59,11 +59,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    /*  Local variables  */
 
-   int      j;
-   int      Solve_err_flag;
-   int      min_iter;
-   int      max_iter;
-   int      num_procs, my_id;
+   HYPRE_Int      j;
+   HYPRE_Int      Solve_err_flag;
+   HYPRE_Int      min_iter;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      num_procs, my_id;
 
    double   alpha = 1.0;
    double   beta = -1.0;
@@ -86,8 +86,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Vtemp;
    hypre_ParVector  *Residual;
 
-   MPI_Comm_size(comm, &num_procs);   
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);   
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    amg_print_level    = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
@@ -173,7 +173,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (my_id == 0 && amg_print_level > 1 && tol > 0.)
-     printf("\n\nAMG SOLUTION INFO:\n");
+     hypre_printf("\n\nAMG SOLUTION INFO:\n");
 
 
    /*-----------------------------------------------------------------------
@@ -205,10 +205,10 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
            found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
         if (amg_print_level > 0)
         {
-          printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-          printf("ERROR -- hypre_BoomerAMGSolve: INFs and/or NaNs detected in input.\n");
-          printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
-          printf("ERROR detected by Hypre ...  END\n\n\n");
+          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+          hypre_printf("ERROR -- hypre_BoomerAMGSolve: INFs and/or NaNs detected in input.\n");
+          hypre_printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
+          hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
         }
         hypre_error(HYPRE_ERROR_GENERIC);
         return hypre_error_flag;
@@ -232,10 +232,10 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
    {     
-      printf("                                            relative\n");
-      printf("               residual        factor       residual\n");
-      printf("               --------        ------       --------\n");
-      printf("    Initial    %e                 %e\n",resid_nrm_init,
+      hypre_printf("                                            relative\n");
+      hypre_printf("               residual        factor       residual\n");
+      hypre_printf("               --------        ------       --------\n");
+      hypre_printf("    Initial    %e                 %e\n",resid_nrm_init,
               relative_resid);
    }
 
@@ -293,7 +293,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
       { 
-         printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
+         hypre_printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
       }
    }
@@ -334,16 +334,16 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    {
       if (Solve_err_flag == 1)
       {
-         printf("\n\n==============================================");
-         printf("\n NOTE: Convergence tolerance was not achieved\n");
-         printf("      within the allowed %d V-cycles\n",max_iter);
-         printf("==============================================");
+         hypre_printf("\n\n==============================================");
+         hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
+         hypre_printf("      within the allowed %d V-cycles\n",max_iter);
+         hypre_printf("==============================================");
       }
       if (tol >= 0.)
-        printf("\n\n Average Convergence Factor = %f",conv_factor);
-      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      printf("                operator = %f\n",operat_cmplxty);
-      printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
+        hypre_printf("\n\n Average Convergence Factor = %f",conv_factor);
+      hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      hypre_printf("                operator = %f\n",operat_cmplxty);
+      hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
    }
 
    hypre_TFree(num_coeffs);

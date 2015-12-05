@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.77 $
+ * $Revision: 2.80 $
  ***********************************************************************EHEADER*/
 
 
@@ -200,6 +200,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   maxIterations_(1000),
                   tolerance_(1.0e-6),
                   normAbsRel_(0),
+                  pcgRecomputeRes_(0),
                   HYPrecon_(NULL), 
                   HYPreconReuse_(0), 
                   HYPreconSetup_(0),
@@ -352,11 +353,11 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsPrintLevel_ = 0;
    amsAlphaCoarsenType_ = 10;
    amsAlphaAggLevels_ = 1;
-   amsAlphaRelaxType_ = 3;
+   amsAlphaRelaxType_ = 6;
    amsAlphaStrengthThresh_ = 0.25;
    amsBetaCoarsenType_ = 10;
    amsBetaAggLevels_ = 1;
-   amsBetaRelaxType_ = 3;
+   amsBetaRelaxType_ = 6;
    amsBetaStrengthThresh_ = 0.25;
    FEI_mixedDiagFlag_ = 0;
    FEI_mixedDiag_ = NULL;
@@ -4779,12 +4780,19 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            }
            setupPCGPrecon();
            HYPRE_ParCSRPCGSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRPCGSetTol(HYSolver_, tolerance_);
            HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
            HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
-           HYPRE_PCGSetRecomputeResidual(HYSolver_, 1);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRPCGSetStopCrit(HYSolver_,1);
+           HYPRE_PCGSetRecomputeResidual(HYSolver_, pcgRecomputeRes_);
+           if ( normAbsRel_ == 0 )
+           {
+              HYPRE_PCGSetStopCrit(HYSolver_,0);
+              HYPRE_PCGSetTol(HYSolver_, tolerance_);
+           }
+           else
+           {
+              HYPRE_PCGSetStopCrit(HYSolver_,1);
+              HYPRE_PCGSetAbsoluteTol(HYSolver_, tolerance_);
+           }
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
               if ( mypid_ == 0 )
@@ -5018,9 +5026,16 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            setupGMRESPrecon();
            HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
            HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
+           if ( normAbsRel_ == 0 )
+           {
+              HYPRE_GMRESSetStopCrit(HYSolver_,0);
+              HYPRE_GMRESSetTol(HYSolver_, tolerance_);
+           }
+           else
+           {
+              HYPRE_GMRESSetStopCrit(HYSolver_,1);
+              HYPRE_GMRESSetAbsoluteTol(HYSolver_, tolerance_);
+           }
            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
            {
               HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 1);

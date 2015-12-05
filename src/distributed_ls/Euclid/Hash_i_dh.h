@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -28,9 +28,9 @@
 /*
     class methods 
     note: all parameters are inputs; the only output 
-          is the "int" returned by Hash_i_dhLookup.
+          is the "HYPRE_Int" returned by Hash_i_dhLookup.
 */
-extern void Hash_i_dhCreate(Hash_i_dh *h, int size);
+extern void Hash_i_dhCreate(Hash_i_dh *h, HYPRE_Int size);
   /* For proper operation, "size," which is the minimal
      size of the hash table, must be a power of 2.
      Or, pass "-1" to use the default.
@@ -40,12 +40,12 @@ extern void Hash_i_dhCreate(Hash_i_dh *h, int size);
 extern void Hash_i_dhDestroy(Hash_i_dh h);
 extern void Hash_i_dhReset(Hash_i_dh h);
 
-extern void Hash_i_dhInsert(Hash_i_dh h, int key, int data);
+extern void Hash_i_dhInsert(Hash_i_dh h, HYPRE_Int key, HYPRE_Int data);
   /* throws error if <data, data> is already inserted;
      grows hash table if out of space.
    */
 
-extern int  Hash_i_dhLookup(Hash_i_dh h, int key);
+extern HYPRE_Int  Hash_i_dhLookup(Hash_i_dh h, HYPRE_Int key);
     /* returns "data" associated with "key,"
        or -1 if "key" is not found.
      */

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,10 +33,10 @@
  * elements in a[q+1:r].
  *--------------------------------------------------------------------------*/
 
-static int partition(double *a, int p, int r)
+static HYPRE_Int partition(double *a, HYPRE_Int p, HYPRE_Int r)
 {
     double x, temp;
-    int i, j;
+    HYPRE_Int i, j;
 
     x = a[p];
     i = p - 1;
@@ -69,10 +69,10 @@ static int partition(double *a, int p, int r)
  * a random pivot element.
  *--------------------------------------------------------------------------*/
 
-static int randomized_partition(double *a, int p, int r)
+static HYPRE_Int randomized_partition(double *a, HYPRE_Int p, HYPRE_Int r)
 {
     double temp;
-    int i;
+    HYPRE_Int i;
 
     /* select a random number in [p,r] */
     i = p + (rand() % (r-p+1));
@@ -90,9 +90,9 @@ static int randomized_partition(double *a, int p, int r)
  * "i" should range from 1 to r-p+1.
  *--------------------------------------------------------------------------*/
 
-double randomized_select(double *a, int p, int r, int i)
+double randomized_select(double *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int i)
 {
-    int q, k;
+    HYPRE_Int q, k;
 
     if (p == r)
 	return a[p];
@@ -112,9 +112,9 @@ double randomized_select(double *a, int p, int r, int i)
  * shell_sort - sorts x[0:n-1] in place, ascending order
  *--------------------------------------------------------------------------*/
 
-void shell_sort(const int n, int x[])
+void shell_sort(const HYPRE_Int n, HYPRE_Int x[])
 {
-    int m, max, j, k, itemp;
+    HYPRE_Int m, max, j, k, itemp;
 
     m = n/2;
 

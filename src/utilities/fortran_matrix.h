@@ -7,20 +7,22 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
 #ifndef FORTRAN_STYLE_MATRIX
 #define FORTRAN_STYLE_MATRIX
 
+#include "_hypre_utilities.h"
+
 typedef struct
 {
-  long	globalHeight;
-  long	height;
-  long	width;
+  hypre_longint	globalHeight;
+  hypre_longint	height;
+  hypre_longint	width;
   double* value;
-  int		ownsValues;
+  HYPRE_Int		ownsValues;
 } utilities_FortranMatrix;
 
 #ifdef __cplusplus
@@ -30,19 +32,19 @@ extern "C" {
 utilities_FortranMatrix* 
 utilities_FortranMatrixCreate(void);
 void 
-utilities_FortranMatrixAllocateData( long h, long w, 
+utilities_FortranMatrixAllocateData( hypre_longint h, hypre_longint w, 
 				     utilities_FortranMatrix* mtx );
 void 
-utilities_FortranMatrixWrap( double*, long gh, long h, long w, 
+utilities_FortranMatrixWrap( double*, hypre_longint gh, hypre_longint h, hypre_longint w, 
 			     utilities_FortranMatrix* mtx );
 void 
 utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx );
 
-long
+hypre_longint
 utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx );
-long
+hypre_longint
 utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx );
-long
+hypre_longint
 utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx );
 double*
 utilities_FortranMatrixValues( utilities_FortranMatrix* mtx );
@@ -60,11 +62,11 @@ void
 utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx );
 
 void 
-utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t, 
 			     utilities_FortranMatrix* dest );
 void 
-utilities_FortranMatrixIndexCopy( int* index, 
-				  utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixIndexCopy( HYPRE_Int* index, 
+				  utilities_FortranMatrix* src, HYPRE_Int t, 
 				  utilities_FortranMatrix* dest );
 
 void 
@@ -85,30 +87,30 @@ void
 utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx, 
 				  utilities_FortranMatrix* d );
 void 
-utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA, 
-				 utilities_FortranMatrix* mtxB, int tB,
+utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA, 
+				 utilities_FortranMatrix* mtxB, HYPRE_Int tB,
 				 utilities_FortranMatrix* mtxC );
 double 
 utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx );
 
 double 
 utilities_FortranMatrixValue( utilities_FortranMatrix* mtx, 
-			      long i, long j );
+			      hypre_longint i, hypre_longint j );
 double* 
 utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx, 
-				 long i, long j );
+				 hypre_longint i, hypre_longint j );
 double 
 utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx );
 
 void 
 utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
-				    long iFrom, long iTo, 
-				    long jFrom, long jTo,
+				    hypre_longint iFrom, hypre_longint iTo, 
+				    hypre_longint jFrom, hypre_longint jTo,
 				    utilities_FortranMatrix* block );
 void 
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u );
 
-int
+HYPRE_Int
 utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] );
 
 #ifdef __cplusplus

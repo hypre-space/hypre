@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,10 +21,10 @@
  * the routine returns the location of the value or -1
  *--------------------------------------------------------------------------*/
  
-int hypre_BinarySearch(int *list, int value, int list_length)
+HYPRE_Int hypre_BinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_length)
 {
-   int low, high, m;
-   int not_found = 1;
+   HYPRE_Int low, high, m;
+   HYPRE_Int not_found = 1;
 
    low = 0;
    high = list_length-1; 
@@ -58,10 +58,10 @@ int hypre_BinarySearch(int *list, int value, int list_length)
 
  *--------------------------------------------------------------------------*/
  
-int hypre_BinarySearch2(int *list, int value, int low, int high, int *spot) 
+HYPRE_Int hypre_BinarySearch2(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int low, HYPRE_Int high, HYPRE_Int *spot) 
 {
    
-   int m;
+   HYPRE_Int m;
    
    while (low <= high) 
    {

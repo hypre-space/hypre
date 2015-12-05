@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -39,11 +39,11 @@
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructInterpAssemble( hypre_StructMatrix  *A,
                             hypre_StructMatrix  *P,
-                            int                  P_stored_as_transpose,
-                            int                  cdir,
+                            HYPRE_Int            P_stored_as_transpose,
+                            HYPRE_Int            cdir,
                             hypre_Index          index,
                             hypre_Index          stride )
 {
@@ -57,8 +57,8 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
 
-   int                   num_ghost[] = {0, 0, 0, 0, 0, 0};
-   int                   i, j, s, dim;
+   HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             i, j, s, dim;
 
    if (hypre_StructMatrixConstantCoefficient(P) != 0)
    {

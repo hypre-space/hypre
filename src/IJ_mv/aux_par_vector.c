@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,7 +27,7 @@
  * hypre_AuxParVectorCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector)
 {
    hypre_AuxParVector  *vector;
@@ -50,10 +50,10 @@ hypre_AuxParVectorCreate( hypre_AuxParVector **aux_vector)
  * hypre_AuxParVectorDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
 {
-   int ierr=0;
+   HYPRE_Int ierr=0;
 
    if (vector)
    {
@@ -71,15 +71,15 @@ hypre_AuxParVectorDestroy( hypre_AuxParVector *vector )
  * hypre_AuxParVectorInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
 {
-   int max_off_proc_elmts = hypre_AuxParVectorMaxOffProcElmts(vector);
+   HYPRE_Int max_off_proc_elmts = hypre_AuxParVectorMaxOffProcElmts(vector);
 
    /* allocate stash for setting or adding off processor values */
    if (max_off_proc_elmts > 0)
    {
-      hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(int,
+      hypre_AuxParVectorOffProcI(vector) = hypre_CTAlloc(HYPRE_Int,
 		max_off_proc_elmts);
       hypre_AuxParVectorOffProcData(vector) = hypre_CTAlloc(double,
 		max_off_proc_elmts);
@@ -92,11 +92,11 @@ hypre_AuxParVectorInitialize( hypre_AuxParVector *vector )
  * hypre_AuxParVectorSetMaxOffProcElmts
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_AuxParVectorSetMaxOffPRocElmts( hypre_AuxParVector *vector,
-					    int max_off_proc_elmts )
+					    HYPRE_Int max_off_proc_elmts )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_AuxParVectorMaxOffProcElmts(vector) = max_off_proc_elmts;
    return ierr;
 }

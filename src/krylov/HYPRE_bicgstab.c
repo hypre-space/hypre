@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,7 +30,7 @@
  * HYPRE_BiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -40,7 +40,7 @@ HYPRE_BiCGSTABDestroy( HYPRE_Solver solver )
  * HYPRE_BiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_BiCGSTABSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -56,7 +56,7 @@ HYPRE_BiCGSTABSetup( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_BiCGSTABSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -72,7 +72,7 @@ HYPRE_BiCGSTABSolve( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -82,7 +82,7 @@ HYPRE_BiCGSTABSetTol( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
                          double             a_tol    )
 {
@@ -92,7 +92,7 @@ HYPRE_BiCGSTABSetAbsoluteTol( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver,
                          double             cf_tol    )
 {
@@ -103,9 +103,9 @@ HYPRE_BiCGSTABSetConvergenceFactorTol( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver,
-                             int          min_iter )
+                             HYPRE_Int          min_iter )
 {
    return( hypre_BiCGSTABSetMinIter( (void *) solver, min_iter ) );
 }
@@ -114,9 +114,9 @@ HYPRE_BiCGSTABSetMinIter( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver,
-                             int          max_iter )
+                             HYPRE_Int          max_iter )
 {
    return( hypre_BiCGSTABSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -125,9 +125,9 @@ HYPRE_BiCGSTABSetMaxIter( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetStopCrit
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver,
-                              int          stop_crit )
+                              HYPRE_Int          stop_crit )
 {
    return( hypre_BiCGSTABSetStopCrit( (void *) solver, stop_crit ) );
 }
@@ -136,7 +136,7 @@ HYPRE_BiCGSTABSetStopCrit( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetPrecond( HYPRE_Solver         solver,
                                 HYPRE_PtrToSolverFcn precond,
                                 HYPRE_PtrToSolverFcn precond_setup,
@@ -151,7 +151,7 @@ HYPRE_BiCGSTABSetPrecond( HYPRE_Solver         solver,
  * HYPRE_BiCGSTABGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
@@ -163,9 +163,9 @@ HYPRE_BiCGSTABGetPrecond( HYPRE_Solver  solver,
  * HYPRE_BiCGSTABSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( hypre_BiCGSTABSetLogging( (void *) solver, logging ) );
 }
@@ -174,9 +174,9 @@ HYPRE_BiCGSTABSetLogging( HYPRE_Solver solver,
  * HYPRE_BiCGSTABSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver,
-                             int print_level)
+                             HYPRE_Int print_level)
 {
    return( hypre_BiCGSTABSetPrintLevel( (void *) solver, print_level ) );
 }
@@ -185,9 +185,9 @@ HYPRE_BiCGSTABSetPrintLevel( HYPRE_Solver solver,
  * HYPRE_BiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( hypre_BiCGSTABGetNumIterations( (void *) solver, num_iterations ) );
 }
@@ -196,7 +196,7 @@ HYPRE_BiCGSTABGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_BiCGSTABGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
@@ -207,7 +207,7 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  * HYPRE_BiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_BiCGSTABGetResidual( HYPRE_Solver  solver,
                             void             **residual  )
 {

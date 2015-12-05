@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,9 +26,9 @@
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_CSRMatrixCreate( int num_rows,
-                       int num_cols,
-                       int num_nonzeros )
+hypre_CSRMatrixCreate( HYPRE_Int num_rows,
+                       HYPRE_Int num_cols,
+                       HYPRE_Int num_nonzeros )
 {
    hypre_CSRMatrix  *matrix;
 
@@ -53,10 +53,10 @@ hypre_CSRMatrixCreate( int num_rows,
  * hypre_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 {
-   int  ierr=0;
+   HYPRE_Int  ierr=0;
 
    if (matrix)
    {
@@ -78,23 +78,23 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
 {
-   int  num_rows     = hypre_CSRMatrixNumRows(matrix);
-   int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
-/*   int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
+   HYPRE_Int  num_rows     = hypre_CSRMatrixNumRows(matrix);
+   HYPRE_Int  num_nonzeros = hypre_CSRMatrixNumNonzeros(matrix);
+/*   HYPRE_Int  num_rownnz = hypre_CSRMatrixNumRownnz(matrix); */
 
-   int  ierr=0;
+   HYPRE_Int  ierr=0;
 
    if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
       hypre_CSRMatrixData(matrix) = hypre_CTAlloc(double, num_nonzeros);
    if ( ! hypre_CSRMatrixI(matrix) )
-      hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(int, num_rows + 1);
+      hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
 /*   if ( ! hypre_CSRMatrixRownnz(matrix) )
-      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(int, num_rownnz);*/
+      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rownnz);*/
    if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
-      hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(int, num_nonzeros);
+      hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
 
    return ierr;
 }
@@ -103,11 +103,11 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
  * hypre_CSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
-                             int              owns_data )
+                             HYPRE_Int              owns_data )
 {
-   int    ierr=0;
+   HYPRE_Int    ierr=0;
 
    hypre_CSRMatrixOwnsData(matrix) = owns_data;
 
@@ -123,16 +123,16 @@ hypre_CSRMatrixSetDataOwner( hypre_CSRMatrix *matrix,
  * the existence of A_i or of the CSR matrix.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
 {
-   int    ierr=0;
-   int  num_rows = hypre_CSRMatrixNumRows(matrix);
-   int  *A_i = hypre_CSRMatrixI(matrix);
-   int  *Arownnz;
+   HYPRE_Int    ierr=0;
+   HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(matrix);
+   HYPRE_Int  *A_i = hypre_CSRMatrixI(matrix);
+   HYPRE_Int  *Arownnz;
 
-   int i, adiag;
-   int irownnz=0;
+   HYPRE_Int i, adiag;
+   HYPRE_Int irownnz=0;
 
    for (i=0; i < num_rows; i++)
    {
@@ -148,7 +148,7 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    }
    else
    {
-       Arownnz = hypre_CTAlloc(int, irownnz);
+       Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz);
        irownnz = 0;
        for (i=0; i < num_rows; i++)
        {
@@ -172,15 +172,15 @@ hypre_CSRMatrixRead( char *file_name )
    FILE    *fp;
 
    double  *matrix_data;
-   int     *matrix_i;
-   int     *matrix_j;
-   int      num_rows;
-   int      num_nonzeros;
-   int      max_col = 0;
+   HYPRE_Int     *matrix_i;
+   HYPRE_Int     *matrix_j;
+   HYPRE_Int      num_rows;
+   HYPRE_Int      num_nonzeros;
+   HYPRE_Int      max_col = 0;
 
-   int      file_base = 1;
+   HYPRE_Int      file_base = 1;
    
-   int      j;
+   HYPRE_Int      j;
 
    /*----------------------------------------------------------
     * Read in the data
@@ -188,12 +188,12 @@ hypre_CSRMatrixRead( char *file_name )
 
    fp = fopen(file_name, "r");
 
-   fscanf(fp, "%d", &num_rows);
+   hypre_fscanf(fp, "%d", &num_rows);
 
-   matrix_i = hypre_CTAlloc(int, num_rows + 1);
+   matrix_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
    for (j = 0; j < num_rows+1; j++)
    {
-      fscanf(fp, "%d", &matrix_i[j]);
+      hypre_fscanf(fp, "%d", &matrix_i[j]);
       matrix_i[j] -= file_base;
    }
 
@@ -206,7 +206,7 @@ hypre_CSRMatrixRead( char *file_name )
    matrix_j = hypre_CSRMatrixJ(matrix);
    for (j = 0; j < num_nonzeros; j++)
    {
-      fscanf(fp, "%d", &matrix_j[j]);
+      hypre_fscanf(fp, "%d", &matrix_j[j]);
       matrix_j[j] -= file_base;
 
       if (matrix_j[j] > max_col)
@@ -218,7 +218,7 @@ hypre_CSRMatrixRead( char *file_name )
    matrix_data = hypre_CSRMatrixData(matrix);
    for (j = 0; j < matrix_i[num_rows]; j++)
    {
-      fscanf(fp, "%le", &matrix_data[j]);
+      hypre_fscanf(fp, "%le", &matrix_data[j]);
    }
 
    fclose(fp);
@@ -233,22 +233,22 @@ hypre_CSRMatrixRead( char *file_name )
  * hypre_CSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
                       char            *file_name )
 {
    FILE    *fp;
 
    double  *matrix_data;
-   int     *matrix_i;
-   int     *matrix_j;
-   int      num_rows;
+   HYPRE_Int     *matrix_i;
+   HYPRE_Int     *matrix_j;
+   HYPRE_Int      num_rows;
    
-   int      file_base = 1;
+   HYPRE_Int      file_base = 1;
    
-   int      j;
+   HYPRE_Int      j;
 
-   int      ierr = 0;
+   HYPRE_Int      ierr = 0;
 
    /*----------------------------------------------------------
     * Print the matrix data
@@ -261,28 +261,28 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
 
    fp = fopen(file_name, "w");
 
-   fprintf(fp, "%d\n", num_rows);
+   hypre_fprintf(fp, "%d\n", num_rows);
 
    for (j = 0; j <= num_rows; j++)
    {
-      fprintf(fp, "%d\n", matrix_i[j] + file_base);
+      hypre_fprintf(fp, "%d\n", matrix_i[j] + file_base);
    }
 
    for (j = 0; j < matrix_i[num_rows]; j++)
    {
-      fprintf(fp, "%d\n", matrix_j[j] + file_base);
+      hypre_fprintf(fp, "%d\n", matrix_j[j] + file_base);
    }
 
    if (matrix_data)
    {
       for (j = 0; j < matrix_i[num_rows]; j++)
       {
-         fprintf(fp, "%.14e\n", matrix_data[j]);
+         hypre_fprintf(fp, "%.14e\n", matrix_data[j]);
       }
    }
    else
    {
-      fprintf(fp, "Warning: No matrix data!\n");
+      hypre_fprintf(fp, "Warning: No matrix data!\n");
    }
 
    fclose(fp);
@@ -297,19 +297,19 @@ hypre_CSRMatrixPrint( hypre_CSRMatrix *matrix,
  * the routine does not check if the dimensions of A and B match !!! 
  *--------------------------------------------------------------------------*/
 
-int 
-hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, int copy_data )
+HYPRE_Int 
+hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data )
 {
-   int  ierr=0;
-   int  num_rows = hypre_CSRMatrixNumRows(A);
-   int *A_i = hypre_CSRMatrixI(A);
-   int *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int  ierr=0;
+   HYPRE_Int  num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int *A_j = hypre_CSRMatrixJ(A);
    double *A_data;
-   int *B_i = hypre_CSRMatrixI(B);
-   int *B_j = hypre_CSRMatrixJ(B);
+   HYPRE_Int *B_i = hypre_CSRMatrixI(B);
+   HYPRE_Int *B_j = hypre_CSRMatrixJ(B);
    double *B_data;
 
-   int i, j;
+   HYPRE_Int i, j;
 
    for (i=0; i < num_rows; i++)
    {
@@ -345,15 +345,15 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, int copy_data )
 
 hypre_CSRMatrix * hypre_CSRMatrixClone( hypre_CSRMatrix * A )
 {
-   int num_rows = hypre_CSRMatrixNumRows( A );
-   int num_cols = hypre_CSRMatrixNumCols( A );
-   int num_nonzeros = hypre_CSRMatrixNumNonzeros( A );
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows( A );
+   HYPRE_Int num_cols = hypre_CSRMatrixNumCols( A );
+   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros( A );
    hypre_CSRMatrix * B = hypre_CSRMatrixCreate( num_rows, num_cols, num_nonzeros );
-   int * A_i;
-   int * A_j;
-   int * B_i;
-   int * B_j;
-   int i, j;
+   HYPRE_Int * A_i;
+   HYPRE_Int * A_j;
+   HYPRE_Int * B_i;
+   HYPRE_Int * B_j;
+   HYPRE_Int i, j;
 
    hypre_CSRMatrixInitialize( B );
 
@@ -389,22 +389,22 @@ hypre_CSRMatrix * hypre_CSRMatrixClone( hypre_CSRMatrix * A )
 
 hypre_CSRMatrix * hypre_CSRMatrixUnion(
    hypre_CSRMatrix * A, hypre_CSRMatrix * B,
-   int * col_map_offd_A, int * col_map_offd_B, int ** col_map_offd_C )
+   HYPRE_Int * col_map_offd_A, HYPRE_Int * col_map_offd_B, HYPRE_Int ** col_map_offd_C )
 {
-   int num_rows = hypre_CSRMatrixNumRows( A );
-   int num_cols_A = hypre_CSRMatrixNumCols( A );
-   int num_cols_B = hypre_CSRMatrixNumCols( B );
-   int num_cols;
-   int num_nonzeros;
-   int * A_i = hypre_CSRMatrixI(A);
-   int * A_j = hypre_CSRMatrixJ(A);
-   int * B_i = hypre_CSRMatrixI(B);
-   int * B_j = hypre_CSRMatrixJ(B);
-   int * C_i;
-   int * C_j;
-   int * jC = NULL;
-   int i, jA, jB, jBg;
-   int ma, mb, mc, ma_min, ma_max, match;
+   HYPRE_Int num_rows = hypre_CSRMatrixNumRows( A );
+   HYPRE_Int num_cols_A = hypre_CSRMatrixNumCols( A );
+   HYPRE_Int num_cols_B = hypre_CSRMatrixNumCols( B );
+   HYPRE_Int num_cols;
+   HYPRE_Int num_nonzeros;
+   HYPRE_Int * A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int * A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Int * B_i = hypre_CSRMatrixI(B);
+   HYPRE_Int * B_j = hypre_CSRMatrixJ(B);
+   HYPRE_Int * C_i;
+   HYPRE_Int * C_j;
+   HYPRE_Int * jC = NULL;
+   HYPRE_Int i, jA, jB, jBg;
+   HYPRE_Int ma, mb, mc, ma_min, ma_max, match;
    hypre_CSRMatrix * C;
 
    hypre_assert( num_rows == hypre_CSRMatrixNumRows(B) );
@@ -420,7 +420,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
    }
    else
    {  /* The matrices are offdiagonal blocks. */
-      jC = hypre_CTAlloc( int, num_cols_B );
+      jC = hypre_CTAlloc( HYPRE_Int, num_cols_B );
       num_cols = num_cols_A;  /* initialization; we'll compute the actual value */
       for ( jB=0; jB<num_cols_B; ++jB )
       {
@@ -443,7 +443,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
       make and load col_map_offd_C */
    if ( col_map_offd_A )
    {
-      *col_map_offd_C = hypre_CTAlloc( int, num_cols );
+      *col_map_offd_C = hypre_CTAlloc( HYPRE_Int, num_cols );
       for ( jA=0; jA<num_cols_A; ++jA )
          (*col_map_offd_C)[jA] = col_map_offd_A[jA];
       for ( jB=0; jB<num_cols_B; ++jB )

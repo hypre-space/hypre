@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -81,7 +81,7 @@ void* Mem_dhMalloc(Mem_dh m, size_t size)
   address = PRIVATE_MALLOC(s);
 
   if (address == NULL) {
-    sprintf(msgBuf_dh, "PRIVATE_MALLOC failed; totalMem = %g; requested additional = %i", m->totalMem, (int)s);
+    hypre_sprintf(msgBuf_dh, "PRIVATE_MALLOC failed; totalMem = %g; requested additional = %i", m->totalMem, (HYPRE_Int)s);
     SET_ERROR(NULL, msgBuf_dh);
   }
 
@@ -132,16 +132,16 @@ void  Mem_dhPrint(Mem_dh m, FILE* fp, bool allPrint)
   if (fp == NULL) SET_V_ERROR("fp == NULL");
   if (myid_dh == 0 || allPrint) {
     double tmp;
-    fprintf(fp, "---------------------- Euclid memory report (start)\n");
-    fprintf(fp, "malloc calls = %g\n", m->mallocCount);
-    fprintf(fp, "free   calls = %g\n", m->freeCount);
-    fprintf(fp, "curMem          = %g Mbytes (should be zero)\n", 
+    hypre_fprintf(fp, "---------------------- Euclid memory report (start)\n");
+    hypre_fprintf(fp, "malloc calls = %g\n", m->mallocCount);
+    hypre_fprintf(fp, "free   calls = %g\n", m->freeCount);
+    hypre_fprintf(fp, "curMem          = %g Mbytes (should be zero)\n", 
                                                    m->curMem/1000000);
     tmp = m->totalMem / 1000000;
-    fprintf(fp, "total allocated = %g Mbytes\n", tmp);
-    fprintf(fp, "max malloc      = %g Mbytes (max allocated at any point in time)\n", m->maxMem/1000000);
-    fprintf(fp, "\n");
-    fprintf(fp, "---------------------- Euclid memory report (end)\n");
+    hypre_fprintf(fp, "total allocated = %g Mbytes\n", tmp);
+    hypre_fprintf(fp, "max malloc      = %g Mbytes (max allocated at any point in time)\n", m->maxMem/1000000);
+    hypre_fprintf(fp, "\n");
+    hypre_fprintf(fp, "---------------------- Euclid memory report (end)\n");
   } 
   END_FUNC_DH_2
 }

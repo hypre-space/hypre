@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,14 +20,14 @@
 
 /* "row" refers to global row number */
 
-extern void EuclidGetDimensions(void *A, int *beg_row, int *rowsLocal, int *rowsGlobal);
-extern void EuclidGetRow(void *A, int row, int *len, int **ind, double **val);
-extern void EuclidRestoreRow(void *A, int row, int *len, int **ind, double **val);
+extern void EuclidGetDimensions(void *A, HYPRE_Int *beg_row, HYPRE_Int *rowsLocal, HYPRE_Int *rowsGlobal);
+extern void EuclidGetRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val);
+extern void EuclidRestoreRow(void *A, HYPRE_Int row, HYPRE_Int *len, HYPRE_Int **ind, double **val);
 
-extern int EuclidReadLocalNz(void *A);
+extern HYPRE_Int EuclidReadLocalNz(void *A);
 
-extern void PrintMatUsingGetRow(void* A, int beg_row, int m,
-                          int *n2o_row, int *n2o_col, char *filename);
+extern void PrintMatUsingGetRow(void* A, HYPRE_Int beg_row, HYPRE_Int m,
+                          HYPRE_Int *n2o_row, HYPRE_Int *n2o_col, char *filename);
 
 
 #endif

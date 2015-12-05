@@ -1,0 +1,52 @@
+#!/bin/ksh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision: 1.1 $
+#EHEADER**********************************************************************
+
+
+#=============================================================================
+# Check PFMG for power-of-two and non-power-of-two systems
+#=============================================================================
+
+# power-of-two
+
+mpirun -np 1 ./struct -n 16 16 16 -p 16 16 0 -P 1 1 1 -solver 1 > periodic.out.10
+mpirun -np 2 ./struct -n  8 16 16 -p 16 16 0 -P 2 1 1 -solver 1 > periodic.out.11
+mpirun -np 4 ./struct -n  8  8 16 -p 16 16 0 -P 2 2 1 -solver 1 > periodic.out.12
+mpirun -np 4 ./struct -n 16  8  8 -p 16 16 0 -P 1 2 2 -solver 1 > periodic.out.13
+
+mpirun -np 1 ./struct -n 16 16 16 -p 16 0 16 -P 1 1 1 -skip 1 -rap 1 -solver 1 \
+> periodic.out.20
+mpirun -np 2 ./struct -n  8 16 16 -p 16 0 16 -P 2 1 1 -skip 1 -rap 1 -solver 1 \
+> periodic.out.21
+
+# non-power-of-two
+
+mpirun -np 1 ./struct -n 20 20 20 -p  0 20 20 -P 1 1 1 -solver 1 > periodic.out.30
+mpirun -np 2 ./struct -n 10 20 20 -p  0 20 20 -P 2 1 1 -solver 1 > periodic.out.31
+mpirun -np 4 ./struct -n 10 20 10 -p  0 20 20 -P 2 1 2 -solver 1 > periodic.out.32
+mpirun -np 4 ./struct -n 20 10 10 -p  0 20 20 -P 1 2 2 -solver 1 > periodic.out.33
+
+mpirun -np 1 ./struct -n 20 20 20 -p  20 0 20 -P 1 1 1 -skip 1 -rap 1 -solver 1 \
+> periodic.out.40
+mpirun -np 2 ./struct -n 20 20 10 -p  20 0 20 -P 1 1 2 -skip 1 -rap 1 -solver 1 \
+> periodic.out.41
+
+#=============================================================================
+# Check SMG for power-of-two systems
+#=============================================================================
+
+# power-of-two
+
+mpirun -np 1 ./struct -n 16 16 16 -p 16 0 16 -P 1 1 1 -solver 0 > periodic.out.50
+mpirun -np 2 ./struct -n  8 16 16 -p 16 0 16 -P 2 1 1 -solver 0 > periodic.out.51
+mpirun -np 4 ./struct -n  8  8 16 -p 16 0 16 -P 2 2 1 -solver 0 > periodic.out.52
+mpirun -np 4 ./struct -n 16  8  8 -p 16 0 16 -P 1 2 2 -solver 0 > periodic.out.53

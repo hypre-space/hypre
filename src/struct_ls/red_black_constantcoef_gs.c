@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -24,7 +24,7 @@
  * hypre_RedBlackGS
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                               hypre_StructMatrix *A,
                               hypre_StructVector *b,
@@ -32,10 +32,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 {
    hypre_RedBlackGSData  *relax_data = relax_vdata;
 
-   int                    max_iter    = (relax_data -> max_iter);
-   int                    zero_guess  = (relax_data -> zero_guess);
-   int                    rb_start    = (relax_data -> rb_start);
-   int                    diag_rank   = (relax_data -> diag_rank);
+   HYPRE_Int              max_iter    = (relax_data -> max_iter);
+   HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
+   HYPRE_Int              rb_start    = (relax_data -> rb_start);
+   HYPRE_Int              diag_rank   = (relax_data -> diag_rank);
    hypre_ComputePkg      *compute_pkg = (relax_data -> compute_pkg);
 
    hypre_CommHandle      *comm_handle;
@@ -48,10 +48,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    hypre_Box             *b_dbox;
    hypre_Box             *x_dbox;
                         
-   int                    Ai, Astart, Ani, Anj;
-   int                    bi, bstart, bni, bnj;
-   int                    xi, xstart, xni, xnj;
-   int                    xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
+   HYPRE_Int              Ai, Astart, Ani, Anj;
+   HYPRE_Int              bi, bstart, bni, bnj;
+   HYPRE_Int              xi, xstart, xni, xnj;
+   HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
    double                *Ap;
    double                *App;
@@ -59,7 +59,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    double                *xp;
 
    /* constant coefficient */
-   int                    constant_coeff= hypre_StructMatrixConstantCoefficient(A);
+   HYPRE_Int              constant_coeff= hypre_StructMatrixConstantCoefficient(A);
    double                 App0, App1, App2, App3, App4, App5, AApd;
                         
    hypre_IndexRef         start;
@@ -67,14 +67,14 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   int                    stencil_size;
-   int                    offd[6];
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              offd[6];
                         
-   int                    iter, rb, redblack;
-   int                    compute_i, i, j, ii, jj, kk;
-   int                    ni, nj, nk;
+   HYPRE_Int              iter, rb, redblack;
+   HYPRE_Int              compute_i, i, j, ii, jj, kk;
+   HYPRE_Int              ni, nj, nk;
 
-   int                    ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
@@ -120,6 +120,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
          }
       }
    }
+
+   hypre_StructVectorClearBoundGhostValues(x, 0);
 
    /*----------------------------------------------------------
     * Do zero_guess iteration
@@ -186,7 +188,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         Ai= hypre_CCBoxIndexRank(A_dbox, start);
                         AApd= 1.0/Ap[Ai];
 
-#define HYPRE_SMP_PRIVATE ii,jj,bi,xi, kk
+#define HYPRE_SMP_PRIVATE ii,jj,bi,xi,kk
 #include "hypre_smp_forloop.h"
         		for (kk = 0; kk < nk; kk++)
                         {

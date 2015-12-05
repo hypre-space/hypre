@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -23,19 +23,19 @@
 
 typedef struct
 {
-   int      variant;
-   int      domain_type;
-   int      overlap;
-   int      num_functions;
-   int      use_nonsymm;  
+   HYPRE_Int      variant;
+   HYPRE_Int      domain_type;
+   HYPRE_Int      overlap;
+   HYPRE_Int      num_functions;
+   HYPRE_Int      use_nonsymm;  
    double   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
    hypre_CSRMatrix *A_boundary;
    hypre_ParVector *Vtemp;
    double  *scale;
-   int     *dof_func;
-   int     *pivots;
+   HYPRE_Int     *dof_func;
+   HYPRE_Int     *pivots;
    
    
 

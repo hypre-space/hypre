@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -16,26 +16,26 @@
 #include "_hypre_parcsr_mv.h"
 #include "eliminate_rowscols.h"
 
-int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
-                                         int nrows_to_eliminate,
-                                         int *rows_to_eliminate)
+HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
+                                         HYPRE_Int nrows_to_eliminate,
+                                         HYPRE_Int *rows_to_eliminate)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    MPI_Comm         comm      = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *diag      = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *offd      = hypre_ParCSRMatrixOffd(A);
-   int diag_nrows             = hypre_CSRMatrixNumRows(diag);
-   int offd_ncols             = hypre_CSRMatrixNumCols(offd);
+   HYPRE_Int diag_nrows             = hypre_CSRMatrixNumRows(diag);
+   HYPRE_Int offd_ncols             = hypre_CSRMatrixNumCols(offd);
 
-   int ncols_to_eliminate;
-   int *cols_to_eliminate;
+   HYPRE_Int ncols_to_eliminate;
+   HYPRE_Int *cols_to_eliminate;
 
-   int             myproc;
-   int             ibeg;
+   HYPRE_Int       myproc;
+   HYPRE_Int       ibeg;
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
    ibeg= 0;
 
 
@@ -51,12 +51,12 @@ int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
    {
       hypre_ParCSRCommHandle *comm_handle;
       hypre_ParCSRCommPkg *comm_pkg;
-      int num_sends, *int_buf_data;
-      int index, start;
-      int i, j, k;
+      HYPRE_Int num_sends, *int_buf_data;
+      HYPRE_Int index, start;
+      HYPRE_Int i, j, k;
 
-      int *eliminate_row = hypre_CTAlloc(int, diag_nrows);
-      int *eliminate_col = hypre_CTAlloc(int, offd_ncols);
+      HYPRE_Int *eliminate_row = hypre_CTAlloc(HYPRE_Int, diag_nrows);
+      HYPRE_Int *eliminate_col = hypre_CTAlloc(HYPRE_Int, offd_ncols);
 
       /* make sure A has a communication package */
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -75,7 +75,7 @@ int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
       /* use a Matvec communication pattern to find (in eliminate_col)
          which of the local offd columns are to be eliminated */
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      int_buf_data = hypre_CTAlloc(int,
+      int_buf_data = hypre_CTAlloc(HYPRE_Int,
                                    hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                                    num_sends));
       index = 0;
@@ -98,7 +98,7 @@ int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
          if (eliminate_col[i])
             ncols_to_eliminate++;
 
-      cols_to_eliminate = hypre_CTAlloc(int, ncols_to_eliminate);
+      cols_to_eliminate = hypre_CTAlloc(HYPRE_Int, ncols_to_eliminate);
 
       ncols_to_eliminate = 0;
       for (i = 0; i < offd_ncols; i++)
@@ -120,32 +120,32 @@ int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
 }
 
 
-int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
-                                          int nrows_to_eliminate,
-                                          int *rows_to_eliminate)
+HYPRE_Int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
+                                          HYPRE_Int nrows_to_eliminate,
+                                          HYPRE_Int *rows_to_eliminate)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
   
    MPI_Comm          comm      = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix  *Adiag     = hypre_ParCSRMatrixDiag(A);
 
-   int               i, j;
-   int               irow, ibeg, iend;
+   HYPRE_Int         i, j;
+   HYPRE_Int         irow, ibeg, iend;
 
-   int               nnz       = hypre_CSRMatrixNumNonzeros(Adiag);
-   int              *Ai        = hypre_CSRMatrixI(Adiag);
-   int              *Aj        = hypre_CSRMatrixJ(Adiag);
+   HYPRE_Int         nnz       = hypre_CSRMatrixNumNonzeros(Adiag);
+   HYPRE_Int        *Ai        = hypre_CSRMatrixI(Adiag);
+   HYPRE_Int        *Aj        = hypre_CSRMatrixJ(Adiag);
    double           *Adata     = hypre_CSRMatrixData(Adiag);
 
-   int              *local_rows;
+   HYPRE_Int        *local_rows;
   
-   int               myproc;
+   HYPRE_Int         myproc;
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
    ibeg= 0;
 
    /* grab local rows to eliminate */
-   local_rows= hypre_TAlloc(int, nrows_to_eliminate);
+   local_rows= hypre_TAlloc(HYPRE_Int, nrows_to_eliminate);
    for (i= 0; i< nrows_to_eliminate; i++)
    {
       local_rows[i]= rows_to_eliminate[i]-ibeg;
@@ -178,30 +178,30 @@ int hypre_CSRMatrixEliminateRowsColsDiag (hypre_ParCSRMatrix *A,
    return ierr;
 }
 
-int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
-                                      int  nrows_to_eliminate,
-                                      int *rows_to_eliminate)
+HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
+                                      HYPRE_Int  nrows_to_eliminate,
+                                      HYPRE_Int *rows_to_eliminate)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    MPI_Comm         comm      = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *Aoffd     = hypre_ParCSRMatrixOffd(A);
-   int             *Ai        = hypre_CSRMatrixI(Aoffd);
+   HYPRE_Int       *Ai        = hypre_CSRMatrixI(Aoffd);
 
    double          *Adata     = hypre_CSRMatrixData(Aoffd);
 
-   int i, j;
-   int ibeg, iend;
+   HYPRE_Int i, j;
+   HYPRE_Int ibeg, iend;
 
-   int *local_rows;
-   int myproc;
+   HYPRE_Int *local_rows;
+   HYPRE_Int myproc;
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
    ibeg= 0;
 
    /* grab local rows to eliminate */
-   local_rows= hypre_TAlloc(int, nrows_to_eliminate);
+   local_rows= hypre_TAlloc(HYPRE_Int, nrows_to_eliminate);
    for (i= 0; i< nrows_to_eliminate; i++)
    {
       local_rows[i]= rows_to_eliminate[i]-ibeg;
@@ -220,17 +220,17 @@ int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
    return ierr;
 }
 
-int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
-                                      int ncols_to_eliminate,
-                                      int *cols_to_eliminate)
+HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
+                                      HYPRE_Int ncols_to_eliminate,
+                                      HYPRE_Int *cols_to_eliminate)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
-   int i;
-   int icol;
+   HYPRE_Int i;
+   HYPRE_Int icol;
 
-   int nnz = hypre_CSRMatrixNumNonzeros(Aoffd);
-   int *Aj = hypre_CSRMatrixJ(Aoffd);
+   HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(Aoffd);
+   HYPRE_Int *Aj = hypre_CSRMatrixJ(Aoffd);
    double *Adata = hypre_CSRMatrixData(Aoffd);
 
    for (i = 0; i < nnz; i++)

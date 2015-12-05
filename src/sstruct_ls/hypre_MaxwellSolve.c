@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,7 +22,7 @@
  * u_edge to change per call.
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_MaxwellSolve( void                * maxwell_vdata,
                     hypre_SStructMatrix * A_in,
                     hypre_SStructVector * f,
@@ -33,12 +33,12 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector       *f_edge;
    hypre_ParVector       *u_edge;
 
-   int                    max_iter     = maxwell_data-> max_iter;
+   HYPRE_Int              max_iter     = maxwell_data-> max_iter;
    double                 tol          = maxwell_data-> tol;
-   int                    rel_change   = maxwell_data-> rel_change;
-   int                    zero_guess   = maxwell_data-> zero_guess;
-   int                    npre_relax   = maxwell_data-> num_pre_relax;
-   int                    npost_relax  = maxwell_data-> num_post_relax;
+   HYPRE_Int              rel_change   = maxwell_data-> rel_change;
+   HYPRE_Int              zero_guess   = maxwell_data-> zero_guess;
+   HYPRE_Int              npre_relax   = maxwell_data-> num_pre_relax;
+   HYPRE_Int              npost_relax  = maxwell_data-> num_post_relax;
 
    hypre_ParCSRMatrix   **Ann_l        = maxwell_data-> Ann_l;
    hypre_ParCSRMatrix   **Pn_l         = maxwell_data-> Pn_l;
@@ -49,17 +49,17 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector      **en_l         = maxwell_data-> en_l;
    hypre_ParVector      **nVtemp_l     = maxwell_data-> nVtemp_l;
    hypre_ParVector      **nVtemp2_l    = maxwell_data-> nVtemp2_l;
-   int                  **nCF_marker_l = maxwell_data-> nCF_marker_l;
+   HYPRE_Int            **nCF_marker_l = maxwell_data-> nCF_marker_l;
    double                *nrelax_weight= maxwell_data-> nrelax_weight;
    double                *nomega       = maxwell_data-> nomega;
-   int                    nrelax_type  = maxwell_data-> nrelax_type;
-   int                    node_numlevs = maxwell_data-> node_numlevels;
+   HYPRE_Int              nrelax_type  = maxwell_data-> nrelax_type;
+   HYPRE_Int              node_numlevs = maxwell_data-> node_numlevels;
 
    hypre_ParCSRMatrix    *Tgrad        = maxwell_data-> Tgrad;
    hypre_ParCSRMatrix    *T_transpose  = maxwell_data-> T_transpose;
 
    hypre_ParCSRMatrix   **Aen_l        = maxwell_data-> Aen_l;
-   int                    en_numlevs   = maxwell_data-> en_numlevels;
+   HYPRE_Int              en_numlevs   = maxwell_data-> en_numlevels;
 
    hypre_ParCSRMatrix   **Aee_l        = maxwell_data-> Aee_l;
    hypre_IJMatrix       **Pe_l         = maxwell_data-> Pe_l;
@@ -70,29 +70,29 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
    hypre_ParVector      **ee_l         = maxwell_data-> ee_l;
    hypre_ParVector      **eVtemp_l     = maxwell_data-> eVtemp_l;
    hypre_ParVector      **eVtemp2_l    = maxwell_data-> eVtemp2_l;
-   int                  **eCF_marker_l = maxwell_data-> eCF_marker_l;
+   HYPRE_Int            **eCF_marker_l = maxwell_data-> eCF_marker_l;
    double                *erelax_weight= maxwell_data-> erelax_weight;
    double                *eomega       = maxwell_data-> eomega;
-   int                    erelax_type  = maxwell_data-> erelax_type;
-   int                    edge_numlevs = maxwell_data-> edge_numlevels;
+   HYPRE_Int              erelax_type  = maxwell_data-> erelax_type;
+   HYPRE_Int              edge_numlevs = maxwell_data-> edge_numlevels;
 
-   int                  **BdryRanks_l  = maxwell_data-> BdryRanks_l;
-   int                   *BdryRanksCnts_l= maxwell_data-> BdryRanksCnts_l;
+   HYPRE_Int            **BdryRanks_l  = maxwell_data-> BdryRanks_l;
+   HYPRE_Int             *BdryRanksCnts_l= maxwell_data-> BdryRanksCnts_l;
 
-   int                    logging     = maxwell_data-> logging;
+   HYPRE_Int              logging     = maxwell_data-> logging;
    double                *norms       = maxwell_data-> norms;
    double                *rel_norms   = maxwell_data-> rel_norms;
 
-   int                    Solve_err_flag;
-   int                    relax_local, cycle_param;
+   HYPRE_Int              Solve_err_flag;
+   HYPRE_Int              relax_local, cycle_param;
 
    double                 b_dot_b, r_dot_r, eps;
    double                 e_dot_e, x_dot_x;
 
-   int                    i, j;
-   int                    level;
+   HYPRE_Int              i, j;
+   HYPRE_Int              level;
 
-   int                    ierr= 0;
+   HYPRE_Int              ierr= 0;
 
 
    /* added for the relaxation routines */
@@ -196,6 +196,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                 cycle_param,
                                                 nrelax_weight[0],
                                                 nomega[0],
+                                                NULL,
                                                 xn_l[0],
                                                 nVtemp2_l[0], 
                                                 ze);
@@ -215,6 +216,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                 cycle_param,
                                                 erelax_weight[0],
                                                 eomega[0],
+                                                NULL,
                                                 xe_l[0],
                                                 eVtemp2_l[0],
                                                 ze);
@@ -300,6 +302,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      cycle_param,
                                                      nrelax_weight[level],
                                                      nomega[level],
+                                                     NULL,
                                                      xn_l[level],
                                                      nVtemp2_l[level], 
                                                      ze);
@@ -319,6 +322,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      cycle_param,
                                                      erelax_weight[level],
                                                      eomega[level],
+                                                     NULL,
                                                      xe_l[level],
                                                      eVtemp2_l[level],
                                                      ze);
@@ -384,6 +388,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      cycle_param,
                                                      nrelax_weight[level],
                                                      nomega[level],
+                                                     NULL,
                                                      xn_l[level],
                                                      nVtemp2_l[level],
                                                      ze);
@@ -404,6 +409,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      cycle_param,
                                                      erelax_weight[level],
                                                      eomega[level],
+                                                     NULL,
                                                      xe_l[level],
                                                      eVtemp2_l[level], 
                                                      ze); 
@@ -420,6 +426,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                  cycle_param,
                                                  nrelax_weight[level],
                                                  nomega[level],
+                                                 NULL,
                                                  xn_l[level],
                                                  nVtemp2_l[level],
                                                  ze);
@@ -439,6 +446,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                   cycle_param,
                                                   erelax_weight[level],
                                                   eomega[level],
+                                                  NULL,
                                                   xe_l[level],
                                                   eVtemp2_l[level],
                                                   ze);
@@ -470,6 +478,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                         cycle_param,
                                                         erelax_weight[level],
                                                         eomega[level],
+                                                        NULL,
                                                         xe_l[level],
                                                         eVtemp2_l[level], 
                                                         ze);
@@ -498,6 +507,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                   cycle_param,
                                                   erelax_weight[level],
                                                   eomega[level],
+                                                  NULL,
                                                   xe_l[level],
                                                   eVtemp2_l[level], 
                                                   ze);
@@ -530,6 +540,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                        cycle_param,
                                                        nrelax_weight[level],
                                                        nomega[level],
+                                                       NULL,
                                                        xn_l[level],
                                                        nVtemp2_l[level],
                                                        ze);
@@ -555,6 +566,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                   cycle_param,
                                                   nrelax_weight[level],
                                                   nomega[level],
+                                                  NULL,
                                                   xn_l[level],
                                                   nVtemp2_l[level], 
                                                   ze);
@@ -586,6 +598,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                         cycle_param,
                                                         erelax_weight[level],
                                                         eomega[level],
+                                                        NULL,
                                                         xe_l[level],
                                                         eVtemp2_l[level], 
                                                         ze);
@@ -613,6 +626,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                         cycle_param,
                                                         nrelax_weight[level],
                                                         nomega[level],
+                                                        NULL,
                                                         xn_l[level],
                                                         nVtemp2_l[level], 
                                                         ze);
@@ -651,6 +665,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      cycle_param,
                                                      nrelax_weight[level],
                                                      nomega[level],
+                                                     NULL,
                                                      xn_l[level],
                                                      nVtemp_l[level], 
                                                      ze);
@@ -669,6 +684,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                      cycle_param,
                                                      erelax_weight[level],
                                                      eomega[level],
+                                                     NULL,
                                                      xe_l[level],
                                                      eVtemp2_l[level], 
                                                      ze);
@@ -729,6 +745,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                  cycle_param,
                                                  nrelax_weight[0],
                                                  nomega[0],
+                                                 NULL,
                                                  xn_l[0],
                                                  nVtemp2_l[0], 
                                                  ze);
@@ -747,6 +764,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                                                  cycle_param,
                                                  erelax_weight[0],
                                                  eomega[0],
+                                                 NULL,
                                                  xe_l[0],
                                                  eVtemp2_l[0], 
                                                  ze);

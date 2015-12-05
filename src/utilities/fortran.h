@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.19 $
+ * $Revision: 2.22 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
@@ -20,13 +18,14 @@
  *   hypre_F90_NAME() or hypre_F90_IFACE()
  *   hypre_F90_NAME_BLAS()
  *   hypre_F90_NAME_LAPACK()
+ *   any of the interface argument macros at the bottom of this file
  *
  *****************************************************************************/
 
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
-#include "HYPRE_config.h"
+#include "_hypre_utilities.h"
 
 /*-------------------------------------------------------
  * Define specific name mangling macros to be used below
@@ -110,5 +109,30 @@
 #define hypre_F90_NAME_LAPACK(name,NAME) hypre_F90_NAME_2(name,NAME)
 
 #endif
+
+/*-------------------------------------------------------
+ * Define interface argument types and macros
+ *
+ * A Fortran communicator is always the size of an integer
+ * and hence usually the size of hypre_int.
+ *-------------------------------------------------------*/
+
+typedef hypre_int  hypre_F90_Comm;
+typedef HYPRE_Int  hypre_F90_Int;
+typedef HYPRE_Int  hypre_F90_IntArray;
+typedef double     hypre_F90_Dbl;
+typedef double     hypre_F90_DblArray;
+typedef HYPRE_Int *hypre_F90_Obj;
+typedef HYPRE_Int *hypre_F90_ObjRef;
+
+#define hypre_F90_PassComm(arg)       (hypre_MPI_Comm_f2c(*arg))
+#define hypre_F90_PassInt(arg)        ((HYPRE_Int) *arg)
+#define hypre_F90_PassIntRef(arg)     ((HYPRE_Int *) arg)
+#define hypre_F90_PassIntArray(arg)   ((HYPRE_Int *) arg)
+#define hypre_F90_PassDbl(arg)        ((double) *arg)
+#define hypre_F90_PassDblRef(arg)     ((double *) arg)
+#define hypre_F90_PassDblArray(arg)   ((double *) arg)
+#define hypre_F90_PassObj(obj,arg)    ((obj) *arg)
+#define hypre_F90_PassObjRef(obj,arg) ((obj *) arg)
 
 #endif

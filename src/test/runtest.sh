@@ -6,9 +6,11 @@ NoRun=0
 JobCheckInterval=10        #sleep time between jobs finished check
 InputString=""
 RunString=""
+RunEcho=""
 ExecFileNames=""           #string of executable file names used
 TestDirNames=""            #string of names of TEST_* directories used
 HOST=`hostname|cut -c1-4`  #first 4 characters of host platform name
+NumThreads=0               #number of OpenMP threads to use if > 0
 
 function usage
 {
@@ -20,6 +22,7 @@ function usage
    printf "\n"
    printf " with options:\n"
    printf "    -h|-help       prints this usage information and exits\n"
+   printf "    -nthreads <n>  use 'n' OpenMP threads\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -83,6 +86,25 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
+      dawn*) shift
+         BatchMode=1
+         MY_NUM_TASKS=$1  
+         MY_EXECUTE_DIR=`pwd`
+         MY_EXECUTE_JOB=`pwd`/$EXECFILE
+         shift
+         shift
+         MY_ARGS="$*"
+         RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
+         RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
+         ;;
+      hera*) shift
+         if [ $NumThreads -gt 0 ] ; then
+            export OMP_NUM_THREADS=$NumThreads
+            RunString="srun -p pdebug -c $NumThreads -n$*"
+         else
+            RunString="srun -p pdebug -n$*"
+         fi
+         ;;
       zeus*) shift
          RunString="srun -p pdebug -n$*"
          ;;
@@ -122,7 +144,11 @@ function CalcNodes
          ;;
       up*) CPUS_PER_NODE=8
          ;;
+      dawn*) CPUS_PER_NODE=4
+         ;;
       vert*) CPUS_PER_NODE=2
+         ;;
+      hera*) CPUS_PER_NODE=16
          ;;
       zeus*) CPUS_PER_NODE=8
          ;;
@@ -175,7 +201,11 @@ function CheckBatch
          ;;
       up*) BATCH_MODE=0
          ;;
+      dawn*) BATCH_MODE=1
+         ;;
       vert*) BATCH_MODE=0
+         ;;
+      hera*) BATCH_MODE=0
          ;;
       zeus*) BATCH_MODE=0
          ;;
@@ -228,13 +258,19 @@ function PsubCmdStub
          ;;
       thun*) PsubCmd="psub -c thunder,pbatch -b casc -r $RunName -ln $NumNodes -g $NumProcs"
          ;;
-      ubgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
+      vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      *bgl*) PsubCmd="psub -c ubgl -pool pbatch -b science -r $RunName -ln 32"
          ;;
       up*) PsubCmd="psub -c up -pool pbatch -b a_casc -r $RunName -ln $NumProcs"
          ;;
-      vert*) PsubCmd="psub -c vertex,pbatch -b casc -r $RunName -ln $NumProcs"
+      dawn*) PsubCmd="psub -c dawndev -pool pdebug -r $RunName"
+         ;;
+      hera*) PsubCmd="psub -c hera,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       zeus*) PsubCmd="psub -c zeus,pbatch -b casc -r $RunName -ln $NumProcs"
+         ;;
+      atla*) PsubCmd="psub -c atlas,pbatch -b casc -r $RunName -ln $NumProcs"
          ;;
       *) PsubCmd="psub -b casc -r $RunName -ln $NumProcs"
          ;;
@@ -297,9 +333,12 @@ EOF
             MpirunString $RunCmd            # construct "RunString"
             case $HOST in
                *bgl*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
+                      ;;
+               dawn*) RunString="${RunString} > `pwd`/$OutFile 2>`pwd`/$ErrFile"
+                      ;;
             esac
             if [ "$BatchMode" -eq 0 ] ; then
-               ${RunString} > $OutFile 2> $ErrFile </dev/null
+               ${RunEcho} ${RunString} > $OutFile 2> $ErrFile </dev/null
             else
                if [ "$BatchFlag" -eq 0 ] ; then
                   BatchFile=`echo $OutFile | sed -e 's/\.out\./.batch./'`
@@ -311,6 +350,8 @@ EOF
                   PsubCmdStub ${RunCmd}
                   case $HOST in
                      *bgl*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
+                            ;;
+                     dawn*) PsubCmd="$PsubCmd `pwd`/$BatchFile"
                             ;;
                          *) PsubCmd="$PsubCmd -o $OutFile -e $ErrFile `pwd`/$BatchFile"
                             ;;
@@ -384,6 +425,10 @@ function PostProcess
          mv purify.log $InputFile.purify.log
          grep -i hypre_ $InputFile.purify.log >> $InputFile.err
       elif [ -f insure.log ] ; then
+         if [ -f ~/insure.log ] ; then
+            cat ~/insure.log >> insure.log
+            rm -f ~/insure.log*
+         fi
          mv insure.log $InputFile.insure.log
          grep -i hypre_ $InputFile.insure.log >> $InputFile.err
       fi
@@ -410,6 +455,10 @@ function CleanUp
          if [ -f $ExecuteFile ] ; then
             rm -f $ExecuteFile
          fi
+         case $i in
+            TEST_examples)
+               rm -f ex? ex?? ex??f
+         esac
       done
    fi
 }
@@ -417,12 +466,17 @@ function CleanUp
 # process files
 function StartCrunch
 {
+   rm -f ~/insure.log*
+
    CheckBatch
    BatchMode=$?
    ExecuteJobs "$@"
    ExecuteTest "$@"
    PostProcess "$@"
 }
+
+#==========================================================================
+#==========================================================================
 
 # main
 
@@ -433,8 +487,14 @@ do
          usage
          exit
          ;;
+      -nthreads)
+         shift
+         NumThreads=$1
+         shift
+         ;;
       -n|-norun)
          NoRun=1
+         RunEcho="echo"
          shift
          ;;
       -t|-trace)
@@ -455,10 +515,9 @@ do
                TestDirNames="$TestDirNames $DirPart"
                case $DirPart in
                   TEST_examples)
-                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9"
-                     BabelExampleFiles="ex5b ex5b77"
+                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5f ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex12f ex13 ex14 ex15"
                      cd ../examples
-                     for file in $ExampleFiles $BabelExampleFiles
+                     for file in $ExampleFiles
                      do
                         if [ -x $file ]
                         then
@@ -495,6 +554,7 @@ CleanUp $TestDirNames $ExecFileNames
 
 # Filter misleading error messages
 cat > runtest.filters <<EOF
+hypre_MPI_Init
 job [0-9]* queued and waiting for resources
 job [0-9]* has been allocated resources
 SLURMINFO: Job [0-9]* is pending allocation of resources.

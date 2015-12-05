@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.25 $
+ * $Revision: 2.27 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,7 +22,7 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixCreate( MPI_Comm              comm,
                            HYPRE_SStructGraph    graph,
                            HYPRE_SStructMatrix  *matrix_ptr )
@@ -30,21 +30,21 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
 
    hypre_SStructMatrix    *matrix;
-   int                  ***splits;
-   int                     nparts;
+   HYPRE_Int            ***splits;
+   HYPRE_Int               nparts;
    hypre_SStructPMatrix  **pmatrices;
-   int                  ***symmetric;
+   HYPRE_Int            ***symmetric;
 
    hypre_SStructPGrid     *pgrid;
-   int                     nvars;
+   HYPRE_Int               nvars;
 
-   int                     stencil_size;
-   int                    *stencil_vars;
-   int                     pstencil_size;
+   HYPRE_Int               stencil_size;
+   HYPRE_Int              *stencil_vars;
+   HYPRE_Int               pstencil_size;
 
    HYPRE_SStructVariable   vitype, vjtype;
-   int                     part, vi, vj, i;
-   int                     size, rectangular;
+   HYPRE_Int               part, vi, vj, i;
+   HYPRE_Int               size, rectangular;
 
    matrix = hypre_TAlloc(hypre_SStructMatrix, 1);
 
@@ -55,11 +55,11 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    /* compute S/U-matrix split */
    nparts = hypre_SStructGraphNParts(graph);
    hypre_SStructMatrixNParts(matrix) = nparts;
-   splits = hypre_TAlloc(int **, nparts);
+   splits = hypre_TAlloc(HYPRE_Int **, nparts);
    hypre_SStructMatrixSplits(matrix) = splits;
    pmatrices = hypre_TAlloc(hypre_SStructPMatrix *, nparts);
    hypre_SStructMatrixPMatrices(matrix) = pmatrices;
-   symmetric = hypre_TAlloc(int **, nparts);
+   symmetric = hypre_TAlloc(HYPRE_Int **, nparts);
    hypre_SStructMatrixSymmetric(matrix) = symmetric;
    /* is this a rectangular matrix? */
    rectangular = 0;
@@ -71,15 +71,15 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    {
       pgrid = hypre_SStructGraphPGrid(graph, part);
       nvars = hypre_SStructPGridNVars(pgrid);
-      splits[part] = hypre_TAlloc(int *, nvars);
-      symmetric[part] = hypre_TAlloc(int *, nvars);
+      splits[part] = hypre_TAlloc(HYPRE_Int *, nvars);
+      symmetric[part] = hypre_TAlloc(HYPRE_Int *, nvars);
       for (vi = 0; vi < nvars; vi++)
       {
          stencil_size  = hypre_SStructStencilSize(stencils[part][vi]);
          stencil_vars  = hypre_SStructStencilVars(stencils[part][vi]);
          pstencil_size = 0;
-         splits[part][vi] = hypre_TAlloc(int, stencil_size);
-         symmetric[part][vi] = hypre_TAlloc(int, nvars);
+         splits[part][vi] = hypre_TAlloc(HYPRE_Int, stencil_size);
+         symmetric[part][vi] = hypre_TAlloc(HYPRE_Int, nvars);
          for (i = 0; i < stencil_size; i++)
          {
             /* for rectangular matrices, put all coefficients in U-matrix */
@@ -130,8 +130,8 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
       }
    }
    hypre_SStructMatrixEntriesSize(matrix) = size;
-   hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(int, size);
-   hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(int, size);
+   hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
    hypre_SStructMatrixTmpColCoords(matrix) = NULL;
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
 
@@ -151,17 +151,17 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
 {
    hypre_SStructGraph     *graph;
-   int                  ***splits;
-   int                     nparts;
+   HYPRE_Int            ***splits;
+   HYPRE_Int               nparts;
    hypre_SStructPMatrix  **pmatrices;
-   int                  ***symmetric;
+   HYPRE_Int            ***symmetric;
    hypre_SStructPGrid     *pgrid;
-   int                     nvars;
-   int                     part, var;
+   HYPRE_Int               nvars;
+   HYPRE_Int               part, var;
 
    if (matrix)
    {
@@ -205,34 +205,34 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 {
-   int                     nparts    = hypre_SStructMatrixNParts(matrix);
+   HYPRE_Int               nparts    = hypre_SStructMatrixNParts(matrix);
    hypre_SStructGraph     *graph     = hypre_SStructMatrixGraph(matrix);
    hypre_SStructPMatrix  **pmatrices = hypre_SStructMatrixPMatrices(matrix);
-   int                  ***symmetric = hypre_SStructMatrixSymmetric(matrix);
+   HYPRE_Int            ***symmetric = hypre_SStructMatrixSymmetric(matrix);
    hypre_SStructStencil ***stencils  = hypre_SStructGraphStencils(graph);
-   int                    *split;
+   HYPRE_Int              *split;
 
    MPI_Comm                pcomm;
    hypre_SStructPGrid     *pgrid;
    hypre_SStructStencil  **pstencils;
-   int                     nvars;
+   HYPRE_Int               nvars;
 
-   int                     stencil_size;
+   HYPRE_Int               stencil_size;
    hypre_Index            *stencil_shape;
-   int                    *stencil_vars;
-   int                     pstencil_ndim;
-   int                     pstencil_size;
+   HYPRE_Int              *stencil_vars;
+   HYPRE_Int               pstencil_ndim;
+   HYPRE_Int               pstencil_size;
 
-   int                     part, var, i;
+   HYPRE_Int               part, var, i;
 
    /* GEC0902 addition of variables for ilower and iupper   */
    MPI_Comm                comm;
    hypre_SStructGrid      *grid, *domain_grid;
-   int                     ilower, iupper, jlower, jupper;
-   int                     matrix_type = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_Int               ilower, iupper, jlower, jupper;
+   HYPRE_Int               matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    /* S-matrix */
    for (part = 0; part < nparts; part++)
@@ -316,13 +316,13 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
-                              int                  part,
-                              int                 *index,
-                              int                  var,
-                              int                  nentries,
-                              int                 *entries,
+                              HYPRE_Int            part,
+                              HYPRE_Int           *index,
+                              HYPRE_Int            var,
+                              HYPRE_Int            nentries,
+                              HYPRE_Int           *entries,
                               double              *values )
 {
    hypre_SStructMatrixSetValues(matrix, part, index, var,
@@ -334,13 +334,13 @@ HYPRE_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
-                                int                  part,
-                                int                 *index,
-                                int                  var,
-                                int                  nentries,
-                                int                 *entries,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                HYPRE_Int            var,
+                                HYPRE_Int            nentries,
+                                HYPRE_Int           *entries,
                                 double              *values )
 {
    hypre_SStructMatrixSetValues(matrix, part, index, var,
@@ -352,21 +352,21 @@ HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
-                                 int                  part,
-                                 int                 *index,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *index,
                                  double              *values )
 {
-   int                 ndim         = hypre_SStructMatrixNDim(matrix);
+   HYPRE_Int           ndim         = hypre_SStructMatrixNDim(matrix);
    hypre_SStructGraph *graph        = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid  *grid         = hypre_SStructGraphGrid(graph);
-   int                 fem_nsparse  = hypre_SStructGraphFEMPNSparse(graph, part);
-   int                *fem_sparse_i = hypre_SStructGraphFEMPSparseI(graph, part);
-   int                *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
-   int                *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
+   HYPRE_Int           fem_nsparse  = hypre_SStructGraphFEMPNSparse(graph, part);
+   HYPRE_Int          *fem_sparse_i = hypre_SStructGraphFEMPSparseI(graph, part);
+   HYPRE_Int          *fem_entries  = hypre_SStructGraphFEMPEntries(graph, part);
+   HYPRE_Int          *fem_vars     = hypre_SStructGridFEMPVars(grid, part);
    hypre_Index        *fem_offsets  = hypre_SStructGridFEMPOffsets(grid, part);
-   int                 s, i, d, vindex[3];
+   HYPRE_Int           s, i, d, vindex[3];
 
    for (s = 0; s < fem_nsparse; s++)
    {
@@ -386,13 +386,13 @@ HYPRE_SStructMatrixAddFEMValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
-                              int                  part,
-                              int                 *index,
-                              int                  var,
-                              int                  nentries,
-                              int                 *entries,
+                              HYPRE_Int            part,
+                              HYPRE_Int           *index,
+                              HYPRE_Int            var,
+                              HYPRE_Int            nentries,
+                              HYPRE_Int           *entries,
                               double              *values )
 {
    hypre_SStructMatrixSetValues(matrix, part, index, var,
@@ -404,14 +404,14 @@ HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
-                                 int                  part,
-                                 int                 *ilower,
-                                 int                 *iupper,
-                                 int                  var,
-                                 int                  nentries,
-                                 int                 *entries,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int            nentries,
+                                 HYPRE_Int           *entries,
                                  double              *values )
 {
    hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
@@ -423,14 +423,14 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix  matrix,
-                                   int                  part,
-                                   int                 *ilower,
-                                   int                 *iupper,
-                                   int                  var,
-                                   int                  nentries,
-                                   int                 *entries,
+                                   HYPRE_Int            part,
+                                   HYPRE_Int           *ilower,
+                                   HYPRE_Int           *iupper,
+                                   HYPRE_Int            var,
+                                   HYPRE_Int            nentries,
+                                   HYPRE_Int           *entries,
                                    double              *values )
 {
    hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
@@ -442,14 +442,14 @@ HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
-                                 int                  part,
-                                 int                 *ilower,
-                                 int                 *iupper,
-                                 int                  var,
-                                 int                  nentries,
-                                 int                 *entries,
+                                 HYPRE_Int            part,
+                                 HYPRE_Int           *ilower,
+                                 HYPRE_Int           *iupper,
+                                 HYPRE_Int            var,
+                                 HYPRE_Int            nentries,
+                                 HYPRE_Int           *entries,
                                  double              *values )
 {
    hypre_SStructMatrixSetBoxValues(matrix, part, ilower, iupper, var,
@@ -461,25 +461,25 @@ HYPRE_SStructMatrixGetBoxValues( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 {
    hypre_SStructGraph     *graph          = hypre_SStructMatrixGraph(matrix);
-   int                     nparts         = hypre_SStructMatrixNParts(matrix);
+   HYPRE_Int               nparts         = hypre_SStructMatrixNParts(matrix);
    hypre_SStructPMatrix  **pmatrices      = hypre_SStructMatrixPMatrices(matrix);
    hypre_SStructGrid      *grid           = hypre_SStructGraphGrid(graph);
    hypre_SStructCommInfo **vnbor_comm_info = hypre_SStructGridVNborCommInfo(grid);
-   int                     vnbor_ncomms    = hypre_SStructGridVNborNComms(grid);
+   HYPRE_Int               vnbor_ncomms    = hypre_SStructGridVNborNComms(grid);
 
-   int                     part;
+   HYPRE_Int               part;
 
    hypre_CommInfo         *comm_info;
-   int                     send_part,    recv_part;
-   int                     send_var,     recv_var;
+   HYPRE_Int               send_part,    recv_part;
+   HYPRE_Int               send_var,     recv_var;
    hypre_StructMatrix     *send_matrix, *recv_matrix;
    hypre_CommPkg          *comm_pkg;
    hypre_CommHandle       *comm_handle;
-   int                     ci;
+   HYPRE_Int               ci;
 
 
    /*------------------------------------------------------
@@ -516,21 +516,21 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
       {
          hypre_StructStencil *send_stencil = hypre_StructMatrixStencil(send_matrix);
          hypre_StructStencil *recv_stencil = hypre_StructMatrixStencil(recv_matrix);
-         int                  num_values, stencil_size, num_transforms;
-         int                 *symm;
-         int                 *v_to_s, *s_to_v;
+         HYPRE_Int            num_values, stencil_size, num_transforms;
+         HYPRE_Int           *symm;
+         HYPRE_Int           *v_to_s, *s_to_v;
          hypre_Index         *coords, *dirs;
-         int                **orders, *order;
+         HYPRE_Int          **orders, *order;
          hypre_IndexRef       sentry0;
          hypre_Index          sentry1;
-         int                  ti, si, i, j;
+         HYPRE_Int            ti, si, i, j;
 
          /* to compute 'orders', remember that we are doing reverse communication */
          num_values = hypre_StructMatrixNumValues(recv_matrix);
          symm = hypre_StructMatrixSymmElements(recv_matrix);
          stencil_size = hypre_StructStencilSize(recv_stencil);
-         v_to_s = hypre_TAlloc(int, num_values);
-         s_to_v = hypre_TAlloc(int, stencil_size);
+         v_to_s = hypre_TAlloc(HYPRE_Int, num_values);
+         s_to_v = hypre_TAlloc(HYPRE_Int, stencil_size);
          for (si = 0, i = 0; si < stencil_size; si++)
          {
             s_to_v[si] = -1;
@@ -542,8 +542,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
             }
          }
          hypre_CommInfoGetTransforms(comm_info, &num_transforms, &coords, &dirs);
-         orders = hypre_TAlloc(int *, num_transforms);
-         order = hypre_TAlloc(int, num_values);
+         orders = hypre_TAlloc(HYPRE_Int *, num_transforms);
+         order = hypre_TAlloc(HYPRE_Int, num_values);
          for (ti = 0; ti < num_transforms; ti++)
          {
             for (i = 0; i < num_values; i++)
@@ -563,7 +563,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                }
             }
             /* want order to indicate the natural order on the remote process */
-            orders[ti] = hypre_TAlloc(int, num_values);
+            orders[ti] = hypre_TAlloc(HYPRE_Int, num_values);
             for (i = 0; i < num_values; i++)
             {
                orders[ti][i] = -1;
@@ -623,24 +623,24 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
  * currently not created until the SStructMatrix is initialized.
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
-                                 int                 part,
-                                 int                 var,
-                                 int                 to_var,
-                                 int                 symmetric )
+                                 HYPRE_Int           part,
+                                 HYPRE_Int           var,
+                                 HYPRE_Int           to_var,
+                                 HYPRE_Int           symmetric )
 {
-   int                ***msymmetric = hypre_SStructMatrixSymmetric(matrix);
+   HYPRE_Int          ***msymmetric = hypre_SStructMatrixSymmetric(matrix);
    hypre_SStructGraph   *graph      = hypre_SStructMatrixGraph(matrix);
    hypre_SStructPGrid   *pgrid;
 
-   int pstart = part;
-   int psize  = 1;
-   int vstart = var;
-   int vsize  = 1;
-   int tstart = to_var;
-   int tsize  = 1;
-   int p, v, t;
+   HYPRE_Int pstart = part;
+   HYPRE_Int psize  = 1;
+   HYPRE_Int vstart = var;
+   HYPRE_Int vsize  = 1;
+   HYPRE_Int tstart = to_var;
+   HYPRE_Int tsize  = 1;
+   HYPRE_Int p, v, t;
 
    if (part == -1)
    {
@@ -677,9 +677,9 @@ HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 HYPRE_SStructMatrixSetNSSymmetric( HYPRE_SStructMatrix matrix,
-                                   int                 symmetric )
+                                   HYPRE_Int           symmetric )
 {
    hypre_SStructMatrixNSSymmetric(matrix) = symmetric;
 
@@ -689,19 +689,19 @@ HYPRE_SStructMatrixSetNSSymmetric( HYPRE_SStructMatrix matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix  matrix,
-                                  int                  type )
+                                  HYPRE_Int            type )
 {
    hypre_SStructGraph     *graph    = hypre_SStructMatrixGraph(matrix);
-   int                  ***splits   = hypre_SStructMatrixSplits(matrix);
-   int                     nparts   = hypre_SStructMatrixNParts(matrix);
+   HYPRE_Int            ***splits   = hypre_SStructMatrixSplits(matrix);
+   HYPRE_Int               nparts   = hypre_SStructMatrixNParts(matrix);
    hypre_SStructStencil ***stencils = hypre_SStructGraphStencils(graph);
 
    hypre_SStructPGrid     *pgrid;
-   int                     nvars;
-   int                     stencil_size;
-   int                     part, var, i;
+   HYPRE_Int               nvars;
+   HYPRE_Int               stencil_size;
+   HYPRE_Int               part, var, i;
 
    hypre_SStructMatrixObjectType(matrix) = type ;   
 
@@ -730,15 +730,15 @@ HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix  matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
                               void                **object )
 {
-   int            type     = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_Int      type     = hypre_SStructMatrixObjectType(matrix);
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructPMatrix *pA;
    hypre_StructMatrix   *sA;
-   int                   part, var;
+   HYPRE_Int             part, var;
  
 
    if (type == HYPRE_PARCSR)
@@ -768,15 +768,15 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
  * RDF: Why is this here?  Isn't in the header file.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixGetObject2( HYPRE_SStructMatrix   matrix,
                                void                **object )
 {
-   int            type     = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_Int      type     = hypre_SStructMatrixObjectType(matrix);
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructPMatrix *pA;
    hypre_StructMatrix   *sA;
-   int                   part, var;
+   HYPRE_Int             part, var;
  
 
    if (type == HYPRE_PARCSR)
@@ -806,25 +806,25 @@ HYPRE_SStructMatrixGetObject2( HYPRE_SStructMatrix   matrix,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixPrint( const char          *filename,
                           HYPRE_SStructMatrix  matrix,
-                          int                  all )
+                          HYPRE_Int            all )
 {
-   int  nparts = hypre_SStructMatrixNParts(matrix);
-   int  part;
+   HYPRE_Int  nparts = hypre_SStructMatrixNParts(matrix);
+   HYPRE_Int  part;
    char new_filename[255];
 
    for (part = 0; part < nparts; part++)
    {
-      sprintf(new_filename, "%s.%02d", filename, part);
+      hypre_sprintf(new_filename, "%s.%02d", filename, part);
       hypre_SStructPMatrixPrint(new_filename,
                                 hypre_SStructMatrixPMatrix(matrix, part),
                                 all);
    }
 
    /* U-matrix */
-   sprintf(new_filename, "%s.UMatrix", filename);
+   hypre_sprintf(new_filename, "%s.UMatrix", filename);
    HYPRE_IJMatrixPrint(hypre_SStructMatrixIJMatrix(matrix), new_filename);
 
    return hypre_error_flag;
@@ -833,7 +833,7 @@ HYPRE_SStructMatrixPrint( const char          *filename,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructMatrixMatvec( double alpha,
                            HYPRE_SStructMatrix A,
                            HYPRE_SStructVector x,

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,7 +25,7 @@
 hypre_NumbersNode * hypre_NumbersNewNode()
 /* makes a new node for a tree representing numbers */
 {
-   int i;
+   HYPRE_Int i;
    hypre_NumbersNode * newnode = hypre_CTAlloc( hypre_NumbersNode, 1 );
    for ( i=0; i<=10; ++i ) newnode->digit[i] = NULL;
    return newnode;
@@ -34,7 +34,7 @@ hypre_NumbersNode * hypre_NumbersNewNode()
 void hypre_NumbersDeleteNode( hypre_NumbersNode * node )
 /* deletes a node and the tree of which it is root */
 {
-   int i;
+   HYPRE_Int i;
    for ( i=0; i<=10; ++i ) if ( node->digit[i] != NULL ) {
       hypre_NumbersDeleteNode( node->digit[i] );
       node->digit[i] = NULL;
@@ -42,12 +42,12 @@ void hypre_NumbersDeleteNode( hypre_NumbersNode * node )
    hypre_TFree( node );
 }
 
-int hypre_NumbersEnter( hypre_NumbersNode * node, const int n )
+HYPRE_Int hypre_NumbersEnter( hypre_NumbersNode * node, const HYPRE_Int n )
 /* enters a number in the tree starting with 'node'. */
 {
-   int new = 0;
-   int q = n/10;
-   int r = n%10;
+   HYPRE_Int new = 0;
+   HYPRE_Int q = n/10;
+   HYPRE_Int r = n%10;
    hypre_assert( n>=0 );
    if ( node->digit[r] == NULL ) {
       node->digit[r] = hypre_NumbersNewNode();
@@ -63,11 +63,11 @@ int hypre_NumbersEnter( hypre_NumbersNode * node, const int n )
    return new;
 }
 
-int hypre_NumbersNEntered( hypre_NumbersNode * node )
+HYPRE_Int hypre_NumbersNEntered( hypre_NumbersNode * node )
 /* returns the number of numbers represented by the tree whose root is 'node' */
 {
-   int i;
-   int count = 0;
+   HYPRE_Int i;
+   HYPRE_Int count = 0;
    if ( node==NULL ) return 0;
    for ( i=0; i<10; ++i ) if ( node->digit[i] != NULL )
       count += hypre_NumbersNEntered( node->digit[i] );
@@ -75,11 +75,11 @@ int hypre_NumbersNEntered( hypre_NumbersNode * node )
    return count;
 }
 
-int hypre_NumbersQuery( hypre_NumbersNode * node, const int n )
+HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n )
 /* returns 1 if n is on the tree with root 'node', 0 otherwise */
 {
-   int q = n/10;
-   int r = n%10;
+   HYPRE_Int q = n/10;
+   HYPRE_Int r = n%10;
    hypre_assert( n>=0 );
    if ( node->digit[r] == NULL ) { /* low order digit of n not on tree */
       return 0;
@@ -95,16 +95,16 @@ int hypre_NumbersQuery( hypre_NumbersNode * node, const int n )
    }
 }
 
-int * hypre_NumbersArray( hypre_NumbersNode * node )
+HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node )
 /* allocates and returns an unordered array of ints as a simpler representation
    of the contents of the Numbers tree.
    For the array length, call hypre_NumbersNEntered */
 {
-   int i, j, Ntemp;
-   int k = 0;
-   int N = hypre_NumbersNEntered(node);
-   int * array, * temp;
-   array = hypre_CTAlloc( int, N );
+   HYPRE_Int i, j, Ntemp;
+   HYPRE_Int k = 0;
+   HYPRE_Int N = hypre_NumbersNEntered(node);
+   HYPRE_Int * array, * temp;
+   array = hypre_CTAlloc( HYPRE_Int, N );
    if ( node==NULL ) return array;
    for ( i=0; i<10; ++i ) if ( node->digit[i] != NULL ) {
       Ntemp = hypre_NumbersNEntered( node->digit[i] );

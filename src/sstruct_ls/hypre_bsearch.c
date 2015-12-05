@@ -7,11 +7,10 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
-
-
+#include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
  * hypre_LowerBinarySearch
@@ -19,10 +18,11 @@
  *      list[m-1] < value <= list[m].
  * The routine returns location m or -1.
  *--------------------------------------------------------------------------*/
-int hypre_LowerBinarySearch(int *list, int value, int list_length)
+
+HYPRE_Int hypre_LowerBinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_length)
 {
-   int low, high, m;
-   int not_found = 1;
+   HYPRE_Int low, high, m;
+   HYPRE_Int not_found = 1;
 
    /* special case, list is size zero. */
    if (list_length < 1)
@@ -69,10 +69,10 @@ int hypre_LowerBinarySearch(int *list, int value, int list_length)
  *      list[m] <= value < list[m+1].
  * The routine returns location m or -1.
  *--------------------------------------------------------------------------*/
-int hypre_UpperBinarySearch(int *list, int value, int list_length)
+HYPRE_Int hypre_UpperBinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_length)
 {
-   int low, high, m;
-   int not_found = 1;
+   HYPRE_Int low, high, m;
+   HYPRE_Int not_found = 1;
 
    /* special case, list is size zero. */
    if (list_length < 1)

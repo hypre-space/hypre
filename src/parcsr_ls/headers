@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.10 $
+# $Revision: 2.11 $
 #EHEADER**********************************************************************
 
 
@@ -43,7 +43,7 @@ cat >> $INTERNAL_HEADER <<@
 extern "C" {
 #endif
 
-typedef struct { int prev; int next; } Link;
+typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 @
 

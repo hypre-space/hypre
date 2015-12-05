@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -28,12 +28,12 @@
 extern "C" {
 #endif
 
-int hypre_ParCSRMatrixMatMultiVec(double, hypre_ParCSRMatrix*,
+HYPRE_Int hypre_ParCSRMatrixMatMultiVec(double, hypre_ParCSRMatrix*,
                                   hypre_ParMultiVector*,
                                   double, hypre_ParMultiVector*);
 
 
-int hypre_ParCSRMatrixMatMultiVecT(double, hypre_ParCSRMatrix*,
+HYPRE_Int hypre_ParCSRMatrixMatMultiVecT(double, hypre_ParCSRMatrix*,
                                   hypre_ParMultiVector*,
                                   double, hypre_ParMultiVector*);
 

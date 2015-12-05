@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,17 +34,17 @@ typedef struct
 {
    MPI_Comm      context;
 
-   int M, N;                               /* number of rows and cols in matrix */
+   HYPRE_Int M, N;                               /* number of rows and cols in matrix */
 
    void         *auxiliary_data;           /* Placeholder for implmentation specific
                                               data */
 
    void         *local_storage;            /* Structure for storing local portion */
-   int      	 local_storage_type;       /* Indicates the type of "local storage" */
+   HYPRE_Int      	 local_storage_type;       /* Indicates the type of "local storage" */
    void         *translator;               /* optional storage_type specfic structure
                                               for holding additional local info */
 #ifdef HYPRE_TIMING
-   int           GetRow_timer;
+   HYPRE_Int           GetRow_timer;
 #endif
 } hypre_DistributedMatrix;
 

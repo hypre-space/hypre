@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dormbr_(char *vect, char *side, char *trans, integer *m, 
+/* Subroutine */ HYPRE_Int dormbr_(char *vect, char *side, char *trans, integer *m, 
 	integer *n, integer *k, doublereal *a, integer *lda, doublereal *tau, 
 	doublereal *c__, integer *ldc, doublereal *work, integer *lwork, 
 	integer *info)
@@ -133,19 +133,19 @@
     integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2, i__3[2];
     char ch__1[2];
     /* Builtin functions   
-       Subroutine */ int s_cat(char *, char **, integer *, integer *, ftnlen);
+       Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
     static logical left;
     extern logical lsame_(char *, char *);
     static integer iinfo, i1, i2, nb, mi, ni, nq, nw;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ int dormlq_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dormlq_(char *, char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *);
     static logical notran;
-    extern /* Subroutine */ int dormqr_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dormqr_(char *, char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *);
     static logical applyq;

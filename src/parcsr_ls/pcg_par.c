@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,8 +27,8 @@
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_ParKrylovCAlloc( int count,
-                 int elt_size )
+hypre_ParKrylovCAlloc( HYPRE_Int count,
+                 HYPRE_Int elt_size )
 {
    return( hypre_CAlloc( count, elt_size ) );
 }
@@ -37,10 +37,10 @@ hypre_ParKrylovCAlloc( int count,
  * hypre_ParKrylovFree
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovFree( char *ptr )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Free( ptr );
 
@@ -71,11 +71,11 @@ hypre_ParKrylovCreateVector( void *vvector )
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_ParKrylovCreateVectorArray(int n, void *vvector )
+hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
    hypre_ParVector *vector = vvector;
    hypre_ParVector **new_vector;
-   int i;
+   HYPRE_Int i;
 
    new_vector = hypre_CTAlloc(hypre_ParVector*,n);
    for (i=0; i < n; i++)
@@ -94,7 +94,7 @@ hypre_ParKrylovCreateVectorArray(int n, void *vvector )
  * hypre_ParKrylovDestroyVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovDestroyVector( void *vvector )
 {
    hypre_ParVector *vector = vvector;
@@ -121,7 +121,7 @@ hypre_ParKrylovMatvecCreate( void   *A,
  * hypre_ParKrylovMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovMatvec( void   *matvec_data,
                  double  alpha,
                  void   *A,
@@ -140,7 +140,7 @@ hypre_ParKrylovMatvec( void   *matvec_data,
  * hypre_ParKrylovMatvecT
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovMatvecT(void   *matvec_data,
                  double  alpha,
                  void   *A,
@@ -159,7 +159,7 @@ hypre_ParKrylovMatvecT(void   *matvec_data,
  * hypre_ParKrylovMatvecDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovMatvecDestroy( void *matvec_data )
 {
    return 0;
@@ -182,7 +182,7 @@ hypre_ParKrylovInnerProd( void *x,
  * hypre_ParKrylovCopyVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovCopyVector( void *x, 
                      void *y )
 {
@@ -194,7 +194,7 @@ hypre_ParKrylovCopyVector( void *x,
  * hypre_ParKrylovClearVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovClearVector( void *x )
 {
    return ( hypre_ParVectorSetConstantValues( (hypre_ParVector *) x, 0.0 ) );
@@ -204,7 +204,7 @@ hypre_ParKrylovClearVector( void *x )
  * hypre_ParKrylovScaleVector
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovScaleVector( double  alpha,
                       void   *x     )
 {
@@ -215,7 +215,7 @@ hypre_ParKrylovScaleVector( double  alpha,
  * hypre_ParKrylovAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovAxpy( double alpha,
                void   *x,
                void   *y )
@@ -228,12 +228,12 @@ hypre_ParKrylovAxpy( double alpha,
  * hypre_ParKrylovCommInfo
  *--------------------------------------------------------------------------*/
 
-int
-hypre_ParKrylovCommInfo( void   *A, int *my_id, int *num_procs)
+HYPRE_Int
+hypre_ParKrylovCommInfo( void   *A, HYPRE_Int *my_id, HYPRE_Int *num_procs)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm ( (hypre_ParCSRMatrix *) A);
-   MPI_Comm_size(comm,num_procs);
-   MPI_Comm_rank(comm,my_id);
+   hypre_MPI_Comm_size(comm,num_procs);
+   hypre_MPI_Comm_rank(comm,my_id);
    return 0;
 }
 
@@ -241,7 +241,7 @@ hypre_ParKrylovCommInfo( void   *A, int *my_id, int *num_procs)
  * hypre_ParKrylovIdentitySetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovIdentitySetup( void *vdata,
                         void *A,
                         void *b,
@@ -255,7 +255,7 @@ hypre_ParKrylovIdentitySetup( void *vdata,
  * hypre_ParKrylovIdentity
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParKrylovIdentity( void *vdata,
                    void *A,
                    void *b,

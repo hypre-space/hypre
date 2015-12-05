@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,10 +30,10 @@ struct upc_struct
 void *_uinitial_block[MAX_THREAD_COUNT];
 struct upc_struct _uparam[MAX_THREAD_COUNT];
 
-int _uheapReleasesCount=0;
-int _uheapGetsCount=0;
+HYPRE_Int _uheapReleasesCount=0;
+HYPRE_Int _uheapGetsCount=0;
 
-void *_uget_fn(Heap_t usrheap, size_t *length, int *clean);
+void *_uget_fn(Heap_t usrheap, size_t *length, HYPRE_Int *clean);
 void _urelease_fn(Heap_t usrheap, void *p, size_t size);
 
 #endif

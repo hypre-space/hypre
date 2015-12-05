@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -39,9 +39,9 @@
  * MatrixCreate - Return (a pointer to) a matrix object.
  *--------------------------------------------------------------------------*/
 
-Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row)
+Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
 {
-    int num_rows, mype, npes;
+    HYPRE_Int num_rows, mype, npes;
 
     Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
 
@@ -54,21 +54,21 @@ Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row)
 
     num_rows = mat->end_row - mat->beg_row + 1;
 
-    mat->lens = (int *)     MemAlloc(mat->mem, num_rows * sizeof(int));
-    mat->inds = (int **)    MemAlloc(mat->mem, num_rows * sizeof(int *));
+    mat->lens = (HYPRE_Int *)     MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int));
+    mat->inds = (HYPRE_Int **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int *));
     mat->vals = (double **) MemAlloc(mat->mem, num_rows * sizeof(double *));
 
     /* Send beg_row and end_row to all processors */
     /* This is needed in order to map row numbers to processors */
 
-    MPI_Comm_rank(comm, &mype);
-    MPI_Comm_size(comm, &npes);
+    hypre_MPI_Comm_rank(comm, &mype);
+    hypre_MPI_Comm_size(comm, &npes);
 
-    mat->beg_rows = (int *) MemAlloc(mat->mem, npes * sizeof(int));
-    mat->end_rows = (int *) MemAlloc(mat->mem, npes * sizeof(int));
+    mat->beg_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
+    mat->end_rows = (HYPRE_Int *) MemAlloc(mat->mem, npes * sizeof(HYPRE_Int));
 
-    MPI_Allgather(&beg_row, 1, MPI_INT, mat->beg_rows, 1, MPI_INT, comm);
-    MPI_Allgather(&end_row, 1, MPI_INT, mat->end_rows, 1, MPI_INT, comm);
+    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, mat->beg_rows, 1, HYPRE_MPI_INT, comm);
+    hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, mat->end_rows, 1, HYPRE_MPI_INT, comm);
 
     mat->num_recv = 0;
     mat->num_send = 0;
@@ -93,13 +93,13 @@ Matrix *MatrixCreate(MPI_Comm comm, int beg_row, int end_row)
  * The matrix created by this call is a local matrix, not a global matrix.
  *--------------------------------------------------------------------------*/
 
-Matrix *MatrixCreateLocal(int beg_row, int end_row)
+Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row)
 {
-    int num_rows;
+    HYPRE_Int num_rows;
 
     Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
 
-    mat->comm = MPI_COMM_NULL;
+    mat->comm = hypre_MPI_COMM_NULL;
 
     mat->beg_row = beg_row;
     mat->end_row = end_row;
@@ -108,8 +108,8 @@ Matrix *MatrixCreateLocal(int beg_row, int end_row)
 
     num_rows = mat->end_row - mat->beg_row + 1;
 
-    mat->lens = (int *)     MemAlloc(mat->mem, num_rows * sizeof(int));
-    mat->inds = (int **)    MemAlloc(mat->mem, num_rows * sizeof(int *));
+    mat->lens = (HYPRE_Int *)     MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int));
+    mat->inds = (HYPRE_Int **)    MemAlloc(mat->mem, num_rows * sizeof(HYPRE_Int *));
     mat->vals = (double **) MemAlloc(mat->mem, num_rows * sizeof(double *));
 
     /* Send beg_row and end_row to all processors */
@@ -142,13 +142,13 @@ Matrix *MatrixCreateLocal(int beg_row, int end_row)
 
 void MatrixDestroy(Matrix *mat)
 {
-    int i;
+    HYPRE_Int i;
 
     for (i=0; i<mat->num_recv; i++)
-        MPI_Request_free(&mat->recv_req[i]);
+        hypre_MPI_Request_free(&mat->recv_req[i]);
 
     for (i=0; i<mat->num_send; i++)
-        MPI_Request_free(&mat->send_req[i]);
+        hypre_MPI_Request_free(&mat->send_req[i]);
 
     free(mat->recv_req);
     free(mat->send_req);
@@ -175,16 +175,16 @@ void MatrixDestroy(Matrix *mat)
  * the matrix is destroyed.  "row" is in global coordinate numbering.
  *--------------------------------------------------------------------------*/
 
-void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val)
+void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, double *val)
 {
     row -= mat->beg_row;
 
     mat->lens[row] = len;
-    mat->inds[row] = (int *) MemAlloc(mat->mem, len*sizeof(int));
+    mat->inds[row] = (HYPRE_Int *) MemAlloc(mat->mem, len*sizeof(HYPRE_Int));
     mat->vals[row] = (double *) MemAlloc(mat->mem, len*sizeof(double));
 
     if (ind != NULL)
-        memcpy(mat->inds[row], ind, len*sizeof(int));
+        memcpy(mat->inds[row], ind, len*sizeof(HYPRE_Int));
 
     if (val != NULL)
         memcpy(mat->vals[row], val, len*sizeof(double));
@@ -194,7 +194,7 @@ void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val)
  * MatrixGetRow - Get a *local* row in a matrix.  
  *--------------------------------------------------------------------------*/
 
-void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp)
+void MatrixGetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int *lenp, HYPRE_Int **indp, double **valp)
 {
     *lenp = mat->lens[row];
     *indp = mat->inds[row];
@@ -205,14 +205,14 @@ void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp)
  * MatrixRowPe - Map "row" to a processor number.
  *--------------------------------------------------------------------------*/
 
-int MatrixRowPe(Matrix *mat, int row)
+HYPRE_Int MatrixRowPe(Matrix *mat, HYPRE_Int row)
 {
-    int npes, pe;
+    HYPRE_Int npes, pe;
 
-    int *beg = mat->beg_rows;
-    int *end = mat->end_rows;
+    HYPRE_Int *beg = mat->beg_rows;
+    HYPRE_Int *end = mat->end_rows;
 
-    MPI_Comm_size(mat->comm, &npes);
+    hypre_MPI_Comm_size(mat->comm, &npes);
 
     for (pe=0; pe<npes; pe++)
     {
@@ -220,7 +220,7 @@ int MatrixRowPe(Matrix *mat, int row)
             return pe;
     }
 
-    printf("MatrixRowPe: could not map row %d.\n", row);
+    hypre_printf("MatrixRowPe: could not map row %d.\n", row);
     PARASAILS_EXIT;
 
     return -1; /* for picky compilers */
@@ -230,9 +230,9 @@ int MatrixRowPe(Matrix *mat, int row)
  * MatrixNnz - Return total number of nonzeros in preconditioner.
  *--------------------------------------------------------------------------*/
 
-int MatrixNnz(Matrix *mat)
+HYPRE_Int MatrixNnz(Matrix *mat)
 {
-    int num_local, i, total, alltotal;
+    HYPRE_Int num_local, i, total, alltotal;
 
     num_local = mat->end_row - mat->beg_row + 1;
 
@@ -240,7 +240,7 @@ int MatrixNnz(Matrix *mat)
     for (i=0; i<num_local; i++)
 	total += mat->lens[i];
 
-    MPI_Allreduce(&total, &alltotal, 1, MPI_INT, MPI_SUM, mat->comm);
+    hypre_MPI_Allreduce(&total, &alltotal, 1, HYPRE_MPI_INT, hypre_MPI_SUM, mat->comm);
 
     return alltotal;
 }
@@ -252,16 +252,16 @@ int MatrixNnz(Matrix *mat)
 
 void MatrixPrint(Matrix *mat, char *filename)
 {
-    int mype, npes, pe;
-    int row, i, len, *ind;
+    HYPRE_Int mype, npes, pe;
+    HYPRE_Int row, i, len, *ind;
     double *val;
 
-    MPI_Comm_rank(mat->comm, &mype);
-    MPI_Comm_size(mat->comm, &npes);
+    hypre_MPI_Comm_rank(mat->comm, &mype);
+    hypre_MPI_Comm_size(mat->comm, &npes);
 
     for (pe=0; pe<npes; pe++)
     {
-	MPI_Barrier(mat->comm);
+	hypre_MPI_Barrier(mat->comm);
 
 	if (mype == pe)
 	{
@@ -273,7 +273,7 @@ void MatrixPrint(Matrix *mat, char *filename)
                 MatrixGetRow(mat, row, &len, &ind, &val);
 
                 for (i=0; i<len; i++)
-                    fprintf(file, "%d %d %.14e\n", 
+                    hypre_fprintf(file, "%d %d %.14e\n", 
 			row + mat->beg_row, 
 			mat->numb->local_to_global[ind[i]], val[i]);
             }
@@ -290,61 +290,61 @@ void MatrixPrint(Matrix *mat, char *filename)
 static void MatrixReadMaster(Matrix *mat, char *filename)
 {
     MPI_Comm comm = mat->comm;
-    int mype, npes;
+    HYPRE_Int mype, npes;
     FILE *file;
-    int ret;
-    int num_rows, curr_proc;
-    int row, col;
+    HYPRE_Int ret;
+    HYPRE_Int num_rows, curr_proc;
+    HYPRE_Int row, col;
     double value;
-    long offset;
-    long outbuf;
+    hypre_longint offset;
+    hypre_longint outbuf;
 
-    int curr_row;
-    int len;
-    int ind[MAX_NZ_PER_ROW];
+    HYPRE_Int curr_row;
+    HYPRE_Int len;
+    HYPRE_Int ind[MAX_NZ_PER_ROW];
     double val[MAX_NZ_PER_ROW];
 
     char line[100];
-    int oldrow;
+    HYPRE_Int oldrow;
 
-    MPI_Request request;
-    MPI_Status  status;
+    hypre_MPI_Request request;
+    hypre_MPI_Status  status;
 
-    MPI_Comm_size(mat->comm, &npes);
-    MPI_Comm_rank(mat->comm, &mype);
+    hypre_MPI_Comm_size(mat->comm, &npes);
+    hypre_MPI_Comm_rank(mat->comm, &mype);
 
     file = fopen(filename, "r");
     assert(file != NULL);
 
     fgets(line, 100, file);
 #ifdef EMSOLVE
-    ret = sscanf(line, "%*d %d %*d %*d", &num_rows);
+    ret = hypre_sscanf(line, "%*d %d %*d %*d", &num_rows);
     for (row=0; row<num_rows; row++)
-        fscanf(file, "%*d");
+        hypre_fscanf(file, "%*d");
 #else
-    ret = sscanf(line, "%d %*d %*d", &num_rows);
+    ret = hypre_sscanf(line, "%d %*d %*d", &num_rows);
 #endif
 
     offset = ftell(file);
-    fscanf(file, "%d %d %lf", &row, &col, &value);
+    hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
 
-    request = MPI_REQUEST_NULL;
+    request = hypre_MPI_REQUEST_NULL;
     curr_proc = 1; /* proc for which we are looking for the beginning */
     while (curr_proc < npes)
     {
 	if (row == mat->beg_rows[curr_proc])
 	{
-            MPI_Wait(&request, &status);
+            hypre_MPI_Wait(&request, &status);
 	    outbuf = offset;
-	    MPI_Isend(&outbuf, 1, MPI_LONG, curr_proc, 0, comm, &request);
+	    hypre_MPI_Isend(&outbuf, 1, hypre_MPI_LONG, curr_proc, 0, comm, &request);
 	    curr_proc++;
 	}
         offset = ftell(file);
 	oldrow = row;
-        fscanf(file, "%d %d %lf", &row, &col, &value);
+        hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
 	if (oldrow > row)
 	{
-	    fprintf(stderr, "Matrix file is not sorted by rows.\n");
+	    hypre_fprintf(stderr, "Matrix file is not sorted by rows.\n");
 	    PARASAILS_EXIT;
 	}
     }
@@ -354,14 +354,14 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
     fgets(line, 100, file);
 #ifdef EMSOLVE
-    ret = sscanf(line, "%*d %d %*d %*d", &num_rows);
+    ret = hypre_sscanf(line, "%*d %d %*d %*d", &num_rows);
     for (row=0; row<num_rows; row++)
-        fscanf(file, "%*d");
+        hypre_fscanf(file, "%*d");
 #else
-    ret = sscanf(line, "%d %*d %*d", &num_rows);
+    ret = hypre_sscanf(line, "%d %*d %*d", &num_rows);
 #endif
 
-    ret = fscanf(file, "%d %d %lf", &row, &col, &value);
+    ret = hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
     curr_row = row;
     len = 0;
 
@@ -380,9 +380,9 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
 	if (len >= MAX_NZ_PER_ROW)
 	{
-	    fprintf(stderr, "The matrix has exceeded %d\n", MAX_NZ_PER_ROW);
-	    fprintf(stderr, "nonzeros per row.  Internal buffers must be\n");
-	    fprintf(stderr, "increased to continue.\n");
+	    hypre_fprintf(stderr, "The matrix has exceeded %d\n", MAX_NZ_PER_ROW);
+	    hypre_fprintf(stderr, "nonzeros per row.  Internal buffers must be\n");
+	    hypre_fprintf(stderr, "increased to continue.\n");
 	    PARASAILS_EXIT;
 	}
 
@@ -390,7 +390,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 	val[len] = value;
 	len++;
 
-        ret = fscanf(file, "%d %d %lf", &row, &col, &value);
+        ret = hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
     }
 
     /* Store the final row */
@@ -399,7 +399,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
     fclose(file);
 
-    MPI_Wait(&request, &status);
+    hypre_MPI_Wait(&request, &status);
 }
 
 /*--------------------------------------------------------------------------
@@ -409,17 +409,17 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 static void MatrixReadSlave(Matrix *mat, char *filename)
 {
     MPI_Comm comm = mat->comm;
-    MPI_Status status;
-    int mype;
+    hypre_MPI_Status status;
+    HYPRE_Int mype;
     FILE *file;
-    int ret;
-    int row, col;
+    HYPRE_Int ret;
+    HYPRE_Int row, col;
     double value;
-    long offset;
+    hypre_longint offset;
 
-    int curr_row;
-    int len;
-    int ind[MAX_NZ_PER_ROW];
+    HYPRE_Int curr_row;
+    HYPRE_Int len;
+    HYPRE_Int ind[MAX_NZ_PER_ROW];
     double val[MAX_NZ_PER_ROW];
 
     double time0, time1;
@@ -427,15 +427,15 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
     file = fopen(filename, "r");
     assert(file != NULL);
 
-    MPI_Comm_rank(mat->comm, &mype);
+    hypre_MPI_Comm_rank(mat->comm, &mype);
 
-    MPI_Recv(&offset, 1, MPI_LONG, 0, 0, comm, &status);
-    time0 = MPI_Wtime();
+    hypre_MPI_Recv(&offset, 1, hypre_MPI_LONG, 0, 0, comm, &status);
+    time0 = hypre_MPI_Wtime();
 
     ret = fseek(file, offset, SEEK_SET);
     assert(ret == 0);
 
-    ret = fscanf(file, "%d %d %lf", &row, &col, &value);
+    ret = hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
     curr_row = row;
     len = 0;
 
@@ -454,9 +454,9 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
 	if (len >= MAX_NZ_PER_ROW)
 	{
-	    fprintf(stderr, "The matrix has exceeded %d\n", MAX_NZ_PER_ROW);
-	    fprintf(stderr, "nonzeros per row.  Internal buffers must be\n");
-	    fprintf(stderr, "increased to continue.\n");
+	    hypre_fprintf(stderr, "The matrix has exceeded %d\n", MAX_NZ_PER_ROW);
+	    hypre_fprintf(stderr, "nonzeros per row.  Internal buffers must be\n");
+	    hypre_fprintf(stderr, "increased to continue.\n");
 	    PARASAILS_EXIT;
 	}
 
@@ -464,7 +464,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 	val[len] = value;
 	len++;
 
-        ret = fscanf(file, "%d %d %lf", &row, &col, &value);
+        ret = hypre_fscanf(file, "%d %d %lf", &row, &col, &value);
     }
 
     /* Store the final row */
@@ -472,8 +472,8 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 	MatrixSetRow(mat, mat->end_row, len, ind, val);
 
     fclose(file);
-    time1 = MPI_Wtime();
-    printf("%d: Time for slave read: %f\n", mype, time1-time0);
+    time1 = hypre_MPI_Wtime();
+    hypre_printf("%d: Time for slave read: %f\n", mype, time1-time0);
 }
 
 /*--------------------------------------------------------------------------
@@ -485,18 +485,18 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
 void MatrixRead(Matrix *mat, char *filename)
 {
-    int mype;
+    HYPRE_Int mype;
     double time0, time1;
 
-    MPI_Comm_rank(mat->comm, &mype);
+    hypre_MPI_Comm_rank(mat->comm, &mype);
 
-    time0 = MPI_Wtime();
+    time0 = hypre_MPI_Wtime();
     if (mype == 0)
 	MatrixReadMaster(mat, filename);
     else
 	MatrixReadSlave(mat, filename);
-    time1 = MPI_Wtime();
-    printf("%d: Time for reading matrix: %f\n", mype, time1-time0);
+    time1 = hypre_MPI_Wtime();
+    hypre_printf("%d: Time for reading matrix: %f\n", mype, time1-time0);
 
     MatrixComplete(mat);
 }
@@ -505,28 +505,28 @@ void MatrixRead(Matrix *mat, char *filename)
  * RhsRead - Read a right-hand side file "filename" from disk and store in the 
  * location pointed to by "rhs".  "mat" is needed to provide the partitioning
  * information.  The expected format is: a header line (n, nrhs) followed
- * by n values.  Also allows isis format, indicated by 1 int in first line.
+ * by n values.  Also allows isis format, indicated by 1 HYPRE_Int in first line.
  *--------------------------------------------------------------------------*/
 
 void RhsRead(double *rhs, Matrix *mat, char *filename)
 {
     FILE *file;
-    MPI_Status status;
-    int mype, npes;
-    int num_rows, num_local, pe, i, converted;
+    hypre_MPI_Status status;
+    HYPRE_Int mype, npes;
+    HYPRE_Int num_rows, num_local, pe, i, converted;
     double *buffer = NULL;
-    int buflen = 0;
+    HYPRE_Int buflen = 0;
     char line[100];
-    int dummy;
+    HYPRE_Int dummy;
 
-    MPI_Comm_size(mat->comm, &npes);
-    MPI_Comm_rank(mat->comm, &mype);
+    hypre_MPI_Comm_size(mat->comm, &npes);
+    hypre_MPI_Comm_rank(mat->comm, &mype);
 
     num_local = mat->end_row - mat->beg_row + 1;
 
     if (mype != 0)
     {
-	MPI_Recv(rhs, num_local, MPI_DOUBLE, 0, 0, mat->comm, &status);
+	hypre_MPI_Recv(rhs, num_local, hypre_MPI_DOUBLE, 0, 0, mat->comm, &status);
 	return;
     }
 
@@ -534,15 +534,15 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
     assert(file != NULL);
 
     fgets(line, 100, file);
-    converted = sscanf(line, "%d %d", &num_rows, &dummy);
+    converted = hypre_sscanf(line, "%d %d", &num_rows, &dummy);
     assert(num_rows == mat->end_rows[npes-1]);
 
     /* Read own rows first */
     for (i=0; i<num_local; i++)
         if (converted == 1) /* isis format */
-            fscanf(file, "%*d %lf", &rhs[i]);
+            hypre_fscanf(file, "%*d %lf", &rhs[i]);
 	else
-            fscanf(file, "%lf", &rhs[i]);
+            hypre_fscanf(file, "%lf", &rhs[i]);
 
     for (pe=1; pe<npes; pe++)
     {
@@ -557,11 +557,11 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
 
         for (i=0; i<num_local; i++)
           if (converted == 1) /* isis format */
-            fscanf(file, "%*d %lf", &buffer[i]);
+            hypre_fscanf(file, "%*d %lf", &buffer[i]);
 	  else
-            fscanf(file, "%lf", &buffer[i]);
+            hypre_fscanf(file, "%lf", &buffer[i]);
 
-	MPI_Send(buffer, num_local, MPI_DOUBLE, pe, 0, mat->comm);
+	hypre_MPI_Send(buffer, num_local, hypre_MPI_DOUBLE, pe, 0, mat->comm);
     }
 
     free(buffer);
@@ -571,14 +571,14 @@ void RhsRead(double *rhs, Matrix *mat, char *filename)
  * SetupReceives
  *--------------------------------------------------------------------------*/
 
-static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
+static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPRE_Int *outlist)
 {
-    int i, j, this_pe, mype;
-    MPI_Request request;
+    HYPRE_Int i, j, this_pe, mype;
+    hypre_MPI_Request request;
     MPI_Comm comm = mat->comm;
-    int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
 
-    MPI_Comm_rank(comm, &mype);
+    hypre_MPI_Comm_rank(comm, &mype);
 
     mat->num_recv = 0;
 
@@ -602,16 +602,16 @@ static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
         }
 
         /* Request rows in reqind[i..j-1] */
-        MPI_Isend(&reqind[i], j-i, MPI_INT, this_pe, 444, comm, &request);
-        MPI_Request_free(&request);
+        hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, 444, comm, &request);
+        hypre_MPI_Request_free(&request);
 
 	/* Count of number of number of indices needed from this_pe */
         outlist[this_pe] = j-i;
 
-        MPI_Recv_init(&mat->recvbuf[i+num_local], j-i, MPI_DOUBLE, this_pe, 555,
+        hypre_MPI_Recv_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_DOUBLE, this_pe, 555,
 	    comm, &mat->recv_req[mat->num_recv]);
 
-        MPI_Send_init(&mat->recvbuf[i+num_local], j-i, MPI_DOUBLE, this_pe, 666,
+        hypre_MPI_Send_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_DOUBLE, this_pe, 666,
 	    comm, &mat->send_req2[mat->num_recv]);
 
         mat->num_recv++;
@@ -623,18 +623,18 @@ static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
  * This function will wait for all receives to complete.
  *--------------------------------------------------------------------------*/
 
-static void SetupSends(Matrix *mat, int *inlist)
+static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
 {
-    int i, j, mype, npes;
-    MPI_Request *requests;
-    MPI_Status  *statuses;
+    HYPRE_Int i, j, mype, npes;
+    hypre_MPI_Request *requests;
+    hypre_MPI_Status  *statuses;
     MPI_Comm comm = mat->comm;
 
-    MPI_Comm_rank(comm, &mype);
-    MPI_Comm_size(comm, &npes);
+    hypre_MPI_Comm_rank(comm, &mype);
+    hypre_MPI_Comm_size(comm, &npes);
 
-    requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
-    statuses = (MPI_Status *)  malloc(npes * sizeof(MPI_Status));
+    requests = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
+    statuses = (hypre_MPI_Status *)  malloc(npes * sizeof(hypre_MPI_Status));
 
     /* Determine size of and allocate sendbuf and sendind */
     mat->sendlen = 0;
@@ -645,7 +645,7 @@ static void SetupSends(Matrix *mat, int *inlist)
     if (mat->sendlen)
     {
         mat->sendbuf = (double *) malloc(mat->sendlen * sizeof(double));
-        mat->sendind = (int *) malloc(mat->sendlen * sizeof(int));
+        mat->sendind = (HYPRE_Int *) malloc(mat->sendlen * sizeof(HYPRE_Int));
     }
 
     j = 0;
@@ -655,15 +655,15 @@ static void SetupSends(Matrix *mat, int *inlist)
 	if (inlist[i] != 0)
 	{
 	    /* Post receive for the actual indices */
-	    MPI_Irecv(&mat->sendind[j], inlist[i], MPI_INT, i, 444, comm, 
+	    hypre_MPI_Irecv(&mat->sendind[j], inlist[i], HYPRE_MPI_INT, i, 444, comm, 
                 &requests[mat->num_send]);
 
 	    /* Set up the send */
-	    MPI_Send_init(&mat->sendbuf[j], inlist[i], MPI_DOUBLE, i, 555, comm,
+	    hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_DOUBLE, i, 555, comm,
 		&mat->send_req[mat->num_send]);
 
 	    /* Set up the receive for the transpose  */
-	    MPI_Recv_init(&mat->sendbuf[j], inlist[i], MPI_DOUBLE, i, 666, comm,
+	    hypre_MPI_Recv_init(&mat->sendbuf[j], inlist[i], hypre_MPI_DOUBLE, i, 666, comm,
 		&mat->recv_req2[mat->num_send]);
 
 	    mat->num_send++;
@@ -672,7 +672,7 @@ static void SetupSends(Matrix *mat, int *inlist)
 
     }
 
-    MPI_Waitall(mat->num_send, requests, statuses);
+    hypre_MPI_Waitall(mat->num_send, requests, statuses);
     free(requests);
     free(statuses);
 
@@ -688,22 +688,22 @@ static void SetupSends(Matrix *mat, int *inlist)
 
 void MatrixComplete(Matrix *mat)
 {
-    int mype, npes;
-    int *outlist, *inlist;
-    int row, len, *ind;
+    HYPRE_Int mype, npes;
+    HYPRE_Int *outlist, *inlist;
+    HYPRE_Int row, len, *ind;
     double *val;
 
-    MPI_Comm_rank(mat->comm, &mype);
-    MPI_Comm_size(mat->comm, &npes);
+    hypre_MPI_Comm_rank(mat->comm, &mype);
+    hypre_MPI_Comm_size(mat->comm, &npes);
 
-    mat->recv_req = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
-    mat->send_req = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
-    mat->recv_req2 = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
-    mat->send_req2 = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
-    mat->statuses = (MPI_Status *)  malloc(npes * sizeof(MPI_Status));
+    mat->recv_req = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
+    mat->send_req = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
+    mat->recv_req2 = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
+    mat->send_req2 = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
+    mat->statuses = (hypre_MPI_Status *)  malloc(npes * sizeof(hypre_MPI_Status));
 
-    outlist = (int *) calloc(npes, sizeof(int));
-    inlist  = (int *) calloc(npes, sizeof(int));
+    outlist = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+    inlist  = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
 
     /* Create Numbering object */
     mat->numb = NumberingCreate(mat, PARASAILS_NROWS);
@@ -711,7 +711,7 @@ void MatrixComplete(Matrix *mat)
     SetupReceives(mat, mat->numb->num_ind - mat->numb->num_loc,
         &mat->numb->local_to_global[mat->numb->num_loc], outlist);
 
-    MPI_Alltoall(outlist, 1, MPI_INT, inlist, 1, MPI_INT, mat->comm);
+    hypre_MPI_Alltoall(outlist, 1, HYPRE_MPI_INT, inlist, 1, HYPRE_MPI_INT, mat->comm);
 
     SetupSends(mat, inlist);
 
@@ -733,9 +733,9 @@ void MatrixComplete(Matrix *mat)
 
 void MatrixMatvec(Matrix *mat, double *x, double *y)
 {
-    int row, i, len, *ind;
+    HYPRE_Int row, i, len, *ind;
     double *val, temp;
-    int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
 
     /* Set up persistent communications */
 
@@ -745,14 +745,14 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
     for (i=0; i<mat->sendlen; i++)
         mat->sendbuf[i] = x[mat->sendind[i]];
 
-    MPI_Startall(mat->num_recv, mat->recv_req);
-    MPI_Startall(mat->num_send, mat->send_req);
+    hypre_MPI_Startall(mat->num_recv, mat->recv_req);
+    hypre_MPI_Startall(mat->num_send, mat->send_req);
 
     /* Copy local part of x into top part of recvbuf */
     for (i=0; i<num_local; i++)
 	mat->recvbuf[i] = x[i];
 
-    MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
+    hypre_MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
 
     /* do the multiply */
 #ifdef HYPRE_USING_OPENMP
@@ -770,14 +770,14 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
 	y[row] = temp;
     } 
 
-    MPI_Waitall(mat->num_send, mat->send_req, mat->statuses);
+    hypre_MPI_Waitall(mat->num_send, mat->send_req, mat->statuses);
 }
 
 void MatrixMatvecSerial(Matrix *mat, double *x, double *y)
 {
-    int row, i, len, *ind;
+    HYPRE_Int row, i, len, *ind;
     double *val, temp;
-    int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
 
     /* Set up persistent communications */
 
@@ -787,14 +787,14 @@ void MatrixMatvecSerial(Matrix *mat, double *x, double *y)
     for (i=0; i<mat->sendlen; i++)
         mat->sendbuf[i] = x[mat->sendind[i]];
 
-    MPI_Startall(mat->num_recv, mat->recv_req);
-    MPI_Startall(mat->num_send, mat->send_req);
+    hypre_MPI_Startall(mat->num_recv, mat->recv_req);
+    hypre_MPI_Startall(mat->num_send, mat->send_req);
 
     /* Copy local part of x into top part of recvbuf */
     for (i=0; i<num_local; i++)
 	mat->recvbuf[i] = x[i];
 
-    MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
+    hypre_MPI_Waitall(mat->num_recv, mat->recv_req, mat->statuses);
 
     /* do the multiply */
     for (row=0; row<=mat->end_row - mat->beg_row; row++)
@@ -809,7 +809,7 @@ void MatrixMatvecSerial(Matrix *mat, double *x, double *y)
 	y[row] = temp;
     } 
 
-    MPI_Waitall(mat->num_send, mat->send_req, mat->statuses);
+    hypre_MPI_Waitall(mat->num_send, mat->send_req, mat->statuses);
 }
 
 /*--------------------------------------------------------------------------
@@ -819,16 +819,16 @@ void MatrixMatvecSerial(Matrix *mat, double *x, double *y)
 
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
 {
-    int row, i, len, *ind;
+    HYPRE_Int row, i, len, *ind;
     double *val;
-    int num_local = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int num_local = mat->end_row - mat->beg_row + 1;
 
     /* Set up persistent communications */
 
     /* Assumes MatrixComplete has been called */
 
     /* Post receives for local parts of the solution y */
-    MPI_Startall(mat->num_send, mat->recv_req2);
+    hypre_MPI_Startall(mat->num_send, mat->recv_req2);
 
     /* initialize accumulator buffer to zero */
     for (i=0; i<mat->recvlen+num_local; i++)
@@ -846,18 +846,18 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
     }
 
     /* Now can send nonlocal parts of solution to other procs */
-    MPI_Startall(mat->num_recv, mat->send_req2);
+    hypre_MPI_Startall(mat->num_recv, mat->send_req2);
 
     /* copy local part of solution into y */
     for (i=0; i<num_local; i++)
         y[i] = mat->recvbuf[i];
 
     /* alternatively, loop over a wait any */
-    MPI_Waitall(mat->num_send, mat->recv_req2, mat->statuses);
+    hypre_MPI_Waitall(mat->num_send, mat->recv_req2, mat->statuses);
 
     /* add all the incoming partial sums to y */
     for (i=0; i<mat->sendlen; i++)
         y[mat->sendind[i]] += mat->sendbuf[i];
 
-    MPI_Waitall(mat->num_recv, mat->send_req2, mat->statuses);
+    hypre_MPI_Waitall(mat->num_recv, mat->send_req2, mat->statuses);
 }

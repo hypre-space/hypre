@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -49,29 +49,29 @@ void    *data;
 {
    PCGData  *pcg_data      = data;
 
-   int        max_iter     = PCGDataMaxIter(pcg_data);
-   int        two_norm     = PCGDataTwoNorm(pcg_data);
+   HYPRE_Int        max_iter     = PCGDataMaxIter(pcg_data);
+   HYPRE_Int        two_norm     = PCGDataTwoNorm(pcg_data);
 
    hypre_CSRMatrix    *A         = PCGDataA(pcg_data);
    hypre_Vector    *p            = PCGDataP(pcg_data);
    hypre_Vector    *s            = PCGDataS(pcg_data);
    hypre_Vector    *r            = PCGDataR(pcg_data);
 
-   int      (*precond)()   = PCGDataPrecond(pcg_data);
+   HYPRE_Int      (*precond)()   = PCGDataPrecond(pcg_data);
    void      *precond_data = PCGDataPrecondData(pcg_data);
 
    double     alpha, beta;
    double     gamma, gamma_old;
    double     bi_prod, i_prod, eps;
    
-   int        i = 0;
+   HYPRE_Int        i = 0;
 	     
    /* logging variables */
    double    *norm_log;
    double    *rel_norm_log;
    double    *conv_rate;
    FILE      *log_fp;
-   int        j;
+   HYPRE_Int        j;
 
 
    /*-----------------------------------------------------------------------
@@ -89,7 +89,7 @@ void    *data;
 
 
    log_fp = fopen(PCGDataLogFileName(pcg_data), "w");
-   fprintf(log_fp, "\nPCG INFO:\n\n");
+   hypre_fprintf(log_fp, "\nPCG INFO:\n\n");
 
 
    /*-----------------------------------------------------------------------
@@ -117,7 +117,7 @@ void    *data;
  
    /* Set initial residual norm, print to log */
    norm_log[0] = sqrt(hypre_SeqVectorInnerProd(r,r));
-   fprintf(log_fp, "\nInitial residual norm:    %e\n\n", norm_log[0]);
+   hypre_fprintf(log_fp, "\nInitial residual norm:    %e\n\n", norm_log[0]);
 
 
    /* p = C*r */
@@ -160,10 +160,10 @@ void    *data;
 
 #if 0
       if (two_norm)
-	 printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+	 hypre_printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
       else
-	 printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+	 hypre_printf("Iter (%d): ||r||_C = %e, ||r||_C/||b||_C = %e\n",
 		i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
  
@@ -185,10 +185,10 @@ void    *data;
 
 #if 1
    if (two_norm)
-      printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
+      hypre_printf("Iterations = %d: ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
 	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
    else
-      printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
+      hypre_printf("Iterations = %d: ||r||_C = %e, ||r||_C/||b||_C = %e\n",
 	     i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
 
@@ -200,20 +200,20 @@ void    *data;
 
    if (two_norm)
    {
-      fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2    Conv. Factor\n");
-      fprintf(log_fp, "-----    ------------    ------------   ------------\n");
+      hypre_fprintf(log_fp, "Iters       ||r||_2    ||r||_2/||b||_2    Conv. Factor\n");
+      hypre_fprintf(log_fp, "-----    ------------    ------------   ------------\n");
    }
    else
    {
-      fprintf(log_fp, "Iters       ||r||_C    ||r||_C/||b||_C    Conv. Factor\n");
-      fprintf(log_fp, "-----    ------------    ------------   ------------\n");
+      hypre_fprintf(log_fp, "Iters       ||r||_C    ||r||_C/||b||_C    Conv. Factor\n");
+      hypre_fprintf(log_fp, "-----    ------------    ------------   ------------\n");
    }
    
 
    for (j = 1; j <= i; j++)
    {
       conv_rate[j]=norm_log[j]/norm_log[j-1];
-      fprintf(log_fp, "% 5d    %e    %e    %f\n",
+      hypre_fprintf(log_fp, "% 5d    %e    %e    %f\n",
 	      (j), norm_log[j], rel_norm_log[j], conv_rate[j]);
    }
    
@@ -229,13 +229,13 @@ void    *data;
 
 void      PCGSetup(A, precond, precond_data, data)
 hypre_CSRMatrix   *A;
-int     (*precond)();
+HYPRE_Int     (*precond)();
 void     *precond_data;
 void     *data;
 {
    PCGData  *pcg_data = data;
 
-   int       size;
+   HYPRE_Int       size;
 
 
    PCGDataA(pcg_data) = A;

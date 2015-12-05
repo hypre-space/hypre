@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -18,7 +18,7 @@
 
 #define AbsStencilShape(stencil, abs_shape) \
 {\
-   int ii,jj,kk;\
+   HYPRE_Int ii,jj,kk;\
    ii = hypre_IndexX(stencil);\
    jj = hypre_IndexY(stencil);\
    kk = hypre_IndexZ(stencil);\
@@ -45,11 +45,11 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    hypre_Box             *box;
 
    hypre_Index            stencil_shape, cstart, zero_index, neg_index;
-   int                    stencil_size;
-   int                    abs_stencil;
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              abs_stencil;
 
-   int                    ndim= hypre_StructStencilDim(stencils);
-   int                    i, j;
+   HYPRE_Int              ndim= hypre_StructStencilDim(stencils);
+   HYPRE_Int              i, j;
     
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(neg_index);
@@ -130,7 +130,7 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    return stencil_box_extents;
 }
 
-int
+HYPRE_Int
 hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
                            hypre_Box              *cgrid_box,
                            hypre_StructStencil    *stencils,
@@ -143,13 +143,13 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    hypre_Box             *cfine_box;
 
    hypre_Index            stencil_shape, zero_index, neg_index;
-   int                    stencil_size;
-   int                    abs_stencil;
+   HYPRE_Int              stencil_size;
+   HYPRE_Int              abs_stencil;
 
-   int                    ndim= hypre_StructStencilDim(stencils);
+   HYPRE_Int              ndim= hypre_StructStencilDim(stencils);
 
-   int                    i;
-   int                    ierr= 0;
+   HYPRE_Int              i;
+   HYPRE_Int              ierr= 0;
     
    hypre_ClearIndex(zero_index);
    hypre_ClearIndex(neg_index);

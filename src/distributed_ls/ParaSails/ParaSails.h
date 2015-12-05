@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,9 +31,9 @@
 
 typedef struct
 {
-    int        symmetric;
+    HYPRE_Int        symmetric;
     double     thresh;
-    int        num_levels;
+    HYPRE_Int        num_levels;
     double     filter;
     double     loadbal_beta;
 
@@ -45,20 +45,20 @@ typedef struct
     Matrix    *M;             /* preconditioner */
 
     MPI_Comm   comm;
-    int        beg_row;
-    int        end_row;
-    int       *beg_rows;
-    int       *end_rows;
+    HYPRE_Int        beg_row;
+    HYPRE_Int        end_row;
+    HYPRE_Int       *beg_rows;
+    HYPRE_Int       *end_rows;
 }
 ParaSails;
 
-ParaSails *ParaSailsCreate(MPI_Comm comm, int beg_row, int end_row, int sym);
+ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row, HYPRE_Int sym);
 void ParaSailsDestroy(ParaSails *ps);
 void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
-  double thresh, int num_levels);
+  double thresh, HYPRE_Int num_levels);
 void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A, 
-  double thresh_global, double thresh_local, int num_levels);
-int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
+  double thresh_global, double thresh_local, HYPRE_Int num_levels);
+HYPRE_Int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
 void ParaSailsApply(ParaSails *ps, double *u, double *v);
 void ParaSailsApplyTrans(ParaSails *ps, double *u, double *v);
 double ParaSailsStatsPattern(ParaSails *ps, Matrix *A);

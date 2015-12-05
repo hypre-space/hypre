@@ -110,7 +110,7 @@ integer ilaenv_(integer *ispec, char *name__, char *opts, integer *n1,
     /* System generated locals */
     integer ret_val;
     /* Builtin functions   
-       Subroutine */ int s_copy(char *, char *, ftnlen, ftnlen);
+       Subroutine */ HYPRE_Int s_copy(char *, char *, ftnlen, ftnlen);
     integer s_cmp(char *, char *, ftnlen, ftnlen);
     /* Local variables */
     static integer i__;

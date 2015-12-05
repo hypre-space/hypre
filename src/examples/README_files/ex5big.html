@@ -1,0 +1,14 @@
+<a href="ex5big.c.html"><h2>Example 5 (64-bit version)</h2></a>
+<p>
+This example is a slight modification of Example 5 that illustrates the 64-bit
+integer support in hypre needed to run problems with more than 2B unknowns.
+<p>
+Specifically, the changes compared to Example 5 are as follows:
+<ol>
+<li> All integer arguments to HYPRE functions should be declared of type HYPRE_Int.
+<li> Variables of type HYPRE_Int are 64-bit integers, so they should be printed in the %lld format (not %d).
+</ol>
+<p>
+To enable the 64-bit integer support, you need to build hypre with the
+--enable-bigint option of the configure script.  We recommend comparing this
+example with <a href="ex5.c.html">Example 5</a>.

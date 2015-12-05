@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -22,18 +19,19 @@
 #include "./_hypre_IJ_mv.h"
 #include "fortran.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)(
-                                                     long int *matrix,
-                                                     long int *object,
-                                                     int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Obj *object,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) ( hypre_IJMatrixSetObject( (HYPRE_IJMatrix) *matrix,
-                                            (void *)         *object  ) );
+   *ierr = (hypre_F90_Int)
+      ( hypre_IJMatrixSetObject(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           (void *)         *object  ) );
 }
 

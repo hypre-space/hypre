@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -42,13 +42,13 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                        hypre_StructMatrix *A,
                        hypre_StructMatrix *P,
                        hypre_StructGrid   *coarse_grid,
-                       int                 cdir,
-                       int                 rap_type    )
+                       HYPRE_Int           cdir,
+                       HYPRE_Int           rap_type    )
 {
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
-   int                    P_stored_as_transpose = 0;
-   int                    constant_coefficient;
+   HYPRE_Int              P_stored_as_transpose = 0;
+   HYPRE_Int              constant_coefficient;
 
    stencil = hypre_StructMatrixStencil(A);
 
@@ -117,18 +117,18 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
  *      rap_type = 2   General purpose Galerkin code.
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
                       hypre_StructMatrix *A,
                       hypre_StructMatrix *P,
-                      int                 cdir,
+                      HYPRE_Int           cdir,
                       hypre_Index         cindex,
                       hypre_Index         cstride,
-                      int                 rap_type,
+                      HYPRE_Int           rap_type,
                       hypre_StructMatrix *Ac      )
 {
-   int                    ierr = 0;
-   int                    P_stored_as_transpose = 0;
+   HYPRE_Int              ierr = 0;
+   HYPRE_Int              P_stored_as_transpose = 0;
    hypre_StructStencil   *stencil;
 
    stencil = hypre_StructMatrixStencil(A);

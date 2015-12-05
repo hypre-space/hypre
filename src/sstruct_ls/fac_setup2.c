@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
-
-
-
 
 #include "headers.h"
 #include "fac.h"
@@ -22,7 +19,7 @@
  * coarse parent base grids.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FacSetup2( void                 *fac_vdata,
                 hypre_SStructMatrix  *A_in,
                 hypre_SStructVector  *b,
@@ -30,23 +27,23 @@ hypre_FacSetup2( void                 *fac_vdata,
 {
    hypre_FACData          *fac_data      =  fac_vdata;
 
-   int                    *plevels       = (fac_data-> plevels);
+   HYPRE_Int              *plevels       = (fac_data-> plevels);
    hypre_Index            *rfactors      = (fac_data-> prefinements);
 
    MPI_Comm                comm;
-   int                     ndim;
-   int                     npart;
-   int                     nparts_level  =  2;
-   int                     part_crse     =  0;
-   int                     part_fine     =  1;
+   HYPRE_Int               ndim;
+   HYPRE_Int               npart;
+   HYPRE_Int               nparts_level  =  2;
+   HYPRE_Int               part_crse     =  0;
+   HYPRE_Int               part_fine     =  1;
    hypre_SStructPMatrix   *A_pmatrix;
    hypre_StructMatrix     *A_smatrix;
    hypre_Box              *A_smatrix_dbox;
 
    hypre_SStructGrid     **grid_level;
    hypre_SStructGraph    **graph_level;
-   int                     part, level;
-   int                     nvars;
+   HYPRE_Int               part, level;
+   HYPRE_Int               nvars;
 
    hypre_SStructGraph     *graph;
    hypre_SStructGrid      *grid;
@@ -62,14 +59,14 @@ hypre_FacSetup2( void                 *fac_vdata,
    hypre_IndexRef          box_end;
 
    hypre_SStructUVEntry  **Uventries;
-   int                     nUventries;
-   int                    *iUventries;
+   HYPRE_Int               nUventries;
+   HYPRE_Int              *iUventries;
    hypre_SStructUVEntry   *Uventry; 
    hypre_SStructUEntry    *Uentry;
    hypre_Index             index, to_index, stride;
-   int                     var, to_var, to_part, level_part, level_topart;
-   int                     var1, var2;
-   int                     i, j, k, to_rank, row_coord, nUentries;
+   HYPRE_Int               var, to_var, to_part, level_part, level_topart;
+   HYPRE_Int               var1, var2;
+   HYPRE_Int               i, j, k, to_rank, row_coord, nUentries;
    hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructMatrix    *A_rap;
@@ -90,43 +87,43 @@ hypre_FacSetup2( void                 *fac_vdata,
 
 
    /* coarsest grid solver */
-   int                     csolver_type       =(fac_data-> csolver_type);
+   HYPRE_Int               csolver_type       =(fac_data-> csolver_type);
    HYPRE_SStructSolver     crse_solver;
    HYPRE_SStructSolver     crse_precond;
    
-   int                     max_level        =  hypre_FACDataMaxLevels(fac_data);
-   int                     relax_type       =  fac_data -> relax_type;
-   int                     usr_jacobi_weight=  fac_data -> usr_jacobi_weight;
+   HYPRE_Int               max_level        =  hypre_FACDataMaxLevels(fac_data);
+   HYPRE_Int               relax_type       =  fac_data -> relax_type;
+   HYPRE_Int               usr_jacobi_weight=  fac_data -> usr_jacobi_weight;
    double                  jacobi_weight    =  fac_data -> jacobi_weight;
-   int                    *levels;
-   int                    *part_to_level;
+   HYPRE_Int              *levels;
+   HYPRE_Int              *part_to_level;
 
-   int                     box, box_volume;
-   int                     max_box_volume;
-   int                     stencil_size;
+   HYPRE_Int               box, box_volume;
+   HYPRE_Int               max_box_volume;
+   HYPRE_Int               stencil_size;
    hypre_Index             stencil_shape_i, loop_size;
-   int                    *stencil_vars;
+   HYPRE_Int              *stencil_vars;
    double                 *values;
    double                 *A_smatrix_value;
-   int                     iA, loopi, loopj, loopk;
+   HYPRE_Int               iA, loopi, loopj, loopk;
  
-   int                    *nrows;
-   int                   **ncols;
-   int                   **rows;
-   int                   **cols;
-   int                    *cnt;
+   HYPRE_Int              *nrows;
+   HYPRE_Int             **ncols;
+   HYPRE_Int             **rows;
+   HYPRE_Int             **cols;
+   HYPRE_Int              *cnt;
    double                 *vals;
    
-   int                    *level_rows;
-   int                    *level_cols;
-   int                     level_cnt;
+   HYPRE_Int              *level_rows;
+   HYPRE_Int              *level_cols;
+   HYPRE_Int               level_cnt;
 
    HYPRE_IJMatrix          ij_A;
-   int                     matrix_type;
+   HYPRE_Int               matrix_type;
 
-   int                     max_cycles;
+   HYPRE_Int               max_cycles;
 
-   int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 /*hypre_SStructMatrix *nested_A;
 
    nested_A= hypre_TAlloc(hypre_SStructMatrix , 1);
@@ -157,8 +154,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    /*--------------------------------------------------------------------------
     * Extract the amr/sstruct level/part structure and refinement factors.
     *--------------------------------------------------------------------------*/
-   levels        = hypre_CTAlloc(int, npart);
-   part_to_level = hypre_CTAlloc(int, npart);
+   levels        = hypre_CTAlloc(HYPRE_Int, npart);
+   part_to_level = hypre_CTAlloc(HYPRE_Int, npart);
    refine_factors= hypre_CTAlloc(hypre_Index, npart);
    for (part= 0; part< npart; part++)
    {
@@ -341,7 +338,7 @@ hypre_FacSetup2( void                 *fac_vdata,
    nUventries=  hypre_SStructGraphNUVEntries(graph);
    iUventries=  hypre_SStructGraphIUVEntries(graph);
 
-   nrows     =  hypre_CTAlloc(int, max_level+1);
+   nrows     =  hypre_CTAlloc(HYPRE_Int, max_level+1);
    for (i= 0; i< nUventries; i++)
    {
       Uventry=  Uventries[iUventries[i]];
@@ -497,16 +494,16 @@ hypre_FacSetup2( void                 *fac_vdata,
 
                 hypre_BoxGetSize(sgrid_box, loop_size);
 
-                k= 0;
-                hypre_BoxLoop1Begin(loop_size,
-                                       A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+                hypre_BoxLoop2Begin(loop_size,
+                                    sgrid_box, box_start, stride, k,
+                                    A_smatrix_dbox, box_start, stride, iA);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
 #include "hypre_box_smp_forloop.h"
-                hypre_BoxLoop1For(loopi, loopj, loopk, iA)
+                hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
                 {
-                   values[k++]= A_smatrix_value[iA];
+                   values[k]= A_smatrix_value[iA];
                 }
-                hypre_BoxLoop1End(iA);
+                hypre_BoxLoop2End(k, iA);
 
                 HYPRE_SStructMatrixSetBoxValues(A_level[level], part_fine, box_start, box_end,
                                                 var1, 1, &i, values);
@@ -571,16 +568,16 @@ hypre_FacSetup2( void                 *fac_vdata,
 
                    hypre_BoxGetSize(sgrid_box, loop_size);
 
-                   k= 0;
-                   hypre_BoxLoop1Begin(loop_size,
+                   hypre_BoxLoop2Begin(loop_size,
+                                       sgrid_box, box_start, stride, k,
                                        A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
 #include "hypre_box_smp_forloop.h"
-                   hypre_BoxLoop1For(loopi, loopj, loopk, iA)
+                   hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
                    {
-                       values[k++]= A_smatrix_value[iA];
+                       values[k]= A_smatrix_value[iA];
                    }
-                   hypre_BoxLoop1End(iA);
+                   hypre_BoxLoop2End(k, iA);
 
                    HYPRE_SStructMatrixSetBoxValues(A_level[level], part_crse, box_start, box_end,
                                                    var1, 1, &i, values);
@@ -604,23 +601,23 @@ hypre_FacSetup2( void                 *fac_vdata,
    /*-----------------------------------------------------------
     * Allocate memory for arguments of HYPRE_IJMatrixGetValues.
     *-----------------------------------------------------------*/
-   ncols =  hypre_TAlloc(int *, max_level+1);
-   rows  =  hypre_TAlloc(int *, max_level+1);
-   cols  =  hypre_TAlloc(int *, max_level+1);
-   cnt   =  hypre_CTAlloc(int, max_level+1);
+   ncols =  hypre_TAlloc(HYPRE_Int *, max_level+1);
+   rows  =  hypre_TAlloc(HYPRE_Int *, max_level+1);
+   cols  =  hypre_TAlloc(HYPRE_Int *, max_level+1);
+   cnt   =  hypre_CTAlloc(HYPRE_Int, max_level+1);
 
    ncols[0]= NULL;
    rows[0] = NULL;
    cols[0] = NULL;
    for (level= 1; level<= max_level; level++)
    {
-      ncols[level]= hypre_TAlloc(int, nrows[level]);
+      ncols[level]= hypre_TAlloc(HYPRE_Int, nrows[level]);
       for (i=0; i< nrows[level]; i++)
       {
          ncols[level][i]= 1;
       }
-      rows[level] = hypre_TAlloc(int, nrows[level]);
-      cols[level] = hypre_TAlloc(int, nrows[level]);
+      rows[level] = hypre_TAlloc(HYPRE_Int, nrows[level]);
+      cols[level] = hypre_TAlloc(HYPRE_Int, nrows[level]);
    }
    
    for (i= 0; i< nUventries; i++)
@@ -655,8 +652,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    {
   
       vals      = hypre_CTAlloc(double, nrows[level]);
-      level_rows= hypre_TAlloc(int, nrows[level]);
-      level_cols= hypre_TAlloc(int, nrows[level]);
+      level_rows= hypre_TAlloc(HYPRE_Int, nrows[level]);
+      level_cols= hypre_TAlloc(HYPRE_Int, nrows[level]);
 
       HYPRE_IJMatrixGetValues(ij_A, nrows[level], ncols[level], rows[level], 
                               cols[level], vals);
@@ -699,8 +696,8 @@ hypre_FacSetup2( void                 *fac_vdata,
        * matrices.
        *-----------------------------------------------------------*/
       HYPRE_IJMatrixSetValues( hypre_SStructMatrixIJMatrix(A_level[level]),
-                               nrows[level], ncols[level], (const int *) level_rows, 
-                              (const int *) level_cols, (const double *) vals );
+                               nrows[level], ncols[level], (const HYPRE_Int *) level_rows, 
+                              (const HYPRE_Int *) level_cols, (const double *) vals );
       
       hypre_TFree(ncols[level]);
       hypre_TFree(rows[level]);
@@ -831,16 +828,16 @@ hypre_FacSetup2( void                 *fac_vdata,
 
              hypre_BoxGetSize(sgrid_box, loop_size);
 
-             k= 0;
-             hypre_BoxLoop1Begin(loop_size,
+             hypre_BoxLoop2Begin(loop_size,
+                                 sgrid_box, box_start, stride, k,
                                  A_smatrix_dbox, box_start, stride, iA);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iA
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,k,iA
 #include "hypre_box_smp_forloop.h"
-             hypre_BoxLoop1For(loopi, loopj, loopk, iA)
+             hypre_BoxLoop2For(loopi, loopj, loopk, k, iA)
              {
-                 values[k++]= A_smatrix_value[iA];
+                 values[k]= A_smatrix_value[iA];
              }
-             hypre_BoxLoop1End(iA);
+             hypre_BoxLoop2End(k, iA);
 
              HYPRE_SStructMatrixSetBoxValues(A_level[0], part_crse, box_start, box_end,
                                              var1, 1, &i, values);

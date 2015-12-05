@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.9 $
+ * $Revision: 1.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,9 +22,9 @@
 #include "_hypre_utilities.h"
 
 static void
-mv_collectVectorPtr( int* mask, mv_TempMultiVector* x, void** px ) {
+mv_collectVectorPtr( HYPRE_Int* mask, mv_TempMultiVector* x, void** px ) {
 
-  int ix, jx;
+  HYPRE_Int ix, jx;
 
   if ( mask != NULL ) {
     for ( ix = 0, jx = 0; ix < x->numVectors; ix++ )
@@ -37,10 +37,10 @@ mv_collectVectorPtr( int* mask, mv_TempMultiVector* x, void** px ) {
 
 }
 
-static int
-aux_maskCount( int n, int* mask ) {
+static HYPRE_Int
+aux_maskCount( HYPRE_Int n, HYPRE_Int* mask ) {
 
-  int i, m;
+  HYPRE_Int i, m;
 
   if ( mask == NULL )
     return n;
@@ -53,9 +53,9 @@ aux_maskCount( int n, int* mask ) {
 }
 
 static void
-aux_indexFromMask( int n, int* mask, int* index ) {
+aux_indexFromMask( HYPRE_Int n, HYPRE_Int* mask, HYPRE_Int* index ) {
 
-  long i, j;
+  HYPRE_Int i, j;
   
   if ( mask != NULL ) {
     for ( i = 0, j = 0; i < n; i++ )
@@ -70,10 +70,10 @@ aux_indexFromMask( int n, int* mask, int* index ) {
 
 /* ------- here goes simple random number generator --------- */
 
-static unsigned long next = 1;
+static hypre_ulongint next = 1;
 
 /* RAND_MAX assumed to be 32767 */
-static int myrand(void) {
+static HYPRE_Int myrand(void) {
    next = next * 1103515245 + 12345;
    return((unsigned)(next/65536) % 32768);
 }
@@ -84,9 +84,9 @@ static void mysrand(unsigned seed) {
 
 
 void*
-mv_TempMultiVectorCreateFromSampleVector( void* ii_, int n, void* sample ) { 
+mv_TempMultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample ) { 
 
-  int i;
+  HYPRE_Int i;
   mv_TempMultiVector* x;
   mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
 
@@ -111,9 +111,9 @@ mv_TempMultiVectorCreateFromSampleVector( void* ii_, int n, void* sample ) {
 }
 
 void*
-mv_TempMultiVectorCreateCopy( void* src_, int copyValues ) {
+mv_TempMultiVectorCreateCopy( void* src_, HYPRE_Int copyValues ) {
 
-  int i, n;
+  HYPRE_Int i, n;
 
   mv_TempMultiVector* src;
   mv_TempMultiVector* dest;
@@ -136,7 +136,7 @@ mv_TempMultiVectorCreateCopy( void* src_, int copyValues ) {
 void 
 mv_TempMultiVectorDestroy( void* x_ ) {
 
-  int i;
+  HYPRE_Int i;
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
 
   if ( x == NULL )
@@ -152,7 +152,7 @@ mv_TempMultiVectorDestroy( void* x_ ) {
   free(x);
 }
 
-int
+HYPRE_Int
 mv_TempMultiVectorWidth( void* x_ ) {
 
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
@@ -163,7 +163,7 @@ mv_TempMultiVectorWidth( void* x_ ) {
   return x->numVectors;
 }
 
-int
+HYPRE_Int
 mv_TempMultiVectorHeight( void* x_ ) {
  
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
@@ -177,7 +177,7 @@ mv_TempMultiVectorHeight( void* x_ ) {
 /* this shallow copy of the mask is convenient but not safe;
    a proper copy should be considered */
 void
-mv_TempMultiVectorSetMask( void* x_, int* mask ) {
+mv_TempMultiVectorSetMask( void* x_, HYPRE_Int* mask ) {
 
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
 
@@ -189,7 +189,7 @@ mv_TempMultiVectorSetMask( void* x_, int* mask ) {
 void
 mv_TempMultiVectorClear( void* x_ ) {
 
-  int i;
+  HYPRE_Int i;
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
 
   hypre_assert( x != NULL );
@@ -200,9 +200,9 @@ mv_TempMultiVectorClear( void* x_ ) {
 }
 
 void
-mv_TempMultiVectorSetRandom( void* x_, int seed ) {
+mv_TempMultiVectorSetRandom( void* x_, HYPRE_Int seed ) {
 
-  int i;
+  HYPRE_Int i;
   mv_TempMultiVector* x = (mv_TempMultiVector*)x_;
 
   hypre_assert( x != NULL );
@@ -222,7 +222,7 @@ mv_TempMultiVectorSetRandom( void* x_, int seed ) {
 void 
 mv_TempMultiVectorCopy( void* src_, void* dest_ ) {
 
-  int i, ms, md;
+  HYPRE_Int i, ms, md;
   void** ps;
   void** pd;
   mv_TempMultiVector* src = (mv_TempMultiVector*)src_;
@@ -252,7 +252,7 @@ mv_TempMultiVectorCopy( void* src_, void* dest_ ) {
 void 
 mv_TempMultiVectorAxpy( double a, void* x_, void* y_ ) { 
 	
-  int i, mx, my;
+  HYPRE_Int i, mx, my;
   void** px;
   void** py;
   mv_TempMultiVector* x;
@@ -283,11 +283,11 @@ mv_TempMultiVectorAxpy( double a, void* x_, void* y_ ) {
 
 void 
 mv_TempMultiVectorByMultiVector( void* x_, void* y_,
-				     int xyGHeight, int xyHeight, 
-				     int xyWidth, double* xyVal ) { 
+				     HYPRE_Int xyGHeight, HYPRE_Int xyHeight, 
+				     HYPRE_Int xyWidth, double* xyVal ) { 
 /* xy = x'*y */	
 
-  int ix, iy, mx, my, jxy;
+  HYPRE_Int ix, iy, mx, my, jxy;
   double* p;
   void** px;
   void** py;
@@ -326,13 +326,13 @@ mv_TempMultiVectorByMultiVector( void* x_, void* y_,
 
 void 
 mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
-					int* mask, int n, double* diag ) {
+					HYPRE_Int* mask, HYPRE_Int n, double* diag ) {
 /* diag = diag(x'*y) */	
 
-  int i, mx, my, m;
+  HYPRE_Int i, mx, my, m;
   void** px;
   void** py;
-  int* index;
+  HYPRE_Int* index;
   mv_TempMultiVector* x;
   mv_TempMultiVector* y;
 
@@ -353,7 +353,7 @@ mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
   mv_collectVectorPtr( x->mask, x, px );
   mv_collectVectorPtr( y->mask, y, py );
 
-  index = (int*)calloc( m, sizeof(int) );
+  index = (HYPRE_Int*)calloc( m, sizeof(HYPRE_Int) );
   aux_indexFromMask( n, mask, index );
 
   for ( i = 0; i < m; i++ )
@@ -367,12 +367,12 @@ mv_TempMultiVectorByMultiVectorDiag( void* x_, void* y_,
 
 void 
 mv_TempMultiVectorByMatrix( void* x_, 
-			       int rGHeight, int rHeight, 
-			       int rWidth, double* rVal,
+			       HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+			       HYPRE_Int rWidth, double* rVal,
 			       void* y_ ) {
 
-  int i, j, jump;
-  int mx, my;
+  HYPRE_Int i, j, jump;
+  HYPRE_Int mx, my;
   double* p;
   void** px;
   void** py;
@@ -410,12 +410,12 @@ mv_TempMultiVectorByMatrix( void* x_,
 
 void 
 mv_TempMultiVectorXapy( void* x_, 
-			   int rGHeight, int rHeight, 
-			   int rWidth, double* rVal,
+			   HYPRE_Int rGHeight, HYPRE_Int rHeight, 
+			   HYPRE_Int rWidth, double* rVal,
 			   void* y_ ) {
 
-  int i, j, jump;
-  int mx, my;
+  HYPRE_Int i, j, jump;
+  HYPRE_Int mx, my;
   double* p;
   void** px;
   void** py;
@@ -452,14 +452,14 @@ mv_TempMultiVectorXapy( void* x_,
 
 void 
 mv_TempMultiVectorByDiagonal( void* x_, 
-				int* mask, int n, double* diag,
+				HYPRE_Int* mask, HYPRE_Int n, double* diag,
 				void* y_ ) {
 
-  int j;
-  int mx, my, m;
+  HYPRE_Int j;
+  HYPRE_Int mx, my, m;
   void** px;
   void** py;
-  int* index;
+  HYPRE_Int* index;
   mv_TempMultiVector* x;
   mv_TempMultiVector* y;
 
@@ -481,7 +481,7 @@ mv_TempMultiVectorByDiagonal( void* x_,
   py = (void**) calloc( my, sizeof(void*) );
   hypre_assert( py != NULL );
 
-  index = (int*)calloc( m, sizeof(int) );
+  index = (HYPRE_Int*)calloc( m, sizeof(HYPRE_Int) );
   aux_indexFromMask( n, mask, index );
 
   mv_collectVectorPtr( x->mask, x, px );
@@ -501,7 +501,7 @@ void
 mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
 			   void* x_, void* y_ ) {
 
-  long i, mx, my;
+  HYPRE_Int i, mx, my;
   void** px;
   void** py;
   mv_TempMultiVector* x;

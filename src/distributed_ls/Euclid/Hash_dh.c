@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -17,21 +17,21 @@
 #include "Parser_dh.h"
 #include "Mem_dh.h"
 
-static void Hash_dhInit_private(Hash_dh h, int s);
+static void Hash_dhInit_private(Hash_dh h, HYPRE_Int s);
 
 #define CUR_MARK_INIT  -1
 
 
 struct _hash_node_private {
-  int      key;
-  int      mark;
+  HYPRE_Int      key;
+  HYPRE_Int      mark;
   HashData data;
 };
 
 
 #undef __FUNC__
 #define __FUNC__ "Hash_dhCreate"
-void Hash_dhCreate(Hash_dh *h, int size)
+void Hash_dhCreate(Hash_dh *h, HYPRE_Int size)
 {
   START_FUNC_DH
   struct _hash_dh* tmp = (struct _hash_dh*)MALLOC_DH(
@@ -68,11 +68,11 @@ void Hash_dhReset(Hash_dh h)
 
 #undef __FUNC__
 #define __FUNC__ "Hash_dhInit_private"
-void Hash_dhInit_private(Hash_dh h, int s)
+void Hash_dhInit_private(Hash_dh h, HYPRE_Int s)
 {
   START_FUNC_DH
-  int i;
-  int size = 16;
+  HYPRE_Int i;
+  HYPRE_Int size = 16;
   HashRecord *data;
 
   /* want table size to be a power of 2: */
@@ -82,7 +82,7 @@ void Hash_dhInit_private(Hash_dh h, int s)
   h->size = size;
 
 /*
-  sprintf(msgBuf_dh, "requested size = %i; allocated size = %i", s, size); 
+  hypre_sprintf(msgBuf_dh, "requested size = %i; allocated size = %i", s, size); 
   SET_INFO(msgBuf_dh);
 */
 
@@ -97,19 +97,19 @@ void Hash_dhInit_private(Hash_dh h, int s)
 
 #undef __FUNC__
 #define __FUNC__ "Hash_dhLookup"
-HashData * Hash_dhLookup(Hash_dh h, int key)
+HashData * Hash_dhLookup(Hash_dh h, HYPRE_Int key)
 {
   START_FUNC_DH
-  int i, start;
-  int curMark = h->curMark;
-  int size = h->size;
+  HYPRE_Int i, start;
+  HYPRE_Int curMark = h->curMark;
+  HYPRE_Int size = h->size;
   HashData *retval = NULL;
   HashRecord *data = h->data;
 
   HASH_1(key, size, &start)
 
   for (i=0; i<size; ++i) {
-    int tmp, idx;
+    HYPRE_Int tmp, idx;
     HASH_2(key, size, &tmp)
     idx = (start + i*tmp) % size;
     if (data[idx].mark != curMark) {
@@ -131,11 +131,11 @@ HashData * Hash_dhLookup(Hash_dh h, int key)
 */
 #undef __FUNC__
 #define __FUNC__ "Hash_dhInsert"
-void Hash_dhInsert(Hash_dh h, int key, HashData *dataIN)
+void Hash_dhInsert(Hash_dh h, HYPRE_Int key, HashData *dataIN)
 {
   START_FUNC_DH
-  int i, start, size = h->size;
-  int curMark = h->curMark;
+  HYPRE_Int i, start, size = h->size;
+  HYPRE_Int curMark = h->curMark;
   HashRecord *data;
 
   data = h->data;
@@ -149,7 +149,7 @@ void Hash_dhInsert(Hash_dh h, int key, HashData *dataIN)
   HASH_1(key, size, &start)
 
   for (i=0; i<size; ++i) {
-    int tmp, idx;
+    HYPRE_Int tmp, idx;
     HASH_2(key, size, &tmp)
 
     idx = (start + i*tmp) % size;
@@ -168,18 +168,18 @@ void Hash_dhInsert(Hash_dh h, int key, HashData *dataIN)
 void Hash_dhPrint(Hash_dh h, FILE *fp)
 {
   START_FUNC_DH
-  int i, size = h->size;
-  int curMark = h->curMark;
+  HYPRE_Int i, size = h->size;
+  HYPRE_Int curMark = h->curMark;
   HashRecord *data = h->data;
 
 
-  fprintf(fp, "\n--------------------------- hash table \n");
+  hypre_fprintf(fp, "\n--------------------------- hash table \n");
   for (i=0; i<size; ++i) {
     if (data[i].mark == curMark) {
-      fprintf(fp, "key = %2i;  iData = %3i;  fData = %g\n",
+      hypre_fprintf(fp, "key = %2i;  iData = %3i;  fData = %g\n",
                   data[i].key, data[i].data.iData, data[i].data.fData);
     }
   }
-  fprintf(fp, "\n");
+  hypre_fprintf(fp, "\n");
   END_FUNC_DH
 }

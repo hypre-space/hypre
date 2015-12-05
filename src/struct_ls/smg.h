@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -27,19 +27,19 @@ typedef struct
 {
    MPI_Comm              comm;
                       
-   int                   memory_use;
+   HYPRE_Int             memory_use;
    double                tol;
-   int                   max_iter;
-   int                   rel_change;
-   int                   zero_guess;
-   int                   max_levels;  /* max_level <= 0 means no limit */
+   HYPRE_Int             max_iter;
+   HYPRE_Int             rel_change;
+   HYPRE_Int             zero_guess;
+   HYPRE_Int             max_levels;  /* max_level <= 0 means no limit */
                       
-   int                   num_levels;
+   HYPRE_Int             num_levels;
                       
-   int                   num_pre_relax;  /* number of pre relaxation sweeps */
-   int                   num_post_relax; /* number of post relaxation sweeps */
+   HYPRE_Int             num_pre_relax;  /* number of pre relaxation sweeps */
+   HYPRE_Int             num_post_relax; /* number of post relaxation sweeps */
 
-   int                   cdir;  /* coarsening direction */
+   HYPRE_Int             cdir;  /* coarsening direction */
 
    /* base index space info */
    hypre_Index           base_index;
@@ -67,13 +67,13 @@ typedef struct
    void                **interp_data_l;
 
    /* log info (always logged) */
-   int                   num_iterations;
-   int                   time_index;
+   HYPRE_Int             num_iterations;
+   HYPRE_Int             time_index;
 
-   int                  print_level;
+   HYPRE_Int            print_level;
 
    /* additional log info (logged when `logging' > 0) */
-   int                   logging;
+   HYPRE_Int             logging;
    double               *norms;
    double               *rel_norms;
 

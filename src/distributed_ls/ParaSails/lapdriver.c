@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -41,8 +41,8 @@ void hcinit()
 {
         pm_info_t myinfo;
         pm_prog_t prog;
-        int rc;
-        int filter = 0;
+        HYPRE_Int rc;
+        HYPRE_Int filter = 0;
 
         prog.mode.w = 0;
 
@@ -71,7 +71,7 @@ void hcinit()
 
 void hcreset()
 {
-        int rc;
+        HYPRE_Int rc;
 
         if ( (rc = pm_reset_data_mygroup()) != OK_CODE)
                 pm_error("pm_reset_data_mygroup", rc);
@@ -79,7 +79,7 @@ void hcreset()
 
 void hcstart()
 {
-        int rc;
+        HYPRE_Int rc;
 
         if ( (rc = pm_start_mygroup()) != OK_CODE)
                 pm_error("pm_start_mygroup", rc);
@@ -89,7 +89,7 @@ void hcstop()
 {
         pm_prog_t getprog;
         pm_data_t mydata;
-        int rc;
+        HYPRE_Int rc;
 
         if ( (rc = pm_stop_mygroup()) != OK_CODE)
                 pm_error("pm_stop_mygroup", rc);
@@ -100,28 +100,28 @@ void hcstop()
         if ( (rc = pm_get_data_mygroup(&mydata)) != OK_CODE)
                 pm_error("pm_get_data_mygroup", rc);
 
-        printf("--------------\n");
-        printf("flops:  %-8lld\n", mydata.accu[0]);
-        printf("dcmiss: %-8lld\n", mydata.accu[1]);
-        printf("cycles: %-8lld\n", mydata.accu[2]);
-        printf("instr:  %-8lld\n", mydata.accu[3]);
+        hypre_printf("--------------\n");
+        hypre_printf("flops:  %-8lld\n", mydata.accu[0]);
+        hypre_printf("dcmiss: %-8lld\n", mydata.accu[1]);
+        hypre_printf("cycles: %-8lld\n", mydata.accu[2]);
+        hypre_printf("instr:  %-8lld\n", mydata.accu[3]);
 }
 
 void hcfinish()
 {
-        int rc;
+        HYPRE_Int rc;
 
         if ( (rc = pm_delete_program_mygroup()) != OK_CODE)
                 pm_error("pm_delete_program_mygroup", rc);
 }
 #endif
 
-int rownum(const int x, const int y, const int z, 
-   const int nx, const int ny, const int nz, int P, int Q)
+HYPRE_Int rownum(const HYPRE_Int x, const HYPRE_Int y, const HYPRE_Int z, 
+   const HYPRE_Int nx, const HYPRE_Int ny, const HYPRE_Int nz, HYPRE_Int P, HYPRE_Int Q)
 {
-   int p, q, r;
-   int lowerx, lowery, lowerz;
-   int id, startrow;
+   HYPRE_Int p, q, r;
+   HYPRE_Int lowerx, lowery, lowerz;
+   HYPRE_Int id, startrow;
 
    p = (x-1) / nx;
    q = (y-1) / ny;
@@ -135,35 +135,35 @@ int rownum(const int x, const int y, const int z,
    return startrow + nx*ny*(z-lowerz) + nx*(y-lowery) + (x-lowerx);
 }
 
-int main(int argc, char *argv[]) 
+HYPRE_Int main(HYPRE_Int argc, char *argv[]) 
 {
-   int                 npes, mype;
+   HYPRE_Int                 npes, mype;
 
-   int                 nx, ny, nz;
-   int                 P, Q, R;
+   HYPRE_Int                 nx, ny, nz;
+   HYPRE_Int                 P, Q, R;
    double              dx, dy, dz;
-   int                 p, q, r;
-   int                 lowerx, lowery, lowerz;
-   int                 upperx, uppery, upperz;
-   int x, y, z;
-   int num_rows;
-   int row;
-   int inds[100], *inds_p;
+   HYPRE_Int                 p, q, r;
+   HYPRE_Int                 lowerx, lowery, lowerz;
+   HYPRE_Int                 upperx, uppery, upperz;
+   HYPRE_Int x, y, z;
+   HYPRE_Int num_rows;
+   HYPRE_Int row;
+   HYPRE_Int inds[100], *inds_p;
    double coefs[100], *coefs_p;
-    int beg_row, end_row;
+    HYPRE_Int beg_row, end_row;
    double time0, time1;
     double setup_time, solve_time;
     double max_setup_time, max_solve_time;
 
    double *x0, *b;
-   int i;
+   HYPRE_Int i;
    Matrix *A;
    ParaSails *ps;
 
-   MPI_Init(&argc, &argv);
+   hypre_MPI_Init(&argc, &argv);
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-   MPI_Comm_size(MPI_COMM_WORLD, &npes);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &npes);
 
    if (argc > 9)
    {
@@ -179,18 +179,18 @@ int main(int argc, char *argv[])
    }
    else
    {
-      printf("Usage: mpirun -np %d %s <nx,ny,nz,P,Q,R,dx,dy,dz> ,\n\n",
+      hypre_printf("Usage: mpirun -np %d %s <nx,ny,nz,P,Q,R,dx,dy,dz> ,\n\n",
              npes, argv[0]);
-      printf("     where nx X ny X nz is the problem size per processor;\n");
-      printf("           P  X  Q X  R is the processor topology;\n");
-      printf("           dx, dy, dz   are the diffusion coefficients.\n");
+      hypre_printf("     where nx X ny X nz is the problem size per processor;\n");
+      hypre_printf("           P  X  Q X  R is the processor topology;\n");
+      hypre_printf("           dx, dy, dz   are the diffusion coefficients.\n");
 
       exit(1);
    }
 
    assert(npes == P*Q*R);
 
-   printf("XX side: %4d npes: %4d n: %10d\n", nx, npes, npes*nx*ny*nz);
+   hypre_printf("XX side: %4d npes: %4d n: %10d\n", nx, npes, npes*nx*ny*nz);
 
    /* compute p,q,r from P,Q,R and mype */
    p = mype % P;
@@ -221,14 +221,14 @@ int main(int argc, char *argv[])
 	}
 
 
-    A = MatrixCreate(MPI_COMM_WORLD, beg_row, end_row);
+    A = MatrixCreate(hypre_MPI_COMM_WORLD, beg_row, end_row);
 
 
    for (z=lowerz; z<=upperz; z++)
    for (y=lowery; y<=uppery; y++)
    for (x=lowerx; x<=upperx; x++)
    {
-       int temp;
+       HYPRE_Int temp;
 
        coefs_p = coefs;
        inds_p = inds;
@@ -264,21 +264,21 @@ hcinit();
 hcreset();
 hcstart();
 */
-        MPI_Barrier(MPI_COMM_WORLD);
-        time0 = MPI_Wtime();
+        hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+        time0 = hypre_MPI_Wtime();
 
-        ps = ParaSailsCreate(MPI_COMM_WORLD, beg_row, end_row, 1);
+        ps = ParaSailsCreate(hypre_MPI_COMM_WORLD, beg_row, end_row, 1);
 
         ParaSailsSetupPattern(ps, A, .1, 3);
         ParaSailsSetupValues(ps, A, 0.00);
 
-        time1 = MPI_Wtime();
+        time1 = hypre_MPI_Wtime();
 /*
 hcstop();
 */
         setup_time = time1-time0;
         fflush(stdout);
-        MPI_Barrier(MPI_COMM_WORLD);
+        hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
         /*****************
          * Solution phase
@@ -288,14 +288,14 @@ hcstop();
 hcreset();
 hcstart();
 */
-        MPI_Barrier(MPI_COMM_WORLD);
-        time0 = MPI_Wtime();
+        hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+        time0 = hypre_MPI_Wtime();
 
 /*
         PCG_ParaSails(A, ps, b, x0, 1.e-8, 1500);
 */
 
-        time1 = MPI_Wtime();
+        time1 = hypre_MPI_Wtime();
 /*
 hcstop();
 */
@@ -304,18 +304,18 @@ hcstop();
         ParaSailsStatsPattern(ps, A);
         ParaSailsStatsValues(ps, A);
 
-        MPI_Reduce(&setup_time, &max_setup_time, 1, MPI_DOUBLE, MPI_MAX, 0,
-            MPI_COMM_WORLD);
-        MPI_Reduce(&solve_time, &max_solve_time, 1, MPI_DOUBLE, MPI_MAX, 0,
-            MPI_COMM_WORLD);
+        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0,
+            hypre_MPI_COMM_WORLD);
+        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0,
+            hypre_MPI_COMM_WORLD);
 
         if (mype == 0)
         {
-            printf("**********************************************\n");
-            printf("***    Setup    Solve    Total\n");
-            printf("III %8.1f %8.1f %8.1f\n", max_setup_time, max_solve_time,
+            hypre_printf("**********************************************\n");
+            hypre_printf("***    Setup    Solve    Total\n");
+            hypre_printf("III %8.1f %8.1f %8.1f\n", max_setup_time, max_solve_time,
                 max_setup_time+max_solve_time);
-            printf("**********************************************\n");
+            hypre_printf("**********************************************\n");
         }
 
 /*
@@ -332,5 +332,5 @@ HashPrint(A->numb->hash);
     free(x0);
     free(b);
 
-    MPI_Finalize();
+    hypre_MPI_Finalize();
 }

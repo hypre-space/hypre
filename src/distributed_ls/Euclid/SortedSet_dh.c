@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,14 +20,14 @@
 
 #undef __FUNC__
 #define __FUNC__ "SortedSet_dhCreate"
-void SortedSet_dhCreate(SortedSet_dh *ss, int size)
+void SortedSet_dhCreate(SortedSet_dh *ss, HYPRE_Int size)
 {
   START_FUNC_DH
   struct _sortedset_dh* tmp = (struct _sortedset_dh*)MALLOC_DH(sizeof(struct _sortedset_dh)); CHECK_V_ERROR;
   *ss= tmp;
 
   tmp->n = size;
-  tmp->list = (int*)MALLOC_DH(size*sizeof(int)); CHECK_V_ERROR;
+  tmp->list = (HYPRE_Int*)MALLOC_DH(size*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   tmp->count = 0;
   END_FUNC_DH
 }
@@ -45,13 +45,13 @@ void SortedSet_dhDestroy(SortedSet_dh ss)
 
 #undef __FUNC__
 #define __FUNC__ "SortedSet_dhInsert"
-void SortedSet_dhInsert(SortedSet_dh ss, int idx)
+void SortedSet_dhInsert(SortedSet_dh ss, HYPRE_Int idx)
 {
   START_FUNC_DH
   bool isInserted = false;
-  int ct = ss->count;
-  int *list = ss->list;
-  int i, n = ss->n;
+  HYPRE_Int ct = ss->count;
+  HYPRE_Int *list = ss->list;
+  HYPRE_Int i, n = ss->n;
 
   /* determine if item was already inserted */
   for (i=0; i<ct; ++i) {
@@ -67,8 +67,8 @@ void SortedSet_dhInsert(SortedSet_dh ss, int idx)
   */
   if (! isInserted) {
     if (ct == n) {
-      int *tmp = (int*)MALLOC_DH(n*2*sizeof(int)); CHECK_V_ERROR;
-      memcpy(tmp, list, n*sizeof(int));
+      HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(n*2*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+      memcpy(tmp, list, n*sizeof(HYPRE_Int));
       FREE_DH(list); CHECK_V_ERROR;
       list = ss->list = tmp;
       ss->n *= 2;
@@ -83,7 +83,7 @@ void SortedSet_dhInsert(SortedSet_dh ss, int idx)
 
 #undef __FUNC__
 #define __FUNC__ "SortedSet_dhGetList"
-void SortedSet_dhGetList(SortedSet_dh ss, int **list, int *count)
+void SortedSet_dhGetList(SortedSet_dh ss, HYPRE_Int **list, HYPRE_Int *count)
 {
   START_FUNC_DH
   shellSort_int(ss->count, ss->list);

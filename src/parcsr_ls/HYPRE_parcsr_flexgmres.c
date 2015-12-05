@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,7 +25,7 @@
  * HYPRE_ParCSRFlexGMRESCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    hypre_FlexGMRESFunctions * fgmres_functions =
@@ -50,7 +50,7 @@ HYPRE_ParCSRFlexGMRESCreate( MPI_Comm comm, HYPRE_Solver *solver )
  * HYPRE_ParCSRFlexGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRFlexGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_FlexGMRESDestroy( (void *) solver ) );
@@ -60,7 +60,7 @@ HYPRE_ParCSRFlexGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_ParCSRFlexGMRESSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRFlexGMRESSetup( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -76,7 +76,7 @@ HYPRE_ParCSRFlexGMRESSetup( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ParCSRFlexGMRESSolve( HYPRE_Solver solver,
                         HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,
@@ -92,9 +92,9 @@ HYPRE_ParCSRFlexGMRESSolve( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetKDim( HYPRE_Solver solver,
-                          int             k_dim    )
+                          HYPRE_Int             k_dim    )
 {
    return( HYPRE_FlexGMRESSetKDim( solver, k_dim ) );
 }
@@ -103,7 +103,7 @@ HYPRE_ParCSRFlexGMRESSetKDim( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -113,7 +113,7 @@ HYPRE_ParCSRFlexGMRESSetTol( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetAbsoluteTol( HYPRE_Solver solver,
                          double             a_tol    )
 {
@@ -123,9 +123,9 @@ HYPRE_ParCSRFlexGMRESSetAbsoluteTol( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetMinIter( HYPRE_Solver solver,
-                             int          min_iter )
+                             HYPRE_Int          min_iter )
 {
    return( HYPRE_FlexGMRESSetMinIter( solver, min_iter ) );
 }
@@ -134,9 +134,9 @@ HYPRE_ParCSRFlexGMRESSetMinIter( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetMaxIter( HYPRE_Solver solver,
-                             int          max_iter )
+                             HYPRE_Int          max_iter )
 {
    return( HYPRE_FlexGMRESSetMaxIter( solver, max_iter ) );
 }
@@ -147,7 +147,7 @@ HYPRE_ParCSRFlexGMRESSetMaxIter( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  precond,
                              HYPRE_PtrToParSolverFcn  precond_setup,
@@ -163,7 +163,7 @@ HYPRE_ParCSRFlexGMRESSetPrecond( HYPRE_Solver          solver,
  * HYPRE_ParCSRFlexGMRESGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
@@ -174,9 +174,9 @@ HYPRE_ParCSRFlexGMRESGetPrecond( HYPRE_Solver  solver,
  * HYPRE_ParCSRFlexGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( HYPRE_FlexGMRESSetLogging( solver, logging ) );
 }
@@ -185,9 +185,9 @@ HYPRE_ParCSRFlexGMRESSetLogging( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESSetPrintLevel( HYPRE_Solver solver,
-                             int print_level)
+                             HYPRE_Int print_level)
 {
    return( HYPRE_FlexGMRESSetPrintLevel( solver, print_level ) );
 }
@@ -196,9 +196,9 @@ HYPRE_ParCSRFlexGMRESSetPrintLevel( HYPRE_Solver solver,
  * HYPRE_ParCSRFlexGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( HYPRE_FlexGMRESGetNumIterations( solver, num_iterations ) );
 }
@@ -207,7 +207,7 @@ HYPRE_ParCSRFlexGMRESGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
@@ -220,7 +220,7 @@ HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  *--------------------------------------------------------------------------*/
  
 
-int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver  solver,
+HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver  solver,
                                    HYPRE_PtrToModifyPCFcn modify_pc)
 
 {

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,19 +30,19 @@
 typedef struct
 {
    double  *data;
-   int      size;
+   HYPRE_Int      size;
 
    /* Does the Vector create/destroy `data'? */
-   int      owns_data;
+   HYPRE_Int      owns_data;
 
    /* For multivectors...*/
-   int   num_vectors;  /* the above "size" is size of one vector */
-   int   multivec_storage_method;
+   HYPRE_Int   num_vectors;  /* the above "size" is size of one vector */
+   HYPRE_Int   multivec_storage_method;
    /* ...if 0, store colwise v0[0], v0[1], ..., v1[0], v1[1], ... v2[0]... */
    /* ...if 1, store rowwise v0[0], v1[0], ..., v0[1], v1[1], ... */
    /* With colwise storage, vj[i] = data[ j*size + i]
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
-   int  vecstride, idxstride;
+   HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
 
 } hypre_Vector;

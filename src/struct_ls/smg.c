@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -60,13 +60,13 @@ hypre_SMGCreate( MPI_Comm  comm )
  * hypre_SMGDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGDestroy( void *smg_vdata )
 {
    hypre_SMGData *smg_data = smg_vdata;
 
-   int l;
-   int ierr = 0;
+   HYPRE_Int l;
+   HYPRE_Int ierr = 0;
 
    if (smg_data)
    {
@@ -143,24 +143,24 @@ hypre_SMGDestroy( void *smg_vdata )
  * hypre_SMGSetMemoryUse, hypre_SMGGetMemoryUse
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetMemoryUse( void *smg_vdata,
-                       int   memory_use )
+                       HYPRE_Int   memory_use )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> memory_use) = memory_use;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetMemoryUse( void *smg_vdata,
-                       int * memory_use )
+                       HYPRE_Int * memory_use )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *memory_use = (smg_data -> memory_use);
  
@@ -171,24 +171,24 @@ hypre_SMGGetMemoryUse( void *smg_vdata,
  * hypre_SMGSetTol, hypre_SMGGetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetTol( void   *smg_vdata,
                  double  tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> tol) = tol;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetTol( void   *smg_vdata,
                  double *tol       )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *tol = (smg_data -> tol);
  
@@ -199,24 +199,24 @@ hypre_SMGGetTol( void   *smg_vdata,
  * hypre_SMGSetMaxIter, hypre_SMGGetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetMaxIter( void *smg_vdata,
-                     int   max_iter  )
+                     HYPRE_Int   max_iter  )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> max_iter) = max_iter;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetMaxIter( void *smg_vdata,
-                     int * max_iter  )
+                     HYPRE_Int * max_iter  )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *max_iter = (smg_data -> max_iter);
  
@@ -227,24 +227,24 @@ hypre_SMGGetMaxIter( void *smg_vdata,
  * hypre_SMGSetRelChange, hypre_SMGGetRelChange
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetRelChange( void *smg_vdata,
-                       int   rel_change  )
+                       HYPRE_Int   rel_change  )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> rel_change) = rel_change;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetRelChange( void *smg_vdata,
-                       int * rel_change  )
+                       HYPRE_Int * rel_change  )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *rel_change = (smg_data -> rel_change);
  
@@ -255,24 +255,24 @@ hypre_SMGGetRelChange( void *smg_vdata,
  * hypre_SMGSetZeroGuess, hypre_SMGGetZeroGuess
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_SMGSetZeroGuess( void *smg_vdata,
-                       int   zero_guess )
+                       HYPRE_Int   zero_guess )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> zero_guess) = zero_guess;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetZeroGuess( void *smg_vdata,
-                       int * zero_guess )
+                       HYPRE_Int * zero_guess )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *zero_guess = (smg_data -> zero_guess);
  
@@ -284,24 +284,24 @@ hypre_SMGGetZeroGuess( void *smg_vdata,
  * Note that we require at least 1 pre-relax sweep. 
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetNumPreRelax( void *smg_vdata,
-                         int   num_pre_relax )
+                         HYPRE_Int   num_pre_relax )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> num_pre_relax) = hypre_max(num_pre_relax,1);
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetNumPreRelax( void *smg_vdata,
-                         int * num_pre_relax )
+                         HYPRE_Int * num_pre_relax )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *num_pre_relax = (smg_data -> num_pre_relax);
  
@@ -312,24 +312,24 @@ hypre_SMGGetNumPreRelax( void *smg_vdata,
  * hypre_SMGSetNumPostRelax, hypre_SMGGetNumPostRelax
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetNumPostRelax( void *smg_vdata,
-                          int   num_post_relax )
+                          HYPRE_Int   num_post_relax )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> num_post_relax) = num_post_relax;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetNumPostRelax( void *smg_vdata,
-                          int * num_post_relax )
+                          HYPRE_Int * num_post_relax )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *num_post_relax = (smg_data -> num_post_relax);
  
@@ -340,14 +340,14 @@ hypre_SMGGetNumPostRelax( void *smg_vdata,
  * hypre_SMGSetBase
  *--------------------------------------------------------------------------*/
  
-int
+HYPRE_Int
 hypre_SMGSetBase( void        *smg_vdata,
                   hypre_Index  base_index,
                   hypre_Index  base_stride )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            d;
-   int            ierr = 0;
+   HYPRE_Int      d;
+   HYPRE_Int      ierr = 0;
  
    for (d = 0; d < 3; d++)
    {
@@ -364,24 +364,24 @@ hypre_SMGSetBase( void        *smg_vdata,
  * hypre_SMGSetLogging, hypre_SMGGetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetLogging( void *smg_vdata,
-                     int   logging)
+                     HYPRE_Int   logging)
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> logging) = logging;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetLogging( void *smg_vdata,
-                     int * logging)
+                     HYPRE_Int * logging)
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *logging = (smg_data -> logging);
  
@@ -392,24 +392,24 @@ hypre_SMGGetLogging( void *smg_vdata,
  * hypre_SMGSetPrintLevel, hypre_SMGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetPrintLevel( void *smg_vdata,
-                        int   print_level)
+                        HYPRE_Int   print_level)
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    (smg_data -> print_level) = print_level;
  
    return ierr;
 }
 
-int
+HYPRE_Int
 hypre_SMGGetPrintLevel( void *smg_vdata,
-                        int * print_level)
+                        HYPRE_Int * print_level)
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
  
    *print_level = (smg_data -> print_level);
  
@@ -420,12 +420,12 @@ hypre_SMGGetPrintLevel( void *smg_vdata,
  * hypre_SMGGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGGetNumIterations( void *smg_vdata,
-                           int  *num_iterations )
+                           HYPRE_Int  *num_iterations )
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int            ierr = 0;
+   HYPRE_Int      ierr = 0;
 
    *num_iterations = (smg_data -> num_iterations);
 
@@ -436,16 +436,16 @@ hypre_SMGGetNumIterations( void *smg_vdata,
  * hypre_SMGPrintLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGPrintLogging( void *smg_vdata,
-                       int   myid)
+                       HYPRE_Int   myid)
 {
    hypre_SMGData *smg_data = smg_vdata;
-   int          ierr = 0;
-   int          i;
-   int          num_iterations  = (smg_data -> num_iterations);
-   int          logging   = (smg_data -> logging);
-   int          print_level  = (smg_data -> print_level);
+   HYPRE_Int    ierr = 0;
+   HYPRE_Int    i;
+   HYPRE_Int    num_iterations  = (smg_data -> num_iterations);
+   HYPRE_Int    logging   = (smg_data -> logging);
+   HYPRE_Int    print_level  = (smg_data -> print_level);
    double      *norms     = (smg_data -> norms);
    double      *rel_norms = (smg_data -> rel_norms);
 
@@ -458,8 +458,8 @@ hypre_SMGPrintLogging( void *smg_vdata,
         {
            for (i = 0; i < num_iterations; i++)
            {
-              printf("Residual norm[%d] = %e   ",i,norms[i]);
-              printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+              hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
+              hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
            }
         }
      }
@@ -472,18 +472,18 @@ hypre_SMGPrintLogging( void *smg_vdata,
  * hypre_SMGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
                                        double *relative_residual_norm )
 {
    hypre_SMGData *smg_data = smg_vdata;
 
-   int            max_iter        = (smg_data -> max_iter);
-   int            num_iterations  = (smg_data -> num_iterations);
-   int            logging         = (smg_data -> logging);
+   HYPRE_Int      max_iter        = (smg_data -> max_iter);
+   HYPRE_Int      num_iterations  = (smg_data -> num_iterations);
+   HYPRE_Int      logging         = (smg_data -> logging);
    double        *rel_norms       = (smg_data -> rel_norms);
 
-   int            ierr = -1;
+   HYPRE_Int      ierr = -1;
 
    
    if (logging > 0)
@@ -507,25 +507,25 @@ hypre_SMGGetFinalRelativeResidualNorm( void   *smg_vdata,
  * hypre_SMGSetStructVectorConstantValues
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
                                         double              values,
                                         hypre_BoxArray     *box_array,
                                         hypre_Index         stride    )
 {
-   int    ierr = 0;
+   HYPRE_Int    ierr = 0;
 
    hypre_Box          *v_data_box;
 
-   int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
 
    hypre_Box          *box;
    hypre_Index         loop_size;
    hypre_IndexRef      start;
 
-   int                 loopi, loopj, loopk;
-   int                 i;
+   HYPRE_Int           loopi, loopj, loopk;
+   HYPRE_Int           i;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients

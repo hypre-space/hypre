@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -23,7 +23,7 @@
 typedef struct
 {
    /* Space dimension (2 or 3) */
-   int dim;
+   HYPRE_Int dim;
 
    /* Edge element (ND1) stiffness matrix */
    hypre_ParCSRMatrix *A;
@@ -35,7 +35,7 @@ typedef struct
    /* AMG solver for A_G */
    HYPRE_Solver B_G;
    /* Is the mass term coefficient zero? */
-   int beta_is_zero;
+   HYPRE_Int beta_is_zero;
 
    /* Nedelec interpolation matrix (vertex^dim-to-edge) */
    hypre_ParCSRMatrix *Pi;
@@ -52,7 +52,7 @@ typedef struct
    HYPRE_Solver B_Pix, B_Piy, B_Piz;
 
    /* Does the solver own the coarse grid matrices? */
-   int owns_A_G, owns_A_Pi;
+   HYPRE_Int owns_A_G, owns_A_Pi;
 
    /* Coordinates of the vertices (z = 0 if dim == 2) */
    hypre_ParVector *x, *y, *z;
@@ -69,44 +69,48 @@ typedef struct
    /* AMG solver for A_G0 */
    HYPRE_Solver B_G0;
    /* How frequently to project the r.h.s. onto Ker(G0^T)? */
-   int projection_frequency;
+   HYPRE_Int projection_frequency;
    /* Internal counter to use with projection_frequency in PCG */
-   int solve_counter;
+   HYPRE_Int solve_counter;
 
    /* Solver options */
-   int maxit;
+   HYPRE_Int maxit;
    double tol;
-   int cycle_type;
-   int print_level;
+   HYPRE_Int cycle_type;
+   HYPRE_Int print_level;
 
    /* Smoothing options for A */
-   int A_relax_type;
-   int A_relax_times;
+   HYPRE_Int A_relax_type;
+   HYPRE_Int A_relax_times;
    double *A_l1_norms;
    double A_relax_weight;
    double A_omega;
+   double A_max_eig_est;
+   double A_min_eig_est;
+   HYPRE_Int A_cheby_order;
+   double  A_cheby_fraction;
 
    /* AMG options for B_G */
-   int B_G_coarsen_type;
-   int B_G_agg_levels;
-   int B_G_relax_type;
+   HYPRE_Int B_G_coarsen_type;
+   HYPRE_Int B_G_agg_levels;
+   HYPRE_Int B_G_relax_type;
    double B_G_theta;
-   int B_G_interp_type;
-   int B_G_Pmax;
+   HYPRE_Int B_G_interp_type;
+   HYPRE_Int B_G_Pmax;
 
    /* AMG options for B_Pi */
-   int B_Pi_coarsen_type;
-   int B_Pi_agg_levels;
-   int B_Pi_relax_type;
+   HYPRE_Int B_Pi_coarsen_type;
+   HYPRE_Int B_Pi_agg_levels;
+   HYPRE_Int B_Pi_relax_type;
    double B_Pi_theta;
-   int B_Pi_interp_type;
-   int B_Pi_Pmax;
+   HYPRE_Int B_Pi_interp_type;
+   HYPRE_Int B_Pi_Pmax;
 
    /* Temporary vectors */
    hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2;
 
    /* Output log info */
-   int num_iterations;
+   HYPRE_Int num_iterations;
    double rel_resid_norm;
 
 } hypre_AMSData;
@@ -152,6 +156,12 @@ typedef struct
 #define hypre_AMSDataAL1Norms(ams_data) ((ams_data)->A_l1_norms)
 #define hypre_AMSDataARelaxWeight(ams_data) ((ams_data)->A_relax_weight)
 #define hypre_AMSDataAOmega(ams_data) ((ams_data)->A_omega)
+#define hypre_AMSDataAMaxEigEst(ams_data) ((ams_data)->A_max_eig_est)
+#define hypre_AMSDataAMinEigEst(ams_data) ((ams_data)->A_min_eig_est)
+#define hypre_AMSDataAChebyOrder(ams_data) ((ams_data)->A_cheby_order)
+#define hypre_AMSDataAChebyFraction(ams_data) ((ams_data)->A_cheby_fraction)
+
+
 #define hypre_AMSDataPoissonBetaAMGCoarsenType(ams_data) ((ams_data)->B_G_coarsen_type)
 #define hypre_AMSDataPoissonBetaAMGAggLevels(ams_data) ((ams_data)->B_G_agg_levels)
 #define hypre_AMSDataPoissonBetaAMGRelaxType(ams_data) ((ams_data)->B_G_relax_type)

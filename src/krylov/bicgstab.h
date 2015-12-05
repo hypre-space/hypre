@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -56,42 +56,42 @@
  **/
 
 /* functions in pcg_struct.c which aren't used here:
-char *hypre_ParKrylovCAlloc( int count , int elt_size );
-int hypre_ParKrylovFree( char *ptr );
-void *hypre_ParKrylovCreateVectorArray( int n , void *vvector );
-int hypre_ParKrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+char *hypre_ParKrylovCAlloc( HYPRE_Int count , HYPRE_Int elt_size );
+HYPRE_Int hypre_ParKrylovFree( char *ptr );
+void *hypre_ParKrylovCreateVectorArray( HYPRE_Int n , void *vvector );
+HYPRE_Int hypre_ParKrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
 */
 /* functions in pcg_struct.c which are used here:
   void *hypre_ParKrylovCreateVector( void *vvector );
-  int hypre_ParKrylovDestroyVector( void *vvector );
+  HYPRE_Int hypre_ParKrylovDestroyVector( void *vvector );
   void *hypre_ParKrylovMatvecCreate( void *A , void *x );
-  int hypre_ParKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-  int hypre_ParKrylovMatvecDestroy( void *matvec_data );
+  HYPRE_Int hypre_ParKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+  HYPRE_Int hypre_ParKrylovMatvecDestroy( void *matvec_data );
   double hypre_ParKrylovInnerProd( void *x , void *y );
-  int hypre_ParKrylovCopyVector( void *x , void *y );
-  int hypre_ParKrylovClearVector( void *x );
-  int hypre_ParKrylovScaleVector( double alpha , void *x );
-  int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
-  int hypre_ParKrylovCommInfo( void *A , int *my_id , int *num_procs );
-  int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
-  int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
+  HYPRE_Int hypre_ParKrylovCopyVector( void *x , void *y );
+  HYPRE_Int hypre_ParKrylovClearVector( void *x );
+  HYPRE_Int hypre_ParKrylovScaleVector( double alpha , void *x );
+  HYPRE_Int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
+  HYPRE_Int hypre_ParKrylovCommInfo( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+  HYPRE_Int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
+  HYPRE_Int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 */
 
 typedef struct
 {
   void *(*CreateVector)( void *vvector );
-  int (*DestroyVector)( void *vvector );
+  HYPRE_Int (*DestroyVector)( void *vvector );
   void *(*MatvecCreate)( void *A , void *x );
-  int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
-  int (*MatvecDestroy)( void *matvec_data );
+  HYPRE_Int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+  HYPRE_Int (*MatvecDestroy)( void *matvec_data );
   double (*InnerProd)( void *x , void *y );
-  int (*CopyVector)( void *x , void *y );
-  int (*ClearVector)( void *x );
-  int (*ScaleVector)( double alpha , void *x );
-  int (*Axpy)( double alpha , void *x , void *y );
-  int (*CommInfo)( void *A , int *my_id , int *num_procs );
-  int (*precond_setup)();
-  int (*precond)();
+  HYPRE_Int (*CopyVector)( void *x , void *y );
+  HYPRE_Int (*ClearVector)( void *x );
+  HYPRE_Int (*ScaleVector)( double alpha , void *x );
+  HYPRE_Int (*Axpy)( double alpha , void *x , void *y );
+  HYPRE_Int (*CommInfo)( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+  HYPRE_Int (*precond_setup)();
+  HYPRE_Int (*precond)();
 
 } hypre_BiCGSTABFunctions;
 
@@ -101,10 +101,10 @@ typedef struct
 
 typedef struct
 {
-   int      min_iter;
-   int      max_iter;
-   int      stop_crit;
-   int      converged;
+   HYPRE_Int      min_iter;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      stop_crit;
+   HYPRE_Int      converged;
    double   tol;
    double   cf_tol;
    double   rel_residual_norm;
@@ -125,11 +125,11 @@ typedef struct
    hypre_BiCGSTABFunctions * functions;
 
    /* log info (always logged) */
-   int      num_iterations;
+   HYPRE_Int      num_iterations;
  
    /* additional log info (logged when `logging' > 0) */
-   int      logging;
-   int      print_level;
+   HYPRE_Int      logging;
+   HYPRE_Int      print_level;
    double  *norms;
    char    *log_file_name;
 
@@ -155,18 +155,18 @@ extern "C" {
    hypre_BiCGSTABFunctions *
    hypre_BiCGSTABFunctionsCreate(
       void *(*CreateVector)( void *vvector ),
-      int (*DestroyVector)( void *vvector ),
+      HYPRE_Int (*DestroyVector)( void *vvector ),
       void *(*MatvecCreate)( void *A , void *x ),
-      int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y ),
-      int (*MatvecDestroy)( void *matvec_data ),
+      HYPRE_Int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y ),
+      HYPRE_Int (*MatvecDestroy)( void *matvec_data ),
       double (*InnerProd)( void *x , void *y ),
-      int (*CopyVector)( void *x , void *y ),
-      int (*ClearVector)( void *x ),
-      int (*ScaleVector)( double alpha , void *x ),
-      int (*Axpy)( double alpha , void *x , void *y ),
-      int (*CommInfo)( void *A , int *my_id , int *num_procs ),
-      int (*PrecondSetup) (void *vdata, void *A, void *b, void *x ),
-      int (*Precond)  ( void *vdata, void *A, void *b, void *x )
+      HYPRE_Int (*CopyVector)( void *x , void *y ),
+      HYPRE_Int (*ClearVector)( void *x ),
+      HYPRE_Int (*ScaleVector)( double alpha , void *x ),
+      HYPRE_Int (*Axpy)( double alpha , void *x , void *y ),
+      HYPRE_Int (*CommInfo)( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs ),
+      HYPRE_Int (*PrecondSetup) (void *vdata, void *A, void *b, void *x ),
+      HYPRE_Int (*Precond)  ( void *vdata, void *A, void *b, void *x )
       );
 
 

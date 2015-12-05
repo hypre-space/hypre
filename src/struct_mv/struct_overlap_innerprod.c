@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -49,8 +49,8 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
 
    hypre_BoxArray      *overlap_boxes;
                    
-   int                  xi;
-   int                  yi;
+   HYPRE_Int            xi;
+   HYPRE_Int            yi;
                    
    double              *xp;
    double              *yp;
@@ -61,7 +61,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    hypre_StructGrid    *grid= hypre_StructVectorGrid(y);
    hypre_BoxManager    *boxman = hypre_StructGridBoxMan(grid);
    hypre_BoxArray      *neighbor_boxes;
-   int                 *neighbors_procs= NULL;
+   HYPRE_Int           *neighbors_procs= NULL;
    hypre_BoxArray      *selected_nboxes;
    hypre_BoxArray      *tmp_box_array, *tmp2_box_array;
 
@@ -69,12 +69,12 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    hypre_IndexRef       start;
    hypre_Index          unit_stride;
                    
-   int                  i, j;
-   int                  myid;
-   int                  boxarray_size;
-   int                  loopi, loopj, loopk;
+   HYPRE_Int            i, j;
+   HYPRE_Int            myid;
+   HYPRE_Int            boxarray_size;
+   HYPRE_Int            loopi, loopj, loopk;
 #ifdef HYPRE_USE_PTHREADS
-   int                  threadid = hypre_GetThreadID();
+   HYPRE_Int            threadid = hypre_GetThreadID();
 #endif
 
    
@@ -82,7 +82,7 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
    process_result = 0.0;
    hypre_SetIndex(unit_stride, 1, 1, 1);
 
-   MPI_Comm_rank(hypre_StructVectorComm(y), &myid);
+   hypre_MPI_Comm_rank(hypre_StructVectorComm(y), &myid);
 
    /*-----------------------------------------------------------------------
     * Determine the overlapped boxes on this local processor.
@@ -291,8 +291,8 @@ hypre_StructOverlapInnerProd( hypre_StructVector *x,
 #endif
 
 
-   MPI_Allreduce(&process_result, &final_innerprod_result, 1,
-                 MPI_DOUBLE, MPI_SUM, hypre_StructVectorComm(x));
+   hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
+                 hypre_MPI_DOUBLE, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
 
 #ifdef HYPRE_USE_PTHREADS

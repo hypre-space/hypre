@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,7 +26,7 @@
  *--------------------------------------------------------------------------*/
 /* to do, not trivial */
 /*
-int 
+HYPRE_Int 
 HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
 {
    return( hypre_LGMRESDestroy( (void *) solver ) );
@@ -37,7 +37,7 @@ HYPRE_ParCSRLGMRESDestroy( HYPRE_Solver solver )
  * HYPRE_LGMRESSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_LGMRESSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -53,7 +53,7 @@ HYPRE_LGMRESSetup( HYPRE_Solver solver,
  * HYPRE_LGMRESSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_LGMRESSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -69,16 +69,16 @@ HYPRE_LGMRESSolve( HYPRE_Solver solver,
  * HYPRE_LGMRESSetKDim, HYPRE_LGMRESGetKDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetKDim( HYPRE_Solver solver,
-                          int             k_dim    )
+                          HYPRE_Int             k_dim    )
 {
    return( hypre_LGMRESSetKDim( (void *) solver, k_dim ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetKDim( HYPRE_Solver solver,
-                          int           * k_dim    )
+                          HYPRE_Int           * k_dim    )
 {
    return( hypre_LGMRESGetKDim( (void *) solver, k_dim ) );
 }
@@ -86,16 +86,16 @@ HYPRE_LGMRESGetKDim( HYPRE_Solver solver,
  * HYPRE_LGMRESSetAugDim, HYPRE_LGMRESGetAugDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetAugDim( HYPRE_Solver solver,
-                          int             aug_dim    )
+                          HYPRE_Int             aug_dim    )
 {
    return( hypre_LGMRESSetAugDim( (void *) solver, aug_dim ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetAugDim( HYPRE_Solver solver,
-                          int           * aug_dim    )
+                          HYPRE_Int           * aug_dim    )
 {
    return( hypre_LGMRESGetAugDim( (void *) solver, aug_dim ) );
 }
@@ -104,14 +104,14 @@ HYPRE_LGMRESGetAugDim( HYPRE_Solver solver,
  * HYPRE_LGMRESSetTol, HYPRE_LGMRESGetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
    return( hypre_LGMRESSetTol( (void *) solver, tol ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetTol( HYPRE_Solver solver,
                          double           * tol    )
 {
@@ -121,14 +121,14 @@ HYPRE_LGMRESGetTol( HYPRE_Solver solver,
  * HYPRE_LGMRESSetAbsoluteTol, HYPRE_LGMRESGetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetAbsoluteTol( HYPRE_Solver solver,
                          double             a_tol    )
 {
    return( hypre_LGMRESSetAbsoluteTol( (void *) solver, a_tol ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetAbsoluteTol( HYPRE_Solver solver,
                          double           * a_tol    )
 {
@@ -139,14 +139,14 @@ HYPRE_LGMRESGetAbsoluteTol( HYPRE_Solver solver,
  * HYPRE_LGMRESSetConvergenceFactorTol, HYPRE_LGMRESGetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetConvergenceFactorTol( HYPRE_Solver solver,
                          double             cf_tol    )
 {
    return( hypre_LGMRESSetConvergenceFactorTol( (void *) solver, cf_tol ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver,
                          double           * cf_tol    )
 {
@@ -157,16 +157,16 @@ HYPRE_LGMRESGetConvergenceFactorTol( HYPRE_Solver solver,
  * HYPRE_LGMRESSetMinIter, HYPRE_LGMRESGetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetMinIter( HYPRE_Solver solver,
-                             int          min_iter )
+                             HYPRE_Int          min_iter )
 {
    return( hypre_LGMRESSetMinIter( (void *) solver, min_iter ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetMinIter( HYPRE_Solver solver,
-                             int        * min_iter )
+                             HYPRE_Int        * min_iter )
 {
    return( hypre_LGMRESGetMinIter( (void *) solver, min_iter ) );
 }
@@ -175,16 +175,16 @@ HYPRE_LGMRESGetMinIter( HYPRE_Solver solver,
  * HYPRE_LGMRESSetMaxIter, HYPRE_LGMRESGetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetMaxIter( HYPRE_Solver solver,
-                             int          max_iter )
+                             HYPRE_Int          max_iter )
 {
    return( hypre_LGMRESSetMaxIter( (void *) solver, max_iter ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver,
-                             int        * max_iter )
+                             HYPRE_Int        * max_iter )
 {
    return( hypre_LGMRESGetMaxIter( (void *) solver, max_iter ) );
 }
@@ -195,7 +195,7 @@ HYPRE_LGMRESGetMaxIter( HYPRE_Solver solver,
  * HYPRE_LGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_PtrToSolverFcn  precond,
                              HYPRE_PtrToSolverFcn  precond_setup,
@@ -210,7 +210,7 @@ HYPRE_LGMRESSetPrecond( HYPRE_Solver          solver,
  * HYPRE_LGMRESGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetPrecond( HYPRE_Solver  solver,
                              HYPRE_Solver *precond_data_ptr )
 {
@@ -222,16 +222,16 @@ HYPRE_LGMRESGetPrecond( HYPRE_Solver  solver,
  * HYPRE_LGMRESSetPrintLevel, HYPRE_LGMRESGetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetPrintLevel( HYPRE_Solver solver,
-                        int          level )
+                        HYPRE_Int          level )
 {
    return( hypre_LGMRESSetPrintLevel( (void *) solver, level ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver,
-                        int        * level )
+                        HYPRE_Int        * level )
 {
    return( hypre_LGMRESGetPrintLevel( (void *) solver, level ) );
 }
@@ -240,16 +240,16 @@ HYPRE_LGMRESGetPrintLevel( HYPRE_Solver solver,
  * HYPRE_LGMRESSetLogging, HYPRE_LGMRESGetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESSetLogging( HYPRE_Solver solver,
-                     int          level )
+                     HYPRE_Int          level )
 {
    return( hypre_LGMRESSetLogging( (void *) solver, level ) );
 }
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetLogging( HYPRE_Solver solver,
-                     int        * level )
+                     HYPRE_Int        * level )
 {
    return( hypre_LGMRESGetLogging( (void *) solver, level ) );
 }
@@ -258,9 +258,9 @@ HYPRE_LGMRESGetLogging( HYPRE_Solver solver,
  * HYPRE_LGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( hypre_LGMRESGetNumIterations( (void *) solver, num_iterations ) );
 }
@@ -269,9 +269,9 @@ HYPRE_LGMRESGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_LGMRESGetConverged
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetConverged( HYPRE_Solver  solver,
-                         int                *converged )
+                         HYPRE_Int                *converged )
 {
    return( hypre_LGMRESGetConverged( (void *) solver, converged ) );
 }
@@ -280,7 +280,7 @@ HYPRE_LGMRESGetConverged( HYPRE_Solver  solver,
  * HYPRE_LGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
@@ -291,7 +291,7 @@ HYPRE_LGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  * HYPRE_LGMRESGetResidual
  *--------------------------------------------------------------------------*/
 
-int HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void **residual )
+HYPRE_Int HYPRE_LGMRESGetResidual( HYPRE_Solver solver, void **residual )
 {
    /* returns a pointer to the residual vector */
    return hypre_LGMRESGetResidual( (void *) solver, residual );

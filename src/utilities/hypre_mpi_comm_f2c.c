@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
-
-
 
 #include <HYPRE_config.h>
 #include "fortran.h"
@@ -22,23 +20,11 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_mpi_comm_f2c, HYPRE_MPI_COMM_F2C)(int *c_comm,
-                                                        int *f_comm,
-                                                        int *ierr)
+hypre_F90_IFACE(hypre_mpi_comm_f2c, HYPRE_MPI_COMM_F2C)
+   (hypre_F90_Comm *c_comm,
+    hypre_F90_Comm *f_comm,
+    hypre_F90_Int  *ierr)
 {
-#ifdef HYPRE_HAVE_MPI_COMM_F2C
-
-   *c_comm = (int)MPI_Comm_f2c(*f_comm);
-
-   if (sizeof(MPI_Comm) > sizeof(int))
-      *ierr = 1;
-   else
-      *ierr = 0;
-
-#else
-
-   *c_comm = *f_comm;
+   *c_comm = (hypre_F90_Comm) hypre_MPI_Comm_f2c( (hypre_int) *f_comm );
    *ierr = 0;
-
-#endif
 }

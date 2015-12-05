@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -23,7 +23,7 @@
 
 #define DEBUG 0
 
-int
+HYPRE_Int
 hypre_FACSolve3( void                 *fac_vdata,
                 hypre_SStructMatrix  *A_user,
                 hypre_SStructVector  *b_in,
@@ -47,21 +47,21 @@ hypre_FACSolve3( void                 *fac_vdata,
    void                    *matvec_data        =(fac_data-> matvec_data);
    HYPRE_SStructSolver      csolver            =(fac_data-> csolver);
 
-   int                      max_level          =(fac_data-> max_levels);
-   int                     *levels             =(fac_data-> level_to_part);
-   int                      max_cycles         =(fac_data-> max_cycles);
-   int                      rel_change         =(fac_data-> rel_change);
-   int                      zero_guess         =(fac_data-> zero_guess);
-   int                      num_pre_smooth     =(fac_data-> num_pre_smooth);
-   int                      num_post_smooth    =(fac_data-> num_post_smooth);
-   int                      csolver_type       =(fac_data-> csolver_type);
-   int                      logging            =(fac_data-> logging);
+   HYPRE_Int                max_level          =(fac_data-> max_levels);
+   HYPRE_Int               *levels             =(fac_data-> level_to_part);
+   HYPRE_Int                max_cycles         =(fac_data-> max_cycles);
+   HYPRE_Int                rel_change         =(fac_data-> rel_change);
+   HYPRE_Int                zero_guess         =(fac_data-> zero_guess);
+   HYPRE_Int                num_pre_smooth     =(fac_data-> num_pre_smooth);
+   HYPRE_Int                num_post_smooth    =(fac_data-> num_post_smooth);
+   HYPRE_Int                csolver_type       =(fac_data-> csolver_type);
+   HYPRE_Int                logging            =(fac_data-> logging);
    double                  *norms              =(fac_data-> norms);
    double                  *rel_norms          =(fac_data-> rel_norms);
    double                   tol                =(fac_data-> tol);
 
-   int                      part_crse= 0;
-   int                      part_fine= 1;
+   HYPRE_Int                part_crse= 0;
+   HYPRE_Int                part_fine= 1;
 
    hypre_SStructPMatrix    *pA;
    hypre_SStructPVector    *px;
@@ -73,8 +73,8 @@ hypre_FACSolve3( void                 *fac_vdata,
    double                   b_dot_b, r_dot_r, eps;
    double                   e_dot_e, e_dot_e_l, x_dot_x;
                     
-   int                      level, i;
-   int                      ierr = 0;
+   HYPRE_Int                level, i;
+   HYPRE_Int                ierr = 0;
   
    grid= hypre_SStructGraphGrid( hypre_SStructMatrixGraph(A_in) );
 

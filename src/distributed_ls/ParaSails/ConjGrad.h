@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -23,8 +23,8 @@
 #define _CONJGRAD_H
 
 void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
-   double tol, int max_iter);
+   double tol, HYPRE_Int max_iter);
 void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
-   int dim, double tol, int max_iter);
+   HYPRE_Int dim, double tol, HYPRE_Int max_iter);
 
 #endif /* _CONJGRAD_H */

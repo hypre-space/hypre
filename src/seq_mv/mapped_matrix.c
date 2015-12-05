@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -40,10 +40,10 @@ hypre_MappedMatrixCreate(  )
  * hypre_MappedMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_MappedMatrixDestroy( hypre_MappedMatrix *matrix )
 {
-   int  ierr=0;
+   HYPRE_Int  ierr=0;
 
    if (matrix)
    {
@@ -61,10 +61,10 @@ hypre_MappedMatrixDestroy( hypre_MappedMatrix *matrix )
  * hypre_MappedMatrixLimitedDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
 {
-   int  ierr=0;
+   HYPRE_Int  ierr=0;
 
    if (matrix)
    {
@@ -79,10 +79,10 @@ hypre_MappedMatrixLimitedDestroy( hypre_MappedMatrix *matrix )
  * hypre_MappedMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_MappedMatrixInitialize( hypre_MappedMatrix *matrix )
 {
-   int    ierr=0;
+   HYPRE_Int    ierr=0;
 
    return ierr;
 }
@@ -92,10 +92,10 @@ hypre_MappedMatrixInitialize( hypre_MappedMatrix *matrix )
  * hypre_MappedMatrixAssemble
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_MappedMatrixAssemble( hypre_MappedMatrix *matrix )
 {
-   int    ierr=0;
+   HYPRE_Int    ierr=0;
 
    if( matrix == NULL )
       return ( -1 ) ;
@@ -120,15 +120,15 @@ hypre_MappedMatrixAssemble( hypre_MappedMatrix *matrix )
 void
 hypre_MappedMatrixPrint(hypre_MappedMatrix *matrix  )
 {
-   printf("Stub for hypre_MappedMatrix\n");
+   hypre_printf("Stub for hypre_MappedMatrix\n");
 }
 
 /*--------------------------------------------------------------------------
  * hypre_MappedMatrixGetColIndex
  *--------------------------------------------------------------------------*/
 
-int
-hypre_MappedMatrixGetColIndex(hypre_MappedMatrix *matrix, int j  )
+HYPRE_Int
+hypre_MappedMatrixGetColIndex(hypre_MappedMatrix *matrix, HYPRE_Int j  )
 {
    return( hypre_MappedMatrixColIndex(matrix,j) );
 }
@@ -147,10 +147,10 @@ hypre_MappedMatrixGetMatrix(hypre_MappedMatrix *matrix )
  * hypre_MappedMatrixSetMatrix
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_MappedMatrixSetMatrix(hypre_MappedMatrix *matrix, void *matrix_data  )
 {
-   int ierr=0;
+   HYPRE_Int ierr=0;
 
    hypre_MappedMatrixMatrix(matrix) = matrix_data;
 
@@ -161,11 +161,11 @@ hypre_MappedMatrixSetMatrix(hypre_MappedMatrix *matrix, void *matrix_data  )
  * hypre_MappedMatrixSetColMap
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_MappedMatrixSetColMap(hypre_MappedMatrix *matrix, 
-                          int (*ColMap)(int, void *)  )
+                          HYPRE_Int (*ColMap)(HYPRE_Int, void *)  )
 {
-   int ierr=0;
+   HYPRE_Int ierr=0;
 
    hypre_MappedMatrixColMap(matrix) = ColMap;
 
@@ -176,11 +176,11 @@ hypre_MappedMatrixSetColMap(hypre_MappedMatrix *matrix,
  * hypre_MappedMatrixSetMapData
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_MappedMatrixSetMapData(hypre_MappedMatrix *matrix, 
                           void *map_data )
 {
-   int ierr=0;
+   HYPRE_Int ierr=0;
 
    hypre_MappedMatrixMapData(matrix) = map_data;
 

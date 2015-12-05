@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * HYPRE_NewDistributedMatrixPilutSolver
  *--------------------------------------------------------------------------*/
 
-int  HYPRE_NewDistributedMatrixPilutSolver( 
+HYPRE_Int  HYPRE_NewDistributedMatrixPilutSolver( 
                                   MPI_Comm comm,
                                   HYPRE_DistributedMatrix matrix,
                                   HYPRE_DistributedMatrixPilutSolver *new_solver )
@@ -30,7 +30,7 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
 
    hypre_DistributedMatrixPilutSolver     *solver;
    hypre_PilutSolverGlobals *globals;
-   int            nprocs, myid;
+   HYPRE_Int            nprocs, myid;
    FactorMatType *ldu;
 
    /* Allocate structure for holding solver data */
@@ -54,10 +54,10 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    /* Set some variables in the "global variables" section */
    pilut_comm = comm;
 
-   MPI_Comm_size( comm, &nprocs );
+   hypre_MPI_Comm_size( comm, &nprocs );
    npes = nprocs;
 
-   MPI_Comm_rank( comm, &myid );
+   hypre_MPI_Comm_rank( comm, &myid );
    mype = myid;
 
 #ifdef HYPRE_TIMING
@@ -79,7 +79,7 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
 
    /* Data distribution structure */
    DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist(solver))
-       = (int *) hypre_CTAlloc( int, nprocs+1 );
+       = (HYPRE_Int *) hypre_CTAlloc( HYPRE_Int, nprocs+1 );
 
    hypre_DistributedMatrixPilutSolverFactorMat(solver) = 
           (FactorMatType *) hypre_CTAlloc( FactorMatType, 1 );
@@ -118,7 +118,7 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
  * HYPRE_FreeDistributedMatrixPilutSolver
  *--------------------------------------------------------------------------*/
 
-int HYPRE_FreeDistributedMatrixPilutSolver ( 
+HYPRE_Int HYPRE_FreeDistributedMatrixPilutSolver ( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
   FactorMatType *ldu;
@@ -214,7 +214,7 @@ int HYPRE_FreeDistributedMatrixPilutSolver (
  * HYPRE_DistributedMatrixPilutSolverInitialize
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverInitialize ( 
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverInitialize ( 
                   HYPRE_DistributedMatrixPilutSolver solver )
 {
 
@@ -225,7 +225,7 @@ int HYPRE_DistributedMatrixPilutSolverInitialize (
  * HYPRE_DistributedMatrixPilutSolverSetMatrix
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSetMatrix( 
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetMatrix( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   HYPRE_DistributedMatrix matrix )
 {
@@ -255,9 +255,9 @@ HYPRE_DistributedMatrix
  * HYPRE_DistributedMatrixPilutSolverSetFirstLocalRow
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSetNumLocalRow( 
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetNumLocalRow( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
-                  int FirstLocalRow )
+                  HYPRE_Int FirstLocalRow )
 {
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
@@ -276,9 +276,9 @@ int HYPRE_DistributedMatrixPilutSolverSetNumLocalRow(
  *   row of U.
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSetFactorRowSize( 
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetFactorRowSize( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
-                  int size )
+                  HYPRE_Int size )
 {
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
@@ -292,7 +292,7 @@ int HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
  * HYPRE_DistributedMatrixPilutSolverSetDropTolerance
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSetDropTolerance( 
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetDropTolerance( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   double tolerance )
 {
@@ -308,9 +308,9 @@ int HYPRE_DistributedMatrixPilutSolverSetDropTolerance(
  * HYPRE_DistributedMatrixPilutSolverSetMaxIts
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSetMaxIts( 
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetMaxIts( 
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
-                  int its )
+                  HYPRE_Int its )
 {
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
@@ -324,9 +324,9 @@ int HYPRE_DistributedMatrixPilutSolverSetMaxIts(
  * HYPRE_DistributedMatrixPilutSolverSetup
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
-   int m, n, nprocs, start, end, *rowdist, col0, coln, ierr;
+   HYPRE_Int m, n, nprocs, start, end, *rowdist, col0, coln, ierr;
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
@@ -335,7 +335,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
    if(hypre_DistributedMatrixPilutSolverMatrix(solver) == NULL )
    {
        hypre_error_in_arg(1);
-      /* printf("Cannot call setup to solver until matrix has been set\n");*/
+      /* hypre_printf("Cannot call setup to solver until matrix has been set\n");*/
       /* return hypre_error_flag; */
    }
 
@@ -358,14 +358,14 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
    rowdist = DataDistTypeRowdist( hypre_DistributedMatrixPilutSolverDataDist( solver ) );
 
-   MPI_Allgather( &start, 1, MPI_INT, rowdist, 1, MPI_INT, 
+   hypre_MPI_Allgather( &start, 1, HYPRE_MPI_INT, rowdist, 1, HYPRE_MPI_INT, 
       hypre_DistributedMatrixPilutSolverComm(solver) );
 
    rowdist[ nprocs ] = n;
 
 #ifdef HYPRE_TIMING
 {
-   int ilut_timer;
+   HYPRE_Int ilut_timer;
 
    ilut_timer = hypre_InitializeTiming( "hypre_ILUT factorization" );
 
@@ -395,7 +395,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
 #ifdef HYPRE_TIMING
 {
-   int Setup_timer;
+   HYPRE_Int Setup_timer;
 
    Setup_timer = hypre_InitializeTiming( "hypre_SetUpLUFactor: setup for triangular solvers");
 
@@ -421,7 +421,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
 #ifdef HYPRE_DEBUG
    fflush(stdout);
-   printf("Nlevels: %d\n",
+   hypre_printf("Nlevels: %d\n",
           hypre_DistributedMatrixPilutSolverFactorMat (solver)->nlevels);
 #endif
 
@@ -433,7 +433,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
  * HYPRE_DistributedMatrixPilutSolverSolve
  *--------------------------------------------------------------------------*/
 
-int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver in_ptr,
+HYPRE_Int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver in_ptr,
                                            double *x, double *b )
 {
 
@@ -450,7 +450,7 @@ int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver 
    */
 #ifdef HYPRE_TIMING
 {
-   int LDUSolve_timer;
+   HYPRE_Int LDUSolve_timer;
 
    LDUSolve_timer = hypre_InitializeTiming( "hypre_ILUT application" );
 

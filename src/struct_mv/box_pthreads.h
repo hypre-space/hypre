@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,8 +27,8 @@
 #include "threading.h"
 
 
-extern volatile int hypre_thread_counter;
-extern int iteration_counter;
+extern volatile HYPRE_Int hypre_thread_counter;
+extern HYPRE_Int iteration_counter;
 
 /*--------------------------------------------------------------------------
  * Threaded Looping macros:
@@ -45,15 +45,15 @@ extern int iteration_counter;
 #endif
 
 #define hypre_BoxLoopDeclare(loop_size, data_box, stride, iinc, jinc, kinc) \
-int  iinc = (hypre_IndexX(stride));\
-int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box) -\
+HYPRE_Int  iinc = (hypre_IndexX(stride));\
+HYPRE_Int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box) -\
              hypre_IndexX(loop_size)*hypre_IndexX(stride));\
-int  kinc = (hypre_IndexZ(stride)*\
+HYPRE_Int  kinc = (hypre_IndexZ(stride)*\
              hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box) -\
              hypre_IndexY(loop_size)*\
              hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
 
-#define vol_cbrt(vol) (int) pow((double)(vol), 1. / 3.) 
+#define vol_cbrt(vol) (HYPRE_Int) pow((double)(vol), 1. / 3.) 
 
 #define hypre_ThreadLoopBegin(local_counter, init_val, stop_val, tl_index,\
 			      tl_mtx, tl_body)\
@@ -128,24 +128,24 @@ int  kinc = (hypre_IndexZ(stride)*\
 }
 
 #define hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz)\
-   int target_vol, target_area, target_len;\
-   int cbrt_tar_vol, sqrt_tar_area;\
-   int edge_divisor;\
-   int znumchunk, ynumchunk, xnumchunk;\
-   int hypre__cz, hypre__cy, hypre__cx;\
-   int numchunks;\
-   int clfreq[3], clreset[3];\
-   int clstart[3];\
-   int clfinish[3];\
-   int chunkcount;\
+   HYPRE_Int target_vol, target_area, target_len;\
+   HYPRE_Int cbrt_tar_vol, sqrt_tar_area;\
+   HYPRE_Int edge_divisor;\
+   HYPRE_Int znumchunk, ynumchunk, xnumchunk;\
+   HYPRE_Int hypre__cz, hypre__cy, hypre__cx;\
+   HYPRE_Int numchunks;\
+   HYPRE_Int clfreq[3], clreset[3];\
+   HYPRE_Int clstart[3];\
+   HYPRE_Int clfinish[3];\
+   HYPRE_Int chunkcount;\
    target_vol    = hypre_min(hypre_max((hypre__nx * hypre__ny * hypre__nz) / CHUNK_GOAL,\
                            MIN_VOL), MAX_VOL);\
-   cbrt_tar_vol  = (int) (pow ((double)target_vol, 1./3.));\
+   cbrt_tar_vol  = (HYPRE_Int) (pow ((double)target_vol, 1./3.));\
    edge_divisor  = hypre__nz / cbrt_tar_vol + !!(hypre__nz % cbrt_tar_vol);\
    hypre__cz     = hypre__nz / edge_divisor + !!(hypre__nz % edge_divisor);\
    znumchunk     = hypre__nz / hypre__cz + !!(hypre__nz % hypre__cz);\
    target_area   = target_vol / hypre__cz;\
-   sqrt_tar_area = (int) (sqrt((double)target_area));\
+   sqrt_tar_area = (HYPRE_Int) (sqrt((double)target_area));\
    edge_divisor  = hypre__ny / sqrt_tar_area + !!(hypre__ny % sqrt_tar_area);\
    hypre__cy     = hypre__ny / edge_divisor + !!(hypre__ny % edge_divisor);\
    ynumchunk     = hypre__ny / hypre__cy + !!(hypre__ny % hypre__cy);\
@@ -183,9 +183,9 @@ int  kinc = (hypre_IndexZ(stride)*\
 
 #define hypre_BoxLoop0Begin(loop_size)\
 {\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size);\
+   HYPRE_Int hypre__nx = hypre_IndexX(loop_size);\
+   HYPRE_Int hypre__ny = hypre_IndexY(loop_size);\
+   HYPRE_Int hypre__nz = hypre_IndexZ(loop_size);\
    if (hypre__nx && hypre__ny && hypre__nz )\
    {\
       hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
@@ -214,10 +214,10 @@ int  kinc = (hypre_IndexZ(stride)*\
 {\
    hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
                         hypre__iinc1, hypre__jinc1, hypre__kinc1);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size);\
-   int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
+   HYPRE_Int hypre__nx = hypre_IndexX(loop_size);\
+   HYPRE_Int hypre__ny = hypre_IndexY(loop_size);\
+   HYPRE_Int hypre__nz = hypre_IndexZ(loop_size);\
+   HYPRE_Int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
    if (hypre__nx && hypre__ny && hypre__nz )\
    {\
       hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
@@ -251,11 +251,11 @@ int  kinc = (hypre_IndexZ(stride)*\
                         hypre__iinc1, hypre__jinc1, hypre__kinc1);\
    hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
                         hypre__iinc2, hypre__jinc2, hypre__kinc2);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size);\
-   int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
-   int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
+   HYPRE_Int hypre__nx = hypre_IndexX(loop_size);\
+   HYPRE_Int hypre__ny = hypre_IndexY(loop_size);\
+   HYPRE_Int hypre__nz = hypre_IndexZ(loop_size);\
+   HYPRE_Int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
+   HYPRE_Int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
    if (hypre__nx && hypre__ny && hypre__nz )\
    {\
       hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
@@ -298,12 +298,12 @@ int  kinc = (hypre_IndexZ(stride)*\
                         hypre__iinc2, hypre__jinc2, hypre__kinc2);\
    hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
                         hypre__iinc3, hypre__jinc3, hypre__kinc3);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size);\
-   int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
-   int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
-   int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
+   HYPRE_Int hypre__nx = hypre_IndexX(loop_size);\
+   HYPRE_Int hypre__ny = hypre_IndexY(loop_size);\
+   HYPRE_Int hypre__nz = hypre_IndexZ(loop_size);\
+   HYPRE_Int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
+   HYPRE_Int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
+   HYPRE_Int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
    if (hypre__nx && hypre__ny && hypre__nz )\
    {\
       hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\
@@ -350,13 +350,13 @@ int  kinc = (hypre_IndexZ(stride)*\
                         hypre__iinc3, hypre__jinc3, hypre__kinc3);\
    hypre_BoxLoopDeclare(loop_size, data_box4, stride4,\
                         hypre__iinc4, hypre__jinc4, hypre__kinc4);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size);\
-   int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
-   int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
-   int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
-   int orig_i4 = hypre_BoxIndexRank(data_box4, start4);\
+   HYPRE_Int hypre__nx = hypre_IndexX(loop_size);\
+   HYPRE_Int hypre__ny = hypre_IndexY(loop_size);\
+   HYPRE_Int hypre__nz = hypre_IndexZ(loop_size);\
+   HYPRE_Int orig_i1 = hypre_BoxIndexRank(data_box1, start1);\
+   HYPRE_Int orig_i2 = hypre_BoxIndexRank(data_box2, start2);\
+   HYPRE_Int orig_i3 = hypre_BoxIndexRank(data_box3, start3);\
+   HYPRE_Int orig_i4 = hypre_BoxIndexRank(data_box4, start4);\
    if (hypre__nx && hypre__ny && hypre__nz )\
    {\
       hypre_ChunkLoopExternalSetup(hypre__nx, hypre__ny, hypre__nz);\

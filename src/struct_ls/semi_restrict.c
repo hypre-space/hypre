@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.16 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,12 +27,12 @@
 typedef struct
 {
    hypre_StructMatrix *R;
-   int                 R_stored_as_transpose;
+   HYPRE_Int           R_stored_as_transpose;
    hypre_ComputePkg   *compute_pkg;
    hypre_Index         cindex;
    hypre_Index         stride;
 
-   int                 time_index;
+   HYPRE_Int           time_index;
 
 } hypre_SemiRestrictData;
 
@@ -56,10 +56,10 @@ hypre_SemiRestrictCreate( )
  * hypre_SemiRestrictSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SemiRestrictSetup( void               *restrict_vdata,
                          hypre_StructMatrix *R,
-                         int                 R_stored_as_transpose,
+                         HYPRE_Int           R_stored_as_transpose,
                          hypre_StructVector *r,
                          hypre_StructVector *rc,
                          hypre_Index         cindex,
@@ -74,7 +74,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
    hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
-   int                     ierr = 0;
+   HYPRE_Int               ierr = 0;
 
    /*----------------------------------------------------------
     * Set up the compute package
@@ -107,26 +107,26 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
  * hypre_SemiRestrict:
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SemiRestrict( void               *restrict_vdata,
                     hypre_StructMatrix *R,
                     hypre_StructVector *r,
                     hypre_StructVector *rc             )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SemiRestrictData *restrict_data = restrict_vdata;
 
-   int                     R_stored_as_transpose;
+   HYPRE_Int               R_stored_as_transpose;
    hypre_ComputePkg       *compute_pkg;
    hypre_IndexRef          cindex;
    hypre_IndexRef          stride;
 
    hypre_StructGrid       *fgrid;
-   int                    *fgrid_ids;
+   HYPRE_Int              *fgrid_ids;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   int                    *cgrid_ids;
+   HYPRE_Int              *cgrid_ids;
 
    hypre_CommHandle       *comm_handle;
                        
@@ -138,10 +138,10 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
                        
-   int                     Ri;
-   int                     ri;
-   int                     rci;
-   int                     constant_coefficient;
+   HYPRE_Int               Ri;
+   HYPRE_Int               ri;
+   HYPRE_Int               rci;
+   HYPRE_Int               constant_coefficient;
 
    double                 *Rp0, *Rp1;
    double                 *rp, *rp0, *rp1;
@@ -155,8 +155,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_StructStencil    *stencil;
    hypre_Index            *stencil_shape;
 
-   int                     compute_i, fi, ci, j;
-   int                     loopi, loopj, loopk;
+   HYPRE_Int               compute_i, fi, ci, j;
+   HYPRE_Int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
@@ -174,7 +174,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
    constant_coefficient = hypre_StructMatrixConstantCoefficient(R);
    hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
    /* ... if A has constant_coefficient==2, R has constant_coefficient==0 */
-   if (constant_coefficient==1) hypre_StructVectorClearBoundGhostValues( r );
+
+   if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(r, 0);
 
    hypre_SetIndex(stridec, 1, 1, 1);
 
@@ -305,10 +306,10 @@ hypre_SemiRestrict( void               *restrict_vdata,
  * hypre_SemiRestrictDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SemiRestrictDestroy( void *restrict_vdata )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_SemiRestrictData *restrict_data = restrict_vdata;
 

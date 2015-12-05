@@ -92,7 +92,7 @@ L10:
     ix = 1;
 /*                                                 begin main loop */
 L20:
-    switch ((int)next) {
+    switch ((HYPRE_Int)next) {
 	case 0: goto L30;
 	case 1: goto L50;
 	case 2: goto L70;

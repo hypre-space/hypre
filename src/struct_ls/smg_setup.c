@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 /******************************************************************************
  *
@@ -23,7 +23,7 @@
  * hypre_SMGSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SMGSetup( void               *smg_vdata,
                 hypre_StructMatrix *A,
                 hypre_StructVector *b,
@@ -35,15 +35,15 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_IndexRef        base_index  = (smg_data -> base_index);
    hypre_IndexRef        base_stride = (smg_data -> base_stride);
                      
-   int                   n_pre   = (smg_data -> num_pre_relax);
-   int                   n_post  = (smg_data -> num_post_relax);
+   HYPRE_Int             n_pre   = (smg_data -> num_pre_relax);
+   HYPRE_Int             n_post  = (smg_data -> num_post_relax);
                      
-   int                   max_iter;
-   int                   max_levels;
+   HYPRE_Int             max_iter;
+   HYPRE_Int             max_levels;
                       
-   int                   num_levels;
+   HYPRE_Int             num_levels;
                      
-   int                   cdir;
+   HYPRE_Int             cdir;
 
    hypre_Index           bindex;
    hypre_Index           bstride;
@@ -55,7 +55,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructGrid    **PT_grid_l;
                     
    double               *data;
-   int                   data_size = 0;
+   HYPRE_Int             data_size = 0;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -69,8 +69,8 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVector  **e_l;
    double               *b_data;
    double               *x_data;
-   int                   b_data_alloced;
-   int                   x_data_alloced;
+   HYPRE_Int             b_data_alloced;
+   HYPRE_Int             x_data_alloced;
 
    void                **relax_data_l;
    void                **residual_data_l;
@@ -81,12 +81,12 @@ hypre_SMGSetup( void               *smg_vdata,
 
    hypre_Box            *cbox;
 
-   int                   i, l;
+   HYPRE_Int             i, l;
                        
-   int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
-   int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
-   int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -423,12 +423,12 @@ hypre_SMGSetup( void               *smg_vdata,
    {
       for (l = 0; l < (num_levels - 1); l++)
       {
-         sprintf(filename, "zout_A.%02d", l);
+         hypre_sprintf(filename, "zout_A.%02d", l);
          hypre_StructMatrixPrint(filename, A_l[l], 0);
-         sprintf(filename, "zout_PT.%02d", l);
+         hypre_sprintf(filename, "zout_PT.%02d", l);
          hypre_StructMatrixPrint(filename, PT_l[l], 0);
       }
-      sprintf(filename, "zout_A.%02d", l);
+      hypre_sprintf(filename, "zout_A.%02d", l);
       hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
 #endif

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,7 +21,7 @@
  * Started 11/29/95
  * George
  *
- * $Id: ilut.c,v 2.5 2008/07/18 01:32:40 ulrikey Exp $
+ * $Id: ilut.c,v 2.6 2010/12/20 19:27:34 falgout Exp $
  */
 
 #include <math.h>
@@ -30,16 +30,16 @@
 /*************************************************************************
 * This function is the entry point of the hypre_ILUT factorization
 **************************************************************************/
-int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu, 
-          int maxnz, double tol, hypre_PilutSolverGlobals *globals )
+HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu, 
+          HYPRE_Int maxnz, double tol, hypre_PilutSolverGlobals *globals )
 {
-  int i, ierr;
+  HYPRE_Int i, ierr;
   ReduceMatType rmat;
-  int dummy_row_ptr[2], size;
+  HYPRE_Int dummy_row_ptr[2], size;
   double *values;
 
 #ifdef HYPRE_DEBUG
-  printf("hypre_ILUT, maxnz = %d\n ", maxnz);
+  hypre_printf("hypre_ILUT, maxnz = %d\n ", maxnz);
 #endif
 
   /* Allocate memory for ldu */
@@ -100,11 +100,11 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
   }
 
   /* Factor the internal nodes first */
-  MPI_Barrier( pilut_comm );
+  hypre_MPI_Barrier( pilut_comm );
 
 #ifdef HYPRE_TIMING
   {
-   int SerILUT_timer;
+   HYPRE_Int SerILUT_timer;
 
    SerILUT_timer = hypre_InitializeTiming( "Sequential hypre_ILUT done on each proc" );
 
@@ -113,7 +113,7 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
 
   hypre_SerILUT(ddist, matrix, ldu, &rmat, maxnz, tol, globals);
 
-  MPI_Barrier( pilut_comm );
+  hypre_MPI_Barrier( pilut_comm );
 
 #ifdef HYPRE_TIMING
    hypre_EndTiming( SerILUT_timer );
@@ -124,7 +124,7 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
   /* Factor the interface nodes */
 #ifdef HYPRE_TIMING
   {
-   int ParILUT_timer;
+   HYPRE_Int ParILUT_timer;
 
    ParILUT_timer = hypre_InitializeTiming( "Parallel portion of hypre_ILUT factorization" );
 
@@ -133,7 +133,7 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
 
   hypre_ParILUT(ddist, ldu, &rmat, maxnz, tol, globals);
 
-  MPI_Barrier( pilut_comm );
+  hypre_MPI_Barrier( pilut_comm );
 
 #ifdef HYPRE_TIMING
    hypre_EndTiming( ParILUT_timer );
@@ -156,9 +156,9 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
 * This function computes the 2 norms of the rows and adds them into the 
 * nrm2s array ... Changed to "Add" by AJC, Dec 22 1997.
 **************************************************************************/
-void hypre_ComputeAdd2Nrms(int num_rows, int *rowptr, double *values, double *nrm2s)
+void hypre_ComputeAdd2Nrms(HYPRE_Int num_rows, HYPRE_Int *rowptr, double *values, double *nrm2s)
 {
-  int i, j, n;
+  HYPRE_Int i, j, n;
   double sum;
 
   for (i=0; i<num_rows; i++) {

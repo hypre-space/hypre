@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 /*****************************************************************************
@@ -26,9 +26,9 @@
  *****************************************************************************/
 
 hypre_BCSRMatrix*
-hypre_BCSRMatrixCreate(int num_block_rows, int num_block_cols,
-		       int num_nonzero_blocks,
-		       int num_rows_per_block, int num_cols_per_block) {
+hypre_BCSRMatrixCreate(HYPRE_Int num_block_rows, HYPRE_Int num_block_cols,
+		       HYPRE_Int num_nonzero_blocks,
+		       HYPRE_Int num_rows_per_block, HYPRE_Int num_cols_per_block) {
   hypre_BCSRMatrix* A;
 
   A = hypre_CTAlloc(hypre_BCSRMatrix, 1);
@@ -51,10 +51,10 @@ hypre_BCSRMatrixCreate(int num_block_rows, int num_block_cols,
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDestroy(hypre_BCSRMatrix* A) {
   hypre_BCSRMatrixBlock** blocks;
-  int i;
+  HYPRE_Int i;
 
   if(A) {
     hypre_TFree(hypre_BCSRMatrixI(A));
@@ -78,9 +78,9 @@ hypre_BCSRMatrixDestroy(hypre_BCSRMatrix* A) {
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_BCSRMatrixInitialise(hypre_BCSRMatrix* A) {
-  int i;
+  HYPRE_Int i;
 
   if(!hypre_BCSRMatrixBlocks(A) && hypre_BCSRMatrixNumNonzeroBlocks(A)) {
     hypre_BCSRMatrixBlocks(A) =
@@ -92,11 +92,11 @@ hypre_BCSRMatrixInitialise(hypre_BCSRMatrix* A) {
   }
   if(!hypre_BCSRMatrixI(A)) {
     hypre_BCSRMatrixI(A) =
-      hypre_CTAlloc(int, hypre_BCSRMatrixNumBlockRows(A) + 1);
+      hypre_CTAlloc(HYPRE_Int, hypre_BCSRMatrixNumBlockRows(A) + 1);
   }
   if(!hypre_BCSRMatrixJ(A) && hypre_BCSRMatrixNumNonzeroBlocks(A)) {
     hypre_BCSRMatrixJ(A) =
-      hypre_CTAlloc(int, hypre_BCSRMatrixNumNonzeroBlocks(A));
+      hypre_CTAlloc(HYPRE_Int, hypre_BCSRMatrixNumNonzeroBlocks(A));
   }
 
   return 0;
@@ -108,24 +108,24 @@ hypre_BCSRMatrixInitialise(hypre_BCSRMatrix* A) {
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_BCSRMatrixPrint(hypre_BCSRMatrix* A, char* file_name) {
   FILE* out_file = fopen(file_name, "w");
-  int file_base = 1;
-  int i;
+  HYPRE_Int file_base = 1;
+  HYPRE_Int i;
 
-  fprintf(out_file, "%d\n", hypre_BCSRMatrixNumBlockRows(A));
-  fprintf(out_file, "%d\n", hypre_BCSRMatrixNumBlockCols(A));
-  fprintf(out_file, "%d\n", hypre_BCSRMatrixNumNonzeroBlocks(A));
-  fprintf(out_file, "%d\n", hypre_BCSRMatrixNumRowsPerBlock(A));
-  fprintf(out_file, "%d\n", hypre_BCSRMatrixNumColsPerBlock(A));
+  hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixNumBlockRows(A));
+  hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixNumBlockCols(A));
+  hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixNumNonzeroBlocks(A));
+  hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixNumRowsPerBlock(A));
+  hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixNumColsPerBlock(A));
 
   for(i = 0; i < hypre_BCSRMatrixNumBlockRows(A) + 1; i++) {
-    fprintf(out_file, "%d\n", hypre_BCSRMatrixI(A)[i] + file_base);
+    hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixI(A)[i] + file_base);
   }
 
   for(i = 0; i < hypre_BCSRMatrixNumNonzeroBlocks(A); i++) {
-    fprintf(out_file, "%d\n", hypre_BCSRMatrixJ(A)[i] + file_base);
+    hypre_fprintf(out_file, "%d\n", hypre_BCSRMatrixJ(A)[i] + file_base);
   }
 
   for(i = 0; i < hypre_BCSRMatrixNumNonzeroBlocks(A); i++) {
@@ -144,26 +144,26 @@ hypre_BCSRMatrixPrint(hypre_BCSRMatrix* A, char* file_name) {
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_BCSRMatrixTranspose(hypre_BCSRMatrix* A, hypre_BCSRMatrix** AT) {
    hypre_BCSRMatrixBlock*       *A_blocks = hypre_BCSRMatrixBlocks(A);
-   int          *A_i = hypre_BCSRMatrixI(A);
-   int          *A_j = hypre_BCSRMatrixJ(A);
-   int           num_rowsA = hypre_BCSRMatrixNumBlockRows(A);
-   int           num_colsA = hypre_BCSRMatrixNumBlockCols(A);
-   int           num_nonzerosA = hypre_BCSRMatrixNumNonzeroBlocks(A);
-   int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
-   int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
+   HYPRE_Int          *A_i = hypre_BCSRMatrixI(A);
+   HYPRE_Int          *A_j = hypre_BCSRMatrixJ(A);
+   HYPRE_Int           num_rowsA = hypre_BCSRMatrixNumBlockRows(A);
+   HYPRE_Int           num_colsA = hypre_BCSRMatrixNumBlockCols(A);
+   HYPRE_Int           num_nonzerosA = hypre_BCSRMatrixNumNonzeroBlocks(A);
+   HYPRE_Int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
+   HYPRE_Int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
 
    hypre_BCSRMatrixBlock*       *AT_blocks;
-   int          *AT_i;
-   int          *AT_j;
-   int           num_rowsAT;
-   int           num_colsAT;
-   int           num_nonzerosAT;
+   HYPRE_Int          *AT_i;
+   HYPRE_Int          *AT_j;
+   HYPRE_Int           num_rowsAT;
+   HYPRE_Int           num_colsAT;
+   HYPRE_Int           num_nonzerosAT;
 
-/*    int           max_col; */
-   int           i, j;
+/*    HYPRE_Int           max_col; */
+   HYPRE_Int           i, j;
 
    num_rowsAT = num_colsA;
    num_colsAT = num_rowsA;
@@ -229,22 +229,22 @@ hypre_BCSRMatrixTranspose(hypre_BCSRMatrix* A, hypre_BCSRMatrix** AT) {
 
 hypre_BCSRMatrix*
 hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
-			      int num_rows_per_block, int num_cols_per_block) {
+			      HYPRE_Int num_rows_per_block, HYPRE_Int num_cols_per_block) {
   hypre_BCSRMatrix* B;
-  int* B_i;
-  int* B_j;
+  HYPRE_Int* B_i;
+  HYPRE_Int* B_j;
   hypre_BCSRMatrixBlock** B_blocks;
-  int* A_i = hypre_CSRMatrixI(A);
-  int* A_j = hypre_CSRMatrixJ(A);
+  HYPRE_Int* A_i = hypre_CSRMatrixI(A);
+  HYPRE_Int* A_j = hypre_CSRMatrixJ(A);
   double* A_data = hypre_CSRMatrixData(A);
-  int num_rows = hypre_CSRMatrixNumRows(A);
-  int num_cols = hypre_CSRMatrixNumCols(A);
-  int num_block_rows = num_rows/num_rows_per_block;
-  int num_block_cols = num_cols/num_cols_per_block;
-  int num_nonzero_blocks;
-  int i, j, jA, t, d, i_block, j_block, jB;
-  int* block_flag;
-  int* block_number;
+  HYPRE_Int num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int num_block_rows = num_rows/num_rows_per_block;
+  HYPRE_Int num_block_cols = num_cols/num_cols_per_block;
+  HYPRE_Int num_nonzero_blocks;
+  HYPRE_Int i, j, jA, t, d, i_block, j_block, jB;
+  HYPRE_Int* block_flag;
+  HYPRE_Int* block_number;
   double** blocks;
 
   /*--------------------------------------------------------------------------
@@ -254,12 +254,12 @@ hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
    *
    *-------------------------------------------------------------------------*/
 
-  block_flag = hypre_CTAlloc(int, num_block_cols);
-  block_number = hypre_CTAlloc(int, hypre_CSRMatrixNumNonzeros(A));
+  block_flag = hypre_CTAlloc(HYPRE_Int, num_block_cols);
+  block_number = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumNonzeros(A));
 
   num_nonzero_blocks = 0;
   for(i = 0; i < num_block_rows; i++) {
-    memset(block_flag, -1, sizeof(int)*num_block_cols);
+    memset(block_flag, -1, sizeof(HYPRE_Int)*num_block_cols);
     for(d = 0; d < num_rows_per_block; d++) {
       t = i*num_rows_per_block + d;
       for(jA = A_i[t]; jA < A_i[t + 1]; jA++) {
@@ -342,22 +342,22 @@ hypre_BCSRMatrixFromCSRMatrix(hypre_CSRMatrix* A,
 hypre_CSRMatrix*
 hypre_BCSRMatrixToCSRMatrix(hypre_BCSRMatrix* B) {
   hypre_CSRMatrix* A;
-  int* A_i;
-  int* A_j;
+  HYPRE_Int* A_i;
+  HYPRE_Int* A_j;
   double* A_data;
   hypre_CSRMatrix* A_no_zeros;
-  int* B_i = hypre_BCSRMatrixI(B);
-  int* B_j = hypre_BCSRMatrixJ(B);
+  HYPRE_Int* B_i = hypre_BCSRMatrixI(B);
+  HYPRE_Int* B_j = hypre_BCSRMatrixJ(B);
   hypre_BCSRMatrixBlock** B_blocks = hypre_BCSRMatrixBlocks(B);
-  int num_block_rows = hypre_BCSRMatrixNumBlockRows(B);
-  int num_block_cols = hypre_BCSRMatrixNumBlockCols(B);
-  int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(B);
-  int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(B);
-  int num_rows = num_rows_per_block*num_block_rows;
-  int num_cols = num_cols_per_block*num_block_cols;
-  int num_nonzero_blocks = hypre_BCSRMatrixNumNonzeroBlocks(B);
-  int num_nonzeros = num_nonzero_blocks*num_rows_per_block*num_cols_per_block;
-  int i, j, k, l, d, jB;
+  HYPRE_Int num_block_rows = hypre_BCSRMatrixNumBlockRows(B);
+  HYPRE_Int num_block_cols = hypre_BCSRMatrixNumBlockCols(B);
+  HYPRE_Int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(B);
+  HYPRE_Int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(B);
+  HYPRE_Int num_rows = num_rows_per_block*num_block_rows;
+  HYPRE_Int num_cols = num_cols_per_block*num_block_cols;
+  HYPRE_Int num_nonzero_blocks = hypre_BCSRMatrixNumNonzeroBlocks(B);
+  HYPRE_Int num_nonzeros = num_nonzero_blocks*num_rows_per_block*num_cols_per_block;
+  HYPRE_Int i, j, k, l, d, jB;
   double* block = hypre_CTAlloc(double, num_rows_per_block*num_cols_per_block);
 
   A = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
@@ -422,12 +422,12 @@ hypre_BCSRMatrixToCSRMatrix(hypre_BCSRMatrix* B) {
 
 hypre_CSRMatrix*
 hypre_BCSRMatrixCompress(hypre_BCSRMatrix* A) {
-  int num_block_rows = hypre_BCSRMatrixNumBlockRows(A);
-  int num_block_cols = hypre_BCSRMatrixNumBlockCols(A);
-  int num_nonzero_blocks = hypre_BCSRMatrixNumNonzeroBlocks(A);
+  HYPRE_Int num_block_rows = hypre_BCSRMatrixNumBlockRows(A);
+  HYPRE_Int num_block_cols = hypre_BCSRMatrixNumBlockCols(A);
+  HYPRE_Int num_nonzero_blocks = hypre_BCSRMatrixNumNonzeroBlocks(A);
   hypre_CSRMatrix* B = hypre_CSRMatrixCreate(num_block_rows, num_block_cols,
 					     num_nonzero_blocks);
-  int i;
+  HYPRE_Int i;
 
   hypre_CSRMatrixInitialize(B);
   for(i = 0; i < num_block_rows + 1; i++) {

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,14 +25,14 @@
 
 typedef struct 
 {
-   int                   size;
+   HYPRE_Int             size;
 
    hypre_BoxArrayArray  *own_boxes;    /* size of fgrid */
-   int                 **own_cboxnums; /* local cbox number- each fbox
+   HYPRE_Int           **own_cboxnums; /* local cbox number- each fbox
                                           leads to an array of cboxes */
 
    hypre_BoxArrayArray  *own_composite_cboxes;  /* size of cgrid */
-   int                   own_composite_size;
+   HYPRE_Int             own_composite_size;
 } hypre_SStructOwnInfoData;
 
 

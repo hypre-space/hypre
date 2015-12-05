@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,7 +35,7 @@ HYPRE_AMGInitialize( )
  * HYPRE_AMGFinalize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_AMGFinalize( HYPRE_Solver solver )
 {
    return( hypre_AMGFinalize( (void *) solver ) );
@@ -45,7 +45,7 @@ HYPRE_AMGFinalize( HYPRE_Solver solver )
  * HYPRE_AMGSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_AMGSetup( HYPRE_Solver solver,
                 HYPRE_CSRMatrix A,
                 HYPRE_Vector b,
@@ -61,7 +61,7 @@ HYPRE_AMGSetup( HYPRE_Solver solver,
  * HYPRE_AMGSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_AMGSolve( HYPRE_Solver solver,
                 HYPRE_CSRMatrix A,
                 HYPRE_Vector b,
@@ -79,9 +79,9 @@ HYPRE_AMGSolve( HYPRE_Solver solver,
  * HYPRE_AMGSetMaxLevels
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetMaxLevels( HYPRE_Solver solver,
-                       int          max_levels  )
+                       HYPRE_Int          max_levels  )
 {
    return( hypre_AMGSetMaxLevels( (void *) solver, max_levels ) );
 }
@@ -90,7 +90,7 @@ HYPRE_AMGSetMaxLevels( HYPRE_Solver solver,
  * HYPRE_AMGSetStrongThreshold
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
                              double       strong_threshold  )
 {
@@ -101,9 +101,9 @@ HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
  * HYPRE_AMGSetMode
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetMode( HYPRE_Solver solver,
-                       int          mode  )
+                       HYPRE_Int          mode  )
 {
    return( hypre_AMGSetMode( (void *) solver, mode ) );
 }
@@ -112,7 +112,7 @@ HYPRE_AMGSetMode( HYPRE_Solver solver,
  * HYPRE_AMGSetATruncFactor
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetATruncFactor( HYPRE_Solver solver,
                           double       A_trunc_factor)
 {
@@ -123,9 +123,9 @@ HYPRE_AMGSetATruncFactor( HYPRE_Solver solver,
  * HYPRE_AMGSetAMaxElmts
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver,
-                       int          A_max_elmts)
+                       HYPRE_Int          A_max_elmts)
 {
    return( hypre_AMGSetAMaxElmts( (void *) solver, A_max_elmts ) );
 }
@@ -134,7 +134,7 @@ HYPRE_AMGSetAMaxElmts( HYPRE_Solver solver,
  * HYPRE_AMGSetPTruncFactor
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver,
                           double       P_trunc_factor)
 {
@@ -145,9 +145,9 @@ HYPRE_AMGSetPTruncFactor( HYPRE_Solver solver,
  * HYPRE_AMGSetPMaxElmts
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetPMaxElmts( HYPRE_Solver solver,
-                       int          P_max_elmts)
+                       HYPRE_Int          P_max_elmts)
 {
    return( hypre_AMGSetPMaxElmts( (void *) solver, P_max_elmts ) );
 }
@@ -156,9 +156,9 @@ HYPRE_AMGSetPMaxElmts( HYPRE_Solver solver,
  * HYPRE_AMGSetCoarsenType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetCoarsenType( HYPRE_Solver solver,
-                         int          coarsen_type  )
+                         HYPRE_Int          coarsen_type  )
 {
    return( hypre_AMGSetCoarsenType( (void *) solver, coarsen_type ) );
 }
@@ -167,9 +167,9 @@ HYPRE_AMGSetCoarsenType( HYPRE_Solver solver,
  * HYPRE_AMGSetAggCoarsenType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetAggCoarsenType( HYPRE_Solver solver,
-                         int          agg_coarsen_type  )
+                         HYPRE_Int          agg_coarsen_type  )
 {
    return( hypre_AMGSetAggCoarsenType( (void *) solver, agg_coarsen_type ) );
 }
@@ -178,9 +178,9 @@ HYPRE_AMGSetAggCoarsenType( HYPRE_Solver solver,
  * HYPRE_AMGSetAggLevels
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetAggLevels( HYPRE_Solver solver,
-                         int          agg_levels  )
+                         HYPRE_Int          agg_levels  )
 {
    return( hypre_AMGSetAggLevels( (void *) solver, agg_levels ) );
 }
@@ -189,9 +189,9 @@ HYPRE_AMGSetAggLevels( HYPRE_Solver solver,
  * HYPRE_AMGSetInterpType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetInterpType( HYPRE_Solver solver,
-                        int          interp_type  )
+                        HYPRE_Int          interp_type  )
 {
    return( hypre_AMGSetInterpType( (void *) solver, interp_type ) );
 }
@@ -200,9 +200,9 @@ HYPRE_AMGSetInterpType( HYPRE_Solver solver,
  * HYPRE_AMGSetAggInterpType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetAggInterpType( HYPRE_Solver solver,
-                        int          agg_interp_type  )
+                        HYPRE_Int          agg_interp_type  )
 {
    return( hypre_AMGSetAggInterpType( (void *) solver, agg_interp_type ) );
 }
@@ -211,9 +211,9 @@ HYPRE_AMGSetAggInterpType( HYPRE_Solver solver,
  * HYPRE_AMGSetNumJacs
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetNumJacs( HYPRE_Solver solver,
-                     int          num_jacs  )
+                     HYPRE_Int          num_jacs  )
 {
    return( hypre_AMGSetNumJacs( (void *) solver, num_jacs ) );
 }
@@ -222,9 +222,9 @@ HYPRE_AMGSetNumJacs( HYPRE_Solver solver,
  * HYPRE_AMGSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetMaxIter( HYPRE_Solver solver,
-                     int          max_iter  )
+                     HYPRE_Int          max_iter  )
 {
    return( hypre_AMGSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -233,9 +233,9 @@ HYPRE_AMGSetMaxIter( HYPRE_Solver solver,
  * HYPRE_AMGSetCycleType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetCycleType( HYPRE_Solver solver,
-                       int          cycle_type  )
+                       HYPRE_Int          cycle_type  )
 {
    return( hypre_AMGSetCycleType( (void *) solver, cycle_type ) );
 }
@@ -244,7 +244,7 @@ HYPRE_AMGSetCycleType( HYPRE_Solver solver,
  * HYPRE_AMGSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetTol( HYPRE_Solver solver,
                  double       tol    )
 {
@@ -255,9 +255,9 @@ HYPRE_AMGSetTol( HYPRE_Solver solver,
  * HYPRE_AMGSetNumRelaxSteps
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetNumRelaxSteps( HYPRE_Solver  solver,
-                           int           num_relax_steps  )
+                           HYPRE_Int           num_relax_steps  )
 {
    return( hypre_AMGSetNumRelaxSteps( (void *) solver, num_relax_steps ) );
 }
@@ -266,9 +266,9 @@ HYPRE_AMGSetNumRelaxSteps( HYPRE_Solver  solver,
  * HYPRE_AMGSetNumGridSweeps
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetNumGridSweeps( HYPRE_Solver  solver,
-                           int          *num_grid_sweeps  )
+                           HYPRE_Int          *num_grid_sweeps  )
 {
    return( hypre_AMGSetNumGridSweeps( (void *) solver, num_grid_sweeps ) );
 }
@@ -277,9 +277,9 @@ HYPRE_AMGSetNumGridSweeps( HYPRE_Solver  solver,
  * HYPRE_AMGSetGridRelaxType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetGridRelaxType( HYPRE_Solver  solver,
-                           int          *grid_relax_type  )
+                           HYPRE_Int          *grid_relax_type  )
 {
    return( hypre_AMGSetGridRelaxType( (void *) solver, grid_relax_type ) );
 }
@@ -288,9 +288,9 @@ HYPRE_AMGSetGridRelaxType( HYPRE_Solver  solver,
  * HYPRE_AMGSetGridRelaxPoints
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver   solver,
-                             int          **grid_relax_points  )
+                             HYPRE_Int          **grid_relax_points  )
 {
    return( hypre_AMGSetGridRelaxPoints( (void *) solver, grid_relax_points ) );
 }
@@ -299,7 +299,7 @@ HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver   solver,
  * HYPRE_AMGSetRelaxWeight
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetRelaxWeight( HYPRE_Solver   solver,
                          double        *relax_weight  )
 {
@@ -310,9 +310,9 @@ HYPRE_AMGSetRelaxWeight( HYPRE_Solver   solver,
  * HYPRE_AMGSetSchwarzOption
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetSchwarzOption( HYPRE_Solver   solver,
-                         int        *schwarz_option  )
+                         HYPRE_Int        *schwarz_option  )
 {
    return( hypre_AMGSetSchwarzOption( (void *) solver, schwarz_option ) );
 }
@@ -321,9 +321,9 @@ HYPRE_AMGSetSchwarzOption( HYPRE_Solver   solver,
  * HYPRE_AMGSetIOutDat
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetIOutDat( HYPRE_Solver solver,
-                     int          ioutdat  )
+                     HYPRE_Int          ioutdat  )
 {
    return( hypre_AMGSetIOutDat( (void *) solver, ioutdat ) );
 }
@@ -332,7 +332,7 @@ HYPRE_AMGSetIOutDat( HYPRE_Solver solver,
  * HYPRE_AMGSetLogFileName
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetLogFileName( HYPRE_Solver  solver,
                          char         *log_file_name  )
 {
@@ -343,9 +343,9 @@ HYPRE_AMGSetLogFileName( HYPRE_Solver  solver,
  * HYPRE_AMGSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetLogging( HYPRE_Solver  solver,
-                     int           ioutdat,
+                     HYPRE_Int           ioutdat,
                      char         *log_file_name  )
 {
    return( hypre_AMGSetLogging( (void *) solver, ioutdat, log_file_name ) );
@@ -355,16 +355,16 @@ HYPRE_AMGSetLogging( HYPRE_Solver  solver,
  * HYPRE_AMGSetNumFunctions
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetNumFunctions( HYPRE_Solver solver,
-                       int          num_functions  )
+                       HYPRE_Int          num_functions  )
 {
    return( hypre_AMGSetNumFunctions( (void *) solver, num_functions ) );
 }
 
-int
+HYPRE_Int
 HYPRE_AMGSetDofFunc( HYPRE_Solver solver,
-                     int          *dof_func  )
+                     HYPRE_Int          *dof_func  )
 {
    return( hypre_AMGSetDofFunc( (void *) solver, dof_func ) );
 }
@@ -373,9 +373,9 @@ HYPRE_AMGSetDofFunc( HYPRE_Solver solver,
  * HYPRE_AMGSetUseBlockFlag
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_AMGSetUseBlockFlag( HYPRE_Solver solver,
-                       int          use_block_flag  )
+                       HYPRE_Int          use_block_flag  )
 {
    return( hypre_AMGSetUseBlockFlag( (void *) solver, use_block_flag ) );
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,7 +26,7 @@
  * hypre_CSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixMatvec( double           alpha,
               hypre_CSRMatrix *A,
               hypre_Vector    *x,
@@ -34,33 +34,33 @@ hypre_CSRMatrixMatvec( double           alpha,
               hypre_Vector    *y     )
 {
    double     *A_data   = hypre_CSRMatrixData(A);
-   int        *A_i      = hypre_CSRMatrixI(A);
-   int        *A_j      = hypre_CSRMatrixJ(A);
-   int         num_rows = hypre_CSRMatrixNumRows(A);
-   int         num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
 
-   int        *A_rownnz = hypre_CSRMatrixRownnz(A);
-   int         num_rownnz = hypre_CSRMatrixNumRownnz(A);
+   HYPRE_Int        *A_rownnz = hypre_CSRMatrixRownnz(A);
+   HYPRE_Int         num_rownnz = hypre_CSRMatrixNumRownnz(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   int         x_size = hypre_VectorSize(x);
-   int         y_size = hypre_VectorSize(y);
-   int         num_vectors = hypre_VectorNumVectors(x);
-   int         idxstride_y = hypre_VectorIndexStride(y);
-   int         vecstride_y = hypre_VectorVectorStride(y);
-   int         idxstride_x = hypre_VectorIndexStride(x);
-   int         vecstride_x = hypre_VectorVectorStride(x);
+   HYPRE_Int         x_size = hypre_VectorSize(x);
+   HYPRE_Int         y_size = hypre_VectorSize(y);
+   HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int         idxstride_y = hypre_VectorIndexStride(y);
+   HYPRE_Int         vecstride_y = hypre_VectorVectorStride(y);
+   HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
+   HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
 
    double      temp, tempx;
 
-   int         i, j, jj;
+   HYPRE_Int         i, j, jj;
 
-   int         m;
+   HYPRE_Int         m;
 
    double     xpar=0.7;
 
-   int         ierr = 0;
+   HYPRE_Int         ierr = 0;
 
 
    /*---------------------------------------------------------------------
@@ -214,7 +214,7 @@ hypre_CSRMatrixMatvec( double           alpha,
  *   From Van Henson's modification of hypre_CSRMatrixMatvec.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixMatvecT( double           alpha,
                hypre_CSRMatrix *A,
                hypre_Vector    *x,
@@ -222,27 +222,27 @@ hypre_CSRMatrixMatvecT( double           alpha,
                hypre_Vector    *y     )
 {
    double     *A_data    = hypre_CSRMatrixData(A);
-   int        *A_i       = hypre_CSRMatrixI(A);
-   int        *A_j       = hypre_CSRMatrixJ(A);
-   int         num_rows  = hypre_CSRMatrixNumRows(A);
-   int         num_cols  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Int         num_rows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         num_cols  = hypre_CSRMatrixNumCols(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   int         x_size = hypre_VectorSize(x);
-   int         y_size = hypre_VectorSize(y);
-   int         num_vectors = hypre_VectorNumVectors(x);
-   int         idxstride_y = hypre_VectorIndexStride(y);
-   int         vecstride_y = hypre_VectorVectorStride(y);
-   int         idxstride_x = hypre_VectorIndexStride(x);
-   int         vecstride_x = hypre_VectorVectorStride(x);
+   HYPRE_Int         x_size = hypre_VectorSize(x);
+   HYPRE_Int         y_size = hypre_VectorSize(y);
+   HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int         idxstride_y = hypre_VectorIndexStride(y);
+   HYPRE_Int         vecstride_y = hypre_VectorVectorStride(y);
+   HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
+   HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
 
    double      temp;
 
-   int         i, i1, j, jv, jj, ns, ne, size, rest;
-   int         num_threads;
+   HYPRE_Int         i, i1, j, jv, jj, ns, ne, size, rest;
+   HYPRE_Int         num_threads;
 
-   int         ierr  = 0;
+   HYPRE_Int         ierr  = 0;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
@@ -409,7 +409,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
  *   From Van Henson's modification of hypre_CSRMatrixMatvec.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_CSRMatrixMatvecT( double           alpha,
                hypre_CSRMatrix *A,
                hypre_Vector    *x,
@@ -417,30 +417,30 @@ hypre_CSRMatrixMatvecT( double           alpha,
                hypre_Vector    *y     )
 {
    double     *A_data    = hypre_CSRMatrixData(A);
-   int        *A_i       = hypre_CSRMatrixI(A);
-   int        *A_j       = hypre_CSRMatrixJ(A);
-   int         num_rows  = hypre_CSRMatrixNumRows(A);
-   int         num_cols  = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        *A_i       = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j       = hypre_CSRMatrixJ(A);
+   HYPRE_Int         num_rows  = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         num_cols  = hypre_CSRMatrixNumCols(A);
 
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   int         x_size = hypre_VectorSize(x);
-   int         y_size = hypre_VectorSize(y);
-   int         num_vectors = hypre_VectorNumVectors(x);
-   int         idxstride_y = hypre_VectorIndexStride(y);
-   int         vecstride_y = hypre_VectorVectorStride(y);
-   int         idxstride_x = hypre_VectorIndexStride(x);
-   int         vecstride_x = hypre_VectorVectorStride(x);
+   HYPRE_Int         x_size = hypre_VectorSize(x);
+   HYPRE_Int         y_size = hypre_VectorSize(y);
+   HYPRE_Int         num_vectors = hypre_VectorNumVectors(x);
+   HYPRE_Int         idxstride_y = hypre_VectorIndexStride(y);
+   HYPRE_Int         vecstride_y = hypre_VectorVectorStride(y);
+   HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
+   HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
 
    double      temp;
 
    double      *y_data_expand;
-   int         my_thread_num = 0, offset = 0;
+   HYPRE_Int         my_thread_num = 0, offset = 0;
    
-   int         i, j, jv, jj;
-   int         num_threads;
+   HYPRE_Int         i, j, jv, jj;
+   HYPRE_Int         num_threads;
 
-   int         ierr  = 0;
+   HYPRE_Int         ierr  = 0;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if
@@ -610,32 +610,32 @@ hypre_CSRMatrixMatvecT( double           alpha,
  * hypre_CSRMatrixMatvec_FF
  *--------------------------------------------------------------------------*/
                                                                                                               
-int
+HYPRE_Int
 hypre_CSRMatrixMatvec_FF( double           alpha,
               hypre_CSRMatrix *A,
               hypre_Vector    *x,
               double           beta,
               hypre_Vector    *y,
-              int             *CF_marker_x,
-              int             *CF_marker_y,
-              int fpt )
+              HYPRE_Int             *CF_marker_x,
+              HYPRE_Int             *CF_marker_y,
+              HYPRE_Int fpt )
 {
    double     *A_data   = hypre_CSRMatrixData(A);
-   int        *A_i      = hypre_CSRMatrixI(A);
-   int        *A_j      = hypre_CSRMatrixJ(A);
-   int         num_rows = hypre_CSRMatrixNumRows(A);
-   int         num_cols = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
                                                                                                               
    double     *x_data = hypre_VectorData(x);
    double     *y_data = hypre_VectorData(y);
-   int         x_size = hypre_VectorSize(x);
-   int         y_size = hypre_VectorSize(y);
+   HYPRE_Int         x_size = hypre_VectorSize(x);
+   HYPRE_Int         y_size = hypre_VectorSize(y);
                                                                                                               
    double      temp;
                                                                                                               
-   int         i, jj;
+   HYPRE_Int         i, jj;
                                                                                                               
-   int         ierr = 0;
+   HYPRE_Int         ierr = 0;
                                                                                                               
                                                                                                               
    /*---------------------------------------------------------------------

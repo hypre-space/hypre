@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,37 +38,37 @@ typedef struct
    MPI_Comm comm;
 
   /*  A structure: -------------------------------------------------------- */
-  int num_inprocessors;
-  int *inprocessor;
+  HYPRE_Int num_inprocessors;
+  HYPRE_Int *inprocessor;
 
   /* receiving in idof from different (in)processors; ---------------------- */
-  int *num_idofs_inprocessor; 
-  int **idof_inprocessor; 
+  HYPRE_Int *num_idofs_inprocessor; 
+  HYPRE_Int **idof_inprocessor; 
 
 
   /* symmetric information: ----------------------------------------------- */
   /* this can be replaces by CSR format: ---------------------------------- */
-  int *num_inchords;
-  int **inchord_idof;
-  int **inchord_rdof;
+  HYPRE_Int *num_inchords;
+  HYPRE_Int **inchord_idof;
+  HYPRE_Int **inchord_rdof;
   double **inchord_data;
 
-  int num_idofs;
-  int num_rdofs;
+  HYPRE_Int num_idofs;
+  HYPRE_Int num_rdofs;
 
-  int *firstindex_idof; /* not owned by my_id; ----------------------------- */
-  int *firstindex_rdof; /* not owned by my_id; ----------------------------- */
+  HYPRE_Int *firstindex_idof; /* not owned by my_id; ----------------------------- */
+  HYPRE_Int *firstindex_rdof; /* not owned by my_id; ----------------------------- */
 
   /* --------------------------- mirror information: ---------------------- */
   /* participation of rdof in different processors; ------------------------ */
 
-  int num_toprocessors;
-  int *toprocessor;
+  HYPRE_Int num_toprocessors;
+  HYPRE_Int *toprocessor;
 
   /* rdofs to be sentto toprocessors; --------------------------------------
      ----------------------------------------------------------------------- */
-  int *num_rdofs_toprocessor;
-  int **rdof_toprocessor;
+  HYPRE_Int *num_rdofs_toprocessor;
+  HYPRE_Int **rdof_toprocessor;
 
 
 } hypre_ParChordMatrix;

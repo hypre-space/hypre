@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  ***********************************************************************EHEADER*/
 
 /*
@@ -58,34 +58,34 @@
 #endif
 
 
-int main (int argc, char *argv[])
+HYPRE_Int main (HYPRE_Int argc, char *argv[])
 {
-   int i, j;
+   HYPRE_Int i, j;
 
-   int myid, num_procs;
+   HYPRE_Int myid, num_procs;
 
-   int n, N, pi, pj;
+   HYPRE_Int n, N, pi, pj;
    double h, h2;
-   int ilower[2], iupper[2];
+   HYPRE_Int ilower[2], iupper[2];
 
-   int solver_id;
-   int n_pre, n_post;
+   HYPRE_Int solver_id;
+   HYPRE_Int n_pre, n_post;
 
 #ifdef HYPRE_FORTRAN
-   long int grid;
-   long int stencil;
-   long int A;
-   long int b;
-   long int x;
-   long int solver;
-   long int precond;
-        int temp_COMM;
-        int precond_id;
-        int zero = 0;
-        int one = 1;
-        int two = 2;
-        int five = 5;
-        int fifty = 50;
+   hypre_F90_Obj grid;
+   hypre_F90_Obj stencil;
+   hypre_F90_Obj A;
+   hypre_F90_Obj b;
+   hypre_F90_Obj x;
+   hypre_F90_Obj solver;
+   hypre_F90_Obj precond;
+        HYPRE_Int temp_COMM;
+        HYPRE_Int precond_id;
+        HYPRE_Int zero = 0;
+        HYPRE_Int one = 1;
+        HYPRE_Int two = 2;
+        HYPRE_Int five = 5;
+        HYPRE_Int fifty = 50;
      double zero_dot = 0.0;
      double tol = 1.e-6;
 #else
@@ -98,15 +98,15 @@ int main (int argc, char *argv[])
    HYPRE_StructSolver   precond;
 #endif
 
-   int num_iterations;
+   HYPRE_Int num_iterations;
    double final_res_norm;
 
-   int print_solution;
+   HYPRE_Int print_solution;
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    /* Set defaults */
    n = 33;
@@ -117,8 +117,8 @@ int main (int argc, char *argv[])
 
    /* Parse command line */
    {
-      int arg_index = 0;
-      int print_usage = 0;
+      HYPRE_Int arg_index = 0;
+      HYPRE_Int print_usage = 0;
 
       while (arg_index < argc)
       {
@@ -156,21 +156,21 @@ int main (int argc, char *argv[])
 
       if ((print_usage) && (myid == 0))
       {
-         printf("\n");
-         printf("Usage: %s [<options>]\n", argv[0]);
-         printf("\n");
-         printf("  -n <n>              : problem size per procesor (default: 8)\n");
-         printf("  -solver <ID>        : solver ID\n");
-         printf("                        0  - PCG with SMG precond (default)\n");
-         printf("                        1  - SMG\n");
-         printf("  -v <n_pre> <n_post> : number of pre and post relaxations (default: 1 1)\n");
-         printf("  -print_solution     : print the solution vector\n");
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Usage: %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  -n <n>              : problem size per procesor (default: 8)\n");
+         hypre_printf("  -solver <ID>        : solver ID\n");
+         hypre_printf("                        0  - PCG with SMG precond (default)\n");
+         hypre_printf("                        1  - SMG\n");
+         hypre_printf("  -v <n_pre> <n_post> : number of pre and post relaxations (default: 1 1)\n");
+         hypre_printf("  -print_solution     : print the solution vector\n");
+         hypre_printf("\n");
       }
 
       if (print_usage)
       {
-         MPI_Finalize();
+         hypre_MPI_Finalize();
          return (0);
       }
    }
@@ -195,7 +195,7 @@ int main (int argc, char *argv[])
    /* 1. Set up a grid */
    {
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
       /* Create an empty 2D grid object */
       HYPRE_StructGridCreate(&temp_COMM, &two, &grid);
 
@@ -207,7 +207,7 @@ int main (int argc, char *argv[])
       HYPRE_StructGridAssemble(&grid);
 #else
       /* Create an empty 2D grid object */
-      HYPRE_StructGridCreate(MPI_COMM_WORLD, 2, &grid);
+      HYPRE_StructGridCreate(hypre_MPI_COMM_WORLD, 2, &grid);
 
       /* Add a new box to the grid */
       HYPRE_StructGridSetExtents(grid, ilower, iupper);
@@ -226,8 +226,8 @@ int main (int argc, char *argv[])
 
       /* Define the geometry of the stencil */
       {
-         int entry;
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int entry;
+         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          for (entry = 0; entry < 5; entry++)
             HYPRE_StructStencilSetElement(&stencil, &entry, offsets[entry]);
@@ -238,8 +238,8 @@ int main (int argc, char *argv[])
 
       /* Define the geometry of the stencil */
       {
-         int entry;
-         int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
+         HYPRE_Int entry;
+         HYPRE_Int offsets[5][2] = {{0,0}, {-1,0}, {1,0}, {0,-1}, {0,1}};
 
          for (entry = 0; entry < 5; entry++)
             HYPRE_StructStencilSetElement(stencil, entry, offsets[entry]);
@@ -249,13 +249,13 @@ int main (int argc, char *argv[])
 
    /* 3. Set up a Struct Matrix */
    {
-      int nentries = 5;
-      int nvalues = nentries*n*n;
+      HYPRE_Int nentries = 5;
+      HYPRE_Int nvalues = nentries*n*n;
       double *values;
-      int stencil_indices[5];
+      HYPRE_Int stencil_indices[5];
 
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
       /* Create an empty matrix object */
       HYPRE_StructMatrixCreate(&temp_COMM, &grid, &stencil, &A);
 
@@ -282,7 +282,7 @@ int main (int argc, char *argv[])
       free(values);
 #else
       /* Create an empty matrix object */
-      HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
+      HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
 
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(A);
@@ -312,13 +312,13 @@ int main (int argc, char *argv[])
          the domain and set the stencil entry that reaches to the boundary to
          zero.*/
    {
-      int bc_ilower[2];
-      int bc_iupper[2];
-      int nentries = 1;
-      int nvalues  = nentries*n; /*  number of stencil entries times the length
+      HYPRE_Int bc_ilower[2];
+      HYPRE_Int bc_iupper[2];
+      HYPRE_Int nentries = 1;
+      HYPRE_Int nvalues  = nentries*n; /*  number of stencil entries times the length
                                      of one side of my grid box */
       double *values;
-      int stencil_indices[1];
+      HYPRE_Int stencil_indices[1];
 
       values = calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
@@ -418,19 +418,19 @@ int main (int argc, char *argv[])
 
    /* 5. Set up Struct Vectors for b and x */
    {
-      int    nvalues = n*n;
+      HYPRE_Int    nvalues = n*n;
       double *values;
 
       values = calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
       HYPRE_StructVectorCreate(&temp_COMM, &grid, &b);
       HYPRE_StructVectorCreate(&temp_COMM, &grid, &x);
 #else
-      HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &b);
-      HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, &x);
+      HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
+      HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
 #endif
 
       /* Indicate that the vector coefficients are ready to be set */
@@ -477,7 +477,7 @@ int main (int argc, char *argv[])
    if (solver_id == 0)
    {
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
       HYPRE_StructPCGCreate(&temp_COMM, &solver);
       HYPRE_StructPCGSetMaxIter(&solver, &fifty );
       HYPRE_StructPCGSetTol(&solver, &tol );
@@ -508,7 +508,7 @@ int main (int argc, char *argv[])
       /* Clean up */
       HYPRE_StructPCGDestroy(&solver);
 #else
-      HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_StructPCGSetMaxIter(solver, 50 );
       HYPRE_StructPCGSetTol(solver, 1.0e-06 );
       HYPRE_StructPCGSetTwoNorm(solver, 1 );
@@ -517,7 +517,7 @@ int main (int argc, char *argv[])
       HYPRE_StructPCGSetLogging(solver, 1);
 
       /* Use symmetric SMG as preconditioner */
-      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+      HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &precond);
       HYPRE_StructSMGSetMemoryUse(precond, 0);
       HYPRE_StructSMGSetMaxIter(precond, 1);
       HYPRE_StructSMGSetTol(precond, 0.0);
@@ -543,7 +543,7 @@ int main (int argc, char *argv[])
    if (solver_id == 1)
    {
 #ifdef HYPRE_FORTRAN
-      temp_COMM = (int) MPI_COMM_WORLD;
+      temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
       HYPRE_StructSMGCreate(&temp_COMM, &solver);
       HYPRE_StructSMGSetMemoryUse(&solver, &zero);
       HYPRE_StructSMGSetMaxIter(&solver, &fifty);
@@ -565,7 +565,7 @@ int main (int argc, char *argv[])
       /* Clean up */
       HYPRE_StructSMGDestroy(&solver);
 #else
-      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &solver);
       HYPRE_StructSMGSetMemoryUse(solver, 0);
       HYPRE_StructSMGSetMaxIter(solver, 50);
       HYPRE_StructSMGSetTol(solver, 1.0e-06);
@@ -599,10 +599,10 @@ int main (int argc, char *argv[])
 
    if (myid == 0)
    {
-      printf("\n");
-      printf("Iterations = %d\n", num_iterations);
-      printf("Final Relative Residual Norm = %g\n", final_res_norm);
-      printf("\n");
+      hypre_printf("\n");
+      hypre_printf("Iterations = %d\n", num_iterations);
+      hypre_printf("Final Relative Residual Norm = %g\n", final_res_norm);
+      hypre_printf("\n");
    }
 
    /* Free memory */
@@ -621,7 +621,7 @@ int main (int argc, char *argv[])
 #endif
 
    /* Finalize MPI */
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return (0);
 }

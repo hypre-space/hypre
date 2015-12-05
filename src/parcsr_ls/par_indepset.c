@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -37,18 +37,18 @@
   @see hypre_AMGIndepSet */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
                           double             *measure_array ,
-                          int   seq_rand)
+                          HYPRE_Int   seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
    MPI_Comm         comm = hypre_ParCSRMatrixComm(S);
-   int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
-   int              i, my_id;
-   int              ierr = 0;
+   HYPRE_Int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int              i, my_id;
+   HYPRE_Int              ierr = 0;
 
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm,&my_id);
    i = 2747+my_id;
    if (seq_rand) i = 2747;
    hypre_SeedRand(i);
@@ -103,27 +103,27 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
   @see hypre_InitAMGIndepSet */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                       double             *measure_array,
-                      int                *graph_array,
-                      int                 graph_array_size,
-                      int                *graph_array_offd,
-                      int                 graph_array_offd_size,
-                      int                *IS_marker,
-                      int                *IS_marker_offd     )
+                      HYPRE_Int                *graph_array,
+                      HYPRE_Int                 graph_array_size,
+                      HYPRE_Int                *graph_array_offd,
+                      HYPRE_Int                 graph_array_offd_size,
+                      HYPRE_Int                *IS_marker,
+                      HYPRE_Int                *IS_marker_offd     )
 {
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
-   int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
-   int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
    hypre_CSRMatrix *S_offd      = hypre_ParCSRMatrixOffd(S);
-   int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
-   int             *S_offd_j;
+   HYPRE_Int             *S_offd_i    = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int             *S_offd_j;
 
-   int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
-   int              i, j, ig, jS, jj;
+   HYPRE_Int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int              i, j, ig, jS, jj;
                    
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    /*-------------------------------------------------------
     * Initialize IS_marker by putting all nodes in

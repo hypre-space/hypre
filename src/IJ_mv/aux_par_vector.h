@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,12 +31,12 @@
 
 typedef struct
 {
-   int	    max_off_proc_elmts; /* length of off processor stash for
+   HYPRE_Int	    max_off_proc_elmts; /* length of off processor stash for
 					SetValues and AddToValues*/
-   int	    current_num_elmts; /* current no. of elements stored in stash */
-   int     *off_proc_i; /* contains column indices */
+   HYPRE_Int	    current_num_elmts; /* current no. of elements stored in stash */
+   HYPRE_Int     *off_proc_i; /* contains column indices */
    double  *off_proc_data; /* contains corresponding data */
-   int	    cancel_indx; /* number of elements that have to be deleted due
+   HYPRE_Int	    cancel_indx; /* number of elements that have to be deleted due
                            to setting values from another processor */
 } hypre_AuxParVector;
 

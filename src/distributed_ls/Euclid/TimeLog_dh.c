@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,8 +21,8 @@
 #define MAX_DESC_LENGTH 60
 
 struct _timeLog_dh {
-  int first;
-  int last; 
+  HYPRE_Int first;
+  HYPRE_Int last; 
   double time[MAX_TIME_MARKS];
   char   desc[MAX_TIME_MARKS][MAX_DESC_LENGTH];
   Timer_dh timer; 
@@ -33,7 +33,7 @@ struct _timeLog_dh {
 void TimeLog_dhCreate(TimeLog_dh *t)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
   struct _timeLog_dh* tmp = (struct _timeLog_dh*)MALLOC_DH(sizeof(struct _timeLog_dh)); CHECK_V_ERROR;
   *t = tmp;
   tmp->first = tmp->last = 0;
@@ -81,7 +81,7 @@ void TimeLog_dhMark(TimeLog_dh t, char *desc)
     Timer_dhStop(t->timer);
     t->time[t->last] = Timer_dhReadWall(t->timer);
     Timer_dhStart(t->timer);
-    sprintf(t->desc[t->last], desc);
+    hypre_sprintf(t->desc[t->last], desc);
     t->last += 1;
   }
   END_FUNC_DH
@@ -94,10 +94,10 @@ void TimeLog_dhReset(TimeLog_dh t)
   START_FUNC_DH
   if (t->last < MAX_TIME_MARKS - 2) {
     double total = 0.0;
-    int i, first = t->first, last = t->last;
+    HYPRE_Int i, first = t->first, last = t->last;
     for (i=first; i<last; ++i) total += t->time[i];
     t->time[last] = total;
-    sprintf(t->desc[last], "========== totals, and reset ==========\n");
+    hypre_sprintf(t->desc[last], "========== totals, and reset ==========\n");
     t->last += 1;
     t->first = t->last;
     Timer_dhStart(t->timer);
@@ -111,7 +111,7 @@ void TimeLog_dhReset(TimeLog_dh t)
 void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint)
 {
   START_FUNC_DH
-  int i;
+  HYPRE_Int i;
   double total = 0.0;
   double timeMax[MAX_TIME_MARKS]; double timeMin[MAX_TIME_MARKS];
   static bool wasSummed = false;
@@ -120,20 +120,20 @@ void TimeLog_dhPrint(TimeLog_dh t, FILE *fp, bool allPrint)
   if (! wasSummed) {
     for (i=t->first; i<t->last; ++i) total += t->time[i];
     t->time[t->last] = total;
-    sprintf(t->desc[t->last], "========== totals, and reset ==========\n");
+    hypre_sprintf(t->desc[t->last], "========== totals, and reset ==========\n");
     t->last += 1;
 
-    MPI_Allreduce(t->time, timeMax, t->last, MPI_DOUBLE, MPI_MAX, comm_dh);
-    MPI_Allreduce(t->time, timeMin, t->last, MPI_DOUBLE, MPI_MIN, comm_dh);
+    hypre_MPI_Allreduce(t->time, timeMax, t->last, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm_dh);
+    hypre_MPI_Allreduce(t->time, timeMin, t->last, hypre_MPI_DOUBLE, hypre_MPI_MIN, comm_dh);
     wasSummed = true;
   }
 
   if (fp != NULL) {
     if (myid_dh == 0 || allPrint) {
-      fprintf(fp,"\n----------------------------------------- timing report\n");
-      fprintf(fp, "\n   self     max     min\n");
+      hypre_fprintf(fp,"\n----------------------------------------- timing report\n");
+      hypre_fprintf(fp, "\n   self     max     min\n");
       for (i=0; i<t->last; ++i) {
-        fprintf(fp, "%7.3f %7.3f %7.3f   #%s\n", t->time[i],
+        hypre_fprintf(fp, "%7.3f %7.3f %7.3f   #%s\n", t->time[i],
                                 timeMax[i], timeMin[i], 
                                 t->desc[i]);
       }

@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -29,9 +26,11 @@
 
 void
 hypre_F90_IFACE(hypre_blocktridiagcreate, HYPRE_BLOCKTRIDIAGCREATE)
-               (long int *solver, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagCreate( (HYPRE_Solver *) solver);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagCreate(
+      hypre_F90_PassObjRef (HYPRE_Solver, solver));
 }
 
 /*--------------------------------------------------------------------------
@@ -40,9 +39,11 @@ hypre_F90_IFACE(hypre_blocktridiagcreate, HYPRE_BLOCKTRIDIAGCREATE)
 
 void
 hypre_F90_IFACE(hypre_blocktridiagdestroy, HYPRE_BLOCKTRIDIAGDESTROY)
-               (long int *solver, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagDestroy( (HYPRE_Solver) *solver);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagDestroy(
+      hypre_F90_PassObj (HYPRE_Solver, solver));
 }
 
 /*--------------------------------------------------------------------------
@@ -51,12 +52,17 @@ hypre_F90_IFACE(hypre_blocktridiagdestroy, HYPRE_BLOCKTRIDIAGDESTROY)
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsetup, HYPRE_BLOCKTRIDIAGSETUP)
-               (long int *solver, long int *A, long int *b, long int *x, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Obj *A,
+    hypre_F90_Obj *b,
+    hypre_F90_Obj *x,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSetup( (HYPRE_Solver)       *solver, 
-                                          (HYPRE_ParCSRMatrix) *A,
-                                          (HYPRE_ParVector)    *b, 
-                                          (HYPRE_ParVector)    *x);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetup(
+      hypre_F90_PassObj (HYPRE_Solver, solver), 
+      hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+      hypre_F90_PassObj (HYPRE_ParVector, b), 
+      hypre_F90_PassObj (HYPRE_ParVector, x));
 }
 
 /*--------------------------------------------------------------------------
@@ -65,12 +71,17 @@ hypre_F90_IFACE(hypre_blocktridiagsetup, HYPRE_BLOCKTRIDIAGSETUP)
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsolve, HYPRE_BLOCKTRIDIAGSOLVE)
-               (long int *solver, long int *A, long int *b, long int *x, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Obj *A,
+    hypre_F90_Obj *b,
+    hypre_F90_Obj *x,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSolve( (HYPRE_Solver)       *solver, 
-                                          (HYPRE_ParCSRMatrix) *A,
-                                          (HYPRE_ParVector)    *b, 
-                                          (HYPRE_ParVector)    *x);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSolve(
+      hypre_F90_PassObj (HYPRE_Solver, solver), 
+      hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+      hypre_F90_PassObj (HYPRE_ParVector, b), 
+      hypre_F90_PassObj (HYPRE_ParVector, x));
 }
 
 /*--------------------------------------------------------------------------
@@ -79,11 +90,15 @@ hypre_F90_IFACE(hypre_blocktridiagsolve, HYPRE_BLOCKTRIDIAGSOLVE)
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsetindexset, HYPRE_BLOCKTRIDIAGSETINDEXSET)
-               (long int *solver, int *n, int *inds, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *n,
+    hypre_F90_IntArray *inds,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSetIndexSet( (HYPRE_Solver) *solver,
-                                                (int)          *n, 
-                                                (int *)         inds);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetIndexSet(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (n), 
+      hypre_F90_PassIntArray (inds));
 }
 
 /*--------------------------------------------------------------------------
@@ -92,10 +107,13 @@ hypre_F90_IFACE(hypre_blocktridiagsetindexset, HYPRE_BLOCKTRIDIAGSETINDEXSET)
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsetamgstrengt, HYPRE_BLOCKTRIDIAGSETAMGSTRENGT)
-               (long int *solver, double *thresh, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Dbl *thresh,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSetAMGStrengthThreshold( (HYPRE_Solver) *solver,
-                                                            (double)       *thresh);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetAMGStrengthThreshold(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassDbl (thresh));
 }
 
 /*--------------------------------------------------------------------------
@@ -104,10 +122,13 @@ hypre_F90_IFACE(hypre_blocktridiagsetamgstrengt, HYPRE_BLOCKTRIDIAGSETAMGSTRENGT
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsetamgnumswee, HYPRE_BLOCKTRIDIAGSETAMGNUMSWEE)
-               (long int *solver, int *num_sweeps, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *num_sweeps,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSetAMGNumSweeps( (HYPRE_Solver) *solver,
-                                                    (int)          *num_sweeps);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetAMGNumSweeps(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (num_sweeps));
 }
 
 /*--------------------------------------------------------------------------
@@ -116,10 +137,13 @@ hypre_F90_IFACE(hypre_blocktridiagsetamgnumswee, HYPRE_BLOCKTRIDIAGSETAMGNUMSWEE
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsetamgrelaxty, HYPRE_BLOCKTRIDIAGSETAMGRELAXTY)
-               (long int *solver, int *relax_type, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *relax_type,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSetAMGRelaxType( (HYPRE_Solver) *solver,
-                                                    (int)          *relax_type);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetAMGRelaxType(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (relax_type));
 }
 
 /*--------------------------------------------------------------------------
@@ -128,8 +152,11 @@ hypre_F90_IFACE(hypre_blocktridiagsetamgrelaxty, HYPRE_BLOCKTRIDIAGSETAMGRELAXTY
 
 void
 hypre_F90_IFACE(hypre_blocktridiagsetprintlevel, HYPRE_BLOCKTRIDIAGSETPRINTLEVEL)
-               (long int *solver, int *print_level, int *ierr)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *print_level,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) HYPRE_BlockTridiagSetPrintLevel( (HYPRE_Solver) *solver,
-                                                  (int)          *print_level);
+   *ierr = (hypre_F90_Int) HYPRE_BlockTridiagSetPrintLevel(
+      hypre_F90_PassObj (HYPRE_Solver, solver),
+      hypre_F90_PassInt (print_level));
 }

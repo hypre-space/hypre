@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlasq3_(integer *i0, integer *n0, doublereal *z__, 
+/* Subroutine */ HYPRE_Int dlasq3_(integer *i0, integer *n0, doublereal *z__, 
 	integer *pp, doublereal *dmin__, doublereal *sigma, doublereal *desig,
 	 doublereal *qmax, integer *nfail, integer *iter, integer *ndiv, 
 	logical *ieee)
@@ -81,7 +81,7 @@
     /* Local variables */
     static doublereal temp, s, t;
     static integer j4;
-    extern /* Subroutine */ int dlasq4_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlasq4_(integer *, integer *, doublereal *, 
 	    integer *, integer *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *, doublereal *, integer *)
 	    , dlasq5_(integer *, integer *, doublereal *, integer *, 

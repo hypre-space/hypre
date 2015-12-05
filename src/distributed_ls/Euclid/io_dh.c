@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 #include "io_dh.h"
@@ -27,7 +27,7 @@ FILE * openFile_dh(const char *filenameIN, const char *modeIN)
   FILE *fp = NULL;
 
   if ((fp = fopen(filenameIN, modeIN)) == NULL) {
-    sprintf(msgBuf_dh, "can't open file: %s for mode %s\n", filenameIN, modeIN);
+    hypre_sprintf(msgBuf_dh, "can't open file: %s for mode %s\n", filenameIN, modeIN);
     SET_ERROR(NULL, msgBuf_dh);
   }
   END_FUNC_VAL(fp)
@@ -43,18 +43,18 @@ void closeFile_dh(FILE *fpIN)
 }
 
 /*----------------------------------------------------------------*/
-void io_dh_print_ebin_mat_private(int m, int beg_row,
-                                int *rp, int *cval, double *aval, 
-                           int *n2o, int *o2n, Hash_i_dh hash, char *filename)
+void io_dh_print_ebin_mat_private(HYPRE_Int m, HYPRE_Int beg_row,
+                                HYPRE_Int *rp, HYPRE_Int *cval, double *aval, 
+                           HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename)
 {}
 
-extern void io_dh_read_ebin_mat_private(int *m, int **rp, int **cval,
+extern void io_dh_read_ebin_mat_private(HYPRE_Int *m, HYPRE_Int **rp, HYPRE_Int **cval,
                                      double **aval, char *filename)
 {}
 
-void io_dh_print_ebin_vec_private(int n, int beg_row, double *vals,
-                           int *n2o, int *o2n, Hash_i_dh hash, char *filename)
+void io_dh_print_ebin_vec_private(HYPRE_Int n, HYPRE_Int beg_row, double *vals,
+                           HYPRE_Int *n2o, HYPRE_Int *o2n, Hash_i_dh hash, char *filename)
 {}
 
-void io_dh_read_ebin_vec_private(int *n, double **vals, char *filename)
+void io_dh_read_ebin_vec_private(HYPRE_Int *n, double **vals, char *filename)
 {}

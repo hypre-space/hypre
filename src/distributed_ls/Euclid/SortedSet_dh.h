@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,15 +19,15 @@
 #include "euclid_common.h"
 
 struct _sortedset_dh {
-  int n;   /* max items that can be stored */
-  int *list;  /* list of inserted elements */
-  int count;  /* the number of elements in the list */
+  HYPRE_Int n;   /* max items that can be stored */
+  HYPRE_Int *list;  /* list of inserted elements */
+  HYPRE_Int count;  /* the number of elements in the list */
 };
 
-extern void SortedSet_dhCreate(SortedSet_dh *ss, int initialSize);
+extern void SortedSet_dhCreate(SortedSet_dh *ss, HYPRE_Int initialSize);
 extern void SortedSet_dhDestroy(SortedSet_dh ss);
-extern void SortedSet_dhInsert(SortedSet_dh ss, int idx);
-extern void SortedSet_dhGetList(SortedSet_dh ss, int **list, int *count);
+extern void SortedSet_dhInsert(SortedSet_dh ss, HYPRE_Int idx);
+extern void SortedSet_dhGetList(SortedSet_dh ss, HYPRE_Int **list, HYPRE_Int *count);
 
 
 #endif

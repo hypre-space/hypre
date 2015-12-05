@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,7 +33,7 @@ void Euclid_dhApply(Euclid_dh ctx, double *rhs, double *lhs)
   double *rhs_, *lhs_;
   double t1, t2;
 
-  t1 = MPI_Wtime();
+  t1 = hypre_MPI_Wtime();
 
   /* default settings; for everything except PILU */
   ctx->from = 0;
@@ -41,7 +41,7 @@ void Euclid_dhApply(Euclid_dh ctx, double *rhs, double *lhs)
 
   /* case 1: no preconditioning */
   if (! strcmp(ctx->algo_ilu, "none") || ! strcmp(ctx->algo_par, "none")) {
-    int i, m = ctx->m;
+    HYPRE_Int i, m = ctx->m;
     for (i=0; i<m; ++i) lhs[i] = rhs[i];
     goto END_OF_FUNCTION;
   } 
@@ -52,7 +52,7 @@ void Euclid_dhApply(Euclid_dh ctx, double *rhs, double *lhs)
   /* permute rhs vector */
   if (ctx->sg != NULL) {
 
-/* printf("@@@@@@@@@@@@@@@@@ permute_vec_n2o_private\n"); */
+/* hypre_printf("@@@@@@@@@@@@@@@@@ permute_vec_n2o_private\n"); */
 
     permute_vec_n2o_private(ctx, rhs, lhs); CHECK_V_ERROR;
     rhs_ = lhs;
@@ -65,7 +65,7 @@ void Euclid_dhApply(Euclid_dh ctx, double *rhs, double *lhs)
   /* scale rhs vector */
   if (ctx->isScaled) {
 
-/* printf("@@@@@@@@@@@@@@@@@ scale_rhs_private\n"); */
+/* hypre_printf("@@@@@@@@@@@@@@@@@ scale_rhs_private\n"); */
 
     scale_rhs_private(ctx, rhs_); CHECK_V_ERROR;
   }
@@ -100,7 +100,7 @@ void Euclid_dhApply(Euclid_dh ctx, double *rhs, double *lhs)
 
 END_OF_FUNCTION: ;
 
-  t2 = MPI_Wtime();
+  t2 = hypre_MPI_Wtime();
   /* collective timing for triangular solves */
   ctx->timing[TRI_SOLVE_T] += (t2 - t1); 
 
@@ -123,7 +123,7 @@ END_OF_FUNCTION: ;
 void scale_rhs_private(Euclid_dh ctx, double *rhs)
 {
   START_FUNC_DH
-  int i, m = ctx->m;
+  HYPRE_Int i, m = ctx->m;
   REAL_DH *scale = ctx->scale;
 
   /* if matrix was scaled, must scale the rhs */
@@ -142,8 +142,8 @@ void scale_rhs_private(Euclid_dh ctx, double *rhs)
 void permute_vec_o2n_private(Euclid_dh ctx, double *xIN, double *xOUT)
 {
   START_FUNC_DH
-  int i, m = ctx->m;
-  int *o2n = ctx->sg->o2n_col;
+  HYPRE_Int i, m = ctx->m;
+  HYPRE_Int *o2n = ctx->sg->o2n_col;
   for (i=0; i<m; ++i) xOUT[i] = xIN[o2n[i]];
   END_FUNC_DH
 }
@@ -154,8 +154,8 @@ void permute_vec_o2n_private(Euclid_dh ctx, double *xIN, double *xOUT)
 void permute_vec_n2o_private(Euclid_dh ctx, double *xIN, double *xOUT)
 {
   START_FUNC_DH
-  int i, m = ctx->m;
-  int *n2o = ctx->sg->n2o_row;
+  HYPRE_Int i, m = ctx->m;
+  HYPRE_Int *n2o = ctx->sg->n2o_row;
   for (i=0; i<m; ++i) xOUT[i] = xIN[n2o[i]];
   END_FUNC_DH
 }

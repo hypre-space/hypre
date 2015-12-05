@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -53,10 +53,10 @@ typedef struct {
 
 hypre_NumbersNode * hypre_NumbersNewNode(void);
 void hypre_NumbersDeleteNode( hypre_NumbersNode * node );
-int hypre_NumbersEnter( hypre_NumbersNode * node, const int n );
-int hypre_NumbersNEntered( hypre_NumbersNode * node );
-int hypre_NumbersQuery( hypre_NumbersNode * node, const int n );
-int * hypre_NumbersArray( hypre_NumbersNode * node );
+HYPRE_Int hypre_NumbersEnter( hypre_NumbersNode * node, const HYPRE_Int n );
+HYPRE_Int hypre_NumbersNEntered( hypre_NumbersNode * node );
+HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n );
+HYPRE_Int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 
 #endif

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -46,22 +46,22 @@ hypre_TimingCPUCount += time_getCPUSeconds()
  * hypre_InitializeTiming
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_InitializeTiming( const char *name )
 {
-   int      time_index;
+   HYPRE_Int      time_index;
 
    double  *old_wall_time;
    double  *old_cpu_time;
    double  *old_flops;
    char   **old_name;
-   int     *old_state;
-   int     *old_num_regs;
+   HYPRE_Int     *old_state;
+   HYPRE_Int     *old_num_regs;
 
-   int      new_name;
-   int      i;
+   HYPRE_Int      new_name;
+   HYPRE_Int      i;
 #ifdef HYPRE_USE_PTHREADS
-   int      threadid = hypre_GetThreadID();
+   HYPRE_Int      threadid = hypre_GetThreadID();
 #endif
 
    /*-------------------------------------------------------
@@ -133,9 +133,9 @@ hypre_InitializeTiming( const char *name )
          (hypre_global_timing_ref(threadid, name))      =
             hypre_CTAlloc(char *, (time_index+1));
          (hypre_global_timing_ref(threadid, state))     =
-            hypre_CTAlloc(int,    (time_index+1));
+            hypre_CTAlloc(HYPRE_Int,    (time_index+1));
          (hypre_global_timing_ref(threadid, num_regs))  =
-            hypre_CTAlloc(int,    (time_index+1));
+            hypre_CTAlloc(HYPRE_Int,    (time_index+1));
          (hypre_global_timing_ref(threadid, size)) ++;
 
          for (i = 0; i < time_index; i++)
@@ -170,14 +170,14 @@ hypre_InitializeTiming( const char *name )
  * hypre_FinalizeTiming
  *--------------------------------------------------------------------------*/
 
-int
-hypre_FinalizeTiming( int time_index )
+HYPRE_Int
+hypre_FinalizeTiming( HYPRE_Int time_index )
 {
-   int  ierr = 0;
-   int  i;
+   HYPRE_Int  ierr = 0;
+   HYPRE_Int  i;
 #ifdef HYPRE_USE_PTHREADS
-   int  threadid = hypre_GetThreadID();
-   int  free_global_timing;
+   HYPRE_Int  threadid = hypre_GetThreadID();
+   HYPRE_Int  free_global_timing;
 #endif
 
    if (hypre_global_timing == NULL)
@@ -258,12 +258,12 @@ hypre_FinalizeTiming( int time_index )
  * hypre_IncFLOPCount
  *--------------------------------------------------------------------------*/
 
-int
-hypre_IncFLOPCount( int inc )
+HYPRE_Int
+hypre_IncFLOPCount( HYPRE_Int inc )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 #ifdef HYPRE_USE_PTHREADS
-   int threadid = hypre_GetThreadID();
+   HYPRE_Int threadid = hypre_GetThreadID();
 #endif
 
    if (hypre_global_timing == NULL)
@@ -287,12 +287,12 @@ hypre_IncFLOPCount( int inc )
  * hypre_BeginTiming
  *--------------------------------------------------------------------------*/
 
-int
-hypre_BeginTiming( int time_index )
+HYPRE_Int
+hypre_BeginTiming( HYPRE_Int time_index )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 #ifdef HYPRE_USE_PTHREADS
-   int threadid = hypre_GetThreadID();
+   HYPRE_Int threadid = hypre_GetThreadID();
 #endif
 
    if (hypre_global_timing == NULL)
@@ -323,12 +323,12 @@ hypre_BeginTiming( int time_index )
  * hypre_EndTiming
  *--------------------------------------------------------------------------*/
 
-int
-hypre_EndTiming( int time_index )
+HYPRE_Int
+hypre_EndTiming( HYPRE_Int time_index )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 #ifdef HYPRE_USE_PTHREADS
-   int  threadid = hypre_GetThreadID();
+   HYPRE_Int  threadid = hypre_GetThreadID();
 #endif
 
    if (hypre_global_timing == NULL)
@@ -358,13 +358,13 @@ hypre_EndTiming( int time_index )
  * hypre_ClearTiming
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ClearTiming( )
 {
-   int  ierr = 0;
-   int  i;
+   HYPRE_Int  ierr = 0;
+   HYPRE_Int  i;
 #ifdef HYPRE_USE_PTHREADS
-   int  threadid = hypre_GetThreadID();
+   HYPRE_Int  threadid = hypre_GetThreadID();
 #endif
 
    if (hypre_global_timing == NULL)
@@ -386,11 +386,11 @@ hypre_ClearTiming( )
 
 #ifndef HYPRE_USE_PTHREADS  /* non-threaded version of hypre_PrintTiming */
 
-int
+HYPRE_Int
 hypre_PrintTiming( const char     *heading,
                    MPI_Comm        comm  )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    double  local_wall_time;
    double  local_cpu_time;
@@ -399,20 +399,20 @@ hypre_PrintTiming( const char     *heading,
    double  wall_mflops;
    double  cpu_mflops;
 
-   int     i;
-   int     myrank;
+   HYPRE_Int     i;
+   HYPRE_Int     myrank;
 
    if (hypre_global_timing == NULL)
       return ierr;
 
-   MPI_Comm_rank(comm, &myrank );
+   hypre_MPI_Comm_rank(comm, &myrank );
 
    /* print heading */
    if (myrank == 0)
    {
-      printf("=============================================\n");
-      printf("%s:\n", heading);
-      printf("=============================================\n");
+      hypre_printf("=============================================\n");
+      hypre_printf("%s:\n", heading);
+      hypre_printf("=============================================\n");
    }
 
    for (i = 0; i < (hypre_global_timing -> size); i++)
@@ -421,30 +421,30 @@ hypre_PrintTiming( const char     *heading,
       {
          local_wall_time = hypre_TimingWallTime(i);
          local_cpu_time  = hypre_TimingCPUTime(i);
-         MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                       MPI_DOUBLE, MPI_MAX, comm);
-         MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
-                       MPI_DOUBLE, MPI_MAX, comm);
+         hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
+                       hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
+         hypre_MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
+                       hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
 
          if (myrank == 0)
          {
-            printf("%s:\n", hypre_TimingName(i));
+            hypre_printf("%s:\n", hypre_TimingName(i));
 
             /* print wall clock info */
-            printf("  wall clock time = %f seconds\n", wall_time);
+            hypre_printf("  wall clock time = %f seconds\n", wall_time);
             if (wall_time)
                wall_mflops = hypre_TimingFLOPS(i) / wall_time / 1.0E6;
             else
                wall_mflops = 0.0;
-            printf("  wall MFLOPS     = %f\n", wall_mflops);
+            hypre_printf("  wall MFLOPS     = %f\n", wall_mflops);
 
             /* print CPU clock info */
-            printf("  cpu clock time  = %f seconds\n", cpu_time);
+            hypre_printf("  cpu clock time  = %f seconds\n", cpu_time);
             if (cpu_time)
                cpu_mflops = hypre_TimingFLOPS(i) / cpu_time / 1.0E6;
             else
                cpu_mflops = 0.0;
-            printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
+            hypre_printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
          }
       }
    }
@@ -454,18 +454,18 @@ hypre_PrintTiming( const char     *heading,
 
 #else /* threaded version of hypre_PrintTiming */
 
-#ifdef MPI_Comm_rank
-#undef MPI_Comm_rank
+#ifdef hypre_MPI_Comm_rank
+#undef hypre_MPI_Comm_rank
 #endif
-#ifdef MPI_Allreduce
-#undef MPI_Allreduce
+#ifdef hypre_MPI_Allreduce
+#undef hypre_MPI_Allreduce
 #endif
 
-int
+HYPRE_Int
 hypre_PrintTiming( const char     *heading,
                    MPI_Comm        comm  )
 {
-   int  ierr = 0;
+   HYPRE_Int  ierr = 0;
 
    double  local_wall_time;
    double  local_cpu_time;
@@ -474,12 +474,12 @@ hypre_PrintTiming( const char     *heading,
    double  wall_mflops;
    double  cpu_mflops;
 
-   int     i, j, index;
-   int     myrank;
-   int     my_thread = hypre_GetThreadID();
-   int     threadid;
-   int     max_size;
-   int     num_regs;
+   HYPRE_Int     i, j, index;
+   HYPRE_Int     myrank;
+   HYPRE_Int     my_thread = hypre_GetThreadID();
+   HYPRE_Int     threadid;
+   HYPRE_Int     max_size;
+   HYPRE_Int     num_regs;
 
    char    target_name[32];
 
@@ -488,14 +488,14 @@ hypre_PrintTiming( const char     *heading,
       if (hypre_global_timing == NULL)
          return ierr;
 
-      MPI_Comm_rank(comm, &myrank );
+      hypre_MPI_Comm_rank(comm, &myrank );
 
       /* print heading */
       if (myrank == 0)
       {
-         printf("=============================================\n");
-         printf("%s:\n", heading);
-         printf("=============================================\n");
+         hypre_printf("=============================================\n");
+         hypre_printf("%s:\n", heading);
+         hypre_printf("=============================================\n");
       }
 
       for (i = 0; i < 7; i++)
@@ -568,17 +568,17 @@ hypre_PrintTiming( const char     *heading,
                local_cpu_time  += hypre_TimingCPUTime(i);
             }
 
-            MPI_Allreduce(&local_wall_time, &wall_time, 1,
-                          MPI_DOUBLE, MPI_MAX, comm);
-            MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
-                          MPI_DOUBLE, MPI_MAX, comm);
+            hypre_MPI_Allreduce(&local_wall_time, &wall_time, 1,
+                          hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
+            hypre_MPI_Allreduce(&local_cpu_time, &cpu_time, 1,
+                          hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
 
             if (myrank == 0)
             {
-               printf("%s:\n", target_name);
+               hypre_printf("%s:\n", target_name);
 
                /* print wall clock info */
-               printf("  wall clock time = %f seconds\n", wall_time);
+               hypre_printf("  wall clock time = %f seconds\n", wall_time);
                wall_mflops = 0.0;
                if (wall_time)
                {
@@ -597,10 +597,10 @@ hypre_PrintTiming( const char     *heading,
                   }
                }
 
-               printf("  wall MFLOPS     = %f\n", wall_mflops);
+               hypre_printf("  wall MFLOPS     = %f\n", wall_mflops);
 
                /* print CPU clock info */
-               printf("  cpu clock time  = %f seconds\n", cpu_time);
+               hypre_printf("  cpu clock time  = %f seconds\n", cpu_time);
                cpu_mflops = 0.0;
                if (cpu_time)
                {
@@ -619,7 +619,7 @@ hypre_PrintTiming( const char     *heading,
                   }
                }
 
-               printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
+               hypre_printf("  cpu MFLOPS      = %f\n\n", cpu_mflops);
             }
          }
       }

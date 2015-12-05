@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,15 +30,15 @@
 
 typedef struct
 {
-   int      max_iter;
-   int      two_norm;
+   HYPRE_Int      max_iter;
+   HYPRE_Int      two_norm;
 
    hypre_CSRMatrix  *A;
    hypre_Vector  *p;
    hypre_Vector  *s;
    hypre_Vector  *r;
 
-   int    (*precond)();
+   HYPRE_Int    (*precond)();
    void    *precond_data;
 
    char    *log_file_name;

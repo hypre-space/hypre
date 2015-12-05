@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,26 +22,26 @@
 
 float *
 GenerateCoordinates( MPI_Comm comm,
-		     int      nx,
-		     int      ny,
-		     int      nz, 
-		     int      P,
-		     int      Q,
-		     int      R,
-		     int      p,
-		     int      q,
-		     int      r,
-		     int      coorddim)
+		     HYPRE_Int      nx,
+		     HYPRE_Int      ny,
+		     HYPRE_Int      nz, 
+		     HYPRE_Int      P,
+		     HYPRE_Int      Q,
+		     HYPRE_Int      R,
+		     HYPRE_Int      p,
+		     HYPRE_Int      q,
+		     HYPRE_Int      r,
+		     HYPRE_Int      coorddim)
 {
-   int ix, iy, iz;
-   int cnt;
+   HYPRE_Int ix, iy, iz;
+   HYPRE_Int cnt;
 
-   int nx_local, ny_local, nz_local;
-   int local_num_rows;
+   HYPRE_Int nx_local, ny_local, nz_local;
+   HYPRE_Int local_num_rows;
 
-   int *nx_part;
-   int *ny_part;
-   int *nz_part;
+   HYPRE_Int *nx_part;
+   HYPRE_Int *ny_part;
+   HYPRE_Int *nz_part;
 
    float *coord=NULL;
 

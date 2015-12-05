@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.2 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,7 +32,7 @@ headers.h
 @see HYPRE_StructLGMRESDestroy */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    hypre_LGMRESFunctions * lgmres_functions =
@@ -68,7 +68,7 @@ headers.h
 @see HYPRE_StructLGMRESCreate */
 /*--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructLGMRESDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_LGMRESDestroy( (void *) solver ) );
@@ -98,7 +98,7 @@ headers.h
 @see HYPRE_StructLGMRESSolve */
 /*--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructLGMRESSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -131,7 +131,7 @@ headers.h
 @see HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructLGMRESSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -160,7 +160,7 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup   */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
@@ -183,7 +183,7 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup   */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetAbsoluteTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
@@ -206,9 +206,9 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetMaxIter( HYPRE_StructSolver solver,
-                           int                max_iter )
+                           HYPRE_Int          max_iter )
 {
    return( HYPRE_LGMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -230,9 +230,9 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetKDim( HYPRE_StructSolver solver,
-                           int                k_dim )
+                           HYPRE_Int          k_dim )
 {
    return( HYPRE_LGMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
@@ -256,9 +256,9 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetAugDim( HYPRE_StructSolver solver,
-                           int                aug_dim )
+                           HYPRE_Int          aug_dim )
 {
    return( HYPRE_LGMRESSetAugDim( (HYPRE_Solver) solver, aug_dim ) );
 }
@@ -286,7 +286,7 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup*/
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetPrecond( HYPRE_StructSolver         solver,
                            HYPRE_PtrToStructSolverFcn precond,
                            HYPRE_PtrToStructSolverFcn precond_setup,
@@ -317,9 +317,9 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetLogging( HYPRE_StructSolver solver,
-                           int                logging )
+                           HYPRE_Int          logging )
 {
    return( HYPRE_LGMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -342,9 +342,9 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESSetPrintLevel( HYPRE_StructSolver solver,
-                           int                print_level )
+                           HYPRE_Int          print_level )
 {
    return( HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver) solver, print_level ) );
 }
@@ -366,9 +366,9 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESGetNumIterations( HYPRE_StructSolver  solver,
-                                 int                *num_iterations )
+                                 HYPRE_Int          *num_iterations )
 {
    return( HYPRE_LGMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
@@ -390,7 +390,7 @@ headers.h
 @see HYPRE_StructLGMRESSolve, HYPRE_StructLGMRESSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructLGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {

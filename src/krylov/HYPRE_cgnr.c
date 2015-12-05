@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,7 +30,7 @@
  * HYPRE_CGNRDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CGNRDestroy( HYPRE_Solver solver )
 {
    return( hypre_CGNRDestroy( (void *) solver ) );
@@ -40,7 +40,7 @@ HYPRE_CGNRDestroy( HYPRE_Solver solver )
  * HYPRE_CGNRSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CGNRSetup( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -53,7 +53,7 @@ HYPRE_CGNRSetup( HYPRE_Solver solver,
  * HYPRE_CGNRSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CGNRSolve( HYPRE_Solver solver,
                         HYPRE_Matrix A,
                         HYPRE_Vector b,
@@ -66,7 +66,7 @@ HYPRE_CGNRSolve( HYPRE_Solver solver,
  * HYPRE_CGNRSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
@@ -77,9 +77,9 @@ HYPRE_CGNRSetTol( HYPRE_Solver solver,
  * HYPRE_CGNRSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRSetMinIter( HYPRE_Solver solver,
-                             int                min_iter )
+                             HYPRE_Int                min_iter )
 {
    return( hypre_CGNRSetMinIter( (void *) solver, min_iter ) );
 }
@@ -88,9 +88,9 @@ HYPRE_CGNRSetMinIter( HYPRE_Solver solver,
  * HYPRE_CGNRSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRSetMaxIter( HYPRE_Solver solver,
-                             int                max_iter )
+                             HYPRE_Int                max_iter )
 {
    return( hypre_CGNRSetMaxIter( (void *) solver, max_iter ) );
 }
@@ -99,9 +99,9 @@ HYPRE_CGNRSetMaxIter( HYPRE_Solver solver,
  * HYPRE_CGNRSetStopCrit
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRSetStopCrit( HYPRE_Solver solver,
-                             int                stop_crit )
+                             HYPRE_Int                stop_crit )
 {
    return( hypre_CGNRSetStopCrit( (void *) solver, stop_crit ) );
 }
@@ -110,7 +110,7 @@ HYPRE_CGNRSetStopCrit( HYPRE_Solver solver,
  * HYPRE_CGNRSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRSetPrecond( HYPRE_Solver         solver,
                             HYPRE_PtrToSolverFcn precond,
                             HYPRE_PtrToSolverFcn precondT,
@@ -126,7 +126,7 @@ HYPRE_CGNRSetPrecond( HYPRE_Solver         solver,
  * HYPRE_CGNRGetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRGetPrecond( HYPRE_Solver   solver,
                             HYPRE_Solver  *precond_data_ptr )
 {
@@ -138,9 +138,9 @@ HYPRE_CGNRGetPrecond( HYPRE_Solver   solver,
  * HYPRE_CGNRSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRSetLogging( HYPRE_Solver solver,
-                             int logging)
+                             HYPRE_Int logging)
 {
    return( hypre_CGNRSetLogging( (void *) solver, logging ) );
 }
@@ -149,9 +149,9 @@ HYPRE_CGNRSetLogging( HYPRE_Solver solver,
  * HYPRE_CGNRGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRGetNumIterations( HYPRE_Solver  solver,
-                                   int                *num_iterations )
+                                   HYPRE_Int                *num_iterations )
 {
    return( hypre_CGNRGetNumIterations( (void *) solver, num_iterations ) );
 }
@@ -160,7 +160,7 @@ HYPRE_CGNRGetNumIterations( HYPRE_Solver  solver,
  * HYPRE_CGNRGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {

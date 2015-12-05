@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -24,18 +24,18 @@
 
 typedef void *hypre_ParaSails;
 
-int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj);
-int hypre_ParaSailsDestroy(hypre_ParaSails ps);
-int hypre_ParaSailsSetup(hypre_ParaSails obj,
-  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
-  double filter, double loadbal, int logging);
-int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
-  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels, 
-  int logging);
-int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
+HYPRE_Int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj);
+HYPRE_Int hypre_ParaSailsDestroy(hypre_ParaSails ps);
+HYPRE_Int hypre_ParaSailsSetup(hypre_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, HYPRE_Int sym, double thresh, HYPRE_Int nlevels,
+  double filter, double loadbal, HYPRE_Int logging);
+HYPRE_Int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, HYPRE_Int sym, double thresh, HYPRE_Int nlevels, 
+  HYPRE_Int logging);
+HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, double filter, double loadbal, 
-  int logging);
-int hypre_ParaSailsApply(hypre_ParaSails ps, double *u, double *v);
-int hypre_ParaSailsApplyTrans(hypre_ParaSails ps, double *u, double *v);
-int hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A);
+  HYPRE_Int logging);
+HYPRE_Int hypre_ParaSailsApply(hypre_ParaSails ps, double *u, double *v);
+HYPRE_Int hypre_ParaSailsApplyTrans(hypre_ParaSails ps, double *u, double *v);
+HYPRE_Int hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A);
 

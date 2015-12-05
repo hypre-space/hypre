@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,7 +22,7 @@
  * Started 11/28/95
  * George
  *
- * $Id: pblas1.c,v 2.6 2008/07/18 01:32:40 ulrikey Exp $
+ * $Id: pblas1.c,v 2.7 2010/12/20 19:27:34 falgout Exp $
  *
  */
 
@@ -36,7 +36,7 @@
 **************************************************************************/
 double hypre_p_dnrm2(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals)
 {
-  int incx=1;
+  HYPRE_Int incx=1;
   double sum;
 
   sum = SNRM2(&(ddist->ddist_lnrows), x, &incx);
@@ -51,7 +51,7 @@ double hypre_p_dnrm2(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *g
 double hypre_p_ddot(DataDistType *ddist, double *x, double *y,
               hypre_PilutSolverGlobals *globals)
 {
-  int incx=1;
+  HYPRE_Int incx=1;
 
   return hypre_GlobalSESumDouble(SDOT(&(ddist->ddist_lnrows), x, &incx, y, &incx), 
          pilut_comm );
@@ -63,7 +63,7 @@ double hypre_p_ddot(DataDistType *ddist, double *x, double *y,
 **************************************************************************/
 void hypre_p_daxy(DataDistType *ddist, double alpha, double *x, double *y)
 {
-  int i, local_lnrows=ddist->ddist_lnrows;
+  HYPRE_Int i, local_lnrows=ddist->ddist_lnrows;
 
   for (i=0; i<local_lnrows; i++)
     y[i] = alpha*x[i];
@@ -75,7 +75,7 @@ void hypre_p_daxy(DataDistType *ddist, double alpha, double *x, double *y)
 **************************************************************************/
 void hypre_p_daxpy(DataDistType *ddist, double alpha, double *x, double *y)
 {
-  int i, local_lnrows=ddist->ddist_lnrows;
+  HYPRE_Int i, local_lnrows=ddist->ddist_lnrows;
 
   for (i=0; i<local_lnrows; i++)
     y[i] += alpha*x[i];
@@ -89,7 +89,7 @@ void hypre_p_daxpy(DataDistType *ddist, double alpha, double *x, double *y)
 void hypre_p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta, 
               double *y, double *z)
 {
-  int i, local_lnrows=ddist->ddist_lnrows;
+  HYPRE_Int i, local_lnrows=ddist->ddist_lnrows;
 
   for (i=0; i<local_lnrows; i++)
     z[i] = alpha*x[i] + beta*y[i];
@@ -98,22 +98,22 @@ void hypre_p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta,
 /*************************************************************************
 * This function prints a vector
 **************************************************************************/
-int hypre_p_vprintf(DataDistType *ddist, double *x,
+HYPRE_Int hypre_p_vprintf(DataDistType *ddist, double *x,
                     hypre_PilutSolverGlobals *globals )
 {
-  int pe, i;
+  HYPRE_Int pe, i;
 
   for (pe=0; pe<npes; pe++) {
     if (mype == pe) {
       for (i=0; i<ddist->ddist_lnrows; i++)
-        printf("%d:%f, ", ddist->ddist_rowdist[mype]+i, x[i]);
+        hypre_printf("%d:%f, ", ddist->ddist_rowdist[mype]+i, x[i]);
       if (pe == npes-1)
-        printf("\n");
+        hypre_printf("\n");
     }
-    MPI_Barrier( pilut_comm );
+    hypre_MPI_Barrier( pilut_comm );
   }
   fflush(stdout);
-  MPI_Barrier( pilut_comm );
+  hypre_MPI_Barrier( pilut_comm );
 
   return 0;
 }

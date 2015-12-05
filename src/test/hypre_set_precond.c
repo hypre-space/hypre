@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -17,7 +17,7 @@
 #include "hypre_test.h"
 
 
-int hypre_set_precond(int matrix_id, int solver_id, int precond_id, void *solver,
+HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int precond_id, void *solver,
                       void *precond)
 {
   hypre_set_precond_params(precond_id, precond);
@@ -445,10 +445,10 @@ int hypre_set_precond(int matrix_id, int solver_id, int precond_id, void *solver
 }
 
 
-int hypre_set_precond_params(int precond_id, void *precond)
+HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
 {
-    int i;
-    int ierr;
+    HYPRE_Int i;
+    HYPRE_Int ierr;
 
 /* use BoomerAMG preconditioner */
     if (precond_id == HYPRE_BOOMERAMG)
@@ -491,7 +491,7 @@ int hypre_set_precond_params(int precond_id, void *precond)
 /* use ParaSails preconditioner */
       else if (precond_id == HYPRE_PARASAILS)
          {
-  	  HYPRE_ParaSailsCreate(MPI_COMM_WORLD, precond);
+  	  HYPRE_ParaSailsCreate(hypre_MPI_COMM_WORLD, precond);
           HYPRE_ParaSailsSetParams(precond, sai_threshold, max_levels);
           HYPRE_ParaSailsSetFilter(precond, sai_filter);
           HYPRE_ParaSailsSetLogging(precond, poutdat);
@@ -512,7 +512,7 @@ int hypre_set_precond_params(int precond_id, void *precond)
           num_grid_sweeps[0] = num_sweep;
           grid_relax_type[0] = relax_default;
           hypre_TFree (grid_relax_points[0]);
-          grid_relax_points[0] = hypre_CTAlloc(int, num_sweep);
+          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, num_sweep);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[0][i] = 0;
     
@@ -520,7 +520,7 @@ int hypre_set_precond_params(int precond_id, void *precond)
           num_grid_sweeps[1] = num_sweep;
           grid_relax_type[1] = relax_default;
           hypre_TFree (grid_relax_points[1]);
-          grid_relax_points[1] = hypre_CTAlloc(int, num_sweep);
+          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, num_sweep);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[1][i] = 0;
     
@@ -528,7 +528,7 @@ int hypre_set_precond_params(int precond_id, void *precond)
           num_grid_sweeps[2] = num_sweep;
           grid_relax_type[2] = relax_default;
           hypre_TFree (grid_relax_points[2]);
-          grid_relax_points[2] = hypre_CTAlloc(int, num_sweep);
+          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, num_sweep);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[2][i] = 0;
     
@@ -536,7 +536,7 @@ int hypre_set_precond_params(int precond_id, void *precond)
           num_grid_sweeps[3] = 1;
           grid_relax_type[3] = 9;
           hypre_TFree (grid_relax_points[3]);
-          grid_relax_points[3] = hypre_CTAlloc(int, 1);
+          grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, 1);
           grid_relax_points[3][0] = 0;
  
           HYPRE_BoomerAMGCreate(precond); 
@@ -574,12 +574,12 @@ int hypre_set_precond_params(int precond_id, void *precond)
 /* use PILUT as preconditioner */
       else if (precond_id == HYPRE_PILUT)
          {
-          ierr = HYPRE_ParCSRPilutCreate( MPI_COMM_WORLD, precond ); 
+          ierr = HYPRE_ParCSRPilutCreate( hypre_MPI_COMM_WORLD, precond ); 
          }
 }
 
 
-int hypre_destroy_precond(int precond_id, void *precond)
+HYPRE_Int hypre_destroy_precond(HYPRE_Int precond_id, void *precond)
 {
     
     if (precond_id == HYPRE_BICGSTAB)

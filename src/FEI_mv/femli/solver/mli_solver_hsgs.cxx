@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.13 $
+ * $Revision: 1.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -103,7 +103,7 @@ int MLI_Solver_HSGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
    for (iS = 0; iS < nSweeps_; iS++)
    {
       hypre_BoomerAMGRelax(A,f,NULL,relaxType,relaxPts,relaxWeights_,
-                           relaxOmega_,u,vTemp, zTemp);
+                           relaxOmega_,NULL,u,vTemp, zTemp);
       //hypre_ParVectorCopy( f, vTemp );
       //hypre_ParCSRMatrixMatvec( -1.0, A, u, 1.0, vTemp );
       //rnorm = sqrt(hypre_ParVectorInnerProd( vTemp, vTemp ));

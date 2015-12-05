@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,10 +27,10 @@
  * hypre_BoomerAMGCycle
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoomerAMGCGRelaxWt( void              *amg_vdata, 
-		   	  int 		     level,
-		   	  int 		     num_cg_sweeps,
+		   	  HYPRE_Int 		     level,
+		   	  HYPRE_Int 		     num_cg_sweeps,
 			  double 	    *rlx_wt_ptr)
 {
    hypre_ParAMGData *amg_data = amg_vdata;
@@ -51,29 +51,31 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVector    *Ztemp;
    hypre_ParVector    *Qtemp = NULL;
 
-   int     *CF_marker = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
+   HYPRE_Int     *CF_marker = hypre_ParAMGDataCFMarkerArray(amg_data)[level];
    double   *Ptemp_data;
    double   *Ztemp_data;
 
-   /* int     **unknown_map_array;
-   int     **point_map_array;
-   int     **v_at_point_array; */
+   /* HYPRE_Int     **unknown_map_array;
+   HYPRE_Int     **point_map_array;
+   HYPRE_Int     **v_at_point_array; */
 
 
-   int      *grid_relax_type;   
+   HYPRE_Int      *grid_relax_type;   
  
    /* Local variables  */
 
-   int       Solve_err_flag;
-   int       i, j, jj;
-   int       num_sweeps;
-   int       relax_type;
-   int       local_size;
-   int       old_size;
-   int       my_id = 0;
-   int       smooth_type;
-   int       smooth_num_levels;
-   int       smooth_option = 0;
+   HYPRE_Int       Solve_err_flag;
+   HYPRE_Int       i, j, jj;
+   HYPRE_Int       num_sweeps;
+   HYPRE_Int       relax_type;
+   HYPRE_Int       local_size;
+   HYPRE_Int       old_size;
+   HYPRE_Int       my_id = 0;
+   HYPRE_Int       smooth_type;
+   HYPRE_Int       smooth_num_levels;
+   HYPRE_Int       smooth_option = 0;
+
+   double   *l1_norms = NULL;
 
    double    alpha;
    double    beta;
@@ -94,7 +96,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    double   *S_vec;
 #endif
    
-   int num_threads;
+   HYPRE_Int num_threads;
 
    num_threads = hypre_NumThreads();
 
@@ -129,6 +131,9 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    hypre_ParVectorInitialize(Ztemp);
    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
 
+   if (hypre_ParAMGDataL1Norms(amg_data) != NULL)
+      l1_norms = hypre_ParAMGDataL1Norms(amg_data)[level];
+
    if (num_threads > 1)
    {
       
@@ -149,7 +154,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
    Solve_err_flag = 0;
 
    comm = hypre_ParCSRMatrixComm(A);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    if (smooth_num_levels > level)
    {
@@ -251,6 +256,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
                                                   0,
                                                   1.0,
                                                   1.0,
+                                                  l1_norms,
                                                   Ztemp,
                                                   Vtemp, 
                                                   Qtemp);
@@ -298,7 +304,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
          rlx_wt = 2.0/(lambda_min+lambda_max); */
 	 if (fabs(rlx_wt-rlx_wt_old) < 1.e-3 )
 	 {
-	    /* if (my_id == 0) printf (" cg sweeps : %d\n", (jj+1)); */
+	    /* if (my_id == 0) hypre_printf (" cg sweeps : %d\n", (jj+1)); */
 	    break;
 	 } 
       }
@@ -311,7 +317,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
       hypre_ParVectorAxpy(-alpha,Vtemp,Rtemp);
    }
    /*if (my_id == 0)
-	 printf (" lambda-min: %f  lambda-max: %f\n", lambda_min, lambda_max);
+	 hypre_printf (" lambda-min: %f  lambda-max: %f\n", lambda_min, lambda_max);
 
    rlx_wt = fabs(tridiag[0])+fabs(trioffd[1]);
 
@@ -356,16 +362,16 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
  * hypre_Bisection
  *--------------------------------------------------------------------------*/
 
-int
-hypre_Bisection(int n, double *diag, double *offd, 
+HYPRE_Int
+hypre_Bisection(HYPRE_Int n, double *diag, double *offd, 
 		double y, double z,
-		double tol, int k, double *ev_ptr)
+		double tol, HYPRE_Int k, double *ev_ptr)
 {
    double x;
    double eigen_value;
-   int ierr = 0;
-   int sign_change = 0;
-   int i;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int sign_change = 0;
+   HYPRE_Int i;
    double p0, p1, p2;
 
    while (fabs(y-z) > tol*(fabs(y) + fabs(z)))

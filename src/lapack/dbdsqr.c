@@ -14,7 +14,7 @@ static integer c__1 = 1;
 static doublereal c_b49 = 1.;
 static doublereal c_b72 = -1.;
 
-/* Subroutine */ int dbdsqr_(char *uplo, integer *n, integer *ncvt, integer *
+/* Subroutine */ HYPRE_Int dbdsqr_(char *uplo, integer *n, integer *ncvt, integer *
 	nru, integer *ncc, doublereal *d__, doublereal *e, doublereal *vt, 
 	integer *ldvt, doublereal *u, integer *ldu, doublereal *c__, integer *
 	ldc, doublereal *work, integer *info)
@@ -36,27 +36,27 @@ static doublereal c_b72 = -1.;
     static doublereal cosl;
     static integer isub, iter;
     static doublereal unfl, sinl, cosr, smin, smax, sinr;
-    extern /* Subroutine */ int drot_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ HYPRE_Int drot_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *), dlas2_(
 	    doublereal *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *);
     static doublereal f, g, h__;
     static integer i__, j, m;
     static doublereal r__;
-    extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     extern logical lsame_(char *, char *);
     static doublereal oldcs;
-    extern /* Subroutine */ int dlasr_(char *, char *, char *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlasr_(char *, char *, char *, integer *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *);
     static integer oldll;
     static doublereal shift, sigmn, oldsn;
-    extern /* Subroutine */ int dswap_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dswap_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static integer maxit;
     static doublereal sminl, sigmx;
     static logical lower;
-    extern /* Subroutine */ int dlasq1_(integer *, doublereal *, doublereal *,
+    extern /* Subroutine */ HYPRE_Int dlasq1_(integer *, doublereal *, doublereal *,
 	     doublereal *, integer *), dlasv2_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *);
@@ -64,7 +64,7 @@ static doublereal c_b72 = -1.;
     static integer ll;
     extern doublereal dlamch_(char *);
     static doublereal sn, mu;
-    extern /* Subroutine */ int dlartg_(doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlartg_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *), xerbla_(char *, 
 	    integer *);
     static doublereal sminoa, thresh;

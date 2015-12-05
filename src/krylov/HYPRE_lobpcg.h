@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -87,33 +87,33 @@ extern "C" {
 /**
  * LOBPCG constructor.
  */
-int HYPRE_LOBPCGCreate(mv_InterfaceInterpreter *interpreter,
+HYPRE_Int HYPRE_LOBPCGCreate(mv_InterfaceInterpreter *interpreter,
                        HYPRE_MatvecFunctions   *mvfunctions,
                        HYPRE_Solver            *solver);
 
 /**
  * LOBPCG destructor.
  */
-int HYPRE_LOBPCGDestroy(HYPRE_Solver solver);
+HYPRE_Int HYPRE_LOBPCGDestroy(HYPRE_Solver solver);
 
 /**
  * (Optional) Set the preconditioner to use.  If not called, preconditioning is
  * not used.
  **/
-int HYPRE_LOBPCGSetPrecond(HYPRE_Solver         solver, 
+HYPRE_Int HYPRE_LOBPCGSetPrecond(HYPRE_Solver         solver, 
                            HYPRE_PtrToSolverFcn precond, 
                            HYPRE_PtrToSolverFcn precond_setup, 
                            HYPRE_Solver         precond_solver);
 
 /**
  **/
-int HYPRE_LOBPCGGetPrecond(HYPRE_Solver  solver,
+HYPRE_Int HYPRE_LOBPCGGetPrecond(HYPRE_Solver  solver,
                            HYPRE_Solver *precond_data_ptr);
 
 /**
  * Set up {\tt A} and the preconditioner (if there is one).
  **/
-int HYPRE_LOBPCGSetup(HYPRE_Solver solver, 
+HYPRE_Int HYPRE_LOBPCGSetup(HYPRE_Solver solver, 
                       HYPRE_Matrix A,
                       HYPRE_Vector b,
                       HYPRE_Vector x);
@@ -121,21 +121,21 @@ int HYPRE_LOBPCGSetup(HYPRE_Solver solver,
 /**
  * (Optional) Set up {\tt B}.  If not called, B = I.
  **/
-int HYPRE_LOBPCGSetupB(HYPRE_Solver solver, 
+HYPRE_Int HYPRE_LOBPCGSetupB(HYPRE_Solver solver, 
                        HYPRE_Matrix B,
                        HYPRE_Vector x);
 
 /**
  * (Optional) Set the preconditioning to be applied to Tx = b, not Ax = b.
  **/
-int HYPRE_LOBPCGSetupT(HYPRE_Solver solver, 
+HYPRE_Int HYPRE_LOBPCGSetupT(HYPRE_Solver solver, 
                        HYPRE_Matrix T,
                        HYPRE_Vector x);
 
 /**
  * Solve A x = lambda B x, y'x = 0.
  **/
-int HYPRE_LOBPCGSolve(HYPRE_Solver       solver,
+HYPRE_Int HYPRE_LOBPCGSolve(HYPRE_Solver       solver,
                       mv_MultiVectorPtr  y, 
                       mv_MultiVectorPtr  x,
                       double            *lambda );
@@ -143,27 +143,27 @@ int HYPRE_LOBPCGSolve(HYPRE_Solver       solver,
 /**
  * (Optional) Set the absolute convergence tolerance.
  **/
-int HYPRE_LOBPCGSetTol(HYPRE_Solver solver,
+HYPRE_Int HYPRE_LOBPCGSetTol(HYPRE_Solver solver,
                        double       tol);
 
 /**
  * (Optional) Set maximum number of iterations.
  **/
-int HYPRE_LOBPCGSetMaxIter(HYPRE_Solver solver,
-                           int          max_iter);
+HYPRE_Int HYPRE_LOBPCGSetMaxIter(HYPRE_Solver solver,
+                           HYPRE_Int          max_iter);
 
 /**
  * Define which initial guess for inner PCG iterations to use: {\tt mode} = 0:
  * use zero initial guess, otherwise use RHS.
  **/
-int HYPRE_LOBPCGSetPrecondUsageMode(HYPRE_Solver solver,
-                                    int          mode);
+HYPRE_Int HYPRE_LOBPCGSetPrecondUsageMode(HYPRE_Solver solver,
+                                    HYPRE_Int          mode);
 
 /**
  * (Optional) Set the amount of printing to do to the screen.
  **/
-int HYPRE_LOBPCGSetPrintLevel(HYPRE_Solver solver,
-                              int          level);
+HYPRE_Int HYPRE_LOBPCGSetPrintLevel(HYPRE_Solver solver,
+                              HYPRE_Int          level);
 
 /* Returns the pointer to residual norms matrix (blockSize x 1) */
 utilities_FortranMatrix* 
@@ -178,7 +178,7 @@ utilities_FortranMatrix*
 HYPRE_LOBPCGEigenvaluesHistory(HYPRE_Solver solver);
 
 /* Returns the number of iterations performed by LOBPCG */
-int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
+HYPRE_Int HYPRE_LOBPCGIterations(HYPRE_Solver solver);
 
 void hypre_LOBPCGMultiOperatorB(void *data,
                                 void *x,

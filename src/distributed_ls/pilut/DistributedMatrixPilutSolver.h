@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -41,52 +41,52 @@
 
 typedef struct
 {
-MPI_Comm MPI_communicator;
-int mype, npes;
+MPI_Comm hypre_MPI_communicator;
+HYPRE_Int mype, npes;
 double _secpertick;
-int Mfactor;
-int *jr, *jw, lastjr, *lr, lastlr;	/* Work space */
+HYPRE_Int Mfactor;
+HYPRE_Int *jr, *jw, lastjr, *lr, lastlr;	/* Work space */
 double *w;				/* Work space */
-int firstrow, lastrow;			/* Matrix distribution parameters */
+HYPRE_Int firstrow, lastrow;			/* Matrix distribution parameters */
 timer SerTmr, ParTmr;
-int nrows, lnrows, ndone, ntogo, nleft; /* Various values used throught out */
-int maxnz;
-int *map;			        /* Map used for marking rows in the set */
+HYPRE_Int nrows, lnrows, ndone, ntogo, nleft; /* Various values used throught out */
+HYPRE_Int maxnz;
+HYPRE_Int *map;			        /* Map used for marking rows in the set */
 
-int *vrowdist;
+HYPRE_Int *vrowdist;
 
 /* Buffers for point to point communication */
-int pilu_recv[MAX_NPES];
-int pilu_send[MAX_NPES];
-int lu_recv[MAX_NPES];
+HYPRE_Int pilu_recv[MAX_NPES];
+HYPRE_Int pilu_send[MAX_NPES];
+HYPRE_Int lu_recv[MAX_NPES];
 
 #ifdef HYPRE_TIMING
   /* factorization */
-int CCI_timer;
-int SS_timer;
-int SFR_timer;
-int CR_timer;
-int FL_timer;
-int SLUD_timer;
-int SLUM_timer;
-int UL_timer;
-int FNR_timer;
-int SDSeptimer;
-int SDKeeptimer;
-int SDUSeptimer;
-int SDUKeeptimer;
+HYPRE_Int CCI_timer;
+HYPRE_Int SS_timer;
+HYPRE_Int SFR_timer;
+HYPRE_Int CR_timer;
+HYPRE_Int FL_timer;
+HYPRE_Int SLUD_timer;
+HYPRE_Int SLUM_timer;
+HYPRE_Int UL_timer;
+HYPRE_Int FNR_timer;
+HYPRE_Int SDSeptimer;
+HYPRE_Int SDKeeptimer;
+HYPRE_Int SDUSeptimer;
+HYPRE_Int SDUKeeptimer;
 
   /* solves */
-int Ll_timer;
-int Lp_timer;
-int Up_timer;
-int Ul_timer;
+HYPRE_Int Ll_timer;
+HYPRE_Int Lp_timer;
+HYPRE_Int Up_timer;
+HYPRE_Int Ul_timer;
 #endif
 
 } hypre_PilutSolverGlobals;
 
 /* DEFINES for global variables */
-#define pilut_comm (globals->MPI_communicator)
+#define pilut_comm (globals->hypre_MPI_communicator)
 #define mype (globals->mype)
 #define npes (globals->npes)
 #define _secpertick (globals->_secpertick)
@@ -119,8 +119,8 @@ int Ul_timer;
 
 
 /* prototype definitions for BLAS calls that are used */
-double SNRM2( int *, double *, int *);
-double SDOT(int *, double *, int *, double *, int *);
+double SNRM2( HYPRE_Int *, double *, HYPRE_Int *);
+double SDOT(HYPRE_Int *, double *, HYPRE_Int *, double *, HYPRE_Int *);
 
 
 /*--------------------------------------------------------------------------
@@ -139,9 +139,9 @@ typedef struct
   /* Input parameters */
   MPI_Comm               comm;
   HYPRE_DistributedMatrix  Matrix;
-  int                    gmaxnz;
+  HYPRE_Int                    gmaxnz;
   double                 tol;
-  int                    max_its;
+  HYPRE_Int                    max_its;
 
   /* Structure that is used internally and built from matrix */
   DataDistType          *DataDist;

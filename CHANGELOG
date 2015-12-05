@@ -7,19 +7,66 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.109 $
+# $Revision: 2.116 $
 #EHEADER**********************************************************************
-
 
 #=============================================================================
 # This file chronicles user-level changes to hypre, beginning with the most
 # recent release.
 #=============================================================================
 
+Version 2.7.0b released 2011/01/27
+
+- Added a new --enable-bigint feature that, when turned on, requires the user to
+  pass integers of size 'long long int' to hypre and enables ParCSR matrices with
+  more than 2 billion unknowns (previously a limitation due to 32-bit integers).
+  This feature is currently not available in the FEI or babel sections of hypre.
+  Added example 'ex5big.c' as an illustration of how to use this new feature.
+
+- Changed the Fortran interface to use a Fortran MPI communicator.  Previously,
+  users were required to call HYPRE_MPI_Comm_f2c() to convert their Fortran
+  communicator to a C communicator.  Fortran users will need to remove this call
+  from their code to use the new release.
+
+- Added a new version of the l1-SGS smoother in BoomerAMG as a replacement for
+  relax type 8.  This smoother behaves similarly to relax type 6 on matrices
+  with relatively small off-processor entries, but is guaranteed to always be
+  convergent.  The new smoother is also available in AMS as relax type 4.
+
+- Fixed some bugs in the coarsening routines for BoomerAMG.
+
+- Relaxed the power-of-two restrictions for the PFMG and SysPFMG solvers.  See
+  the reference manual for more details.  SMG still requires a power-of-two.
+
+- Fixed the constant-coefficient PFMG solvers.  Also changed the non-Galerkin
+  scheme slightly for the constant-coefficient variable-diagonal PFMG solver to
+  simplify the code and enable easier threading.
+
+- Fixed a bug in the Struct multigrid solvers for periodic problems when the
+  period is larger than the grid.
+
+- Fixed some OpenMP problems in the Struct and SStruct code.
 
 #====================================
 
-Version 2.6.0b released 2010/02/xx
+Version 2.6.1a released 2010/03/30
+
+- Made several bug fixes related to the new SetSharedPart() and FEM() routines:
+  Fixed a memory leak.  Fixed to allow SetSharedPart() or SetNeighborPart()
+  calls from any processor, even if the processor doesn't own data on 'part'.
+
+- Fixed a bug in the void-zone version of AMS, which sometimes produced a
+  non-symmetric preconditioner.
+
+- Added new smoothers to BoomerAMG (Chebyshev, FCF-Jacobi, and CG) and
+  AMS (Chebyshev).
+
+- Made some performance improvements to the implementation of the assumed
+  partition algorithm used in SStruct.
+
+#====================================
+
+Version 2.6.0b released 2010/02/04
 
 - Added a new interface routine to SStruct called GridSetSharedPart() which is
   used to describe how regions inside a part are shared with regions in other

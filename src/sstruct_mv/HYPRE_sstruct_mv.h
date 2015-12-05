@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.26 $
+ * $Revision: 2.28 $
  ***********************************************************************EHEADER*/
 
 
@@ -52,18 +52,6 @@ struct hypre_SStructGrid_struct;
  **/
 typedef struct hypre_SStructGrid_struct *HYPRE_SStructGrid;
 
-enum hypre_SStructVariable_enum
-{
-   HYPRE_SSTRUCT_VARIABLE_UNDEFINED = -1,
-   HYPRE_SSTRUCT_VARIABLE_CELL      =  0,
-   HYPRE_SSTRUCT_VARIABLE_NODE      =  1,
-   HYPRE_SSTRUCT_VARIABLE_XFACE     =  2,
-   HYPRE_SSTRUCT_VARIABLE_YFACE     =  3,
-   HYPRE_SSTRUCT_VARIABLE_ZFACE     =  4,
-   HYPRE_SSTRUCT_VARIABLE_XEDGE     =  5,
-   HYPRE_SSTRUCT_VARIABLE_YEDGE     =  6,
-   HYPRE_SSTRUCT_VARIABLE_ZEDGE     =  7
-};
 /**
  * An enumerated type that supports cell centered, node centered, face centered,
  * and edge centered variables.  Face centered variables are split into x-face,
@@ -105,16 +93,27 @@ enum hypre_SStructVariable_enum
  * processes, variables may be owned by multiple processes because they may be
  * associated with multiple cells.
  **/
-typedef enum hypre_SStructVariable_enum HYPRE_SStructVariable;
+typedef HYPRE_Int HYPRE_SStructVariable;
+
+#define HYPRE_SSTRUCT_VARIABLE_UNDEFINED -1
+#define HYPRE_SSTRUCT_VARIABLE_CELL       0
+#define HYPRE_SSTRUCT_VARIABLE_NODE       1
+#define HYPRE_SSTRUCT_VARIABLE_XFACE      2
+#define HYPRE_SSTRUCT_VARIABLE_YFACE      3
+#define HYPRE_SSTRUCT_VARIABLE_ZFACE      4
+#define HYPRE_SSTRUCT_VARIABLE_XEDGE      5
+#define HYPRE_SSTRUCT_VARIABLE_YEDGE      6
+#define HYPRE_SSTRUCT_VARIABLE_ZEDGE      7
 
 /**
  * Create an {\tt ndim}-dimensional grid object with {\tt nparts} structured
  * parts.
  **/
-int HYPRE_SStructGridCreate(MPI_Comm           comm,
-                            int                ndim,
-                            int                nparts,
-                            HYPRE_SStructGrid *grid);
+HYPRE_Int
+HYPRE_SStructGridCreate(MPI_Comm           comm,
+                        HYPRE_Int          ndim,
+                        HYPRE_Int          nparts,
+                        HYPRE_SStructGrid *grid);
 
 /**
  * Destroy a grid object.  An object should be explicitly destroyed using this
@@ -124,23 +123,26 @@ int HYPRE_SStructGridCreate(MPI_Comm           comm,
  * internal package references to the object.  The object will then be destroyed
  * when all internal reference counts go to zero.
  **/
-int HYPRE_SStructGridDestroy(HYPRE_SStructGrid grid);
+HYPRE_Int
+HYPRE_SStructGridDestroy(HYPRE_SStructGrid grid);
 
 /**
  * Set the extents for a box on a structured part of the grid.
  **/
-int HYPRE_SStructGridSetExtents(HYPRE_SStructGrid  grid,
-                                int                part,
-                                int               *ilower,
-                                int               *iupper);
+HYPRE_Int
+HYPRE_SStructGridSetExtents(HYPRE_SStructGrid  grid,
+                            HYPRE_Int          part,
+                            HYPRE_Int         *ilower,
+                            HYPRE_Int         *iupper);
 
 /**
  * Describe the variables that live on a structured part of the grid.
  **/
-int HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
-                                  int                    part,
-                                  int                    nvars,
-                                  HYPRE_SStructVariable *vartypes);
+HYPRE_Int
+HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
+                              HYPRE_Int              part,
+                              HYPRE_Int              nvars,
+                              HYPRE_SStructVariable *vartypes);
 
 /**
  * Describe additional variables that live at a particular index.  These
@@ -149,13 +151,13 @@ int HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
  *
  * NOTE: This routine is not yet supported.
  **/
-int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
-                                  int                    part,
-                                  int                   *index,
-                                  int                    nvars,
-                                  HYPRE_SStructVariable *vartypes);
+HYPRE_Int
+HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
+                              HYPRE_Int              part,
+                              HYPRE_Int             *index,
+                              HYPRE_Int              nvars,
+                              HYPRE_SStructVariable *vartypes);
 
-/* NEW */
 /**
  * Set the ordering of variables in a finite element problem.  This overrides
  * the default ordering described below.
@@ -178,9 +180,10 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  *
  * (0,-1,0), (0,1,0), (1,0,-1), (1,0,1), (2,-1,-1), (2,1,-1), (2,-1,1), (2,1,1)
  **/
-int HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
-                                    int                part,
-                                    int               *ordering);
+HYPRE_Int
+HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
+                                HYPRE_Int          part,
+                                HYPRE_Int         *ordering);
 
 /**
  * Describe how regions just outside of a part relate to other parts.  This is
@@ -216,17 +219,17 @@ int HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
  * tranformation, and the code determines this association by assuming that the
  * variable lists are as noted here.
  **/
-int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
-                                     int                part,
-                                     int               *ilower,
-                                     int               *iupper,
-                                     int                nbor_part,
-                                     int               *nbor_ilower,
-                                     int               *nbor_iupper,
-                                     int               *index_map,
-                                     int               *index_dir);
+HYPRE_Int
+HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
+                                 HYPRE_Int          part,
+                                 HYPRE_Int         *ilower,
+                                 HYPRE_Int         *iupper,
+                                 HYPRE_Int          nbor_part,
+                                 HYPRE_Int         *nbor_ilower,
+                                 HYPRE_Int         *nbor_iupper,
+                                 HYPRE_Int         *index_map,
+                                 HYPRE_Int         *index_dir);
 
-/* NEW */
 /**
  * Describe how regions inside a part are shared with regions in other parts.
  *
@@ -279,17 +282,18 @@ int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
  * particular tranformation, and the code determines this association by
  * assuming that the variable lists are as noted here.
  **/
-int HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
-                                   int                part,
-                                   int               *ilower,
-                                   int               *iupper,
-                                   int               *offset,
-                                   int                shared_part,
-                                   int               *shared_ilower,
-                                   int               *shared_iupper,
-                                   int               *shared_offset,
-                                   int               *index_map,
-                                   int               *index_dir);
+HYPRE_Int
+HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
+                               HYPRE_Int          part,
+                               HYPRE_Int         *ilower,
+                               HYPRE_Int         *iupper,
+                               HYPRE_Int         *offset,
+                               HYPRE_Int          shared_part,
+                               HYPRE_Int         *shared_ilower,
+                               HYPRE_Int         *shared_iupper,
+                               HYPRE_Int         *shared_offset,
+                               HYPRE_Int         *index_map,
+                               HYPRE_Int         *index_dir);
 
 /**
  * Add an unstructured part to the grid.  The variables in the unstructured part
@@ -299,14 +303,16 @@ int HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
  *
  * NOTE: This is just a placeholder.  This part of the interface is not finished.
  **/
-int HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
-                                         int               ilower,
-                                         int               iupper);
+HYPRE_Int
+HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
+                                     HYPRE_Int         ilower,
+                                     HYPRE_Int         iupper);
 
 /**
  * Finalize the construction of the grid before using.
  **/
-int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
+HYPRE_Int
+HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
 /**
  * Set the periodicity a particular part.
@@ -320,14 +326,16 @@ int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
  * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
  * of the periodic dimensions.
  **/
-int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
-                                 int                part,
-                                 int               *periodic);
+HYPRE_Int
+HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
+                             HYPRE_Int          part,
+                             HYPRE_Int         *periodic);
 /**
  * Setting ghost in the sgrids.
  **/
-int HYPRE_SStructGridSetNumGhost(HYPRE_SStructGrid grid,
-                                   int             *num_ghost);
+HYPRE_Int
+HYPRE_SStructGridSetNumGhost(HYPRE_SStructGrid  grid,
+                             HYPRE_Int         *num_ghost);
 
 /*@}*/
 
@@ -349,22 +357,25 @@ typedef struct hypre_SStructStencil_struct *HYPRE_SStructStencil;
  * Create a stencil object for the specified number of spatial dimensions and
  * stencil entries.
  **/
-int HYPRE_SStructStencilCreate(int                   ndim,
-                               int                   size,
-                               HYPRE_SStructStencil *stencil);
+HYPRE_Int
+HYPRE_SStructStencilCreate(HYPRE_Int             ndim,
+                           HYPRE_Int             size,
+                           HYPRE_SStructStencil *stencil);
 
 /**
  * Destroy a stencil object.
  **/
-int HYPRE_SStructStencilDestroy(HYPRE_SStructStencil stencil);
+HYPRE_Int
+HYPRE_SStructStencilDestroy(HYPRE_SStructStencil stencil);
 
 /**
  * Set a stencil entry.
  **/
-int HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
-                                 int                   entry,
-                                 int                  *offset,
-                                 int                   var);
+HYPRE_Int
+HYPRE_SStructStencilSetEntry(HYPRE_SStructStencil  stencil,
+                             HYPRE_Int             entry,
+                             HYPRE_Int            *offset,
+                             HYPRE_Int             var);
 
 /*@}*/
 
@@ -385,38 +396,40 @@ typedef struct hypre_SStructGraph_struct *HYPRE_SStructGraph;
 /**
  * Create a graph object.
  **/
-int HYPRE_SStructGraphCreate(MPI_Comm             comm,
-                             HYPRE_SStructGrid    grid,
-                             HYPRE_SStructGraph  *graph);
+HYPRE_Int
+HYPRE_SStructGraphCreate(MPI_Comm             comm,
+                         HYPRE_SStructGrid    grid,
+                         HYPRE_SStructGraph  *graph);
 
 /**
  * Destroy a graph object.
  **/
-int HYPRE_SStructGraphDestroy(HYPRE_SStructGraph graph);
+HYPRE_Int
+HYPRE_SStructGraphDestroy(HYPRE_SStructGraph graph);
 
-/* NEW */
 /**
  * Set the domain grid.
  **/
-int HYPRE_SStructGraphSetDomainGrid(HYPRE_SStructGraph graph,
-                                    HYPRE_SStructGrid  domain_grid);
+HYPRE_Int
+HYPRE_SStructGraphSetDomainGrid(HYPRE_SStructGraph graph,
+                                HYPRE_SStructGrid  domain_grid);
 
 /**
  * Set the stencil for a variable on a structured part of the grid.
  **/
-int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
-                                 int                  part,
-                                 int                  var,
-                                 HYPRE_SStructStencil stencil);
+HYPRE_Int
+HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
+                             HYPRE_Int            part,
+                             HYPRE_Int            var,
+                             HYPRE_SStructStencil stencil);
 
-/* NEW */
 /**
  * Indicate that an FEM approach will be used to set matrix values on this part.
  **/
-int HYPRE_SStructGraphSetFEM(HYPRE_SStructGraph graph,
-                             int                part);
+HYPRE_Int
+HYPRE_SStructGraphSetFEM(HYPRE_SStructGraph graph,
+                         HYPRE_Int          part);
 
-/* NEW */
 /**
  * Set the finite element stiffness matrix sparsity.  This overrides the default
  * full sparsity pattern described below.
@@ -430,10 +443,11 @@ int HYPRE_SStructGraphSetFEM(HYPRE_SStructGraph graph,
  * the values passed into the routine \Ref{HYPRE_SStructMatrixAddFEMValues} are
  * assumed to be by rows (that is, column indices vary fastest).
  **/
-int HYPRE_SStructGraphSetFEMSparsity(HYPRE_SStructGraph  graph,
-                                     int                 part,
-                                     int                 nsparse,
-                                     int                *sparsity);
+HYPRE_Int
+HYPRE_SStructGraphSetFEMSparsity(HYPRE_SStructGraph  graph,
+                                 HYPRE_Int           part,
+                                 HYPRE_Int           nsparse,
+                                 HYPRE_Int          *sparsity);
 
 /**
  * Add a non-stencil graph entry at a particular index.  This graph entry is
@@ -442,18 +456,20 @@ int HYPRE_SStructGraphSetFEMSparsity(HYPRE_SStructGraph  graph,
  * NOTE: Users are required to set graph entries on all processes that own the
  * associated variables.  This means that some data will be multiply defined.
  **/
-int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 int                  to_part,
-                                 int                 *to_index,
-                                 int                  to_var);
+HYPRE_Int
+HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
+                             HYPRE_Int            part,
+                             HYPRE_Int           *index,
+                             HYPRE_Int            var,
+                             HYPRE_Int            to_part,
+                             HYPRE_Int           *to_index,
+                             HYPRE_Int            to_var);
 
 /**
  * Finalize the construction of the graph before using.
  **/
-int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
+HYPRE_Int
+HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
 
 /**
  * Set the storage type of the associated matrix object.  It is used before
@@ -464,8 +480,9 @@ int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
  *
  * @see HYPRE_SStructMatrixSetObjectType
  **/
-  int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
-                                      int                 type);
+HYPRE_Int
+HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
+                                HYPRE_Int           type);
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -485,19 +502,22 @@ typedef struct hypre_SStructMatrix_struct *HYPRE_SStructMatrix;
 /**
  * Create a matrix object.
  **/
-int HYPRE_SStructMatrixCreate(MPI_Comm              comm,
-                              HYPRE_SStructGraph    graph,
-                              HYPRE_SStructMatrix  *matrix);
+HYPRE_Int
+HYPRE_SStructMatrixCreate(MPI_Comm              comm,
+                          HYPRE_SStructGraph    graph,
+                          HYPRE_SStructMatrix  *matrix);
 
 /**
  * Destroy a matrix object.
  **/
-int HYPRE_SStructMatrixDestroy(HYPRE_SStructMatrix matrix);
+HYPRE_Int
+HYPRE_SStructMatrixDestroy(HYPRE_SStructMatrix matrix);
 
 /**
  * Prepare a matrix object for setting coefficient values.
  **/
-int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
+HYPRE_Int
+HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
 
 /**
  * Set matrix coefficients index by index.  The {\tt values} array is of length
@@ -519,13 +539,14 @@ int HYPRE_SStructMatrixInitialize(HYPRE_SStructMatrix matrix);
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 int                  nentries,
-                                 int                 *entries,
-                                 double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
+                             HYPRE_Int            part,
+                             HYPRE_Int           *index,
+                             HYPRE_Int            var,
+                             HYPRE_Int            nentries,
+                             HYPRE_Int           *entries,
+                             double              *values);
 
 /**
  * Add to matrix coefficients index by index.  The {\tt values} array is of
@@ -546,15 +567,15 @@ int HYPRE_SStructMatrixSetValues(HYPRE_SStructMatrix  matrix,
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
-                                   int                  part,
-                                   int                 *index,
-                                   int                  var,
-                                   int                  nentries,
-                                   int                 *entries,
-                                   double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
+                               HYPRE_Int            part,
+                               HYPRE_Int           *index,
+                               HYPRE_Int            var,
+                               HYPRE_Int            nentries,
+                               HYPRE_Int           *entries,
+                               double              *values);
 
-/* NEW */
 /**
  * Add finite element stiffness matrix coefficients index by index.  The layout
  * of the data in {\tt values} is determined by the routines
@@ -566,10 +587,11 @@ int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
-                                    int                  part,
-                                    int                 *index,
-                                    double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                double              *values);
 
 /**
  * Get matrix coefficients index by index.  The {\tt values} array is of length
@@ -590,13 +612,14 @@ int HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 int                  nentries,
-                                 int                 *entries,
-                                 double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
+                             HYPRE_Int            part,
+                             HYPRE_Int           *index,
+                             HYPRE_Int            var,
+                             HYPRE_Int            nentries,
+                             HYPRE_Int           *entries,
+                             double              *values);
 
 /**
  * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
@@ -627,14 +650,15 @@ int HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
-                                    int                  part,
-                                    int                 *ilower,
-                                    int                 *iupper,
-                                    int                  var,
-                                    int                  nentries,
-                                    int                 *entries,
-                                    double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *ilower,
+                                HYPRE_Int           *iupper,
+                                HYPRE_Int            var,
+                                HYPRE_Int            nentries,
+                                HYPRE_Int           *entries,
+                                double              *values);
 
 /**
  * Add to matrix coefficients a box at a time.  The data in {\tt values} is
@@ -651,14 +675,15 @@ int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
-                                      int                  part,
-                                      int                 *ilower,
-                                      int                 *iupper,
-                                      int                  var,
-                                      int                  nentries,
-                                      int                 *entries,
-                                      double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int           *ilower,
+                                  HYPRE_Int           *iupper,
+                                  HYPRE_Int            var,
+                                  HYPRE_Int            nentries,
+                                  HYPRE_Int           *entries,
+                                  double              *values);
 
 /**
  * Get matrix coefficients a box at a time.  The data in {\tt values} is
@@ -674,19 +699,21 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
  *
  * @see HYPRE_SStructMatrixSetComplex
  **/
-int HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
-                                    int                  part,
-                                    int                 *ilower,
-                                    int                 *iupper,
-                                    int                  var,
-                                    int                  nentries,
-                                    int                 *entries,
-                                    double              *values);
+HYPRE_Int
+HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *ilower,
+                                HYPRE_Int           *iupper,
+                                HYPRE_Int            var,
+                                HYPRE_Int            nentries,
+                                HYPRE_Int           *entries,
+                                double              *values);
 
 /**
  * Finalize the construction of the matrix before using.
  **/
-int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
+HYPRE_Int
+HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The
@@ -700,17 +727,19 @@ int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
  * By default, matrices are assumed to be nonsymmetric.  Significant
  * storage savings can be made if the matrix is symmetric.
  **/
-int HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix matrix,
-                                    int                 part,
-                                    int                 var,
-                                    int                 to_var,
-                                    int                 symmetric);
+HYPRE_Int
+HYPRE_SStructMatrixSetSymmetric(HYPRE_SStructMatrix matrix,
+                                HYPRE_Int           part,
+                                HYPRE_Int           var,
+                                HYPRE_Int           to_var,
+                                HYPRE_Int           symmetric);
 
 /**
  * Define symmetry properties for all non-stencil matrix entries.
  **/
-int HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
-                                      int                 symmetric);
+HYPRE_Int
+HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
+                                  HYPRE_Int           symmetric);
 
 /**
  * Set the storage type of the matrix object to be constructed.  Currently, {\tt
@@ -719,28 +748,32 @@ int HYPRE_SStructMatrixSetNSSymmetric(HYPRE_SStructMatrix matrix,
  *
  * @see HYPRE_SStructMatrixGetObject
  **/
-int HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
-                                     int                  type);
+HYPRE_Int
+HYPRE_SStructMatrixSetObjectType(HYPRE_SStructMatrix  matrix,
+                                 HYPRE_Int            type);
 
 /**
  * Get a reference to the constructed matrix object.
  *
  * @see HYPRE_SStructMatrixSetObjectType
  **/
-int HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
-                                 void                **object);
+HYPRE_Int
+HYPRE_SStructMatrixGetObject(HYPRE_SStructMatrix   matrix,
+                             void                **object);
 
 /**
  * Set the matrix to be complex.
  **/
-int HYPRE_SStructMatrixSetComplex(HYPRE_SStructMatrix matrix);
+HYPRE_Int
+HYPRE_SStructMatrixSetComplex(HYPRE_SStructMatrix matrix);
 
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_SStructMatrixPrint(const char          *filename,
-                             HYPRE_SStructMatrix  matrix,
-                             int                  all);
+HYPRE_Int
+HYPRE_SStructMatrixPrint(const char          *filename,
+                         HYPRE_SStructMatrix  matrix,
+                         HYPRE_Int            all);
 
 /*@}*/
 
@@ -761,19 +794,22 @@ typedef struct hypre_SStructVector_struct *HYPRE_SStructVector;
 /**
  * Create a vector object.
  **/
-int HYPRE_SStructVectorCreate(MPI_Comm              comm,
-                              HYPRE_SStructGrid     grid,
-                              HYPRE_SStructVector  *vector);
+HYPRE_Int
+HYPRE_SStructVectorCreate(MPI_Comm              comm,
+                          HYPRE_SStructGrid     grid,
+                          HYPRE_SStructVector  *vector);
 
 /**
  * Destroy a vector object.
  **/
-int HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
+HYPRE_Int
+HYPRE_SStructVectorDestroy(HYPRE_SStructVector vector);
 
 /**
  * Prepare a vector object for setting coefficient values.
  **/
-int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
+HYPRE_Int
+HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
 
 /**
  * Set vector coefficients index by index.
@@ -789,11 +825,12 @@ int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 double              *value);
+HYPRE_Int
+HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
+                             HYPRE_Int            part,
+                             HYPRE_Int           *index,
+                             HYPRE_Int            var,
+                             double              *value);
 
 /**
  * Add to vector coefficients index by index.
@@ -809,13 +846,13 @@ int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
-                                   int                  part,
-                                   int                 *index,
-                                   int                  var,
-                                   double              *value);
+HYPRE_Int
+HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
+                               HYPRE_Int            part,
+                               HYPRE_Int           *index,
+                               HYPRE_Int            var,
+                               double              *value);
 
-/* NEW */
 /**
  * Add finite element vector coefficients index by index.  The layout of the
  * data in {\tt values} is determined by the routine
@@ -826,10 +863,11 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
-                                    int                  part,
-                                    int                 *index,
-                                    double              *values);
+HYPRE_Int
+HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *index,
+                                double              *values);
 
 /**
  * Get vector coefficients index by index.
@@ -845,11 +883,12 @@ int HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 double              *value);
+HYPRE_Int
+HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
+                             HYPRE_Int            part,
+                             HYPRE_Int           *index,
+                             HYPRE_Int            var,
+                             double              *value);
 
 /**
  * Set vector coefficients a box at a time.  The data in {\tt values} is ordered
@@ -874,12 +913,13 @@ int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
-                                    int                  part,
-                                    int                 *ilower,
-                                    int                 *iupper,
-                                    int                  var,
-                                    double              *values);
+HYPRE_Int
+HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *ilower,
+                                HYPRE_Int           *iupper,
+                                HYPRE_Int            var,
+                                double              *values);
 
 /**
  * Add to vector coefficients a box at a time.  The data in {\tt values} is
@@ -893,12 +933,13 @@ int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
-                                      int                  part,
-                                      int                 *ilower,
-                                      int                 *iupper,
-                                      int                  var,
-                                      double              *values);
+HYPRE_Int
+HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
+                                  HYPRE_Int            part,
+                                  HYPRE_Int           *ilower,
+                                  HYPRE_Int           *iupper,
+                                  HYPRE_Int            var,
+                                  double              *values);
 
 /**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
@@ -912,17 +953,19 @@ int HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
  *
  * @see HYPRE_SStructVectorSetComplex
  **/
-int HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
-                                    int                  part,
-                                    int                 *ilower,
-                                    int                 *iupper,
-                                    int                  var,
-                                    double              *values);
+HYPRE_Int
+HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
+                                HYPRE_Int            part,
+                                HYPRE_Int           *ilower,
+                                HYPRE_Int           *iupper,
+                                HYPRE_Int            var,
+                                double              *values);
 
 /**
  * Finalize the construction of the vector before using.
  **/
-int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
+HYPRE_Int
+HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
 
 /**
  * Gather vector data so that efficient {\tt GetValues} can be done.  This
@@ -930,7 +973,8 @@ int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
  * correct and consistent values are returned, especially for non cell-centered
  * data that is shared between more than one processor.
  **/
-int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
+HYPRE_Int
+HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
 /**
  * Set the storage type of the vector object to be constructed.  Currently, {\tt
@@ -939,28 +983,32 @@ int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
  *
  * @see HYPRE_SStructVectorGetObject
  **/
-int HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
-                                     int                  type);
+HYPRE_Int
+HYPRE_SStructVectorSetObjectType(HYPRE_SStructVector  vector,
+                                 HYPRE_Int            type);
 
 /**
  * Get a reference to the constructed vector object.
  *
  * @see HYPRE_SStructVectorSetObjectType
  **/
-int HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
-                                 void                **object);
+HYPRE_Int
+HYPRE_SStructVectorGetObject(HYPRE_SStructVector   vector,
+                             void                **object);
 
 /**
  * Set the vector to be complex.
  **/
-int HYPRE_SStructVectorSetComplex(HYPRE_SStructVector vector);
+HYPRE_Int
+HYPRE_SStructVectorSetComplex(HYPRE_SStructVector vector);
 
 /**
  * Print the vector to file.  This is mainly for debugging purposes.
  **/
-int HYPRE_SStructVectorPrint(const char          *filename,
-                             HYPRE_SStructVector  vector,
-                             int                  all);
+HYPRE_Int
+HYPRE_SStructVectorPrint(const char          *filename,
+                         HYPRE_SStructVector  vector,
+                         HYPRE_Int            all);
 
 /*@}*/
 /*@}*/

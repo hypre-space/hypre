@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,10 +26,10 @@
  *   If p <= 0, it returns a -1.
  *--------------------------------------------------------------------------*/
 
-int
-hypre_Log2(int p)
+HYPRE_Int
+hypre_Log2(HYPRE_Int p)
 {
-   int  e;
+   HYPRE_Int  e;
 
    if (p <= 0)
       return -1;

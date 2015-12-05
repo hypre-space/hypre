@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -41,17 +41,17 @@
  * HYPRE_ConvertParCSRMatrixToDistributedMatrix
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ConvertParCSRMatrixToDistributedMatrix( 
                  HYPRE_ParCSRMatrix parcsr_matrix,
                  HYPRE_DistributedMatrix *DistributedMatrix )
 {
-   int ierr;
+   HYPRE_Int ierr;
    MPI_Comm comm;
-   int M, N;
+   HYPRE_Int M, N;
 
 #ifdef HYPRE_TIMING
-   int           timer;
+   HYPRE_Int           timer;
    timer = hypre_InitializeTiming( "ConvertParCSRMatrisToDistributedMatrix");
    hypre_BeginTiming( timer );
 #endif

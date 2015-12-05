@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,18 +22,18 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
-HYPRE_SStructStencilCreate( int                   ndim,
-                            int                   size,
+HYPRE_Int
+HYPRE_SStructStencilCreate( HYPRE_Int             ndim,
+                            HYPRE_Int             size,
                             HYPRE_SStructStencil *stencil_ptr )
 {
    hypre_SStructStencil  *stencil;
    hypre_StructStencil   *sstencil;
-   int                   *vars;
+   HYPRE_Int             *vars;
 
    stencil = hypre_TAlloc(hypre_SStructStencil, 1);
    HYPRE_StructStencilCreate(ndim, size, &sstencil);
-   vars = hypre_CTAlloc(int, hypre_StructStencilSize(sstencil));
+   vars = hypre_CTAlloc(HYPRE_Int, hypre_StructStencilSize(sstencil));
 
    hypre_SStructStencilSStencil(stencil) = sstencil;
    hypre_SStructStencilVars(stencil)     = vars;
@@ -47,7 +47,7 @@ HYPRE_SStructStencilCreate( int                   ndim,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
 {
    if (stencil)
@@ -67,11 +67,11 @@ HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil  stencil,
-                              int                   entry,
-                              int                  *offset,
-                              int                   var )
+                              HYPRE_Int             entry,
+                              HYPRE_Int            *offset,
+                              HYPRE_Int             var )
 {
    hypre_StructStencil  *sstencil = hypre_SStructStencilSStencil(stencil);
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -24,18 +24,18 @@
  * hypre_StructAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_StructAxpy( double              alpha,
                   hypre_StructVector *x,
                   hypre_StructVector *y     )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
                  
-   int               xi;
-   int               yi;
+   HYPRE_Int         xi;
+   HYPRE_Int         yi;
                     
    double           *xp;
    double           *yp;
@@ -46,8 +46,8 @@ hypre_StructAxpy( double              alpha,
    hypre_IndexRef    start;
    hypre_Index       unit_stride;
                     
-   int               i;
-   int               loopi, loopj, loopk;
+   HYPRE_Int         i;
+   HYPRE_Int         loopi, loopj, loopk;
 
    hypre_SetIndex(unit_stride, 1, 1, 1);
 

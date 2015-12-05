@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,18 +34,19 @@ typedef struct hypre_StructVector_struct
    hypre_BoxArray       *data_space;
 
    double               *data;         /* Pointer to vector data */
-   int                   data_alloced; /* Boolean used for freeing data */
-   int                   data_size;    /* Size of vector data */
-   int                  *data_indices; /* num-boxes array of indices into
+   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
+   HYPRE_Int             data_size;    /* Size of vector data */
+   HYPRE_Int            *data_indices; /* num-boxes array of indices into
                                           the data array.  data_indices[b]
                                           is the starting index of vector
                                           data corresponding to box b. */
                       
-   int                   num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             num_ghost[6]; /* Num ghost layers in each direction */
+   HYPRE_Int             bghost_not_clear; /* Are boundary ghosts clear? */
                       
-   int                   global_size;  /* Total number coefficients */
+   HYPRE_Int             global_size;  /* Total number coefficients */
 
-   int                   ref_count;
+   HYPRE_Int             ref_count;
 
 } hypre_StructVector;
 
@@ -61,6 +62,7 @@ typedef struct hypre_StructVector_struct
 #define hypre_StructVectorDataSize(vector)      ((vector) -> data_size)
 #define hypre_StructVectorDataIndices(vector)   ((vector) -> data_indices)
 #define hypre_StructVectorNumGhost(vector)      ((vector) -> num_ghost)
+#define hypre_StructVectorBGhostNotClear(vector)((vector) -> bghost_not_clear)
 #define hypre_StructVectorGlobalSize(vector)    ((vector) -> global_size)
 #define hypre_StructVectorRefCount(vector)      ((vector) -> ref_count)
  

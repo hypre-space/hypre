@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -19,9 +19,9 @@
 #include "blas_dh.h"
 
 extern void bicgstab_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, 
-                                                              int *itsOUT);
+                                                              HYPRE_Int *itsOUT);
 
 extern void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, 
-                                                              int *itsOUT);
+                                                              HYPRE_Int *itsOUT);
 
 #endif

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,8 +34,8 @@ union box_memory
 
 static union box_memory *s_free      = NULL;
 static union box_memory *s_finalize  = NULL;
-static int               s_at_a_time = 1000;
-static int               s_count     = 0;
+static HYPRE_Int         s_at_a_time = 1000;
+static HYPRE_Int         s_count     = 0;
 
 /*--------------------------------------------------------------------------
  * Allocate a new block of memory and thread it into the free list.  The
@@ -43,12 +43,12 @@ static int               s_count     = 0;
  * the hypre_BoxFinalizeMemory() routine to remove memory leaks.
  *--------------------------------------------------------------------------*/
 
-static int
+static HYPRE_Int
 hypre_AllocateBoxBlock()
 {
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
    union box_memory *ptr;
-   int               i;
+   HYPRE_Int         i;
 
    ptr = hypre_TAlloc(union box_memory, s_at_a_time);
    ptr[0].d_next = s_finalize;
@@ -67,10 +67,10 @@ hypre_AllocateBoxBlock()
  * Set up the allocation block size and allocate the first memory block.
  *--------------------------------------------------------------------------*/
 
-int
-hypre_BoxInitializeMemory( const int at_a_time )
+HYPRE_Int
+hypre_BoxInitializeMemory( const HYPRE_Int at_a_time )
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    if (at_a_time > 0)
    {
@@ -86,10 +86,10 @@ hypre_BoxInitializeMemory( const int at_a_time )
  * in the finalize list are freed.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxFinalizeMemory()
 {
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
    union box_memory *byebye;
 
    while (s_finalize)
@@ -129,10 +129,10 @@ hypre_BoxAlloc()
  * Put a box back on the free list.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_BoxFree( hypre_Box *box )
 {
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
    union box_memory *ptr = (union box_memory *) box;
 
    (ptr -> d_next) = s_free;

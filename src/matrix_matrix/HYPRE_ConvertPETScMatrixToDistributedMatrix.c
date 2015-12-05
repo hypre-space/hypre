@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -42,16 +42,16 @@
  * HYPRE_ConvertPETScMatrixToDistributedMatrix
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_ConvertPETScMatrixToDistributedMatrix( 
                  Mat PETSc_matrix,
                  HYPRE_DistributedMatrix *DistributedMatrix )
 {
-   int ierr;
-   MPI_Comm MPI_Comm;
-   int M, N;
+   HYPRE_Int ierr;
+   MPI_Comm hypre_MPI_Comm;
+   HYPRE_Int M, N;
 #ifdef HYPRE_TIMING
-   int           timer;
+   HYPRE_Int           timer;
 #endif
 
 

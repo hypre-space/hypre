@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -23,13 +23,13 @@
 
 #define HYPRE_USING_THREAD_MPISTUBS
 
-int
-hypre_thread_MPI_Init( int    *argc,
+HYPRE_Int
+hypre_thread_MPI_Init( hypre_int    *argc,
           char ***argv)
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Init(argc,argv);
@@ -46,8 +46,8 @@ double
 hypre_thread_MPI_Wtime( )
 {
   double returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Wtime();
@@ -64,8 +64,8 @@ double
 hypre_thread_MPI_Wtick( )
 {
   double returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Wtick();
@@ -77,12 +77,12 @@ hypre_thread_MPI_Wtick( )
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Barrier( MPI_Comm comm )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Barrier(comm);
@@ -95,12 +95,12 @@ hypre_thread_MPI_Barrier( MPI_Comm comm )
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Finalize( )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -113,13 +113,13 @@ hypre_thread_MPI_Finalize( )
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Comm_group( MPI_Comm   comm,
                 MPI_Group *group )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Comm_group(comm,group );
@@ -131,13 +131,13 @@ hypre_thread_MPI_Comm_group( MPI_Comm   comm,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Comm_dup( MPI_Comm  comm,
               MPI_Comm *newcomm )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Comm_dup(comm,newcomm);
@@ -149,15 +149,15 @@ hypre_thread_MPI_Comm_dup( MPI_Comm  comm,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Group_incl( MPI_Group  group,
-                int        n,
-                int       *ranks,
+                HYPRE_Int        n,
+                HYPRE_Int       *ranks,
                 MPI_Group *newgroup )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Group_incl(group,n,ranks,newgroup );
@@ -169,14 +169,14 @@ hypre_thread_MPI_Group_incl( MPI_Group  group,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Comm_create( MPI_Comm  comm,
                  MPI_Group group,
                  MPI_Comm *newcomm )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Comm_create(comm,group,newcomm );
@@ -188,19 +188,19 @@ hypre_thread_MPI_Comm_create( MPI_Comm  comm,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Allgather( void        *sendbuf,
-               int          sendcount,
+               HYPRE_Int          sendcount,
                MPI_Datatype sendtype,
                void        *recvbuf,
-               int          recvcount,
+               HYPRE_Int          recvcount,
                MPI_Datatype recvtype,
                MPI_Comm     comm      ) 
 {
-  int returnval;
-  int i;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int i;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -215,19 +215,19 @@ hypre_thread_MPI_Allgather( void        *sendbuf,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Allgatherv( void        *sendbuf,
-                int          sendcount,
+                HYPRE_Int          sendcount,
                 MPI_Datatype sendtype,
                 void        *recvbuf,
-                int         *recvcounts,
-                int         *displs, 
+                HYPRE_Int         *recvcounts,
+                HYPRE_Int         *displs, 
                 MPI_Datatype recvtype,
                 MPI_Comm     comm       ) 
 { 
-  int i,returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int i,returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -242,16 +242,16 @@ hypre_thread_MPI_Allgatherv( void        *sendbuf,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Bcast( void        *buffer,
-           int          count,
+           HYPRE_Int          count,
            MPI_Datatype datatype,
-           int          root,
+           HYPRE_Int          root,
            MPI_Comm     comm     ) 
 { 
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -265,17 +265,17 @@ hypre_thread_MPI_Bcast( void        *buffer,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Send( void        *buf,
-          int          count,
+          HYPRE_Int          count,
           MPI_Datatype datatype,
-          int          dest,
-          int          tag,
+          HYPRE_Int          dest,
+          HYPRE_Int          tag,
           MPI_Comm     comm     ) 
 { 
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -289,18 +289,18 @@ hypre_thread_MPI_Send( void        *buf,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Recv( void        *buf,
-          int          count,
+          HYPRE_Int          count,
           MPI_Datatype datatype,
-          int          source,
-          int          tag,
+          HYPRE_Int          source,
+          HYPRE_Int          tag,
           MPI_Comm     comm,
           MPI_Status  *status   )
 { 
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -314,18 +314,18 @@ hypre_thread_MPI_Recv( void        *buf,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Isend( void        *buf,
-           int          count,
+           HYPRE_Int          count,
            MPI_Datatype datatype,
-           int          dest,
-           int          tag,
+           HYPRE_Int          dest,
+           HYPRE_Int          tag,
            MPI_Comm     comm,
            MPI_Request *request  )
 { 
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -338,18 +338,18 @@ hypre_thread_MPI_Isend( void        *buf,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Irecv( void        *buf,
-           int          count,
+           HYPRE_Int          count,
            MPI_Datatype datatype,
-           int          source,
-           int          tag,
+           HYPRE_Int          source,
+           HYPRE_Int          tag,
            MPI_Comm     comm,
            MPI_Request *request  )
 { 
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -362,13 +362,13 @@ hypre_thread_MPI_Irecv( void        *buf,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Wait( MPI_Request *request,
           MPI_Status  *status  )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Wait(request,status);
@@ -381,14 +381,14 @@ hypre_thread_MPI_Wait( MPI_Request *request,
   return returnval;
 }
 
-int
-hypre_thread_MPI_Waitall( int          count,
+HYPRE_Int
+hypre_thread_MPI_Waitall( HYPRE_Int          count,
              MPI_Request *array_of_requests,
              MPI_Status  *array_of_statuses )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Waitall(count,array_of_requests,array_of_statuses);
@@ -401,15 +401,15 @@ hypre_thread_MPI_Waitall( int          count,
   return returnval;
 }
 
-int
-hypre_thread_MPI_Waitany( int          count,
+HYPRE_Int
+hypre_thread_MPI_Waitany( HYPRE_Int          count,
              MPI_Request *array_of_requests,
-             int         *index,
+             HYPRE_Int         *index,
              MPI_Status  *status            )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Waitany(count,array_of_requests,index,status);
@@ -422,11 +422,11 @@ hypre_thread_MPI_Waitany( int          count,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Comm_size( MPI_Comm comm,
-               int     *size )
+               HYPRE_Int     *size )
 { 
-  int returnval;
+  HYPRE_Int returnval;
 
   pthread_mutex_lock(&mpi_mtx);
   returnval=MPI_Comm_size(comm,size);
@@ -434,11 +434,11 @@ hypre_thread_MPI_Comm_size( MPI_Comm comm,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Comm_rank( MPI_Comm comm,
-               int     *rank )
+               HYPRE_Int     *rank )
 { 
-  int returnval;
+  HYPRE_Int returnval;
   
   pthread_mutex_lock(&mpi_mtx);
   returnval=MPI_Comm_rank(comm,rank);
@@ -447,17 +447,17 @@ hypre_thread_MPI_Comm_rank( MPI_Comm comm,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Allreduce( void        *sendbuf,
                void        *recvbuf,
-               int          count,
+               HYPRE_Int          count,
                MPI_Datatype datatype,
                MPI_Op       op,
                MPI_Comm     comm     )
 { 
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   hypre_barrier(&mpi_mtx, unthreaded);
   if (I_call_mpi)
   {
@@ -471,16 +471,16 @@ hypre_thread_MPI_Allreduce( void        *sendbuf,
   return returnval;
 }
 
-int
-hypre_thread_MPI_Type_hvector( int           count,
-                  int           blocklength,
+HYPRE_Int
+hypre_thread_MPI_Type_hvector( HYPRE_Int           count,
+                  HYPRE_Int           blocklength,
                   MPI_Aint      stride,
                   MPI_Datatype  oldtype,
                   MPI_Datatype *newtype     )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Type_hvector(count,blocklength,stride,oldtype,newtype);
@@ -492,16 +492,16 @@ hypre_thread_MPI_Type_hvector( int           count,
   return returnval;
 }
 
-int
-hypre_thread_MPI_Type_struct( int           count,
-                 int          *array_of_blocklengths,
+HYPRE_Int
+hypre_thread_MPI_Type_struct( HYPRE_Int           count,
+                 HYPRE_Int          *array_of_blocklengths,
                  MPI_Aint     *array_of_displacements,
                  MPI_Datatype *array_of_types,
                  MPI_Datatype *newtype                )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Type_struct(count,array_of_blocklengths,array_of_displacements,
@@ -514,12 +514,12 @@ hypre_thread_MPI_Type_struct( int           count,
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Type_free( MPI_Datatype *datatype )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Type_free(datatype);
@@ -531,12 +531,12 @@ hypre_thread_MPI_Type_free( MPI_Datatype *datatype )
   return returnval;
 }
 
-int
+HYPRE_Int
 hypre_thread_MPI_Type_commit( MPI_Datatype *datatype )
 {
-  int returnval;
-  int unthreaded = pthread_equal(initial_thread,pthread_self());
-  int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
+  HYPRE_Int returnval;
+  HYPRE_Int unthreaded = pthread_equal(initial_thread,pthread_self());
+  HYPRE_Int I_call_mpi = unthreaded || pthread_equal(hypre_thread[0],pthread_self());
   if (I_call_mpi)
   {
     returnval=MPI_Type_commit(datatype);
@@ -551,6 +551,6 @@ hypre_thread_MPI_Type_commit( MPI_Datatype *datatype )
 #else
 
 /* this is used only to eliminate compiler warnings */
-int hypre_empty3;
+HYPRE_Int hypre_thread_mpistubs_empty;
 
 #endif

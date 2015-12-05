@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -24,14 +24,14 @@
 #include "SubdomainGraph_dh.h"
 
 
-int symbolic_row_private(int localRow, int beg_row, int end_row,
-                 int *list, int *marker, int *tmpFill,
-                 int len, int *CVAL, double *AVAL,
-                 int *o2n_col, Euclid_dh ctx);
+HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
+                 HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
+                 HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                 HYPRE_Int *o2n_col, Euclid_dh ctx);
 
-static int numeric_row_private(int localRow, int beg_row, int end_row,
-                        int len, int *CVAL, double *AVAL,
-                        REAL_DH *work, int *o2n_col, Euclid_dh ctx);
+static HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
+                        HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                        REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx);
 
 
 /* all non-local column indices are discarded in symbolic_row_private() */
@@ -40,13 +40,13 @@ static int numeric_row_private(int localRow, int beg_row, int end_row,
 void iluk_mpi_bj(Euclid_dh ctx)
 {
   START_FUNC_DH
-  int      *rp, *cval, *diag;
-  int      *CVAL;
-  int      i, j, len, count, col, idx = 0;
-  int      *list, *marker, *fill, *tmpFill;
-  int      temp, m, from = ctx->from, to = ctx->to;
-  int      *n2o_row, *o2n_col;
-  int      first_row, last_row;
+  HYPRE_Int      *rp, *cval, *diag;
+  HYPRE_Int      *CVAL;
+  HYPRE_Int      i, j, len, count, col, idx = 0;
+  HYPRE_Int      *list, *marker, *fill, *tmpFill;
+  HYPRE_Int      temp, m, from = ctx->from, to = ctx->to;
+  HYPRE_Int      *n2o_row, *o2n_col;
+  HYPRE_Int      first_row, last_row;
   double   *AVAL;
   REAL_DH  *work, *aval;
   Factor_dh F = ctx->F;
@@ -74,9 +74,9 @@ if (ctx->F->rp == NULL) {
   o2n_col = sg->o2n_col;
 
   /* allocate and initialize working space */
-  list   = (int*)MALLOC_DH((m+1)*sizeof(int)); CHECK_V_ERROR;
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-  tmpFill = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  list   = (HYPRE_Int*)MALLOC_DH((m+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  tmpFill = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) {
     marker[i] = -1;
     work[i] = 0.0; 
@@ -91,8 +91,8 @@ if (ctx->F->rp == NULL) {
   last_row  = first_row + sg->row_count[myid_dh];
   for (i=from; i<to; ++i) {
 
-    int row = n2o_row[i];            /* local row number */
-    int globalRow = row + first_row; /* global row number */
+    HYPRE_Int row = n2o_row[i];            /* local row number */
+    HYPRE_Int globalRow = row + first_row; /* global row number */
 
     EuclidGetRow(ctx->A, globalRow, &len, &CVAL, &AVAL); CHECK_V_ERROR;
 
@@ -152,7 +152,7 @@ if (ctx->F->rp == NULL) {
 
     /* check for zero diagonal */
     if (! aval[diag[i]]) {
-      sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
+      hypre_sprintf(msgBuf_dh, "zero diagonal in local row %i", i+1);
       SET_V_ERROR(msgBuf_dh);
     }
   }
@@ -173,18 +173,18 @@ if (ctx->F->rp == NULL) {
 */
 #undef __FUNC__
 #define __FUNC__ "symbolic_row_private"
-int symbolic_row_private(int localRow, int beg_row, int end_row,
-                 int *list, int *marker, int *tmpFill,
-                 int len, int *CVAL, double *AVAL,
-                 int *o2n_col, Euclid_dh ctx)
+HYPRE_Int symbolic_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
+                 HYPRE_Int *list, HYPRE_Int *marker, HYPRE_Int *tmpFill,
+                 HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                 HYPRE_Int *o2n_col, Euclid_dh ctx)
 {
   START_FUNC_DH
-  int level = ctx->level, m = ctx->F->m;
-  int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
-  int *fill = ctx->F->fill;
-  int count = 0;
-  int j, node, tmp, col, head;
-  int fill1, fill2;
+  HYPRE_Int level = ctx->level, m = ctx->F->m;
+  HYPRE_Int *cval = ctx->F->cval, *diag = ctx->F->diag, *rp = ctx->F->rp; 
+  HYPRE_Int *fill = ctx->F->fill;
+  HYPRE_Int count = 0;
+  HYPRE_Int j, node, tmp, col, head;
+  HYPRE_Int fill1, fill2;
   float val;
   double thresh = ctx->sparseTolA;
   REAL_DH scale;
@@ -272,15 +272,15 @@ int symbolic_row_private(int localRow, int beg_row, int end_row,
 
 #undef __FUNC__
 #define __FUNC__ "numeric_row_private"
-int numeric_row_private(int localRow, int beg_row, int end_row,
-                        int len, int *CVAL, double *AVAL,
-                        REAL_DH *work, int *o2n_col, Euclid_dh ctx)
+HYPRE_Int numeric_row_private(HYPRE_Int localRow, HYPRE_Int beg_row, HYPRE_Int end_row,
+                        HYPRE_Int len, HYPRE_Int *CVAL, double *AVAL,
+                        REAL_DH *work, HYPRE_Int *o2n_col, Euclid_dh ctx)
 {
   START_FUNC_DH
   double  pc, pv, multiplier;
-  int     j, k, col, row;
-  int     *rp = ctx->F->rp, *cval = ctx->F->cval;
-  int     *diag = ctx->F->diag;
+  HYPRE_Int     j, k, col, row;
+  HYPRE_Int     *rp = ctx->F->rp, *cval = ctx->F->cval;
+  HYPRE_Int     *diag = ctx->F->diag;
   double  val;
   REAL_DH *aval = ctx->F->aval, scale;
 

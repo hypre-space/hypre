@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -48,13 +48,13 @@ hypre_FACCreate( MPI_Comm  comm )
 /*--------------------------------------------------------------------------
  * hypre_FACDestroy
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_FACDestroy2(void *fac_vdata)
 {
    hypre_FACData *fac_data = fac_vdata;
 
-   int level;
-   int ierr = 0;
+   HYPRE_Int level;
+   HYPRE_Int ierr = 0;
 
    if (fac_data)
    {
@@ -137,12 +137,12 @@ hypre_FACDestroy2(void *fac_vdata)
    return(ierr);
 }
 
-int
+HYPRE_Int
 hypre_FACSetTol( void   *fac_vdata,
                  double  tol       )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> tol) = tol;
 
@@ -153,17 +153,17 @@ hypre_FACSetTol( void   *fac_vdata,
 /*--------------------------------------------------------------------------
  * hypre_FACSetPLevels
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_FACSetPLevels( void *fac_vdata,
-                     int   nparts,
-                     int  *plevels)
+                     HYPRE_Int   nparts,
+                     HYPRE_Int  *plevels)
 {
    hypre_FACData *fac_data   = fac_vdata;
-   int           *fac_plevels;
-   int            ierr       = 0;
-   int            i;
+   HYPRE_Int     *fac_plevels;
+   HYPRE_Int      ierr       = 0;
+   HYPRE_Int      i;
 
-   fac_plevels= hypre_CTAlloc(int, nparts);
+   fac_plevels= hypre_CTAlloc(HYPRE_Int, nparts);
 
    for (i= 0; i< nparts; i++)
    {
@@ -178,15 +178,15 @@ hypre_FACSetPLevels( void *fac_vdata,
 /*--------------------------------------------------------------------------
  * hypre_FACSetPRefinements
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_FACSetPRefinements( void         *fac_vdata,
-                          int           nparts,
-                          int         (*prefinements)[3] )
+                          HYPRE_Int     nparts,
+                          HYPRE_Int   (*prefinements)[3] )
 {
    hypre_FACData *fac_data   = fac_vdata;
    hypre_Index   *fac_prefinements;
-   int            ierr       = 0;
-   int            i;
+   HYPRE_Int      ierr       = 0;
+   HYPRE_Int      i;
 
    fac_prefinements= hypre_TAlloc(hypre_Index, nparts);
 
@@ -203,12 +203,12 @@ hypre_FACSetPRefinements( void         *fac_vdata,
  * hypre_FACSetMaxLevels
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetMaxLevels( void *fac_vdata,
-                       int   nparts )
+                       HYPRE_Int   nparts )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> max_levels) = nparts-1;
 
@@ -219,12 +219,12 @@ hypre_FACSetMaxLevels( void *fac_vdata,
  * hypre_FACSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetMaxIter( void *fac_vdata,
-                     int   max_iter  )
+                     HYPRE_Int   max_iter  )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> max_cycles) = max_iter;
 
@@ -235,12 +235,12 @@ hypre_FACSetMaxIter( void *fac_vdata,
  * hypre_FACSetRelChange
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetRelChange( void *fac_vdata,
-                       int   rel_change  )
+                       HYPRE_Int   rel_change  )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> rel_change) = rel_change;
 
@@ -251,12 +251,12 @@ hypre_FACSetRelChange( void *fac_vdata,
  * hypre_FACSetZeroGuess
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetZeroGuess( void *fac_vdata,
-                       int   zero_guess )
+                       HYPRE_Int   zero_guess )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> zero_guess) = zero_guess;
 
@@ -267,12 +267,12 @@ hypre_FACSetZeroGuess( void *fac_vdata,
  * hypre_FACSetRelaxType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetRelaxType( void *fac_vdata,
-                       int   relax_type )
+                       HYPRE_Int   relax_type )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> relax_type) = relax_type;
 
@@ -282,7 +282,7 @@ hypre_FACSetRelaxType( void *fac_vdata,
 /*--------------------------------------------------------------------------
  * hypre_FACSetJacobiWeight
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_FACSetJacobiWeight( void  *fac_vdata,
                           double weight )
 {
@@ -298,12 +298,12 @@ hypre_FACSetJacobiWeight( void  *fac_vdata,
  * hypre_FACSetNumPreRelax
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetNumPreSmooth( void *fac_vdata,
-                          int   num_pre_smooth )
+                          HYPRE_Int   num_pre_smooth )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> num_pre_smooth) = num_pre_smooth;
 
@@ -314,12 +314,12 @@ hypre_FACSetNumPreSmooth( void *fac_vdata,
  * hypre_FACSetNumPostRelax
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetNumPostSmooth( void *fac_vdata,
-                           int   num_post_smooth )
+                           HYPRE_Int   num_post_smooth )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> num_post_smooth) = num_post_smooth;
 
@@ -330,12 +330,12 @@ hypre_FACSetNumPostSmooth( void *fac_vdata,
  * hypre_FACSetCoarseSolverType
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetCoarseSolverType( void *fac_vdata,
-                              int   csolver_type)
+                              HYPRE_Int   csolver_type)
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> csolver_type) = csolver_type;
 
@@ -346,12 +346,12 @@ hypre_FACSetCoarseSolverType( void *fac_vdata,
  * hypre_FACSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACSetLogging( void *fac_vdata,
-                     int   logging)
+                     HYPRE_Int   logging)
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    (fac_data -> logging) = logging;
 
@@ -362,12 +362,12 @@ hypre_FACSetLogging( void *fac_vdata,
  * hypre_SysFACGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACGetNumIterations( void *fac_vdata,
-                           int  *num_iterations )
+                           HYPRE_Int  *num_iterations )
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
    *num_iterations = (fac_data -> num_iterations);
 
@@ -378,15 +378,15 @@ hypre_FACGetNumIterations( void *fac_vdata,
  * hypre_FACPrintLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACPrintLogging( void *fac_vdata,
-                       int   myid)
+                       HYPRE_Int   myid)
 {
    hypre_FACData *fac_data = fac_vdata;
-   int                ierr = 0;
-   int                i;
-   int                num_iterations  = (fac_data -> num_iterations);
-   int                logging   = (fac_data -> logging);
+   HYPRE_Int          ierr = 0;
+   HYPRE_Int          i;
+   HYPRE_Int          num_iterations  = (fac_data -> num_iterations);
+   HYPRE_Int          logging   = (fac_data -> logging);
    double            *norms     = (fac_data -> norms);
    double            *rel_norms = (fac_data -> rel_norms);
 
@@ -396,8 +396,8 @@ hypre_FACPrintLogging( void *fac_vdata,
       {
          for (i = 0; i < num_iterations; i++)
          {
-            printf("Residual norm[%d] = %e   ",i,norms[i]);
-            printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
+            hypre_printf("Residual norm[%d] = %e   ",i,norms[i]);
+            hypre_printf("Relative residual norm[%d] = %e\n",i,rel_norms[i]);
          }
       }
    }
@@ -409,18 +409,18 @@ hypre_FACPrintLogging( void *fac_vdata,
  * hypre_FACGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_FACGetFinalRelativeResidualNorm( void   *fac_vdata,
                                        double *relative_residual_norm )
 {
    hypre_FACData *fac_data = fac_vdata;
 
-   int                max_iter        = (fac_data -> max_cycles);
-   int                num_iterations  = (fac_data -> num_iterations);
-   int                logging         = (fac_data -> logging);
+   HYPRE_Int          max_iter        = (fac_data -> max_cycles);
+   HYPRE_Int          num_iterations  = (fac_data -> num_iterations);
+   HYPRE_Int          logging         = (fac_data -> logging);
    double            *rel_norms       = (fac_data -> rel_norms);
 
-   int                ierr = 0;
+   HYPRE_Int          ierr = 0;
 
 
    if (logging > 0)

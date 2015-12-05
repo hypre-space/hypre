@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.49 $
+ * $Revision: 2.54 $
  ***********************************************************************EHEADER*/
 
 
@@ -262,6 +262,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - tolerance <f>\n");
          printf("    - gmresDim <d>\n");
          printf("    - stopCrit <absolute,relative>\n");
+         printf("    - pcgRecomputeResiudal\n");
          printf("    - preconditioner <identity,diagonal,pilut,parasails,\n");
          printf("    -    boomeramg,ddilut,schwarz,ddict,poly,euclid,...\n");
          printf("    -    blockP,ml,mli,reuse,parasails_reuse> <override>\n");
@@ -360,6 +361,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          HYOutputLevel_ |= HYFEI_IMPOSENOBC;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters imposeNoBC on\n");
+      }
+
+      //----------------------------------------------------------------
+      // turn on multiple right hand side
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "mRHS") )
+      {
+         mRHSFlag_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters multiple rhs on\n");
       }
 
       //----------------------------------------------------------------
@@ -633,6 +645,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters stopCrit = %s\n",
                    param2);
+      }
+
+      //----------------------------------------------------------------
+      // for PCG only 
+      //----------------------------------------------------------------
+
+      else if ( !strcmp(param1, "pcgRecomputeResidual") )
+      {
+         pcgRecomputeRes_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters pcgRecomputeResidual\n");
       }
 
       //----------------------------------------------------------------
@@ -4620,6 +4643,7 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    panel_size = sp_ienv(1);
    for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
 
+   set_default_options(&slu_options);
    slu_options.ColPerm = MY_PERMC;
    slu_options.Fact = DOFACT;
    StatInit(&slu_stat);
@@ -4708,7 +4732,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
-   int                j, nz_ptr, *colLengths, maxRowSize;
+   int                nz_ptr;
    int                *partition, start_row, end_row;
    double             *colVal, *new_a, rnorm=-1.0;
    HYPRE_ParCSRMatrix A_csr;
@@ -4718,7 +4742,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 
    int                info, permc_spec, panel_size;
    int                *perm_r, *perm_c, *etree, lwork;
-   double             *rhs, *soln;
+   double             *rhs, *soln, *sol2;
    double             *R, *C;
    double             *ferr, *berr;
    double             rpg, rcond;
@@ -4765,26 +4789,19 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    nrows     = end_row - start_row + 1;
    free( partition );
 
-   colLengths = new int[nrows];
-   for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
-   
-   maxRowSize = 0;
+   nnz = 0;
    for ( i = 0; i < nrows; i++ )
    {
       HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-      maxRowSize = ( rowSize > maxRowSize ) ? rowSize : maxRowSize;
-      for ( j = 0; j < rowSize; j++ ) 
-         if ( colVal[j] != 0.0 ) colLengths[colInd[j]]++;
+      nnz += rowSize;
       HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
    }   
-   nnz = 0;
-   for ( i = 0; i < nrows; i++ ) nnz += colLengths[i];
 
    new_ia = new int[nrows+1];
    new_ja = new int[nnz];
    new_a  = new double[nnz];
    nz_ptr = HYPRE_LSI_GetParCSRMatrix(currA_,nrows,nnz,new_ia,new_ja,new_a);
-   nnz = nz_ptr;
+   nnz    = nz_ptr;
 
    //-------------------------------------------------------------------
    // set up SuperLU CSR matrix and the corresponding rhs
@@ -4794,11 +4811,12 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
                           SLU_D,SLU_GE);
    ind_array = new int[nrows];
    for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
-   rhs = new double[nrows];
 
+   rhs = new double[nrows];
    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, rhs);
    assert(!ierr);
    dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, SLU_DN, SLU_D, SLU_GE);
+
    soln = new double[nrows];
    for ( i = 0; i < nrows; i++ ) soln[i] = 0.0;
    dCreate_Dense_Matrix(&X, nrows, 1, soln, nrows, SLU_DN, SLU_D, SLU_GE);
@@ -4808,16 +4826,22 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    //-------------------------------------------------------------------
  
    perm_r = new int[nrows];
+   for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
    perm_c = new int[nrows];
    etree  = new int[nrows];
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
    lwork                    = 0;
-   slu_options.Equil        = NO;
+   set_default_options(&slu_options);
+   slu_options.ColPerm      = MY_PERMC;
+   slu_options.Equil        = YES;
    slu_options.Trans        = NOTRANS;
    slu_options.Fact         = DOFACT;
    slu_options.IterRefine   = DOUBLE;
    slu_options.DiagPivotThresh = 1.0;
+   slu_options.PivotGrowth = YES;
+   slu_options.ConditionNumber = YES;
+
    StatInit(&slu_stat);
    *equed = 'N';
    R    = (double *) SUPERLU_MALLOC(A2.nrow * sizeof(double));
@@ -4829,7 +4853,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    // solve
    //-------------------------------------------------------------------
 
-   dgssvx(&slu_options, &A2, perm_r, perm_c, etree,
+   dgssvx(&slu_options, &A2, perm_c, perm_r, etree,
           equed, R, C, &L, &U, work, lwork, &B, &X, 
           &rpg, &rcond, ferr, berr, &mem_usage, &slu_stat, &info);
 
@@ -4869,8 +4893,10 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 
    if ( status == 1 )
    {
-      ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) &ind_array,
-                   	       (const double *) soln);
+      sol2 = (double *) ((DNformat *) X.Store)->nzval;
+
+      ierr = HYPRE_IJVectorSetValues(currX_, nrows, (const int *) ind_array,
+                   	       (const double *) sol2);
       assert(!ierr);
 
       HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
@@ -4896,12 +4922,12 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    delete [] perm_r; 
    delete [] etree; 
    delete [] rhs; 
+   delete [] soln;
    delete [] new_ia;
    delete [] new_ja;
    delete [] new_a;
-   delete [] soln;
-   delete [] colLengths;
    Destroy_SuperMatrix_Store(&B);
+   Destroy_SuperMatrix_Store(&X);
    Destroy_SuperNode_Matrix(&L);
    SUPERLU_FREE( A2.Store );
    SUPERLU_FREE( ((NRformat *) U.Store)->colind);

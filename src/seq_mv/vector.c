@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,7 +27,7 @@
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
-hypre_SeqVectorCreate( int size )
+hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
 
@@ -50,7 +50,7 @@ hypre_SeqVectorCreate( int size )
  *--------------------------------------------------------------------------*/
 
 hypre_Vector *
-hypre_SeqMultiVectorCreate( int size, int num_vectors )
+hypre_SeqMultiVectorCreate( HYPRE_Int size, HYPRE_Int num_vectors )
 {
    hypre_Vector *vector = hypre_SeqVectorCreate(size);
    hypre_VectorNumVectors(vector) = num_vectors;
@@ -61,10 +61,10 @@ hypre_SeqMultiVectorCreate( int size, int num_vectors )
  * hypre_SeqVectorDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_SeqVectorDestroy( hypre_Vector *vector )
 {
-   int  ierr=0;
+   HYPRE_Int  ierr=0;
 
    if (vector)
    {
@@ -82,13 +82,13 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
  * hypre_SeqVectorInitialize
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_SeqVectorInitialize( hypre_Vector *vector )
 {
-   int  size = hypre_VectorSize(vector);
-   int  ierr = 0;
-   int  num_vectors = hypre_VectorNumVectors(vector);
-   int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
+   HYPRE_Int  size = hypre_VectorSize(vector);
+   HYPRE_Int  ierr = 0;
+   HYPRE_Int  num_vectors = hypre_VectorNumVectors(vector);
+   HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
       hypre_VectorData(vector) = hypre_CTAlloc(double, num_vectors*size);
@@ -114,11 +114,11 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
  * hypre_SeqVectorSetDataOwner
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_SeqVectorSetDataOwner( hypre_Vector *vector,
-                          int           owns_data   )
+                          HYPRE_Int           owns_data   )
 {
-   int    ierr=0;
+   HYPRE_Int    ierr=0;
 
    hypre_VectorOwnsData(vector) = owns_data;
 
@@ -137,9 +137,9 @@ hypre_SeqVectorRead( char *file_name )
    FILE    *fp;
 
    double  *data;
-   int      size;
+   HYPRE_Int      size;
    
-   int      j;
+   HYPRE_Int      j;
 
    /*----------------------------------------------------------
     * Read in the data
@@ -147,7 +147,7 @@ hypre_SeqVectorRead( char *file_name )
 
    fp = fopen(file_name, "r");
 
-   fscanf(fp, "%d", &size);
+   hypre_fscanf(fp, "%d", &size);
 
    vector = hypre_SeqVectorCreate(size);
    hypre_SeqVectorInitialize(vector);
@@ -155,7 +155,7 @@ hypre_SeqVectorRead( char *file_name )
    data = hypre_VectorData(vector);
    for (j = 0; j < size; j++)
    {
-      fscanf(fp, "%le", &data[j]);
+      hypre_fscanf(fp, "%le", &data[j]);
    }
 
    fclose(fp);
@@ -170,18 +170,18 @@ hypre_SeqVectorRead( char *file_name )
  * hypre_SeqVectorPrint
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SeqVectorPrint( hypre_Vector *vector,
                    char         *file_name )
 {
    FILE    *fp;
 
    double  *data;
-   int      size, num_vectors, vecstride, idxstride;
+   HYPRE_Int      size, num_vectors, vecstride, idxstride;
    
-   int      i, j;
+   HYPRE_Int      i, j;
 
-   int      ierr = 0;
+   HYPRE_Int      ierr = 0;
 
    num_vectors = hypre_VectorNumVectors(vector);
    vecstride = hypre_VectorVectorStride(vector);
@@ -198,21 +198,21 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
 
    if ( hypre_VectorNumVectors(vector) == 1 )
    {
-      fprintf(fp, "%d\n", size);
+      hypre_fprintf(fp, "%d\n", size);
    }
    else
    {
-      fprintf(fp, "%d vectors of size %d\n", num_vectors, size );
+      hypre_fprintf(fp, "%d vectors of size %d\n", num_vectors, size );
    }
 
    if ( num_vectors>1 )
    {
       for ( j=0; j<num_vectors; ++j )
       {
-         fprintf(fp, "vector %d\n", j );
+         hypre_fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            fprintf(fp, "%.14e\n",  data[ j*vecstride + i*idxstride ] );
+            hypre_fprintf(fp, "%.14e\n",  data[ j*vecstride + i*idxstride ] );
          }
       }
    }
@@ -220,7 +220,7 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
    {
       for (i = 0; i < size; i++)
       {
-         fprintf(fp, "%.14e\n", data[i]);
+         hypre_fprintf(fp, "%.14e\n", data[i]);
       }
    }
 
@@ -233,16 +233,16 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
  * hypre_SeqVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SeqVectorSetConstantValues( hypre_Vector *v,
                                double        value )
 {
    double  *vector_data = hypre_VectorData(v);
-   int      size        = hypre_VectorSize(v);
+   HYPRE_Int      size        = hypre_VectorSize(v);
            
-   int      i;
+   HYPRE_Int      i;
            
-   int      ierr  = 0;
+   HYPRE_Int      ierr  = 0;
 
    size *=hypre_VectorNumVectors(v);
 
@@ -260,16 +260,16 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
  *     returns vector of values randomly distributed between -1.0 and +1.0
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SeqVectorSetRandomValues( hypre_Vector *v,
-                             int           seed )
+                             HYPRE_Int           seed )
 {
    double  *vector_data = hypre_VectorData(v);
-   int      size        = hypre_VectorSize(v);
+   HYPRE_Int      size        = hypre_VectorSize(v);
            
-   int      i;
+   HYPRE_Int      i;
            
-   int      ierr  = 0;
+   HYPRE_Int      ierr  = 0;
    hypre_SeedRand(seed);
 
    size *=hypre_VectorNumVectors(v);
@@ -287,17 +287,17 @@ hypre_SeqVectorSetRandomValues( hypre_Vector *v,
  * y should have already been initialized at the same size as x
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SeqVectorCopy( hypre_Vector *x,
                   hypre_Vector *y )
 {
    double  *x_data = hypre_VectorData(x);
    double  *y_data = hypre_VectorData(y);
-   int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size   = hypre_VectorSize(x);
            
-   int      i;
+   HYPRE_Int      i;
            
-   int      ierr = 0;
+   HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(x);
 #define HYPRE_SMP_PRIVATE i
@@ -316,8 +316,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 hypre_Vector *
 hypre_SeqVectorCloneDeep( hypre_Vector *x )
 {
-   int      size   = hypre_VectorSize(x);
-   int      num_vectors   = hypre_VectorNumVectors(x);
+   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
    hypre_Vector * y = hypre_SeqMultiVectorCreate( size, num_vectors );
 
    hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
@@ -338,8 +338,8 @@ hypre_SeqVectorCloneDeep( hypre_Vector *x )
 hypre_Vector *
 hypre_SeqVectorCloneShallow( hypre_Vector *x )
 {
-   int      size   = hypre_VectorSize(x);
-   int      num_vectors   = hypre_VectorNumVectors(x);
+   HYPRE_Int      size   = hypre_VectorSize(x);
+   HYPRE_Int      num_vectors   = hypre_VectorNumVectors(x);
    hypre_Vector * y = hypre_SeqMultiVectorCreate( size, num_vectors );
 
    hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
@@ -357,16 +357,16 @@ hypre_SeqVectorCloneShallow( hypre_Vector *x )
  * hypre_SeqVectorScale
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SeqVectorScale( double        alpha,
                    hypre_Vector *y     )
 {
    double  *y_data = hypre_VectorData(y);
-   int      size   = hypre_VectorSize(y);
+   HYPRE_Int      size   = hypre_VectorSize(y);
            
-   int      i;
+   HYPRE_Int      i;
            
-   int      ierr = 0;
+   HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(y);
 
@@ -382,18 +382,18 @@ hypre_SeqVectorScale( double        alpha,
  * hypre_SeqVectorAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SeqVectorAxpy( double        alpha,
             hypre_Vector *x,
             hypre_Vector *y     )
 {
    double  *x_data = hypre_VectorData(x);
    double  *y_data = hypre_VectorData(y);
-   int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size   = hypre_VectorSize(x);
            
-   int      i;
+   HYPRE_Int      i;
            
-   int      ierr = 0;
+   HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(x);
 
@@ -414,9 +414,9 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
 {
    double  *x_data = hypre_VectorData(x);
    double  *y_data = hypre_VectorData(y);
-   int      size   = hypre_VectorSize(x);
+   HYPRE_Int      size   = hypre_VectorSize(x);
            
-   int      i;
+   HYPRE_Int      i;
 
    double      result = 0.0;
 
@@ -441,8 +441,8 @@ double hypre_VectorSumElts( hypre_Vector *vector )
 {
    double sum = 0;
    double * data = hypre_VectorData( vector );
-   int size = hypre_VectorSize( vector );
-   int i;
+   HYPRE_Int size = hypre_VectorSize( vector );
+   HYPRE_Int i;
 
 #define HYPRE_SMP_PRIVATE i
 #define HYPRE_SMP_REDUCTION_OP +

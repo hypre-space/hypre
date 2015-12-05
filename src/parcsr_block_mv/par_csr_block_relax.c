@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.8 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -16,7 +16,7 @@
 #include "headers.h"
 
 
-int gselim_piv(double *A, double *x, int n);
+HYPRE_Int gselim_piv(double *A, double *x, HYPRE_Int n);
 
 
 /*---------------------------------------------------------------------------
@@ -30,20 +30,20 @@ int gselim_piv(double *A, double *x, int n);
 
  *--------------------------------------------------------------------------*/
 
-int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
+HYPRE_Int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
                              hypre_ParVector    *f,
-                             int                *cf_marker,
-                             int                 relax_type,
-                             int                 relax_order,
-                             int                 cycle_type,
+                             HYPRE_Int                *cf_marker,
+                             HYPRE_Int                 relax_type,
+                             HYPRE_Int                 relax_order,
+                             HYPRE_Int                 cycle_type,
                              double              relax_weight,
                              double              omega,
                              hypre_ParVector    *u,
                              hypre_ParVector    *Vtemp )
 {
 
-   int i, Solve_err_flag = 0;
-   int relax_points[2];
+   HYPRE_Int i, Solve_err_flag = 0;
+   HYPRE_Int relax_points[2];
    
    if (relax_order == 1 && cycle_type < 3)
       /* if do C/F and not on the cg */
@@ -98,11 +98,11 @@ int  hypre_BoomerAMGBlockRelaxIF( hypre_ParCSRBlockMatrix *A,
    CF_marker is size number of nodes.
 
  *--------------------------------------------------------------------------*/
-int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
+HYPRE_Int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                                 hypre_ParVector    *f,
-                                int                *cf_marker,
-                                int                 relax_type,
-                                int                 relax_points,
+                                HYPRE_Int                *cf_marker,
+                                HYPRE_Int                 relax_type,
+                                HYPRE_Int                 relax_points,
                                 double              relax_weight,
                                 double              omega,
                                 hypre_ParVector    *u,
@@ -116,24 +116,24 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
    hypre_CSRBlockMatrix *A_diag       = hypre_ParCSRBlockMatrixDiag(A);
    double               *A_diag_data  = hypre_CSRBlockMatrixData(A_diag);
-   int                  *A_diag_i     = hypre_CSRBlockMatrixI(A_diag);
-   int                  *A_diag_j     = hypre_CSRBlockMatrixJ(A_diag);
+   HYPRE_Int                  *A_diag_i     = hypre_CSRBlockMatrixI(A_diag);
+   HYPRE_Int                  *A_diag_j     = hypre_CSRBlockMatrixJ(A_diag);
 
    hypre_CSRBlockMatrix *A_offd       = hypre_ParCSRBlockMatrixOffd(A);
-   int                  *A_offd_i     = hypre_CSRBlockMatrixI(A_offd);
+   HYPRE_Int                  *A_offd_i     = hypre_CSRBlockMatrixI(A_offd);
    double               *A_offd_data  = hypre_CSRBlockMatrixData(A_offd);
-   int                  *A_offd_j     = hypre_CSRBlockMatrixJ(A_offd);
+   HYPRE_Int                  *A_offd_j     = hypre_CSRBlockMatrixJ(A_offd);
 
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
 
-   int             block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
-   int             bnnz = block_size*block_size;
+   HYPRE_Int             block_size = hypre_CSRBlockMatrixBlockSize(A_diag);
+   HYPRE_Int             bnnz = block_size*block_size;
 
-   int             n_global;
-   int             n             = hypre_CSRBlockMatrixNumRows(A_diag);
-   int             num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
-   int	      	   first_index = hypre_ParVectorFirstIndex(u);
+   HYPRE_Int             n_global;
+   HYPRE_Int             n             = hypre_CSRBlockMatrixNumRows(A_diag);
+   HYPRE_Int             num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
+   HYPRE_Int	      	   first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    double         *u_data  = hypre_VectorData(u_local);
@@ -148,16 +148,16 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    
    double         *tmp_data;
 
-   int            size, rest, ne, ns;
+   HYPRE_Int            size, rest, ne, ns;
    
 
-   int             i, j, k;
-   int             ii, jj;
+   HYPRE_Int             i, j, k;
+   HYPRE_Int             ii, jj;
 
-   int             relax_error = 0;
-   int		   num_sends;
-   int		   index, start;
-   int		   num_procs, num_threads, my_id;
+   HYPRE_Int             relax_error = 0;
+   HYPRE_Int		   num_sends;
+   HYPRE_Int		   index, start;
+   HYPRE_Int		   num_procs, num_threads, my_id;
  
    double	   *res_vec, *out_vec, *tmp_vec;
    double          *res0_vec, *res2_vec;
@@ -166,8 +166,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    double          prod;
 
    hypre_CSRMatrix *A_CSR;
-   int		   *A_CSR_i;   
-   int		   *A_CSR_j;
+   HYPRE_Int		   *A_CSR_i;   
+   HYPRE_Int		   *A_CSR_j;
    double	   *A_CSR_data;
  
    hypre_Vector    *f_vector;
@@ -178,15 +178,16 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
    double         *A_mat;
    double         *b_vec;
 
-   int             column;
+   HYPRE_Int             column;
 
    /* initialize some stuff */
    one_minus_weight = 1.0 - relax_weight;
    one_minus_omega = 1.0 - omega;
-   MPI_Comm_size(comm, &num_procs);  
-   MPI_Comm_rank(comm, &my_id);  
-   num_threads = hypre_NumThreads();
-
+   hypre_MPI_Comm_size(comm, &num_procs);  
+   hypre_MPI_Comm_rank(comm, &my_id);  
+   /* num_threads = hypre_NumThreads(); */
+   num_threads = 1;
+   
    res_vec = hypre_CTAlloc(double, block_size);
    out_vec = hypre_CTAlloc(double, block_size);
    tmp_vec = hypre_CTAlloc(double, block_size);
@@ -247,8 +248,6 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
           * Copy current approximation into temporary vector.
           *-----------------------------------------------------------------*/
          
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
          for (i = 0; i < n*block_size; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -265,8 +264,6 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
 
          if (relax_points == 0)
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res_vec
-#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
                
@@ -315,8 +312,6 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          
          else
          {
-#define HYPRE_SMP_PRIVATE i,ii,jj,res_vec
-#include "../utilities/hypre_smp_forloop.h"
             for (i = 0; i < n; i++)
             {
                
@@ -413,8 +408,7 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
          * Copy current approximation into temporary vector.
          *-----------------------------------------------------------------*/
          
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
          for (i = 0; i < n*block_size; i++)
          {
             Vtemp_data[i] = u_data[i];
@@ -443,12 +437,10 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                if (num_threads > 1)
                {
                   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -563,12 +555,10 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                if (num_threads > 1)
                {
                   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
+
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -701,12 +691,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
                if (num_threads > 1)
                {
                   tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                   for (i = 0; i < n; i++)
                      tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                   for (j = 0; j < num_threads; j++)
                   {
                      size = n/num_threads;
@@ -843,12 +829,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1070,12 +1052,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1285,12 +1263,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1515,8 +1489,6 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
            prod = (1.0-relax_weight*omega);
            res0_vec = hypre_CTAlloc(double, block_size);
            res2_vec = hypre_CTAlloc(double, block_size);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
            {
               Vtemp_data[i] = u_data[i];
@@ -1527,12 +1499,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -1787,12 +1755,8 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
               if (num_threads > 1)
               {
                  tmp_data = hypre_CTAlloc(double,n);
-#define HYPRE_SMP_PRIVATE i
-#include "../utilities/hypre_smp_forloop.h"
                  for (i = 0; i < n; i++)
                     tmp_data[i] = u_data[i];
-#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res_vec,rest,size
-#include "../utilities/hypre_smp_forloop.h"
                  for (j = 0; j < num_threads; j++)
                  {
                     size = n/num_threads;
@@ -2171,10 +2135,10 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
  *
  *------------------------------------------------------------------------ */
 
-int gselim_piv(double *A, double *x, int n)
+HYPRE_Int gselim_piv(double *A, double *x, HYPRE_Int n)
 {
-   int    err_flag = 0;
-   int    j,k,m, piv_row;
+   HYPRE_Int    err_flag = 0;
+   HYPRE_Int    j,k,m, piv_row;
    double factor, piv, tmp;
    double eps = 1e-8;
    
@@ -2241,7 +2205,7 @@ int gselim_piv(double *A, double *x, int n)
           }
          else
          {
-            /* printf("Matrix is nearly singular: zero pivot error\n"); */
+            /* hypre_printf("Matrix is nearly singular: zero pivot error\n"); */
             return(-1);
          }
        }
@@ -2249,7 +2213,7 @@ int gselim_piv(double *A, double *x, int n)
       k = n - 1; /* last row */
       if ( fabs(A[k*n+k]) < eps)
       {
-         /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
+         /* hypre_printf("Block of matrix is nearly singular: zero pivot error\n"); */
          return(-1);
       }
 

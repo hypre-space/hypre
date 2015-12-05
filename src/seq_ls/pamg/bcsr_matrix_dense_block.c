@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 /*****************************************************************************
@@ -27,7 +27,7 @@
  *****************************************************************************/
 
 hypre_BCSRMatrixDenseBlock*
-hypre_BCSRMatrixDenseBlockCreate(int num_rows, int num_cols) {
+hypre_BCSRMatrixDenseBlockCreate(HYPRE_Int num_rows, HYPRE_Int num_cols) {
   hypre_BCSRMatrixDenseBlock* A;
 
   A = hypre_CTAlloc(hypre_BCSRMatrixDenseBlock, 1);
@@ -41,7 +41,7 @@ hypre_BCSRMatrixDenseBlockCreate(int num_rows, int num_cols) {
 
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockDestroy(hypre_BCSRMatrixDenseBlock* A) {
   if(A) {
     hypre_TFree(A->data);
@@ -51,7 +51,7 @@ hypre_BCSRMatrixDenseBlockDestroy(hypre_BCSRMatrixDenseBlock* A) {
   return 0;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A) {
   if(!A->data) {
     A->data = hypre_CTAlloc(double, A->num_rows*A->num_cols);
@@ -60,10 +60,10 @@ hypre_BCSRMatrixDenseBlockInitialise(hypre_BCSRMatrixDenseBlock* A) {
   return 0;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
 				   double* data) {
-  int i;
+  HYPRE_Int i;
 
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
     A->data[i] = data[i];
@@ -74,10 +74,10 @@ hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
 
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockGetData(hypre_BCSRMatrixDenseBlock* A,
 				   double* data) {
-  int i;
+  HYPRE_Int i;
 
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
     data[i] = A->data[i];
@@ -99,10 +99,10 @@ hypre_BCSRMatrixDenseBlockCopy(hypre_BCSRMatrixDenseBlock* A) {
   return B;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockAdd(hypre_BCSRMatrixDenseBlock* A,
 			      hypre_BCSRMatrixDenseBlock* B) {
-  int i;
+  HYPRE_Int i;
 
   if(A->num_rows != B->num_rows || A->num_cols != B->num_cols) {
     return -1;
@@ -114,10 +114,10 @@ hypre_BCSRMatrixDenseBlockAdd(hypre_BCSRMatrixDenseBlock* A,
   return 0;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMultiply(hypre_BCSRMatrixDenseBlock* A,
 				   hypre_BCSRMatrixDenseBlock* B) {
-  int i, j, k;
+  HYPRE_Int i, j, k;
   double t[A->num_rows*A->num_cols];
 
   if(A->num_rows != A->num_cols || A->num_rows != B->num_rows
@@ -142,9 +142,9 @@ hypre_BCSRMatrixDenseBlockMultiply(hypre_BCSRMatrixDenseBlock* A,
   return 0;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockNeg(hypre_BCSRMatrixDenseBlock* A) {
-  int i;
+  HYPRE_Int i;
 
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
     A->data[i] = -A->data[i];
@@ -156,7 +156,7 @@ hypre_BCSRMatrixDenseBlockNeg(hypre_BCSRMatrixDenseBlock* A) {
 hypre_BCSRMatrixDenseBlock*
 hypre_BCSRMatrixDenseBlockDiag(hypre_BCSRMatrixDenseBlock* A) {
   hypre_BCSRMatrixDenseBlock* B;
-  int i;
+  HYPRE_Int i;
 
   B = hypre_BCSRMatrixDenseBlockCreate(A->num_rows, A->num_cols);
   hypre_BCSRMatrixDenseBlockInitialise(B);
@@ -168,15 +168,15 @@ hypre_BCSRMatrixDenseBlockDiag(hypre_BCSRMatrixDenseBlock* A) {
   return B;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 				 hypre_BCSRMatrixDenseBlock* B) {
 
  /* AHB 9/05: this is actually returning B{^-1}A in A*.  If B cannot be 
     inverted, returns A = A */
 
-  int i, j, k;
-  int num_rows = A->num_rows, num_cols = A->num_cols;
+  HYPRE_Int i, j, k;
+  HYPRE_Int num_rows = A->num_rows, num_cols = A->num_cols;
   double T[A->num_rows*A->num_cols];
   double Bi[A->num_rows*A->num_cols];
   double d;
@@ -213,7 +213,7 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
       }
       d = T[i*num_cols + i];
       if(fabs(d) < 1.0e-6) {
-	printf("Singular matrix block being inverted?!\n");
+	hypre_printf("Singular matrix block being inverted?!\n");
 	hypre_BCSRMatrixDenseBlockPrint(B, stdout);
 	return -2;
       }
@@ -262,7 +262,7 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 
 
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
 				 hypre_BCSRMatrixDenseBlock* B) 
 {
@@ -272,7 +272,7 @@ hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
 
    hypre_BCSRMatrixBlock *A_t, *B_t;
    double *out_data;
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    
    
    /* this is the lazy way - for testing */
@@ -304,12 +304,12 @@ hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
 }
 
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A) {
-  int num_rows = A->num_rows;
-  int num_cols = A->num_cols;
+  HYPRE_Int num_rows = A->num_rows;
+  HYPRE_Int num_cols = A->num_cols;
   double t[num_rows*num_cols];
-  int i, j;
+  HYPRE_Int i, j;
 
   for(i = 0; i < num_rows; i++) {
     for(j = 0; j < num_cols; j++) {
@@ -325,14 +325,14 @@ hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A) {
   return 0;
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMatvec(double alpha, hypre_BCSRMatrixBlock* A,
 				 double* x_data, double beta, double* y_data) {
-  int num_rows = A->num_rows;
-  int num_cols = A->num_cols;
-  int i, j;
+  HYPRE_Int num_rows = A->num_rows;
+  HYPRE_Int num_cols = A->num_cols;
+  HYPRE_Int i, j;
   double temp;
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
   double* A_data = A->data;
 
   /*-----------------------------------------------------------------------
@@ -383,15 +383,15 @@ hypre_BCSRMatrixDenseBlockMatvec(double alpha, hypre_BCSRMatrixBlock* A,
 
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockMatvecT(double alpha, hypre_BCSRMatrixBlock* A,
 				  double* x_data, double beta,
 				  double* y_data) {
-  int num_rows = A->num_rows;
-  int num_cols = A->num_cols;
-  int i, j;
+  HYPRE_Int num_rows = A->num_rows;
+  HYPRE_Int num_cols = A->num_cols;
+  HYPRE_Int i, j;
   double temp;
-  int ierr = 0;
+  HYPRE_Int ierr = 0;
   double* A_data = A->data;
 
   /*-----------------------------------------------------------------------
@@ -445,10 +445,10 @@ hypre_BCSRMatrixDenseBlockMatvecT(double alpha, hypre_BCSRMatrixBlock* A,
 double
 hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
 			       const char* norm) {
-  int num_rows = A->num_rows;
-  int num_cols = A->num_cols;
+  HYPRE_Int num_rows = A->num_rows;
+  HYPRE_Int num_cols = A->num_cols;
   double* data = A->data;
-  int i, j;
+  HYPRE_Int i, j;
 
   if(!strcmp(norm, "one")) {
     double col_sums[num_cols];
@@ -505,15 +505,15 @@ hypre_BCSRMatrixDenseBlockNorm(hypre_BCSRMatrixDenseBlock* A,
   }
 }
 
-int
+HYPRE_Int
 hypre_BCSRMatrixDenseBlockPrint(hypre_BCSRMatrixDenseBlock* A,
 				FILE* out_file) {
-  int i;
+  HYPRE_Int i;
 
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
-    fprintf(out_file, "%f ", A->data[i]);
+    hypre_fprintf(out_file, "%f ", A->data[i]);
   }
-  fprintf(out_file, "\n");
+  hypre_fprintf(out_file, "\n");
 
   return 0;
   

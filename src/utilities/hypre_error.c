@@ -7,68 +7,68 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
 
 #include "_hypre_utilities.h"
 
-int hypre__global_error = 0;
+HYPRE_Int hypre__global_error = 0;
 
 /* Process the error with code ierr raised in the given line of the
    given source file. */
-void hypre_error_handler(char *filename, int line, int ierr)
+void hypre_error_handler(char *filename, HYPRE_Int line, HYPRE_Int ierr)
 {
    hypre_error_flag |= ierr;
 
 #ifdef HYPRE_PRINT_ERRORS
-   fprintf(stderr,
+   hypre_fprintf(stderr,
            "hypre error in file \"%s\", line %d, error code = %d\n",
            filename, line, ierr);
 #endif
 }
 
-int HYPRE_GetError()
+HYPRE_Int HYPRE_GetError()
 {
    return hypre_error_flag;
 }
 
-int HYPRE_CheckError(int ierr, int hypre_error_code)
+HYPRE_Int HYPRE_CheckError(HYPRE_Int ierr, HYPRE_Int hypre_error_code)
 {
    return ierr & hypre_error_code;
 }
 
-void HYPRE_DescribeError(int ierr, char *msg)
+void HYPRE_DescribeError(HYPRE_Int ierr, char *msg)
 {
    if (ierr == 0)
-      sprintf(msg,"[No error] ");
+      hypre_sprintf(msg,"[No error] ");
 
    if (ierr & HYPRE_ERROR_GENERIC)
-      sprintf(msg,"[Generic error] ");
+      hypre_sprintf(msg,"[Generic error] ");
 
    if (ierr & HYPRE_ERROR_MEMORY)
-      sprintf(msg,"[Memory error] ");
+      hypre_sprintf(msg,"[Memory error] ");
 
    if (ierr & HYPRE_ERROR_ARG)
-      sprintf(msg,"[Error in argument %d] ", HYPRE_GetErrorArg());
+      hypre_sprintf(msg,"[Error in argument %d] ", HYPRE_GetErrorArg());
 
    if (ierr & HYPRE_ERROR_CONV)
-      sprintf(msg,"[Method did not converge] ");
+      hypre_sprintf(msg,"[Method did not converge] ");
 }
 
-int HYPRE_GetErrorArg()
+HYPRE_Int HYPRE_GetErrorArg()
 {
    return (hypre_error_flag>>3 & 31);
 }
 
-int HYPRE_ClearAllErrors()
+HYPRE_Int HYPRE_ClearAllErrors()
 {
    hypre_error_flag = 0;
    return (hypre_error_flag != 0);
 }
 
-int HYPRE_ClearError(int hypre_error_code)
+HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code)
 {
    hypre_error_flag &= ~hypre_error_code;
    return (hypre_error_flag & hypre_error_code);

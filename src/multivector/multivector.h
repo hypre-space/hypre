@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,36 +35,36 @@ mv_MultiVectorGetData (mv_MultiVectorPtr x);
 
   /* wraps our multivector structure around the data provided by user */
 mv_MultiVectorPtr
-mv_MultiVectorWrap( mv_InterfaceInterpreter* ii, void * data, int ownsData );
+mv_MultiVectorWrap( mv_InterfaceInterpreter* ii, void * data, HYPRE_Int ownsData );
 
   /* creates a multivector of width n using sample vector */
 mv_MultiVectorPtr 
-mv_MultiVectorCreateFromSampleVector( void*, int n, void* sample );
+mv_MultiVectorCreateFromSampleVector( void*, HYPRE_Int n, void* sample );
 
   /* creates a multivector of the same shape as x; copies values
      if copyValues is non-zero */
 mv_MultiVectorPtr 
-mv_MultiVectorCreateCopy( mv_MultiVectorPtr x, int copyValues );
+mv_MultiVectorCreateCopy( mv_MultiVectorPtr x, HYPRE_Int copyValues );
 
 void 
 mv_MultiVectorDestroy( mv_MultiVectorPtr );
 
-int
+HYPRE_Int
 mv_MultiVectorWidth( mv_MultiVectorPtr v );
 
-int
+HYPRE_Int
 mv_MultiVectorHeight( mv_MultiVectorPtr v );
 
   /* sets mask for v; all the subsequent operations
      apply only to masked vectors */
 void
-mv_MultiVectorSetMask( mv_MultiVectorPtr v, int* mask );
+mv_MultiVectorSetMask( mv_MultiVectorPtr v, HYPRE_Int* mask );
 
 void 
 mv_MultiVectorClear( mv_MultiVectorPtr );
 
 void 
-mv_MultiVectorSetRandom( mv_MultiVectorPtr v, int seed );
+mv_MultiVectorSetRandom( mv_MultiVectorPtr v, HYPRE_Int seed );
 
 void 
 mv_MultiVectorCopy( mv_MultiVectorPtr src, mv_MultiVectorPtr dest );
@@ -77,28 +77,28 @@ mv_MultiVectorAxpy( double a, mv_MultiVectorPtr x, mv_MultiVectorPtr y );
      h the number of rows and w the number of columns (cf. blas or lapack) */
 void 
 mv_MultiVectorByMultiVector( mv_MultiVectorPtr x, mv_MultiVectorPtr y,
-				int gh, int h, int w, double* v );
+				HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, double* v );
 
   /*computes the diagonal of x'*y stored in diag(mask) */
 void 
 mv_MultiVectorByMultiVectorDiag( mv_MultiVectorPtr, mv_MultiVectorPtr,
-				   int* mask, int n, double* diag );
+				   HYPRE_Int* mask, HYPRE_Int n, double* diag );
 
   /* computes y = x*v, where v is stored in fortran style */
 void 
 mv_MultiVectorByMatrix( mv_MultiVectorPtr x, 
-			   int gh, int h, int w, double* v,
+			   HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, double* v,
 			   mv_MultiVectorPtr y );
 
   /* computes y = x*v + y, where v is stored in fortran style */
 void 
 mv_MultiVectorXapy( mv_MultiVectorPtr x, 
-		       int gh, int h, int w, double* v,
+		       HYPRE_Int gh, HYPRE_Int h, HYPRE_Int w, double* v,
 		       mv_MultiVectorPtr y );
 
   /* computes y = x*diag(mask) */
 void mv_MultiVectorByDiagonal( mv_MultiVectorPtr x, 
-				  int* mask, int n, double* diag,
+				  HYPRE_Int* mask, HYPRE_Int n, double* diag,
 				  mv_MultiVectorPtr y );
 
   /* computes y = f(x) vector-by-vector */

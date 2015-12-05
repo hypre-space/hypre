@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -17,14 +17,14 @@
 typedef struct
 {
   void*  (*MatvecCreate)  ( void *A, void *x );
-  int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+  HYPRE_Int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
                              void *x, double beta, void *y );
-  int    (*MatvecDestroy) ( void *matvec_data );
+  HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
 
   void*  (*MatMultiVecCreate)  ( void *A, void *x );
-  int    (*MatMultiVec)        ( void *data, double alpha, void *A,
+  HYPRE_Int    (*MatMultiVec)        ( void *data, double alpha, void *A,
 				 void *x, double beta, void *y );
-  int    (*MatMultiVecDestroy)  ( void *data );
+  HYPRE_Int    (*MatMultiVecDestroy)  ( void *data );
 
 } HYPRE_MatvecFunctions;
 

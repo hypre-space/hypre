@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,15 +22,15 @@
 
 HYPRE_ParCSRMatrix 
 GenerateVarDifConv( MPI_Comm comm,
-                 int      nx,
-                 int      ny,
-                 int      nz, 
-                 int      P,
-                 int      Q,
-                 int      R,
-                 int      p,
-                 int      q,
-                 int      r,
+                 HYPRE_Int      nx,
+                 HYPRE_Int      ny,
+                 HYPRE_Int      nz, 
+                 HYPRE_Int      P,
+                 HYPRE_Int      Q,
+                 HYPRE_Int      R,
+                 HYPRE_Int      p,
+                 HYPRE_Int      q,
+                 HYPRE_Int      r,
                  double eps,
 		 HYPRE_ParVector *rhs_ptr)
 {
@@ -41,40 +41,40 @@ GenerateVarDifConv( MPI_Comm comm,
    hypre_Vector *rhs;
    double *rhs_data;
 
-   int    *diag_i;
-   int    *diag_j;
+   HYPRE_Int    *diag_i;
+   HYPRE_Int    *diag_j;
    double *diag_data;
 
-   int    *offd_i;
-   int    *offd_j;
+   HYPRE_Int    *offd_i;
+   HYPRE_Int    *offd_j;
    double *offd_data;
 
-   int *global_part;
-   int ix, iy, iz;
-   int cnt, o_cnt;
-   int local_num_rows; 
-   int *col_map_offd;
-   int row_index;
-   int i,j;
+   HYPRE_Int *global_part;
+   HYPRE_Int ix, iy, iz;
+   HYPRE_Int cnt, o_cnt;
+   HYPRE_Int local_num_rows; 
+   HYPRE_Int *col_map_offd;
+   HYPRE_Int row_index;
+   HYPRE_Int i,j;
 
-   int nx_local, ny_local, nz_local;
-   int nx_size, ny_size, nz_size;
-   int num_cols_offd;
-   int grid_size;
+   HYPRE_Int nx_local, ny_local, nz_local;
+   HYPRE_Int nx_size, ny_size, nz_size;
+   HYPRE_Int num_cols_offd;
+   HYPRE_Int grid_size;
 
-   int *nx_part;
-   int *ny_part;
-   int *nz_part;
+   HYPRE_Int *nx_part;
+   HYPRE_Int *ny_part;
+   HYPRE_Int *nz_part;
 
-   int num_procs, my_id;
-   int P_busy, Q_busy, R_busy;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_Int P_busy, Q_busy, R_busy;
 
    double hhx, hhy, hhz;
    double xx, yy, zz;
    double afp, afm, bfp, bfm, cfp, cfm, df, ef, ff, gf;
 
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny*nz;
 
@@ -82,7 +82,7 @@ GenerateVarDifConv( MPI_Comm comm,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(HYPRE_Int,P*Q*R+1);
 
    global_part[0] = 0;
    cnt = 1;
@@ -109,8 +109,8 @@ GenerateVarDifConv( MPI_Comm comm,
    num_procs = P*Q*R;
 
    local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
    rhs_data = hypre_CTAlloc(double, local_num_rows);
 
    P_busy = hypre_min(nx,P);
@@ -127,7 +127,7 @@ GenerateVarDifConv( MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
 
    hhx = 1.0/(double)(nx+1);
    hhy = 1.0/(double)(ny+1);
@@ -206,12 +206,12 @@ GenerateVarDifConv( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(int, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
    diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(int, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
       offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
    }
 

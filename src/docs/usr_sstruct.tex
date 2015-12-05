@@ -13,9 +13,9 @@ overset grids.  In addition, it supports more general PDEs than the
 multiple variable types (e.g. cell-centered, face-centered, etc.).  The
 interface provides access to data structures and linear solvers in \hypre{}
 that are designed for semi-structured grid problems, but also to the most
-general data structures and solvers.  These latter solvers are usually provided
-via the \code{FEI} or \code{IJ} interfaces described in Chapters~\ref{ch-FEI}
-and \ref{ch-IJ}.
+general data structures and solvers.
+%These latter solvers are usually provided via the \code{FEI} or \code{IJ}
+%interfaces described in Chapters~\ref{ch-FEI} and \ref{ch-IJ}.
 
 The \code{SStruct} grid is composed out of a number of structured grid {\em
 parts}, where the physical inter-relationship between the parts is arbitrary.
@@ -40,33 +40,39 @@ contained in the pictured cell---are not referenced by the $(i,j)$ index.}
 \end{figure}
 
 The \code{SStruct} interface uses a {\em graph} to allow nearly arbitrary
-relationships between part data.  The graph is constructed from stencils plus
-some additional data-coupling information set by the \code{GraphAddEntries()}
-routine.  Another method for relating part data is the
-\code{GridSetNeighborPart()} routine, which is particularly suited for
-block-structured grid problems.
+relationships between part data.  The graph is constructed from stencils or
+finite element stiffness matrices plus some additional data-coupling information
+set by the \code{GraphAddEntries()} routine.  Two other methods for relating
+part data are the \code{GridSetNeighborPart()} and \code{GridSetSharedPart()}
+routines, which are particularly well suited for block-structured grid problems.
+The latter is useful for finite element codes.
 
 There are five basic steps involved in setting up the linear system to be
 solved:
 %\begin{enumerate}
 \begin{list}{\arabic{enumi}.}{\usecounter{enumi}\setlength{\itemsep}{0in}}
 \item set up the grid,
-\item set up the stencils,
+\item set up the stencils (if needed),
 \item set up the graph,
 \item set up the matrix,
 \item set up the right-hand-side vector.
 \end{list}
 %\end{enumerate}
+%In the remainder of this section, we consider three examples: block-structured
+%grid problems with stencils (Section~\ref{sec-Block-Structured-Grids});
+%block-structured grid problems with finite elements
+%(Section~\ref{sec-Block-Structured-Grids-FEM}); and structured adaptive mesh
+%refinement problems (Section~\ref{sec-Structured-Adaptive-Mesh-Refinement}).
 
 %-----------------------------------------------------------------------------
 
-\section{Block-Structured Grids}
+\section{Block-Structured Grids with Stencils}
 \label{sec-Block-Structured-Grids}
 
-In this section, we describe how to use the \code{SStruct} interface to
-define block-structured grid problems.  We will do this primarily by
-example, paying particular attention to the construction of stencils
-and the use of the \code{GridSetNeighborPart()} interface routine.
+In this section, we describe how to use the \code{SStruct} interface to define
+block-structured grid problems.  We do this primarily by example, paying
+particular attention to the construction of stencils and the use of the
+\code{GridSetNeighborPart()} interface routine.
 
 Consider the solution of the diffusion equation
 \begin{equation} \label{eqn-block-diffusion}
@@ -79,17 +85,28 @@ variables: cell-centered, $x$-face, and $y$-face.  The three discretization
 stencils that couple these variables are also given in the figure.  The
 information in this figure is essentially all that is needed to describe the
 nonzero structure of the linear system we wish to solve.
+
 \begin{figure}
 \centering
-\includegraphics[width=.4\textwidth]{figSStructExample1a}
+\mbox{}\hfill
+\includegraphics[width=.45\textwidth]{figSStructExample1a}
 \hfill
 \includegraphics[width=.4\textwidth]{figSStructExample1b}
+\hfill\mbox{}
 \caption{%
 Example of a block-structured grid with five logically-rectangular blocks and
 three variables types: cell-centered, $x$-face, and $y$-face.  Discretization
 stencils for the cell-centered (left), $x$-face (middle), and $y$-face (right)
 variables are also pictured.}
 \label{fig-sstruct-example}
+
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=.6\textwidth]{figSStructExample1c}
+\caption{%
+One possible labeling of the grid in Figure~\ref{fig-sstruct-example}.}
+\label{fig-sstruct-example-parts}
 \end{figure}
 
 The grid in Figure~\ref{fig-sstruct-example} is defined in terms of five
@@ -105,18 +122,6 @@ expects a domain-based data distribution by boxes, but the actual distribution
 is determined by the user and simply described (in parallel) through the
 interface.
 
-\begin{figure}
-\centering
-\includegraphics[width=.4\textwidth]{figSStructExample1c}
-\caption{%
-Test figure.}
-\label{fig-sstruct-example-parts}
-\end{figure}
-
-As with the \code{Struct} interface, each process describes that portion of the
-grid that it ``owns'', one box at a time.  Figure~\ref{fig-sstruct-grid} shows
-the code for setting up the grid on process~3 (the code for the other processes
-is similar).
 \begin{figure}
 \centering
 \begin{tabular}{@{}c@{}}
@@ -178,9 +183,13 @@ is similar).
 Code on process 3 for setting up the grid in Figure~\ref{fig-sstruct-example}.}
 \label{fig-sstruct-grid}
 \end{figure}
-The ``icons'' at the top of the figure illustrate the result of the numbered
-lines of code.  Process~3 needs to describe the data pictured in the
-bottom-right of the figure.  That is, it needs to describe part~3 plus some
+
+As with the \code{Struct} interface, each process describes that portion of the
+grid that it ``owns'', one box at a time.  Figure~\ref{fig-sstruct-grid} shows
+the code for setting up the grid on process~3 (the code for the other processes
+is similar).  The ``icons'' at the top of the figure illustrate the result of
+the numbered lines of code.  Process~3 needs to describe the data pictured in
+the bottom-right of the figure.  That is, it needs to describe part~3 plus some
 additional neighbor information that ties part~3 together with the rest of the
 grid.  The \code{Create()} routine creates an empty 2D grid object with five
 parts that lives on the \code{MPI_COMM_WORLD} communicator.  The
@@ -194,7 +203,7 @@ yet defined.  To do this, we need to relate the index space for part~3 with the
 index spaces of parts 2 and~4.  More specifically, we need to tell the interface
 that the two grey boxes neighboring part~3 in the bottom-right of
 Figure~\ref{fig-sstruct-grid} also correspond to boxes on parts 2 and~4.  This
-is done through the two calls to the \code{SetNeighborPart()} routine.  We will
+is done through the two calls to the \code{SetNeighborPart()} routine.  We
 discuss only the first call, which describes the grey box on the right of the
 figure.  Note that this grey box lives outside of the box extents for the grid
 on part~3, but it can still be described using the index-space for part~3
@@ -241,17 +250,17 @@ convention used for referencing variables of different types.  The geometry
 description uses the same convention, but with indices numbered relative to the
 referencing index $(0,0)$ for the stencil's center.
 Figure~\ref{fig-sstruct-graph} shows the code for setting up the graph .
+
 \begin{figure}
 \centering
 \mbox{}\hfill
-\includegraphics[width=.3\textwidth]{figSStructStenc0}
+\includegraphics[width=.25\textwidth]{figSStructStenc0}
 \hfill
-\includegraphics[width=.25\textwidth]{figSStructStenc1}
+\includegraphics[width=.2\textwidth]{figSStructStenc1}
 \hfill\mbox{}
 \caption{%
 Assignment of labels and geometries to the $y$-face stencil in
-Figure~\ref{fig-sstruct-example}.  Stencil offsets are described relative to
-the $(0,0)$ index for the ``center'' of the stencil.}
+Figure~\ref{fig-sstruct-example}.}
 \label{fig-sstruct-stencil}
 \end{figure}
 
@@ -266,19 +275,9 @@ the $(0,0)$ index for the ``center'' of the stencil.}
 \end{tabular}
 \hfill
 \begin{tabular}{@{}c@{}}
-\includegraphics[width=.32\textwidth]{figSStructGraph3}\vspace{-.5em} \\ 3
+\includegraphics[width=.32\textwidth]{figSStructGraph5}\vspace{-.5em} \\ 3
 \end{tabular}
 \vspace{1em} \\
-\mbox{}\hfill
-\begin{tabular}{@{}c@{}}
-\includegraphics[width=.32\textwidth]{figSStructGraph4}\vspace{-.5em} \\ 4
-\end{tabular}
-\hfill
-\begin{tabular}{@{}c@{}}
-\includegraphics[width=.32\textwidth]{figSStructGraph5}\vspace{-.5em} \\ 5
-\end{tabular}
-\hfill\mbox{}
-\vspace{2em} \\
 \begin{minipage}{0.9\textwidth}
 \begin{verbatim}
     
@@ -287,24 +286,22 @@ the $(0,0)$ index for the ``center'' of the stencil.}
     int c_var = 0, x_var = 1, y_var = 2;
     int part;
     
-    /* Create the graph object */
 1:  HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
     
     /* Set the cell-centered, x-face, and y-face stencils for each part */
     for (part = 0; part < 5; part++)
     {
 2:     HYPRE_SStructGraphSetStencil(graph, part, c_var, c_stencil);
-3:     HYPRE_SStructGraphSetStencil(graph, part, x_var, x_stencil);
-4:     HYPRE_SStructGraphSetStencil(graph, part, y_var, y_stencil);
+       HYPRE_SStructGraphSetStencil(graph, part, x_var, x_stencil);
+       HYPRE_SStructGraphSetStencil(graph, part, y_var, y_stencil);
     }
     
-    /* No need to add non-stencil entries in this example */
-5:  HYPRE_SStructGraphAssemble(graph);
+3:  HYPRE_SStructGraphAssemble(graph);
 
 \end{verbatim}
 \end{minipage}
 \caption{%
-Test figure.}
+Code on process 3 for setting up the graph for Figure~\ref{fig-sstruct-example}.}
 \label{fig-sstruct-graph}
 \end{figure}
 
@@ -331,6 +328,158 @@ participates in the discretization, and make the other variable a dummy
 variable that is decoupled from the discretization by zeroing out appropriate
 entries in the matrix.  All of these complications are avoided by using the
 \code{GridSetNeighborPart()} for this example.
+
+%-----------------------------------------------------------------------------
+
+\section{Block-Structured Grids with Finite Elements}
+\label{sec-Block-Structured-Grids-FEM}
+
+In this section, we describe how to use the \code{SStruct} interface to define
+block-structured grid problems with finite elements.  We again do this by
+example, paying particular attention to the use of the \code{FEM} interface
+routines and the \code{GridSetSharedPart()} routine.  See example code
+\file{ex14.c} for a complete implementation.
+
+Consider a nodal finite element (FEM) discretization of the Laplace equation on
+the star-shaped grid in Figure~\ref{fig-sstruct-fem-example}.  The local FEM
+stiffness matrix in the figure describes the coupling between the grid
+variables.  Although we could still describe this problem using stencils as in
+Section~\ref{sec-Block-Structured-Grids}, an FEM-based approach (available in
+\hypre{} version \code{2.6.0b} and later) is a more natural alternative.
+
+\begin{figure} [t]
+\centering
+\includegraphics[width=.54\textwidth]{figSStructExample3a}
+\hfill
+\includegraphics[width=.44\textwidth]{figSStructExample3b}
+\caption{%
+Example of a star-shaped grid with six logically-rectangular blocks and one
+nodal variable.  Each block has an angle at the origin given by $\gamma=\pi/3$.
+The finite element stiffness matrix (right) is given in terms of the pictured
+variable ordering (left).}
+\label{fig-sstruct-fem-example}
+\end{figure}
+
+%\begin{figure}
+%\centering
+%\includegraphics[width=.5\textwidth]{figSStructExample3c}
+%\caption{%
+%One possible labeling of the grid in Figure~\ref{fig-sstruct-fem-example}.}
+%\label{fig-sstruct-fem-example-parts}
+%\end{figure}
+
+The grid in Figure~\ref{fig-sstruct-fem-example} is defined in terms of six
+separate logically-rectangular parts, and each part is given a unique label
+between 0 and 5.  Each part consists of a single box with lower index $(1,1)$
+and upper index $(9,9)$, and the grid data is distributed on six processes such
+that data associated with part~$p$ lives on process~$p$.
+
+\begin{figure}
+\centering
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGridFEM1} \\ 1
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGridFEM2} \\ 2
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGridFEM3} \\ 3
+\end{tabular}
+\vspace{1em} \\
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGridFEM4} \\ 4
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGridFEM5} \\ 5
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGridFEM6} \\ 6
+\end{tabular}
+\vspace{2em} \\
+\begin{minipage}{0.9\textwidth}
+\begin{verbatim}
+    
+    HYPRE_SStructGrid grid;
+    int ndim = 2, nparts = 6, nvars = 1, part = 0;
+    int ilower[2]    = {1,1}, iupper[2] = {9,9};
+    int vartypes[]   = {HYPRE_SSTRUCT_VARIABLE_NODE};
+    int ordering[12] = {0,-1,-1,  0,+1,-1,  0,+1,+1,  0,-1,+1};
+
+    int s_part   = 2;
+    int ilo[2]   = {1,1}, iup[2]   = {1,9}, offset[2]   = {-1,0};
+    int s_ilo[2] = {1,1}, s_iup[2] = {9,1}, s_offset[2] = {0,-1};
+    int map[2]   = {1,0};
+    int dir[2]   = {-1,1};
+
+1:  HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
+    
+    /* Set grid extents, grid variables, and FEM ordering for part 0 */
+2:  HYPRE_SStructGridSetExtents(grid, part, ilower, iupper);
+3:  HYPRE_SStructGridSetVariables(grid, part, nvars, vartypes);
+4:  HYPRE_SStructGridSetFEMOrdering(grid, part, ordering);
+
+    /* Set shared variables for parts 0 and 1 (0 and 2/3/4/5 not shown) */
+5:  HYPRE_SStructGridSetSharedPart(grid, part, ilo, iup, offset,
+       s_part, s_ilo, s_iup, s_offset, map, dir);
+
+6:  HYPRE_SStructGridAssemble(grid);
+    
+\end{verbatim}
+\end{minipage}
+\caption{%
+Code on process 0 for setting up the grid in Figure~\ref{fig-sstruct-fem-example}.}
+\label{fig-sstruct-fem-grid}
+\end{figure}
+
+As in Section~\ref{sec-Block-Structured-Grids}, each process describes that
+portion of the grid that it ``owns'', one box at a time.
+Figure~\ref{fig-sstruct-fem-grid} shows the code for setting up the grid on
+process~0 (the code for the other processes is similar).  The ``icons'' at the
+top of the figure illustrate the result of the numbered lines of code.
+Process~0 needs to describe the data pictured in the bottom-right of the figure.
+That is, it needs to describe part~0 plus some additional information about
+shared data with other parts on the grid.  The \code{SetFEMOrdering()} routine
+sets the ordering of the unknowns in an element (an element is always a grid
+cell in \hypre{}).  This determines the ordering of the data passed into the
+routines \code{MatrixAddFEMValues()} and \code{VectorAddFEMValues()} discussed
+later.
+
+At this point, the layout of the data on part~0 is complete, but there is no
+relationship to the rest of the grid.  To couple the parts, we need to tell
+\hypre{} that some of the boundary variables on part~0 are shared with other
+parts, i.e., they are the same as some of the variables on other parts.  This is
+done through five calls to the \code{SetSharedPart()} routine.  Only the first
+call is shown in the figure; the other four calls are similar.  The arguments to
+this routine are the same as \code{SetNeighborPart()} with the addition of two
+new offset arguments, named \code{offset} and \code{s_offset} in the figure.
+Each offset represents a pointer from the cell center to one of the following:
+all variables in the cell (no nonzeros in offset); all variables on a face (only
+1 nonzero); all variables on an edge (2 nonzeros); all variables at a point (3
+nonzeros).  The two offsets must be consistent with each other.
+
+The graph is set up similarly to Figure~\ref{fig-sstruct-graph}, except that the
+stencil calls are replaced by calls to \code{GraphSetFEM()}.  The nonzero
+pattern of the stiffness matrix can also be set by calling the optional routine
+\code{GraphSetFEMSparsity()}.
+
+Matrix and vector values are set one element at a time.  For the example in this
+section, calls on part~0 would have the following form:
+\begin{verbatim}
+   int part = 0;
+   int index[2] = {i,j};
+   double m_values[16] = {...};
+   double v_values[4]  = {...};
+   
+   HYPRE_SStructMatrixAddFEMValues(A, part, index, m_values);
+   HYPRE_SStructVectorAddFEMValues(v, part, index, v_values);
+\end{verbatim}
+Here, \code{m_values} contains local stiffness matrix values and \code{v_values}
+contains local variable values.  The global matrix and vector are assembled
+internally by \hypre{}, using the shared variables to couple the parts.
 
 %-----------------------------------------------------------------------------
 

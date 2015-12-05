@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,35 +32,35 @@ typedef struct
    hypre_SStructPGrid     *pgrid;
    hypre_SStructStencil  **stencils;     /* nvar array of stencils */
 
-   int                     nvars;
-   int                   **smaps;
+   HYPRE_Int               nvars;
+   HYPRE_Int             **smaps;
    hypre_StructStencil  ***sstencils;    /* nvar x nvar array of sstencils */
    hypre_StructMatrix   ***smatrices;    /* nvar x nvar array of smatrices */
-   int                   **symmetric;    /* Stencil entries symmetric?
+   HYPRE_Int             **symmetric;    /* Stencil entries symmetric?
                                           * (nvar x nvar array) */
 
    /* temporary storage for SetValues routines */
-   int                     sentries_size;
-   int                    *sentries;
+   HYPRE_Int               sentries_size;
+   HYPRE_Int              *sentries;
 
-   int                     accumulated;  /* AddTo values accumulated? */
-   int                     complex;      /* Matrix complex? */
+   HYPRE_Int               accumulated;  /* AddTo values accumulated? */
+   HYPRE_Int               complex;      /* Matrix complex? */
 
-   int                     ref_count;
+   HYPRE_Int               ref_count;
 
 } hypre_SStructPMatrix;
 
 typedef struct hypre_SStructMatrix_struct
 {
    MPI_Comm                comm;
-   int                     ndim;
+   HYPRE_Int               ndim;
    hypre_SStructGraph     *graph;
-   int                  ***splits;   /* S/U-matrix split for each stencil */
+   HYPRE_Int            ***splits;   /* S/U-matrix split for each stencil */
 
    /* S-matrix info */
-   int                     nparts;
+   HYPRE_Int               nparts;
    hypre_SStructPMatrix  **pmatrices;
-   int                  ***symmetric;    /* Stencil entries symmetric?
+   HYPRE_Int            ***symmetric;    /* Stencil entries symmetric?
                                           * (nparts x nvar x nvar array) */
 
    /* U-matrix info */
@@ -68,20 +68,20 @@ typedef struct hypre_SStructMatrix_struct
    hypre_ParCSRMatrix     *parcsrmatrix;
                          
    /* temporary storage for SetValues routines */
-   int                     entries_size;
-   int                    *Sentries;
-   int                    *Uentries;
-   int                    *tmp_col_coords;
+   HYPRE_Int               entries_size;
+   HYPRE_Int              *Sentries;
+   HYPRE_Int              *Uentries;
+   HYPRE_Int              *tmp_col_coords;
    double                 *tmp_coeffs;
 
-   int                     ns_symmetric; /* Non-stencil entries symmetric? */
-   int                     complex;      /* Matrix complex? */
-   int                     global_size;  /* Total number of nonzero coeffs */
+   HYPRE_Int               ns_symmetric; /* Non-stencil entries symmetric? */
+   HYPRE_Int               complex;      /* Matrix complex? */
+   HYPRE_Int               global_size;  /* Total number of nonzero coeffs */
 
-   int                     ref_count;
+   HYPRE_Int               ref_count;
 
   /* GEC0902   adding an object type to the matrix  */
-   int                     object_type;
+   HYPRE_Int               object_type;
 
 } hypre_SStructMatrix;
 

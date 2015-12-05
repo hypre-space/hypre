@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -113,11 +113,11 @@
 # define starttimer(tmr) (tmr -= rtclock())
 # define stoptimer(tmr)  (tmr += rtclock())
 # define gettimer(tmr)   ((double) tmr*_secpertick)
-  typedef long timer ;
+  typedef hypre_longint timer ;
 #else
 # define cleartimer(tmr) (tmr = 0.0)
-# define starttimer(tmr) (tmr -= MPI_Wtime())
-# define stoptimer(tmr)  (tmr += MPI_Wtime())
+# define starttimer(tmr) (tmr -= hypre_MPI_Wtime())
+# define stoptimer(tmr)  (tmr += hypre_MPI_Wtime())
 # define gettimer(tmr)   (tmr)
   typedef double timer ;
 #endif

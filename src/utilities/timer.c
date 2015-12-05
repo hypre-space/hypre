@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
-
-
 
 /*
  * File:	timer.c
@@ -21,6 +19,8 @@
  * wallclock seconds, since we assume that the MPI timers have better
  * resolution than the system timers.
  */
+
+#include "_hypre_utilities.h"
 
 #include <time.h>
 #ifndef WIN32
@@ -34,14 +34,14 @@
 double time_getWallclockSeconds(void)
 {
 #ifdef TIMER_USE_MPI
-   return(MPI_Wtime());
+   return(hypre_MPI_Wtime());
 #else
 #ifdef WIN32
    clock_t cl=clock();
    return(((double) cl)/((double) CLOCKS_PER_SEC));
 #else
    struct tms usage;
-   long wallclock = times(&usage);
+   hypre_longint wallclock = times(&usage);
    return(((double) wallclock)/((double) sysconf(_SC_CLK_TCK)));
 #endif
 #endif

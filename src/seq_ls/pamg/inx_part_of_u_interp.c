@@ -7,30 +7,30 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 #include "headers.h"
 #include "amg.h"
 
-int
+HYPRE_Int
 hypre_CreateDomain
-(int *CF_marker, hypre_CSRMatrix *A, int num_coarse,
-int *dof_func, int **coarse_dof_ptr,
-int **domain_i_ptr, int **domain_j_ptr)
+(HYPRE_Int *CF_marker, hypre_CSRMatrix *A, HYPRE_Int num_coarse,
+HYPRE_Int *dof_func, HYPRE_Int **coarse_dof_ptr,
+HYPRE_Int **domain_i_ptr, HYPRE_Int **domain_j_ptr)
 
 {
-   int *A_i = hypre_CSRMatrixI(A);    
-   int *A_j = hypre_CSRMatrixJ(A);    
-   int num_vars = hypre_CSRMatrixNumRows(A);
-   int i, j, cnt, domain, j_indx;
-   int *domain_i;
-   int *domain_j;
-   int *coarse_dof;
-   int num_pts = 0;
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);    
+   HYPRE_Int *A_j = hypre_CSRMatrixJ(A);    
+   HYPRE_Int num_vars = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int i, j, cnt, domain, j_indx;
+   HYPRE_Int *domain_i;
+   HYPRE_Int *domain_j;
+   HYPRE_Int *coarse_dof;
+   HYPRE_Int num_pts = 0;
 
-   domain_i = hypre_CTAlloc(int, num_coarse+1);
-   coarse_dof = hypre_CTAlloc(int, num_coarse);
+   domain_i = hypre_CTAlloc(HYPRE_Int, num_coarse+1);
+   coarse_dof = hypre_CTAlloc(HYPRE_Int, num_coarse);
 
    cnt = 0;
    for (i=0; i < num_vars; i++)
@@ -41,7 +41,7 @@ int **domain_i_ptr, int **domain_j_ptr)
          coarse_dof[cnt++] = dof_func[i];
       }
    }
-   domain_j = hypre_CTAlloc(int, num_pts);
+   domain_j = hypre_CTAlloc(HYPRE_Int, num_pts);
 
    cnt = 0;
    domain = 0;
@@ -71,35 +71,35 @@ int **domain_i_ptr, int **domain_j_ptr)
    return 0;
 }
 
-int
+HYPRE_Int
 hypre_InexactPartitionOfUnityInterpolation
 (hypre_CSRMatrix **P_pointer,
 
- int    *i_dof_dof,
- int    *j_dof_dof,
+ HYPRE_Int    *i_dof_dof,
+ HYPRE_Int    *j_dof_dof,
  double *a_dof_dof,
 
 
  double *unit_vector,
 
 
- int *i_domain_dof,
- int *j_domain_dof,
+ HYPRE_Int *i_domain_dof,
+ HYPRE_Int *j_domain_dof,
 
- int num_domains, /* == num-coarsedofs */
+ HYPRE_Int num_domains, /* == num-coarsedofs */
 
- int num_dofs)
+ HYPRE_Int num_dofs)
 
 {
-  int ierr = 0;
-  int i,j,k;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k;
 
-  int ind = 1;
-  int nu, nu_max = 1;
+  HYPRE_Int ind = 1;
+  HYPRE_Int nu, nu_max = 1;
 
   double  eps = 1.e-24;
-  int max_iter = 1000;
-  int iter;
+  HYPRE_Int max_iter = 1000;
+  HYPRE_Int iter;
   double delta0, delta_old, delta, alpha, tau, beta;
   double aux, diag;
 
@@ -110,8 +110,8 @@ hypre_InexactPartitionOfUnityInterpolation
   double *row_sum;
 
 
-  int *i_global_to_local;
-  int local_dof_counter;
+  HYPRE_Int *i_global_to_local;
+  HYPRE_Int local_dof_counter;
 
 
   double *diag_dof_dof;
@@ -126,7 +126,7 @@ hypre_InexactPartitionOfUnityInterpolation
      ------------------------------------------------------------------ */
 
   
-  i_global_to_local = hypre_CTAlloc(int, num_dofs);
+  i_global_to_local = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
   for (i=0; i < num_dofs; i++)
     i_global_to_local[i] = -1;
@@ -138,7 +138,7 @@ hypre_InexactPartitionOfUnityInterpolation
   /* solve T x = unit_vector; --------------------------------------- */
 
   /* cg loop: ------------------------------------------------------- */
-  printf("\n---------------------- num_domains: %d, nnz: %d;\n", 
+  hypre_printf("\n---------------------- num_domains: %d, nnz: %d;\n", 
 	 num_domains, i_domain_dof[num_domains]);
 
   x = hypre_CTAlloc(double, num_dofs);
@@ -341,7 +341,7 @@ loop:
   for (i=0; i < num_dofs; i++)
     delta  += g[i] * r[i];
 
-  printf("\n---------------------- iter: %d, delta: %le\n",
+  hypre_printf("\n---------------------- iter: %d, delta: %le\n",
 	 iter, delta);
   if (delta < eps * delta0 || iter > max_iter)
     goto end_cg;
@@ -356,7 +356,7 @@ loop:
 
  
 end_cg:
-  printf("\n END CG in partition of unity interpolation; num_iters: %d\n",
+  hypre_printf("\n END CG in partition of unity interpolation; num_iters: %d\n",
 	 iter);
 
   hypre_TFree(r);
@@ -460,7 +460,7 @@ end_cg:
   for (i=0; i < num_dofs; i++)
     delta+= (row_sum[i] - 1.e0)*(row_sum[i] - 1.e0);
 
-  printf("\n unit row_sum deviation in seq_PU_interpolation: %le\n", 
+  hypre_printf("\n unit row_sum deviation in seq_PU_interpolation: %le\n", 
 	 sqrt(delta/num_dofs));
 
   hypre_TFree(row_sum);
@@ -481,28 +481,28 @@ end_cg:
 
 }
 /* computes: x = T *v; -------------------------------------------- */
-int
+HYPRE_Int
 compute_sym_GS_T_action(double *x,
 			double *v,
 			double *w,
 
-			int *i_domain_dof,
-			int *j_domain_dof,
+			HYPRE_Int *i_domain_dof,
+			HYPRE_Int *j_domain_dof,
 
-			int nu_max,
+			HYPRE_Int nu_max,
 
-			int    *i_dof_dof,
-			int    *j_dof_dof,
+			HYPRE_Int    *i_dof_dof,
+			HYPRE_Int    *j_dof_dof,
 			double *a_dof_dof,
 
-			int *i_global_to_local,
+			HYPRE_Int *i_global_to_local,
 
-			int num_domains,
-			int num_dofs)
+			HYPRE_Int num_domains,
+			HYPRE_Int num_dofs)
 {
-  int ierr = 0;
-  int i,j,k;
-  int nu;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k;
+  HYPRE_Int nu;
 
   double aux, diag;
 
@@ -584,25 +584,25 @@ compute_sym_GS_T_action(double *x,
 
 }
 /* computes: x = \sum A_i *v; -------------------------------------------- */
-int
+HYPRE_Int
 compute_sum_A_i_action(double *w,
 		       double *v,
 		       
-		       int *i_domain_dof,
-		       int *j_domain_dof,
+		       HYPRE_Int *i_domain_dof,
+		       HYPRE_Int *j_domain_dof,
 
 
-		       int    *i_dof_dof,
-		       int    *j_dof_dof,
+		       HYPRE_Int    *i_dof_dof,
+		       HYPRE_Int    *j_dof_dof,
 		       double *a_dof_dof,
 
-		       int *i_global_to_local,
+		       HYPRE_Int *i_global_to_local,
 
-		       int num_domains,
-		       int num_dofs)
+		       HYPRE_Int num_domains,
+		       HYPRE_Int num_dofs)
 {
-  int ierr = 0;
-  int i,j,k;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k;
 
 
   for (i=0; i < num_dofs; i++)

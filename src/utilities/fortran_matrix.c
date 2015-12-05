@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -37,7 +37,7 @@ utilities_FortranMatrixCreate(void) {
 }
 
 void
-utilities_FortranMatrixAllocateData( long  h, long w, 
+utilities_FortranMatrixAllocateData( hypre_longint  h, hypre_longint w, 
 				     utilities_FortranMatrix* mtx ) {
 
   hypre_assert( h > 0 && w > 0 );
@@ -57,7 +57,7 @@ utilities_FortranMatrixAllocateData( long  h, long w,
 
 
 void
-utilities_FortranMatrixWrap( double* v, long gh, long  h, long w, 
+utilities_FortranMatrixWrap( double* v, hypre_longint gh, hypre_longint  h, hypre_longint w, 
 			     utilities_FortranMatrix* mtx ) {
 
   hypre_assert( h > 0 && w > 0 );
@@ -88,7 +88,7 @@ utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx ) {
   free(mtx);
 }
 
-long
+hypre_longint
 utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx ) {
 
   hypre_assert( mtx != NULL );
@@ -96,7 +96,7 @@ utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx ) {
   return mtx->globalHeight;
 }
 
-long
+hypre_longint
 utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx ) {
 
   hypre_assert( mtx != NULL );
@@ -104,7 +104,7 @@ utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx ) {
   return mtx->height;
 }
 
-long
+hypre_longint
 utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx ) {
 
   hypre_assert( mtx != NULL );
@@ -123,7 +123,7 @@ utilities_FortranMatrixValues( utilities_FortranMatrix* mtx ) {
 void
 utilities_FortranMatrixClear( utilities_FortranMatrix* mtx ) {
 
-  long i, j, h, w, jump;
+  hypre_longint i, j, h, w, jump;
   double* p;
 
   hypre_assert( mtx != NULL );
@@ -143,7 +143,7 @@ utilities_FortranMatrixClear( utilities_FortranMatrix* mtx ) {
 void
 utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx ) {
 
-  long i, j, k, h, w, jump;
+  hypre_longint i, j, k, h, w, jump;
   double* p;
 
   hypre_assert( mtx != NULL );
@@ -169,7 +169,7 @@ utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx ) {
 void 
 utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx ) {
 
-  long j, h, w, jump;
+  hypre_longint j, h, w, jump;
   double* p;
 
   hypre_assert( mtx != NULL );
@@ -189,7 +189,7 @@ utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx ) {
 void 
 utilities_FortranMatrixTransposeSquare( utilities_FortranMatrix* mtx ) {
 
-  long i, j, g, h, w, jump;
+  hypre_longint i, j, g, h, w, jump;
   double* p;
   double* q;
   double tmp;
@@ -220,7 +220,7 @@ utilities_FortranMatrixTransposeSquare( utilities_FortranMatrix* mtx ) {
 void 
 utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx ) {
 
-  long i, j, g, h, w, jump;
+  hypre_longint i, j, g, h, w, jump;
   double* p;
   double* q;
 
@@ -245,11 +245,11 @@ utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx ) {
 }
 
 void 
-utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixCopy( utilities_FortranMatrix* src, HYPRE_Int t, 
 				  utilities_FortranMatrix* dest ) {
 
-  long i, j, h, w;
-  long jp, jq, jr;
+  hypre_longint i, j, h, w;
+  hypre_longint jp, jq, jr;
   double* p;
   double* q;
   double* r;
@@ -278,12 +278,12 @@ utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t,
 }
 
 void 
-utilities_FortranMatrixIndexCopy( int* index, 
-				       utilities_FortranMatrix* src, int t, 
+utilities_FortranMatrixIndexCopy( HYPRE_Int* index, 
+				       utilities_FortranMatrix* src, HYPRE_Int t, 
 				       utilities_FortranMatrix* dest ) {
 
-  long i, j, h, w;
-  long jp, jq, jr;
+  hypre_longint i, j, h, w;
+  hypre_longint jp, jq, jr;
   double* p;
   double* q;
   double* r;
@@ -317,7 +317,7 @@ void
 utilities_FortranMatrixSetDiagonal( utilities_FortranMatrix* mtx, 
 				    utilities_FortranMatrix* vec ) {
 
-  long j, h, w, jump;
+  hypre_longint j, h, w, jump;
   double* p;
   double* q;
 
@@ -340,7 +340,7 @@ void
 utilities_FortranMatrixGetDiagonal( utilities_FortranMatrix* mtx, 
 				    utilities_FortranMatrix* vec ) {
 
-  long j, h, w, jump;
+  hypre_longint j, h, w, jump;
   double* p;
   double* q;
   
@@ -365,7 +365,7 @@ utilities_FortranMatrixAdd( double a,
 				 utilities_FortranMatrix* mtxB, 
 				 utilities_FortranMatrix* mtxC ) {
 
-  long i, j, h, w, jA, jB, jC;
+  hypre_longint i, j, h, w, jA, jB, jC;
   double *pA;
   double *pB;
   double *pC;
@@ -428,7 +428,7 @@ void
 utilities_FortranMatrixDMultiply( utilities_FortranMatrix* vec, 
 				       utilities_FortranMatrix* mtx ) {
 
-  long i, j, h, w, jump;
+  hypre_longint i, j, h, w, jump;
   double* p;
   double* q;
 
@@ -453,7 +453,7 @@ void
 utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx, 
 				       utilities_FortranMatrix* vec ) {
 
-  long i, j, h, w, jump;
+  hypre_longint i, j, h, w, jump;
   double* p;
   double* q;
 
@@ -475,14 +475,14 @@ utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx,
 }
 
 void 
-utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA, 
-				      utilities_FortranMatrix* mtxB, int tB,
+utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, HYPRE_Int tA, 
+				      utilities_FortranMatrix* mtxB, HYPRE_Int tB,
 				      utilities_FortranMatrix* mtxC ) {
-  long h, w;
-  long i, j, k, l;
-  long iA, kA;
-  long kB, jB;
-  long iC, jC;
+  hypre_longint h, w;
+  hypre_longint i, j, k, l;
+  hypre_longint iA, kA;
+  hypre_longint kB, jB;
+  hypre_longint iC, jC;
 
   double* pAi0;
   double* pAik;
@@ -541,7 +541,7 @@ utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA,
 double 
 utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx ) {
 	
-  long i, j, h, w, jump;
+  hypre_longint i, j, h, w, jump;
   double* p;
 
   double norm;
@@ -567,9 +567,9 @@ utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx ) {
 
 double 
 utilities_FortranMatrixValue( utilities_FortranMatrix* mtx, 
-				     long i, long j ) {
+				     hypre_longint i, hypre_longint j ) {
 
-  long k;
+  hypre_longint k;
 
   hypre_assert( mtx != NULL );
 
@@ -582,9 +582,9 @@ utilities_FortranMatrixValue( utilities_FortranMatrix* mtx,
 
 double* 
 utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx, 
-					 long i, long j ) {
+					 hypre_longint i, hypre_longint j ) {
 
-  long k;
+  hypre_longint k;
 
   hypre_assert( mtx != NULL );
 
@@ -598,8 +598,8 @@ utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx,
 double 
 utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx ) {
 
-  long i, j, jump;
-  long h, w;
+  hypre_longint i, j, jump;
+  hypre_longint h, w;
   double* p;
   double maxVal;
 
@@ -624,8 +624,8 @@ utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx ) {
 
 void 
 utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
-					 long iFrom, long iTo, 
-					 long jFrom, long jTo,
+					 hypre_longint iFrom, hypre_longint iTo, 
+					 hypre_longint jFrom, hypre_longint jTo,
 					 utilities_FortranMatrix* block ) {
 
   if ( block->value != NULL && block->ownsValues )
@@ -647,8 +647,8 @@ utilities_FortranMatrixSelectBlock( utilities_FortranMatrix* mtx,
 void 
 utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
 
-  long i, j, k;
-  long n, jc, jd;
+  hypre_longint i, j, k;
+  hypre_longint n, jc, jd;
   double v;
   double* diag;	/* diag(i) = u(i,i)_original */
   double* pin;	/* &u(i-1,n) */
@@ -695,10 +695,10 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
 
 }
 
-int
+HYPRE_Int
 utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
 
-  long i, j, h, w, jump;
+  hypre_longint i, j, h, w, jump;
   double* p;
   FILE* fp;
 
@@ -710,14 +710,14 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
   h = mtx->height;
   w = mtx->width;
   
-  fprintf(fp,"%ld\n",h);
-  fprintf(fp,"%ld\n",w);
+  hypre_fprintf(fp,"%ld\n",h);
+  hypre_fprintf(fp,"%ld\n",w);
   
   jump = mtx->globalHeight - h;
 	
   for ( j = 0, p = mtx->value; j < w; j++ ) {
     for ( i = 0; i < h; i++, p++ )
-      fprintf(fp,"%.14e\n",*p);
+      hypre_fprintf(fp,"%.14e\n",*p);
     p += jump;
   }
 

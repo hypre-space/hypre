@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -33,7 +33,7 @@
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRBlockMatrixMatvec(double alpha, hypre_ParCSRBlockMatrix *A,
                               hypre_ParVector *x, double beta,
                               hypre_ParVector *y)
@@ -42,14 +42,14 @@ hypre_ParCSRBlockMatrixMatvec(double alpha, hypre_ParCSRBlockMatrix *A,
    hypre_ParCSRCommPkg	  *comm_pkg;
    hypre_CSRBlockMatrix   *diag, *offd;
    hypre_Vector           *x_local, *y_local, *x_tmp;
-   int                    i, j, k, index, num_rows, num_cols;
-   int                    blk_size, x_size, y_size, size;
-   int	                  num_cols_offd, start, finish, elem;
-   int                    ierr = 0, nprocs, num_sends, mypid;
+   HYPRE_Int                    i, j, k, index, num_rows, num_cols;
+   HYPRE_Int                    blk_size, x_size, y_size, size;
+   HYPRE_Int	                  num_cols_offd, start, finish, elem;
+   HYPRE_Int                    ierr = 0, nprocs, num_sends, mypid;
    double                 *x_tmp_data, *x_buf_data, *x_local_data;
 
-   MPI_Comm_size(hypre_ParCSRBlockMatrixComm(A), &nprocs);
-   MPI_Comm_rank(hypre_ParCSRBlockMatrixComm(A), &mypid);
+   hypre_MPI_Comm_size(hypre_ParCSRBlockMatrixComm(A), &nprocs);
+   hypre_MPI_Comm_rank(hypre_ParCSRBlockMatrixComm(A), &mypid);
    comm_pkg = hypre_ParCSRBlockMatrixCommPkg(A);
    num_rows = hypre_ParCSRBlockMatrixGlobalNumRows(A);
    num_cols = hypre_ParCSRBlockMatrixGlobalNumCols(A);
@@ -121,7 +121,7 @@ hypre_ParCSRBlockMatrixMatvec(double alpha, hypre_ParCSRBlockMatrix *A,
  *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParCSRBlockMatrixMatvecT( double           alpha,
                   hypre_ParCSRBlockMatrix *A,
                   hypre_ParVector    *x,
@@ -137,22 +137,22 @@ hypre_ParCSRBlockMatrixMatvecT( double           alpha,
    hypre_Vector *y_tmp;
 
    double       *y_local_data;
-   int         blk_size = hypre_ParCSRBlockMatrixBlockSize(A);
-   int         x_size = hypre_ParVectorGlobalSize(x);
-   int         y_size = hypre_ParVectorGlobalSize(y);
+   HYPRE_Int         blk_size = hypre_ParCSRBlockMatrixBlockSize(A);
+   HYPRE_Int         x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int         y_size = hypre_ParVectorGlobalSize(y);
    double       *y_tmp_data, *y_buf_data;
    
 
-   int         num_rows  = hypre_ParCSRBlockMatrixGlobalNumRows(A);
-   int         num_cols  = hypre_ParCSRBlockMatrixGlobalNumCols(A);
-   int	       num_cols_offd = hypre_CSRBlockMatrixNumCols(offd);
+   HYPRE_Int         num_rows  = hypre_ParCSRBlockMatrixGlobalNumRows(A);
+   HYPRE_Int         num_cols  = hypre_ParCSRBlockMatrixGlobalNumCols(A);
+   HYPRE_Int	       num_cols_offd = hypre_CSRBlockMatrixNumCols(offd);
 
 
-   int         i, j, index, start, finish, elem, num_sends;
-   int         size, k;
+   HYPRE_Int         i, j, index, start, finish, elem, num_sends;
+   HYPRE_Int         size, k;
    
 
-   int         ierr  = 0;
+   HYPRE_Int         ierr  = 0;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  MatvecT returns ierr = 1 if

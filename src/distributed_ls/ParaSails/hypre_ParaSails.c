@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -46,9 +46,9 @@ hypre_ParaSails_struct;
 #ifdef BALANCE_INFO
 static void balance_info(MPI_Comm comm, Matrix *mat)
 {
-    int mype, num_local, i, total;
+    HYPRE_Int mype, num_local, i, total;
 
-    MPI_Comm_rank(comm, &mype);
+    hypre_MPI_Comm_rank(comm, &mype);
     num_local = mat->end_row - mat->beg_row + 1;
 
     /* compute number of nonzeros on local matrix */
@@ -57,7 +57,7 @@ static void balance_info(MPI_Comm comm, Matrix *mat)
         total += mat->lens[i];
 
     /* each processor prints out its own info */
-    printf("%4d: nrows %d, nnz %d, send %d (%d), recv %d (%d)\n", mype, 
+    hypre_printf("%4d: nrows %d, nnz %d, send %d (%d), recv %d (%d)\n", mype, 
     num_local, total, mat->num_send, mat->sendlen, mat->num_recv, mat->recvlen);
 }
 
@@ -66,68 +66,68 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
     double time0, time1;
     double trial1, trial2, trial3, trial4, trial5, trial6;
     double *temp1, *temp2;
-    int i, mype;
-    int n = mat->end_row - mat->beg_row + 1;
+    HYPRE_Int i, mype;
+    HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
     temp1 = (double *) calloc(n, sizeof(double));
     temp2 = (double *) calloc(n, sizeof(double));
 
     /* warm-up */
-    MPI_Barrier(comm);
+    hypre_MPI_Barrier(comm);
     for (i=0; i<100; i++)
        MatrixMatvec(mat, temp1, temp2);
 
-    MPI_Barrier(comm);
-    time0 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time0 = hypre_MPI_Wtime();
     for (i=0; i<100; i++)
        MatrixMatvec(mat, temp1, temp2);
-    MPI_Barrier(comm);
-    time1 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time1 = hypre_MPI_Wtime();
     trial1 = time1-time0;
 
-    MPI_Barrier(comm);
-    time0 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time0 = hypre_MPI_Wtime();
     for (i=0; i<100; i++)
        MatrixMatvec(mat, temp1, temp2);
-    MPI_Barrier(comm);
-    time1 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time1 = hypre_MPI_Wtime();
     trial2 = time1-time0;
 
-    MPI_Barrier(comm);
-    time0 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time0 = hypre_MPI_Wtime();
     for (i=0; i<100; i++)
        MatrixMatvec(mat, temp1, temp2);
-    MPI_Barrier(comm);
-    time1 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time1 = hypre_MPI_Wtime();
     trial3 = time1-time0;
 
-    MPI_Barrier(comm);
-    time0 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time0 = hypre_MPI_Wtime();
     for (i=0; i<100; i++)
        MatrixMatvecSerial(mat, temp1, temp2);
-    MPI_Barrier(comm);
-    time1 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time1 = hypre_MPI_Wtime();
     trial4 = time1-time0;
 
-    MPI_Barrier(comm);
-    time0 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time0 = hypre_MPI_Wtime();
     for (i=0; i<100; i++)
        MatrixMatvecSerial(mat, temp1, temp2);
-    MPI_Barrier(comm);
-    time1 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time1 = hypre_MPI_Wtime();
     trial5 = time1-time0;
 
-    MPI_Barrier(comm);
-    time0 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time0 = hypre_MPI_Wtime();
     for (i=0; i<100; i++)
        MatrixMatvecSerial(mat, temp1, temp2);
-    MPI_Barrier(comm);
-    time1 = MPI_Wtime();
+    hypre_MPI_Barrier(comm);
+    time1 = hypre_MPI_Wtime();
     trial6 = time1-time0;
 
-    MPI_Comm_rank(comm, &mype);
+    hypre_MPI_Comm_rank(comm, &mype);
     if (mype == 0)
-        printf("Timings: %f %f %f Serial: %f %f %f\n", 
+        hypre_printf("Timings: %f %f %f Serial: %f %f %f\n", 
 	   trial1, trial2, trial3, trial4, trial5, trial6);
 
     fflush(stdout);
@@ -144,8 +144,8 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
 
 static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
 {
-    int beg_row, end_row, row, dummy;
-    int len, *ind;
+    HYPRE_Int beg_row, end_row, row, dummy;
+    HYPRE_Int len, *ind;
     double *val;
     Matrix *mat;
 
@@ -175,7 +175,7 @@ static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
  * hypre_ParaSailsCreate - Return a ParaSails preconditioner object "obj"
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj)
+HYPRE_Int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj)
 {
     hypre_ParaSails_struct *internal;
 
@@ -194,7 +194,7 @@ int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj)
  * hypre_ParaSailsDestroy - Destroy a ParaSails object "ps".
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsDestroy(hypre_ParaSails obj)
+HYPRE_Int hypre_ParaSailsDestroy(hypre_ParaSails obj)
 {
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
 
@@ -210,14 +210,14 @@ int hypre_ParaSailsDestroy(hypre_ParaSails obj)
  * pattern and values are set up with the same distributed matrix.
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsSetup(hypre_ParaSails obj,
-  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
-  double filter, double loadbal, int logging)
+HYPRE_Int hypre_ParaSailsSetup(hypre_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, HYPRE_Int sym, double thresh, HYPRE_Int nlevels,
+  double filter, double loadbal, HYPRE_Int logging)
 {
     /* double cost; */
     Matrix *mat;
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
-    int err;
+    HYPRE_Int err;
 
     mat = convert_matrix(internal->comm, distmat);
 
@@ -247,9 +247,9 @@ int hypre_ParaSailsSetup(hypre_ParaSails obj,
  * hypre_ParaSailsSetupPattern - Set up pattern using a distributed matrix.
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
-  HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
-  int logging)
+HYPRE_Int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
+  HYPRE_DistributedMatrix *distmat, HYPRE_Int sym, double thresh, HYPRE_Int nlevels,
+  HYPRE_Int logging)
 {
     /* double cost; */
     Matrix *mat;
@@ -276,13 +276,13 @@ int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
  * hypre_ParaSailsSetupValues - Set up values using a distributed matrix.
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
+HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, double filter, double loadbal,
-  int logging)
+  HYPRE_Int logging)
 {
     Matrix *mat;
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
-    int err;
+    HYPRE_Int err;
 
     mat = convert_matrix(internal->comm, distmat);
 
@@ -304,7 +304,7 @@ int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
  * "u", and return the result in the array "v".
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsApply(hypre_ParaSails obj, double *u, double *v)
+HYPRE_Int hypre_ParaSailsApply(hypre_ParaSails obj, double *u, double *v)
 {
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
 
@@ -318,7 +318,7 @@ int hypre_ParaSailsApply(hypre_ParaSails obj, double *u, double *v)
  * to an array "u", and return the result in the array "v".
  *--------------------------------------------------------------------------*/
 
-int hypre_ParaSailsApplyTrans(hypre_ParaSails obj, double *u, double *v)
+HYPRE_Int hypre_ParaSailsApplyTrans(hypre_ParaSails obj, double *u, double *v)
 {
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
 
@@ -333,18 +333,18 @@ int hypre_ParaSailsApplyTrans(hypre_ParaSails obj, double *u, double *v)
  * matrix that is in ParaSails Matrix format.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
 {
      hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
      ParaSails *ps = internal->ps;
      Matrix *mat = internal->ps->M;
 
-     int *diag_sizes, *offdiag_sizes, local_row, i, j;
-     int size;
-     int *col_inds;
+     HYPRE_Int *diag_sizes, *offdiag_sizes, local_row, i, j;
+     HYPRE_Int size;
+     HYPRE_Int *col_inds;
      double *values;
-     int ierr = 0;
+     HYPRE_Int ierr = 0;
 
      ierr += HYPRE_IJMatrixCreate( ps->comm, ps->beg_row, ps->end_row,
                                    ps->beg_row, ps->end_row,
@@ -352,8 +352,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
 
      ierr += HYPRE_IJMatrixSetObjectType( *pij_A, HYPRE_PARCSR );
 
-     diag_sizes = hypre_CTAlloc(int, ps->end_row - ps->beg_row + 1);
-     offdiag_sizes = hypre_CTAlloc(int, ps->end_row - ps->beg_row + 1);
+     diag_sizes = hypre_CTAlloc(HYPRE_Int, ps->end_row - ps->beg_row + 1);
+     offdiag_sizes = hypre_CTAlloc(HYPRE_Int, ps->end_row - ps->beg_row + 1);
      local_row = 0;
      for (i=ps->beg_row; i<= ps->end_row; i++)
      {
@@ -371,8 +371,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
          local_row++;
      }
      ierr += HYPRE_IJMatrixSetDiagOffdSizes( *pij_A,
-                                        (const int *) diag_sizes,
-                                        (const int *) offdiag_sizes );
+                                        (const HYPRE_Int *) diag_sizes,
+                                        (const HYPRE_Int *) offdiag_sizes );
      hypre_TFree(diag_sizes);
      hypre_TFree(offdiag_sizes);
 
@@ -384,7 +384,7 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
          MatrixGetRow(mat, local_row, &size, &col_inds, &values);
 
          ierr += HYPRE_IJMatrixSetValues( *pij_A, 1, &size, &i,
-                                          (const int *) col_inds,
+                                          (const HYPRE_Int *) col_inds,
                                           (const double *) values );
 
          NumberingGlobalToLocal(ps->numb, size, col_inds, col_inds);

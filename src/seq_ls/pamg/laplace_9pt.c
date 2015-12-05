@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,36 +21,36 @@
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_GenerateLaplacian9pt( int      nx,
-                            int      ny,
-                            int      P,
-                            int      Q,
+hypre_GenerateLaplacian9pt( HYPRE_Int      nx,
+                            HYPRE_Int      ny,
+                            HYPRE_Int      P,
+                            HYPRE_Int      Q,
                             double  *value )
 {
    hypre_CSRMatrix *A;
 
-   int *A_i;
-   int *A_j;
+   HYPRE_Int *A_i;
+   HYPRE_Int *A_j;
    double *A_data;
 
-   int *global_part;
-   int ix, iy;
-   int p, q;
-   int cnt;
-   int num_rows; 
-   int row_index;
+   HYPRE_Int *global_part;
+   HYPRE_Int ix, iy;
+   HYPRE_Int p, q;
+   HYPRE_Int cnt;
+   HYPRE_Int num_rows; 
+   HYPRE_Int row_index;
 
-   int nx_size, ny_size;
+   HYPRE_Int nx_size, ny_size;
 
-   int *nx_part;
-   int *ny_part;
+   HYPRE_Int *nx_part;
+   HYPRE_Int *ny_part;
 
    num_rows = nx*ny;
 
    hypre_GeneratePartitioning(nx,P,&nx_part);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
 
-   global_part = hypre_CTAlloc(int,P*Q+1);
+   global_part = hypre_CTAlloc(HYPRE_Int,P*Q+1);
 
    global_part[0] = 0;
    cnt = 1;
@@ -65,7 +65,7 @@ hypre_GenerateLaplacian9pt( int      nx,
       }
    }
 
-   A_i = hypre_CTAlloc(int,num_rows+1);
+   A_i = hypre_CTAlloc(HYPRE_Int,num_rows+1);
 
    cnt = 0;
    A_i[0] = 0;
@@ -193,7 +193,7 @@ hypre_GenerateLaplacian9pt( int      nx,
       }
    }
 
-   A_j = hypre_CTAlloc(int, A_i[num_rows]);
+   A_j = hypre_CTAlloc(HYPRE_Int, A_i[num_rows]);
    A_data = hypre_CTAlloc(double, A_i[num_rows]);
 
    row_index = 0;
@@ -391,22 +391,22 @@ hypre_GenerateLaplacian9pt( int      nx,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
-map2( int  ix,
-      int  iy,
-      int  p,
-      int  q,
-      int  P,
-      int  Q,
-      int *nx_part,
-      int *ny_part,
-      int *global_part )
+HYPRE_Int
+map2( HYPRE_Int  ix,
+      HYPRE_Int  iy,
+      HYPRE_Int  p,
+      HYPRE_Int  q,
+      HYPRE_Int  P,
+      HYPRE_Int  Q,
+      HYPRE_Int *nx_part,
+      HYPRE_Int *ny_part,
+      HYPRE_Int *global_part )
 {
-   int nx_local;
-   int ix_local;
-   int iy_local;
-   int global_index;
-   int proc_num;
+   HYPRE_Int nx_local;
+   HYPRE_Int ix_local;
+   HYPRE_Int iy_local;
+   HYPRE_Int global_index;
+   HYPRE_Int proc_num;
  
    proc_num = q*P + p;
    nx_local = nx_part[p+1] - nx_part[p];

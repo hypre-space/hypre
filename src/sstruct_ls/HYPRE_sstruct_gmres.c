@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,7 +26,7 @@
  * HYPRE_SStructGMRESCreate
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESCreate( MPI_Comm             comm,
                           HYPRE_SStructSolver *solver )
 {
@@ -51,7 +51,7 @@ HYPRE_SStructGMRESCreate( MPI_Comm             comm,
  * HYPRE_SStructGMRESDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver )
 {
    return( hypre_GMRESDestroy( (void *) solver ) );
@@ -61,7 +61,7 @@ HYPRE_SStructGMRESDestroy( HYPRE_SStructSolver solver )
  * HYPRE_SStructGMRESSetup
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructGMRESSetup( HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
@@ -77,7 +77,7 @@ HYPRE_SStructGMRESSetup( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSolve
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver,
                          HYPRE_SStructMatrix A,
                          HYPRE_SStructVector b,
@@ -93,9 +93,9 @@ HYPRE_SStructGMRESSolve( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetKDim
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetKDim( HYPRE_SStructSolver solver,
-                           int                 k_dim )
+                           HYPRE_Int           k_dim )
 {
    return( HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, k_dim ) );
 }
@@ -104,7 +104,7 @@ HYPRE_SStructGMRESSetKDim( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
                           double              tol )
 {
@@ -114,7 +114,7 @@ HYPRE_SStructGMRESSetTol( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetAbsoluteTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
                           double              atol )
 {
@@ -124,9 +124,9 @@ HYPRE_SStructGMRESSetAbsoluteTol( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetMinIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver,
-                              int                 min_iter )
+                              HYPRE_Int           min_iter )
 {
    return( HYPRE_GMRESSetMinIter( (HYPRE_Solver) solver, min_iter ) );
 }
@@ -135,9 +135,9 @@ HYPRE_SStructGMRESSetMinIter( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver,
-                              int                 max_iter )
+                              HYPRE_Int           max_iter )
 {
    return( HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -146,9 +146,9 @@ HYPRE_SStructGMRESSetMaxIter( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetStopCrit
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver,
-                               int                 stop_crit )
+                               HYPRE_Int           stop_crit )
 {
    return( HYPRE_GMRESSetStopCrit( (HYPRE_Solver) solver, stop_crit ) );
 }
@@ -157,7 +157,7 @@ HYPRE_SStructGMRESSetStopCrit( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
                               HYPRE_PtrToSStructSolverFcn  precond,
                               HYPRE_PtrToSStructSolverFcn  precond_setup,
@@ -173,9 +173,9 @@ HYPRE_SStructGMRESSetPrecond( HYPRE_SStructSolver          solver,
  * HYPRE_SStructGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver,
-                              int                 logging )
+                              HYPRE_Int           logging )
 {
    return( HYPRE_GMRESSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -184,9 +184,9 @@ HYPRE_SStructGMRESSetLogging( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESSetPrintLevel( HYPRE_SStructSolver solver,
-                              int                 level )
+                              HYPRE_Int           level )
 {
    return( HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
@@ -195,9 +195,9 @@ HYPRE_SStructGMRESSetPrintLevel( HYPRE_SStructSolver solver,
  * HYPRE_SStructGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver  solver,
-                                    int                 *num_iterations )
+                                    HYPRE_Int           *num_iterations )
 {
    return( HYPRE_GMRESGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
@@ -206,7 +206,7 @@ HYPRE_SStructGMRESGetNumIterations( HYPRE_SStructSolver  solver,
  * HYPRE_SStructGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
                                                 double              *norm )
 {
@@ -217,7 +217,7 @@ HYPRE_SStructGMRESGetFinalRelativeResidualNorm( HYPRE_SStructSolver  solver,
  * HYPRE_SStructGMRESGetResidual
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_SStructGMRESGetResidual( HYPRE_SStructSolver  solver,
                                 void              **residual )
 {

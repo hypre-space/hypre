@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dsterf_(integer *n, doublereal *d__, doublereal *e, 
+/* Subroutine */ HYPRE_Int dsterf_(integer *n, doublereal *d__, doublereal *e, 
 	integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -58,7 +58,7 @@
     /* Local variables */
     static doublereal oldc;
     static integer lend, jtot;
-    extern /* Subroutine */ int dlae2_(doublereal *, doublereal *, doublereal 
+    extern /* Subroutine */ HYPRE_Int dlae2_(doublereal *, doublereal *, doublereal 
 	    *, doublereal *, doublereal *);
     static doublereal c__;
     static integer i__, l, m;
@@ -68,14 +68,14 @@
     static doublereal bb;
     extern doublereal dlamch_(char *);
     static integer iscale;
-    extern /* Subroutine */ int dlascl_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal oldgam, safmin;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     static doublereal safmax;
     extern doublereal dlanst_(char *, integer *, doublereal *, doublereal *);
-    extern /* Subroutine */ int dlasrt_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlasrt_(char *, integer *, doublereal *, 
 	    integer *);
     static integer lendsv;
     static doublereal ssfmin;

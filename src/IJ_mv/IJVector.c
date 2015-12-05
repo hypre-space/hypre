@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,14 +27,14 @@
  * hypre_IJVectorDistribute
  *--------------------------------------------------------------------------*/
 
-int 
-hypre_IJVectorDistribute( HYPRE_IJVector vector, const int *vec_starts )
+HYPRE_Int 
+hypre_IJVectorDistribute( HYPRE_IJVector vector, const HYPRE_Int *vec_starts )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (vec == NULL)
    {
-      printf("Vector variable is NULL -- hypre_IJVectorDistribute\n");
+      hypre_printf("Vector variable is NULL -- hypre_IJVectorDistribute\n");
       exit(1);
    } 
 
@@ -44,7 +44,7 @@ hypre_IJVectorDistribute( HYPRE_IJVector vector, const int *vec_starts )
 
    else
    {
-      printf("Unrecognized object type -- hypre_IJVectorDistribute\n");
+      hypre_printf("Unrecognized object type -- hypre_IJVectorDistribute\n");
       exit(1);
    }
 
@@ -55,14 +55,14 @@ hypre_IJVectorDistribute( HYPRE_IJVector vector, const int *vec_starts )
  * hypre_IJVectorZeroValues
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_IJVectorZeroValues( HYPRE_IJVector vector )
 {
    hypre_IJVector *vec = (hypre_IJVector *) vector;
 
    if (vec == NULL)
    {
-      printf("Vector variable is NULL -- hypre_IJVectorZeroValues\n");
+      hypre_printf("Vector variable is NULL -- hypre_IJVectorZeroValues\n");
       exit(1);
    } 
 
@@ -82,7 +82,7 @@ hypre_IJVectorZeroValues( HYPRE_IJVector vector )
 
    else
    {
-      printf("Unrecognized object type -- hypre_IJVectorZeroValues\n");
+      hypre_printf("Unrecognized object type -- hypre_IJVectorZeroValues\n");
       exit(1);
    }
 

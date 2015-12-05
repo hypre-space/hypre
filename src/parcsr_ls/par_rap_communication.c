@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -16,53 +16,53 @@
 
 #include "headers.h"
 
-int
+HYPRE_Int
 hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 			       	hypre_ParCSRMatrix *A,
-			       	int *fine_to_coarse_offd)
+			       	HYPRE_Int *fine_to_coarse_offd)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(RT);
    hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
-   int num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
-   int *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
-   int *recv_vec_starts_A = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_A);
-   int num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
-   int *send_procs_A = hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
+   HYPRE_Int num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
+   HYPRE_Int *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
+   HYPRE_Int *recv_vec_starts_A = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_A);
+   HYPRE_Int num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
+   HYPRE_Int *send_procs_A = hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
 
    hypre_ParCSRCommPkg *comm_pkg;
-   int num_recvs_RT;
-   int *recv_procs_RT;   
-   int *recv_vec_starts_RT;   
-   int num_sends_RT;
-   int *send_procs_RT;   
-   int *send_map_starts_RT;   
-   int *send_map_elmts_RT;   
+   HYPRE_Int num_recvs_RT;
+   HYPRE_Int *recv_procs_RT;   
+   HYPRE_Int *recv_vec_starts_RT;   
+   HYPRE_Int num_sends_RT;
+   HYPRE_Int *send_procs_RT;   
+   HYPRE_Int *send_map_starts_RT;   
+   HYPRE_Int *send_map_elmts_RT;   
 
-   int *col_map_offd_RT = hypre_ParCSRMatrixColMapOffd(RT);
-   int num_cols_offd_RT = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(RT));
-   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(RT);
+   HYPRE_Int *col_map_offd_RT = hypre_ParCSRMatrixColMapOffd(RT);
+   HYPRE_Int num_cols_offd_RT = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(RT));
+   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(RT);
 
-   int i, j;
-   int vec_len, vec_start;
-   int num_procs, my_id;
-   int ierr = 0;
-   int num_requests;
-   int offd_col, proc_num;
+   HYPRE_Int i, j;
+   HYPRE_Int vec_len, vec_start;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int num_requests;
+   HYPRE_Int offd_col, proc_num;
  
-   int *proc_mark;
-   int *change_array;
+   HYPRE_Int *proc_mark;
+   HYPRE_Int *change_array;
 
-   MPI_Request *requests;
-   MPI_Status *status;
+   hypre_MPI_Request *requests;
+   hypre_MPI_Status *status;
 
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
 /*--------------------------------------------------------------------------
  * determine num_recvs, recv_procs and recv_vec_starts for RT
  *--------------------------------------------------------------------------*/
 
-   proc_mark = hypre_CTAlloc(int, num_recvs_A);
+   proc_mark = hypre_CTAlloc(HYPRE_Int, num_recvs_A);
 
    for (i=0; i < num_recvs_A; i++)
                 proc_mark[i] = 0;
@@ -91,8 +91,8 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    for (i=0; i < num_cols_offd_RT; i++)
       col_map_offd_RT[i] = fine_to_coarse_offd[col_map_offd_RT[i]];
  
-   recv_procs_RT = hypre_CTAlloc(int,num_recvs_RT);
-   recv_vec_starts_RT = hypre_CTAlloc(int, num_recvs_RT+1);
+   recv_procs_RT = hypre_CTAlloc(HYPRE_Int,num_recvs_RT);
+   recv_vec_starts_RT = hypre_CTAlloc(HYPRE_Int, num_recvs_RT+1);
  
    j = 0;
    recv_vec_starts_RT[0] = 0;
@@ -109,21 +109,21 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
  *--------------------------------------------------------------------------*/
 
    num_requests = num_recvs_A+num_sends_A;
-   requests = hypre_CTAlloc(MPI_Request, num_requests);
-   status = hypre_CTAlloc(MPI_Status, num_requests);
+   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests);
+   status = hypre_CTAlloc(hypre_MPI_Status, num_requests);
 
-   change_array = hypre_CTAlloc(int, num_sends_A);
+   change_array = hypre_CTAlloc(HYPRE_Int, num_sends_A);
 
    j = 0;
    for (i=0; i < num_sends_A; i++)
-	MPI_Irecv(&change_array[i],1,MPI_INT,send_procs_A[i],0,comm,
+	hypre_MPI_Irecv(&change_array[i],1,HYPRE_MPI_INT,send_procs_A[i],0,comm,
 		&requests[j++]);
 
    for (i=0; i < num_recvs_A; i++)
-	MPI_Isend(&proc_mark[i],1,MPI_INT,recv_procs_A[i],0,comm,
+	hypre_MPI_Isend(&proc_mark[i],1,HYPRE_MPI_INT,recv_procs_A[i],0,comm,
 		&requests[j++]);
    
-   MPI_Waitall(num_requests,requests,status);
+   hypre_MPI_Waitall(num_requests,requests,status);
 
    hypre_TFree(proc_mark);
    
@@ -138,8 +138,8 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 	 num_sends_RT++;
       }
 
-   send_procs_RT = hypre_CTAlloc(int, num_sends_RT);
-   send_map_starts_RT = hypre_CTAlloc(int, num_sends_RT+1);
+   send_procs_RT = hypre_CTAlloc(HYPRE_Int, num_sends_RT);
+   send_map_starts_RT = hypre_CTAlloc(HYPRE_Int, num_sends_RT+1);
 
    j = 0;
    send_map_starts_RT[0] = 0;
@@ -155,14 +155,14 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
  * generate send_map_elmts
  *--------------------------------------------------------------------------*/
 
-   send_map_elmts_RT = hypre_CTAlloc(int,send_map_starts_RT[num_sends_RT]);
+   send_map_elmts_RT = hypre_CTAlloc(HYPRE_Int,send_map_starts_RT[num_sends_RT]);
 
    j = 0;
    for (i=0; i < num_sends_RT; i++)
    {
 	vec_start = send_map_starts_RT[i];
 	vec_len = send_map_starts_RT[i+1]-vec_start;
-	MPI_Irecv(&send_map_elmts_RT[vec_start],vec_len,MPI_INT,
+	hypre_MPI_Irecv(&send_map_elmts_RT[vec_start],vec_len,HYPRE_MPI_INT,
 		send_procs_RT[i],0,comm,&requests[j++]);
    }
 
@@ -170,11 +170,11 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    {
 	vec_start = recv_vec_starts_RT[i];
 	vec_len = recv_vec_starts_RT[i+1] - vec_start;
-	MPI_Isend(&col_map_offd_RT[vec_start],vec_len,MPI_INT, 
+	hypre_MPI_Isend(&col_map_offd_RT[vec_start],vec_len,HYPRE_MPI_INT, 
 		recv_procs_RT[i],0,comm,&requests[j++]);
    }
    
-   MPI_Waitall(j,requests,status);
+   hypre_MPI_Waitall(j,requests,status);
 
    for (i=0; i < send_map_starts_RT[num_sends_RT]; i++)
 	send_map_elmts_RT[i] -= first_col_diag; 
@@ -199,53 +199,53 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    return ierr;
 }
 
-int
-hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
-				int *recv_procs, int *send_procs,
-				int *recv_vec_starts, hypre_ParCSRMatrix *A)
+HYPRE_Int
+hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, HYPRE_Int num_sends, HYPRE_Int num_recvs,
+				HYPRE_Int *recv_procs, HYPRE_Int *send_procs,
+				HYPRE_Int *recv_vec_starts, hypre_ParCSRMatrix *A)
 {
-   int *send_map_starts;
-   int *send_map_elmts;
-   int i, j;
-   int num_requests = num_sends+num_recvs;
-   MPI_Request *requests;
-   MPI_Status *status;
-   int vec_len, vec_start;
+   HYPRE_Int *send_map_starts;
+   HYPRE_Int *send_map_elmts;
+   HYPRE_Int i, j;
+   HYPRE_Int num_requests = num_sends+num_recvs;
+   hypre_MPI_Request *requests;
+   hypre_MPI_Status *status;
+   HYPRE_Int vec_len, vec_start;
    hypre_ParCSRCommPkg *comm_pkg;
-   int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-   int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
 
 /*--------------------------------------------------------------------------
  * generate send_map_starts and send_map_elmts
  *--------------------------------------------------------------------------*/
-   requests = hypre_CTAlloc(MPI_Request,num_requests);
-   status = hypre_CTAlloc(MPI_Status,num_requests);
-   send_map_starts = hypre_CTAlloc(int, num_sends+1);
+   requests = hypre_CTAlloc(hypre_MPI_Request,num_requests);
+   status = hypre_CTAlloc(hypre_MPI_Status,num_requests);
+   send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
    j = 0;
    for (i=0; i < num_sends; i++)
-	MPI_Irecv(&send_map_starts[i+1],1,MPI_INT,send_procs[i],0,comm,
+	hypre_MPI_Irecv(&send_map_starts[i+1],1,HYPRE_MPI_INT,send_procs[i],0,comm,
 		&requests[j++]);
 
    for (i=0; i < num_recvs; i++)
    {
 	vec_len = recv_vec_starts[i+1] - recv_vec_starts[i];
-	MPI_Isend(&vec_len,1,MPI_INT, recv_procs[i],0,comm,&requests[j++]);
+	hypre_MPI_Isend(&vec_len,1,HYPRE_MPI_INT, recv_procs[i],0,comm,&requests[j++]);
    }
    
-   MPI_Waitall(j,requests,status);
+   hypre_MPI_Waitall(j,requests,status);
  
    send_map_starts[0] = 0; 
    for (i=0; i < num_sends; i++)
 	send_map_starts[i+1] += send_map_starts[i]; 
 
-   send_map_elmts = hypre_CTAlloc(int,send_map_starts[num_sends]);
+   send_map_elmts = hypre_CTAlloc(HYPRE_Int,send_map_starts[num_sends]);
 
    j = 0;
    for (i=0; i < num_sends; i++)
    {
 	vec_start = send_map_starts[i];
 	vec_len = send_map_starts[i+1]-vec_start;
-	MPI_Irecv(&send_map_elmts[vec_start],vec_len,MPI_INT,
+	hypre_MPI_Irecv(&send_map_elmts[vec_start],vec_len,HYPRE_MPI_INT,
 		send_procs[i],0,comm,&requests[j++]);
    }
 
@@ -253,11 +253,11 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
    {
 	vec_start = recv_vec_starts[i];
 	vec_len = recv_vec_starts[i+1] - vec_start;
-	MPI_Isend(&col_map_offd[vec_start],vec_len,MPI_INT, 
+	hypre_MPI_Isend(&col_map_offd[vec_start],vec_len,HYPRE_MPI_INT, 
 		recv_procs[i],0,comm,&requests[j++]);
    }
    
-   MPI_Waitall(j,requests,status);
+   hypre_MPI_Waitall(j,requests,status);
 
    for (i=0; i < send_map_starts[num_sends]; i++)
 	send_map_elmts[i] -= first_col_diag; 

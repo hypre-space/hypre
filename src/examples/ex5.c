@@ -25,7 +25,7 @@
 #include "HYPRE_parcsr_ls.h"
 
 
-int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations, 
+int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                       double rel_residual_norm);
 
 
@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
    solver_id = 0;
    print_solution  = 0;
    print_system = 0;
-   
+
 
    /* Parse command line */
    {
@@ -182,9 +182,9 @@ int main (int argc, char *argv[])
          /* The left identity block:position i-n */
          if ((i-n)>=0)
          {
-	    cols[nnz] = i-n;
-	    values[nnz] = -1.0;
-	    nnz++;
+            cols[nnz] = i-n;
+            values[nnz] = -1.0;
+            nnz++;
          }
 
          /* The left -1: position i-1 */
@@ -225,17 +225,17 @@ int main (int argc, char *argv[])
    HYPRE_IJMatrixAssemble(A);
 
    /* Note: for the testing of small problems, one may wish to read
-      in a matrix in IJ format (for the format, see the output files 
+      in a matrix in IJ format (for the format, see the output files
       from the -print_system option).
-      In this case, one would use the following routine:  
+      In this case, one would use the following routine:
       HYPRE_IJMatrixRead( <filename>, MPI_COMM_WORLD,
                           HYPRE_PARCSR, &A );
       <filename>  = IJ.A.out to read in what has been printed out
       by -print_system (processor numbers are omitted).
-      A call to HYPRE_IJMatrixRead is an *alternative* to the 
-      following sequence of HYPRE_IJMatrix calls: 
+      A call to HYPRE_IJMatrixRead is an *alternative* to the
+      following sequence of HYPRE_IJMatrix calls:
       Create, SetObjectType, Initialize, SetValues, and Assemble
-   */                     
+   */
 
 
    /* Get the parcsr matrix object to use */
@@ -278,10 +278,10 @@ int main (int argc, char *argv[])
 
    HYPRE_IJVectorAssemble(b);
    /*  As with the matrix, for testing purposes, one may wish to read in a rhs:
-       HYPRE_IJVectorRead( <filename>, MPI_COMM_WORLD, 
-                                 HYPRE_PARCSR, &b ); 
-       as an alternative to the 
-       following sequence of HYPRE_IJVectors calls: 
+       HYPRE_IJVectorRead( <filename>, MPI_COMM_WORLD,
+                                 HYPRE_PARCSR, &b );
+       as an alternative to the
+       following sequence of HYPRE_IJVectors calls:
        Create, SetObjectType, Initialize, SetValues, and Assemble
    */
    HYPRE_IJVectorGetObject(b, (void **) &par_b);
@@ -289,7 +289,7 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorAssemble(x);
    HYPRE_IJVectorGetObject(x, (void **) &par_x);
 
- 
+
   /*  Print out the system  - files names will be IJ.out.A.XXXXX
        and IJ.out.b.XXXXX, where XXXXX = processor id */
    if (print_system)
@@ -390,7 +390,7 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGCreate(&precond);
       HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
-      HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */ 
+      HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
       HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
       HYPRE_BoomerAMGSetMaxIter(precond, 1); /* do only one iteration! */
@@ -479,7 +479,7 @@ int main (int argc, char *argv[])
       double final_res_norm;
       int    restart = 30;
       int    modify = 1;
-      
+
 
       /* Create solver */
       HYPRE_ParCSRFlexGMRESCreate(MPI_COMM_WORLD, &solver);
@@ -496,7 +496,7 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGCreate(&precond);
       HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
-      HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */ 
+      HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
       HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
       HYPRE_BoomerAMGSetMaxIter(precond, 1); /* do only one iteration! */
@@ -510,7 +510,7 @@ int main (int argc, char *argv[])
       /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
          is used - which does nothing.  Otherwise, you can define your own, similar to
          the one used here */
-         HYPRE_FlexGMRESSetModifyPC( solver, 
+         HYPRE_FlexGMRESSetModifyPC( solver,
                                      (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
 
 
@@ -532,7 +532,7 @@ int main (int argc, char *argv[])
       /* Destory solver and preconditioner */
       HYPRE_ParCSRFlexGMRESDestroy(solver);
       HYPRE_BoomerAMGDestroy(precond);
-      
+
    }
    else
    {
@@ -555,16 +555,16 @@ int main (int argc, char *argv[])
 }
 
 /*--------------------------------------------------------------------------
-   hypre_FlexGMRESModifyPCAMGExample - 
+   hypre_FlexGMRESModifyPCAMGExample -
 
-    This is an example (not recommended) 
+    This is an example (not recommended)
    of how we can modify things about AMG that
    affect the solve phase based on how FlexGMRES is doing...For
    another preconditioner it may make sense to modify the tolerance..
 
  *--------------------------------------------------------------------------*/
- 
-int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations, 
+
+int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
                                    double rel_residual_norm)
 {
 
@@ -577,7 +577,7 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
    {
       HYPRE_BoomerAMGSetNumSweeps(precond_data, 1);
    }
-   
-   
+
+
    return 0;
-} 
+}

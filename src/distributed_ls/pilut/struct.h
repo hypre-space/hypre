@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,7 +25,7 @@
  * George
  *
  * 7/8
- *  - change to generic int and double (in all files) and verified
+ *  - change to generic HYPRE_Int and double (in all files) and verified
  *  - added rrowlen to rmat and verified
  * 7/9
  *  - add recv info to the LDU communication struct TriSolveCommType
@@ -35,7 +35,7 @@
  *    This is under the assumption that that is the most likely order
  *    for things to be natural word length, so reduces padding.
  *
- * $Id: struct.h,v 2.4 2008/07/18 01:32:40 ulrikey Exp $
+ * $Id: struct.h,v 2.5 2010/12/20 19:27:34 falgout Exp $
  */
 
 #ifndef true
@@ -55,9 +55,9 @@
 * This data structure holds the data distribution
 **************************************************************************/
 struct distdef {
-  int ddist_nrows;		/* The order of the distributed matrix */
-  int ddist_lnrows;           /* The local number of rows */
-  int *ddist_rowdist;	/* How the rows are distributed among processors */
+  HYPRE_Int ddist_nrows;		/* The order of the distributed matrix */
+  HYPRE_Int ddist_lnrows;           /* The local number of rows */
+  HYPRE_Int *ddist_rowdist;	/* How the rows are distributed among processors */
 };
 
 typedef struct distdef DataDistType;
@@ -73,17 +73,17 @@ typedef struct distdef DataDistType;
 struct cphasedef {
   double **raddr;	/* A rnbrpes+1 list of addresses to recv data into */
 
-  int *spes;	/* A snbrpes    list of PEs to send data */
-  int *sptr;	/* An snbrpes+1 list indexing sindex for each spes[i] */
-  int *sindex;	/* The packets to send per PE */
-  int *auxsptr;	/* Auxiliary send ptr, used at intermediate points */
+  HYPRE_Int *spes;	/* A snbrpes    list of PEs to send data */
+  HYPRE_Int *sptr;	/* An snbrpes+1 list indexing sindex for each spes[i] */
+  HYPRE_Int *sindex;	/* The packets to send per PE */
+  HYPRE_Int *auxsptr;	/* Auxiliary send ptr, used at intermediate points */
 
-  int *rpes;	/* A rnbrpes   list of PEs to recv data */
-  int *rdone;	/* A rnbrpes   list of # elements recv'd in this hypre_LDUSolve */
-  int *rnum;        /* A nlevels x npes array of the number of elements to recieve */
+  HYPRE_Int *rpes;	/* A rnbrpes   list of PEs to recv data */
+  HYPRE_Int *rdone;	/* A rnbrpes   list of # elements recv'd in this hypre_LDUSolve */
+  HYPRE_Int *rnum;        /* A nlevels x npes array of the number of elements to recieve */
 
-  int snbrpes;		/* The total number of neighboring PEs (to send to)   */
-  int rnbrpes;		/* The total number of neighboring PEs (to recv from) */
+  HYPRE_Int snbrpes;		/* The total number of neighboring PEs (to send to)   */
+  HYPRE_Int rnbrpes;		/* The total number of neighboring PEs (to recv from) */
 };
 
 typedef struct cphasedef TriSolveCommType;
@@ -93,34 +93,34 @@ typedef struct cphasedef TriSolveCommType;
 * This data structure holds the factored matrix
 **************************************************************************/
 struct factormatdef {
-  int *lsrowptr;	/* Pointers to the locally stored rows start */
-  int *lerowptr;	/* Pointers to the locally stored rows end */
-  int *lcolind;	/* Array of column indices of lnrows */
+  HYPRE_Int *lsrowptr;	/* Pointers to the locally stored rows start */
+  HYPRE_Int *lerowptr;	/* Pointers to the locally stored rows end */
+  HYPRE_Int *lcolind;	/* Array of column indices of lnrows */
    double *lvalues;	/* Array of locally stored values */
-  int *lrowptr;
+  HYPRE_Int *lrowptr;
 
-  int *usrowptr;	/* Pointers to the locally stored rows start */
-  int *uerowptr;	/* Pointers to the locally stored rows end */
-  int *ucolind;	/* Array of column indices of lnrows */
+  HYPRE_Int *usrowptr;	/* Pointers to the locally stored rows start */
+  HYPRE_Int *uerowptr;	/* Pointers to the locally stored rows end */
+  HYPRE_Int *ucolind;	/* Array of column indices of lnrows */
    double *uvalues;	/* Array of locally stored values */
-  int *urowptr;
+  HYPRE_Int *urowptr;
 
   double *dvalues;	/* Diagonal values */
 
   double *nrm2s;	/* Array of the 2-norms of the rows for tolerance testing */
 
-  int *perm;		/* perm and invperm arrays for factorization */
-  int *iperm;
+  HYPRE_Int *perm;		/* perm and invperm arrays for factorization */
+  HYPRE_Int *iperm;
 
   /* Communication info for triangular system solution */
   double *gatherbuf;            /* maxsend*snbrpes buffer for sends */
 
   double *lx;
   double *ux;
-  int lxlen, uxlen;
+  HYPRE_Int lxlen, uxlen;
 
-  int nlevels;			/* The number of reductions performed */
-  int nnodes[MAXNLEVEL];	/* The number of nodes at each reduction level */
+  HYPRE_Int nlevels;			/* The number of reductions performed */
+  HYPRE_Int nnodes[MAXNLEVEL];	/* The number of nodes at each reduction level */
 
   TriSolveCommType lcomm;	/* Communication info during the Lx=y solve */
   TriSolveCommType ucomm;	/* Communication info during the Ux=y solve */
@@ -133,14 +133,14 @@ typedef struct factormatdef FactorMatType;
 * This data structure holds the reduced matrix
 **************************************************************************/
 struct reducematdef {
-  int *rmat_rnz;		/* Pointers to the locally stored rows */
-  int *rmat_rrowlen;	/* Length allocated for each row */
-  int **rmat_rcolind;	/* Array of column indices of lnrows */
+  HYPRE_Int *rmat_rnz;		/* Pointers to the locally stored rows */
+  HYPRE_Int *rmat_rrowlen;	/* Length allocated for each row */
+  HYPRE_Int **rmat_rcolind;	/* Array of column indices of lnrows */
    double **rmat_rvalues;	/* Array of locally stored values */
 
-  int rmat_ndone;	     /* The number of vertices factored so far */
-  int rmat_ntogo;  /* The number of vertices not factored. This is the size of rmat */
-  int rmat_nlevel;	     /* The number of reductions performed so far */
+  HYPRE_Int rmat_ndone;	     /* The number of vertices factored so far */
+  HYPRE_Int rmat_ntogo;  /* The number of vertices not factored. This is the size of rmat */
+  HYPRE_Int rmat_nlevel;	     /* The number of reductions performed so far */
 };
 
 typedef struct reducematdef ReduceMatType;
@@ -154,23 +154,23 @@ typedef struct reducematdef ReduceMatType;
 struct comminfodef {
   double *gatherbuf;	/* Assembly buffer for sending colind & values */
 
-  int *incolind;	/* Receive buffer for colind */
+  HYPRE_Int *incolind;	/* Receive buffer for colind */
    double *invalues;	/* Receive buffer for values */
 
-  int *rnbrind;	/* The neighbor processors */
-  int *rrowind;	/* The indices that are received */
-  int *rnbrptr;	/* Array of size rnnbr+1 into rrowind */
+  HYPRE_Int *rnbrind;	/* The neighbor processors */
+  HYPRE_Int *rrowind;	/* The indices that are received */
+  HYPRE_Int *rnbrptr;	/* Array of size rnnbr+1 into rrowind */
 
-  int *snbrind;	/* The neighbor processors */
-  int *srowind;	/* The indices that are sent */
-  int *snbrptr;	/* Array of size snnbr+1 into srowind */
+  HYPRE_Int *snbrind;	/* The neighbor processors */
+  HYPRE_Int *srowind;	/* The indices that are sent */
+  HYPRE_Int *snbrptr;	/* Array of size snnbr+1 into srowind */
 
-  int maxnsend;		/* The maximum number of rows being sent */
-  int maxnrecv;		/* The maximum number of rows being received */
-  int maxntogo;         /* The maximum number of rows left on any PE */
+  HYPRE_Int maxnsend;		/* The maximum number of rows being sent */
+  HYPRE_Int maxnrecv;		/* The maximum number of rows being received */
+  HYPRE_Int maxntogo;         /* The maximum number of rows left on any PE */
 
-  int rnnbr;		/* Number of neighbor processors */
-  int snnbr;		/* Number of neighbor processors */
+  HYPRE_Int rnnbr;		/* Number of neighbor processors */
+  HYPRE_Int snnbr;		/* Number of neighbor processors */
 };
 
 typedef struct comminfodef CommInfoType;
@@ -180,19 +180,19 @@ typedef struct comminfodef CommInfoType;
 * The following data structure stores communication info for mat-vec
 **************************************************************************/
 struct mvcommdef {
-  int *spes;	/* Array of PE numbers */
-  int *sptr;	/* Array of send indices */
-  int *sindex;	/* Array that stores the actual indices */
+  HYPRE_Int *spes;	/* Array of PE numbers */
+  HYPRE_Int *sptr;	/* Array of send indices */
+  HYPRE_Int *sindex;	/* Array that stores the actual indices */
 
-  int *rpes;
+  HYPRE_Int *rpes;
   double **raddr;
 
   double *bsec;		/* Stores the actual b vector */
   double *gatherbuf;	/* Used to gather the outgoing packets */
-  int *perm;	/* Used to map the LIND back to GIND */
+  HYPRE_Int *perm;	/* Used to map the LIND back to GIND */
 
-  int snpes;		/* Number of send PE's */
-  int rnpes;
+  HYPRE_Int snpes;		/* Number of send PE's */
+  HYPRE_Int rnpes;
 };
 
 typedef struct mvcommdef MatVecCommType;
@@ -202,8 +202,8 @@ typedef struct mvcommdef MatVecCommType;
 * The following data structure stores key-value pair
 **************************************************************************/
 struct KeyValueType {
-  int key;
-  int val;
+  HYPRE_Int key;
+  HYPRE_Int val;
 };
 
 typedef struct KeyValueType KeyValueType;

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,15 +35,15 @@ Returns a pointer to the row partitioning
 The ijmatrix to be pointed to.
 */
 
-int
+HYPRE_Int
 hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix ,
-				  int    **row_partitioning )
+				  HYPRE_Int    **row_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (!ijmatrix)
    {
-      printf("Variable ijmatrix is NULL -- hypre_IJMatrixGetRowPartitioning\n");
+      hypre_printf("Variable ijmatrix is NULL -- hypre_IJMatrixGetRowPartitioning\n");
       exit(1);
    }
 
@@ -66,15 +66,15 @@ Returns a pointer to the column partitioning
 The ijmatrix to be pointed to.
 */
 
-int
+HYPRE_Int
 hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
-				  int    **col_partitioning )
+				  HYPRE_Int    **col_partitioning )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (!ijmatrix)
    {
-      printf("Variable ijmatrix is NULL -- hypre_IJMatrixGetColPartitioning\n");
+      hypre_printf("Variable ijmatrix is NULL -- hypre_IJMatrixGetColPartitioning\n");
       exit(1);
    }
 
@@ -89,7 +89,7 @@ hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix, 
                          void           *object )
 {
@@ -97,8 +97,8 @@ hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix,
 
    if (hypre_IJMatrixObject(ijmatrix) != NULL)
    {
-      printf("Referencing a new IJMatrix object can orphan an old -- ");
-      printf("hypre_IJMatrixSetObject\n");
+      hypre_printf("Referencing a new IJMatrix object can orphan an old -- ");
+      hypre_printf("hypre_IJMatrixSetObject\n");
       exit(1);
    }
 

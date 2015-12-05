@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,12 +30,12 @@
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_IJMatrixSetLocalSizeISIS(hypre_IJMatrix *matrix,
-			       int     	 local_m,
-			       int     	 local_n)
+			       HYPRE_Int     	 local_m,
+			       HYPRE_Int     	 local_n)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_AuxParCSRMatrix *aux_data;
    aux_data = hypre_IJMatrixTranslator(matrix);
    if (aux_data)
@@ -61,28 +61,28 @@ hypre_IJMatrixSetLocalSizeISIS(hypre_IJMatrix *matrix,
  * distributed if not previously defined by user.
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
 {
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
-   int global_m = hypre_IJMatrixM(matrix); 
-   int global_n = hypre_IJMatrixN(matrix); 
+   HYPRE_Int global_m = hypre_IJMatrixM(matrix); 
+   HYPRE_Int global_n = hypre_IJMatrixN(matrix); 
    hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
-   int local_m;   
-   int local_n;   
-   int ierr = 0;
+   HYPRE_Int local_m;   
+   HYPRE_Int local_n;   
+   HYPRE_Int ierr = 0;
 
 
-   int *row_starts;
-   int *col_starts;
-   int num_cols_offd = 0;
-   int num_nonzeros_diag = 0;
-   int num_nonzeros_offd = 0;
-   int num_procs, my_id;
-   int equal;
-   int i;
-   MPI_Comm_size(comm, &num_procs);
-   MPI_Comm_rank(comm, &my_id);
+   HYPRE_Int *row_starts;
+   HYPRE_Int *col_starts;
+   HYPRE_Int num_cols_offd = 0;
+   HYPRE_Int num_nonzeros_diag = 0;
+   HYPRE_Int num_nonzeros_offd = 0;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_Int equal;
+   HYPRE_Int i;
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    if (aux_matrix)
    {
@@ -103,7 +103,7 @@ hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
    }
    else
    {
-      row_starts = hypre_CTAlloc(int,num_procs+1);
+      row_starts = hypre_CTAlloc(HYPRE_Int,num_procs+1);
 
       if (my_id == 0 && local_m == global_m)
       {
@@ -111,7 +111,7 @@ hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
       }
       else
       {
-         MPI_Allgather(&local_m,1,MPI_INT,&row_starts[1],1,MPI_INT,comm);
+         hypre_MPI_Allgather(&local_m,1,HYPRE_MPI_INT,&row_starts[1],1,HYPRE_MPI_INT,comm);
       }
 
    }
@@ -121,7 +121,7 @@ hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
    }
    else
    {
-      col_starts = hypre_CTAlloc(int,num_procs+1);
+      col_starts = hypre_CTAlloc(HYPRE_Int,num_procs+1);
 
       if (my_id == 0 && local_n == global_n)
       {
@@ -129,7 +129,7 @@ hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
       }
       else
       {
-         MPI_Allgather(&local_n,1,MPI_INT,&col_starts[1],1,MPI_INT,comm);
+         hypre_MPI_Allgather(&local_n,1,HYPRE_MPI_INT,&col_starts[1],1,HYPRE_MPI_INT,comm);
       }
    }
 
@@ -161,13 +161,13 @@ hypre_IJMatrixCreateISIS(hypre_IJMatrix *matrix)
  * hypre_IJMatrixSetRowSizesISIS
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixSetRowSizesISIS(hypre_IJMatrix *matrix,
-			      int	       *sizes)
+			      HYPRE_Int	       *sizes)
 {
-   int *row_space;
-   int local_num_rows;
-   int i;
+   HYPRE_Int *row_space;
+   HYPRE_Int local_num_rows;
+   HYPRE_Int i;
    hypre_AuxParCSRMatrix *aux_matrix;
    aux_matrix = hypre_IJMatrixTranslator(matrix);
    if (aux_matrix)
@@ -177,7 +177,7 @@ hypre_IJMatrixSetRowSizesISIS(hypre_IJMatrix *matrix,
    
    row_space =  hypre_AuxParCSRMatrixRowSpace(aux_matrix);
    if (!row_space)
-      row_space = hypre_CTAlloc(int, local_num_rows);
+      row_space = hypre_CTAlloc(HYPRE_Int, local_num_rows);
    for (i = 0; i < local_num_rows; i++)
       row_space[i] = sizes[i];
    hypre_AuxParCSRMatrixRowSpace(aux_matrix) = row_space;
@@ -191,15 +191,15 @@ hypre_IJMatrixSetRowSizesISIS(hypre_IJMatrix *matrix,
  * requires exact sizes for diag
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixSetDiagRowSizesISIS(hypre_IJMatrix *matrix,
-			      	    int	           *sizes)
+			      	    HYPRE_Int	           *sizes)
 {
-   int local_num_rows;
-   int i;
+   HYPRE_Int local_num_rows;
+   HYPRE_Int i;
    hypre_ParCSRMatrix *par_matrix;
    hypre_CSRMatrix *diag;
-   int *diag_i;
+   HYPRE_Int *diag_i;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)
       return -1;
@@ -208,7 +208,7 @@ hypre_IJMatrixSetDiagRowSizesISIS(hypre_IJMatrix *matrix,
    diag_i =  hypre_CSRMatrixI(diag);
    local_num_rows = hypre_CSRMatrixNumRows(diag);
    if (!diag_i)
-      diag_i = hypre_CTAlloc(int, local_num_rows+1);
+      diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
    for (i = 0; i < local_num_rows+1; i++)
       diag_i[i] = sizes[i];
    hypre_CSRMatrixI(diag) = diag_i;
@@ -223,15 +223,15 @@ hypre_IJMatrixSetDiagRowSizesISIS(hypre_IJMatrix *matrix,
  * requires exact sizes for offd
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixSetOffDiagRowSizesISIS(hypre_IJMatrix *matrix,
-			      	     int	      *sizes)
+			      	     HYPRE_Int	      *sizes)
 {
-   int local_num_rows;
-   int i;
+   HYPRE_Int local_num_rows;
+   HYPRE_Int i;
    hypre_ParCSRMatrix *par_matrix;
    hypre_CSRMatrix *offd;
-   int *offd_i;
+   HYPRE_Int *offd_i;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)
       return -1;
@@ -240,7 +240,7 @@ hypre_IJMatrixSetOffDiagRowSizesISIS(hypre_IJMatrix *matrix,
    offd_i =  hypre_CSRMatrixI(offd);
    local_num_rows = hypre_CSRMatrixNumRows(offd);
    if (!offd_i)
-      offd_i = hypre_CTAlloc(int, local_num_rows+1);
+      offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
    for (i = 0; i < local_num_rows+1; i++)
       offd_i[i] = sizes[i];
    hypre_CSRMatrixI(offd) = offd_i;
@@ -256,23 +256,23 @@ hypre_IJMatrixSetOffDiagRowSizesISIS(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_IJMatrixInitializeISIS(hypre_IJMatrix *matrix)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixLocalStorage(matrix);
    hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
-   int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
-   int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(aux_matrix);
-   int *row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
-   int num_nonzeros = hypre_ParCSRMatrixNumNonzeros(par_matrix);
-   int local_nnz;
-   int num_procs, my_id;
+   HYPRE_Int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
+   HYPRE_Int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(aux_matrix);
+   HYPRE_Int *row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
+   HYPRE_Int num_nonzeros = hypre_ParCSRMatrixNumNonzeros(par_matrix);
+   HYPRE_Int local_nnz;
+   HYPRE_Int num_procs, my_id;
    MPI_Comm  comm = hypre_IJMatrixContext(matrix);
-   int global_num_rows = hypre_IJMatrixM(matrix);
+   HYPRE_Int global_num_rows = hypre_IJMatrixM(matrix);
 
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
    
    local_nnz = (num_nonzeros/global_num_rows+1)*local_num_rows;
    if (local_num_rows < 0)
@@ -294,16 +294,16 @@ hypre_IJMatrixInitializeISIS(hypre_IJMatrix *matrix)
  * InsertIJMatrixRowISIS
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixInsertBlockISIS(hypre_IJMatrix *matrix,
-		       	      int	        m,
-		              int	        n,
-		              int	       *rows,
-		              int	       *cols,
+		       	      HYPRE_Int	        m,
+		              HYPRE_Int	        n,
+		              HYPRE_Int	       *rows,
+		              HYPRE_Int	       *cols,
 		              double	       *coeffs)
 {
-   int ierr = 0;
-   int i, in;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i, in;
    for (i=0; i < m; i++)
    {
       in = i*n;
@@ -320,16 +320,16 @@ hypre_IJMatrixInsertBlockISIS(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 
-int
+HYPRE_Int
 hypre_IJMatrixAddToBlockISIS(hypre_IJMatrix *matrix,
-		       	       int	       m,
-		               int	       n,
-		               int	      *rows,
-		               int	      *cols,
+		       	       HYPRE_Int	       m,
+		               HYPRE_Int	       n,
+		               HYPRE_Int	      *rows,
+		               HYPRE_Int	      *cols,
 		               double	      *coeffs)
 {
-   int ierr = 0;
-   int i, in;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i, in;
    for (i=0; i < m; i++)
    {
       in = i*n;
@@ -348,46 +348,46 @@ hypre_IJMatrixAddToBlockISIS(hypre_IJMatrix *matrix,
  * if they are not known, an auxiliary structure, AuxParCSRMatrix is used
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixInsertRowISIS(hypre_IJMatrix *matrix,
-		              int	      n,
-		              int	      row,
-		              int	     *indices,
+		              HYPRE_Int	      n,
+		              HYPRE_Int	      row,
+		              HYPRE_Int	     *indices,
 		              double         *coeffs)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_ParCSRMatrix *par_matrix;
    hypre_AuxParCSRMatrix *aux_matrix;
-   int *row_starts;
-   int *col_starts;
+   HYPRE_Int *row_starts;
+   HYPRE_Int *col_starts;
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
-   int num_procs, my_id;
-   int row_local;
-   int col_0, col_n;
-   int i, temp;
-   int *indx_diag, *indx_offd;
-   int **aux_j;
-   int *local_j;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_Int row_local;
+   HYPRE_Int col_0, col_n;
+   HYPRE_Int i, temp;
+   HYPRE_Int *indx_diag, *indx_offd;
+   HYPRE_Int **aux_j;
+   HYPRE_Int *local_j;
    double **aux_data;
    double *local_data;
-   int diag_space, offd_space;
-   int *row_length, *row_space;
-   int need_aux;
-   int indx_0;
-   int diag_indx, offd_indx;
+   HYPRE_Int diag_space, offd_space;
+   HYPRE_Int *row_length, *row_space;
+   HYPRE_Int need_aux;
+   HYPRE_Int indx_0;
+   HYPRE_Int diag_indx, offd_indx;
 
    hypre_CSRMatrix *diag;
-   int *diag_i;
-   int *diag_j;
+   HYPRE_Int *diag_i;
+   HYPRE_Int *diag_j;
    double *diag_data;
 
    hypre_CSRMatrix *offd;
-   int *offd_i;
-   int *offd_j;
+   HYPRE_Int *offd_i;
+   HYPRE_Int *offd_j;
    double *offd_data;
 
-   MPI_Comm_size(comm, &num_procs);
-   MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
    par_matrix = hypre_IJMatrixLocalStorage( matrix );
    aux_matrix = hypre_IJMatrixTranslator(matrix);
    row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
@@ -415,7 +415,7 @@ hypre_IJMatrixInsertRowISIS(hypre_IJMatrix *matrix,
          {
    	    hypre_TFree(local_j);
    	    hypre_TFree(local_data);
-   	    local_j = hypre_CTAlloc(int,n);
+   	    local_j = hypre_CTAlloc(HYPRE_Int,n);
    	    local_data = hypre_CTAlloc(double,n);
             row_space[row_local] = n;
          }
@@ -497,53 +497,53 @@ hypre_IJMatrixInsertRowISIS(hypre_IJMatrix *matrix,
  * adds a row to an IJMatrix before assembly, 
  * 
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixAddToRowISIS(hypre_IJMatrix *matrix,
-	                 int	           n,
-		         int	           row,
-		         int	          *indices,
+	                 HYPRE_Int	           n,
+		         HYPRE_Int	           row,
+		         HYPRE_Int	          *indices,
 		         double         *coeffs)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_ParCSRMatrix *par_matrix;
    hypre_CSRMatrix *diag, *offd;
    hypre_AuxParCSRMatrix *aux_matrix;
-   int *row_starts;
-   int *col_starts;
+   HYPRE_Int *row_starts;
+   HYPRE_Int *col_starts;
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
-   int num_procs, my_id;
-   int row_local;
-   int col_0, col_n;
-   int i, temp;
-   int *indx_diag, *indx_offd;
-   int **aux_j;
-   int *local_j;
-   int *tmp_j, *tmp2_j;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_Int row_local;
+   HYPRE_Int col_0, col_n;
+   HYPRE_Int i, temp;
+   HYPRE_Int *indx_diag, *indx_offd;
+   HYPRE_Int **aux_j;
+   HYPRE_Int *local_j;
+   HYPRE_Int *tmp_j, *tmp2_j;
    double **aux_data;
    double *local_data;
    double *tmp_data, *tmp2_data;
-   int diag_space, offd_space;
-   int *row_length, *row_space;
-   int need_aux;
-   int tmp_indx, indx;
-   int size, old_size;
-   int cnt, cnt_diag, cnt_offd, indx_0;
-   int offd_indx, diag_indx;
-   int *diag_i;
-   int *diag_j;
+   HYPRE_Int diag_space, offd_space;
+   HYPRE_Int *row_length, *row_space;
+   HYPRE_Int need_aux;
+   HYPRE_Int tmp_indx, indx;
+   HYPRE_Int size, old_size;
+   HYPRE_Int cnt, cnt_diag, cnt_offd, indx_0;
+   HYPRE_Int offd_indx, diag_indx;
+   HYPRE_Int *diag_i;
+   HYPRE_Int *diag_j;
    double *diag_data;
-   int *offd_i;
-   int *offd_j;
+   HYPRE_Int *offd_i;
+   HYPRE_Int *offd_j;
    double *offd_data;
-   int *tmp_diag_i;
-   int *tmp_diag_j;
+   HYPRE_Int *tmp_diag_i;
+   HYPRE_Int *tmp_diag_j;
    double *tmp_diag_data;
-   int *tmp_offd_i;
-   int *tmp_offd_j;
+   HYPRE_Int *tmp_offd_i;
+   HYPRE_Int *tmp_offd_j;
    double *tmp_offd_data;
 
-   MPI_Comm_size(comm, &num_procs);
-   MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
    par_matrix = hypre_IJMatrixLocalStorage( matrix );
    aux_matrix = hypre_IJMatrixTranslator(matrix);
    row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
@@ -563,7 +563,7 @@ hypre_IJMatrixAddToRowISIS(hypre_IJMatrix *matrix,
          aux_data = hypre_AuxParCSRMatrixAuxData(aux_matrix);
          local_j = aux_j[row_local];
          local_data = aux_data[row_local];
-	 tmp_j = hypre_CTAlloc(int,n);
+	 tmp_j = hypre_CTAlloc(HYPRE_Int,n);
 	 tmp_data = hypre_CTAlloc(double,n);
 	 tmp_indx = 0;
          for (i=0; i < n; i++)
@@ -599,7 +599,7 @@ hypre_IJMatrixAddToRowISIS(hypre_IJMatrix *matrix,
          
          if ( row_space[row_local] < size)
          {
-   	    tmp2_j = hypre_CTAlloc(int,size);
+   	    tmp2_j = hypre_CTAlloc(HYPRE_Int,size);
    	    tmp2_data = hypre_CTAlloc(double,size);
 	    for (i=0; i < old_size; i++)
 	    {
@@ -658,10 +658,10 @@ hypre_IJMatrixAddToRowISIS(hypre_IJMatrix *matrix,
 	 indx_0 = diag_i[row_local];
 	 diag_indx = indx_0+1;
 	 
-	 tmp_diag_j = hypre_CTAlloc(int,n);
+	 tmp_diag_j = hypre_CTAlloc(HYPRE_Int,n);
 	 tmp_diag_data = hypre_CTAlloc(double,n);
 	 cnt_diag = 0;
-	 tmp_offd_j = hypre_CTAlloc(int,n);
+	 tmp_offd_j = hypre_CTAlloc(HYPRE_Int,n);
 	 tmp_offd_data = hypre_CTAlloc(double,n);
 	 cnt_offd = 0;
   	 for (i=0; i < n; i++)
@@ -755,44 +755,44 @@ hypre_IJMatrixAddToRowISIS(hypre_IJMatrix *matrix,
  *
  * assembles IJMAtrix from AuxParCSRMatrix auxiliary structure
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixAssembleISIS(hypre_IJMatrix *matrix)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixLocalStorage(matrix);
    hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
    hypre_CSRMatrix *diag;
    hypre_CSRMatrix *offd;
-   int *diag_i;
-   int *offd_i;
-   int *diag_j;
-   int *offd_j;
+   HYPRE_Int *diag_i;
+   HYPRE_Int *offd_i;
+   HYPRE_Int *diag_j;
+   HYPRE_Int *offd_j;
    double *diag_data;
    double *offd_data;
-   int *row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
-   int *col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
-   int j_indx, cnt, i, j;
-   int num_cols_offd;
-   int *col_map_offd;
-   int *row_length;
-   int *row_space;
-   int **aux_j;
+   HYPRE_Int *row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
+   HYPRE_Int *col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
+   HYPRE_Int j_indx, cnt, i, j;
+   HYPRE_Int num_cols_offd;
+   HYPRE_Int *col_map_offd;
+   HYPRE_Int *row_length;
+   HYPRE_Int *row_space;
+   HYPRE_Int **aux_j;
    double **aux_data;
-   int *indx_diag;
-   int *indx_offd;
-   int need_aux = hypre_AuxParCSRMatrixNeedAux(aux_matrix);
-   int my_id, num_procs;
-   int num_rows;
-   int i_diag, i_offd;
-   int *local_j;
+   HYPRE_Int *indx_diag;
+   HYPRE_Int *indx_offd;
+   HYPRE_Int need_aux = hypre_AuxParCSRMatrixNeedAux(aux_matrix);
+   HYPRE_Int my_id, num_procs;
+   HYPRE_Int num_rows;
+   HYPRE_Int i_diag, i_offd;
+   HYPRE_Int *local_j;
    double *local_data;
-   int col_0, col_n;
-   int nnz_offd;
-   int *aux_offd_j;
+   HYPRE_Int col_0, col_n;
+   HYPRE_Int nnz_offd;
+   HYPRE_Int *aux_offd_j;
 
-   MPI_Comm_size(comm, &num_procs); 
-   MPI_Comm_rank(comm, &my_id);
+   hypre_MPI_Comm_size(comm, &num_procs); 
+   hypre_MPI_Comm_rank(comm, &my_id);
    num_rows = row_starts[my_id+1] - row_starts[my_id]; 
 /* move data into ParCSRMatrix if not there already */ 
    if (need_aux)
@@ -815,9 +815,9 @@ hypre_IJMatrixAssembleISIS(hypre_IJMatrix *matrix)
 	 diag_i[i] = i_diag;
 	 offd_i[i] = i_offd;
       }
-      diag_j = hypre_CTAlloc(int,i_diag);
+      diag_j = hypre_CTAlloc(HYPRE_Int,i_diag);
       diag_data = hypre_CTAlloc(double,i_diag);
-      offd_j = hypre_CTAlloc(int,i_offd);
+      offd_j = hypre_CTAlloc(HYPRE_Int,i_offd);
       offd_data = hypre_CTAlloc(double,i_offd);
       i_diag = 0;
       i_offd = 0;
@@ -849,7 +849,7 @@ hypre_IJMatrixAssembleISIS(hypre_IJMatrix *matrix)
 
 /*  generate col_map_offd */
    nnz_offd = offd_i[num_rows];
-   aux_offd_j = hypre_CTAlloc(int, nnz_offd);
+   aux_offd_j = hypre_CTAlloc(HYPRE_Int, nnz_offd);
    for (i=0; i < nnz_offd; i++)
       aux_offd_j[i] = offd_j[i];
    qsort0(aux_offd_j,0,nnz_offd-1);
@@ -859,7 +859,7 @@ hypre_IJMatrixAssembleISIS(hypre_IJMatrix *matrix)
       if (aux_offd_j[i+1] > aux_offd_j[i])
       num_cols_offd++;
    }
-   col_map_offd = hypre_CTAlloc(int,num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
    col_map_offd[0] = aux_offd_j[0];
    cnt = 0;
    for (i=1; i < nnz_offd; i++)
@@ -892,12 +892,12 @@ hypre_IJMatrixAssembleISIS(hypre_IJMatrix *matrix)
  * if row_starts and/or col_starts NULL, it distributes them evenly.
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixDistributeISIS(hypre_IJMatrix *matrix,
-			     int	      *row_starts,
-			     int	      *col_starts)
+			     HYPRE_Int	      *row_starts,
+			     HYPRE_Int	      *col_starts)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_ParCSRMatrix *old_matrix = hypre_IJMatrixLocalStorage(matrix);
    hypre_ParCSRMatrix *par_matrix;
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(old_matrix);
@@ -915,12 +915,12 @@ hypre_IJMatrixDistributeISIS(hypre_IJMatrix *matrix,
  * NOT IMPLEMENTED YET
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixApplyISIS(hypre_IJMatrix  *matrix,
 		        hypre_ParVector *x,
 		          hypre_ParVector *b)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
 
    return ierr;
 }
@@ -932,7 +932,7 @@ hypre_IJMatrixApplyISIS(hypre_IJMatrix  *matrix,
  * frees an IJMatrix
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixDestroyISIS(hypre_IJMatrix *matrix)
 {
    return hypre_ParCSRMatrixDestroy(hypre_IJMatrixLocalStorage(matrix));
@@ -946,11 +946,11 @@ hypre_IJMatrixDestroyISIS(hypre_IJMatrix *matrix)
  * for storage estimates
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_IJMatrixSetTotalSizeISIS(hypre_IJMatrix *matrix,
-			   	 int     	 size)
+			   	 HYPRE_Int     	 size)
 {
-   int ierr = 0;
+   HYPRE_Int ierr = 0;
    hypre_ParCSRMatrix *par_matrix;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)

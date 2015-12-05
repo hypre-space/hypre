@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -58,11 +58,11 @@ hypre_JacobiCreate( MPI_Comm  comm )
  * hypre_JacobiDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiDestroy( void *jacobi_vdata )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    if (jacobi_data)
    {
@@ -77,14 +77,14 @@ hypre_JacobiDestroy( void *jacobi_vdata )
  * hypre_JacobiSetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiSetup( void               *jacobi_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *b,
                    hypre_StructVector *x            )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxSetup((jacobi_data -> relax_data), A, b, x);
 
@@ -95,14 +95,14 @@ hypre_JacobiSetup( void               *jacobi_vdata,
  * hypre_JacobiSolve
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiSolve( void               *jacobi_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *b,
                    hypre_StructVector *x            )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelax((jacobi_data -> relax_data), A, b, x);
 
@@ -113,12 +113,12 @@ hypre_JacobiSolve( void               *jacobi_vdata,
  * hypre_JacobiSetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiSetTol( void   *jacobi_vdata,
                     double  tol          )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxSetTol((jacobi_data -> relax_data), tol);
 
@@ -129,12 +129,12 @@ hypre_JacobiSetTol( void   *jacobi_vdata,
  * hypre_JacobiGetTol
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiGetTol( void   *jacobi_vdata,
                     double *tol          )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxGetTol((jacobi_data -> relax_data), tol);
 
@@ -145,12 +145,12 @@ hypre_JacobiGetTol( void   *jacobi_vdata,
  * hypre_JacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiSetMaxIter( void  *jacobi_vdata,
-                        int    max_iter     )
+                        HYPRE_Int    max_iter     )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxSetMaxIter((jacobi_data -> relax_data),
                                      max_iter);
@@ -162,12 +162,12 @@ hypre_JacobiSetMaxIter( void  *jacobi_vdata,
  * hypre_JacobiGetMaxIter
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiGetMaxIter( void  *jacobi_vdata,
-                        int  * max_iter     )
+                        HYPRE_Int  * max_iter     )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxGetMaxIter((jacobi_data -> relax_data),
                                      max_iter);
@@ -179,12 +179,12 @@ hypre_JacobiGetMaxIter( void  *jacobi_vdata,
  * hypre_JacobiSetZeroGuess
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiSetZeroGuess( void  *jacobi_vdata,
-                          int    zero_guess   )
+                          HYPRE_Int    zero_guess   )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxSetZeroGuess((jacobi_data -> relax_data),
                                        zero_guess);
@@ -196,12 +196,12 @@ hypre_JacobiSetZeroGuess( void  *jacobi_vdata,
  * hypre_JacobiGetZeroGuess
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiGetZeroGuess( void  *jacobi_vdata,
-                          int  * zero_guess   )
+                          HYPRE_Int  * zero_guess   )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxGetZeroGuess((jacobi_data -> relax_data),
                                        zero_guess);
@@ -213,12 +213,12 @@ hypre_JacobiGetZeroGuess( void  *jacobi_vdata,
  * hypre_JacobiGetNumIterations
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiGetNumIterations( void  *jacobi_vdata,
-                              int  * num_iterations   )
+                              HYPRE_Int  * num_iterations   )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxGetNumIterations((jacobi_data -> relax_data),
                                            num_iterations );
@@ -230,12 +230,12 @@ hypre_JacobiGetNumIterations( void  *jacobi_vdata,
  * hypre_JacobiSetTempVec
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_JacobiSetTempVec( void               *jacobi_vdata,
                         hypre_StructVector *t            )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
-   int               ierr = 0;
+   HYPRE_Int         ierr = 0;
 
    ierr = hypre_PointRelaxSetTempVec((jacobi_data -> relax_data), t);
 
@@ -247,7 +247,7 @@ hypre_JacobiSetTempVec( void               *jacobi_vdata,
  * hypre_JacobiGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
-int hypre_JacobiGetFinalRelativeResidualNorm( void * jacobi_vdata, double * norm )
+HYPRE_Int hypre_JacobiGetFinalRelativeResidualNorm( void * jacobi_vdata, double * norm )
 {
    hypre_JacobiData *jacobi_data = jacobi_vdata;
    void *relax_data = jacobi_data -> relax_data;

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -24,9 +24,9 @@
  * HYPRE_StructStencilCreate
  *--------------------------------------------------------------------------*/
 
-int
-HYPRE_StructStencilCreate( int                  dim,
-                           int                  size,
+HYPRE_Int
+HYPRE_StructStencilCreate( HYPRE_Int            dim,
+                           HYPRE_Int            size,
                            HYPRE_StructStencil *stencil )
 {
    hypre_Index  *shape;
@@ -42,15 +42,15 @@ HYPRE_StructStencilCreate( int                  dim,
  * HYPRE_StructStencilSetElement
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
-                               int                  element_index,
-                               int                 *offset )
+                               HYPRE_Int            element_index,
+                               HYPRE_Int           *offset )
 {
-   int           ierr = 0;
+   HYPRE_Int     ierr = 0;
                 
    hypre_Index  *shape;
-   int           d;
+   HYPRE_Int     d;
  
    shape = hypre_StructStencilShape(stencil);
    hypre_ClearIndex(shape[element_index]);
@@ -66,7 +66,7 @@ HYPRE_StructStencilSetElement( HYPRE_StructStencil  stencil,
  * HYPRE_StructStencilDestroy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructStencilDestroy( HYPRE_StructStencil stencil )
 {
    return ( hypre_StructStencilDestroy(stencil) );

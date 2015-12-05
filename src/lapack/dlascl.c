@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlascl_(char *type__, integer *kl, integer *ku, 
+/* Subroutine */ HYPRE_Int dlascl_(char *type__, integer *kl, integer *ku, 
 	doublereal *cfrom, doublereal *cto, integer *m, integer *n, 
 	doublereal *a, integer *lda, integer *info)
 {
@@ -88,7 +88,7 @@
     static doublereal cfrom1;
     extern doublereal dlamch_(char *);
     static doublereal cfromc;
-    extern /* Subroutine */ int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
     static doublereal bignum, smlnum, mul, cto1;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 

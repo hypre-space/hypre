@@ -8,7 +8,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ int dscal_(integer *n, doublereal *da, doublereal *dx, 
+/* Subroutine */ HYPRE_Int dscal_(integer *n, doublereal *da, doublereal *dx, 
 	integer *incx)
 {
 

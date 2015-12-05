@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,9 +25,22 @@
 
 /*--------------------------------------------------------------------------
  * hypre_PFMGSolve
+ *
+ * NOTE regarding hypre_StructVectorClearBoundGhostValues:
+ *
+ * Since r_l and e_l point to the same temporary data, the boundary ghost values
+ * are not guaranteed to stay clear as needed in the constant coefficient case.
+ * In addition, for the non-Galerkin case, the interpolation operator is set to
+ * be a variable coefficient operator.  However, interpolation values that reach
+ * outside of the boundary are currently not always computed to be zero in this
+ * case, so we can't rewrite SemiRestrict and SemiInterp to faithfully zero out
+ * boundary ghost values only when needed because there isn't enough context.
+ * So, below we force the values of r_l and e_l to be cleared before calling
+ * Restrict and Interp.
+ *
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_PFMGSolve( void               *pfmg_vdata,
                  hypre_StructMatrix *A,
                  hypre_StructVector *b,
@@ -36,12 +49,12 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    hypre_PFMGData       *pfmg_data = pfmg_vdata;
 
    double                tol             = (pfmg_data -> tol);
-   int                   max_iter        = (pfmg_data -> max_iter);
-   int                   rel_change      = (pfmg_data -> rel_change);
-   int                   zero_guess      = (pfmg_data -> zero_guess);
-   int                   num_pre_relax   = (pfmg_data -> num_pre_relax);
-   int                   num_post_relax  = (pfmg_data -> num_post_relax);
-   int                   num_levels      = (pfmg_data -> num_levels);
+   HYPRE_Int             max_iter        = (pfmg_data -> max_iter);
+   HYPRE_Int             rel_change      = (pfmg_data -> rel_change);
+   HYPRE_Int             zero_guess      = (pfmg_data -> zero_guess);
+   HYPRE_Int             num_pre_relax   = (pfmg_data -> num_pre_relax);
+   HYPRE_Int             num_post_relax  = (pfmg_data -> num_post_relax);
+   HYPRE_Int             num_levels      = (pfmg_data -> num_levels);
    hypre_StructMatrix  **A_l             = (pfmg_data -> A_l);
    hypre_StructMatrix  **P_l             = (pfmg_data -> P_l);
    hypre_StructMatrix  **RT_l            = (pfmg_data -> RT_l);
@@ -53,18 +66,18 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    void                **matvec_data_l   = (pfmg_data -> matvec_data_l);
    void                **restrict_data_l = (pfmg_data -> restrict_data_l);
    void                **interp_data_l   = (pfmg_data -> interp_data_l);
-   int                   logging         = (pfmg_data -> logging);
+   HYPRE_Int             logging         = (pfmg_data -> logging);
    double               *norms           = (pfmg_data -> norms);
    double               *rel_norms       = (pfmg_data -> rel_norms);
-   int                  *active_l        = (pfmg_data -> active_l);
+   HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   int                   i, l;
-   int                   constant_coefficient;
+   HYPRE_Int             i, l;
+   HYPRE_Int             constant_coefficient;
 
-   int                   ierr = 0;
+   HYPRE_Int             ierr = 0;
 #if DEBUG
    char                  filename[255];
 #endif
@@ -176,13 +189,17 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
+         if (constant_coefficient)
+         {
+            hypre_StructVectorClearBoundGhostValues(r_l[0], 1);
+         }
          hypre_SemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
 #if DEBUG
-         sprintf(filename, "zout_xdown.%02d", 0);
+         hypre_sprintf(filename, "zout_xdown.%02d", 0);
          hypre_StructVectorPrint(filename, x_l[0], 0);
-         sprintf(filename, "zout_rdown.%02d", 0);
+         hypre_sprintf(filename, "zout_rdown.%02d", 0);
          hypre_StructVectorPrint(filename, r_l[0], 0);
-         sprintf(filename, "zout_b.%02d", 1);
+         hypre_sprintf(filename, "zout_b.%02d", 1);
          hypre_StructVectorPrint(filename, b_l[1], 0);
 #endif
          for (l = 1; l <= (num_levels - 2); l++)
@@ -208,13 +225,17 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             }
 
             /* restrict residual */
+            if (constant_coefficient)
+            {
+               hypre_StructVectorClearBoundGhostValues(r_l[l], 1);
+            }
             hypre_SemiRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
-            sprintf(filename, "zout_xdown.%02d", l);
+            hypre_sprintf(filename, "zout_xdown.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
-            sprintf(filename, "zout_rdown.%02d", l);
+            hypre_sprintf(filename, "zout_rdown.%02d", l);
             hypre_StructVectorPrint(filename, r_l[l], 0);
-            sprintf(filename, "zout_b.%02d", l+1);
+            hypre_sprintf(filename, "zout_b.%02d", l+1);
             hypre_StructVectorPrint(filename, b_l[l+1], 0);
 #endif
          }
@@ -233,7 +254,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             hypre_StructVectorSetConstantValues(x_l[l], 0.0);
          }
 #if DEBUG
-         sprintf(filename, "zout_xbottom.%02d", l);
+         hypre_sprintf(filename, "zout_xbottom.%02d", l);
          hypre_StructVectorPrint(filename, x_l[l], 0);
 #endif
 
@@ -244,13 +265,16 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          for (l = (num_levels - 2); l >= 1; l--)
          {
             /* interpolate error and correct (x = x + Pe_c) */
-            if (constant_coefficient>=1) hypre_StructVectorClearBoundGhostValues( e_l[l] );
+            if (constant_coefficient)
+            {
+               hypre_StructVectorClearBoundGhostValues(e_l[l], 1);
+            }
             hypre_SemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
 #if DEBUG
-            sprintf(filename, "zout_eup.%02d", l);
+            hypre_sprintf(filename, "zout_eup.%02d", l);
             hypre_StructVectorPrint(filename, e_l[l], 0);
-            sprintf(filename, "zout_xup.%02d", l);
+            hypre_sprintf(filename, "zout_xup.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
 #endif
             if (active_l[l])
@@ -264,13 +288,16 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
-         if (constant_coefficient>=1) hypre_StructVectorClearBoundGhostValues( e_l[0] );
+         if (constant_coefficient)
+         {
+            hypre_StructVectorClearBoundGhostValues(e_l[0], 1);
+         }
          hypre_SemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);
 #if DEBUG
-         sprintf(filename, "zout_eup.%02d", 0);
+         hypre_sprintf(filename, "zout_eup.%02d", 0);
          hypre_StructVectorPrint(filename, e_l[0], 0);
-         sprintf(filename, "zout_xup.%02d", 0);
+         hypre_sprintf(filename, "zout_xup.%02d", 0);
          hypre_StructVectorPrint(filename, x_l[0], 0);
 #endif
       }

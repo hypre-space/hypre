@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,31 +29,31 @@
 #include <unistd.h>
 #endif
 
-static void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A);
-static void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A);
+static void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A);
+static void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A);
 /*
 static void partition_metis_private(SubdomainGraph_dh s, void *A);
 
   grep for same below!
 */
-static void allocate_storage_private(SubdomainGraph_dh s, int blocks, int m, bool bj);
+static void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m, bool bj);
 static void form_subdomaingraph_mpi_private(SubdomainGraph_dh s);
-static void form_subdomaingraph_seq_private(SubdomainGraph_dh s, int m, void *A);
-static void find_all_neighbors_sym_private(SubdomainGraph_dh s, int m, void *A);
-static void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A);
-static void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
-                     int *interiorNodes, int *bdryNodes,
-                     int *interiorCount, int *bdryCount);
-static void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
-                     int *interiorNodes, int *bdryNodes,
-                     int *interiorCount, int *bdryCount);
+static void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A);
+static void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A);
+static void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A);
+static void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
+                     HYPRE_Int *interiorNodes, HYPRE_Int *bdryNodes,
+                     HYPRE_Int *interiorCount, HYPRE_Int *bdryCount);
+static void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
+                     HYPRE_Int *interiorNodes, HYPRE_Int *bdryNodes,
+                     HYPRE_Int *interiorCount, HYPRE_Int *bdryCount);
 
-static void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A);
+static void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A);
   /* above also forms n2o[] and o2n[] */
 
 static void find_ordered_neighbors_private(SubdomainGraph_dh s);
 static void color_subdomain_graph_private(SubdomainGraph_dh s);
-static void adjust_matrix_perms_private(SubdomainGraph_dh s, int m);
+static void adjust_matrix_perms_private(SubdomainGraph_dh s, HYPRE_Int m);
 
 #undef __FUNC__
 #define __FUNC__ "SubdomainGraph_dhCreate"
@@ -79,7 +79,7 @@ void SubdomainGraph_dhCreate(SubdomainGraph_dh *s)
 
   tmp->doNotColor = Parser_dhHasSwitch(parser_dh, "-doNotColor");
   tmp->debug = Parser_dhHasSwitch(parser_dh, "-debug_SubGraph");
-  { int i;
+  { HYPRE_Int i;
     for (i=0; i<TIMING_BINS_SG; ++i) tmp->timing[i] = 0.0;
   }
   END_FUNC_DH
@@ -114,10 +114,10 @@ void SubdomainGraph_dhDestroy(SubdomainGraph_dh s)
 
 #undef __FUNC__
 #define __FUNC__ "SubdomainGraph_dhInit"
-void SubdomainGraph_dhInit(SubdomainGraph_dh s, int blocks, bool bj, void *A)
+void SubdomainGraph_dhInit(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  double t1 = MPI_Wtime();
+  double t1 = hypre_MPI_Wtime();
 
   if (blocks < 1) blocks = 1;
 
@@ -129,20 +129,20 @@ void SubdomainGraph_dhInit(SubdomainGraph_dh s, int blocks, bool bj, void *A)
     init_mpi_private(s, np_dh, bj, A); CHECK_V_ERROR;
   }
 
-  s->timing[TOTAL_SGT] += (MPI_Wtime() - t1);
+  s->timing[TOTAL_SGT] += (hypre_MPI_Wtime() - t1);
   END_FUNC_DH
 }
 
 
 #undef __FUNC__
 #define __FUNC__ "SubdomainGraph_dhFindOwner"
-int SubdomainGraph_dhFindOwner(SubdomainGraph_dh s, int idx, bool permuted)
+HYPRE_Int SubdomainGraph_dhFindOwner(SubdomainGraph_dh s, HYPRE_Int idx, bool permuted)
 {
   START_FUNC_DH
-  int sd;
-  int *beg_row = s->beg_row;
-  int *row_count = s->row_count;
-  int owner = -1, blocks = s->blocks;
+  HYPRE_Int sd;
+  HYPRE_Int *beg_row = s->beg_row;
+  HYPRE_Int *row_count = s->row_count;
+  HYPRE_Int owner = -1, blocks = s->blocks;
 
   if (permuted) beg_row = s->beg_rowP;
 
@@ -156,10 +156,10 @@ int SubdomainGraph_dhFindOwner(SubdomainGraph_dh s, int idx, bool permuted)
 
   if (owner == -1) {
 
-fprintf(stderr, "@@@ failed to find owner for idx = %i @@@\n", idx);
-fprintf(stderr, "blocks= %i\n", blocks);
+hypre_fprintf(stderr, "@@@ failed to find owner for idx = %i @@@\n", idx);
+hypre_fprintf(stderr, "blocks= %i\n", blocks);
 
-    sprintf(msgBuf_dh, "failed to find owner for idx = %i", idx);
+    hypre_sprintf(msgBuf_dh, "failed to find owner for idx = %i", idx);
     SET_ERROR(-1, msgBuf_dh);
   }
 
@@ -172,19 +172,19 @@ fprintf(stderr, "blocks= %i\n", blocks);
 void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 {
   START_FUNC_DH
-    int i, j, k; 
+    HYPRE_Int i, j, k; 
     double max = 0, min = INT_MAX;
 
-    fprintf(fp, "\n------------- SubdomainGraph_dhPrintStatsLong -----------\n");
-    fprintf(fp, "colors used     = %i\n", s->colors);
-    fprintf(fp, "subdomain count = %i\n", s->blocks);
+    hypre_fprintf(fp, "\n------------- SubdomainGraph_dhPrintStatsLong -----------\n");
+    hypre_fprintf(fp, "colors used     = %i\n", s->colors);
+    hypre_fprintf(fp, "subdomain count = %i\n", s->blocks);
 
 
-    fprintf(fp, "\ninterior/boundary node ratios:\n");
+    hypre_fprintf(fp, "\ninterior/boundary node ratios:\n");
 
     for (i=0; i<s->blocks; ++i) {
-      int inNodes = s->row_count[i] - s->bdry_count[i];
-      int bdNodes = s->bdry_count[i];
+      HYPRE_Int inNodes = s->row_count[i] - s->bdry_count[i];
+      HYPRE_Int bdNodes = s->bdry_count[i];
       double ratio;
 
       if (bdNodes == 0) {
@@ -195,27 +195,27 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 
       max = MAX(max, ratio);
       min = MIN(min, ratio);
-      fprintf(fp, "   P_%i: first= %3i  rowCount= %3i  interior= %3i  bdry= %3i  ratio= %0.1f\n",
+      hypre_fprintf(fp, "   P_%i: first= %3i  rowCount= %3i  interior= %3i  bdry= %3i  ratio= %0.1f\n",
                    i, 1+s->beg_row[i], s->row_count[i], inNodes,
                    bdNodes, ratio);
     }
 
 
-    fprintf(fp, "\nmax interior/bdry ratio = %.1f\n", max);
-    fprintf(fp, "min interior/bdry ratio = %.1f\n", min);
+    hypre_fprintf(fp, "\nmax interior/bdry ratio = %.1f\n", max);
+    hypre_fprintf(fp, "min interior/bdry ratio = %.1f\n", min);
 
 
     /*-----------------------------------------
      * subdomain graph
      *-----------------------------------------*/
     if (s->adj != NULL) {
-      fprintf(fp, "\nunpermuted subdomain graph: \n");
+      hypre_fprintf(fp, "\nunpermuted subdomain graph: \n");
       for (i=0; i<s->blocks; ++i) {
-        fprintf(fp, "%i :: ", i);
+        hypre_fprintf(fp, "%i :: ", i);
         for (j=s->ptrs[i]; j<s->ptrs[i+1]; ++j) {
-          fprintf(fp, "%i  ", s->adj[j]);
+          hypre_fprintf(fp, "%i  ", s->adj[j]);
         }
-        fprintf(fp, "\n");
+        hypre_fprintf(fp, "\n");
       }
     }
 
@@ -223,61 +223,61 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     /*-----------------------------------------
      * subdomain permutation
      *-----------------------------------------*/
-    fprintf(fp, "\no2n subdomain permutation:\n");
+    hypre_fprintf(fp, "\no2n subdomain permutation:\n");
     for (i=0; i<s->blocks; ++i) {
-      fprintf(fp, "  %i %i\n", i, s->o2n_sub[i]);
+      hypre_fprintf(fp, "  %i %i\n", i, s->o2n_sub[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
 
    if (np_dh > 1) {
 
     /*-----------------------------------------
      * local n2o_row permutation
      *-----------------------------------------*/
-    fprintf(fp, "\nlocal n2o_row permutation:\n   ");
+    hypre_fprintf(fp, "\nlocal n2o_row permutation:\n   ");
     for (i=0; i<s->row_count[myid_dh]; ++i) {
-      fprintf(fp, "%i ", s->n2o_row[i]);
+      hypre_fprintf(fp, "%i ", s->n2o_row[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
 
     /*-----------------------------------------
      * local n2o permutation
      *-----------------------------------------*/
-    fprintf(fp, "\nlocal o2n_col permutation:\n   ");
+    hypre_fprintf(fp, "\nlocal o2n_col permutation:\n   ");
     for (i=0; i<s->row_count[myid_dh]; ++i) {
-      fprintf(fp, "%i ", s->o2n_col[i]);
+      hypre_fprintf(fp, "%i ", s->o2n_col[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
 
   } else {
     /*-----------------------------------------
      * local n2o_row permutation 
      *-----------------------------------------*/
-    fprintf(fp, "\nlocal n2o_row permutation:\n");
-    fprintf(fp, "--------------------------\n");
+    hypre_fprintf(fp, "\nlocal n2o_row permutation:\n");
+    hypre_fprintf(fp, "--------------------------\n");
     for (k=0; k<s->blocks; ++k) {
-      int beg_row = s->beg_row[k];
-      int end_row = beg_row + s->row_count[k];
+      HYPRE_Int beg_row = s->beg_row[k];
+      HYPRE_Int end_row = beg_row + s->row_count[k];
 
       for (i=beg_row; i<end_row; ++i) {
-        fprintf(fp, "%i ", s->n2o_row[i]);
+        hypre_fprintf(fp, "%i ", s->n2o_row[i]);
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
     }
 
     /*-----------------------------------------
      * local n2o permutation
      *-----------------------------------------*/
-    fprintf(fp, "\nlocal o2n_col permutation:\n");
-    fprintf(fp, "--------------------------\n");
+    hypre_fprintf(fp, "\nlocal o2n_col permutation:\n");
+    hypre_fprintf(fp, "--------------------------\n");
     for (k=0; k<s->blocks; ++k) {
-      int beg_row = s->beg_row[k];
-      int end_row = beg_row + s->row_count[k];
+      HYPRE_Int beg_row = s->beg_row[k];
+      HYPRE_Int end_row = beg_row + s->row_count[k];
 
       for (i=beg_row; i<end_row; ++i) {
-        fprintf(fp, "%i ", s->o2n_col[i]);
+        hypre_fprintf(fp, "%i ", s->o2n_col[i]);
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
     }
 
 
@@ -288,10 +288,10 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 
 #undef __FUNC__
 #define __FUNC__ "init_seq_private"
-void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
+void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  int m, n, beg_row;
+  HYPRE_Int m, n, beg_row;
   double t1;
 
   /*-------------------------------------------------------
@@ -315,8 +315,8 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *          row_count[]
    * At this point, beg_rowP[] is a copy of beg_row[])
    *-------------------------------------------------------------*/
-  { int i;
-    int rpp = m/blocks;
+  { HYPRE_Int i;
+    HYPRE_Int rpp = m/blocks;
 
     if (rpp*blocks < m) ++rpp;
 
@@ -325,7 +325,7 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
     for (i=0; i<blocks; ++i) s->row_count[i] = rpp;
     s->row_count[blocks-1] = m - rpp*(blocks-1);
   }
-  memcpy(s->beg_rowP, s->beg_row, blocks*sizeof(int));
+  memcpy(s->beg_rowP, s->beg_row, blocks*sizeof(HYPRE_Int));
 
 
   /*-----------------------------------------------------------------
@@ -343,18 +343,18 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *                      n2o_col[]
    *                      o2n_row[]
    *-------------------------------------------------------*/
-  t1 = MPI_Wtime();
+  t1 = hypre_MPI_Wtime();
   if (!bj) {
     find_bdry_nodes_seq_private(s, m, A); CHECK_V_ERROR;
   }
   else {
-    int i;
+    HYPRE_Int i;
     for (i=0; i<m; ++i) {
       s->n2o_row[i] = i;
       s->o2n_col[i] = i;
     }
   }
-  s->timing[ORDER_BDRY_SGT] += (MPI_Wtime() - t1);
+  s->timing[ORDER_BDRY_SGT] += (hypre_MPI_Wtime() - t1);
 
   /*-------------------------------------------------------
    * Form subdomain graph,
@@ -365,11 +365,11 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *                      n2o_sub[]
    *                      beg_rowP[]
    *-------------------------------------------------------*/
-  t1 = MPI_Wtime();
+  t1 = hypre_MPI_Wtime();
   if (! bj) {
     form_subdomaingraph_seq_private(s, m, A); CHECK_V_ERROR;
     if (s->doNotColor) {
-      int i;
+      HYPRE_Int i;
       printf_dh("subdomain coloring and reordering is OFF\n");
       for (i=0; i<blocks; ++i) {
         s->o2n_sub[i] = i;
@@ -384,13 +384,13 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
 
   /* bj setup */
   else {
-    int i;
+    HYPRE_Int i;
     for (i=0; i<blocks; ++i) {
       s->o2n_sub[i] = i;
       s->n2o_sub[i] = i;
     }
   }
-  s->timing[FORM_GRAPH_SGT] += (MPI_Wtime() - t1);
+  s->timing[FORM_GRAPH_SGT] += (hypre_MPI_Wtime() - t1);
 
   /*-------------------------------------------------------
    * Here's a step we DON'T do for the parallel case:
@@ -436,30 +436,30 @@ void partition_metis_private(SubdomainGraph_dh s, void *A)
 
 #undef __FUNC__
 #define __FUNC__ "allocate_storage_private"
-void allocate_storage_private(SubdomainGraph_dh s, int blocks, int m, bool bj)
+void allocate_storage_private(SubdomainGraph_dh s, HYPRE_Int blocks, HYPRE_Int m, bool bj)
 {
   START_FUNC_DH
 
   if (!bj) {
-    s->ptrs = (int*)MALLOC_DH((blocks+1)*sizeof(int)); CHECK_V_ERROR;
+    s->ptrs = (HYPRE_Int*)MALLOC_DH((blocks+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     s->ptrs[0] = 0;
-    s->colorVec = (int*)MALLOC_DH(blocks*sizeof(int)); CHECK_V_ERROR;
-    s->loNabors = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-    s->hiNabors = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-    s->allNabors = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+    s->colorVec = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->loNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->hiNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+    s->allNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   }
 
-  s->n2o_row = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-  s->o2n_col = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  s->n2o_row = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->o2n_col = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* these are probably only needed for single mpi task -- ?? */
   /* nope; beg_row and row_ct are needed by ilu_mpi_bj; yuck! */
-  s->beg_row = (int*)MALLOC_DH((blocks)*sizeof(int)); CHECK_V_ERROR;
-  s->beg_rowP = (int*)MALLOC_DH((blocks)*sizeof(int)); CHECK_V_ERROR;
-  s->row_count = (int*)MALLOC_DH(blocks*sizeof(int)); CHECK_V_ERROR;
-  s->bdry_count = (int*)MALLOC_DH(blocks*sizeof(int)); CHECK_V_ERROR;
-  s->o2n_sub = (int*)MALLOC_DH(blocks*sizeof(int)); CHECK_V_ERROR;
-  s->n2o_sub = (int*)MALLOC_DH(blocks*sizeof(int)); CHECK_V_ERROR;
+  s->beg_row = (HYPRE_Int*)MALLOC_DH((blocks)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->beg_rowP = (HYPRE_Int*)MALLOC_DH((blocks)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->row_count = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->bdry_count = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->o2n_sub = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  s->n2o_sub = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   END_FUNC_DH
 }
@@ -469,10 +469,10 @@ void allocate_storage_private(SubdomainGraph_dh s, int blocks, int m, bool bj)
 
 #undef __FUNC__
 #define __FUNC__ "init_mpi_private"
-void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
+void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  int m, n, beg_row;
+  HYPRE_Int m, n, beg_row;
   bool symmetric;
   double t1;
 
@@ -502,9 +502,9 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    * At this point, beg_rowP[] is a copy of beg_row[])
    *-------------------------------------------------------------*/
   if (!bj) {
-    MPI_Allgather(&beg_row, 1, MPI_INT, s->beg_row, 1, MPI_INT, comm_dh);
-    MPI_Allgather(&m, 1, MPI_INT, s->row_count, 1, MPI_INT, comm_dh);
-    memcpy(s->beg_rowP, s->beg_row, np_dh*sizeof(int));
+    hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, s->beg_row, 1, HYPRE_MPI_INT, comm_dh);
+    hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
+    memcpy(s->beg_rowP, s->beg_row, np_dh*sizeof(HYPRE_Int));
   } else {
     s->beg_row[myid_dh] = beg_row;
     s->beg_rowP[myid_dh] = beg_row;
@@ -516,13 +516,13 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    * This block fills in: allNabors[]
    *-----------------------------------------------------------------*/
   if (! bj) {
-    t1 = MPI_Wtime();
+    t1 = hypre_MPI_Wtime();
     if (symmetric) {
       find_all_neighbors_sym_private(s, m, A); CHECK_V_ERROR;
     } else {
       find_all_neighbors_unsym_private(s, m, A); CHECK_V_ERROR;
     }
-    s->timing[FIND_NABORS_SGT] += (MPI_Wtime() - t1);
+    s->timing[FIND_NABORS_SGT] += (hypre_MPI_Wtime() - t1);
   }
 
 
@@ -534,15 +534,15 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *                       n2o_col[]
    *                       o2n_row[]
    *-----------------------------------------------------------------*/
-  t1 = MPI_Wtime();
+  t1 = hypre_MPI_Wtime();
   if (!bj) {
-      int *interiorNodes, *bdryNodes;
-      int interiorCount, bdryCount;
-      int *o2n = s->o2n_col, idx;
-      int i;
+      HYPRE_Int *interiorNodes, *bdryNodes;
+      HYPRE_Int interiorCount, bdryCount;
+      HYPRE_Int *o2n = s->o2n_col, idx;
+      HYPRE_Int i;
 
-      interiorNodes = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-      bdryNodes     = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+      interiorNodes = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+      bdryNodes     = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
       /* divide this subdomain's rows into interior and boundary rows;
          the returned lists are with respect to local numbering.
@@ -556,7 +556,7 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
       }
 
       /* exchange number of boundary rows with all neighbors */
-      MPI_Allgather(&bdryCount, 1, MPI_INT, s->bdry_count, 1, MPI_INT, comm_dh);
+      hypre_MPI_Allgather(&bdryCount, 1, HYPRE_MPI_INT, s->bdry_count, 1, HYPRE_MPI_INT, comm_dh);
 
       /* form local permutation */
       idx = 0;
@@ -576,15 +576,15 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
 
   /* bj setup */
   else {
-    int *o2n = s->o2n_col, *n2o = s->n2o_row;
-    int i, m = s->m;
+    HYPRE_Int *o2n = s->o2n_col, *n2o = s->n2o_row;
+    HYPRE_Int i, m = s->m;
 
     for (i=0; i<m; ++i) {
       o2n[i] = i;
       n2o[i] = i;
     }
   }
-  s->timing[ORDER_BDRY_SGT] += (MPI_Wtime() - t1);
+  s->timing[ORDER_BDRY_SGT] += (hypre_MPI_Wtime() - t1);
 
   /*-------------------------------------------------------
    * Form subdomain graph,
@@ -596,10 +596,10 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *                      beg_rowP[]
    *-------------------------------------------------------*/
   if (!bj) {
-    t1 = MPI_Wtime();
+    t1 = hypre_MPI_Wtime();
     form_subdomaingraph_mpi_private(s); CHECK_V_ERROR;
     if (s->doNotColor) {
-      int i;
+      HYPRE_Int i;
       printf_dh("subdomain coloring and reordering is OFF\n");
       for (i=0; i<blocks; ++i) {
         s->o2n_sub[i] = i;
@@ -610,7 +610,7 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
       SET_INFO("subdomain coloring and reordering is ON");
       color_subdomain_graph_private(s); CHECK_V_ERROR;
     }
-    s->timing[FORM_GRAPH_SGT] += (MPI_Wtime() - t1);
+    s->timing[FORM_GRAPH_SGT] += (hypre_MPI_Wtime() - t1);
   }
 
   /*-------------------------------------------------------
@@ -629,9 +629,9 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *                       n2o_ext (hash table)
    *-------------------------------------------------------*/
   if (!bj) {
-    t1 = MPI_Wtime();
+    t1 = hypre_MPI_Wtime();
     SubdomainGraph_dhExchangePerms(s); CHECK_V_ERROR;
-    s->timing[EXCHANGE_PERMS_SGT] += (MPI_Wtime() - t1);
+    s->timing[EXCHANGE_PERMS_SGT] += (hypre_MPI_Wtime() - t1);
   }
 
   END_FUNC_DH
@@ -644,18 +644,18 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
 void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
 {
   START_FUNC_DH
-  MPI_Request *recv_req = NULL, *send_req = NULL;
-  MPI_Status *status = NULL;
-  int *nabors = s->allNabors, naborCount = s->allCount;
-  int i, j, *sendBuf = NULL, *recvBuf = NULL, *naborIdx = NULL, nz;
-  int m = s->row_count[myid_dh];
-  int beg_row = s->beg_row[myid_dh];
-  int beg_rowP = s->beg_rowP[myid_dh];
-  int *bdryNodeCounts = s->bdry_count;
-  int myBdryCount = s->bdry_count[myid_dh];
+  hypre_MPI_Request *recv_req = NULL, *send_req = NULL;
+  hypre_MPI_Status *status = NULL;
+  HYPRE_Int *nabors = s->allNabors, naborCount = s->allCount;
+  HYPRE_Int i, j, *sendBuf = NULL, *recvBuf = NULL, *naborIdx = NULL, nz;
+  HYPRE_Int m = s->row_count[myid_dh];
+  HYPRE_Int beg_row = s->beg_row[myid_dh];
+  HYPRE_Int beg_rowP = s->beg_rowP[myid_dh];
+  HYPRE_Int *bdryNodeCounts = s->bdry_count;
+  HYPRE_Int myBdryCount = s->bdry_count[myid_dh];
   bool debug = false;
-  int myFirstBdry = m - myBdryCount;
-  int *n2o_row = s->n2o_row;
+  HYPRE_Int myFirstBdry = m - myBdryCount;
+  HYPRE_Int *n2o_row = s->n2o_row;
   Hash_i_dh n2o_table, o2n_table;
 
   if (logFile != NULL && s->debug) debug = true;
@@ -663,11 +663,11 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   /* allocate send buffer, and copy permutation info to buffer;
      each entry is a <old_value, new_value> pair.
    */
-  sendBuf = (int*)MALLOC_DH(2*myBdryCount*sizeof(int)); CHECK_V_ERROR;
+  sendBuf = (HYPRE_Int*)MALLOC_DH(2*myBdryCount*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
 
   if (debug) {
-    fprintf(logFile, "\nSUBG myFirstBdry= %i  myBdryCount= %i  m= %i  beg_rowP= %i\n", 1+ myFirstBdry, myBdryCount, m, 1+beg_rowP);
+    hypre_fprintf(logFile, "\nSUBG myFirstBdry= %i  myBdryCount= %i  m= %i  beg_rowP= %i\n", 1+ myFirstBdry, myBdryCount, m, 1+beg_rowP);
     fflush(logFile);
   }
 
@@ -677,9 +677,9 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   }
 
   if (debug) {
-    fprintf(logFile, "\nSUBG SEND_BUF:\n");
+    hypre_fprintf(logFile, "\nSUBG SEND_BUF:\n");
     for (i=myFirstBdry, j=0; j<myBdryCount; ++i, ++j) {
-      fprintf(logFile, "SUBG  %i, %i\n", 1+sendBuf[2*j], 1+sendBuf[2*j+1]);
+      hypre_fprintf(logFile, "SUBG  %i, %i\n", 1+sendBuf[2*j], 1+sendBuf[2*j+1]);
     }
     fflush(logFile);
   }
@@ -688,7 +688,7 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
      and set up index array for locating the beginning of each
      nabor's buffers.
    */
-  naborIdx = (int*)MALLOC_DH((1+naborCount)*sizeof(int)); CHECK_V_ERROR;
+  naborIdx = (HYPRE_Int*)MALLOC_DH((1+naborCount)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   naborIdx[0] = 0;
   nz = 0;
   for (i=0; i<naborCount; ++i) {
@@ -697,39 +697,39 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   }
 
 
-  recvBuf = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
+  recvBuf = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
 
 /* for (i=0; i<nz; ++i) recvBuf[i] = -10; */
 
   /* perform sends and receives */
-  recv_req = (MPI_Request*)MALLOC_DH(naborCount*sizeof(MPI_Request)); CHECK_V_ERROR;
-  send_req = (MPI_Request*)MALLOC_DH(naborCount*sizeof(MPI_Request)); CHECK_V_ERROR;
-  status = (MPI_Status*)MALLOC_DH(naborCount*sizeof(MPI_Status)); CHECK_V_ERROR;
+  recv_req = (hypre_MPI_Request*)MALLOC_DH(naborCount*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  send_req = (hypre_MPI_Request*)MALLOC_DH(naborCount*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  status = (hypre_MPI_Status*)MALLOC_DH(naborCount*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
   for (i=0; i<naborCount; ++i) {
-    int nabr = nabors[i];
-    int *buf = recvBuf + naborIdx[i];
-    int ct = 2*bdryNodeCounts[nabr];
+    HYPRE_Int nabr = nabors[i];
+    HYPRE_Int *buf = recvBuf + naborIdx[i];
+    HYPRE_Int ct = 2*bdryNodeCounts[nabr];
 
 
-    MPI_Isend(sendBuf, 2*myBdryCount, MPI_INT, nabr, 444, comm_dh, &(send_req[i]));
+    hypre_MPI_Isend(sendBuf, 2*myBdryCount, HYPRE_MPI_INT, nabr, 444, comm_dh, &(send_req[i]));
 
     if (debug) {
-      fprintf(logFile , "SUBG   sending %i elts to %i\n", 2*myBdryCount, nabr);
+      hypre_fprintf(logFile , "SUBG   sending %i elts to %i\n", 2*myBdryCount, nabr);
       fflush(logFile);
     }
 
-    MPI_Irecv(buf, ct, MPI_INT, nabr, 444, comm_dh, &(recv_req[i]));
+    hypre_MPI_Irecv(buf, ct, HYPRE_MPI_INT, nabr, 444, comm_dh, &(recv_req[i]));
 
     if (debug) {
-      fprintf(logFile, "SUBG  receiving %i elts from %i\n", ct, nabr);
+      hypre_fprintf(logFile, "SUBG  receiving %i elts from %i\n", ct, nabr);
       fflush(logFile);
     }
   }
 
-  MPI_Waitall(naborCount, send_req, status);
-  MPI_Waitall(naborCount, recv_req, status);
+  hypre_MPI_Waitall(naborCount, send_req, status);
+  hypre_MPI_Waitall(naborCount, recv_req, status);
 
   Hash_i_dhCreate(&n2o_table, nz/2); CHECK_V_ERROR;
   Hash_i_dhCreate(&o2n_table, nz/2); CHECK_V_ERROR;
@@ -738,11 +738,11 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
 
   /* insert non-local boundary node permutations in lookup tables */
   for (i=0; i<nz; i += 2) {
-    int old = recvBuf[i];
-    int new = recvBuf[i+1];
+    HYPRE_Int old = recvBuf[i];
+    HYPRE_Int new = recvBuf[i+1];
 
     if (debug) {
-      fprintf(logFile, "SUBG  i= %i  old= %i  new= %i\n", i, old+1, new+1);
+      hypre_fprintf(logFile, "SUBG  i= %i  old= %i  new= %i\n", i, old+1, new+1);
       fflush(logFile);
     }
 
@@ -768,34 +768,34 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
 void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 {
   START_FUNC_DH
-  int *nabors = s->allNabors, nct = s->allCount;
-  int *idxAll = NULL;
-  int i, j, nz, *adj, *ptrs = s->ptrs;
-  MPI_Request *recvReqs = NULL, sendReq;
-  MPI_Status *statuses = NULL, status;
+  HYPRE_Int *nabors = s->allNabors, nct = s->allCount;
+  HYPRE_Int *idxAll = NULL;
+  HYPRE_Int i, j, nz, *adj, *ptrs = s->ptrs;
+  hypre_MPI_Request *recvReqs = NULL, sendReq;
+  hypre_MPI_Status *statuses = NULL, status;
 
   /* all processors tell root how many nabors they have */
   if (myid_dh == 0) {
-    idxAll = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+    idxAll = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   }
-  MPI_Gather(&nct, 1, MPI_INT, idxAll, 1, MPI_INT, 0, comm_dh);
+  hypre_MPI_Gather(&nct, 1, HYPRE_MPI_INT, idxAll, 1, HYPRE_MPI_INT, 0, comm_dh);
 
   /* root counts edges in graph, and broacasts to all */
   if (myid_dh == 0) {
     nz = 0;
     for (i=0; i<np_dh; ++i) nz += idxAll[i];
   }
-  MPI_Bcast(&nz, 1, MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(&nz, 1, HYPRE_MPI_INT, 0, comm_dh);
 
   /* allocate space for adjacency lists (memory for the
      pointer array was previously allocated)
    */
-  adj = s->adj = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
+  adj = s->adj = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
   /* root receives adjacency lists from all processors */
   if (myid_dh == 0) {
-    recvReqs = (MPI_Request*)MALLOC_DH(np_dh*sizeof(MPI_Request)); CHECK_V_ERROR;
-    statuses = (MPI_Status*)MALLOC_DH(np_dh*sizeof(MPI_Status)); CHECK_V_ERROR;
+    recvReqs = (hypre_MPI_Request*)MALLOC_DH(np_dh*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+    statuses = (hypre_MPI_Status*)MALLOC_DH(np_dh*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
     /* first, set up row pointer array */
     ptrs[0] = 0;
@@ -803,24 +803,24 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 
     /* second, start the receives */
     for (j=0; j<np_dh; ++j) {
-      int ct = idxAll[j];
+      HYPRE_Int ct = idxAll[j];
 
-      MPI_Irecv(adj+ptrs[j], ct, MPI_INT, j, 42, comm_dh, recvReqs+j);
+      hypre_MPI_Irecv(adj+ptrs[j], ct, HYPRE_MPI_INT, j, 42, comm_dh, recvReqs+j);
     }
   }
 
   /* all processors send root their adjacency list */
-  MPI_Isend(nabors, nct, MPI_INT, 0, 42, comm_dh, &sendReq);
+  hypre_MPI_Isend(nabors, nct, HYPRE_MPI_INT, 0, 42, comm_dh, &sendReq);
 
   /* wait for comms to go through */
   if (myid_dh == 0) {
-    MPI_Waitall(np_dh, recvReqs, statuses);
+    hypre_MPI_Waitall(np_dh, recvReqs, statuses);
   }
-  MPI_Wait(&sendReq, &status);
+  hypre_MPI_Wait(&sendReq, &status);
 
   /* root broadcasts assembled subdomain graph to all processors */
-  MPI_Bcast(ptrs, 1+np_dh, MPI_INT, 0, comm_dh);
-  MPI_Bcast(adj, nz, MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(ptrs, 1+np_dh, HYPRE_MPI_INT, 0, comm_dh);
+  hypre_MPI_Bcast(adj, nz, HYPRE_MPI_INT, 0, comm_dh);
 
   if (idxAll != NULL) { FREE_DH(idxAll); CHECK_V_ERROR; }
   if (recvReqs != NULL) { FREE_DH(recvReqs); CHECK_V_ERROR; }
@@ -834,34 +834,34 @@ void form_subdomaingraph_mpi_private(SubdomainGraph_dh s)
 */
 #undef __FUNC__
 #define __FUNC__ "form_subdomaingraph_seq_private"
-void form_subdomaingraph_seq_private(SubdomainGraph_dh s, int m, void *A)
+void form_subdomaingraph_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
   START_FUNC_DH
-  int *dense, i, j, row, blocks = s->blocks;
-  int *cval, len, *adj;
-  int idx = 0, *ptrs = s->ptrs;
+  HYPRE_Int *dense, i, j, row, blocks = s->blocks;
+  HYPRE_Int *cval, len, *adj;
+  HYPRE_Int idx = 0, *ptrs = s->ptrs;
 
   /* allocate storage for adj[]; since this function is intended
      for debugging/testing, and the number of blocks should be
      relatively small, we'll punt and allocate the maximum
      possibly needed.
   */
-  adj = s->adj = (int*)MALLOC_DH(blocks*blocks*sizeof(int)); CHECK_V_ERROR;
+  adj = s->adj = (HYPRE_Int*)MALLOC_DH(blocks*blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
 
-  dense = (int*)MALLOC_DH(blocks*blocks*sizeof(int)); CHECK_V_ERROR;
+  dense = (HYPRE_Int*)MALLOC_DH(blocks*blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<blocks*blocks; ++i) dense[i] = 0;
 
   /* loop over each block's rows to identify all boundary nodes */
   for (i=0; i<blocks; ++i) {
-    int beg_row = s->beg_row[i];
-    int end_row = beg_row + s->row_count[i];
+    HYPRE_Int beg_row = s->beg_row[i];
+    HYPRE_Int end_row = beg_row + s->row_count[i];
 
     for (row=beg_row; row<end_row; ++row) {
       EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
       for (j=0; j<len; ++j) {
-        int col = cval[j];
+        HYPRE_Int col = cval[j];
         if (col < beg_row  ||  col >= end_row) {
-          int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
+          HYPRE_Int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
           dense[i*blocks+owner] = 1;
           dense[owner*blocks+i] = 1;
         }
@@ -890,14 +890,14 @@ void form_subdomaingraph_seq_private(SubdomainGraph_dh s, int m, void *A)
 
 #undef __FUNC__
 #define __FUNC__ "find_all_neighbors_sym_private"
-void find_all_neighbors_sym_private(SubdomainGraph_dh s, int m, void *A)
+void find_all_neighbors_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
   START_FUNC_DH
-  int *marker, i, j, beg_row, end_row;
-  int row, len, *cval, ct = 0;
-  int *nabors = s->allNabors;
+  HYPRE_Int *marker, i, j, beg_row, end_row;
+  HYPRE_Int row, len, *cval, ct = 0;
+  HYPRE_Int *nabors = s->allNabors;
 
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = 0;
 
   SET_INFO("finding nabors in subdomain graph for structurally symmetric matrix");
@@ -909,9 +909,9 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, int m, void *A)
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {
-      int col = cval[j];
+      HYPRE_Int col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
-        int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
+        HYPRE_Int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
         if (! marker[owner]) {
           marker[owner] = 1;
           nabors[ct++] = owner;
@@ -922,7 +922,7 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, int m, void *A)
   }
   s->allCount = ct;
 
-/* fprintf(logFile, "@@@@@ allCount= %i\n", ct); */
+/* hypre_fprintf(logFile, "@@@@@ allCount= %i\n", ct); */
 
   if (marker != NULL) { FREE_DH(marker); CHECK_V_ERROR; }
   END_FUNC_DH
@@ -930,16 +930,16 @@ void find_all_neighbors_sym_private(SubdomainGraph_dh s, int m, void *A)
 
 #undef __FUNC__
 #define __FUNC__ "find_all_neighbors_unsym_private"
-void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
+void find_all_neighbors_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void *A)
 {
   START_FUNC_DH
-  int i, j, row, beg_row, end_row;
-  int *marker;
-  int *cval, len, idx = 0;
-  int nz, *nabors = s->allNabors, *myNabors;
+  HYPRE_Int i, j, row, beg_row, end_row;
+  HYPRE_Int *marker;
+  HYPRE_Int *cval, len, idx = 0;
+  HYPRE_Int nz, *nabors = s->allNabors, *myNabors;
 
-  myNabors = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-  marker = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+  myNabors = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<np_dh; ++i) marker[i] = 0;
 
   SET_INFO("finding nabors in subdomain graph for structurally unsymmetric matrix");
@@ -956,10 +956,10 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {
-      int col = cval[j];
+      HYPRE_Int col = cval[j];
       /*for each column that corresponds to a non-locally owned row ...  */
       if (col < beg_row  ||  col >= end_row) {
-        int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
+        HYPRE_Int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
         /*if I've not yet done so ...   */
         if (! marker[owner]) {
           marker[owner] = 1;
@@ -987,15 +987,15 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
   -dah 1/31/06
   */
 
-/* fprintf(stderr, "[%i] marker: ", myid_dh);
+/* hypre_fprintf(stderr, "[%i] marker: ", myid_dh);
 for (j=0; j<np_dh; j++) {
-  fprintf(stderr, "[%i] (j=%d) %d\n", myid_dh, j,  marker[j]);
+  hypre_fprintf(stderr, "[%i] (j=%d) %d\n", myid_dh, j,  marker[j]);
 }
-fprintf(stderr, "\n");
+hypre_fprintf(stderr, "\n");
 */
 
   /* find out who my neighbors are that I cannot discern locally */
-  MPI_Alltoall(marker, 1, MPI_INT, nabors, 1, MPI_INT, comm_dh); CHECK_V_ERROR;
+  hypre_MPI_Alltoall(marker, 1, HYPRE_MPI_INT, nabors, 1, HYPRE_MPI_INT, comm_dh); CHECK_V_ERROR;
 
   /* add in neighbors that I know about from scanning my adjacency lists */
   for (i=0; i<idx; ++i) nabors[myNabors[i]] = 1;
@@ -1015,7 +1015,7 @@ fprintf(stderr, "\n");
     if (nabors[i]) myNabors[nz++] = i;
   }
   s->allCount = nz;
-  memcpy(nabors, myNabors, nz*sizeof(int));
+  memcpy(nabors, myNabors, nz*sizeof(HYPRE_Int));
 
   if (marker != NULL) { FREE_DH(marker); CHECK_V_ERROR; }
   if (myNabors != NULL) { FREE_DH(myNabors); CHECK_V_ERROR; }
@@ -1026,26 +1026,26 @@ fprintf(stderr, "\n");
 
 #undef __FUNC__
 #define __FUNC__ "find_bdry_nodes_sym_private"
-void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
-                     int *interiorNodes, int *bdryNodes,
-                     int *interiorCount, int *bdryCount)
+void find_bdry_nodes_sym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
+                     HYPRE_Int *interiorNodes, HYPRE_Int *bdryNodes,
+                     HYPRE_Int *interiorCount, HYPRE_Int *bdryCount)
 {
   START_FUNC_DH
-  int beg_row = s->beg_row[myid_dh];
-  int end_row = beg_row + s->row_count[myid_dh];
-  int row, inCt = 0, bdCt = 0;
+  HYPRE_Int beg_row = s->beg_row[myid_dh];
+  HYPRE_Int end_row = beg_row + s->row_count[myid_dh];
+  HYPRE_Int row, inCt = 0, bdCt = 0;
 
-  int j;
-  int *cval;
+  HYPRE_Int j;
+  HYPRE_Int *cval;
 
   /* determine if the row is a boundary row */
   for (row=beg_row; row<end_row; ++row) { /* for each row in the subdomain */
     bool isBdry = false;
-    int len;
+    HYPRE_Int len;
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
     for (j=0; j<len; ++j) { /* for each column in the row */
-      int col = cval[j];
+      HYPRE_Int col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
         isBdry = true;
         break;
@@ -1070,23 +1070,23 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
 
 #undef __FUNC__
 #define __FUNC__ "find_bdry_nodes_unsym_private"
-void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
-                     int *interiorNodes, int *boundaryNodes,
-                     int *interiorCount, int *bdryCount)
+void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, HYPRE_Int m, void* A,
+                     HYPRE_Int *interiorNodes, HYPRE_Int *boundaryNodes,
+                     HYPRE_Int *interiorCount, HYPRE_Int *bdryCount)
 {
   START_FUNC_DH
-  int beg_row = s->beg_row[myid_dh];
-  int end_row = beg_row + s->row_count[myid_dh];
-  int i, j, row, max;
-  int *cval;
-  int *list, count;
-  int *rpIN = NULL, *rpOUT = NULL;
-  int *sendBuf, *recvBuf;
-  int *marker, inCt, bdCt;
-  int *bdryNodes, nz;
-  int sendCt, recvCt;
-  MPI_Request *sendReq, *recvReq;
-  MPI_Status *status;
+  HYPRE_Int beg_row = s->beg_row[myid_dh];
+  HYPRE_Int end_row = beg_row + s->row_count[myid_dh];
+  HYPRE_Int i, j, row, max;
+  HYPRE_Int *cval;
+  HYPRE_Int *list, count;
+  HYPRE_Int *rpIN = NULL, *rpOUT = NULL;
+  HYPRE_Int *sendBuf, *recvBuf;
+  HYPRE_Int *marker, inCt, bdCt;
+  HYPRE_Int *bdryNodes, nz;
+  HYPRE_Int sendCt, recvCt;
+  hypre_MPI_Request *sendReq, *recvReq;
+  hypre_MPI_Status *status;
   SortedSet_dh ss;
 
   SortedSet_dhCreate(&ss, m); CHECK_V_ERROR;
@@ -1097,11 +1097,11 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
    *-----------------------------------------------------*/
   for (row=beg_row; row<end_row; ++row) {
     bool isBdry = false;
-    int len;
+    HYPRE_Int len;
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
     for (j=0; j<len; ++j) {
-      int col = cval[j];
+      HYPRE_Int col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
         isBdry = true;           /* this row is a boundary node */
         SortedSet_dhInsert(ss, col); CHECK_V_ERROR;
@@ -1119,9 +1119,9 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
    * scan the sorted list to determine what boundary
    * node information to send to whom
    *-----------------------------------------------------*/
-  sendBuf = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-  recvBuf = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-  rpOUT = (int*)MALLOC_DH((np_dh+1)*sizeof(int)); CHECK_V_ERROR;
+  sendBuf = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  recvBuf = (HYPRE_Int*)MALLOC_DH(np_dh*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  rpOUT = (HYPRE_Int*)MALLOC_DH((np_dh+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   rpOUT[0] = 0;
   for (i=0; i<np_dh; ++i) sendBuf[i] = 0;
 
@@ -1129,9 +1129,9 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
   SortedSet_dhGetList(ss, &list, &count); CHECK_V_ERROR;
 
   for (i=0; i<count; /* i is set below */) {
-    int node = list[i];
-    int owner;
-    int last;
+    HYPRE_Int node = list[i];
+    HYPRE_Int owner;
+    HYPRE_Int last;
 
     owner = SubdomainGraph_dhFindOwner(s, node, false); CHECK_V_ERROR;
     last = s->beg_row[owner] + s->row_count[owner];
@@ -1148,7 +1148,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
    * processors tell each other how much information
    * each will send to whom
    *-----------------------------------------------------*/
-  MPI_Alltoall(sendBuf, 1, MPI_INT, recvBuf, 1, MPI_INT, comm_dh); CHECK_V_ERROR;
+  hypre_MPI_Alltoall(sendBuf, 1, HYPRE_MPI_INT, recvBuf, 1, HYPRE_MPI_INT, comm_dh); CHECK_V_ERROR;
 
   /*-----------------------------------------------------
    * exchange boundary node information
@@ -1156,7 +1156,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
    *-----------------------------------------------------*/
 
   /* first, set up data structures to hold incoming information */
-  rpIN = (int*)MALLOC_DH((np_dh+1)*sizeof(int)); CHECK_V_ERROR;
+  rpIN = (HYPRE_Int*)MALLOC_DH((np_dh+1)*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   rpIN[0] = 0;
   nz = 0;
   recvCt = 0;
@@ -1167,17 +1167,17 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
       rpIN[recvCt] = nz;
     }
   }
-  bdryNodes = (int*)MALLOC_DH(nz*sizeof(int)); CHECK_V_ERROR;
-  sendReq = (MPI_Request*)MALLOC_DH(sendCt*sizeof(MPI_Request)); CHECK_V_ERROR;
-  recvReq = (MPI_Request*)MALLOC_DH(recvCt*sizeof(MPI_Request)); CHECK_V_ERROR;
+  bdryNodes = (HYPRE_Int*)MALLOC_DH(nz*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+  sendReq = (hypre_MPI_Request*)MALLOC_DH(sendCt*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
+  recvReq = (hypre_MPI_Request*)MALLOC_DH(recvCt*sizeof(hypre_MPI_Request)); CHECK_V_ERROR;
   max = MAX(sendCt, recvCt);
-  status = (MPI_Status*)MALLOC_DH(max*sizeof(MPI_Status)); CHECK_V_ERROR;
+  status = (hypre_MPI_Status*)MALLOC_DH(max*sizeof(hypre_MPI_Status)); CHECK_V_ERROR;
 
   /* second, start receives for incoming data */
   j = 0;
   for (i=0; i<np_dh; ++i) {
     if (recvBuf[i]) {
-      MPI_Irecv(bdryNodes+rpIN[j], recvBuf[i], MPI_INT,
+      hypre_MPI_Irecv(bdryNodes+rpIN[j], recvBuf[i], HYPRE_MPI_INT,
                 i, BDRY_NODE_TAG, comm_dh, recvReq+j);
       ++j;
     }
@@ -1187,15 +1187,15 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
   j = 0;
   for (i=0; i<np_dh; ++i) {
     if (sendBuf[i]) {
-      MPI_Isend(list+rpOUT[j], sendBuf[i], MPI_INT,
+      hypre_MPI_Isend(list+rpOUT[j], sendBuf[i], HYPRE_MPI_INT,
                 i, BDRY_NODE_TAG, comm_dh, sendReq+j);
       ++j;
     }
   }
 
   /* fourth, wait for all comms to finish */
-  MPI_Waitall(sendCt, sendReq, status);
-  MPI_Waitall(recvCt, recvReq, status);
+  hypre_MPI_Waitall(sendCt, sendReq, status);
+  hypre_MPI_Waitall(recvCt, recvReq, status);
 
   /* fifth, convert from global to local indices */
   for (i=0; i<nz; ++i) bdryNodes[i] -= beg_row;
@@ -1204,7 +1204,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
    * consolidate information from all processors to
    * identify all local boundary nodes
    *-----------------------------------------------------*/
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+  marker = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = 0;
   for (i=0; i<nz; ++i) marker[bdryNodes[i]] = 1;
 
@@ -1241,15 +1241,15 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
 void find_ordered_neighbors_private(SubdomainGraph_dh s)
 {
   START_FUNC_DH
-  int *loNabors = s->loNabors;
-  int *hiNabors = s->hiNabors;
-  int *allNabors = s->allNabors, allCount = s->allCount;
-  int loCt = 0, hiCt = 0;
-  int *o2n = s->o2n_sub;
-  int i, myNewId = o2n[myid_dh];
+  HYPRE_Int *loNabors = s->loNabors;
+  HYPRE_Int *hiNabors = s->hiNabors;
+  HYPRE_Int *allNabors = s->allNabors, allCount = s->allCount;
+  HYPRE_Int loCt = 0, hiCt = 0;
+  HYPRE_Int *o2n = s->o2n_sub;
+  HYPRE_Int i, myNewId = o2n[myid_dh];
 
   for (i=0; i<allCount; ++i) {
-    int nabor = allNabors[i];
+    HYPRE_Int nabor = allNabors[i];
     if (o2n[nabor] < myNewId) {
       loNabors[loCt++] = nabor;
     } else {
@@ -1268,16 +1268,16 @@ void find_ordered_neighbors_private(SubdomainGraph_dh s)
 void color_subdomain_graph_private(SubdomainGraph_dh s)
 {
   START_FUNC_DH
-  int i, n = np_dh;
-  int *rp = s->ptrs, *cval = s->adj;
-  int j, *marker, thisNodesColor, *colorCounter;
-  int *o2n = s->o2n_sub;
-  int *color = s->colorVec;
+  HYPRE_Int i, n = np_dh;
+  HYPRE_Int *rp = s->ptrs, *cval = s->adj;
+  HYPRE_Int j, *marker, thisNodesColor, *colorCounter;
+  HYPRE_Int *o2n = s->o2n_sub;
+  HYPRE_Int *color = s->colorVec;
 
   if (np_dh == 1) n = s->blocks;
 
-  marker = (int*)MALLOC_DH((n+1)*sizeof(int));
-  colorCounter = (int*)MALLOC_DH((n+1)*sizeof(int));
+  marker = (HYPRE_Int*)MALLOC_DH((n+1)*sizeof(HYPRE_Int));
+  colorCounter = (HYPRE_Int*)MALLOC_DH((n+1)*sizeof(HYPRE_Int));
   for (i=0; i<=n; ++i) {
     marker[i] = -1;
     colorCounter[i] = 0;
@@ -1292,9 +1292,9 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
        numbered less than "i."
      */
     for (j=rp[i]; j<rp[i+1]; ++j) {
-      int nabor = cval[j];
+      HYPRE_Int nabor = cval[j];
       if (nabor < i) {
-        int naborsColor = color[nabor];
+        HYPRE_Int naborsColor = color[nabor];
         marker[naborsColor] = i;
       }
     }
@@ -1333,7 +1333,7 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
   /*------------------------------------------------------------------
    * count the number of colors used
    *------------------------------------------------------------------*/
-  { int ct = 0;
+  { HYPRE_Int ct = 0;
     for (j=0; j<n; ++j) {
       if (marker[j] == -1) break;
       ++ct;
@@ -1345,9 +1345,9 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
   /*------------------------------------------------------------------
    * (re)build the beg_rowP array
    *------------------------------------------------------------------*/
-  { int sum = 0;
+  { HYPRE_Int sum = 0;
     for (i=0; i<n; ++i) {
-      int old = s->n2o_sub[i];
+      HYPRE_Int old = s->n2o_sub[i];
       s->beg_rowP[old] = sum;
       sum += s->row_count[old];
     }
@@ -1364,8 +1364,8 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
 void SubdomainGraph_dhDump(SubdomainGraph_dh s, char *filename)
 {
   START_FUNC_DH
-  int i;
-  int sCt = np_dh;
+  HYPRE_Int i;
+  HYPRE_Int sCt = np_dh;
   FILE *fp;
 
   if (np_dh == 1) sCt = s->blocks;
@@ -1378,83 +1378,83 @@ void SubdomainGraph_dhDump(SubdomainGraph_dh s, char *filename)
   fp=openFile_dh(filename, "w"); CHECK_V_ERROR;
 
   /* write subdomain ordering permutations */
-  fprintf(fp, "----- colors used\n");
-  fprintf(fp, "%i\n", s->colors);
+  hypre_fprintf(fp, "----- colors used\n");
+  hypre_fprintf(fp, "%i\n", s->colors);
   if (s->colorVec == NULL) {
-    fprintf(fp, "s->colorVec == NULL\n");
+    hypre_fprintf(fp, "s->colorVec == NULL\n");
   } else {
-    fprintf(fp, "----- colorVec\n");
+    hypre_fprintf(fp, "----- colorVec\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", s->colorVec[i]);
+      hypre_fprintf(fp, "%i ", s->colorVec[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
   }
 
   if (s->o2n_sub == NULL || s->o2n_sub == NULL) {
-    fprintf(fp, "s->o2n_sub == NULL || s->o2n_sub == NULL\n");
+    hypre_fprintf(fp, "s->o2n_sub == NULL || s->o2n_sub == NULL\n");
   } else {
-    fprintf(fp, "----- o2n_sub\n");
+    hypre_fprintf(fp, "----- o2n_sub\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", s->o2n_sub[i]);
+      hypre_fprintf(fp, "%i ", s->o2n_sub[i]);
     }
-    fprintf(fp, "\n");
-    fprintf(fp, "----- n2o_sub\n");
+    hypre_fprintf(fp, "\n");
+    hypre_fprintf(fp, "----- n2o_sub\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", s->n2o_sub[i]);
+      hypre_fprintf(fp, "%i ", s->n2o_sub[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
   }
 
   /* write begin row arrays */
   if (s->beg_row == NULL || s->beg_rowP == NULL) {
-    fprintf(fp, "s->beg_row == NULL || s->beg_rowP == NULL\n");
+    hypre_fprintf(fp, "s->beg_row == NULL || s->beg_rowP == NULL\n");
   } else {
-    fprintf(fp, "----- beg_row\n");
+    hypre_fprintf(fp, "----- beg_row\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", 1+s->beg_row[i]);
+      hypre_fprintf(fp, "%i ", 1+s->beg_row[i]);
     }
-    fprintf(fp, "\n");
-    fprintf(fp, "----- beg_rowP\n");
+    hypre_fprintf(fp, "\n");
+    hypre_fprintf(fp, "----- beg_rowP\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", 1+s->beg_rowP[i]);
+      hypre_fprintf(fp, "%i ", 1+s->beg_rowP[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
   }
 
   /* write row count  and bdry count arrays */
   if (s->row_count == NULL || s->bdry_count == NULL) {
-    fprintf(fp, "s->row_count == NULL || s->bdry_count == NULL\n");
+    hypre_fprintf(fp, "s->row_count == NULL || s->bdry_count == NULL\n");
   } else {
-    fprintf(fp, "----- row_count\n");
+    hypre_fprintf(fp, "----- row_count\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", s->row_count[i]);
+      hypre_fprintf(fp, "%i ", s->row_count[i]);
     }
-    fprintf(fp, "\n");
-    fprintf(fp, "----- bdry_count\n");
+    hypre_fprintf(fp, "\n");
+    hypre_fprintf(fp, "----- bdry_count\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i ", s->bdry_count[i]);
+      hypre_fprintf(fp, "%i ", s->bdry_count[i]);
     }
-    fprintf(fp, "\n");
+    hypre_fprintf(fp, "\n");
      
   }
 
   /* write subdomain graph */
   if (s->ptrs == NULL || s->adj == NULL) {
-    fprintf(fp, "s->ptrs == NULL || s->adj == NULL\n");
+    hypre_fprintf(fp, "s->ptrs == NULL || s->adj == NULL\n");
   } else {
-    int j;
-    int ct;
-    fprintf(fp, "----- subdomain graph\n");
+    HYPRE_Int j;
+    HYPRE_Int ct;
+    hypre_fprintf(fp, "----- subdomain graph\n");
     for (i=0; i<sCt; ++i) {
-      fprintf(fp, "%i :: ", i);
+      hypre_fprintf(fp, "%i :: ", i);
       ct = s->ptrs[i+1] - s->ptrs[i];
       if (ct) {
         shellSort_int(ct, s->adj+s->ptrs[i]); CHECK_V_ERROR;
       }
       for (j=s->ptrs[i]; j<s->ptrs[i+1]; ++j) {
-        fprintf(fp, "%i ", s->adj[j]);
+        hypre_fprintf(fp, "%i ", s->adj[j]);
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
     }
   }
   closeFile_dh(fp); CHECK_V_ERROR;
@@ -1479,13 +1479,13 @@ void SubdomainGraph_dhDump(SubdomainGraph_dh s, char *filename)
 
     /* write n2o_row  and o2n_col */
     if (s->n2o_row == NULL|| s->o2n_col == NULL) {
-      fprintf(fp, "s->n2o_row == NULL|| s->o2n_col == NULL\n");
+      hypre_fprintf(fp, "s->n2o_row == NULL|| s->o2n_col == NULL\n");
     } else {
-      fprintf(fp, "----- n2o_row\n");
+      hypre_fprintf(fp, "----- n2o_row\n");
       for (i=0; i<s->m; ++i) {
-        fprintf(fp, "%i ", 1+s->n2o_row[i]);
+        hypre_fprintf(fp, "%i ", 1+s->n2o_row[i]);
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
 
 #if 0
 /*
@@ -1494,17 +1494,17 @@ note: this won't match the parallel case, since
       local
 */
 
-      fprintf(fp, "----- o2n_col\n");
+      hypre_fprintf(fp, "----- o2n_col\n");
       for (i=0; i<sCt; ++i) {
-        int br = s->beg_row[i];
-        int er = br + s->row_count[i];
+        HYPRE_Int br = s->beg_row[i];
+        HYPRE_Int er = br + s->row_count[i];
 
         for (j=br; j<er; ++j) {
-          fprintf(fp, "%i ", 1+s->o2n_col[j]);
+          hypre_fprintf(fp, "%i ", 1+s->o2n_col[j]);
         }
-        fprintf(fp, "\n");
+        hypre_fprintf(fp, "\n");
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
 
 #endif
 
@@ -1514,23 +1514,23 @@ note: this won't match the parallel case, since
 
   /* parallel case */
   else {
-    int id = s->n2o_sub[myid_dh];
-    int m = s->m;
-    int pe;
-    int beg_row = 0;
+    HYPRE_Int id = s->n2o_sub[myid_dh];
+    HYPRE_Int m = s->m;
+    HYPRE_Int pe;
+    HYPRE_Int beg_row = 0;
     if (s->beg_row != 0) beg_row = s->beg_row[myid_dh];
 
     /* write n2o_row */
     for (pe=0; pe<np_dh; ++pe) {
-      MPI_Barrier(comm_dh);
+      hypre_MPI_Barrier(comm_dh);
       if (id == pe) {
         fp=openFile_dh(filename, "a"); CHECK_V_ERROR;
-        if (id == 0) fprintf(fp, "----- n2o_row\n");
+        if (id == 0) hypre_fprintf(fp, "----- n2o_row\n");
 
         for (i=0; i<m; ++i) {
-          fprintf(fp, "%i ", 1+s->n2o_row[i]+beg_row);
+          hypre_fprintf(fp, "%i ", 1+s->n2o_row[i]+beg_row);
         }
-        if (id == np_dh - 1) fprintf(fp, "\n");
+        if (id == np_dh - 1) hypre_fprintf(fp, "\n");
         closeFile_dh(fp); CHECK_V_ERROR;
       }
     }
@@ -1539,17 +1539,17 @@ note: this won't match the parallel case, since
 
     /* write o2n_col */
     for (pe=0; pe<np_dh; ++pe) {
-      MPI_Barrier(comm_dh);
+      hypre_MPI_Barrier(comm_dh);
       if (myid_dh == pe) {
         fp=openFile_dh(filename, "a"); CHECK_V_ERROR;
-        if (myid_dh == 0) fprintf(fp, "----- o2n_col\n");
+        if (myid_dh == 0) hypre_fprintf(fp, "----- o2n_col\n");
 
         for (i=0; i<m; ++i) {
-          fprintf(fp, "%i ", 1+s->o2n_col[i]+beg_row);
+          hypre_fprintf(fp, "%i ", 1+s->o2n_col[i]+beg_row);
         }
-        fprintf(fp, "\n");
+        hypre_fprintf(fp, "\n");
 
-        if (myid_dh == np_dh - 1) fprintf(fp, "\n");
+        if (myid_dh == np_dh - 1) hypre_fprintf(fp, "\n");
 
         closeFile_dh(fp); CHECK_V_ERROR;
       }
@@ -1566,29 +1566,29 @@ note: this won't match the parallel case, since
 
 #undef __FUNC__
 #define __FUNC__ "find_bdry_nodes_seq_private"
-void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A)
+void find_bdry_nodes_seq_private(SubdomainGraph_dh s, HYPRE_Int m, void* A)
 {
   START_FUNC_DH
-  int i, j, row, blocks = s->blocks;
-  int *cval, *tmp;
+  HYPRE_Int i, j, row, blocks = s->blocks;
+  HYPRE_Int *cval, *tmp;
 
-    tmp = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+    tmp = (HYPRE_Int*)MALLOC_DH(m*sizeof(HYPRE_Int)); CHECK_V_ERROR;
     for (i=0; i<m; ++i) tmp[i] = 0;
 
     /*------------------------------------------ 
      * mark all boundary nodes
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      int beg_row = s->beg_row[i];
-      int end_row = beg_row + s->row_count[i];
+      HYPRE_Int beg_row = s->beg_row[i];
+      HYPRE_Int end_row = beg_row + s->row_count[i];
 
       for (row=beg_row; row<end_row; ++row) {
         bool isBdry = false;
-        int len;
+        HYPRE_Int len;
         EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
         for (j=0; j<len; ++j) { /* for each column in the row */
-          int col = cval[j];
+          HYPRE_Int col = cval[j];
 
           if (col < beg_row  ||  col >= end_row) {
             tmp[col] = 1;
@@ -1604,9 +1604,9 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A)
      * fill in the bdry_count[] array
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      int beg_row = s->beg_row[i];
-      int end_row = beg_row + s->row_count[i];
-      int ct = 0;
+      HYPRE_Int beg_row = s->beg_row[i];
+      HYPRE_Int end_row = beg_row + s->row_count[i];
+      HYPRE_Int ct = 0;
       for (row=beg_row; row<end_row; ++row) {
         if (tmp[row]) ++ct;
       }
@@ -1617,10 +1617,10 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A)
      * form the o2n_col[] permutation
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      int beg_row = s->beg_row[i];
-      int end_row = beg_row + s->row_count[i];
-      int interiorIDX = beg_row;
-      int bdryIDX = end_row - s->bdry_count[i];
+      HYPRE_Int beg_row = s->beg_row[i];
+      HYPRE_Int end_row = beg_row + s->row_count[i];
+      HYPRE_Int interiorIDX = beg_row;
+      HYPRE_Int bdryIDX = end_row - s->bdry_count[i];
 
       for (row=beg_row; row<end_row; ++row) {
         if (tmp[row]) {
@@ -1644,30 +1644,30 @@ void SubdomainGraph_dhPrintSubdomainGraph(SubdomainGraph_dh s, FILE *fp)
 {
   START_FUNC_DH
   if (myid_dh == 0) {
-    int i, j;
+    HYPRE_Int i, j;
 
-    fprintf(fp, "\n-----------------------------------------------------\n");
-    fprintf(fp, "SubdomainGraph, and coloring and ordering information\n");
-    fprintf(fp, "-----------------------------------------------------\n");
-    fprintf(fp, "colors used: %i\n", s->colors);
+    hypre_fprintf(fp, "\n-----------------------------------------------------\n");
+    hypre_fprintf(fp, "SubdomainGraph, and coloring and ordering information\n");
+    hypre_fprintf(fp, "-----------------------------------------------------\n");
+    hypre_fprintf(fp, "colors used: %i\n", s->colors);
 
-    fprintf(fp, "o2n ordering vector: ");
-    for (i=0; i<s->blocks; ++i) fprintf(fp, "%i ", s->o2n_sub[i]);
+    hypre_fprintf(fp, "o2n ordering vector: ");
+    for (i=0; i<s->blocks; ++i) hypre_fprintf(fp, "%i ", s->o2n_sub[i]);
 
-    fprintf(fp, "\ncoloring vector (node, color): \n");
-    for (i=0; i<s->blocks; ++i) fprintf(fp, "  %i, %i\n", i, s->colorVec[i]);
+    hypre_fprintf(fp, "\ncoloring vector (node, color): \n");
+    for (i=0; i<s->blocks; ++i) hypre_fprintf(fp, "  %i, %i\n", i, s->colorVec[i]);
 
-    fprintf(fp, "\n");
-    fprintf(fp, "Adjacency lists:\n");
+    hypre_fprintf(fp, "\n");
+    hypre_fprintf(fp, "Adjacency lists:\n");
 
     for (i=0; i<s->blocks; ++i) {
-      fprintf(fp, "   P_%i :: ", i);
+      hypre_fprintf(fp, "   P_%i :: ", i);
       for (j=s->ptrs[i]; j<s->ptrs[i+1]; ++j) {
-        fprintf(fp, "%i ", s->adj[j]);
+        hypre_fprintf(fp, "%i ", s->adj[j]);
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
     }
-    fprintf(fp, "-----------------------------------------------------\n");
+    hypre_fprintf(fp, "-----------------------------------------------------\n");
   }
   END_FUNC_DH
 }
@@ -1675,16 +1675,16 @@ void SubdomainGraph_dhPrintSubdomainGraph(SubdomainGraph_dh s, FILE *fp)
 
 #undef __FUNC__
 #define __FUNC__ "adjust_matrix_perms_private"
-void adjust_matrix_perms_private(SubdomainGraph_dh s, int m)
+void adjust_matrix_perms_private(SubdomainGraph_dh s, HYPRE_Int m)
 {
   START_FUNC_DH
-  int i, j, blocks = s->blocks;
-  int *o2n = s->o2n_col;
+  HYPRE_Int i, j, blocks = s->blocks;
+  HYPRE_Int *o2n = s->o2n_col;
 
   for (i=0; i<blocks; ++i) {
-    int beg_row = s->beg_row[i];
-    int end_row = beg_row + s->row_count[i];
-    int adjust = s->beg_rowP[i] - s->beg_row[i];
+    HYPRE_Int beg_row = s->beg_row[i];
+    HYPRE_Int end_row = beg_row + s->row_count[i];
+    HYPRE_Int adjust = s->beg_rowP[i] - s->beg_row[i];
     for (j=beg_row; j<end_row; ++j) o2n[j] += adjust;
   }
 
@@ -1697,17 +1697,17 @@ void adjust_matrix_perms_private(SubdomainGraph_dh s, int m)
 void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
 {
   START_FUNC_DH
-  int i;
-  int blocks = np_dh;
+  HYPRE_Int i;
+  HYPRE_Int blocks = np_dh;
   double ratio[25];
 
   if (myid_dh == 0) {
     if (np_dh == 1) blocks = s->blocks;
     if (blocks > 25) blocks = 25;
 
-    fprintf(fp, "\n");
-    fprintf(fp, "Subdomain interior/boundary node ratios\n");
-    fprintf(fp, "---------------------------------------\n");
+    hypre_fprintf(fp, "\n");
+    hypre_fprintf(fp, "Subdomain interior/boundary node ratios\n");
+    hypre_fprintf(fp, "---------------------------------------\n");
 
     /* compute ratios */
     for (i=0; i<blocks; ++i) {
@@ -1723,26 +1723,26 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
 
     /* print ratios */
     if (blocks <= 20) {  /* print all ratios */
-      int j = 0;
+      HYPRE_Int j = 0;
       for (i=0; i<blocks; ++i) {
-        fprintf(fp, "%0.2g  ", ratio[i]);
+        hypre_fprintf(fp, "%0.2g  ", ratio[i]);
         ++j;
-        if (j == 10) { fprintf(fp, "\n"); }
+        if (j == 10) { hypre_fprintf(fp, "\n"); }
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
     }
     else {  /* print 10 largest and 10 smallest ratios */
-      fprintf(fp, "10 smallest ratios: ");
+      hypre_fprintf(fp, "10 smallest ratios: ");
       for (i=0; i<10; ++i) {
-        fprintf(fp, "%0.2g  ", ratio[i]);
+        hypre_fprintf(fp, "%0.2g  ", ratio[i]);
       }
-      fprintf(fp, "\n");
-      fprintf(fp, "10 largest ratios:  ");
-      { int start = blocks-6, stop = blocks-1;
+      hypre_fprintf(fp, "\n");
+      hypre_fprintf(fp, "10 largest ratios:  ");
+      { HYPRE_Int start = blocks-6, stop = blocks-1;
       for (i=start; i < stop; ++i) {
-        fprintf(fp, "%0.2g  ", ratio[i]);
+        hypre_fprintf(fp, "%0.2g  ", ratio[i]);
       }
-      fprintf(fp, "\n");
+      hypre_fprintf(fp, "\n");
     }
   }
  }

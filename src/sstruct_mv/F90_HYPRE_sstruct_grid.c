@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -26,17 +25,17 @@
 
 void
 hypre_F90_IFACE(hypre_sstructgridcreate, HYPRE_SSTRUCTGRIDCREATE)
-   (int        *comm,
-    int        *ndim,
-    int        *nparts,
-    long int   *grid_ptr,
-    int        *ierr)
+   (hypre_F90_Comm   *comm,
+    hypre_F90_Int    *ndim,
+    hypre_F90_Int    *nparts,
+    hypre_F90_ObjRef *grid_ptr,
+    hypre_F90_Int    *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridCreate(
-                     (MPI_Comm)           *comm,
-                     (int)                *ndim,
-                     (int)                *nparts,
-                     (HYPRE_SStructGrid *) grid_ptr ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridCreate(
+      hypre_F90_PassComm   (comm),
+      hypre_F90_PassInt    (ndim),
+      hypre_F90_PassInt    (nparts),
+      hypre_F90_PassObjRef (HYPRE_SStructGrid, grid_ptr) );
 }
 
 /*--------------------------------------------------------------------------
@@ -45,11 +44,11 @@ hypre_F90_IFACE(hypre_sstructgridcreate, HYPRE_SSTRUCTGRIDCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructgriddestroy, HYPRE_SSTRUCTGRIDDESTROY)
-   (long int   *grid,
-    int        *ierr)
+   (hypre_F90_Obj *grid,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridDestroy(
-                     (HYPRE_SStructGrid) *grid ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridDestroy(
+      hypre_F90_PassObj (HYPRE_SStructGrid, grid) );
 }
 
 /*--------------------------------------------------------------------------
@@ -58,17 +57,17 @@ hypre_F90_IFACE(hypre_sstructgriddestroy, HYPRE_SSTRUCTGRIDDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetextents, HYPRE_SSTRUCTGRIDSETEXTENTS)
-   (long int   *grid,
-    int        *part,
-    int        *ilower,
-    int        *iupper,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *ilower,
+    hypre_F90_IntArray *iupper,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetExtents(
-                     (HYPRE_SStructGrid) *grid,
-                     (int)               *part,
-                     (int *)              ilower,
-                     (int *)              iupper ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetExtents(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (ilower),
+      hypre_F90_PassIntArray (iupper) );
 }
 
 /*--------------------------------------------------------------------------
@@ -77,40 +76,17 @@ hypre_F90_IFACE(hypre_sstructgridsetextents, HYPRE_SSTRUCTGRIDSETEXTENTS)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetvariables, HYPRE_SSTRUCTGRIDSETVARIABLES)
-   (long int   *grid,
-    int        *part,
-    int        *nvars,
-    int        *vartypes,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_Int      *nvars,
+    hypre_F90_IntArray *vartypes,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetVariables(
-                     (HYPRE_SStructGrid)      *grid,
-                     (int)                    *part,
-                     (int)                    *nvars,
-                     (HYPRE_SStructVariable *) vartypes ) );
-}
-
-/*--------------------------------------------------------------------------
- *  HYPRE_SStructGridSetVariable
- *     Like HYPRE_SStructGridSetVariables; except only one variable is done
- *     at a time; nvars is needed for memory allocation.
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
-   (long int   *grid,
-    int        *part,
-    int        *var,
-    int        *nvars,
-    int        *vartype,
-    int        *ierr)
-{
-   *ierr = (int) (HYPRE_SStructGridSetVariable(
-                     (HYPRE_SStructGrid)      *grid,
-                     (int)                    *part,
-                     (int)                    *var,
-                     (int)                    *nvars,
-                     (HYPRE_SStructVariable)  *vartype ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetVariables(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassInt      (nvars),
+      hypre_F90_PassIntArray (vartypes) );
 }
 
 /*--------------------------------------------------------------------------
@@ -119,42 +95,19 @@ hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgridaddvariables, HYPRE_SSTRUCTGRIDADDVARIABLES)
-   (long int   *grid,
-    int        *part,
-    int        *index,
-    int        *nvars,
-    int        *vartypes,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_Int      *nvars,
+    hypre_F90_IntArray *vartypes,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAddVariables(
-                     (HYPRE_SStructGrid)      *grid,
-                     (int)                    *part,
-                     (int *)                   index,
-                     (int)                    *nvars,
-                     (HYPRE_SStructVariable *) vartypes ));
-}
-
-/*--------------------------------------------------------------------------
- *  HYPRE_SStructGridAddVariable
- *     Like HYPRE_SStructGridAddVariables; except only one variable is done
- *     at a time.
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
-   (long int   *grid,
-    int        *part,
-    int        *index,
-    int        *var,
-    int        *vartype,
-    int        *ierr)
-{
-   *ierr = (int) (HYPRE_SStructGridAddVariable(
-                     (HYPRE_SStructGrid)      *grid,
-                     (int)                    *part,
-                     (int *)                   index,
-                     (int)                    *var,
-                     (HYPRE_SStructVariable)  *vartype ));
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridAddVariables(
+      hypre_F90_PassObj(HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt(part),
+      hypre_F90_PassIntArray(index),
+      hypre_F90_PassInt(nvars),
+      hypre_F90_PassIntArray(vartypes));
 }
 
 /*--------------------------------------------------------------------------
@@ -163,15 +116,15 @@ hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetfemordering, HYPRE_SSTRUCTGRIDSETFEMORDERING)
-   (long int   *grid,
-    int        *part,
-    int        *ordering,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *ordering,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetFEMOrdering(
-                     (HYPRE_SStructGrid)      *grid,
-                     (int)                    *part,
-                     (int *)                   ordering ));
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetFEMOrdering(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (ordering) );
 }
 
 /*--------------------------------------------------------------------------
@@ -180,27 +133,27 @@ hypre_F90_IFACE(hypre_sstructgridsetfemordering, HYPRE_SSTRUCTGRIDSETFEMORDERING
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetneighborpart, HYPRE_SSTRUCTGRIDSETNEIGHBORPART)
-   (long int   *grid,
-    int        *part,
-    int        *ilower,
-    int        *iupper,
-    int        *nbor_part,
-    int        *nbor_ilower,
-    int        *nbor_iupper,
-    int        *index_map,
-    int        *index_dir,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *ilower,
+    hypre_F90_IntArray *iupper,
+    hypre_F90_Int      *nbor_part,
+    hypre_F90_IntArray *nbor_ilower,
+    hypre_F90_IntArray *nbor_iupper,
+    hypre_F90_IntArray *index_map,
+    hypre_F90_IntArray *index_dir,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetNeighborPart(
-                     (HYPRE_SStructGrid) *grid,
-                     (int)               *part,
-                     (int *)              ilower,
-                     (int *)              iupper,
-                     (int)               *nbor_part,
-                     (int *)              nbor_ilower,
-                     (int *)              nbor_iupper,
-                     (int *)              index_map,
-                     (int *)              index_dir ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetNeighborPart(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (ilower),
+      hypre_F90_PassIntArray (iupper),
+      hypre_F90_PassInt      (nbor_part),
+      hypre_F90_PassIntArray (nbor_ilower),
+      hypre_F90_PassIntArray (nbor_iupper),
+      hypre_F90_PassIntArray (index_map),
+      hypre_F90_PassIntArray (index_dir) );
 }
 
 /*--------------------------------------------------------------------------
@@ -209,31 +162,31 @@ hypre_F90_IFACE(hypre_sstructgridsetneighborpart, HYPRE_SSTRUCTGRIDSETNEIGHBORPA
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetsharedpart, HYPRE_SSTRUCTGRIDSETSHAREDPART)
-   (long int   *grid,
-    int        *part,
-    int        *ilower,
-    int        *iupper,
-    int        *offset,
-    int        *shared_part,
-    int        *shared_ilower,
-    int        *shared_iupper,
-    int        *shared_offset,
-    int        *index_map,
-    int        *index_dir,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *ilower,
+    hypre_F90_IntArray *iupper,
+    hypre_F90_IntArray *offset,
+    hypre_F90_Int      *shared_part,
+    hypre_F90_IntArray *shared_ilower,
+    hypre_F90_IntArray *shared_iupper,
+    hypre_F90_IntArray *shared_offset,
+    hypre_F90_IntArray *index_map,
+    hypre_F90_IntArray *index_dir,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetSharedPart(
-                     (HYPRE_SStructGrid) *grid,
-                     (int)               *part,
-                     (int *)              ilower,
-                     (int *)              iupper,
-                     (int *)              offset,
-                     (int)               *shared_part,
-                     (int *)              shared_ilower,
-                     (int *)              shared_iupper,
-                     (int *)              shared_offset,
-                     (int *)              index_map,
-                     (int *)              index_dir ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetSharedPart(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (ilower),
+      hypre_F90_PassIntArray (iupper),
+      hypre_F90_PassIntArray (offset),
+      hypre_F90_PassInt      (shared_part),
+      hypre_F90_PassIntArray (shared_ilower),
+      hypre_F90_PassIntArray (shared_iupper),
+      hypre_F90_PassIntArray (shared_offset),
+      hypre_F90_PassIntArray (index_map),
+      hypre_F90_PassIntArray (index_dir) );
 }
 
 /*--------------------------------------------------------------------------
@@ -245,15 +198,15 @@ hypre_F90_IFACE(hypre_sstructgridsetsharedpart, HYPRE_SSTRUCTGRIDSETSHAREDPART)
 
 void
 hypre_F90_IFACE(hypre_sstructgridaddunstructure, HYPRE_SSTRUCTGRIDADDUNSTRUCTURE)
-   (long int   *grid,
-    int        *ilower,
-    int        *iupper,
-    int        *ierr)
+   (hypre_F90_Obj *grid,
+    hypre_F90_Int *ilower,
+    hypre_F90_Int *iupper,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAddUnstructuredPart(
-                     (HYPRE_SStructGrid) *grid,
-                     (int *)              ilower,
-                     (int *)              iupper) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridAddUnstructuredPart(
+      hypre_F90_PassObj (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt (ilower),
+      hypre_F90_PassInt (iupper) );
 }
 #endif
 
@@ -263,11 +216,11 @@ hypre_F90_IFACE(hypre_sstructgridaddunstructure, HYPRE_SSTRUCTGRIDADDUNSTRUCTURE
 
 void
 hypre_F90_IFACE(hypre_sstructgridassemble, HYPRE_SSTRUCTGRIDASSEMBLE)
-   (long int   *grid,
-    int        *ierr)
+   (hypre_F90_Obj *grid,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAssemble(
-                     (HYPRE_SStructGrid) *grid ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridAssemble(
+      hypre_F90_PassObj (HYPRE_SStructGrid, grid) );
 }
 
 /*--------------------------------------------------------------------------
@@ -276,15 +229,15 @@ hypre_F90_IFACE(hypre_sstructgridassemble, HYPRE_SSTRUCTGRIDASSEMBLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetperiodic, HYPRE_SSTRUCTGRIDSETPERIODIC)
-   (long int   *grid,
-    int        *part,
-    int        *periodic,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *periodic,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetPeriodic(
-                     (HYPRE_SStructGrid) *grid,
-                     (int)               *part,
-                     (int *)              periodic ) );
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetPeriodic(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (periodic) );
 }
 
 /*--------------------------------------------------------------------------
@@ -293,11 +246,60 @@ hypre_F90_IFACE(hypre_sstructgridsetperiodic, HYPRE_SSTRUCTGRIDSETPERIODIC)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetnumghost, HYPRE_SSTRUCTGRIDSETNUMGHOST)
-   (long int   *grid,
-    int        *num_ghost,
-    int        *ierr)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_IntArray *num_ghost,
+    hypre_F90_Int      *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetNumGhost(
-                     (HYPRE_SStructGrid) *grid,
-                     (int *)              num_ghost));       
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetNumGhost(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassIntArray (num_ghost) );
+}
+
+/******************************************************************************
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridSetVariable
+ *     Like HYPRE_SStructGridSetVariables; except only one variable is done
+ *     at a time; nvars is needed for memory allocation.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
+   (hypre_F90_Obj *grid,
+    hypre_F90_Int *part,
+    hypre_F90_Int *var,
+    hypre_F90_Int *nvars,
+    hypre_F90_Int *vartype,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridSetVariable(
+      hypre_F90_PassObj (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt (part),
+      hypre_F90_PassInt (var),
+      hypre_F90_PassInt (nvars),
+      hypre_F90_PassObj (HYPRE_SStructVariable, vartype) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridAddVariable
+ *     Like HYPRE_SStructGridAddVariables; except only one variable is done
+ *     at a time.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
+   (hypre_F90_Obj      *grid,
+    hypre_F90_Int      *part,
+    hypre_F90_IntArray *index,
+    hypre_F90_Int      *var,
+    hypre_F90_Int      *vartype,
+    hypre_F90_Int      *ierr)
+{
+   *ierr = (hypre_F90_Int) HYPRE_SStructGridAddVariable(
+      hypre_F90_PassObj      (HYPRE_SStructGrid, grid),
+      hypre_F90_PassInt      (part),
+      hypre_F90_PassIntArray (index),
+      hypre_F90_PassInt      (var),
+      hypre_F90_PassObj      (HYPRE_SStructVariable, vartype) );
 }

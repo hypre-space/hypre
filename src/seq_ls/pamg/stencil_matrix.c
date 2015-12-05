@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,26 +20,26 @@
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix *
-hypre_GenerateStencilMatrix(int    nx,
-                            int    ny,
-                            int    nz,
+hypre_GenerateStencilMatrix(HYPRE_Int    nx,
+                            HYPRE_Int    ny,
+                            HYPRE_Int    nz,
                             char  *infile )
 {
    hypre_CSRMatrix *A;
 
-   int     *A_i;
-   int     *A_j;
+   HYPRE_Int     *A_i;
+   HYPRE_Int     *A_j;
    double  *A_data;
 
-   int      grid_size = nx*ny*nz;
+   HYPRE_Int      grid_size = nx*ny*nz;
 
-   int      stencil_size;
-   typedef  int Index[3];
+   HYPRE_Int      stencil_size;
+   typedef  HYPRE_Int Index[3];
    Index   *stencil_offsets;
    double  *stencil_values;
 
-   int      ix, iy, iz, i, j, k, s, ss;
-   int      I, J, jj;
+   HYPRE_Int      ix, iy, iz, i, j, k, s, ss;
+   HYPRE_Int      I, J, jj;
 
    FILE    *fp;
 
@@ -49,19 +49,19 @@ hypre_GenerateStencilMatrix(int    nx,
 
    fp = fopen(infile, "r");
 
-   fscanf(fp, "%d\n", &stencil_size);
+   hypre_fscanf(fp, "%d\n", &stencil_size);
    stencil_offsets = hypre_CTAlloc(Index,  stencil_size);
    stencil_values  = hypre_CTAlloc(double, stencil_size);
 
    for (s = 0; s < stencil_size; s++)
    {
-      fscanf(fp, "%d", &ss);
-      fscanf(fp, "%d%d%d %lf\n",
+      hypre_fscanf(fp, "%d", &ss);
+      hypre_fscanf(fp, "%d%d%d %lf\n",
              &stencil_offsets[ss][0],
              &stencil_offsets[ss][1],
              &stencil_offsets[ss][2],
              &stencil_values[ss]);
-      printf("%d %d %d %d %f\n", ss,
+      hypre_printf("%d %d %d %d %f\n", ss,
              stencil_offsets[ss][0],
              stencil_offsets[ss][1],
              stencil_offsets[ss][2],
@@ -74,8 +74,8 @@ hypre_GenerateStencilMatrix(int    nx,
     * set up matrix
     *---------------------------------------------------*/
 
-   A_i    = hypre_CTAlloc(int, grid_size + 1);
-   A_j    = hypre_CTAlloc(int, grid_size * stencil_size);
+   A_i    = hypre_CTAlloc(HYPRE_Int, grid_size + 1);
+   A_j    = hypre_CTAlloc(HYPRE_Int, grid_size * stencil_size);
    A_data = hypre_CTAlloc(double, grid_size * stencil_size);
 
    jj = 0;

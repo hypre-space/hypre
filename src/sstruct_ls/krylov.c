@@ -7,25 +7,23 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
-
-
-
+#include "_hypre_utilities.h"
 
 /******************************************************************************
  *
  *
  *****************************************************************************/
 
-int hypre_SStructKrylovCopyVector( void *x, void *y );
+HYPRE_Int hypre_SStructKrylovCopyVector( void *x, void *y );
 
 /*--------------------------------------------------------------------------
  * hypre_SStructKrylovIdentitySetup
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovIdentitySetup( void *vdata,
                            void *A,
                            void *b,
@@ -39,7 +37,7 @@ hypre_SStructKrylovIdentitySetup( void *vdata,
  * hypre_SStructKrylovIdentity
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructKrylovIdentity( void *vdata,
                       void *A,
                       void *b,

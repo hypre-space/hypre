@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,15 +26,15 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_CSRMatrix 
-HYPRE_CSRMatrixCreate( int  num_rows,
-                       int  num_cols,
-                       int *row_sizes )
+HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
+                       HYPRE_Int  num_cols,
+                       HYPRE_Int *row_sizes )
 {
    hypre_CSRMatrix *matrix;
-   int             *matrix_i;
-   int              i;
+   HYPRE_Int             *matrix_i;
+   HYPRE_Int              i;
 
-   matrix_i = hypre_CTAlloc(int, num_rows + 1);
+   matrix_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
    matrix_i[0] = 0;
    for (i = 0; i < num_rows; i++)
    {
@@ -51,7 +51,7 @@ HYPRE_CSRMatrixCreate( int  num_rows,
  * HYPRE_CSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
 {
    return( hypre_CSRMatrixDestroy( (hypre_CSRMatrix *) matrix ) );
@@ -61,7 +61,7 @@ HYPRE_CSRMatrixDestroy( HYPRE_CSRMatrix matrix )
  * HYPRE_CSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_CSRMatrixInitialize( HYPRE_CSRMatrix matrix )
 {
    return ( hypre_CSRMatrixInitialize( (hypre_CSRMatrix *) matrix ) );
@@ -93,8 +93,8 @@ HYPRE_CSRMatrixPrint( HYPRE_CSRMatrix  matrix,
  * HYPRE_CSRMatrixGetNumRows
  *--------------------------------------------------------------------------*/
 
-int
-HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, int *num_rows )
+HYPRE_Int
+HYPRE_CSRMatrixGetNumRows( HYPRE_CSRMatrix matrix, HYPRE_Int *num_rows )
 {
    hypre_CSRMatrix *csr_matrix = (hypre_CSRMatrix *) matrix;
 

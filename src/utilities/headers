@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.16 $
+# $Revision: 2.17 $
 #EHEADER**********************************************************************
 
 
@@ -23,10 +23,10 @@ INTERNAL_HEADER=_hypre_utilities.h
 cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
 cat >> $INTERNAL_HEADER <<@
 
-#include "HYPRE_utilities.h"
-
 #ifndef hypre_UTILITIES_HEADER
 #define hypre_UTILITIES_HEADER
+
+#include "HYPRE_utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +49,7 @@ cat exchange_data.h            >> $INTERNAL_HEADER
 cat hypre_error.h              >> $INTERNAL_HEADER
 ./protos amg_linklist.c        >> $INTERNAL_HEADER
 ./protos binsearch.c           >> $INTERNAL_HEADER
+./protos hypre_printf.c        >> $INTERNAL_HEADER
 ./protos hypre_qsort.c         >> $INTERNAL_HEADER
 ./protos qsplit.c              >> $INTERNAL_HEADER
 ./protos random.c              >> $INTERNAL_HEADER

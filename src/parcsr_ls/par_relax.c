@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.13 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,19 +21,27 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "Common.h"
 
+#ifdef HYPRE_USING_ESSL
+#include <essl.h>
+#else
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, double *, HYPRE_Int *, HYPRE_Int *, double *b, HYPRE_Int*, HYPRE_Int *);
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
 
-int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
+HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                            hypre_ParVector    *f,
-                           int                *cf_marker,
-                           int                 relax_type,
-                           int                 relax_points,
+                           HYPRE_Int                *cf_marker,
+                           HYPRE_Int                 relax_type,
+                           HYPRE_Int                 relax_points,
                            double              relax_weight,
                            double              omega,
+                           double             *l1_norms,
                            hypre_ParVector    *u,
                            hypre_ParVector    *Vtemp,
                            hypre_ParVector    *Ztemp )
@@ -41,19 +49,19 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
-   int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
    hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
    double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
-   int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
    hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
 
-   int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
-   int             n       = hypre_CSRMatrixNumRows(A_diag);
-   int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   int	      	   first_index = hypre_ParVectorFirstIndex(u);
+   HYPRE_Int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int	      	   first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    double         *u_data  = hypre_VectorData(u_local);
@@ -71,25 +79,25 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    double         *Ztemp_data;
 
    hypre_CSRMatrix *A_CSR;
-   int		   *A_CSR_i;   
-   int		   *A_CSR_j;
+   HYPRE_Int		   *A_CSR_i;   
+   HYPRE_Int		   *A_CSR_j;
    double	   *A_CSR_data;
    
    hypre_Vector    *f_vector;
    double	   *f_vector_data;
 
-   int             i, j, jr;
-   int             ii, jj;
-   int             ns, ne, size, rest;
-   int             column;
-   int             relax_error = 0;
-   int		   num_sends;
-   int		   num_recvs;
-   int		   index, start;
-   int		   num_procs, num_threads, my_id, ip, p;
-   int		   vec_start, vec_len;
-   MPI_Status     *status;
-   MPI_Request    *requests;
+   HYPRE_Int             i, j, jr;
+   HYPRE_Int             ii, jj;
+   HYPRE_Int             ns, ne, size, rest;
+   HYPRE_Int             column;
+   HYPRE_Int             relax_error = 0;
+   HYPRE_Int		   num_sends;
+   HYPRE_Int		   num_recvs;
+   HYPRE_Int		   index, start;
+   HYPRE_Int		   num_procs, num_threads, my_id, ip, p;
+   HYPRE_Int		   vec_start, vec_len;
+   hypre_MPI_Status     *status;
+   hypre_MPI_Request    *requests;
 
    double         *A_mat;
    double         *b_vec;
@@ -102,8 +110,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
    one_minus_weight = 1.0 - relax_weight;
    one_minus_omega = 1.0 - omega;
-   MPI_Comm_size(comm,&num_procs);  
-   MPI_Comm_rank(comm,&my_id);  
+   hypre_MPI_Comm_size(comm,&num_procs);  
+   hypre_MPI_Comm_rank(comm,&my_id);  
    num_threads = hypre_NumThreads();
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
@@ -120,6 +128,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     		    with outer relaxation parameters 
     *     relax_type = 7 -> Jacobi (uses Matvec), only needed in CGNR
     *     relax_type = 9 -> Direct Solve
+    *     relax_type = 99-> Direct solve: use gaussian elimination & BLAS (with pivoting)
     *-----------------------------------------------------------------------*/
    switch (relax_type)
    {            
@@ -818,8 +827,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
-	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
+	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -854,12 +863,12 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	       vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
                for (j=vec_start; j < vec_start+vec_len; j++)
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
+	       hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	    }
    	  }
-	  MPI_Waitall(jr,requests,status);
-	  MPI_Barrier(comm);
+	  hypre_MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Barrier(comm);
         }
 	else
         {
@@ -870,10 +879,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
              ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
              vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
              vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
-             MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
+             hypre_MPI_Irecv(&Vext_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	  }
-	  MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Waitall(jr,requests,status);
 	  }
           if (relax_points == 0)
           {
@@ -935,7 +944,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }     
           }
 	  if (num_procs > 1)
-	  MPI_Barrier(comm);
+	  hypre_MPI_Barrier(comm);
 	 }
 	}
 	if (num_procs > 1)
@@ -961,8 +970,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
-	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
+	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -1043,12 +1052,12 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	       vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
                for (j=vec_start; j < vec_start+vec_len; j++)
                   v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
+	       hypre_MPI_Isend(&v_buf_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	    }
    	  }
-	  MPI_Waitall(jr,requests,status);
-	  MPI_Barrier(comm);
+	  hypre_MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Barrier(comm);
         }
 	else
         {
@@ -1059,10 +1068,10 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
              ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
              vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
              vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
-             MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
+             hypre_MPI_Irecv(&Vext_data[vec_start], vec_len, hypre_MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	  }
-	  MPI_Waitall(jr,requests,status);
+	  hypre_MPI_Waitall(jr,requests,status);
 	  }
           if (relax_points == 0)
           {
@@ -1126,7 +1135,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }     
           }
 	  if (num_procs > 1)
-	  MPI_Barrier(comm);
+	  hypre_MPI_Barrier(comm);
 	 }
 	}
 	if (num_procs > 1)
@@ -2306,6 +2315,699 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       }
       break;
 
+      case 8: /* hybrid L1 Symm. Gauss-Seidel */
+      {
+
+         if (num_threads > 1)
+         {
+            Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
+            Ztemp_data = hypre_VectorData(Ztemp_local);
+         }
+
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+        if (num_procs > 1)
+        {
+        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+
+        v_buf_data = hypre_CTAlloc(double,
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+
+        Vext_data = hypre_CTAlloc(double,num_cols_offd);
+
+        if (num_cols_offd)
+        {
+                A_offd_j = hypre_CSRMatrixJ(A_offd);
+                A_offd_data = hypre_CSRMatrixData(A_offd);
+        }
+
+        index = 0;
+        for (i = 0; i < num_sends; i++)
+        {
+                start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+                for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
+                        v_buf_data[index++]
+                        = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+        }
+
+        comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
+                Vext_data);
+
+         /*-----------------------------------------------------------------
+          * Copy current approximation into temporary vector.
+          *-----------------------------------------------------------------*/
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+         comm_handle = NULL;
+        }
+
+        /*-----------------------------------------------------------------
+         * Relax all points.
+         *-----------------------------------------------------------------*/
+
+        if (relax_weight == 1 && omega == 1)
+        {
+         if (relax_points == 0)
+         {
+          if (num_threads > 1)
+          {
+             tmp_data = Ztemp_data;
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+           for (i = 0; i < n; i++)
+              tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+           for (j = 0; j < num_threads; j++)
+           {
+            size = n/num_threads;
+            rest = n - size*num_threads;
+            if (j < rest)
+            {
+               ns = j*size+j;
+               ne = (j+1)*size+j+1;
+            }
+            else
+            {
+               ns = j*size+rest;
+               ne = (j+1)*size+rest;
+            }
+            for (i = ns; i < ne; i++)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res -= A_diag_data[jj] * u_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+            for (i = ne-1; i > ns-1; i--)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res -= A_diag_data[jj] * u_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+           }
+
+          }
+          else
+          {
+            for (i = 0; i < n; i++)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+            for (i = n-1; i > -1; i--)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+          }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+          if (num_threads > 1)
+          {
+             tmp_data = Ztemp_data;
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+           for (i = 0; i < n; i++)
+              tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+           for (j = 0; j < num_threads; j++)
+           {
+            size = n/num_threads;
+            rest = n - size*num_threads;
+            if (j < rest)
+            {
+               ns = j*size+j;
+               ne = (j+1)*size+j+1;
+            }
+            else
+            {
+               ns = j*size+rest;
+               ne = (j+1)*size+rest;
+            }
+            for (i = ns; i < ne; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res -= A_diag_data[jj] * u_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+            for (i = ne-1; i > ns-1; i--) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res -= A_diag_data[jj] * u_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+           }
+
+          }
+          else
+          {
+            for (i = 0; i < n; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+            for (i = n-1; i > -1; i--) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] += res / l1_norms[i];
+               }
+            }
+          }
+         }
+        }
+        else
+        {
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+         for (i = 0; i < n; i++)
+         {
+            Vtemp_data[i] = u_data[i];
+         }
+         prod = (1.0-relax_weight*omega);
+         if (relax_points == 0)
+         {
+          if (num_threads > 1)
+          {
+             tmp_data = Ztemp_data;
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+           for (i = 0; i < n; i++)
+              tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+           for (j = 0; j < num_threads; j++)
+           {
+            size = n/num_threads;
+            rest = n - size*num_threads;
+            if (j < rest)
+            {
+               ns = j*size+j;
+               ne = (j+1)*size+j+1;
+            }
+            else
+            {
+               ns = j*size+rest;
+               ne = (j+1)*size+rest;
+            }
+            for (i = ns; i < ne; i++)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res0 = 0.0;
+                  res2 = 0.0;
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res0 -= A_diag_data[jj] * u_data[ii];
+                        res2 += A_diag_data[jj] * Vtemp_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+            for (i = ne-1; i > ns-1; i--)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res0 = 0.0;
+                  res2 = 0.0;
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res0 -= A_diag_data[jj] * u_data[ii];
+                        res2 += A_diag_data[jj] * Vtemp_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+           }
+
+          }
+          else
+          {
+            for (i = 0; i < n; i++)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res0 = 0.0;
+                  res = f_data[i];
+                  res2 = 0.0;
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res0 -= A_diag_data[jj] * u_data[ii];
+                     res2 += A_diag_data[jj] * Vtemp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+            for (i = n-1; i > -1; i--)	/* interior points first */
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if ( l1_norms[i] != zero)
+               {
+                  res0 = 0.0;
+                  res = f_data[i];
+                  res2 = 0.0;
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res0 -= A_diag_data[jj] * u_data[ii];
+                     res2 += A_diag_data[jj] * Vtemp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+          }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+
+         else
+         {
+          if (num_threads > 1)
+          {
+             tmp_data = Ztemp_data;
+#define HYPRE_SMP_PRIVATE i
+#include "../utilities/hypre_smp_forloop.h"
+           for (i = 0; i < n; i++)
+              tmp_data[i] = u_data[i];
+#define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
+#include "../utilities/hypre_smp_forloop.h"
+           for (j = 0; j < num_threads; j++)
+           {
+            size = n/num_threads;
+            rest = n - size*num_threads;
+            if (j < rest)
+            {
+               ns = j*size+j;
+               ne = (j+1)*size+j+1;
+            }
+            else
+            {
+               ns = j*size+rest;
+               ne = (j+1)*size+rest;
+            }
+            for (i = ns; i < ne; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res0 = 0.0;
+                  res2 = 0.0;
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res2 += A_diag_data[jj] * Vtemp_data[ii];
+                        res0 -= A_diag_data[jj] * u_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+            for (i = ne-1; i > ns-1; i--) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res0 = 0.0;
+                  res2 = 0.0;
+                  res = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     if (ii >= ns && ii < ne)
+                     {
+                        res2 += A_diag_data[jj] * Vtemp_data[ii];
+                        res0 -= A_diag_data[jj] * u_data[ii];
+                     }
+                     else
+                        res -= A_diag_data[jj] * tmp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+           }
+
+          }
+          else
+          {
+            for (i = 0; i < n; i++) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  res0 = 0.0;
+                  res2 = 0.0;
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res0 -= A_diag_data[jj] * u_data[ii];
+                     res2 += A_diag_data[jj] * Vtemp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+            for (i = n-1; i > -1; i--) /* relax interior points */
+            {
+
+               /*-----------------------------------------------------------
+                * If i is of the right type ( C or F ) and diagonal is
+
+                * nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (cf_marker[i] == relax_points
+                                && l1_norms[i] != zero)
+               {
+                  res = f_data[i];
+                  res0 = 0.0;
+                  res2 = 0.0;
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
+                  {
+                     ii = A_diag_j[jj];
+                     res0 -= A_diag_data[jj] * u_data[ii];
+                     res2 += A_diag_data[jj] * Vtemp_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  {
+                     ii = A_offd_j[jj];
+                     res -= A_offd_data[jj] * Vext_data[ii];
+                  }
+                  u_data[i] *= prod;
+                  u_data[i] += relax_weight*(omega*res + res0 +
+                        one_minus_omega*res2) / l1_norms[i];
+                  /*u_data[i] += omega*(relax_weight*res + res0 +
+                        one_minus_weight*res2) / l1_norms[i];*/
+               }
+            }
+          }
+         }
+        }
+        if (num_procs > 1)
+        {
+           hypre_TFree(Vext_data);
+           hypre_TFree(v_buf_data);
+        }
+      }
+      break;
+
       case 9: /* Direct solve: use gaussian elimination */
       {
 
@@ -2377,6 +3079,103 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
       }
       break;   
+      case 99: /* Direct solve: use gaussian elimination & BLAS (with pivoting) */
+      {
+
+         HYPRE_Int info;
+         HYPRE_Int one_i = 1;
+         HYPRE_Int *piv;
+         /*-----------------------------------------------------------------
+          *  Generate CSR matrix from ParCSRMatrix A
+          *-----------------------------------------------------------------*/
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         /* all processors are needed for these routines */
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
+	 if (n)
+	 {
+	 
+#else
+	 if (n)
+	 {
+	    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+	    f_vector = hypre_ParVectorToVectorAll(f);
+#endif
+ 	    A_CSR_i = hypre_CSRMatrixI(A_CSR);
+ 	    A_CSR_j = hypre_CSRMatrixJ(A_CSR);
+ 	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
+   	    f_vector_data = hypre_VectorData(f_vector);
+
+            A_mat = hypre_CTAlloc(double, n_global*n_global);
+            b_vec = hypre_CTAlloc(double, n_global);    
+
+            /*---------------------------------------------------------------
+             *  Load CSR matrix into A_mat.
+             *---------------------------------------------------------------*/
+
+            for (i = 0; i < n_global; i++)
+            {
+               for (jj = A_CSR_i[i]; jj < A_CSR_i[i+1]; jj++)
+               {
+             
+                  /* need col major */
+                  column = A_CSR_j[jj];
+                  A_mat[i + n_global*column] = A_CSR_data[jj];
+               }
+               b_vec[i] = f_vector_data[i];
+            }
+
+            piv = hypre_CTAlloc(HYPRE_Int, n_global);
+
+           /* write over A with LU */
+#ifdef HYPRE_USING_ESSL
+            dgetrf(n_global, n_global, A_mat, n_global, piv, &info);
+
+#else
+            hypre_F90_NAME_LAPACK(dgetrf, DGETRF)(&n_global, &n_global, 
+                                             A_mat, &n_global, piv, &info);
+#endif
+            
+           /*now b_vec = inv(A)*b_vec  */
+#ifdef HYPRE_USING_ESSL
+            dgetrs("N", n_global, &one_i, A_mat, 
+                   n_global, piv, b_vec, 
+                   n_global, &info);
+
+#else
+            hypre_F90_NAME_LAPACK(dgetrs, DGETRS)("N", &n_global, &one_i, A_mat, 
+                                             &n_global, piv, b_vec, 
+                                             &n_global, &info);
+#endif
+            hypre_TFree(piv);
+            
+
+            for (i = 0; i < n; i++)
+            {
+               u_data[i] = b_vec[first_index+i];
+            }
+
+	    hypre_TFree(A_mat); 
+            hypre_TFree(b_vec);
+            hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
+            hypre_SeqVectorDestroy(f_vector);
+            f_vector = NULL;
+         
+         }
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         else
+         {
+            
+            hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
+            hypre_SeqVectorDestroy(f_vector);
+            f_vector = NULL;
+         }
+#endif
+
+      }
+      break;   
    }
 
    return(relax_error); 
@@ -2388,13 +3187,13 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  *
  *------------------------------------------------------------------------ */
 
-int gselim(A,x,n)
+HYPRE_Int gselim(A,x,n)
 double *A;
 double *x;
-int n;
+HYPRE_Int n;
 {
-   int    err_flag = 0;
-   int    j,k,m;
+   HYPRE_Int    err_flag = 0;
+   HYPRE_Int    j,k,m;
    double factor;
    
    if (n==1)                           /* A is 1x1 */  

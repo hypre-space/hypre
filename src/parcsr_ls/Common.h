@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -51,9 +51,9 @@
 
 #define PARASAILS_EXIT              \
 {                                   \
-   fprintf(stderr, "Exiting...\n"); \
+   hypre_fprintf(stderr, "Exiting...\n"); \
    fflush(NULL);                    \
-   MPI_Abort(MPI_COMM_WORLD, -1);   \
+   hypre_MPI_Abort(hypre_MPI_COMM_WORLD, -1);   \
 }
 
 #endif /* _COMMON_H */

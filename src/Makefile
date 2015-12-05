@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.34 $
+# $Revision: 2.37 $
 #EHEADER**********************************************************************
 
 
@@ -156,13 +156,24 @@ check:
 	(cd test; ls -l ij.err struct.err sstruct.err)
 
 install: all
-	@echo "Installing hypre ..."
-	@echo "lib-install: ${HYPRE_LIB_INSTALL}"
-	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
-	cp -fpPR ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
-	cp -fpPR ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
-	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
-	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
+	@ \
+	echo "Installing hypre ..."; \
+	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}; \
+	cd ${HYPRE_BUILD_DIR}/lib; HYPRE_FROMDIR=`pwd`; \
+	cd ${HYPRE_LIB_INSTALL};   HYPRE_TODIR=`pwd`; \
+	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
+	then \
+	  cp -fpPR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
+	fi; \
+	cd ${HYPRE_BUILD_DIR}/include; HYPRE_FROMDIR=`pwd`; \
+	cd ${HYPRE_INC_INSTALL};       HYPRE_TODIR=`pwd`; \
+	if [ "$$HYPRE_FROMDIR" != "$$HYPRE_TODIR" ]; \
+	then \
+	  cp -fpPR $$HYPRE_FROMDIR/* $$HYPRE_TODIR; \
+	fi; \
+	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}; \
+	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}; \
+	echo
 
 clean:
 	@ \
@@ -197,5 +208,5 @@ distclean:
 	rm -rf ./HYPRE_config.h
 
 tags:
-	find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
-	-name "*.c??" -or -name "*.h??" -or -name "*.f" | etags -
+	find . -name "*.c" -o -name "*.C" -o -name "*.h" -o \
+	-name "*.c??" -o -name "*.h??" -o -name "*.f" | etags -

@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
-
-
-
 
 /******************************************************************************
  *
@@ -27,17 +24,19 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)(
-                                                    int      *comm,
-                                                    int      *jlower,
-                                                    int      *jupper,
-                                                    long int *vector,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)
+   ( hypre_F90_Comm *comm,
+     hypre_F90_Int *jlower,
+     hypre_F90_Int *jupper,
+     hypre_F90_Obj *vector,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) ( HYPRE_IJVectorCreate( (MPI_Comm)         *comm,
-                                         (int)              *jlower,
-                                         (int)              *jupper, 
-                                         (HYPRE_IJVector *)  vector  ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorCreate(
+           hypre_F90_PassComm (comm),
+           hypre_F90_PassInt (jlower),
+           hypre_F90_PassInt (jupper), 
+           hypre_F90_PassObjRef (HYPRE_IJVector, vector)  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -45,11 +44,13 @@ hypre_F90_IFACE(hypre_ijvectorcreate, HYPRE_IJVECTORCREATE)(
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)(
-                                                    long int *vector,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) ( HYPRE_IJVectorDestroy( (HYPRE_IJVector) *vector ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorDestroy(
+           hypre_F90_PassObj (HYPRE_IJVector, vector) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -57,11 +58,13 @@ hypre_F90_IFACE(hypre_ijvectordestroy, HYPRE_IJVECTORDESTROY)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)(
-                                                    long int *vector,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) ( HYPRE_IJVectorInitialize( (HYPRE_IJVector) *vector ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorInitialize(
+           hypre_F90_PassObj (HYPRE_IJVector, vector) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -69,17 +72,19 @@ hypre_F90_IFACE(hypre_ijvectorinitialize, HYPRE_IJVECTORINITIALIZE)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)(
-                                                    long int *vector,
-                                                    int      *num_values,
-                                                    int      *indices,
-                                                    double   *values,
-                                                    int      *ierr        )
+hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *num_values,
+     hypre_F90_IntArray *indices,
+     hypre_F90_DblArray *values,
+     hypre_F90_Int *ierr        )
 {
-   *ierr = (int) ( HYPRE_IJVectorSetValues( (HYPRE_IJVector) *vector,
-                                            (int)            *num_values,
-                                            (const int *)     indices,
-                                            (const double *)  values      ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorSetValues(
+           hypre_F90_PassObj (HYPRE_IJVector, vector),
+           hypre_F90_PassInt (num_values),
+           hypre_F90_PassIntArray (indices),
+           hypre_F90_PassDblArray (values)      ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -87,17 +92,19 @@ hypre_F90_IFACE(hypre_ijvectorsetvalues, HYPRE_IJVECTORSETVALUES)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)(
-                                                    long int *vector,
-                                                    int      *num_values,
-                                                    int      *indices,
-                                                    double   *values,
-                                                    int      *ierr        )
+hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *num_values,
+     hypre_F90_IntArray *indices,
+     hypre_F90_DblArray *values,
+     hypre_F90_Int *ierr        )
 {
-   *ierr = (int) ( HYPRE_IJVectorAddToValues( (HYPRE_IJVector) *vector,
-                                              (int)            *num_values,
-                                              (const int *)     indices,
-                                              (const double *)  values      ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorAddToValues(
+           hypre_F90_PassObj (HYPRE_IJVector, vector),
+           hypre_F90_PassInt (num_values),
+           hypre_F90_PassIntArray (indices),
+           hypre_F90_PassDblArray (values)      ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -105,11 +112,13 @@ hypre_F90_IFACE(hypre_ijvectoraddtovalues, HYPRE_IJVECTORADDTOVALUES)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorassemble, HYPRE_IJVECTORASSEMBLE)(
-                                                    long int *vector,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorassemble, HYPRE_IJVECTORASSEMBLE)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) ( HYPRE_IJVectorAssemble( (HYPRE_IJVector) *vector ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorAssemble(
+           hypre_F90_PassObj (HYPRE_IJVector, vector) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -117,17 +126,19 @@ hypre_F90_IFACE(hypre_ijvectorassemble, HYPRE_IJVECTORASSEMBLE)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)(
-                                                    long int  *vector,
-                                                    const int *num_values,
-                                                    const int *indices,
-                                                    double   *values,
-                                                    int      *ierr        )
+hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *num_values,
+     hypre_F90_IntArray *indices,
+     hypre_F90_DblArray *values,
+     hypre_F90_Int *ierr        )
 {
-   *ierr = (int) ( HYPRE_IJVectorGetValues( (HYPRE_IJVector) *vector,
-                                            (int)            *num_values,
-                                            (const int *)     indices,
-                                            (double *)        values      ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorGetValues(
+           hypre_F90_PassObj (HYPRE_IJVector, vector),
+           hypre_F90_PassInt (num_values),
+           hypre_F90_PassIntArray (indices),
+           hypre_F90_PassDblArray (values)      ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -136,13 +147,14 @@ hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)(
 
 void 
 hypre_F90_IFACE(hypre_ijvectorsetmaxoffprocelmt, HYPRE_IJVECTORSETMAXOFFPROCELMT)
-                                              ( long int  *vector,
-                                                int       *max_off_proc_elmts,
-                                                int       *ierr    )
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *max_off_proc_elmts,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) 
-          ( HYPRE_IJVectorSetMaxOffProcElmts( (HYPRE_IJVector) *vector,
-                                              (int)            *max_off_proc_elmts ) );
+   *ierr = (hypre_F90_Int) 
+      ( HYPRE_IJVectorSetMaxOffProcElmts(
+           hypre_F90_PassObj (HYPRE_IJVector, vector),
+           hypre_F90_PassInt (max_off_proc_elmts) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -150,13 +162,15 @@ hypre_F90_IFACE(hypre_ijvectorsetmaxoffprocelmt, HYPRE_IJVECTORSETMAXOFFPROCELMT
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijvectorsetobjecttype, HYPRE_IJVECTORSETOBJECTTYPE)(
-                                                    long int  *vector,
-                                                    const int *type,
-                                                    int       *ierr    )
+hypre_F90_IFACE(hypre_ijvectorsetobjecttype, HYPRE_IJVECTORSETOBJECTTYPE)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *type,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) ( HYPRE_IJVectorSetObjectType( (HYPRE_IJVector) *vector,
-                                                (int)            *type    ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJVectorSetObjectType(
+           hypre_F90_PassObj (HYPRE_IJVector, vector),
+           hypre_F90_PassInt (type)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -164,13 +178,15 @@ hypre_F90_IFACE(hypre_ijvectorsetobjecttype, HYPRE_IJVECTORSETOBJECTTYPE)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetobjecttype, HYPRE_IJVECTORGETOBJECTTYPE)(
-                                                    long int *vector,
-                                                    int      *type,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorgetobjecttype, HYPRE_IJVECTORGETOBJECTTYPE)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *type,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) (HYPRE_IJVectorGetObjectType( (HYPRE_IJVector) *vector,
-                                               (int *)           type    ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_IJVectorGetObjectType(
+          hypre_F90_PassObj (HYPRE_IJVector, vector),
+          hypre_F90_PassIntRef (type)    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -179,14 +195,16 @@ hypre_F90_IFACE(hypre_ijvectorgetobjecttype, HYPRE_IJVECTORGETOBJECTTYPE)(
 
 void
 hypre_F90_IFACE(hypre_ijvectorgetlocalrange, HYPRE_IJVECTORGETLOCALRANGE)
-                                           ( long int *vector,
-                                             int      *jlower,
-                                             int      *jupper,
-                                             int      *ierr    )
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Int *jlower,
+     hypre_F90_Int *jupper,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (int) (HYPRE_IJVectorGetLocalRange( (HYPRE_IJVector) *vector,
-                                                    (int *)           jlower,
-                                                    (int *)           jupper  ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_IJVectorGetLocalRange(
+          hypre_F90_PassObj (HYPRE_IJVector, vector),
+          hypre_F90_PassIntRef (jlower),
+          hypre_F90_PassIntRef (jupper)  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -194,13 +212,15 @@ hypre_F90_IFACE(hypre_ijvectorgetlocalrange, HYPRE_IJVECTORGETLOCALRANGE)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorgetobject, HYPRE_IJVECTORGETOBJECT)(
-                                                    long int *vector,
-                                                    long int *object,
-                                                    int      *ierr    )
+hypre_F90_IFACE(hypre_ijvectorgetobject, HYPRE_IJVECTORGETOBJECT)
+   ( hypre_F90_Obj *vector,
+     hypre_F90_Obj *object,
+     hypre_F90_Int *ierr    )
 {
-   *ierr = (long int) (HYPRE_IJVectorGetObject( (HYPRE_IJVector) *vector,
-                                                (void **)         object  ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_IJVectorGetObject(
+          hypre_F90_PassObj (HYPRE_IJVector, vector),
+          (void **)         object  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -208,16 +228,19 @@ hypre_F90_IFACE(hypre_ijvectorgetobject, HYPRE_IJVECTORGETOBJECT)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorread, HYPRE_IJVECTORREAD)( char     *filename,
-                                                         long int *comm,
-                                                         int      *object_type,
-                                                         long int *vector,
-                                                         int      *ierr      )
+hypre_F90_IFACE(hypre_ijvectorread, HYPRE_IJVECTORREAD)
+   ( char     *filename,
+     hypre_F90_Comm *comm,
+     hypre_F90_Int *object_type,
+     hypre_F90_Obj *vector,
+     hypre_F90_Int *ierr      )
 {
-   *ierr = (int) (HYPRE_IJVectorRead( (char *)            filename,
-                                      (MPI_Comm)         *comm,
-                                      (int)              *object_type,
-                                      (HYPRE_IJVector *)  vector       ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_IJVectorRead(
+          (char *)            filename,
+          hypre_F90_PassComm (comm),
+          hypre_F90_PassInt (object_type),
+          hypre_F90_PassObjRef (HYPRE_IJVector, vector)       ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -225,10 +248,13 @@ hypre_F90_IFACE(hypre_ijvectorread, HYPRE_IJVECTORREAD)( char     *filename,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijvectorprint, HYPRE_IJVECTORPRINT)( long int *vector,
-                                                           char     *filename,
-                                                           int      *ierr      )
+hypre_F90_IFACE(hypre_ijvectorprint, HYPRE_IJVECTORPRINT)
+   ( hypre_F90_Obj *vector,
+     char     *filename,
+     hypre_F90_Int *ierr      )
 {
-   *ierr = (int) (HYPRE_IJVectorPrint( (HYPRE_IJVector) *vector,
-                                       (char *)          filename ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_IJVectorPrint(
+          hypre_F90_PassObj (HYPRE_IJVector, vector),
+          (char *)          filename ) );
 }

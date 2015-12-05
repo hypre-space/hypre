@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,10 +26,10 @@
 
 typedef struct
 {
-   int    num_sweeps;  
-   int    relax_type;   
-   int    *index_set1, *index_set2;
-   int    print_level;
+   HYPRE_Int    num_sweeps;  
+   HYPRE_Int    relax_type;   
+   HYPRE_Int    *index_set1, *index_set2;
+   HYPRE_Int    print_level;
    double threshold;
    hypre_ParCSRMatrix *A11, *A21, *A22;
    hypre_ParVector    *F1, *U1, *F2, *U2;
@@ -42,16 +42,16 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *hypre_BlockTridiagCreate();
-int  hypre_BlockTridiagDestroy(void *);
-int  hypre_BlockTridiagSetup(void * , hypre_ParCSRMatrix *,
+HYPRE_Int  hypre_BlockTridiagDestroy(void *);
+HYPRE_Int  hypre_BlockTridiagSetup(void * , hypre_ParCSRMatrix *,
                              hypre_ParVector *, hypre_ParVector *);
-int  hypre_BlockTridiagSolve(void * , hypre_ParCSRMatrix *,
+HYPRE_Int  hypre_BlockTridiagSolve(void * , hypre_ParCSRMatrix *,
                              hypre_ParVector *, hypre_ParVector *);
-int  hypre_BlockTridiagSetIndexSet(void *, int, int *);
-int  hypre_BlockTridiagSetAMGStrengthThreshold(void *, double);
-int  hypre_BlockTridiagSetAMGNumSweeps(void *, int);
-int  hypre_BlockTridiagSetAMGRelaxType(void *, int);
-int  hypre_BlockTridiagSetPrintLevel(void *, int);
+HYPRE_Int  hypre_BlockTridiagSetIndexSet(void *, HYPRE_Int, HYPRE_Int *);
+HYPRE_Int  hypre_BlockTridiagSetAMGStrengthThreshold(void *, double);
+HYPRE_Int  hypre_BlockTridiagSetAMGNumSweeps(void *, HYPRE_Int);
+HYPRE_Int  hypre_BlockTridiagSetAMGRelaxType(void *, HYPRE_Int);
+HYPRE_Int  hypre_BlockTridiagSetPrintLevel(void *, HYPRE_Int);
 
 #endif
 

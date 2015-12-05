@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -25,12 +24,13 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amscreate, HYPRE_AMSCREATE)(
-   long int *solver,
-   int      *ierr)
-
+hypre_F90_IFACE(hypre_amscreate, HYPRE_AMSCREATE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSCreate( (HYPRE_Solver *) solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSCreate(
+           hypre_F90_PassObjRef (HYPRE_Solver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -38,11 +38,13 @@ hypre_F90_IFACE(hypre_amscreate, HYPRE_AMSCREATE)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amsdestroy, HYPRE_AMSDESTROY)(
-   long int *solver,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amsdestroy, HYPRE_AMSDESTROY)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSDestroy( (HYPRE_Solver) *solver ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSDestroy(
+           hypre_F90_PassObj (HYPRE_Solver, solver) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -50,17 +52,19 @@ hypre_F90_IFACE(hypre_amsdestroy, HYPRE_AMSDESTROY)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetup, HYPRE_AMSSETUP)(
-   long int *solver,
-   long int *A,
-   long int *b,
-   long int *x,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetup, HYPRE_AMSSETUP)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A,
+     hypre_F90_Obj *b,
+     hypre_F90_Obj *x,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetup( (HYPRE_Solver)       *solver,
-                                   (HYPRE_ParCSRMatrix) *A,
-                                   (HYPRE_ParVector)    *b,
-                                   (HYPRE_ParVector)    *x ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetup(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+           hypre_F90_PassObj (HYPRE_ParVector, b),
+           hypre_F90_PassObj (HYPRE_ParVector, x) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -68,17 +72,19 @@ hypre_F90_IFACE(hypre_amssetup, HYPRE_AMSSETUP)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssolve, HYPRE_AMSSOLVE)(
-   long int *solver,
-   long int *A,
-   long int *b,
-   long int *x,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssolve, HYPRE_AMSSOLVE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A,
+     hypre_F90_Obj *b,
+     hypre_F90_Obj *x,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSolve( (HYPRE_Solver)       *solver,
-                                   (HYPRE_ParCSRMatrix) *A,
-                                   (HYPRE_ParVector)    *b,
-                                   (HYPRE_ParVector)    *x ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSolve(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+           hypre_F90_PassObj (HYPRE_ParVector, b),
+           hypre_F90_PassObj (HYPRE_ParVector, x) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -86,13 +92,15 @@ hypre_F90_IFACE(hypre_amssolve, HYPRE_AMSSOLVE)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetdimension, HYPRE_AMSSETDIMENSION)(
-   long int *solver,
-   int      *dim,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetdimension, HYPRE_AMSSETDIMENSION)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *dim,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetDimension( (HYPRE_Solver) *solver,
-                                          (int)          *dim ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetDimension(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (dim) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -100,13 +108,15 @@ hypre_F90_IFACE(hypre_amssetdimension, HYPRE_AMSSETDIMENSION)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetdiscretegradient, HYPRE_AMSSETDISCRETEGRADIENT)(
-   long int *solver,
-   long int *G,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetdiscretegradient, HYPRE_AMSSETDISCRETEGRADIENT)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *G,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetDiscreteGradient( (HYPRE_Solver)       *solver,
-                                                 (HYPRE_ParCSRMatrix) *G ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetDiscreteGradient(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, G) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -114,17 +124,19 @@ hypre_F90_IFACE(hypre_amssetdiscretegradient, HYPRE_AMSSETDISCRETEGRADIENT)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetcoordinatevectors, HYPRE_AMSSETCOORDINATEVECTORS)(
-   long int *solver,
-   long int *x,
-   long int *y,
-   long int *z,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetcoordinatevectors, HYPRE_AMSSETCOORDINATEVECTORS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *x,
+     hypre_F90_Obj *y,
+     hypre_F90_Obj *z,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetCoordinateVectors( (HYPRE_Solver)    *solver,
-                                                  (HYPRE_ParVector) *x,
-                                                  (HYPRE_ParVector) *y,
-                                                  (HYPRE_ParVector) *z ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetCoordinateVectors(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParVector, x),
+           hypre_F90_PassObj (HYPRE_ParVector, y),
+           hypre_F90_PassObj (HYPRE_ParVector, z) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -132,17 +144,19 @@ hypre_F90_IFACE(hypre_amssetcoordinatevectors, HYPRE_AMSSETCOORDINATEVECTORS)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetedgeconstantvectors, HYPRE_AMSSETEDGECONSTANTVECTORS)(
-   long int *solver,
-   long int *Gx,
-   long int *Gy,
-   long int *Gz,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetedgeconstantvectors, HYPRE_AMSSETEDGECONSTANTVECTORS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *Gx,
+     hypre_F90_Obj *Gy,
+     hypre_F90_Obj *Gz,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetEdgeConstantVectors( (HYPRE_Solver)    *solver,
-                                                    (HYPRE_ParVector) *Gx,
-                                                    (HYPRE_ParVector) *Gy,
-                                                    (HYPRE_ParVector) *Gz ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetEdgeConstantVectors(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParVector, Gx),
+           hypre_F90_PassObj (HYPRE_ParVector, Gy),
+           hypre_F90_PassObj (HYPRE_ParVector, Gz) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -150,13 +164,15 @@ hypre_F90_IFACE(hypre_amssetedgeconstantvectors, HYPRE_AMSSETEDGECONSTANTVECTORS
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetalphapoissonmatrix, HYPRE_AMSSETALPHAPOISSONMATRIX)(
-   long int *solver,
-   long int *A_alpha,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetalphapoissonmatrix, HYPRE_AMSSETALPHAPOISSONMATRIX)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A_alpha,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetAlphaPoissonMatrix( (HYPRE_Solver)       *solver,
-                                                   (HYPRE_ParCSRMatrix) *A_alpha ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetAlphaPoissonMatrix(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A_alpha) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -164,13 +180,15 @@ hypre_F90_IFACE(hypre_amssetalphapoissonmatrix, HYPRE_AMSSETALPHAPOISSONMATRIX)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetbetapoissonmatrix, HYPRE_AMSSETBETAPOISSONMATRIX)(
-   long int *solver,
-   long int *A_beta,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetbetapoissonmatrix, HYPRE_AMSSETBETAPOISSONMATRIX)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Obj *A_beta,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetBetaPoissonMatrix( (HYPRE_Solver)       *solver,
-                                                  (HYPRE_ParCSRMatrix) *A_beta ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetBetaPoissonMatrix(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A_beta) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -178,13 +196,15 @@ hypre_F90_IFACE(hypre_amssetbetapoissonmatrix, HYPRE_AMSSETBETAPOISSONMATRIX)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetmaxiter, HYPRE_AMSSETMAXITER)(
-   long int *solver,
-   int      *maxiter,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetmaxiter, HYPRE_AMSSETMAXITER)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *maxiter,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetMaxIter( (HYPRE_Solver) *solver,
-                                        (int)          *maxiter ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetMaxIter(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (maxiter) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -192,13 +212,15 @@ hypre_F90_IFACE(hypre_amssetmaxiter, HYPRE_AMSSETMAXITER)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssettol, HYPRE_AMSSETTOL)(
-   long int *solver,
-   double   *tol,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssettol, HYPRE_AMSSETTOL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Dbl *tol,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetTol( (HYPRE_Solver) *solver,
-                                    (double)       *tol ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetTol(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassDbl (tol) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -206,13 +228,15 @@ hypre_F90_IFACE(hypre_amssettol, HYPRE_AMSSETTOL)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetcycletype, HYPRE_AMSSETCYCLETYPE)(
-   long int *solver,
-   int      *cycle_type,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetcycletype, HYPRE_AMSSETCYCLETYPE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *cycle_type,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetCycleType( (HYPRE_Solver) *solver,
-                                          (int)          *cycle_type ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetCycleType(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (cycle_type) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -220,13 +244,15 @@ hypre_F90_IFACE(hypre_amssetcycletype, HYPRE_AMSSETCYCLETYPE)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetprintlevel, HYPRE_AMSSETPRINTLEVEL)(
-   long int *solver,
-   int      *print_level,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetprintlevel, HYPRE_AMSSETPRINTLEVEL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *print_level,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetPrintLevel( (HYPRE_Solver) *solver,
-                                           (int)          *print_level ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetPrintLevel(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (print_level) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -234,19 +260,21 @@ hypre_F90_IFACE(hypre_amssetprintlevel, HYPRE_AMSSETPRINTLEVEL)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetsmoothingoptions, HYPRE_AMSSETSMOOTHINGOPTIONS)(
-   long int *solver,
-   int      *relax_type,
-   int      *relax_times,
-   double   *relax_weight,
-   double   *omega,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetsmoothingoptions, HYPRE_AMSSETSMOOTHINGOPTIONS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *relax_type,
+     hypre_F90_Int *relax_times,
+     hypre_F90_Dbl *relax_weight,
+     hypre_F90_Dbl *omega,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSSetSmoothingOptions( (HYPRE_Solver) *solver,
-                                                 (int)          *relax_type,
-                                                 (int)          *relax_times,
-                                                 (double)       *relax_weight,
-                                                 (double)       *omega ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetSmoothingOptions(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (relax_type),
+           hypre_F90_PassInt (relax_times),
+           hypre_F90_PassDbl (relax_weight),
+           hypre_F90_PassDbl (omega) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -254,24 +282,26 @@ hypre_F90_IFACE(hypre_amssetsmoothingoptions, HYPRE_AMSSETSMOOTHINGOPTIONS)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetalphaamgoptions, HYPRE_AMSSETALPHAAMGOPTIONS)(
-   long int *solver,
-   int      *alpha_coarsen_type,
-   int      *alpha_agg_levels,
-   int      *alpha_relax_type,
-   double   *alpha_strength_threshold,
-   int      *alpha_interp_type,
-   int      *alpha_Pmax,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetalphaamgoptions, HYPRE_AMSSETALPHAAMGOPTIONS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *alpha_coarsen_type,
+     hypre_F90_Int *alpha_agg_levels,
+     hypre_F90_Int *alpha_relax_type,
+     hypre_F90_Dbl *alpha_strength_threshold,
+     hypre_F90_Int *alpha_interp_type,
+     hypre_F90_Int *alpha_Pmax,
+     hypre_F90_Int *ierr)
 
 {
-   *ierr = (int) ( HYPRE_AMSSetAlphaAMGOptions( (HYPRE_Solver) *solver,
-                                                (int)          *alpha_coarsen_type,
-                                                (int)          *alpha_agg_levels,
-                                                (int)          *alpha_relax_type,
-                                                (double)       *alpha_strength_threshold,
-                                                (int)          *alpha_interp_type,
-                                                (int)          *alpha_Pmax ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetAlphaAMGOptions(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (alpha_coarsen_type),
+           hypre_F90_PassInt (alpha_agg_levels),
+           hypre_F90_PassInt (alpha_relax_type),
+           hypre_F90_PassDbl (alpha_strength_threshold),
+           hypre_F90_PassInt (alpha_interp_type),
+           hypre_F90_PassInt (alpha_Pmax) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -279,24 +309,26 @@ hypre_F90_IFACE(hypre_amssetalphaamgoptions, HYPRE_AMSSETALPHAAMGOPTIONS)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amssetbetaamgoptions, HYPRE_AMSSETBETAAMGOPTIONS)(
-   long int *solver,
-   int      *beta_coarsen_type,
-   int      *beta_agg_levels,
-   int      *beta_relax_type,
-   double   *beta_strength_threshold,
-   int      *beta_interp_type,
-   int      *beta_Pmax,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amssetbetaamgoptions, HYPRE_AMSSETBETAAMGOPTIONS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *beta_coarsen_type,
+     hypre_F90_Int *beta_agg_levels,
+     hypre_F90_Int *beta_relax_type,
+     hypre_F90_Dbl *beta_strength_threshold,
+     hypre_F90_Int *beta_interp_type,
+     hypre_F90_Int *beta_Pmax,
+     hypre_F90_Int *ierr)
 
 {
-   *ierr = (int) ( HYPRE_AMSSetBetaAMGOptions( (HYPRE_Solver) *solver,
-                                               (int)          *beta_coarsen_type,
-                                               (int)          *beta_agg_levels,
-                                               (int)          *beta_relax_type,
-                                               (double)       *beta_strength_threshold,
-                                               (int)          *beta_interp_type,
-                                               (int)          *beta_Pmax ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSSetBetaAMGOptions(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (beta_coarsen_type),
+           hypre_F90_PassInt (beta_agg_levels),
+           hypre_F90_PassInt (beta_relax_type),
+           hypre_F90_PassDbl (beta_strength_threshold),
+           hypre_F90_PassInt (beta_interp_type),
+           hypre_F90_PassInt (beta_Pmax) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -304,13 +336,15 @@ hypre_F90_IFACE(hypre_amssetbetaamgoptions, HYPRE_AMSSETBETAAMGOPTIONS)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amsgetnumiterations, HYPRE_AMSGETNUMITERATIONS)(
-   long int *solver,
-   int      *num_iterations,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amsgetnumiterations, HYPRE_AMSGETNUMITERATIONS)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *num_iterations,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSGetNumIterations( (HYPRE_Solver) *solver,
-                                              (int *)         num_iterations ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSGetNumIterations(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassIntRef (num_iterations) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -318,13 +352,15 @@ hypre_F90_IFACE(hypre_amsgetnumiterations, HYPRE_AMSGETNUMITERATIONS)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amsgetfinalrelativeresidualnorm, HYPRE_AMSGETFINALRELATIVERESIDUALNORM)(
-   long int *solver,
-   double   *rel_resid_norm,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amsgetfinalrelativeresidualnorm, HYPRE_AMSGETFINALRELATIVERESIDUALNORM)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Dbl *rel_resid_norm,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSGetFinalRelativeResidualNorm( (HYPRE_Solver) *solver,
-                                                          (double *)      rel_resid_norm ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSGetFinalRelativeResidualNorm(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassDblRef (rel_resid_norm) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -332,17 +368,19 @@ hypre_F90_IFACE(hypre_amsgetfinalrelativeresidualnorm, HYPRE_AMSGETFINALRELATIVE
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGRADIENT)(
-   long int *A,
-   long int *x_coord,
-   int      *edge_vertex,
-   int      *edge_orientation,
-   long int *G,
-   int      *ierr)
+hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGRADIENT)
+   ( hypre_F90_Obj *A,
+     hypre_F90_Obj *x_coord,
+     hypre_F90_IntArray *edge_vertex,
+     hypre_F90_Int *edge_orientation,
+     hypre_F90_Obj *G,
+     hypre_F90_Int *ierr)
 {
-   *ierr = (int) ( HYPRE_AMSConstructDiscreteGradient( (HYPRE_ParCSRMatrix)   *A,
-                                                       (HYPRE_ParVector)      *x_coord,
-                                                       (int *)                 edge_vertex,
-                                                       (int)                  *edge_orientation,
-                                                       (HYPRE_ParCSRMatrix *)  G ) );
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_AMSConstructDiscreteGradient(
+           hypre_F90_PassObj (HYPRE_ParCSRMatrix, A),
+           hypre_F90_PassObj (HYPRE_ParVector, x_coord),
+           hypre_F90_PassIntArray (edge_vertex),
+           hypre_F90_PassInt (edge_orientation),
+           hypre_F90_PassObjRef (HYPRE_ParCSRMatrix, G) ) );
 }

@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.10 $
+# $Revision: 1.11 $
 #EHEADER**********************************************************************
 
 
@@ -43,6 +43,7 @@ then
       rm -f $testdir/*err*
       rm -f $testdir/*out*
       rm -f $testdir/*log*
+      rm -f $testdir/*.fil
    done
 else
    while [ "$*" ]
@@ -50,6 +51,7 @@ else
       rm -f $1/*err*
       rm -f $1/*out*
       rm -f $1/*log*
+      rm -f $1/*.fil
       shift
    done
 fi

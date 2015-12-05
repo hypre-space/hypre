@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,19 +27,19 @@
 hypre_SStructPMatrix *
 hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
                              hypre_SStructPGrid   *cgrid,
-                             int                   cdir  )
+                             HYPRE_Int             cdir  )
 {
    hypre_SStructPMatrix  *P;
 
    hypre_Index           *stencil_shape;
-   int                    stencil_size;
+   HYPRE_Int              stencil_size;
                        
-   int                    ndim;
+   HYPRE_Int              ndim;
 
-   int                    nvars;
+   HYPRE_Int              nvars;
    hypre_SStructStencil **P_stencils;
 
-   int                    i,s;
+   HYPRE_Int              i,s;
 
    /* set up stencil_shape */
    stencil_size = 2;
@@ -79,19 +79,19 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
  * hypre_SysPFMGSetupInterpOp
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SysPFMGSetupInterpOp( hypre_SStructPMatrix *A,
-                            int                   cdir,
+                            HYPRE_Int             cdir,
                             hypre_Index           findex,
                             hypre_Index           stride,
                             hypre_SStructPMatrix *P      )
 {
-   int                    nvars;
+   HYPRE_Int              nvars;
    hypre_StructMatrix    *A_s;
    hypre_StructMatrix    *P_s;
-   int                    vi;
+   HYPRE_Int              vi;
 
-   int                    ierr;
+   HYPRE_Int              ierr;
 
    nvars = hypre_SStructPMatrixNVars(A);
 

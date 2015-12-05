@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlaset_(char *uplo, integer *m, integer *n, doublereal *
+/* Subroutine */ HYPRE_Int dlaset_(char *uplo, integer *m, integer *n, doublereal *
 	alpha, doublereal *beta, doublereal *a, integer *lda)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   

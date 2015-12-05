@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -15,7 +15,7 @@
 
 #include "headers.h"
 
-int
+HYPRE_Int
 hypre_SStructIndexScaleF_C( hypre_Index findex,
                             hypre_Index index,
                             hypre_Index stride,
@@ -32,7 +32,7 @@ hypre_SStructIndexScaleF_C( hypre_Index findex,
 }
 
 
-int
+HYPRE_Int
 hypre_SStructIndexScaleC_F( hypre_Index cindex,
                             hypre_Index index,
                             hypre_Index stride,
@@ -62,7 +62,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    hypre_SStructOwnInfoData *owninfo_data;
 
    MPI_Comm                  comm= hypre_SStructVectorComm(fgrid);
-   int                       ndim= hypre_StructGridDim(fgrid);
+   HYPRE_Int                 ndim= hypre_StructGridDim(fgrid);
 
    hypre_BoxArray           *grid_boxes;
    hypre_BoxArray           *intersect_boxes;
@@ -72,22 +72,22 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    hypre_Box                 boxman_entry_box;
 
    hypre_BoxManEntry       **boxman_entries;
-   int                       nboxman_entries;
+   HYPRE_Int                 nboxman_entries;
 
    hypre_BoxArrayArray      *own_boxes;
-   int                     **own_cboxnums;
+   HYPRE_Int               **own_cboxnums;
 
    hypre_BoxArrayArray      *own_composite_cboxes;
 
    hypre_Index               ilower, iupper, index;
 
-   int                       myproc, proc;
+   HYPRE_Int                 myproc, proc;
 
-   int                       cnt;
-   int                       i, j, k, mod;
+   HYPRE_Int                 cnt;
+   HYPRE_Int                 i, j, k, mod;
 
    hypre_ClearIndex(index); 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
 
    owninfo_data= hypre_CTAlloc(hypre_SStructOwnInfoData, 1);
 
@@ -101,7 +101,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
    grid_boxes    = hypre_StructGridBoxes(fgrid);
 
    own_boxes   = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(grid_boxes));
-   own_cboxnums= hypre_CTAlloc(int *, hypre_BoxArraySize(grid_boxes));
+   own_cboxnums= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(grid_boxes));
 
    hypre_ForBoxI(i, grid_boxes)
    {
@@ -131,7 +131,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
              cnt++;
           }
        }
-       own_cboxnums[i]= hypre_CTAlloc(int, cnt);
+       own_cboxnums[i]= hypre_CTAlloc(HYPRE_Int, cnt);
 
        cnt= 0;
        for (j= 0; j< nboxman_entries; j++)
@@ -229,11 +229,11 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
 /*--------------------------------------------------------------------------
  * hypre_SStructOwnInfoDataDestroy
  *--------------------------------------------------------------------------*/
-int
+HYPRE_Int
 hypre_SStructOwnInfoDataDestroy(hypre_SStructOwnInfoData *owninfo_data)
 {
-   int ierr = 0;
-   int i;
+   HYPRE_Int ierr = 0;
+   HYPRE_Int i;
 
    if (owninfo_data)
    {

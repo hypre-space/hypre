@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,15 +25,15 @@
  * hypre_SStructPInnerProd
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPInnerProd( hypre_SStructPVector *px,
                          hypre_SStructPVector *py,
                          double               *presult_ptr )
 {
-   int    nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int    nvars = hypre_SStructPVectorNVars(px);
    double presult;
    double sresult;
-   int    var;
+   HYPRE_Int    var;
 
    presult = 0.0;
    for (var = 0; var < nvars; var++)
@@ -52,18 +52,18 @@ hypre_SStructPInnerProd( hypre_SStructPVector *px,
  * hypre_SStructInnerProd
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructInnerProd( hypre_SStructVector *x,
                         hypre_SStructVector *y,
                         double              *result_ptr )
 {
-   int    nparts = hypre_SStructVectorNParts(x);
+   HYPRE_Int    nparts = hypre_SStructVectorNParts(x);
    double result;
    double presult;
-   int    part;
+   HYPRE_Int    part;
 
-   int    x_object_type= hypre_SStructVectorObjectType(x);
-   int    y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int    x_object_type= hypre_SStructVectorObjectType(x);
+   HYPRE_Int    y_object_type= hypre_SStructVectorObjectType(y);
    
    if (x_object_type != y_object_type)
    {

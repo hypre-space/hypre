@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -16,15 +16,15 @@
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
 
-int 
+HYPRE_Int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
-                                   int seed )
+                                   HYPRE_Int seed )
 {
-   int    ierr = 0;
+   HYPRE_Int    ierr = 0;
 
    hypre_Box          *v_data_box;
                     
-   int                 vi;
+   HYPRE_Int           vi;
    double             *vp;
 
    hypre_BoxArray     *boxes;
@@ -33,8 +33,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_IndexRef      start;
    hypre_Index         unit_stride;
 
-   int                 i;
-   int                 loopi, loopj, loopk;
+   HYPRE_Int           i;
+   HYPRE_Int           loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
@@ -70,13 +70,13 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    return ierr;
 }
 
-int
-hypre_StructSetRandomValues( void* v, int seed ) {
+HYPRE_Int
+hypre_StructSetRandomValues( void* v, HYPRE_Int seed ) {
 
   return hypre_StructVectorSetRandomValues( (hypre_StructVector*)v, seed );
 }
 
-int
+HYPRE_Int
 HYPRE_StructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
   i->CreateVector = hypre_StructKrylovCreateVector;
@@ -109,7 +109,7 @@ HYPRE_StructSetupInterpreter( mv_InterfaceInterpreter *i )
   return 0;
 }
 
-int
+HYPRE_Int
 HYPRE_StructSetupMatvec(HYPRE_MatvecFunctions * mv)
 {
   mv->MatvecCreate = hypre_StructKrylovMatvecCreate;

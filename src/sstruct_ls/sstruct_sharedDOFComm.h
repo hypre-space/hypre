@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -15,10 +15,10 @@
 
 typedef struct
 {
-   int       row;
+   HYPRE_Int row;
                                                                                                                                     
-   int       ncols;
-   int      *cols;
+   HYPRE_Int ncols;
+   HYPRE_Int      *cols;
    double   *data;
                                                                                                                                     
 } hypre_MaxwellOffProcRow;

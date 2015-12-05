@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,18 +29,18 @@
 typedef struct
 {
     Mem      *mem;   /* storage for arrays, indices, and values */
-    int      size;
+    HYPRE_Int      size;
 
-    int     *len;
-    int    **ind;
+    HYPRE_Int     *len;
+    HYPRE_Int    **ind;
 }
 PrunedRows;
 
-PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale,
+PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
   double thresh);
 void PrunedRowsDestroy(PrunedRows *p);
-int *PrunedRowsAlloc(PrunedRows *p, int len);
-void PrunedRowsPut(PrunedRows *p, int index, int len, int *ind);
-void PrunedRowsGet(PrunedRows *p, int index, int *lenp, int **indp);
+HYPRE_Int *PrunedRowsAlloc(PrunedRows *p, HYPRE_Int len);
+void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind);
+void PrunedRowsGet(PrunedRows *p, HYPRE_Int index, HYPRE_Int *lenp, HYPRE_Int **indp);
 
 #endif /* _PRUNEDROWS_H */

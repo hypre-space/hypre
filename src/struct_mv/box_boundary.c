@@ -7,262 +7,135 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
-
-
 
 /******************************************************************************
  *
- * Member functions for hypre_Box class:
- *   Functions to check for (physical) boundaries, adjacency, etc.
- * This is experimental code.  Whatever functions I find useful will be
- * copied into some other file.
+ * NOTE: The following routines are currently only used as follows in hypre, and
+ * also appear in '_hypre_struct_mv.h':
+ * 
+ * hypre_BoxBoundaryG
+ * struct_mv/box_boundary.c
+ * struct_mv/struct_vector.c
+ * sstruct_ls/maxwell_grad.c
+ * sstruct_ls/maxwell_TV_setup.c
+ * 
+ * hypre_BoxBoundaryDG
+ * struct_mv/box_boundary.c
+ * sstruct_ls/maxwell_grad.c
+ * sstruct_ls/maxwell_PNedelec_bdy.c
  *
  *****************************************************************************/
 
 #include "headers.h"
 
-
 /*--------------------------------------------------------------------------
- * Take away from the boxes in boxes1 whatever is adjacent to boxes in boxes2,
- * as well as the boxes themselves.  But ignore "box" if it appears in boxes2.
- * The result is returned in boxes1.  The last argument, thick, is the number
- * of layers around a box considered to be "adjacent", typically 1.
+ * Intersect a surface of 'box' with the physical boundary.  The surface is
+ * given by (d,dir), where 'dir' is a direction (+-1) in dimension 'd'.
+ *
+ * The result will be returned in the box array 'boundary'.  Any boxes already
+ * in 'boundary' will be overwritten.
  *--------------------------------------------------------------------------*/
 
-int
-hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1,
-                                        hypre_BoxArray *boxes2,
-                                        hypre_Box *box, int thick )
+HYPRE_Int
+hypre_BoxBoundaryIntersect( hypre_Box *box,
+                            hypre_StructGrid *grid,
+                            HYPRE_Int d,
+                            HYPRE_Int dir,
+                            hypre_BoxArray *boundary )
 {
-   int ierr = 0;
-   int i;
-   int numexp[6];
-   hypre_Box *box2e;
-   hypre_Box *boxe = hypre_BoxDuplicate( box );
-   hypre_BoxArray *boxes2e = hypre_BoxArrayDuplicate( boxes2 );
-   hypre_BoxArray *tmp_box_array = hypre_BoxArrayCreate( 0 );
-   for ( i=0; i<6; ++i ) numexp[i] = thick;
-   hypre_ForBoxI(i, boxes2e)
-      {
-         box2e = hypre_BoxArrayBox(boxes2e, i);
-         ierr += hypre_BoxExpand( box2e, numexp );
-      }
-   ierr += hypre_BoxExpand( boxe, numexp );
-   ierr += hypre_SubtractBoxArraysExceptBoxes( boxes1, boxes2e, tmp_box_array, box, boxe );
+   hypre_BoxManager   *boxman;
+   hypre_BoxManEntry **entries;
+   hypre_BoxArray     *int_boxes, *tmp_boxes;
+   hypre_Box          *bbox, *ibox;
+   HYPRE_Int           nentries, i;
 
-   ierr += hypre_BoxArrayDestroy( boxes2e );
-   ierr += hypre_BoxArrayDestroy( tmp_box_array );
-   ierr += hypre_BoxDestroy( boxe );
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * Take away from the boxes in boxes1 whatever is adjacent to boxes in boxes2,
- * in the signed direction ds only (ds=0,1,2,3,4,5);
- * as well as the boxes themselves.  But ignore "box" if it appears in boxes2.
- * The result is returned in boxes1.  The last argument, thick, is the number
- * of layers around a box considered to be "adjacent", typically 1.
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1,
-                                        hypre_BoxArray *boxes2,
-                                        hypre_Box *box, int ds, int thick )
-{
-   int ierr = 0;
-   int i;
-   int numexp[6];
-   hypre_Box *box2e;
-   hypre_Box *boxe = hypre_BoxDuplicate( box );
-   hypre_BoxArray *boxes2e = hypre_BoxArrayDuplicate( boxes2 );
-   hypre_BoxArray *tmp_box_array = hypre_BoxArrayCreate( 0 );
-   for ( i=0; i<6; ++i ) numexp[i] = 0;
-   numexp[ds] = thick;
-   hypre_ForBoxI(i, boxes2e)
-      {
-         box2e = hypre_BoxArrayBox(boxes2e, i);
-         ierr += hypre_BoxExpand( box2e, numexp );
-      }
-   ierr += hypre_BoxExpand( boxe, numexp );
-   ierr += hypre_SubtractBoxArraysExceptBoxes( boxes1, boxes2e, tmp_box_array, box, boxe );
-
-   ierr += hypre_BoxArrayDestroy( boxes2e );
-   ierr += hypre_BoxArrayDestroy( tmp_box_array );
-   ierr += hypre_BoxDestroy( boxe );
-
-   return ierr;
-}
-
-
-
-
-/*--------------------------------------------------------------------------
- * Find the parts of the given box which lie on a (physical) boundary, in
- * the supplied signed direction (ds=0,1,2,3,4,5; for unsigned directions
- * d=0,0,1,1,2,2).  Boundary thickness is provided.
- * Stick them into the user-provided box array boundary (any input contents
- * of this box array may get changed).
- * The second input argument is a list of all neighbor boxes.
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoxBoundaryDNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
-                      hypre_BoxArray *boundary, int ds, int thick )
-{
-   int i;
-   int numexp[6];
-   int ierr = 0;
-   hypre_Box *boxe = hypre_BoxDuplicate( box );
-   for ( i=0; i<6; ++i ) numexp[i] = 0;
-   numexp[ds] = -thick;
-
-   ierr += hypre_BoxExpand( boxe, numexp );  /* shrink box away from boundary */
-   ierr += hypre_SubtractBoxes( box, boxe, boundary );
-
-   /* Now boundary contains the surface of the original box, in direction ds.
-      Subtract out the neighbor boxes, and anything adjacent to a neighbor box
-      in the opposite direction.
-      Anything left will belong to the physical boundary. */
-
-   switch(ds)
+   /* set bbox to the box surface of interest */
+   hypre_BoxArraySetSize(boundary, 1);
+   bbox = hypre_BoxArrayBox(boundary, 0);
+   hypre_CopyBox(box, bbox);
+   if (dir > 0)
    {
-   case 0:
-      ds = 1;
-      break;
-   case 1:
-      ds = 0;
-      break;
-   case 2:
-      ds = 3;
-      break;
-   case 3:
-      ds = 2;
-      break;
-   case 4:
-      ds = 5;
-      break;
-   case 5:
-      ds = 4;
+      hypre_BoxIMinD(bbox, d) = hypre_BoxIMaxD(bbox, d);
    }
-   ierr += hypre_BoxArraySubtractAdjacentBoxArrayD(
-      boundary, neighbor_boxes, box, ds, thick );
-
-   ierr += hypre_BoxDestroy( boxe );
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * Find the parts of the given box which lie on a (physical) boundary.
- * Stick them into the user-provided box array boundary (it is recommended that
- * this box array be empty on input).
- * The second input argument is a list of all neighbor boxes.
- * The last argument has 6 values to denote the boundary thickness in each direction.
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoxBoundaryNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
-                    hypre_BoxArray *boundary, int* thickness )
-{
-   int ds;
-   int ierr = 0;
-   hypre_BoxArray *boundary_d;
-
-   /* We'll find the physical boundary in one direction at a time.
-      This is so that we don't lose boundary points which are adjacent
-      to boundary points of the neighbor boxes. */
-   for ( ds=0; ds<6; ++ds )
+   else if (dir < 0)
    {
-      boundary_d = hypre_BoxArrayCreate( 0 );
-      ierr += hypre_BoxBoundaryDNT( box, neighbor_boxes, boundary_d,
-                                    ds, thickness[ds] );
-      ierr += hypre_AppendBoxArray( boundary_d, boundary );
-      hypre_BoxArrayDestroy( boundary_d );
+      hypre_BoxIMaxD(bbox, d) = hypre_BoxIMinD(bbox, d);
    }
 
-   return ierr;
-}
+   /* temporarily shift bbox in direction dir and intersect with the grid */
+   hypre_BoxIMinD(bbox, d) += dir;
+   hypre_BoxIMaxD(bbox, d) += dir;
+   boxman = hypre_StructGridBoxMan(grid);
+   hypre_BoxManIntersect(boxman, hypre_BoxIMin(bbox), hypre_BoxIMax(bbox),
+                         &entries, &nentries);
+   hypre_BoxIMinD(bbox, d) -= dir;
+   hypre_BoxIMaxD(bbox, d) -= dir;
 
+   /* shift intersected boxes in direction -dir and subtract from bbox */
+   int_boxes  = hypre_BoxArrayCreate(nentries);
+   tmp_boxes  = hypre_BoxArrayCreate(0);
+   for (i = 0; i < nentries; i++)
+   {
+      ibox = hypre_BoxArrayBox(int_boxes, i);
+      hypre_BoxManEntryGetExtents(
+         entries[i], hypre_BoxIMin(ibox), hypre_BoxIMax(ibox));
+      hypre_BoxIMinD(ibox, d) -= dir;
+      hypre_BoxIMaxD(ibox, d) -= dir;
+   }
+   hypre_SubtractBoxArrays(boundary, int_boxes, tmp_boxes);
 
-
-/*--------------------------------------------------------------------------
- * Find the parts of the given box which lie on a (physical) boundary.
- * Stick them into the user-provided box array boundary (any input contents
- * of this box array may get changed).
- * The second input argument is the grid.
- * The boundary thickness is set to the ghost layer thickness, regardless
- * of whether the computed boundary will consist of ghost zones.
- *--------------------------------------------------------------------------*/
-
-int
-hypre_BoxBoundaryG( hypre_Box *box, hypre_StructGrid *g,
-                    hypre_BoxArray *boundary )
-{
-
-    
-
-   hypre_BoxManager *boxman;
-   hypre_BoxArray   *neighbor_boxes = NULL;
-   int              *thickness = hypre_StructGridNumGhost(g);
- 
-   /* neighbor_boxes are this processor's neighbors, not this box's
-      neighbors.  But it's likely to be cheaper to use them all in the
-      next step than to try to shrink it to just this box's neighbors. */
-
-   /* get the boxes out of the box manager - use these as the neighbor boxes */
-   boxman = hypre_StructGridBoxMan(g);
-   neighbor_boxes = hypre_BoxArrayCreate(0);
-   hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
-      
-   hypre_BoxBoundaryNT( box, neighbor_boxes, boundary, thickness );
-
-   /* clean up */
-   hypre_BoxArrayDestroy(neighbor_boxes);
+   hypre_BoxArrayDestroy(int_boxes);
+   hypre_BoxArrayDestroy(tmp_boxes);
+   hypre_TFree(entries);
 
    return hypre_error_flag;
-   
-
-
 }
 
 /*--------------------------------------------------------------------------
- * Find the parts of the given box which lie on a (physical) boundary, only
- * in the (unsigned) direction of d (d=0,1,2).
- * Stick them into the user-provided box arrays boundarym (for the minus direction)
- * and boundaryp (for the plus direction).  (Any input contents of these box
- * arrays may get changed).
- * The second input argument is the grid the box is in (hypre_BoxBoundaryG).
- * The boundary thickness is set to 1.
+ * Find the parts of the given box which lie on a (physical) boundary of grid g.
+ * Stick them into the user-provided box array boundary.  Any input contents of
+ * this box array will get overwritten.
  *--------------------------------------------------------------------------*/
 
-int
-hypre_BoxBoundaryDG( hypre_Box *box, hypre_StructGrid *g,
-                     hypre_BoxArray *boundarym, hypre_BoxArray *boundaryp,
-                     int d )
+HYPRE_Int
+hypre_BoxBoundaryG( hypre_Box *box,
+                    hypre_StructGrid *g,
+                    hypre_BoxArray *boundary )
 {
-   hypre_BoxManager *boxman;
-   hypre_BoxArray *neighbor_boxes = NULL;
-   int i;
-   int thickness[6];
+   hypre_BoxArray *boundary_d;
+   HYPRE_Int       d;
+ 
+   boundary_d = hypre_BoxArrayCreate(0);
+   for (d = 0; d < 3; d++)
+   {
+      hypre_BoxBoundaryIntersect(box, g, d, -1, boundary_d);
+      hypre_AppendBoxArray(boundary_d, boundary);
+      hypre_BoxBoundaryIntersect(box, g, d,  1, boundary_d);
+      hypre_AppendBoxArray(boundary_d, boundary);
+   }
+   hypre_BoxArrayDestroy(boundary_d);
 
-   /* neighbor_boxes are this processor's neighbors, not this box's
-      neighbors.  But it's likely to be cheaper to use them all in the
-      next step than to try to shrink it to just this box's neighbors. */
-   
-   /* get the boxes out of the box manager - use these as the neighbor boxes */
-   boxman = hypre_StructGridBoxMan(g);
-   neighbor_boxes = hypre_BoxArrayCreate(0);
-   hypre_BoxManGetAllEntriesBoxes( boxman, neighbor_boxes);
-   
-   for ( i=0; i<6; ++i ) thickness[i] = 1;
-   
-   hypre_BoxBoundaryDNT( box, neighbor_boxes, boundarym, 2*d, thickness[2*d] );
-   hypre_BoxBoundaryDNT( box, neighbor_boxes, boundaryp, 2*d+1, thickness[2*d] );
+   return hypre_error_flag;
+}
 
-   hypre_BoxArrayDestroy(neighbor_boxes);
+/*--------------------------------------------------------------------------
+ * Find the parts of the given box which lie on a (physical) boundary of grid g,
+ * only in the (unsigned) direction of d (d=0,1,2).  Stick them into the
+ * user-provided box arrays boundarym (minus direction) and boundaryp (plus
+ * direction).  Any input contents of these box arrays will get overwritten.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoxBoundaryDG( hypre_Box *box,
+                     hypre_StructGrid *g,
+                     hypre_BoxArray *boundarym,
+                     hypre_BoxArray *boundaryp,
+                     HYPRE_Int d )
+{
+   hypre_BoxBoundaryIntersect(box, g, d, -1, boundarym);
+   hypre_BoxBoundaryIntersect(box, g, d,  1, boundaryp);
 
    return hypre_error_flag;
 }

@@ -7,11 +7,18 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
-
-
+/******************************************************************************
+ * OpenMP Problems
+ *
+ * Need to fix the way these variables are set and incremented in loops:
+ *   i, nrows (only where they are listed at the end of SMP_PRIVATE)
+ *
+ * Are private static arrays a problem?
+ *
+ ******************************************************************************/
 
 #include "headers.h"
 
@@ -50,7 +57,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
    HYPRE_IJMatrix         T_grad;
    hypre_ParCSRMatrix    *parcsr_grad;
-   int                    matrix_type= HYPRE_PARCSR;
+   HYPRE_Int              matrix_type= HYPRE_PARCSR;
 
    hypre_SStructGrid     *node_grid, *edge_grid;
 
@@ -65,36 +72,36 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    hypre_BoxManager      *boxman;
    hypre_BoxManEntry     *entry;
 
-   int                   *inode, *jedge;
-   int                    nrows, nnodes, *nflag, *eflag, *ncols;
+   HYPRE_Int             *inode, *jedge;
+   HYPRE_Int              nrows, nnodes, *nflag, *eflag, *ncols;
    double                *vals;
 
    hypre_Index            index;
    hypre_Index            loop_size, start;
    hypre_Index            shift, shift2;
    hypre_Index           *offsets, *varoffsets;
-   int                    loopi, loopj, loopk;
+   HYPRE_Int              loopi, loopj, loopk;
 
-   int                    nparts= hypre_SStructGridNParts(grid);
-   int                    ndim  = hypre_SStructGridNDim(grid);
+   HYPRE_Int              nparts= hypre_SStructGridNParts(grid);
+   HYPRE_Int              ndim  = hypre_SStructGridNDim(grid);
 
    HYPRE_SStructVariable  vartype_node, *vartype_edges;
    HYPRE_SStructVariable *vartypes;
 
-   int                    nvars, part;
+   HYPRE_Int              nvars, part;
 
-   int                    i, j, k, m, n, d;
-   int                   *direction, ndirection;
+   HYPRE_Int              i, j, k, m, n, d;
+   HYPRE_Int             *direction, ndirection;
 
-   int                    ilower, iupper;
-   int                    jlower, jupper;
+   HYPRE_Int              ilower, iupper;
+   HYPRE_Int              jlower, jupper;
 
-   int                    start_rank1, start_rank2, rank;
+   HYPRE_Int              start_rank1, start_rank2, rank;
 
-   int                    myproc;
-   int                    ierr;
+   HYPRE_Int              myproc;
+   HYPRE_Int              ierr;
 
-   MPI_Comm_rank(comm, &myproc);
+   hypre_MPI_Comm_rank(comm, &myproc);
 
    hypre_ClearIndex(shift);
    for (i= 0; i< ndim; i++)
@@ -134,21 +141,21 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             k++;
             break;
          }
-                                                                                                                       
+
          case 5:
          {
             vartype_edges[k]= HYPRE_SSTRUCT_VARIABLE_XEDGE;
             k++;
             break;
          }
-                                                                                                                       
+
          case 6:
          {
             vartype_edges[k]= HYPRE_SSTRUCT_VARIABLE_YEDGE;
             k++;
             break;
          }
-                                                                                                                       
+
          case 7:
          {
             vartype_edges[k]= HYPRE_SSTRUCT_VARIABLE_ZEDGE;
@@ -272,8 +279,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       }
    }
 
-   eflag = hypre_CTAlloc(int, nrows);
-   nflag = hypre_CTAlloc(int, nnodes);
+   eflag = hypre_CTAlloc(HYPRE_Int, nrows);
+   nflag = hypre_CTAlloc(HYPRE_Int, nnodes);
 
   /* Set eflag to have the number of nodes connected to an edge (2) and
      nflag to have the number of edges connect to a node. */
@@ -317,9 +324,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
          
-               hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+               hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#else
+               hypre_BoxLoopSetOneBlock();
+#endif
                hypre_BoxLoop0For(loopi, loopj, loopk)
                {
                    hypre_SetIndex(index, loopi, loopj, loopk);
@@ -350,7 +361,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       *-----------------------------------------------------------------*/
       pgrid    = hypre_SStructGridPGrid(edge_grid, part);
       nvars    = hypre_SStructPGridNVars(pgrid);
-      direction= hypre_TAlloc(int, 2); /* only two directions at most */
+      direction= hypre_TAlloc(HYPRE_Int, 2); /* only two directions at most */
       for (m= 0; m< nvars; m++)
       {
          var_grid= hypre_SStructPGridSGrid(pgrid, m);
@@ -398,13 +409,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                break;
             }
          }  /* switch(j) */
-                                                                                                                        
+
          hypre_ForBoxI(j, boxes)
          {
             box= hypre_BoxArrayBox(boxes, j);
             hypre_BoxManGetEntry(boxman, myproc, j, &entry);
             i= hypre_BoxVolume(box);
-                                                                                                                        
+
             for (d= 0; d< ndirection; d++)
             {
                tmp_box_array1= hypre_BoxArrayCreate(0);
@@ -419,10 +430,14 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   {
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
-                                                                                                                        
-                     hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+
+                     hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
+#endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
                         hypre_SetIndex(index, loopi, loopj, loopk);
@@ -445,15 +460,19 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   {
                      hypre_BoxGetSize(box_piece, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
-                                                                                                                        
-                     hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+
+                     hypre_BoxLoop0Begin(loop_size);
+#if 0 /* Are private static arrays a problem? */
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,rank
 #include "hypre_box_smp_forloop.h"
+#else
+                     hypre_BoxLoopSetOneBlock();
+#endif
                      hypre_BoxLoop0For(loopi, loopj, loopk)
                      {
                         hypre_SetIndex(index, loopi, loopj, loopk);
                         hypre_AddIndex(index, start, index);
-                                                                                                                        
+
                         hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                               &rank, matrix_type);
                         eflag[rank-start_rank2]= 0;
@@ -461,7 +480,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                      hypre_BoxLoop0End();
                   }  /* if (hypre_BoxVolume(box_piece) < i) */
                }     /* for (k= 0; k< hypre_BoxArraySize(tmp_box_array2); k++) */
-                                                                                                                        
                hypre_BoxArrayDestroy(tmp_box_array2);
             }  /* for (d= 0; d< ndirection; d++) */
 
@@ -473,12 +491,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
 
   /* set vals. Will have more memory than is needed- extra allotted
      for repeated nodes. */
-   inode= hypre_CTAlloc(int, nrows);
-   ncols= hypre_CTAlloc(int, nrows);
+   inode= hypre_CTAlloc(HYPRE_Int, nrows);
+   ncols= hypre_CTAlloc(HYPRE_Int, nrows);
 
   /* each row can have at most two columns */
    k= 2*nrows;
-   jedge= hypre_CTAlloc(int, k);
+   jedge= hypre_CTAlloc(HYPRE_Int, k);
    vals = hypre_TAlloc(double, k);
    for (i= 0; i< k; i++)
    {
@@ -507,13 +525,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
             hypre_SetIndex(offsets[i], 1, 0, 0);
             break;
          }
-                                                                                                             
+
          case 5:
          {
             hypre_SetIndex(offsets[i], 1, 0, 0);
             break;
          }
-                                                                                                             
+
          case 6:
          {
             hypre_SetIndex(offsets[i], 0, 1, 0);
@@ -578,9 +596,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
            /* Interior box- loop over each edge and find the row rank and 
               then the column ranks for the connected nodes. Change the 
               appropriate values to 1. */
-            hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+            hypre_BoxLoop0Begin(loop_size);
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
 #include "hypre_box_smp_forloop.h"
+#else
+            hypre_BoxLoopSetOneBlock();
+#endif
             hypre_BoxLoop0For(loopi, loopj, loopk)
             {
                hypre_SetIndex(index, loopi, loopj, loopk);
@@ -641,9 +663,13 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                   hypre_BoxGetSize(&layer, loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&layer), start);
 
-                  hypre_BoxLoop0Begin(loop_size)
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
+                  hypre_BoxLoop0Begin(loop_size);
+#if 0
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,index,entry,m,i,nrows
 #include "hypre_box_smp_forloop.h"
+#else
+                  hypre_BoxLoopSetOneBlock();
+#endif
                   hypre_BoxLoop0For(loopi, loopj, loopk)
                   {
                      hypre_SetIndex(index, loopi, loopj, loopk);
@@ -704,7 +730,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                            {
                               jedge[i]= m;
                               i++;
-                                                                                                                        
                               ncols[nrows]++;
                            }
                         }
@@ -712,10 +737,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                         {
                            jedge[i]= m;
                            i++;
-                                                                                                                        
                            ncols[nrows]++;
                         }
-                                                                                                                        
+
                         nrows++; /* must have at least one node connection */
                      }  /* if (eflag[m-start_rank2]) */
 
@@ -735,7 +759,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_SStructGridDestroy(edge_grid);
 
    HYPRE_IJMatrixSetValues(T_grad, nrows, ncols,
-                          (const int*) inode, (const int*) jedge,
+                          (const HYPRE_Int*) inode, (const HYPRE_Int*) jedge,
                           (const double*) vals);
    HYPRE_IJMatrixAssemble(T_grad);
 

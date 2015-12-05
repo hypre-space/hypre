@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ int dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
+/* Subroutine */ HYPRE_Int dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
 	doublereal *sn, doublereal *r__)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   

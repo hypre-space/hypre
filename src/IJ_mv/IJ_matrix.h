@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,21 +30,21 @@ typedef struct hypre_IJMatrix_struct
 {
    MPI_Comm    comm;
 
-   int        *row_partitioning;    /* distribution of rows across processors */
-   int        *col_partitioning;    /* distribution of columns */
+   HYPRE_Int        *row_partitioning;    /* distribution of rows across processors */
+   HYPRE_Int        *col_partitioning;    /* distribution of columns */
 
-   int         object_type;         /* Indicates the type of "object" */
+   HYPRE_Int         object_type;         /* Indicates the type of "object" */
    void       *object;              /* Structure for storing local portion */
    void       *translator;          /* optional storage_type specfic structure
                                        for holding additional local info */
-   int         assemble_flag;       /* indicates whether matrix has been 
+   HYPRE_Int         assemble_flag;       /* indicates whether matrix has been 
 				       assembled */
 
-   int         global_first_row;    /* these for data items are necessary */
-   int         global_first_col;    /*   to be able to avoind using the global */
-   int         global_num_rows;     /*   global partition */ 
-   int         global_num_cols;
-   int         print_level;
+   HYPRE_Int         global_first_row;    /* these for data items are necessary */
+   HYPRE_Int         global_first_col;    /*   to be able to avoind using the global */
+   HYPRE_Int         global_num_rows;     /*   global partition */ 
+   HYPRE_Int         global_num_cols;
+   HYPRE_Int         print_level;
    
 
 
@@ -78,13 +78,13 @@ typedef struct hypre_IJMatrix_struct
 
 #ifdef PETSC_AVAILABLE
 /* IJMatrix_petsc.c */
-int
+HYPRE_Int
 hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 #endif
   
 #ifdef ISIS_AVAILABLE
 /* IJMatrix_isis.c */
-int
+HYPRE_Int
 hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
 

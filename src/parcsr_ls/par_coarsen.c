@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.21 $
+ * $Revision: 2.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -100,63 +100,63 @@
 #define COMMON_C_PT  2
 #define Z_PT -2
 
-int
+HYPRE_Int
 hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
                         hypre_ParCSRMatrix    *A,
-                        int                    CF_init,
-                        int                    debug_flag,
-                        int                  **CF_marker_ptr)
+                        HYPRE_Int                    CF_init,
+                        HYPRE_Int                    debug_flag,
+                        HYPRE_Int                  **CF_marker_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
 
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
-   int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
-   int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
 
    hypre_CSRMatrix    *S_offd          = hypre_ParCSRMatrixOffd(S);
-   int                *S_offd_i        = hypre_CSRMatrixI(S_offd);
-   int                *S_offd_j;
+   HYPRE_Int                *S_offd_i        = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int                *S_offd_j;
 
-   int 		      *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
-   int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
-   int		       col_1 = hypre_ParCSRMatrixFirstColDiag(S);
-   int		       col_n = col_1 + hypre_CSRMatrixNumCols(S_diag);
-   int 		       num_cols_offd = 0;
+   HYPRE_Int 		      *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
+   HYPRE_Int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int		       col_1 = hypre_ParCSRMatrixFirstColDiag(S);
+   HYPRE_Int		       col_n = col_1 + hypre_CSRMatrixNumCols(S_diag);
+   HYPRE_Int 		       num_cols_offd = 0;
                   
    hypre_CSRMatrix    *S_ext;
-   int                *S_ext_i;
-   int                *S_ext_j;
+   HYPRE_Int                *S_ext_i;
+   HYPRE_Int                *S_ext_j;
 
-   int		       num_sends = 0;
-   int  	      *int_buf_data;
+   HYPRE_Int		       num_sends = 0;
+   HYPRE_Int  	      *int_buf_data;
    double	      *buf_data;
 
-   int                *CF_marker;
-   int                *CF_marker_offd;
+   HYPRE_Int                *CF_marker;
+   HYPRE_Int                *CF_marker_offd;
                       
    double             *measure_array;
-   int                *graph_array;
-   int                *graph_array_offd;
-   int                 graph_size;
-   int                 graph_offd_size;
-   int                 global_graph_size;
+   HYPRE_Int                *graph_array;
+   HYPRE_Int                *graph_array_offd;
+   HYPRE_Int                 graph_size;
+   HYPRE_Int                 graph_offd_size;
+   HYPRE_Int                 global_graph_size;
                       
-   int                 i, j, k, kc, jS, kS, ig, elmt;
-   int		       index, start, my_id, num_procs, jrow, cnt;
+   HYPRE_Int                 i, j, k, kc, jS, kS, ig, elmt;
+   HYPRE_Int		       index, start, my_id, num_procs, jrow, cnt;
                       
-   int                 ierr = 0;
-   int                 use_commpkg_A = 0;
-   int                 break_var = 1;
+   HYPRE_Int                 ierr = 0;
+   HYPRE_Int                 use_commpkg_A = 0;
+   HYPRE_Int                 break_var = 1;
 
    double	    wall_time;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    /*--------------------------------------------------------------
@@ -175,8 +175,8 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    S_ext = NULL;
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    if (!comm_pkg)
    {
@@ -192,7 +192,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
    buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
@@ -260,9 +260,9 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
     * followed by boundary values
     *---------------------------------------------------*/
 
-   graph_array = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(HYPRE_Int, num_variables);
    if (num_cols_offd) 
-      graph_array_offd = hypre_CTAlloc(int, num_cols_offd);
+      graph_array_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    else
       graph_array_offd = NULL;
 
@@ -311,7 +311,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    }
    else
    {
-      CF_marker = hypre_CTAlloc(int, num_variables);
+      CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
       cnt = 0;
       for (i=0; i < num_variables; i++)
       {
@@ -328,7 +328,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    }
    graph_size = cnt;
    if (num_cols_offd)
-      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    else
       CF_marker_offd = NULL;
    for (i=0; i < num_cols_offd; i++)
@@ -375,7 +375,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    if (debug_flag == 3)
    {
       wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d    Initialize CLJP phase = %f\n",
+      hypre_printf("Proc = %d    Initialize CLJP phase = %f\n",
                      my_id, wall_time); 
    }
 
@@ -481,24 +481,24 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
 #if 0 /* debugging */
       /* print out measures */
-      sprintf(filename, "coarsen.out.measures.%04d", iter);
+      hypre_sprintf(filename, "coarsen.out.measures.%04d", iter);
       fp = fopen(filename, "w");
       for (i = 0; i < num_variables; i++)
       {
-         fprintf(fp, "%f\n", measure_array[i]);
+         hypre_fprintf(fp, "%f\n", measure_array[i]);
       }
       fclose(fp);
 
       /* print out strength matrix */
-      sprintf(filename, "coarsen.out.strength.%04d", iter);
+      hypre_sprintf(filename, "coarsen.out.strength.%04d", iter);
       hypre_CSRMatrixPrint(S, filename);
 
       /* print out C/F marker */
-      sprintf(filename, "coarsen.out.CF.%04d", iter);
+      hypre_sprintf(filename, "coarsen.out.CF.%04d", iter);
       fp = fopen(filename, "w");
       for (i = 0; i < num_variables; i++)
       {
-         fprintf(fp, "%d\n", CF_marker[i]);
+         hypre_fprintf(fp, "%d\n", CF_marker[i]);
       }
       fclose(fp);
 
@@ -509,7 +509,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
        * Test for convergence
        *------------------------------------------------*/
 
-      MPI_Allreduce(&graph_size,&global_graph_size,1,MPI_INT,MPI_SUM,comm);
+      hypre_MPI_Allreduce(&graph_size,&global_graph_size,1,HYPRE_MPI_INT,hypre_MPI_SUM,comm);
 
       if (global_graph_size == 0)
          break;
@@ -587,7 +587,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
       if (debug_flag == 3)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
-         printf("Proc = %d  iter %d  comm. and subgraph update = %f\n",
+         hypre_printf("Proc = %d  iter %d  comm. and subgraph update = %f\n",
                      my_id, iter, wall_time); 
       }
       /*------------------------------------------------
@@ -807,7 +807,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
       if (debug_flag == 3)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
-         printf("Proc = %d    CLJP phase = %f graph_size = %d nc_offd = %d\n",
+         hypre_printf("Proc = %d    CLJP phase = %f graph_size = %d nc_offd = %d\n",
                      my_id, wall_time, graph_size, num_cols_offd); 
       }
    }
@@ -860,71 +860,71 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
  *      Ruge Coarsening routine
  *
  **************************************************************/
-int
+HYPRE_Int
 hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
-                            int                    measure_type,
-                            int                    coarsen_type,
-                            int                    debug_flag,
-                            int                  **CF_marker_ptr)
+                            HYPRE_Int                    measure_type,
+                            HYPRE_Int                    coarsen_type,
+                            HYPRE_Int                    debug_flag,
+                            HYPRE_Int                  **CF_marker_ptr)
 {
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
    hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
-   int             *S_i           = hypre_CSRMatrixI(S_diag);
-   int             *S_j           = hypre_CSRMatrixJ(S_diag);
-   int             *S_offd_i      = hypre_CSRMatrixI(S_offd);
-   int             *S_offd_j;
-   int              num_variables = hypre_CSRMatrixNumRows(S_diag);
-   int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
-   int 	           *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
+   HYPRE_Int             *S_i           = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int             *S_j           = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int             *S_offd_i      = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int             *S_offd_j;
+   HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
+   HYPRE_Int 	           *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
                   
    hypre_CSRMatrix *S_ext;
-   int             *S_ext_i;
-   int             *S_ext_j;
+   HYPRE_Int             *S_ext_i;
+   HYPRE_Int             *S_ext_j;
                  
    hypre_CSRMatrix *ST;
-   int             *ST_i;
-   int             *ST_j;
+   HYPRE_Int             *ST_i;
+   HYPRE_Int             *ST_j;
                  
-   int             *CF_marker;
-   int             *CF_marker_offd;
-   int              ci_tilde = -1;
-   int              ci_tilde_mark = -1;
-   int              ci_tilde_offd = -1;
-   int              ci_tilde_offd_mark = -1;
+   HYPRE_Int             *CF_marker;
+   HYPRE_Int             *CF_marker_offd;
+   HYPRE_Int              ci_tilde = -1;
+   HYPRE_Int              ci_tilde_mark = -1;
+   HYPRE_Int              ci_tilde_offd = -1;
+   HYPRE_Int              ci_tilde_offd_mark = -1;
 
-   int             *measure_array;
-   int             *graph_array;
-   int 	           *int_buf_data;
-   int 	           *ci_array;
+   HYPRE_Int             *measure_array;
+   HYPRE_Int             *graph_array;
+   HYPRE_Int 	           *int_buf_data;
+   HYPRE_Int 	           *ci_array;
 
-   int              i, j, k, jS;
-   int		    ji, jj, jk, jm, index;
-   int		    set_empty = 1;
-   int		    C_i_nonempty = 0;
-   int		    num_nonzeros;
-   int		    num_procs, my_id;
-   int		    num_sends = 0;
-   int		    first_col, start;
-   int		    col_0, col_n;
+   HYPRE_Int              i, j, k, jS;
+   HYPRE_Int		    ji, jj, jk, jm, index;
+   HYPRE_Int		    set_empty = 1;
+   HYPRE_Int		    C_i_nonempty = 0;
+   HYPRE_Int		    num_nonzeros;
+   HYPRE_Int		    num_procs, my_id;
+   HYPRE_Int		    num_sends = 0;
+   HYPRE_Int		    first_col, start;
+   HYPRE_Int		    col_0, col_n;
 
    hypre_LinkList   LoL_head;
    hypre_LinkList   LoL_tail;
 
-   int             *lists, *where;
-   int              measure, new_meas;
-   int              meas_type = 0;
-   int              agg_2 = 0;
-   int              num_left, elmt;
-   int              nabor, nabor_two;
+   HYPRE_Int             *lists, *where;
+   HYPRE_Int              measure, new_meas;
+   HYPRE_Int              meas_type = 0;
+   HYPRE_Int              agg_2 = 0;
+   HYPRE_Int              num_left, elmt;
+   HYPRE_Int              nabor, nabor_two;
 
-   int              ierr = 0;
-   int              use_commpkg_A = 0;
-   int              break_var = 0;
-   int              f_pnt = F_PT;
+   HYPRE_Int              ierr = 0;
+   HYPRE_Int              use_commpkg_A = 0;
+   HYPRE_Int              break_var = 0;
+   HYPRE_Int              f_pnt = F_PT;
    double	    wall_time;
 
    if (coarsen_type < 0) coarsen_type = -coarsen_type;
@@ -937,13 +937,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    LoL_head = NULL;
    LoL_tail = NULL;
-   lists = hypre_CTAlloc(int, num_variables);
-   where = hypre_CTAlloc(int, num_variables);
+   lists = hypre_CTAlloc(HYPRE_Int, num_variables);
+   where = hypre_CTAlloc(HYPRE_Int, num_variables);
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    /*--------------------------------------------------------------
@@ -962,8 +962,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    if (!comm_pkg)
    {
@@ -984,8 +984,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    jS = S_i[num_variables];
 
    ST = hypre_CSRMatrixCreate(num_variables, num_variables, jS);
-   ST_i = hypre_CTAlloc(int,num_variables+1);
-   ST_j = hypre_CTAlloc(int,jS);
+   ST_i = hypre_CTAlloc(HYPRE_Int,num_variables+1);
+   ST_j = hypre_CTAlloc(HYPRE_Int,jS);
    hypre_CSRMatrixI(ST) = ST_i;
    hypre_CSRMatrixJ(ST) = ST_j;
 
@@ -1029,7 +1029,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     * neighbor processors
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(int, num_variables);
+   measure_array = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -1086,7 +1086,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    *
    *************************************************************/
 
-   CF_marker = hypre_CTAlloc(int, num_variables);
+   CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
    
    num_left = 0;
    for (j = 0; j < num_variables; j++)
@@ -1116,7 +1116,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
          }
          else
          {
-            if (measure < 0) printf("negative measure!\n");
+            if (measure < 0) hypre_printf("negative measure!\n");
             CF_marker[j] = f_pnt;
             for (k = S_i[j]; k < S_i[j+1]; k++)
             {
@@ -1249,7 +1249,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    if (debug_flag == 3)
    {
       wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d    Coarsen 1st pass = %f\n",
+      hypre_printf("Proc = %d    Coarsen 1st pass = %f\n",
                      my_id, wall_time); 
    }
 
@@ -1275,7 +1275,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     * Initialize the graph array
     *---------------------------------------------------*/
 
-   graph_array = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
@@ -1290,8 +1290,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
        * Exchange boundary data for CF_marker
        *------------------------------------------------*/
     
-      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
-      int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                    num_sends));
     
       index = 0;
@@ -1311,14 +1311,14 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_ParCSRCommHandleDestroy(comm_handle);
       }
     
-      ci_array = hypre_CTAlloc(int,num_cols_offd);
+      ci_array = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
       for (i=0; i < num_cols_offd; i++)
 	 ci_array[i] = -1;
 	
       for (i=0; i < num_variables; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
-	 if (ci_tilde_offd_mark |= i) ci_tilde_offd = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
+	 if (ci_tilde_offd_mark != i) ci_tilde_offd = -1;
          if (CF_marker[i] == -1)
          {
             break_var = 1;
@@ -1463,7 +1463,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       for (i=0; i < num_variables; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
          if (CF_marker[i] == -1)
          {
    	    for (ji = S_i[i]; ji < S_i[i+1]; ji++)
@@ -1519,7 +1519,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    if (debug_flag == 3 && coarsen_type != 2)
    {
       wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d    Coarsen 2nd pass = %f\n",
+      hypre_printf("Proc = %d    Coarsen 2nd pass = %f\n",
                        my_id, wall_time); 
    }
 
@@ -1529,8 +1529,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    {
       if (debug_flag == 3) wall_time = time_getWallclockSeconds();
 
-      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
-      int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
 
       /*------------------------------------------------
@@ -1554,7 +1554,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_ParCSRCommHandleDestroy(comm_handle);   
       }
 
-      ci_array = hypre_CTAlloc(int,num_cols_offd);
+      ci_array = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
       for (i=0; i < num_cols_offd; i++)
 	 ci_array[i] = -1;
    }
@@ -1565,8 +1565,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 	 graph_array[i] = -1;
       for (i=0; i < num_cols_offd; i++)
       {
-	 if (ci_tilde_mark |= i) ci_tilde = -1;
-	 if (ci_tilde_offd_mark |= i) ci_tilde_offd = -1;
+	 if (ci_tilde_mark != i) ci_tilde = -1;
+	 if (ci_tilde_offd_mark != i) ci_tilde_offd = -1;
          if (CF_marker_offd[i] == -1)
          {
    	    for (ji = S_ext_i[i]; ji < S_ext_i[i+1]; ji++)
@@ -1762,13 +1762,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       {
          wall_time = time_getWallclockSeconds() - wall_time;
          if (coarsen_type == 4)
-		printf("Proc = %d    Coarsen 3rd pass = %f\n",
+		hypre_printf("Proc = %d    Coarsen 3rd pass = %f\n",
                 my_id, wall_time); 
          if (coarsen_type == 3)
-		printf("Proc = %d    Coarsen 3rd pass = %f\n",
+		hypre_printf("Proc = %d    Coarsen 3rd pass = %f\n",
                 my_id, wall_time); 
          if (coarsen_type == 2)
-		printf("Proc = %d    Coarsen 2nd pass = %f\n",
+		hypre_printf("Proc = %d    Coarsen 2nd pass = %f\n",
                 my_id, wall_time); 
       }
    }
@@ -1780,8 +1780,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
       if (debug_flag == 3) wall_time = time_getWallclockSeconds();
     
-      CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
-      int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                    num_sends));
     
       index = 0;
@@ -1801,7 +1801,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_ParCSRCommHandleDestroy(comm_handle);
       }
     
-      ci_array = hypre_CTAlloc(int,num_cols_offd);
+      ci_array = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
       for (i=0; i < num_cols_offd; i++)
    	 ci_array[i] = -1;
       for (i=0; i < num_variables; i++)
@@ -1876,7 +1876,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       if (debug_flag == 3)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
-         printf("Proc = %d    Coarsen special points = %f\n",
+         hypre_printf("Proc = %d    Coarsen special points = %f\n",
                        my_id, wall_time); 
       }
 
@@ -1902,14 +1902,14 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 }
 
 
-int
+HYPRE_Int
 hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
                                hypre_ParCSRMatrix    *A,
-                               int                    measure_type,
-                               int                    debug_flag,
-                               int                  **CF_marker_ptr)
+                               HYPRE_Int                    measure_type,
+                               HYPRE_Int                    debug_flag,
+                               HYPRE_Int                  **CF_marker_ptr)
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    /*-------------------------------------------------------
     * Perform Ruge coarsening followed by CLJP coarsening
@@ -1924,14 +1924,14 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *S,
    return (ierr);
 }
 
-int
+HYPRE_Int
 hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
                             hypre_ParCSRMatrix    *A,
-                            int                    measure_type,
-                            int                    debug_flag,
-                            int                  **CF_marker_ptr)
+                            HYPRE_Int                    measure_type,
+                            HYPRE_Int                    debug_flag,
+                            HYPRE_Int                  **CF_marker_ptr)
 {
-   int              ierr = 0;
+   HYPRE_Int              ierr = 0;
 
    /*-------------------------------------------------------
     * Perform Ruge coarsening followed by CLJP coarsening
@@ -1962,60 +1962,60 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
  *           without a common C point)
  *
  **************************************************************/
-int
+HYPRE_Int
 hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 			    hypre_ParCSRMatrix    *A,
-                        int                    CF_init,
-                        int                    debug_flag,
-                        int                  **CF_marker_ptr)
+                        HYPRE_Int                    CF_init,
+                        HYPRE_Int                    debug_flag,
+                        HYPRE_Int                  **CF_marker_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle   *comm_handle;
 
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
-   int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
-   int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
+   HYPRE_Int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
 
    hypre_CSRMatrix    *S_offd          = hypre_ParCSRMatrixOffd(S);
-   int                *S_offd_i        = hypre_CSRMatrixI(S_offd);
-   int                *S_offd_j;
+   HYPRE_Int                *S_offd_i        = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int                *S_offd_j;
 
-   int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
-   int 		       num_cols_offd = 0;
+   HYPRE_Int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
+   HYPRE_Int 		       num_cols_offd = 0;
                   
    /* hypre_CSRMatrix    *S_ext;
-   int                *S_ext_i;
-   int                *S_ext_j; */
+   HYPRE_Int                *S_ext_i;
+   HYPRE_Int                *S_ext_j; */
 
-   int		       num_sends = 0;
-   int  	      *int_buf_data;
+   HYPRE_Int		       num_sends = 0;
+   HYPRE_Int  	      *int_buf_data;
    double	      *buf_data;
 
-   int                *CF_marker;
-   int                *CF_marker_offd;
+   HYPRE_Int                *CF_marker;
+   HYPRE_Int                *CF_marker_offd;
                       
    double             *measure_array;
-   int                *graph_array;
-   int                *graph_array_offd;
-   int                 graph_size;
-   int                 graph_offd_size;
-   int                 global_graph_size;
+   HYPRE_Int                *graph_array;
+   HYPRE_Int                *graph_array_offd;
+   HYPRE_Int                 graph_size;
+   HYPRE_Int                 graph_offd_size;
+   HYPRE_Int                 global_graph_size;
                       
-   int                 i, j, jS, ig;
-   int		       index, start, my_id, num_procs, jrow, cnt, elmt;
+   HYPRE_Int                 i, j, jS, ig;
+   HYPRE_Int		       index, start, my_id, num_procs, jrow, cnt, elmt;
                       
-   int                 ierr = 0;
+   HYPRE_Int                 ierr = 0;
 
    double	    wall_time;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 
 
 
 #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
-   int   iter = 0;
+   HYPRE_Int   iter = 0;
 #endif
 
    /*******************************************************************************
@@ -2042,8 +2042,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    /*S_ext = NULL; */
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    if (!comm_pkg)
    {
@@ -2058,7 +2058,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
    buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
@@ -2136,7 +2136,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    /* first the off-diagonal part of the graph array */
    if (num_cols_offd) 
-      graph_array_offd = hypre_CTAlloc(int, num_cols_offd);
+      graph_array_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    else
       graph_array_offd = NULL;
 
@@ -2146,7 +2146,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    graph_offd_size = num_cols_offd;
 
    /* now the local part of the graph array, and the local CF_marker array */
-   graph_array = hypre_CTAlloc(int, num_variables);
+   graph_array = hypre_CTAlloc(HYPRE_Int, num_variables);
 
    if (CF_init==1)
    { 
@@ -2179,7 +2179,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    }
    else
    {
-      CF_marker = hypre_CTAlloc(int, num_variables);
+      CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
       cnt = 0;
       for (i=0; i < num_variables; i++)
       {
@@ -2199,7 +2199,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    /* now the off-diagonal part of CF_marker */
    if (num_cols_offd)
-     CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+     CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
    else
      CF_marker_offd = NULL;
 
@@ -2269,7 +2269,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    if (debug_flag == 3)
    {
       wall_time = time_getWallclockSeconds() - wall_time;
-      printf("Proc = %d    Initialize CLJP phase = %f\n",
+      hypre_printf("Proc = %d    Initialize CLJP phase = %f\n",
                      my_id, wall_time); 
    }
 
@@ -2285,14 +2285,14 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    {
 
      /* stop the coarsening if nothing left to be coarsened */
-     MPI_Allreduce(&graph_size,&global_graph_size,1,MPI_INT,MPI_SUM,comm);
+     hypre_MPI_Allreduce(&graph_size,&global_graph_size,1,HYPRE_MPI_INT,hypre_MPI_SUM,comm);
 
      if (global_graph_size == 0)
        break;
 
-     /*     printf("\n");
-     printf("*** MIS iteration %d\n",iter);
-     printf("graph_size remaining %d\n",graph_size);*/
+     /*     hypre_printf("\n");
+     hypre_printf("*** MIS iteration %d\n",iter);
+     hypre_printf("graph_size remaining %d\n",graph_size);*/
 
      /*------------------------------------------------
       * Pick an independent set of points with
@@ -2561,14 +2561,14 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
      
    } /* end while */
 
-   /*   printf("*** MIS iteration %d\n",iter);
-   printf("graph_size remaining %d\n",graph_size);
+   /*   hypre_printf("*** MIS iteration %d\n",iter);
+   hypre_printf("graph_size remaining %d\n",graph_size);
 
-   printf("num_cols_offd %d\n",num_cols_offd);
+   hypre_printf("num_cols_offd %d\n",num_cols_offd);
    for (i=0;i<num_variables;i++)
      {
               if(CF_marker[i]==1)
-       printf("node %d CF %d\n",i,CF_marker[i]);
+       hypre_printf("node %d CF %d\n",i,CF_marker[i]);
        }*/
 
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -23,7 +23,7 @@
  * runs, since recording CPU time probably isn't useful.
  * if EUCLID_TIMING is defined in $PCPACK_DIR/bmake_XXX/common,
  * the times() function is used;
- * then MPI_Wtime() is used in preference to times().
+ * then hypre_MPI_Wtime() is used in preference to times().
  *
  * You may need to fiddle with some of these includes, depending
  * on your system.  Make sure and check the logFile to ensure
@@ -61,7 +61,7 @@
 
 struct _timer_dh {
   bool isRunning;
-  long int sc_clk_tck;
+  hypre_longint sc_clk_tck;
   double begin_wall; 
   double end_wall;
 

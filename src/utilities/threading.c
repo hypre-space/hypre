@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -18,10 +18,10 @@
 
 #if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
 
-int
+HYPRE_Int
 hypre_NumThreads( )
 {
-   int num_threads;
+   HYPRE_Int num_threads;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
@@ -39,10 +39,10 @@ hypre_NumThreads( )
 /* This next function must be called from within a 
 parallel region! */
 
-int
+HYPRE_Int
 hypre_GetThreadNum( )
 {
-   int my_thread_num;
+   HYPRE_Int my_thread_num;
 
 #ifdef HYPRE_USING_OPENMP
    my_thread_num = omp_get_thread_num();
@@ -69,15 +69,15 @@ hypre_GetThreadNum( )
 #include "umalloc_local.h"
 #endif
 
-int iteration_counter = 0;
-volatile int hypre_thread_counter;
-volatile int work_continue = 1;
+HYPRE_Int iteration_counter = 0;
+volatile HYPRE_Int hypre_thread_counter;
+volatile HYPRE_Int work_continue = 1;
 
 
-int HYPRE_InitPthreads( int num_threads )
+HYPRE_Int HYPRE_InitPthreads( HYPRE_Int num_threads )
 {
-   int err;
-   int i;
+   HYPRE_Int err;
+   HYPRE_Int i;
    hypre_qptr =
           (hypre_workqueue_t) malloc(sizeof(struct hypre_workqueue_struct));
 
@@ -128,7 +128,7 @@ void hypre_StopWorker(void *i)
 
 void HYPRE_DestroyPthreads( void )
 {
-   int i;
+   HYPRE_Int i;
    void *status;
 
    for (i=0; i < hypre_NumThreads; i++) {
@@ -156,7 +156,7 @@ void HYPRE_DestroyPthreads( void )
 }
 
 
-void hypre_pthread_worker( int threadid )
+void hypre_pthread_worker( HYPRE_Int threadid )
 {
    void *argptr;
    hypre_work_proc_t funcptr;
@@ -220,10 +220,10 @@ hypre_work_wait( void )
 }                               
 
 
-int
-hypre_fetch_and_add( int *w )
+HYPRE_Int
+hypre_fetch_and_add( HYPRE_Int *w )
 {
-   int temp;
+   HYPRE_Int temp;
 
    temp = *w;
    *w += 1;
@@ -231,10 +231,10 @@ hypre_fetch_and_add( int *w )
    return temp;
 }
    
-int
-ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
+HYPRE_Int
+ifetchadd( HYPRE_Int *w, pthread_mutex_t *mutex_fetchadd )
 {
-   int n;
+   HYPRE_Int n;
    
    pthread_mutex_lock(mutex_fetchadd);
    n = *w;
@@ -244,10 +244,10 @@ ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
    return n;
 }
 
-static volatile int thb_count = 0;
-static volatile int thb_release = 0;
+static volatile HYPRE_Int thb_count = 0;
+static volatile HYPRE_Int thb_release = 0;
 
-void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
+void hypre_barrier(pthread_mutex_t *mtx, HYPRE_Int unthreaded)
 {
    if (!unthreaded) {
       pthread_mutex_lock(mtx);
@@ -271,10 +271,10 @@ void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
    }
 }
 
-int
+HYPRE_Int
 hypre_GetThreadID( void )
 {
-   int i;
+   HYPRE_Int i;
 
    if (pthread_equal(pthread_self(), initial_thread)) 
       return hypre_NumThreads;

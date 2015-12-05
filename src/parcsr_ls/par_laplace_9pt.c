@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,55 +22,55 @@
 
 HYPRE_ParCSRMatrix 
 GenerateLaplacian9pt( MPI_Comm comm,
-                      int      nx,
-                      int      ny,
-                      int      P,
-                      int      Q,
-                      int      p,
-                      int      q,
+                      HYPRE_Int      nx,
+                      HYPRE_Int      ny,
+                      HYPRE_Int      P,
+                      HYPRE_Int      Q,
+                      HYPRE_Int      p,
+                      HYPRE_Int      q,
                       double  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag;
    hypre_CSRMatrix *offd;
 
-   int    *diag_i;
-   int    *diag_j;
+   HYPRE_Int    *diag_i;
+   HYPRE_Int    *diag_j;
    double *diag_data;
 
-   int    *offd_i;
-   int    *offd_j;
+   HYPRE_Int    *offd_i;
+   HYPRE_Int    *offd_j;
    double *offd_data;
 
-   int *global_part;
-   int ix, iy;
-   int cnt, o_cnt;
-   int local_num_rows; 
-   int *col_map_offd;
-   int *work;
-   int row_index;
-   int i,j;
+   HYPRE_Int *global_part;
+   HYPRE_Int ix, iy;
+   HYPRE_Int cnt, o_cnt;
+   HYPRE_Int local_num_rows; 
+   HYPRE_Int *col_map_offd;
+   HYPRE_Int *work;
+   HYPRE_Int row_index;
+   HYPRE_Int i,j;
 
-   int nx_local, ny_local;
-   int nx_size, ny_size;
-   int num_cols_offd;
-   int grid_size;
+   HYPRE_Int nx_local, ny_local;
+   HYPRE_Int nx_size, ny_size;
+   HYPRE_Int num_cols_offd;
+   HYPRE_Int grid_size;
 
-   int *nx_part;
-   int *ny_part;
+   HYPRE_Int *nx_part;
+   HYPRE_Int *ny_part;
 
-   int num_procs, my_id;
-   int P_busy, Q_busy;
+   HYPRE_Int num_procs, my_id;
+   HYPRE_Int P_busy, Q_busy;
 
-   MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    grid_size = nx*ny;
 
    hypre_GeneratePartitioning(nx,P,&nx_part);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
 
-   global_part = hypre_CTAlloc(int,P*Q+1);
+   global_part = hypre_CTAlloc(HYPRE_Int,P*Q+1);
 
    global_part[0] = 0;
    cnt = 1;
@@ -92,8 +92,8 @@ GenerateLaplacian9pt( MPI_Comm comm,
    num_procs = P*Q;
 
    local_num_rows = nx_local*ny_local;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
+   offd_i = hypre_CTAlloc(HYPRE_Int, local_num_rows+1);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -110,7 +110,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
 
    cnt = 0;
    o_cnt = 0;
@@ -236,12 +236,12 @@ GenerateLaplacian9pt( MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(int, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(HYPRE_Int, diag_i[local_num_rows]);
    diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(int, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(HYPRE_Int, offd_i[local_num_rows]);
       offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
    }
 
@@ -420,7 +420,7 @@ GenerateLaplacian9pt( MPI_Comm comm,
 
    if (num_procs > 1)
    {
-      work = hypre_CTAlloc(int,o_cnt);
+      work = hypre_CTAlloc(HYPRE_Int,o_cnt);
 
       for (i=0; i < o_cnt; i++)
          work[i] = offd_j[i];
@@ -459,11 +459,11 @@ GenerateLaplacian9pt( MPI_Comm comm,
 /* ideally we would use less storage earlier in this function, but this is fine
    for testing */
    {
-      int tmp1, tmp2;
+      HYPRE_Int tmp1, tmp2;
       tmp1 = global_part[my_id];
       tmp2 = global_part[my_id + 1];
       hypre_TFree(global_part);
-      global_part = hypre_CTAlloc(int, 2);
+      global_part = hypre_CTAlloc(HYPRE_Int, 2);
       global_part[0] = tmp1;
       global_part[1] = tmp2;
    }
@@ -498,22 +498,22 @@ GenerateLaplacian9pt( MPI_Comm comm,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-int
-hypre_map2( int  ix,
-      int  iy,
-      int  p,
-      int  q,
-      int  P,
-      int  Q,
-      int *nx_part,
-      int *ny_part,
-      int *global_part )
+HYPRE_Int
+hypre_map2( HYPRE_Int  ix,
+      HYPRE_Int  iy,
+      HYPRE_Int  p,
+      HYPRE_Int  q,
+      HYPRE_Int  P,
+      HYPRE_Int  Q,
+      HYPRE_Int *nx_part,
+      HYPRE_Int *ny_part,
+      HYPRE_Int *global_part )
 {
-   int nx_local;
-   int ix_local;
-   int iy_local;
-   int global_index;
-   int proc_num;
+   HYPRE_Int nx_local;
+   HYPRE_Int ix_local;
+   HYPRE_Int iy_local;
+   HYPRE_Int global_index;
+   HYPRE_Int proc_num;
  
    proc_num = q*P + p;
    nx_local = nx_part[p+1] - nx_part[p];

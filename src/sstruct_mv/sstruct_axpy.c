@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -25,13 +25,13 @@
  * hypre_SStructPAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructPAxpy( double                alpha,
                     hypre_SStructPVector *px,
                     hypre_SStructPVector *py )
 {
-   int nvars = hypre_SStructPVectorNVars(px);
-   int var;
+   HYPRE_Int nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Int var;
 
    for (var = 0; var < nvars; var++)
    {
@@ -47,16 +47,16 @@ hypre_SStructPAxpy( double                alpha,
  * hypre_SStructAxpy
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_SStructAxpy( double               alpha,
                    hypre_SStructVector *x,
                    hypre_SStructVector *y )
 {
-   int nparts = hypre_SStructVectorNParts(x);
-   int part;
+   HYPRE_Int nparts = hypre_SStructVectorNParts(x);
+   HYPRE_Int part;
 
-   int    x_object_type= hypre_SStructVectorObjectType(x);
-   int    y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int    x_object_type= hypre_SStructVectorObjectType(x);
+   HYPRE_Int    y_object_type= hypre_SStructVectorObjectType(y);
                                                                                                                      
    if (x_object_type != y_object_type)
    {

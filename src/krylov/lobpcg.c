@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,15 +27,15 @@
 #include "fortran_matrix.h"
 #include "multivector.h"
 
-static int
+static HYPRE_Int
 lobpcg_chol( utilities_FortranMatrix* a, 
-        int (*dpotrf) (char *uplo, int *n, double *a, int *lda, int *info) )
+        HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *lda, HYPRE_Int *info) )
 {
 
-  int lda, n;
+  HYPRE_Int lda, n;
   double* aval;
   char uplo;
-  int ierr;
+  HYPRE_Int ierr;
 
   lda = utilities_FortranMatrixGlobalHeight( a );
   n = utilities_FortranMatrixHeight( a );
@@ -47,17 +47,17 @@ lobpcg_chol( utilities_FortranMatrix* a,
   return ierr;
 }
 
-static int
+static HYPRE_Int
 lobpcg_solveGEVP( 
 utilities_FortranMatrix* mtxA, 
 utilities_FortranMatrix* mtxB,
 utilities_FortranMatrix* eigVal,
-int   (*dsygv) (int *itype, char *jobz, char *uplo, int *
-        n, double *a, int *lda, double *b, int *ldb,
-        double *w, double *work, int *lwork, int *info)
+HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
+        n, double *a, HYPRE_Int *lda, double *b, HYPRE_Int *ldb,
+        double *w, double *work, HYPRE_Int *lwork, HYPRE_Int *info)
 ){
 
-  int n, lda, ldb, itype, lwork, info;
+  HYPRE_Int n, lda, ldb, itype, lwork, info;
   char jobz, uplo;
   double* work;
   double* a;
@@ -116,18 +116,18 @@ mv_MultiVectorPtr y
 			     y );
 }
 
-static int
+static HYPRE_Int
 lobpcg_MultiVectorImplicitQR( 
 mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 utilities_FortranMatrix* r,
 mv_MultiVectorPtr z,
-int (*dpotrf) (char *uplo, int *n, double *a, int *lda, int *info)
+HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, double *a, HYPRE_Int *lda, HYPRE_Int *info)
 
 ){
 
   /* B-orthonormalizes x using y = B x */
 
-  int ierr;
+  HYPRE_Int ierr;
 
   lobpcg_MultiVectorByMultiVector( x, y, r );
 
@@ -146,24 +146,24 @@ int (*dpotrf) (char *uplo, int *n, double *a, int *lda, int *info)
 }
 
 static void
-lobpcg_sqrtVector( int n, int* mask, double* v ) {
+lobpcg_sqrtVector( HYPRE_Int n, HYPRE_Int* mask, double* v ) {
 
-  int i;
+  HYPRE_Int i;
 
   for ( i = 0; i < n; i++ )
     if ( mask == NULL || mask[i] )
       v[i] = sqrt(v[i]);
 }
 
-static int
+static HYPRE_Int
 lobpcg_checkResiduals( 
 utilities_FortranMatrix* resNorms,
 utilities_FortranMatrix* lambda,
 lobpcg_Tolerance tol,
-int* activeMask
+HYPRE_Int* activeMask
 ){
-  int i, n;
-  int notConverged;
+  HYPRE_Int i, n;
+  HYPRE_Int notConverged;
   double atol;
   double rtol;
 
@@ -187,15 +187,15 @@ int* activeMask
 }
 
 static void
-lobpcg_errorMessage( int verbosityLevel, char* message )
+lobpcg_errorMessage( HYPRE_Int verbosityLevel, char* message )
 {
   if ( verbosityLevel ) {
-    fprintf( stderr, "Error in LOBPCG:\n" );
-    fprintf( stderr, message );
+    hypre_fprintf( stderr, "Error in LOBPCG:\n" );
+    hypre_fprintf( stderr, message );
   }
 }
 
-int
+HYPRE_Int
 lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 	      void* operatorAData,
 	      void (*operatorA)( void*, void*, void* ),
@@ -206,9 +206,9 @@ lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 	      mv_MultiVectorPtr blockVectorY,
               lobpcg_BLASLAPACKFunctions blap_fn,
 	      lobpcg_Tolerance tolerance,
-	      int maxIterations,
-	      int verbosityLevel,
-	      int* iterationNumber,
+	      HYPRE_Int maxIterations,
+	      HYPRE_Int verbosityLevel,
+	      HYPRE_Int* iterationNumber,
 
 /* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
 ze> is the width of multivector "blockVectorX" */
@@ -221,7 +221,7 @@ argument; If you don't need eigenvalues history, provide NULL in this entry */
               double * lambdaHistory_values,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              int lambdaHistory_gh,
+              HYPRE_Int lambdaHistory_gh,
 
 /* residual norms; argument should point to array of <blocksize> doubles */
               double * residualNorms_values,
@@ -234,39 +234,39 @@ argument If you don't need residual norms history, provide NULL in this entry */
               double * residualNormsHistory_values ,
 
 /* global height of the matrix (stored in fotran-style)  specified by previous argument */
-              int residualNormsHistory_gh
+              HYPRE_Int residualNormsHistory_gh
 
 ){
 
-  int				sizeX; /* number of eigenvectors */
-  int				sizeY; /* number of constraints */
-  int				sizeR; /* number of residuals used */
-  int				sizeP; /* number of conj. directions used */
-  int				sizeA; /* size of the Gram matrix for A */
-  int				sizeX3; /* 3*sizeX */
+  HYPRE_Int				sizeX; /* number of eigenvectors */
+  HYPRE_Int				sizeY; /* number of constraints */
+  HYPRE_Int				sizeR; /* number of residuals used */
+  HYPRE_Int				sizeP; /* number of conj. directions used */
+  HYPRE_Int				sizeA; /* size of the Gram matrix for A */
+  HYPRE_Int				sizeX3; /* 3*sizeX */
 
-  int				firstR; /* first line of the Gram block
+  HYPRE_Int				firstR; /* first line of the Gram block
 					   corresponding to residuals */
-  int				lastR; /* last line of this block */
-  int				firstP; /* same for conjugate directions */
-  int				lastP;
+  HYPRE_Int				lastR; /* last line of this block */
+  HYPRE_Int				firstP; /* same for conjugate directions */
+  HYPRE_Int				lastP;
 
-  int				noTFlag; /* nonzero: no preconditioner */
-  int				noBFlag; /* nonzero: no operator B */
-  int				noYFlag; /* nonzero: no constaints */
+  HYPRE_Int				noTFlag; /* nonzero: no preconditioner */
+  HYPRE_Int				noBFlag; /* nonzero: no operator B */
+  HYPRE_Int				noYFlag; /* nonzero: no constaints */
 
-  int				exitFlag; /* 1: problem size is too small,
+  HYPRE_Int				exitFlag; /* 1: problem size is too small,
 					     2: block size < 1,
 					     3: linearly dependent constraints,
 					     -1: requested accuracy not 
 					     achieved */
 
-  int*				activeMask; /* soft locking mask */
+  HYPRE_Int*				activeMask; /* soft locking mask */
 
-  int				i; /* short loop counter */
+  HYPRE_Int				i; /* short loop counter */
 
 #if 0
-  long				n; /* dimension 1 of X */
+  hypre_longint				n; /* dimension 1 of X */
   /* had to remove because n is not available in some interfaces */ 
 #endif 
 
@@ -412,7 +412,7 @@ es" argument */
     exitFlag = lobpcg_chol( gramYBY, blap_fn.dpotrf );
     if ( exitFlag != 0 ) {
       if ( verbosityLevel )
-	printf("Cannot handle linear dependent constraints\n");
+	hypre_printf("Cannot handle linear dependent constraints\n");
       utilities_FortranMatrixDestroy( gramYBY );
       utilities_FortranMatrixDestroy( gramYBX );
       utilities_FortranMatrixDestroy( tempYBX );
@@ -435,23 +435,23 @@ es" argument */
   }
 
   if ( verbosityLevel ) {
-    printf("\nSolving ");
+    hypre_printf("\nSolving ");
     if ( noBFlag )
-      printf("standard");
+      hypre_printf("standard");
     else
-      printf("generalized");
-    printf(" eigenvalue problem with");
+      hypre_printf("generalized");
+    hypre_printf(" eigenvalue problem with");
     if ( noTFlag )
-      printf("out");
-    printf(" preconditioning\n\n");
-    printf("block size %d\n\n", sizeX );
+      hypre_printf("out");
+    hypre_printf(" preconditioning\n\n");
+    hypre_printf("block size %d\n\n", sizeX );
     if ( noYFlag )
-      printf("No constraints\n\n");
+      hypre_printf("No constraints\n\n");
     else {
       if ( sizeY > 1 )
-	printf("%d constraints\n\n", sizeY);
+	hypre_printf("%d constraints\n\n", sizeY);
       else
-	printf("%d constraint\n\n", sizeY);
+	hypre_printf("%d constraint\n\n", sizeY);
     }
   }
 
@@ -489,7 +489,7 @@ es" argument */
   historyColumn = utilities_FortranMatrixCreate();
   
   /* initializing soft locking mask */
-  activeMask = (int*)calloc( sizeX, sizeof(int) );
+  activeMask = (HYPRE_Int*)calloc( sizeX, sizeof(HYPRE_Int) );
   hypre_assert( activeMask != NULL );
   for ( i = 0; i < sizeX; i++ )
     activeMask[i] = 1;
@@ -540,7 +540,7 @@ es" argument */
   if ( exitFlag ) {
     lobpcg_errorMessage( verbosityLevel, "Bad initial vectors: orthonormalization failed\n" );
     if ( verbosityLevel )
-      printf("DPOTRF INFO = %d\n", exitFlag);
+      hypre_printf("DPOTRF INFO = %d\n", exitFlag);
   }
   else {
 
@@ -567,7 +567,7 @@ es" argument */
       lobpcg_errorMessage( verbosityLevel, 
 			   "Bad problem: Rayleigh-Ritz in the initial subspace failed\n" );
       if ( verbosityLevel )
-	printf("DSYGV INFO = %d\n", exitFlag);
+	hypre_printf("DSYGV INFO = %d\n", exitFlag);
     }
     else {
       utilities_FortranMatrixSelectBlock( gramXAX, 1, sizeX, 1, sizeX, coordX );
@@ -616,16 +616,16 @@ es" argument */
       }
 	
       if ( verbosityLevel == 2 ) {
-	printf("\n");
+	hypre_printf("\n");
 	for (i = 1; i <= sizeX; i++ ) 
-	  printf("Initial eigenvalues lambda %22.14e\n",
+	  hypre_printf("Initial eigenvalues lambda %22.14e\n",
 		 utilities_FortranMatrixValue( lambda, i, 1) );
 	for (i = 1; i <= sizeX; i++) 
-	  printf("Initial residuals %12.6e\n",
+	  hypre_printf("Initial residuals %12.6e\n",
 		 utilities_FortranMatrixValue( residualNorms, i, 1) );
       }
       else if ( verbosityLevel == 1 )
-	printf("\nInitial Max. Residual %22.14e\n",
+	hypre_printf("\nInitial Max. Residual %22.14e\n",
 	       utilities_FortranMatrixMaxValue( residualNorms ) );
     }
   }
@@ -686,7 +686,7 @@ es" argument */
     if ( exitFlag ) {
       lobpcg_errorMessage( verbosityLevel, "Orthonormalization of residuals failed\n" );
       if ( verbosityLevel )
-	printf("DPOTRF INFO = %d\n", exitFlag);
+	hypre_printf("DPOTRF INFO = %d\n", exitFlag);
       break;
     }
 
@@ -712,7 +712,7 @@ es" argument */
 	/*
 	lobpcg_errorMessage( verbosityLevel, "Orthonormalization of P failed\n" );
 	if ( verbosityLevel )
-	  printf("DPOTRF INFO = %d\n", exitFlag);
+	  hypre_printf("DPOTRF INFO = %d\n", exitFlag);
 	*/
 	sizeP = 0;
       }
@@ -793,7 +793,7 @@ es" argument */
       lobpcg_errorMessage( verbosityLevel, "GEVP solver failure\n" );
       (*iterationNumber)--;
       /* if ( verbosityLevel )
-	 printf("INFO = %d\n", exitFlag);*/
+	 hypre_printf("INFO = %d\n", exitFlag);*/
       break;
     }
 
@@ -898,16 +898,16 @@ es" argument */
     }
     
     if ( verbosityLevel == 2 ) {
-      printf( "Iteration %d \tbsize %d\n", *iterationNumber, sizeR );
+      hypre_printf( "Iteration %d \tbsize %d\n", *iterationNumber, sizeR );
       for ( i = 1; i <= sizeX; i++ ) 
-	printf("Eigenvalue lambda %22.14e\n",
+	hypre_printf("Eigenvalue lambda %22.14e\n",
 	       utilities_FortranMatrixValue( lambda, i, 1) );
       for ( i = 1; i <= sizeX; i++ ) 
-	printf("Residual %12.6e\n",
+	hypre_printf("Residual %12.6e\n",
 	       utilities_FortranMatrixValue( residualNorms, i, 1) );
     }
     else if ( verbosityLevel == 1 )
-      printf("Iteration %d \tbsize %d \tmaxres %22.14e\n",
+      hypre_printf("Iteration %d \tbsize %d \tmaxres %22.14e\n",
 	     *iterationNumber, sizeR, 
 	     utilities_FortranMatrixMaxValue( residualNorms ) );
 
@@ -926,14 +926,14 @@ es" argument */
   (*iterationNumber)--;
 	
   if ( verbosityLevel == 1 ) {
-    printf("\n");
+    hypre_printf("\n");
     for ( i = 1; i <= sizeX; i++ ) 
-      printf("Eigenvalue lambda %22.14e\n",
+      hypre_printf("Eigenvalue lambda %22.14e\n",
 	     utilities_FortranMatrixValue( lambda, i, 1) );
     for ( i = 1; i <= sizeX; i++ ) 
-      printf("Residual %22.14e\n",
+      hypre_printf("Residual %22.14e\n",
 	     utilities_FortranMatrixValue( residualNorms, i, 1) );
-    printf("\n%d iterations\n", *iterationNumber );
+    hypre_printf("\n%d iterations\n", *iterationNumber );
   }
 
   mv_MultiVectorDestroy( blockVectorR );

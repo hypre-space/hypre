@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -28,13 +28,13 @@
  *   Note: An "empty" projection is represented by a box with volume 0.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ProjectBox( hypre_Box    *box,
                   hypre_Index   index,
                   hypre_Index   stride )
 {
-   int  i, s, d, hl, hu, kl, ku;
-   int  ierr = 0;
+   HYPRE_Int  i, s, d, hl, hu, kl, ku;
+   HYPRE_Int  ierr = 0;
 
    /*------------------------------------------------------
     * project in all 3 dimensions
@@ -50,14 +50,14 @@ hypre_ProjectBox( hypre_Box    *box,
       hu = hypre_BoxIMaxD(box, d) - i;
 
       if ( hl <= 0 )
-         kl = (int) (hl / s);
+         kl = (HYPRE_Int) (hl / s);
       else
-         kl = (int) ((hl + (s-1)) / s);
+         kl = (HYPRE_Int) ((hl + (s-1)) / s);
 
       if ( hu >= 0 )
-         ku = (int) (hu / s);
+         ku = (HYPRE_Int) (hu / s);
       else
-         ku = (int) ((hu - (s-1)) / s);
+         ku = (HYPRE_Int) ((hu - (s-1)) / s);
 
       hypre_BoxIMinD(box, d) = i + kl * s;
       hypre_BoxIMaxD(box, d) = i + ku * s;
@@ -74,14 +74,14 @@ hypre_ProjectBox( hypre_Box    *box,
  *   So, it is possible to have boxes with volume 0.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
                        hypre_Index      index,
                        hypre_Index      stride    )
 {
    hypre_Box  *box;
-   int         i;
-   int         ierr = 0;
+   HYPRE_Int   i;
+   HYPRE_Int   ierr = 0;
 
    hypre_ForBoxI(i, box_array)
       {
@@ -99,15 +99,15 @@ hypre_ProjectBoxArray( hypre_BoxArray  *box_array,
  *   So, it is possible to have boxes with volume 0.
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_ProjectBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
                             hypre_Index           index,
                             hypre_Index           stride          )
 {
    hypre_BoxArray  *box_array;
    hypre_Box       *box;
-   int              i, j;
-   int              ierr = 0;
+   HYPRE_Int        i, j;
+   HYPRE_Int        ierr = 0;
 
    hypre_ForBoxArrayI(i, box_array_array)
       {

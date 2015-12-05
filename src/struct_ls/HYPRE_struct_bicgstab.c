@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -32,7 +32,7 @@ headers.h
 @see HYPRE_StructBiCGSTABDestroy */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABCreate( MPI_Comm comm, HYPRE_StructSolver *solver )
 {
    hypre_BiCGSTABFunctions * bicgstab_functions =
@@ -66,7 +66,7 @@ headers.h
 @see HYPRE_StructBiCGSTABCreate */
 /*--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructBiCGSTABDestroy( HYPRE_StructSolver solver )
 {
    return( hypre_BiCGSTABDestroy( (void *) solver ) );
@@ -96,7 +96,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve */
 /*--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructBiCGSTABSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -129,7 +129,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int 
+HYPRE_Int 
 HYPRE_StructBiCGSTABSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
                       HYPRE_StructVector b,
@@ -158,7 +158,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup   */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABSetTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
@@ -182,7 +182,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup   */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABSetAbsoluteTol( HYPRE_StructSolver solver,
                        double             tol    )
 {
@@ -206,9 +206,9 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABSetMaxIter( HYPRE_StructSolver solver,
-                           int                max_iter )
+                           HYPRE_Int          max_iter )
 {
    return( HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver) solver, max_iter ) );
 }
@@ -236,7 +236,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup*/
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABSetPrecond( HYPRE_StructSolver         solver,
                            HYPRE_PtrToStructSolverFcn precond,
                            HYPRE_PtrToStructSolverFcn precond_setup,
@@ -267,9 +267,9 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABSetLogging( HYPRE_StructSolver solver,
-                           int                logging )
+                           HYPRE_Int          logging )
 {
    return( HYPRE_BiCGSTABSetLogging( (HYPRE_Solver) solver, logging ) );
 }
@@ -292,9 +292,9 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABSetPrintLevel( HYPRE_StructSolver solver,
-                            	int level)
+                            	HYPRE_Int level)
 {
    return( HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver) solver, level ) );
 }
@@ -316,9 +316,9 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABGetNumIterations( HYPRE_StructSolver  solver,
-                                 int                *num_iterations )
+                                 HYPRE_Int          *num_iterations )
 {
    return( HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver) solver, num_iterations ) );
 }
@@ -340,7 +340,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                              double             *norm   )
 {
@@ -365,7 +365,7 @@ headers.h
 @see HYPRE_StructBiCGSTABSolve, HYPRE_StructBiCGSTABSetup */
 /*--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 HYPRE_StructBiCGSTABGetResidual( HYPRE_StructSolver  solver,
                                  void  **residual)
 {

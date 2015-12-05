@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.120 $
+ * $Revision: 2.121 $
  ***********************************************************************EHEADER*/
 
 
@@ -622,6 +622,7 @@ class HYPRE_LinSysCore
    int             maxIterations_;
    double          tolerance_;
    int             normAbsRel_;
+   int             pcgRecomputeRes_;
 
    char            *HYPreconName_;
    HYPRE_Solver    HYPrecon_;

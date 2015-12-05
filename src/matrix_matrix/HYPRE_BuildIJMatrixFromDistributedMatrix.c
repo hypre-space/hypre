@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -38,14 +38,14 @@
 #include "IJ_mv/HYPRE_IJ_mv.h"
 
 /* Local routine prototypes */
-int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix, 
-                                      int local_storage_type );
+HYPRE_Int HYPRE_IJMatrixSetLocalStorageType(HYPRE_IJMatrix ij_matrix, 
+                                      HYPRE_Int local_storage_type );
 
-int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix, 
-                               int row, int col );
+HYPRE_Int HYPRE_IJMatrixSetLocalSize(HYPRE_IJMatrix ij_matrix, 
+                               HYPRE_Int row, HYPRE_Int col );
 
-int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
-                             int size, int i, int *col_ind,
+HYPRE_Int HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix ij_matrix, 
+                             HYPRE_Int size, HYPRE_Int i, HYPRE_Int *col_ind,
                              double *values );
 
 /*--------------------------------------------------------------------------
@@ -59,19 +59,19 @@ in another format. NOTE: because this routine makes a copy and is not just
 a simple conversion, it is memory-expensive and should only be used in
 low-memory requirement situations (such as unit-testing code). 
 */
-int 
+HYPRE_Int 
 HYPRE_BuildIJMatrixFromDistributedMatrix(
                  HYPRE_DistributedMatrix DistributedMatrix,
                  HYPRE_IJMatrix *ij_matrix,
-                 int local_storage_type )
+                 HYPRE_Int local_storage_type )
 {
-   int ierr;
+   HYPRE_Int ierr;
    MPI_Comm comm;
-   int M, N;
-   int first_local_row, last_local_row;
-   int first_local_col, last_local_col;
-   int i;
-   int size, *col_ind;
+   HYPRE_Int M, N;
+   HYPRE_Int first_local_row, last_local_row;
+   HYPRE_Int first_local_col, last_local_col;
+   HYPRE_Int i;
+   HYPRE_Int size, *col_ind;
    double *values;
 
 

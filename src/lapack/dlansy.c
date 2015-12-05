@@ -87,7 +87,7 @@ doublereal dlansy_(char *norm, char *uplo, integer *n, doublereal *a, integer
     static doublereal scale;
     extern logical lsame_(char *, char *);
     static doublereal value;
-    extern /* Subroutine */ int dlassq_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
     static doublereal sum;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]

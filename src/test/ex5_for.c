@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  ***********************************************************************EHEADER*/
 
 /*
@@ -42,41 +42,41 @@
 #include "hypre_parcsr_fortran_test.h"
 #endif
 
-int main (int argc, char *argv[])
+HYPRE_Int main (HYPRE_Int argc, char *argv[])
 {
-   int i;
-   int myid, num_procs;
-   int N, n;
+   HYPRE_Int i;
+   HYPRE_Int myid, num_procs;
+   HYPRE_Int N, n;
 
-   int ilower, iupper;
-   int local_size, extra;
+   HYPRE_Int ilower, iupper;
+   HYPRE_Int local_size, extra;
 
-   int solver_id;
-   int print_solution;
+   HYPRE_Int solver_id;
+   HYPRE_Int print_solution;
 
    double h, h2;
 
 #ifdef HYPRE_FORTRAN
-   long int A;
-   long int parcsr_A;
-   long int b;
-   long int par_b;
-   long int x;
-   long int par_x;
+   hypre_F90_Obj A;
+   hypre_F90_Obj parcsr_A;
+   hypre_F90_Obj b;
+   hypre_F90_Obj par_b;
+   hypre_F90_Obj x;
+   hypre_F90_Obj par_x;
 
-   long int solver, precond;
+   hypre_F90_Obj solver, precond;
 
-   long int long_temp_COMM;
-        int temp_COMM;
-        int precond_id;
+   hypre_F90_Obj long_temp_COMM;
+        HYPRE_Int temp_COMM;
+        HYPRE_Int precond_id;
 
-        int one = 1;
-        int two = 2;
-        int three = 3;
-        int six = 6;
-        int twenty = 20;
-        int thousand = 1000;
-        int hypre_type = HYPRE_PARCSR;
+        HYPRE_Int one = 1;
+        HYPRE_Int two = 2;
+        HYPRE_Int three = 3;
+        HYPRE_Int six = 6;
+        HYPRE_Int twenty = 20;
+        HYPRE_Int thousand = 1000;
+        HYPRE_Int hypre_type = HYPRE_PARCSR;
 
      double oo1 = 1.e-3;
      double tol = 1.e-7;
@@ -92,9 +92,9 @@ int main (int argc, char *argv[])
 #endif
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    /* Default problem parameters */
    n = 33;
@@ -103,8 +103,8 @@ int main (int argc, char *argv[])
 
    /* Parse command line */
    {
-      int arg_index = 0;
-      int print_usage = 0;
+      HYPRE_Int arg_index = 0;
+      HYPRE_Int print_usage = 0;
 
       while (arg_index < argc)
       {
@@ -136,22 +136,22 @@ int main (int argc, char *argv[])
 
       if ((print_usage) && (myid == 0))
       {
-         printf("\n");
-         printf("Usage: %s [<options>]\n", argv[0]);
-         printf("\n");
-         printf("  -n <n>              : problem size in each direction (default: 33)\n");
-         printf("  -solver <ID>        : solver ID\n");
-         printf("                        0  - AMG (default) \n");
-         printf("                        1  - AMG-PCG\n");
-         printf("                        8  - ParaSails-PCG\n");
-         printf("                        50 - PCG\n");
-         printf("  -print_solution     : print the solution vector\n");
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Usage: %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  -n <n>              : problem size in each direction (default: 33)\n");
+         hypre_printf("  -solver <ID>        : solver ID\n");
+         hypre_printf("                        0  - AMG (default) \n");
+         hypre_printf("                        1  - AMG-PCG\n");
+         hypre_printf("                        8  - ParaSails-PCG\n");
+         hypre_printf("                        50 - PCG\n");
+         hypre_printf("  -print_solution     : print the solution vector\n");
+         hypre_printf("\n");
       }
 
       if (print_usage)
       {
-         MPI_Finalize();
+         hypre_MPI_Finalize();
          return (0);
       }
    }
@@ -182,11 +182,11 @@ int main (int argc, char *argv[])
       Note that this is a square matrix, so we indicate the row partition
       size twice (since number of rows = number of cols) */
 #ifdef HYPRE_FORTRAN
-   long_temp_COMM = (long int) MPI_COMM_WORLD;
-   temp_COMM = (int) MPI_COMM_WORLD;
+   long_temp_COMM = (hypre_F90_Obj) hypre_MPI_COMM_WORLD;
+   temp_COMM = (HYPRE_Int) hypre_MPI_COMM_WORLD;
    HYPRE_IJMatrixCreate(&long_temp_COMM, &ilower, &iupper, &ilower, &iupper, &A);
 #else
-   HYPRE_IJMatrixCreate(MPI_COMM_WORLD, ilower, iupper, ilower, iupper, &A);
+   HYPRE_IJMatrixCreate(hypre_MPI_COMM_WORLD, ilower, iupper, ilower, iupper, &A);
 #endif
 
    /* Choose a parallel csr format storage (see the User's Manual) */
@@ -213,9 +213,9 @@ int main (int argc, char *argv[])
       one could set all the rows together (see the User's Manual).
    */
    {
-      int nnz;
+      HYPRE_Int nnz;
       double values[5];
-      int cols[5];
+      HYPRE_Int cols[5];
 
       for (i = ilower; i <= iupper; i++)
       {
@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorSetObjectType(&b, &hypre_type);
    HYPRE_IJVectorInitialize(&b);
 #else
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&b);
+   HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, ilower, iupper,&b);
    HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(b);
 #endif
@@ -298,7 +298,7 @@ int main (int argc, char *argv[])
    HYPRE_IJVectorSetObjectType(&x, &hypre_type);
    HYPRE_IJVectorInitialize(&x);
 #else
-   HYPRE_IJVectorCreate(MPI_COMM_WORLD, ilower, iupper,&x);
+   HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, ilower, iupper,&x);
    HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(x);
 #endif
@@ -306,11 +306,11 @@ int main (int argc, char *argv[])
    /* Set the rhs values to h^2 and the solution to zero */
    {
       double *rhs_values, *x_values;
-      int    *rows;
+      HYPRE_Int    *rows;
 
       rhs_values = calloc(local_size, sizeof(double));
       x_values = calloc(local_size, sizeof(double));
-      rows = calloc(local_size, sizeof(int));
+      rows = calloc(local_size, sizeof(HYPRE_Int));
 
       for (i=0; i<local_size; i++)
       {
@@ -352,7 +352,7 @@ int main (int argc, char *argv[])
    /* AMG */
    if (solver_id == 0)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
@@ -398,10 +398,10 @@ int main (int argc, char *argv[])
 #endif
       if (myid == 0)
       {
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
       /* Destroy solver */
@@ -414,14 +414,14 @@ int main (int argc, char *argv[])
    /* PCG */
    else if (solver_id == 50)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
 #ifdef HYPRE_FORTRAN
       HYPRE_ParCSRPCGCreate(&temp_COMM, &solver);
 #else
-      HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_ParCSRPCGCreate(hypre_MPI_COMM_WORLD, &solver);
 #endif
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -457,10 +457,10 @@ int main (int argc, char *argv[])
 #endif
       if (myid == 0)
       {
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
       /* Destroy solver */
@@ -473,14 +473,14 @@ int main (int argc, char *argv[])
    /* PCG with AMG preconditioner */
    else if (solver_id == 1)
    {
-      int num_iterations;
+      HYPRE_Int num_iterations;
       double final_res_norm;
 
       /* Create solver */
 #ifdef HYPRE_FORTRAN
       HYPRE_ParCSRPCGCreate(&temp_COMM, &solver);
 #else
-      HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_ParCSRPCGCreate(hypre_MPI_COMM_WORLD, &solver);
 #endif
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -542,10 +542,10 @@ int main (int argc, char *argv[])
 #endif
       if (myid == 0)
       {
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
       /* Destroy solver and preconditioner */
@@ -560,19 +560,19 @@ int main (int argc, char *argv[])
    /* PCG with Parasails Preconditioner */
    else if (solver_id == 8)
    {
-      int    num_iterations;
+      HYPRE_Int    num_iterations;
       double final_res_norm;
 
-      int      sai_max_levels = 1;
+      HYPRE_Int      sai_max_levels = 1;
       double   sai_threshold = 0.1;
       double   sai_filter = 0.05;
-      int      sai_sym = 1;
+      HYPRE_Int      sai_sym = 1;
 
       /* Create solver */
 #ifdef HYPRE_FORTRAN
       HYPRE_ParCSRPCGCreate(&temp_COMM, &solver);
 #else
-      HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_ParCSRPCGCreate(hypre_MPI_COMM_WORLD, &solver);
 #endif
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -593,7 +593,7 @@ int main (int argc, char *argv[])
 #ifdef HYPRE_FORTRAN
       HYPRE_ParaSailsCreate(&temp_COMM, &precond);
 #else
-      HYPRE_ParaSailsCreate(MPI_COMM_WORLD, &precond);
+      HYPRE_ParaSailsCreate(hypre_MPI_COMM_WORLD, &precond);
 #endif
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -638,10 +638,10 @@ int main (int argc, char *argv[])
 #endif
       if (myid == 0)
       {
-         printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
-         printf("\n");
+         hypre_printf("\n");
+         hypre_printf("Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
       }
 
       /* Destory solver and preconditioner */
@@ -655,7 +655,7 @@ int main (int argc, char *argv[])
    }
    else
    {
-      if (myid ==0) printf("Invalid solver id specified.\n");
+      if (myid ==0) hypre_printf("Invalid solver id specified.\n");
    }
 
    /* Print the solution */
@@ -679,7 +679,7 @@ int main (int argc, char *argv[])
 #endif
 
    /* Finalize MPI*/
-   MPI_Finalize();
+   hypre_MPI_Finalize();
 
    return(0);
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.6 $
+ * $Revision: 1.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,20 +22,30 @@
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
 
-/* F2C_INTEGER will normally be `int' but would be `long' on 16-bit systems */
+#include "_hypre_utilities.h"
+
+#ifdef HYPRE_BIGINT
+typedef long long int HYPRE_LongInt;
+typedef unsigned long long int HYPRE_ULongInt;
+#else 
+typedef long int HYPRE_LongInt;
+typedef unsigned long int HYPRE_ULongInt;
+#endif
+
+/* F2C_INTEGER will normally be `HYPRE_Int' but would be `long' on 16-bit systems */
 /* we assume short, float are OK */
 
-/* integer changed to int - edmond 1/12/00 */
+/* integer changed to HYPRE_Int - edmond 1/12/00 */
 
-typedef int integer;
-typedef unsigned long int /* long */ uinteger;
+typedef HYPRE_Int integer;
+typedef HYPRE_ULongInt uinteger;
 typedef char *address;
 typedef short int shortint;
 typedef float real;
 typedef double doublereal;
 typedef struct { real r, i; } complex;
 typedef struct { doublereal r, i; } doublecomplex;
-typedef long int /* long int */ logical;
+typedef HYPRE_LongInt logical;
 typedef short int shortlogical;
 typedef char logical1;
 typedef char integer1;
@@ -46,7 +56,7 @@ typedef unsigned @F2C_LONGINT@ ulongint;	/* system-dependent */
 #define qbit_clear(a,b)	((a) & ~((ulongint)1 << (b)))
 #define qbit_set(a,b)	((a) |  ((ulongint)1 << (b)))
 #endif
-/* typedef long long int longint; */ /* RDF: removed */
+/* typedef long long HYPRE_Int longint; */ /* RDF: removed */
 
 #define TRUE_ (1)
 #define FALSE_ (0)
@@ -65,9 +75,9 @@ typedef short flag;
 typedef short ftnlen;
 typedef short ftnint;
 #else
-typedef long int /* int or long int */ flag;
-typedef int /* int or long int */ ftnlen; /* changed by edmond */
-typedef long int /* int or long int */ ftnint;
+typedef HYPRE_LongInt /* HYPRE_Int or long HYPRE_Int */ flag;
+typedef HYPRE_Int /* HYPRE_Int or long HYPRE_Int */ ftnlen; /* changed by edmond */
+typedef HYPRE_LongInt /* HYPRE_Int or long HYPRE_Int */ ftnint;
 #endif
 
 /*external read, write*/
@@ -160,23 +170,25 @@ union Multitype {	/* for multiple entry points */
 
 typedef union Multitype Multitype;
 
-/*typedef long int Long;*/	/* No longer used; formerly in Namelist */
+/*typedef long HYPRE_Int Long;*/	/* No longer used; formerly in Namelist */
 
 struct Vardesc {	/* for Namelist */
 	char *name;
 	char *addr;
 	ftnlen *dims;
-	int  type;
+	HYPRE_Int  type;
 	};
 typedef struct Vardesc Vardesc;
 
 struct Namelist {
 	char *name;
 	Vardesc **vars;
-	int nvars;
+	HYPRE_Int nvars;
 	};
 typedef struct Namelist Namelist;
 
+/* The following undefs are to prevent conflicts with external libraries */
+#undef abs
 #define abs(x) ((x) >= 0 ? (x) : -(x))
 #define dabs(x) (doublereal)abs(x)
 #define min(a,b) ((a) <= (b) ? (a) : (b))
@@ -191,7 +203,7 @@ typedef struct Namelist Namelist;
 
 #define F2C_proc_par_types 1
 #ifdef __cplusplus
-typedef int /* Unknown procedure type */ (*U_fp)(...);
+typedef HYPRE_Int /* Unknown procedure type */ (*U_fp)(...);
 typedef shortint (*J_fp)(...);
 typedef integer (*I_fp)(...);
 typedef real (*R_fp)(...);
@@ -201,9 +213,9 @@ typedef /* Double Complex */ VOID (*Z_fp)(...);
 typedef logical (*L_fp)(...);
 typedef shortlogical (*K_fp)(...);
 typedef /* Character */ VOID (*H_fp)(...);
-typedef /* Subroutine */ int (*S_fp)(...);
+typedef /* Subroutine */ HYPRE_Int (*S_fp)(...);
 #else
-typedef int /* Unknown procedure type */ (*U_fp)();
+typedef HYPRE_Int /* Unknown procedure type */ (*U_fp)();
 typedef shortint (*J_fp)();
 typedef integer (*I_fp)();
 typedef real (*R_fp)();
@@ -213,7 +225,7 @@ typedef /* Double Complex */ VOID (*Z_fp)();
 typedef logical (*L_fp)();
 typedef shortlogical (*K_fp)();
 typedef /* Character */ VOID (*H_fp)();
-typedef /* Subroutine */ int (*S_fp)();
+typedef /* Subroutine */ HYPRE_Int (*S_fp)();
 #endif
 /* E_fp is for real functions when -R is not specified */
 typedef VOID C_f;	/* complex function */

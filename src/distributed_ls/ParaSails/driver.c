@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,31 +30,31 @@
  * e.g., thresh > 10.
  */
 
-int main(int argc, char *argv[])
+HYPRE_Int main(HYPRE_Int argc, char *argv[])
 {
-    int mype, npes;
-    int symmetric;
-    int num_runs;
+    HYPRE_Int mype, npes;
+    HYPRE_Int symmetric;
+    HYPRE_Int num_runs;
     Matrix *A;
     ParaSails *ps;
     FILE *file;
-    int n, beg_row, end_row;
+    HYPRE_Int n, beg_row, end_row;
     double time0, time1;
     double setup_time, solve_time;
     double max_setup_time, max_solve_time;
     double cost;
 
     double *x, *b;
-    int i, niter;
+    HYPRE_Int i, niter;
     double thresh;
     double threshg;
-    int nlevels;
+    HYPRE_Int nlevels;
     double filter;
     double loadbal;
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-    MPI_Comm_size(MPI_COMM_WORLD, &npes);
+    hypre_MPI_Init(&argc, &argv);
+    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &mype);
+    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &npes);
 
     /* Read number of rows in matrix */
     symmetric = atoi(argv[1]);
@@ -63,15 +63,15 @@ int main(int argc, char *argv[])
     file = fopen(argv[3], "r");
     assert(file != NULL);
 #ifdef EMSOLVE
-    fscanf(file, "%*d %d\n", &n);
+    hypre_fscanf(file, "%*d %d\n", &n);
 #else
-    fscanf(file, "%d\n", &n);
+    hypre_fscanf(file, "%d\n", &n);
 #endif
     fclose(file);
     assert(n >= npes);
 
-    beg_row = (int) ((double)(mype*n) / npes) + 1; /* assumes 1-based */
-    end_row = (int) ((double)((mype+1)* n) / npes);
+    beg_row = (HYPRE_Int) ((double)(mype*n) / npes) + 1; /* assumes 1-based */
+    end_row = (HYPRE_Int) ((double)((mype+1)* n) / npes);
 
     if (mype == 0)
         assert(beg_row == 1);
@@ -86,11 +86,11 @@ int main(int argc, char *argv[])
     x = (double *) malloc((end_row-beg_row+1) * sizeof(double));
     b = (double *) malloc((end_row-beg_row+1) * sizeof(double));
 
-    A = MatrixCreate(MPI_COMM_WORLD, beg_row, end_row);
+    A = MatrixCreate(hypre_MPI_COMM_WORLD, beg_row, end_row);
 
     MatrixRead(A, argv[3]);
     if (mype == 0) 
-        printf("%s\n", argv[3]);
+        hypre_printf("%s\n", argv[3]);
 
     /* MatrixPrint(A, "A"); */
 
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     {
         RhsRead(b, A, argv[4]);
         if (mype == 0) 
-            printf("Using rhs from %s\n", argv[4]);
+            hypre_printf("Using rhs from %s\n", argv[4]);
     }
     else
     {
@@ -125,25 +125,25 @@ int main(int argc, char *argv[])
             if (mype == 0)
             {
 #if PARASAILS_EXT_PATTERN
-                printf("Enter parameters threshg, thresh, nlevels, "
+                hypre_printf("Enter parameters threshg, thresh, nlevels, "
 	            "filter, beta:\n");
 	        fflush(stdout);
-                scanf("%lf %lf %d %lf %lf", &threshg, &thresh, &nlevels, 
+                hypre_scanf("%lf %lf %d %lf %lf", &threshg, &thresh, &nlevels, 
 		    &filter, &loadbal);
 #else
-                printf("Enter parameters thresh, nlevels, "
+                hypre_printf("Enter parameters thresh, nlevels, "
 	            "filter, beta:\n");
 	        fflush(stdout);
-                scanf("%lf %d %lf %lf", &thresh, &nlevels, 
+                hypre_scanf("%lf %d %lf %lf", &thresh, &nlevels, 
 		    &filter, &loadbal);
 #endif
 	    }
 
-	    MPI_Bcast(&threshg, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	    MPI_Bcast(&thresh,  1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	    MPI_Bcast(&nlevels, 1, MPI_INT,    0, MPI_COMM_WORLD);
-	    MPI_Bcast(&filter,  1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	    MPI_Bcast(&loadbal, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&threshg, 1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&thresh,  1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&nlevels, 1, HYPRE_MPI_INT,    0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&filter,  1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&loadbal, 1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
 
             if (nlevels < 0)
                 break;
@@ -153,10 +153,10 @@ int main(int argc, char *argv[])
 	 * Setup phase   
 	 **************/
 
-        MPI_Barrier(MPI_COMM_WORLD);
-        time0 = MPI_Wtime();
+        hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+        time0 = hypre_MPI_Wtime();
 
-        ps = ParaSailsCreate(MPI_COMM_WORLD, beg_row, end_row, symmetric);
+        ps = ParaSailsCreate(hypre_MPI_COMM_WORLD, beg_row, end_row, symmetric);
 
         ps->loadbal_beta = loadbal;
 
@@ -166,27 +166,27 @@ int main(int argc, char *argv[])
         ParaSailsSetupPattern(ps, A, thresh, nlevels);
 #endif
 
-        time1 = MPI_Wtime();
+        time1 = hypre_MPI_Wtime();
 	setup_time = time1-time0;
 
         cost = ParaSailsStatsPattern(ps, A);
 	if (cost > 5.e11)
 	{
-            printf("Aborting setup and solve due to high cost.\n");
+            hypre_printf("Aborting setup and solve due to high cost.\n");
 	    goto cleanup;
 	}
 
-        MPI_Barrier(MPI_COMM_WORLD);
-        time0 = MPI_Wtime();
+        hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+        time0 = hypre_MPI_Wtime();
 
         err = ParaSailsSetupValues(ps, A, filter);
         if (err != 0)
 	{
-            printf("ParaSailsSetupValues returned error.\n");
+            hypre_printf("ParaSailsSetupValues returned error.\n");
 	    goto cleanup;
 	}
 
-        time1 = MPI_Wtime();
+        time1 = hypre_MPI_Wtime();
 	setup_time += (time1-time0);
 
         ParaSailsStatsValues(ps, A);
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 
 #if 0
         if (mype == 0) 
-            printf("SETTING UP VALUES AGAIN WITH FILTERED PATTERN\n");
+            hypre_printf("SETTING UP VALUES AGAIN WITH FILTERED PATTERN\n");
         ps->loadbal_beta = 0;
         ParaSailsSetupValues(ps, A, 0.0);
 #endif
@@ -209,29 +209,29 @@ int main(int argc, char *argv[])
         if (MatrixNnz(ps->M) == n) /* if diagonal preconditioner */
 	    niter = 5000;
 
-        MPI_Barrier(MPI_COMM_WORLD);
-        time0 = MPI_Wtime();
+        hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+        time0 = hypre_MPI_Wtime();
 
         if (symmetric == 1)
             PCG_ParaSails(A, ps, b, x, 1.e-8, niter);
 	else
             FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, niter);
 
-        time1 = MPI_Wtime();
+        time1 = hypre_MPI_Wtime();
 	solve_time = time1-time0;
 
-        MPI_Reduce(&setup_time, &max_setup_time, 1, MPI_DOUBLE, MPI_MAX, 0, 
-	    MPI_COMM_WORLD);
-        MPI_Reduce(&solve_time, &max_solve_time, 1, MPI_DOUBLE, MPI_MAX, 0, 
-	    MPI_COMM_WORLD);
+        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, 
+	    hypre_MPI_COMM_WORLD);
+        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, 
+	    hypre_MPI_COMM_WORLD);
 
 	if (mype == 0)
 	{
-            printf("**********************************************\n");
-            printf("***    Setup    Solve    Total\n");
-            printf("III %8.1f %8.1f %8.1f\n", max_setup_time, max_solve_time, 
+            hypre_printf("**********************************************\n");
+            hypre_printf("***    Setup    Solve    Total\n");
+            hypre_printf("III %8.1f %8.1f %8.1f\n", max_setup_time, max_solve_time, 
 		max_setup_time+max_solve_time);
-            printf("**********************************************\n");
+            hypre_printf("**********************************************\n");
 	}
 
 cleanup:
@@ -244,7 +244,7 @@ cleanup:
     free(b);
 
     MatrixDestroy(A);
-    MPI_Finalize();
+    hypre_MPI_Finalize();
 
     return 0;
 }

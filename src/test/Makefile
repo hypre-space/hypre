@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.57 $
+# $Revision: 1.58 $
 #EHEADER**********************************************************************
 
 
@@ -41,7 +41,8 @@ F77_COMPILE_FLAGS = \
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
-LIBFLAGS = ${LDFLAGS} ${LIBS} ${FLIBS}
+LIBFLAGS = ${LDFLAGS} ${LIBS}
+# LIBFLAGS = ${LDFLAGS} ${LIBS} ${FLIBS}
 
 LFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\

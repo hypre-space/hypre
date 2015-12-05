@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -35,17 +35,17 @@
 
 
 
-int
+HYPRE_Int
 hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
-			       int                *dof_func,
-			       int                 num_functions,
+			       HYPRE_Int                *dof_func,
+			       HYPRE_Int                 num_functions,
 
-			       int		   option,
-			       int               **i_domain_dof_pointer,
-			       int               **j_domain_dof_pointer,
+			       HYPRE_Int		   option,
+			       HYPRE_Int               **i_domain_dof_pointer,
+			       HYPRE_Int               **j_domain_dof_pointer,
 			       double            **domain_matrixinverse_pointer,
-			       int                *num_domains_pointer)
+			       HYPRE_Int                *num_domains_pointer)
 
 {
 
@@ -53,38 +53,38 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 		    1: next to nodal symGS (overlapping Schwarz) */
 	
 
-  int *i_domain_dof, *j_domain_dof;
+  HYPRE_Int *i_domain_dof, *j_domain_dof;
   double *domain_matrixinverse;
-  int num_domains;
+  HYPRE_Int num_domains;
 
 
-  int *i_dof_node, *j_dof_node;
-  int *i_node_dof, *j_node_dof;
+  HYPRE_Int *i_dof_node, *j_dof_node;
+  HYPRE_Int *i_node_dof, *j_node_dof;
 
-  int *i_node_dof_dof, *j_node_dof_dof;
+  HYPRE_Int *i_node_dof_dof, *j_node_dof_dof;
 
-  int *i_node_node, *j_node_node;
+  HYPRE_Int *i_node_node, *j_node_node;
 
-  int num_nodes;
+  HYPRE_Int num_nodes;
 
-  int *i_dof_dof = hypre_CSRMatrixI(A);
-  int *j_dof_dof = hypre_CSRMatrixJ(A);
+  HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
+  HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
   double *a_dof_dof = hypre_CSRMatrixData(A);
-  int num_dofs = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
 
-  int ierr = 0;
-  int i,j,k, l_loc, i_loc, j_loc;
-  int i_dof, j_dof;
-  int *i_local_to_global;
-  int *i_global_to_local;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k, l_loc, i_loc, j_loc;
+  HYPRE_Int i_dof, j_dof;
+  HYPRE_Int *i_local_to_global;
+  HYPRE_Int *i_global_to_local;
 
-  int *i_int;
-  int *i_int_to_local;
+  HYPRE_Int *i_int;
+  HYPRE_Int *i_int_to_local;
 
-  int int_dof_counter, local_dof_counter, max_local_dof_counter=0; 
+  HYPRE_Int int_dof_counter, local_dof_counter, max_local_dof_counter=0; 
 
-  int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
+  HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
   double *AE, *XE;
@@ -93,7 +93,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   /* PCG arrays: --------------------------------------------------- 
   double *x, *rhs, *v, *w, *d, *aux;
 
-  int max_iter;
+  HYPRE_Int max_iter;
 
   ------------------------------------------------------------------ */
 
@@ -104,11 +104,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   num_nodes = num_dofs / num_functions;
 
-  printf("\nnum_nodes: %d, num_dofs: %d = %d x %d\n", num_nodes, num_dofs,
+  hypre_printf("\nnum_nodes: %d, num_dofs: %d = %d x %d\n", num_nodes, num_dofs,
 	 num_nodes, num_functions);
 
-  i_dof_node = hypre_CTAlloc(int, num_dofs+1);
-  j_dof_node = hypre_CTAlloc(int, num_dofs);
+  i_dof_node = hypre_CTAlloc(HYPRE_Int, num_dofs+1);
+  j_dof_node = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
   for (i=0; i < num_dofs+1; i++)
     i_dof_node[i] = i;
@@ -196,12 +196,12 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   num_domains = num_nodes;
 
   
-  i_domain_dof = hypre_CTAlloc(int, num_domains+1);
+  i_domain_dof = hypre_CTAlloc(HYPRE_Int, num_domains+1);
 
   if (option == 1)
-    j_domain_dof = hypre_CTAlloc(int, domain_dof_counter);
+    j_domain_dof = hypre_CTAlloc(HYPRE_Int, domain_dof_counter);
   else
-    j_domain_dof = hypre_CTAlloc(int, num_dofs);
+    j_domain_dof = hypre_CTAlloc(HYPRE_Int, num_dofs);
 
 
   if (option == 1)
@@ -211,7 +211,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
 
-  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
   AE = hypre_CTAlloc(double, max_local_dof_counter *
@@ -222,8 +222,8 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   XE = hypre_CTAlloc(double, max_local_dof_counter *
 		     max_local_dof_counter);
 
-  i_int_to_local = hypre_CTAlloc(int, max_local_dof_counter);
-  i_int          = hypre_CTAlloc(int, max_local_dof_counter);
+  i_int_to_local = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
+  i_int          = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
 
@@ -256,7 +256,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
       for (j=i_node_dof[i]; j < i_node_dof[i+1]; j++)
 	for (k=i_dof_dof[j_node_dof[j]]; k < i_dof_dof[j_node_dof[j]+1]; k++)
 	  if (i_global_to_local[j_dof_dof[k]] < 0)
-	    printf("WRONG local indexing: ====================== \n");
+	    hypre_printf("WRONG local indexing: ====================== \n");
 
 
       int_dof_counter = 0;
@@ -292,7 +292,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	  /* get block for Schwarz smoother: ============================= */
 	  ierr = matinv(XE, AE, local_dof_counter); 
 
-	  /* printf("ierr_AE_inv: %d\n", ierr); */
+	  /* hypre_printf("ierr_AE_inv: %d\n", ierr); */
   
 	}
 
@@ -395,7 +395,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
 
-  /* printf("exit *Schwarz*: ===============================\n\n"); */
+  /* hypre_printf("exit *Schwarz*: ===============================\n\n"); */
 
   /* -----------------------------------------------------------------
    x   = hypre_CTAlloc(double, num_dofs); 
@@ -415,7 +415,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
    max_iter = 1000;
 
-   printf("\nenter SchwarzPCG: =======================================\n");
+   hypre_printf("\nenter SchwarzPCG: =======================================\n");
 
    ierr = hypre_Schwarzpcg(x, rhs,
 			   a_dof_dof,
@@ -433,9 +433,9 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 			   num_dofs);
 
 
-   printf("\n\n=======================================================\n");
-   printf("             END test PCG solve:                           \n");
-   printf("===========================================================\n");
+   hypre_printf("\n\n=======================================================\n");
+   hypre_printf("             END test PCG solve:                           \n");
+   hypre_printf("===========================================================\n");
  
    hypre_TFree(x);
    hypre_TFree(rhs);
@@ -452,29 +452,29 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 }
 
-int hypre_SchwarzSolve(hypre_CSRMatrix *A,
+HYPRE_Int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 		       hypre_Vector *rhs_vector,
-		       int num_domains,
-		       int *i_domain_dof,
-		       int *j_domain_dof,
+		       HYPRE_Int num_domains,
+		       HYPRE_Int *i_domain_dof,
+		       HYPRE_Int *j_domain_dof,
 		       double *domain_matrixinverse,
 		       hypre_Vector *x_vector,
 		       hypre_Vector *aux_vector)
 
 {
-  int ierr = 0;
-  /* int num_dofs; */
-  int *i_dof_dof;
-  int *j_dof_dof;
+  HYPRE_Int ierr = 0;
+  /* HYPRE_Int num_dofs; */
+  HYPRE_Int *i_dof_dof;
+  HYPRE_Int *j_dof_dof;
   double *a_dof_dof;
   double *x;
   double *rhs;
   double *aux;
 
-  int i,j,k, j_loc, k_loc;
+  HYPRE_Int i,j,k, j_loc, k_loc;
 
 
-  int matrix_size, matrix_size_counter = 0;
+  HYPRE_Int matrix_size, matrix_size_counter = 0;
 
 
   /* initiate:      ----------------------------------------------- */
@@ -564,26 +564,26 @@ int hypre_SchwarzSolve(hypre_CSRMatrix *A,
 
 }
 
-int 
-transpose_matrix_create(  int **i_face_element_pointer,
-			  int **j_face_element_pointer,
+HYPRE_Int 
+transpose_matrix_create(  HYPRE_Int **i_face_element_pointer,
+			  HYPRE_Int **j_face_element_pointer,
 
-			  int *i_element_face, int *j_element_face,
+			  HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
 
-			  int num_elements, int num_faces)
+			  HYPRE_Int num_elements, HYPRE_Int num_faces)
 
 {
   /* FILE *f; */
-  int ierr =0, i, j;
+  HYPRE_Int ierr =0, i, j;
 
-  int *i_face_element, *j_face_element;
+  HYPRE_Int *i_face_element, *j_face_element;
 
   /* ======================================================================
      first create face_element graph: -------------------------------------
      ====================================================================== */
 
-  i_face_element = (int *) malloc((num_faces+1) * sizeof(int));
-  j_face_element = (int *) malloc(i_element_face[num_elements] * sizeof(int));
+  i_face_element = (HYPRE_Int *) malloc((num_faces+1) * sizeof(HYPRE_Int));
+  j_face_element = (HYPRE_Int *) malloc(i_element_face[num_elements] * sizeof(HYPRE_Int));
 
 
   for (i=0; i < num_faces; i++)
@@ -610,7 +610,7 @@ transpose_matrix_create(  int **i_face_element_pointer,
 
   i_face_element[0] = 0;
 
-  /* printf("end building face--element graph: ++++++++++++++++++\n"); */
+  /* hypre_printf("end building face--element graph: ++++++++++++++++++\n"); */
 
   /* END building face_element graph; ================================ */
 
@@ -620,30 +620,30 @@ transpose_matrix_create(  int **i_face_element_pointer,
   return ierr;
 
 }
-int 
-matrix_matrix_product(    int **i_element_edge_pointer, 
-			  int **j_element_edge_pointer,
+HYPRE_Int 
+matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer, 
+			  HYPRE_Int **j_element_edge_pointer,
 
-			  int *i_element_face, int *j_element_face,
-			  int *i_face_edge, int *j_face_edge,
+			  HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
+			  HYPRE_Int *i_face_edge, HYPRE_Int *j_face_edge,
 
-			  int num_elements, int num_faces, int num_edges)
+			  HYPRE_Int num_elements, HYPRE_Int num_faces, HYPRE_Int num_edges)
 
 {
   /* FILE *f; */
-  int ierr =0, i, j, k, l, m;
+  HYPRE_Int ierr =0, i, j, k, l, m;
 
-  int i_edge_on_local_list, i_edge_on_list;
-  int local_element_edge_counter = 0, element_edge_counter = 0;
-  int *j_local_element_edge;
+  HYPRE_Int i_edge_on_local_list, i_edge_on_list;
+  HYPRE_Int local_element_edge_counter = 0, element_edge_counter = 0;
+  HYPRE_Int *j_local_element_edge;
 
   
-  int *i_element_edge, *j_element_edge;
+  HYPRE_Int *i_element_edge, *j_element_edge;
 
 
-  j_local_element_edge = (int *) malloc((num_edges+1) * sizeof(int));
+  j_local_element_edge = (HYPRE_Int *) malloc((num_edges+1) * sizeof(HYPRE_Int));
 
-  i_element_edge = (int *) malloc((num_elements+1) * sizeof(int));
+  i_element_edge = (HYPRE_Int *) malloc((num_elements+1) * sizeof(HYPRE_Int));
 
   for (i=0; i < num_elements+1; i++)
     i_element_edge[i] = 0;
@@ -659,7 +659,7 @@ matrix_matrix_product(    int **i_element_edge_pointer,
 	    {
 	      /* element i  and edge j_face_edge[l] are connected */
 	    
-	      /* printf("element %d  contains edge %d;\n",
+	      /* hypre_printf("element %d  contains edge %d;\n",
 		     i, j_face_edge[l]);  */
 
 	      i_edge_on_local_list = -1;
@@ -691,8 +691,8 @@ matrix_matrix_product(    int **i_element_edge_pointer,
 
   i_element_edge[0] = 0;
 
-  j_element_edge = (int *) malloc(i_element_edge[num_elements]
-				     * sizeof(int));
+  j_element_edge = (HYPRE_Int *) malloc(i_element_edge[num_elements]
+				     * sizeof(HYPRE_Int));
 
   /* fill--in the actual j_element_edge array: --------------------- */
 
@@ -721,7 +721,7 @@ matrix_matrix_product(    int **i_element_edge_pointer,
 		  if (element_edge_counter >= 
 		      i_element_edge[num_elements])
 		    {
-		      printf("error in j_element_edge size: %d \n",
+		      hypre_printf("error in j_element_edge size: %d \n",
 			     element_edge_counter);
 		      break;
 		    }
@@ -741,20 +741,20 @@ matrix_matrix_product(    int **i_element_edge_pointer,
   f = fopen("element_edge", "w");
   for (i=0; i < num_elements; i++)
     {   
-      printf("\nelement: %d has edges:\n", i);  
+      hypre_printf("\nelement: %d has edges:\n", i);  
       for (j=i_element_edge[i]; j < i_element_edge[i+1]; j++)
 	{
-	  printf("%d ", j_element_edge[j]); 
-	  fprintf(f, "%d %d\n", i, j_element_edge[j]);
+	  hypre_printf("%d ", j_element_edge[j]); 
+	  hypre_fprintf(f, "%d %d\n", i, j_element_edge[j]);
 	}
 	  
-      printf("\n"); 
+      hypre_printf("\n"); 
     }
 
   fclose(f);
   */
 
-  /* printf("end element_edge computation: ++++++++++++++++++++++++ \n");*/
+  /* hypre_printf("end element_edge computation: ++++++++++++++++++++++++ \n");*/
 
   *i_element_edge_pointer = i_element_edge;
   *j_element_edge_pointer = j_element_edge;
@@ -776,46 +776,46 @@ matrix_matrix_product(    int **i_element_edge_pointer,
  *             in AMG); 
  *
  *****************************************************************************/
-int
+HYPRE_Int
 hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
 
-			 int                 **i_domain_dof_pointer,
-			 int                 **j_domain_dof_pointer,
+			 HYPRE_Int                 **i_domain_dof_pointer,
+			 HYPRE_Int                 **j_domain_dof_pointer,
 			 double              **domain_matrixinverse_pointer,
 
 
-			 int                 *num_domains_pointer) 
+			 HYPRE_Int                 *num_domains_pointer) 
 
 {
 
-  int *i_domain_dof, *j_domain_dof;
+  HYPRE_Int *i_domain_dof, *j_domain_dof;
   double *domain_matrixinverse;
-  int num_domains;
+  HYPRE_Int num_domains;
   
 
-  int *i_dof_dof = hypre_CSRMatrixI(A);
-  int *j_dof_dof = hypre_CSRMatrixJ(A);
+  HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
+  HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
   double *a_dof_dof = hypre_CSRMatrixData(A);
-  int num_dofs = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int num_dofs = hypre_CSRMatrixNumRows(A);
 
-  /* int *i_dof_to_accept_weight; */
-  int *i_dof_to_prefer_weight,
+  /* HYPRE_Int *i_dof_to_accept_weight; */
+  HYPRE_Int *i_dof_to_prefer_weight,
     *w_dof_dof, *i_dof_weight;
-  int *i_dof_to_aggregate, *i_aggregate_dof, *j_aggregate_dof;
+  HYPRE_Int *i_dof_to_aggregate, *i_aggregate_dof, *j_aggregate_dof;
   
-  int *i_dof_index;
+  HYPRE_Int *i_dof_index;
 
-  int ierr = 0;
-  int i,j,k,  l_loc, i_loc, j_loc;
-  int i_dof;
-  int *i_local_to_global;
-  int *i_global_to_local;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i,j,k,  l_loc, i_loc, j_loc;
+  HYPRE_Int i_dof;
+  HYPRE_Int *i_local_to_global;
+  HYPRE_Int *i_global_to_local;
 
 
-  int local_dof_counter, max_local_dof_counter=0; 
+  HYPRE_Int local_dof_counter, max_local_dof_counter=0; 
 
-  int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
+  HYPRE_Int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
 
   double *AE, *XE;
@@ -823,7 +823,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   /* PCG arrays: --------------------------------------------------- */
   /* double *x, *rhs, *v, *w, *d, *aux;
 
-  int max_iter; */
+  HYPRE_Int max_iter; */
 
   /* --------------------------------------------------------------------- */
 
@@ -831,11 +831,11 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   /*    create artificial domains by agglomeration;                        */
   /*=======================================================================*/
 
-  printf("----------- create artificials domain by agglomeration;  ======\n");
+  hypre_printf("----------- create artificials domain by agglomeration;  ======\n");
 
 
-  i_dof_to_prefer_weight = (int *) malloc(num_dofs * sizeof(int));
-  w_dof_dof = (int *) malloc(i_dof_dof[num_dofs] * sizeof(int));
+  i_dof_to_prefer_weight = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
+  w_dof_dof = (HYPRE_Int *) malloc(i_dof_dof[num_dofs] * sizeof(HYPRE_Int));
 
   for (i=0; i < num_dofs; i++)
     i_dof_to_prefer_weight[i] = 0;
@@ -850,12 +850,12 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
       }
 
 
-  printf("end computing weights for agglomeration procedure: --------\n");
+  hypre_printf("end computing weights for agglomeration procedure: --------\n");
 
 
-  i_dof_weight = (int *) malloc(num_dofs * sizeof(int));
-  i_aggregate_dof = (int *) malloc(num_dofs * sizeof(int));
-  j_aggregate_dof= (int *) malloc(num_dofs * sizeof(int));
+  i_dof_weight = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
+  i_aggregate_dof = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
+  j_aggregate_dof= (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
   ierr = hypre_AMGeAgglomerate(i_aggregate_dof, j_aggregate_dof,
 
 			       i_dof_dof, j_dof_dof, w_dof_dof,
@@ -871,27 +871,27 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
 
 
-  printf("num_dofs: %d, num_domains: %d\n", num_dofs, num_domains);
+  hypre_printf("num_dofs: %d, num_domains: %d\n", num_dofs, num_domains);
 
-  i_dof_to_aggregate = (int *) malloc(num_dofs * sizeof(int));
+  i_dof_to_aggregate = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
   for (i=0; i < num_domains; i++)
     for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
       i_dof_to_aggregate[j_aggregate_dof[j]] = i;
 
 
   /*
-  printf("========================================================\n");
-  printf("== artificial non--overlapping domains (aggregates): ===\n");
-  printf("========================================================\n");
+  hypre_printf("========================================================\n");
+  hypre_printf("== artificial non--overlapping domains (aggregates): ===\n");
+  hypre_printf("========================================================\n");
 
 
   for (i=0; i < num_domains; i++)
     {
-      printf("\n aggregate %d:\n", i);
+      hypre_printf("\n aggregate %d:\n", i);
       for (j=i_aggregate_dof[i]; j < i_aggregate_dof[i+1]; j++)
-	printf("%d, ", j_aggregate_dof[j]);
+	hypre_printf("%d, ", j_aggregate_dof[j]);
 
-      printf("\n");
+      hypre_printf("\n");
     }
     */
 
@@ -904,9 +904,9 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   /* make domains from aggregates: *********************************/
 
 
-  i_domain_dof = (int *) malloc((num_domains+1) * sizeof(int));
+  i_domain_dof = (HYPRE_Int *) malloc((num_domains+1) * sizeof(HYPRE_Int));
 
-  i_dof_index = (int *) malloc(num_dofs * sizeof(int));
+  i_dof_index = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int));
 
   for (i=0; i < num_dofs; i++)
     i_dof_index[i] = -1;
@@ -933,7 +933,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
     }
 
   i_domain_dof[num_domains] =  domain_dof_counter;
-  j_domain_dof = (int *) malloc(domain_dof_counter * sizeof(int));
+  j_domain_dof = (HYPRE_Int *) malloc(domain_dof_counter * sizeof(HYPRE_Int));
 
   domain_dof_counter=0;
   for (i=0; i < num_domains; i++)
@@ -965,7 +965,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   i_domain_dof = i_aggregate_dof;
   j_domain_dof = j_aggregate_dof;
   */
-  printf("END domain_dof computations: =================================\n");
+  hypre_printf("END domain_dof computations: =================================\n");
 
   domain_matrixinverse_counter = 0;
   local_dof_counter = 0;
@@ -982,7 +982,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   domain_matrixinverse = hypre_CTAlloc(double, domain_matrixinverse_counter);
 
 
-  i_local_to_global = hypre_CTAlloc(int, max_local_dof_counter);
+  i_local_to_global = hypre_CTAlloc(HYPRE_Int, max_local_dof_counter);
 
 
   AE = hypre_CTAlloc(double, max_local_dof_counter *
@@ -991,7 +991,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   XE = hypre_CTAlloc(double, max_local_dof_counter *
 		     max_local_dof_counter);
 
-  /* i_dof_index = (int *) malloc(num_dofs * sizeof(int)); */
+  /* i_dof_index = (HYPRE_Int *) malloc(num_dofs * sizeof(HYPRE_Int)); */
   i_global_to_local = i_dof_index;
 
   for (i=0; i < num_dofs; i++)
@@ -1032,7 +1032,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
       ierr = matinv(XE, AE, local_dof_counter);
 
 
-      /* printf("ierr_AE_inv: %d\n", ierr); */
+      /* hypre_printf("ierr_AE_inv: %d\n", ierr); */
   
 
       for (i_loc=0; i_loc < local_dof_counter; i_loc++)
@@ -1087,7 +1087,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
    max_iter = 1000;
 
-   printf("\nenter SchwarzPCG: =======================================\n");
+   hypre_printf("\nenter SchwarzPCG: =======================================\n");
 
    ierr = hypre_Schwarzpcg(x, rhs,
 			   a_dof_dof,
@@ -1105,9 +1105,9 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 			   num_dofs);
 
 
-   printf("\n\n=======================================================\n");
-   printf("             END test PCG solve:                           \n");
-   printf("===========================================================\n");
+   hypre_printf("\n\n=======================================================\n");
+   hypre_printf("             END test PCG solve:                           \n");
+   hypre_printf("===========================================================\n");
  
    hypre_TFree(x);
    hypre_TFree(rhs);
@@ -1131,38 +1131,38 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 /* unacceptable faces: i_face_to_prefer_weight[] = -1; ------------------*/
 
 
-int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
+HYPRE_Int hypre_AMGeAgglomerate(HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element,
 
-			  int *i_face_face, int *j_face_face, int *w_face_face,
+			  HYPRE_Int *i_face_face, HYPRE_Int *j_face_face, HYPRE_Int *w_face_face,
 		     
-			  int *i_face_element, int *j_face_element,
-			  int *i_element_face, int *j_element_face,
+			  HYPRE_Int *i_face_element, HYPRE_Int *j_face_element,
+			  HYPRE_Int *i_element_face, HYPRE_Int *j_element_face,
 
-			  int *i_face_to_prefer_weight,
-			  int *i_face_weight,
+			  HYPRE_Int *i_face_to_prefer_weight,
+			  HYPRE_Int *i_face_weight,
 
-			  int num_faces, int num_elements,
-			  int *num_AEs_pointer)
+			  HYPRE_Int num_faces, HYPRE_Int num_elements,
+			  HYPRE_Int *num_AEs_pointer)
 {
 
-  int ierr = 0;
-  int i, j, k, l;
+  HYPRE_Int ierr = 0;
+  HYPRE_Int i, j, k, l;
 
-  int face_to_eliminate;
-  int max_weight_old, max_weight;
+  HYPRE_Int face_to_eliminate;
+  HYPRE_Int max_weight_old, max_weight;
 
-  int AE_counter=0, AE_element_counter=0;
+  HYPRE_Int AE_counter=0, AE_element_counter=0;
 
-  /* int i_element_face_counter; */
+  /* HYPRE_Int i_element_face_counter; */
 
-  int *i_element_to_AE;
+  HYPRE_Int *i_element_to_AE;
 
-  int *previous, *next, *first;
-  int head, tail, last;
+  HYPRE_Int *previous, *next, *first;
+  HYPRE_Int head, tail, last;
 
-  int face_max_weight, face_local_max_weight, preferred_weight;
+  HYPRE_Int face_max_weight, face_local_max_weight, preferred_weight;
 
-  int weight, weight_max;
+  HYPRE_Int weight, weight_max;
 
   max_weight = 1;
   for (i=0; i < num_faces; i++)
@@ -1173,14 +1173,14 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
       if (max_weight < weight) max_weight = weight;
     }
 
-  first = hypre_CTAlloc(int, max_weight+1);
+  first = hypre_CTAlloc(HYPRE_Int, max_weight+1);
 
 
 
-  next = hypre_CTAlloc(int, num_faces);
+  next = hypre_CTAlloc(HYPRE_Int, num_faces);
 
 
-  previous = hypre_CTAlloc(int, num_faces+1);
+  previous = hypre_CTAlloc(HYPRE_Int, num_faces+1);
 
 
   tail = num_faces;
@@ -1198,7 +1198,7 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
   for (weight=1; weight <= max_weight; weight++)
     first[weight] = tail;
 
-  i_element_to_AE = hypre_CTAlloc(int, num_elements);
+  i_element_to_AE = hypre_CTAlloc(HYPRE_Int, num_elements);
 
   /*=======================================================================
                      AGGLOMERATION PROCEDURE:
@@ -1292,7 +1292,7 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
 
   if (face_max_weight == -1)
     {
-      printf("all faces are unacceptable, i.e., no faces to eliminate !\n");
+      hypre_printf("all faces are unacceptable, i.e., no faces to eliminate !\n");
 
       *num_AEs_pointer = 1;
 
@@ -1392,7 +1392,7 @@ eliminate_face:
 
 	weight = i_face_weight[j_face_face[j]];
 
-	/* printf("update entry: %d\n", j_face_face[j]);  */
+	/* hypre_printf("update entry: %d\n", j_face_face[j]);  */
 
 	last = previous[tail];
 	if (last == head) 
@@ -1487,7 +1487,7 @@ eliminate_face:
       
   if (AE_element_counter > i_AE_element[AE_counter]) 
     {
-      /* printf("completing agglomerated element: %d\n", 
+      /* hypre_printf("completing agglomerated element: %d\n", 
 		  AE_counter);   */ 
       AE_counter++;
     }
@@ -1504,7 +1504,7 @@ eliminate_face:
   weight_max = i_face_weight[last];
 
       
-  /* printf("global search: ======================================\n"); */
+  /* hypre_printf("global search: ======================================\n"); */
 
   face_max_weight = -1;
 
@@ -1660,13 +1660,13 @@ end_agglomerate:
   return ierr;
 }
 
-int update_entry(int weight, int *weight_max, 
-		 int *previous, int *next, int *first, int *last,
-		 int head, int tail, 
-		 int i)
+HYPRE_Int update_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
+		 HYPRE_Int head, HYPRE_Int tail, 
+		 HYPRE_Int i)
 
 {
-  int ierr = 0, weight0;
+  HYPRE_Int ierr = 0, weight0;
 
   if (previous[i] != head) next[previous[i]] = next[i];
   previous[next[i]] = previous[i];
@@ -1676,15 +1676,15 @@ int update_entry(int weight, int *weight_max,
     {
       if (weight <= weight_max[0]) 
 	{
-	  printf("ERROR IN UPDATE_ENTRY: ===================\n");
-	  printf("weight: %d, weight_max: %d\n",
+	  hypre_printf("ERROR IN UPDATE_ENTRY: ===================\n");
+	  hypre_printf("weight: %d, weight_max: %d\n",
 		 weight, weight_max[0]);
 	  return -1;
 	}
       for (weight0=weight_max[0]+1; weight0 <= weight; weight0++)
 	{
 	  first[weight0] = i;
-	  /* printf("create first[%d] = %d\n", weight0, i); */
+	  /* hypre_printf("create first[%d] = %d\n", weight0, i); */
 	}
 
 	  previous[i] = previous[tail];
@@ -1715,26 +1715,26 @@ int update_entry(int weight, int *weight_max,
     
 }
 
-int remove_entry(int weight, int *weight_max, 
-		 int *previous, int *next, int *first, int *last,
-		 int head, int tail, 
-		 int i)
+HYPRE_Int remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
+		 HYPRE_Int head, HYPRE_Int tail, 
+		 HYPRE_Int i)
 {
-  int ierr=0, weight0;
+  HYPRE_Int ierr=0, weight0;
 
   if (previous[i] != head) next[previous[i]] = next[i];
   previous[next[i]] = previous[i];
 
   for (weight0=1; weight0 <= weight_max[0]; weight0++)
     {
-      /* printf("first[%d}: %d\n", weight0,  first[weight0]); */
+      /* hypre_printf("first[%d}: %d\n", weight0,  first[weight0]); */
       if (first[weight0] == i)
 	{
 	  first[weight0] = next[i];
-	  /* printf("shift: first[%d]= %d to %d\n",
+	  /* hypre_printf("shift: first[%d]= %d to %d\n",
 		 weight0, i, next[i]);
 	  if (i == last[0]) 
-	    printf("i= last[0]: %d\n", i); */
+	    hypre_printf("i= last[0]: %d\n", i); */
 	}
     }
 
@@ -1745,12 +1745,12 @@ int remove_entry(int weight, int *weight_max,
 
 }
 
-int move_entry(int weight, int *weight_max, 
-	       int *previous, int *next, int *first, int *last,
-	       int head, int tail, 
-	       int i)
+HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+	       HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
+	       HYPRE_Int head, HYPRE_Int tail, 
+	       HYPRE_Int i)
 {
-  int ierr=0, weight0;
+  HYPRE_Int ierr=0, weight0;
 
   if (previous[i] != head) next[previous[i]] = next[i];
   previous[next[i]] = previous[i];

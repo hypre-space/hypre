@@ -7,9 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
-
 
 /******************************************************************************
  *
@@ -26,15 +25,16 @@
 
 void
 hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
-   (int      *ndim,
-    int      *size,
-    long int *stencil_ptr,
-    int      *ierr)
+   (hypre_F90_Int *ndim,
+    hypre_F90_Int *size,
+    hypre_F90_Obj *stencil_ptr,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilCreate(
-                     (int)                   *ndim,
-                     (int)                   *size,
-                     (HYPRE_SStructStencil *) stencil_ptr ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructStencilCreate(
+          hypre_F90_PassInt (ndim),
+          hypre_F90_PassInt (size),
+          hypre_F90_PassObjRef (HYPRE_SStructStencil, stencil_ptr) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -43,11 +43,12 @@ hypre_F90_IFACE(hypre_sstructstencilcreate, HYPRE_SSTRUCTSTENCILCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
-   (long int *stencil,
-    int      *ierr)
+   (hypre_F90_Obj *stencil,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilDestroy(
-                     (HYPRE_SStructStencil) *stencil ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructStencilDestroy(
+          hypre_F90_PassObj (HYPRE_SStructStencil, stencil) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -56,15 +57,16 @@ hypre_F90_IFACE(hypre_sstructstencildestroy, HYPRE_SSTRUCTSTENCILDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructstencilsetentry, HYPRE_SSTRUCTSTENCILSETENTRY)
-   (long int *stencil,
-    int      *entry,
-    int      *offset,
-    int      *var,
-    int      *ierr)
+   (hypre_F90_Obj *stencil,
+    hypre_F90_Int *entry,
+    hypre_F90_IntArray *offset,
+    hypre_F90_Int *var,
+    hypre_F90_Int *ierr)
 {
-   *ierr = (int) (HYPRE_SStructStencilSetEntry(
-                     (HYPRE_SStructStencil) *stencil,
-                     (int)                  *entry,
-                     (int *)                 offset,
-                     (int)                  *var ) );
+   *ierr = (hypre_F90_Int)
+      (HYPRE_SStructStencilSetEntry(
+          hypre_F90_PassObj (HYPRE_SStructStencil, stencil),
+          hypre_F90_PassInt (entry),
+          hypre_F90_PassIntArray (offset),
+          hypre_F90_PassInt (var) ) );
 }

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,7 +27,7 @@
  * hypre_AMGCycle
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMGCycle( void           *amg_vdata, 
                 hypre_Vector  **F_array,
                 hypre_Vector  **U_array   )
@@ -41,37 +41,37 @@ hypre_AMGCycle( void           *amg_vdata,
    hypre_CSRMatrix    **P_array;
    hypre_Vector    *Vtemp;
 
-   int     **CF_marker_array;
-/* int     **dof_func_array;
-   int     **dof_point_array;
-   int     **point_dof_map_array; */
+   HYPRE_Int     **CF_marker_array;
+/* HYPRE_Int     **dof_func_array;
+   HYPRE_Int     **dof_point_array;
+   HYPRE_Int     **point_dof_map_array; */
 
-   int       cycle_op_count;   
-   int       cycle_type;
-   int       num_levels;
-/* int       num_functions; */
+   HYPRE_Int       cycle_op_count;   
+   HYPRE_Int       cycle_type;
+   HYPRE_Int       num_levels;
+/* HYPRE_Int       num_functions; */
 
-   int      *num_coeffs;
-   int      *num_grid_sweeps;   
-   int      *grid_relax_type;   
-   int     **grid_relax_points;  
+   HYPRE_Int      *num_coeffs;
+   HYPRE_Int      *num_grid_sweeps;   
+   HYPRE_Int      *grid_relax_type;   
+   HYPRE_Int     **grid_relax_points;  
  
    /* Local variables  */
 
-   int      *lev_counter;
-   int       Solve_err_flag;
-   int       k;
-   int       j;
-   int       level;
-   int       cycle_param;
-   int       coarse_grid;
-   int       fine_grid;
-   int       Not_Finished;
-   int       num_sweep;
-   int       relax_type;
-   int       relax_points;
+   HYPRE_Int      *lev_counter;
+   HYPRE_Int       Solve_err_flag;
+   HYPRE_Int       k;
+   HYPRE_Int       j;
+   HYPRE_Int       level;
+   HYPRE_Int       cycle_param;
+   HYPRE_Int       coarse_grid;
+   HYPRE_Int       fine_grid;
+   HYPRE_Int       Not_Finished;
+   HYPRE_Int       num_sweep;
+   HYPRE_Int       relax_type;
+   HYPRE_Int       relax_points;
    double   *relax_weight;
-   int use_block_flag;
+   HYPRE_Int use_block_flag;
 
    double    alpha;
    double    beta;
@@ -102,13 +102,13 @@ hypre_AMGCycle( void           *amg_vdata,
 
    cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
-   lev_counter = hypre_CTAlloc(int, num_levels);
+   lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels);
 
    /* Initialize */
 
    Solve_err_flag = 0;
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
+   num_coeffs = hypre_CTAlloc(HYPRE_Int, num_levels);
    num_coeffs[0]    = hypre_CSRMatrixNumNonzeros(A_array[0]);
 
    for (j = 1; j < num_levels; j++)

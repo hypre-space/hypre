@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -51,40 +51,40 @@
 /****************************************************************************
  * Prototypes for testing routines
  ***************************************************************************/
-int hypre_set_precond(int matrix_id, int solver_id, int precond_id, 
+HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int precond_id, 
                       void *solver, void *precond);
 
-int hypre_set_precond_params(int precond_id, void *precond);
+HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond);
 
-int hypre_destroy_precond(int precond_id, void *precond);
+HYPRE_Int hypre_destroy_precond(HYPRE_Int precond_id, void *precond);
 
 /****************************************************************************
  * Variables for testing routines
  ***************************************************************************/
-int      k_dim = 5;
-int      gsmg_samples = 5;
-int      poutdat = 1;
-int      hybrid = 1;
-int      coarsen_type = 6;
-int      measure_type = 0;
-int      smooth_type = 6;
-int      num_functions = 1;
-int      smooth_num_levels = 0;
-int      smooth_num_sweeps = 1;
-int      num_sweep = 1;
-int      max_levels = 25;
-int      variant = 0;
-int      overlap = 1;
-int      domain_type = 2;
-int      nonzeros_to_keep = -1;
+HYPRE_Int      k_dim = 5;
+HYPRE_Int      gsmg_samples = 5;
+HYPRE_Int      poutdat = 1;
+HYPRE_Int      hybrid = 1;
+HYPRE_Int      coarsen_type = 6;
+HYPRE_Int      measure_type = 0;
+HYPRE_Int      smooth_type = 6;
+HYPRE_Int      num_functions = 1;
+HYPRE_Int      smooth_num_levels = 0;
+HYPRE_Int      smooth_num_sweeps = 1;
+HYPRE_Int      num_sweep = 1;
+HYPRE_Int      max_levels = 25;
+HYPRE_Int      variant = 0;
+HYPRE_Int      overlap = 1;
+HYPRE_Int      domain_type = 2;
+HYPRE_Int      nonzeros_to_keep = -1;
 
-int      interp_type; 
-int      cycle_type;
-int      relax_default;
-int     *dof_func;
-int     *num_grid_sweeps;  
-int     *grid_relax_type;   
-int    **grid_relax_points;
+HYPRE_Int      interp_type; 
+HYPRE_Int      cycle_type;
+HYPRE_Int      relax_default;
+HYPRE_Int     *dof_func;
+HYPRE_Int     *num_grid_sweeps;  
+HYPRE_Int     *grid_relax_type;   
+HYPRE_Int    **grid_relax_points;
 
 double   tol = 1.e-8;
 double   pc_tol = 0.;

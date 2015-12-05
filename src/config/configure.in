@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.91 $
+ * $Revision: 1.97 $
  ***********************************************************************EHEADER*/
 
 dnl *********************************************************************
@@ -55,8 +55,8 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.6.0b])
-m4_define([M4_HYPRE_DATE],    [2010/02/04])
+m4_define([M4_HYPRE_VERSION], [2.7.0b])
+m4_define([M4_HYPRE_DATE],    [2011/01/27])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -66,7 +66,7 @@ m4_include([config/hypre_lapack_macros.m4])
 m4_include([config/hypre_macros_misc.m4])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.91 2010/02/04 19:15:45 falgout Exp $)
+AC_REVISION($Id: configure.in,v 1.97 2011/01/28 00:28:34 falgout Exp $)
 AC_INIT(M4_HYPRE_NAME, M4_HYPRE_VERSION)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -127,6 +127,25 @@ PACKAGE_TARNAME=
 PACKAGE_BUGREPORT=
 
 dnl *********************************************************************
+dnl * Initialize hypre variables
+dnl *********************************************************************
+hypre_user_chose_mpi=no
+hypre_user_chose_blas=no
+hypre_user_chose_lapack=no
+hypre_user_chose_fei=no
+
+hypre_using_c=yes
+hypre_using_cxx=yes
+
+hypre_using_fei=yes
+hypre_using_superlu=yes
+
+hypre_using_babel=no
+hypre_using_examples=no
+hypre_using_openmp=no
+hypre_using_insure=no
+
+dnl *********************************************************************
 dnl * Determine BUILD, HOST, and TARGET types
 dnl *********************************************************************
 if test "x$build_alias" = "x"
@@ -168,6 +187,23 @@ AS_HELP_STRING([--enable-shared],
  esac],
 [hypre_using_shared=no]
 )
+
+AC_ARG_ENABLE(bigint,
+AS_HELP_STRING([--enable-bigint],
+               [Use long long int for HYPRE_Int (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_bigint=yes ;;
+    no)  hypre_using_bigint=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-bigint]) ;;
+ esac],
+[hypre_using_bigint=no]
+)
+if test "$hypre_using_bigint" = "yes"
+then
+   AC_DEFINE(HYPRE_BIGINT, 1)
+fi
 
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
@@ -277,26 +313,6 @@ dnl * if the user indicated any MPI include, library, or directory
 dnl * to use with the chosen compiler those options are identified
 dnl * and the appropriate macros are assigned values.
 dnl *********************************************************************
-hypre_user_chose_mpi=no
-hypre_user_chose_blas=no
-hypre_user_chose_lapack=no
-hypre_user_chose_fei=no
-
-hypre_using_c=yes
-hypre_using_cxx=yes
-
-hypre_using_fei=yes
-hypre_using_superlu=yes
-
-hypre_using_babel=no
-hypre_using_examples=no
-hypre_using_openmp=no
-hypre_using_insure=no
-
-hypre_testing_alpha=no
-hypre_testing_beta=no
-hypre_testing_general=no
-
 
 AC_ARG_WITH(LD,
 AS_HELP_STRING([--with-LD=ARG],
@@ -660,12 +676,12 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CC, [mpxlc xlc mpguidec guidec mpiicc icc pgcc cc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc mpixlc_r xlc mpiicc icc mpguidec guidec pgcc cc], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CC, [xlc xlC gcc g++ pgcc pgCC icc icpc cc CC kcc KCC], [""])
+      AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC], [""])
    else
-      AC_CHECK_PROGS(CC, [mpxlc mpcc mpicc mpiicc mpipgcc], [""])
+      AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpcc mpicc mpipgcc], [""])
    fi
 
    if test "x$CC" = "x"
@@ -678,12 +694,12 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(CXX, [mpxlC xlC mpguidec++ guidec++ mpiicpc icpc pgCC CC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r xlC mpiicpc mpguidec++ guidec++ icpc pgCC CC], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(CXX, [xlC xlc g++ gcc pgCC pgcc icpc icc CC cc KCC kcc], [""])
+      AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc], [""])
    else
-      AC_CHECK_PROGS(CXX, [mpxlC mpCC mpiCC mpicxx mpiicpc mpipgCC], [""])
+      AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpCC mpiCC mpicxx mpipgCC], [""])
    fi
 
    if test "x$CXX" = "x"
@@ -696,12 +712,12 @@ if test "$hypre_using_fortran" = "yes" -a "$hypre_user_chose_fcompilers" = "no"
 then
    if test "$hypre_using_openmp" = "yes"
    then
-      AC_CHECK_PROGS(F77, [mpxlf xlf mpguidef77 guidef77 mpiifort ifort pg77 f77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf mpixlf77_r xlf mpiifort ifort mpguidef77 guidef77 pg77 f77], [""])
    elif test "$hypre_using_mpi" = "no"
    then
-      AC_CHECK_PROGS(F77, [xlf g77 pgf77 ifort f77], [""])
+      AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77], [""])
    else
-      AC_CHECK_PROGS(F77, [mpxlf mpf77 mpif77 mpiifort mpipgf77], [""])
+      AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpf77 mpif77 mpipgf77], [""])
    fi
 
    if test "x$F77" = "x"
@@ -976,9 +992,11 @@ dnl * Set INSURE options
 dnl *********************************************************************
 if test "$hypre_using_insure" = "yes"
 then
-   LINK_F77="insure ${hypre_insure_flags}"
-   LINK_CC="insure ${hypre_insure_flags}"
-   LINK_CXX="insure ${hypre_insure_flags}"
+   LINK_F77="insure"
+   LINK_CC="insure"
+   LINK_CXX="insure"
+   LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
+   LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
 fi
 
 dnl *********************************************************************

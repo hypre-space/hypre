@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -20,51 +20,51 @@
  * hypre_AMGBuildInterp
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
-                   int                 *CF_marker,
+                   HYPRE_Int                 *CF_marker,
                    hypre_CSRMatrix     *S,
-                   int                 *dof_func,
-                   int                 **coarse_dof_func_ptr,
+                   HYPRE_Int                 *dof_func,
+                   HYPRE_Int                 **coarse_dof_func_ptr,
                    hypre_CSRMatrix     **P_ptr )
 {
    
    double          *A_data;
-   int             *A_i;
-   int             *A_j;
+   HYPRE_Int             *A_i;
+   HYPRE_Int             *A_j;
 
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
 
    hypre_CSRMatrix    *P; 
 
    double          *P_data;
-   int             *P_i;
-   int             *P_j;
+   HYPRE_Int             *P_i;
+   HYPRE_Int             *P_j;
 
-   int              P_size;
+   HYPRE_Int              P_size;
    
-   int             *P_marker;
+   HYPRE_Int             *P_marker;
 
-   int             *coarse_dof_func;
+   HYPRE_Int             *coarse_dof_func;
 
-   int              jj_counter;
-   int              jj_begin_row;
-   int              jj_end_row;
+   HYPRE_Int              jj_counter;
+   HYPRE_Int              jj_begin_row;
+   HYPRE_Int              jj_end_row;
    
-   int              start_indexing = 0; /* start indexing for P_data at 0 */
+   HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
 
-   int              n_fine;
-   int              n_coarse;
+   HYPRE_Int              n_fine;
+   HYPRE_Int              n_coarse;
 
-   int              strong_f_marker;
+   HYPRE_Int              strong_f_marker;
 
-   int             *fine_to_coarse;
-   int              coarse_counter;
+   HYPRE_Int             *fine_to_coarse;
+   HYPRE_Int              coarse_counter;
    
-   int              i,i1,i2;
-   int              jj,jj1;
-   int              sgn;
+   HYPRE_Int              i,i1,i2;
+   HYPRE_Int              jj,jj1;
+   HYPRE_Int              sgn;
    
    double           diagonal;
    double           sum;
@@ -96,7 +96,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
 
    coarse_counter = 0;
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
 
    jj_counter = start_indexing;
       
@@ -145,11 +145,11 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
 
    P_size = jj_counter;
 
-   P_i    = hypre_CTAlloc(int, n_fine+1);
-   P_j    = hypre_CTAlloc(int, P_size);
+   P_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
+   P_j    = hypre_CTAlloc(HYPRE_Int, P_size);
    P_data = hypre_CTAlloc(double, P_size);
 
-   P_marker = hypre_CTAlloc(int, n_fine);
+   P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
 
    /*-----------------------------------------------------------------------
     *  Second Pass: Define interpolation and fill in P_data, P_i, and P_j.
@@ -339,7 +339,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.
     *-----------------------------------------------------------------------*/
-    coarse_dof_func = hypre_CTAlloc(int, n_coarse);
+    coarse_dof_func = hypre_CTAlloc(HYPRE_Int, n_coarse);
 
     coarse_counter=0;
 
@@ -372,63 +372,63 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
  * This routine implements Stube's direct interpolation with multiple passes. 
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
-                   int                 *CF_marker,
+                   HYPRE_Int                 *CF_marker,
                    hypre_CSRMatrix     *S,
-                   int                 *dof_func,
-                   int                 **coarse_dof_func_ptr,
+                   HYPRE_Int                 *dof_func,
+                   HYPRE_Int                 **coarse_dof_func_ptr,
                    hypre_CSRMatrix     **P_ptr )
 {
    
    double          *A_data;
-   int             *A_i;
-   int             *A_j;
+   HYPRE_Int             *A_i;
+   HYPRE_Int             *A_j;
 
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
 
    hypre_CSRMatrix    *P; 
 
    double          *P_data;
-   int             *P_i;
-   int             *P_j;
+   HYPRE_Int             *P_i;
+   HYPRE_Int             *P_j;
 
-   int              P_size;
+   HYPRE_Int              P_size;
    
-   int             *P_marker;
+   HYPRE_Int             *P_marker;
 
-   int             *coarse_dof_func;
+   HYPRE_Int             *coarse_dof_func;
 
-   int              jj_counter;
+   HYPRE_Int              jj_counter;
    
-   int              start_indexing = 0; /* start indexing for P_data at 0 */
+   HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
 
-   int              n_fine;
-   int              n_fine_remaining;
-   int              n_coarse;
+   HYPRE_Int              n_fine;
+   HYPRE_Int              n_fine_remaining;
+   HYPRE_Int              n_coarse;
 
 
-   int             *fine_to_coarse;
+   HYPRE_Int             *fine_to_coarse;
 
-   int             *assigned;
-   int             *assigned_new;
-   int             *elementsPerRow;
-   int             *elementsPerRowNew;
-   int              loopCount;
-   int              elem;
+   HYPRE_Int             *assigned;
+   HYPRE_Int             *assigned_new;
+   HYPRE_Int             *elementsPerRow;
+   HYPRE_Int             *elementsPerRowNew;
+   HYPRE_Int              loopCount;
+   HYPRE_Int              elem;
    double           wsum;
    double           rsum;
    double           factor;
-   int              jP;
-   int              found;
-   int              elemIndex;
-   int              jPStart;
+   HYPRE_Int              jP;
+   HYPRE_Int              found;
+   HYPRE_Int              elemIndex;
+   HYPRE_Int              jPStart;
 
-   int              coarse_counter;
+   HYPRE_Int              coarse_counter;
    
-   int              i,i1,i2;
-   int              jj,jj1;
+   HYPRE_Int              i,i1,i2;
+   HYPRE_Int              jj,jj1;
 
    
    double           diagonal;
@@ -436,8 +436,8 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    double           zero = 0.0;
    double           one  = 1.0;
    
-   printf("\n");
-   printf("Multi-pass interpolation...\n");
+   hypre_printf("\n");
+   hypre_printf("Multi-pass interpolation...\n");
 
    /*-----------------------------------------------------------------------
     *  Access the CSR vectors for A and S. Also get size of fine grid.
@@ -458,12 +458,12 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    coarse_counter = 0;
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
 
-   assigned = hypre_CTAlloc(int, n_fine);
-   assigned_new = hypre_CTAlloc(int, n_fine);
-   elementsPerRow = hypre_CTAlloc(int, n_fine);
-   elementsPerRowNew = hypre_CTAlloc(int, n_fine);
+   assigned = hypre_CTAlloc(HYPRE_Int, n_fine);
+   assigned_new = hypre_CTAlloc(HYPRE_Int, n_fine);
+   elementsPerRow = hypre_CTAlloc(HYPRE_Int, n_fine);
+   elementsPerRowNew = hypre_CTAlloc(HYPRE_Int, n_fine);
 
    jj_counter = start_indexing;
       
@@ -494,7 +494,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 					      and in column of P */
        coarse_counter++; /* one more coarse grid point */
        n_fine_remaining--; /* one less unassigned point remaining*/
-       // printf("coarse point %d elementsPerRow %d\n",i,elementsPerRow[i]);
+       // hypre_printf("coarse point %d elementsPerRow %d\n",i,elementsPerRow[i]);
      }
    }
 
@@ -508,12 +508,12 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
      loopCount++;
      if(loopCount > 10){
-       printf("too many multipass loops, first pass...\n");
+       hypre_printf("too many multipass loops, first pass...\n");
        /* end();*/
        return(-1);
      }
 
-     printf("*** PASS %d: %d fine points to be treated out of total %d\n",loopCount-1,n_fine_remaining,n_fine);
+     hypre_printf("*** PASS %d: %d fine points to be treated out of total %d\n",loopCount-1,n_fine_remaining,n_fine);
 
      /* see which points can be assigned, and determine how many elements in row */
      for (i = 0; i < n_fine; i++)  {
@@ -543,17 +543,17 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 	   elementsPerRow[i]= zero;	   
 	 }
 
-         //printf("point %d assigned_new %d elementsPerRow %d marker %d %d %d
+         //hypre_printf("point %d assigned_new %d elementsPerRow %d marker %d %d %d
          //    \n",i,assigned_new[i],elementsPerRow[i],CF_marker[i],S_i[i],S_i[i+1]);
        }
      }
 
      /* for (i = 0; i < n_fine; i++)  {
-       printf("%d %d ",i,CF_marker[i]);
+       hypre_printf("%d %d ",i,CF_marker[i]);
        for(jj=S_i[i]; jj<S_i[i+1];jj++){
-	 printf("%d ",S_j[jj]);	 
+	 hypre_printf("%d ",S_j[jj]);	 
        }
-       printf("\n");
+       hypre_printf("\n");
        } */
    
      /* assign the points that have been determined for interpolation in this loop */
@@ -561,13 +561,13 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
        if ( assigned_new[i] == loopCount ){
 	 assigned[i] = loopCount ; /* assigned F point */
 	 n_fine_remaining--; /* one less unassigned point remaining*/
-	 //	 printf("F point %d elementsPerRow %d\n",i,elementsPerRow[i]);
+	 //	 hypre_printf("F point %d elementsPerRow %d\n",i,elementsPerRow[i]);
 	 jj_counter=jj_counter+elementsPerRow[i]; /* more elements in P */
        }
      }
    }
 
-   // printf("jj_counter %d \n",jj_counter);
+   // hypre_printf("jj_counter %d \n",jj_counter);
 
    /*-----------------------------------------------------------------------
     *  Allocate  arrays.
@@ -577,8 +577,8 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    P_size = jj_counter;
 
-   P_i    = hypre_CTAlloc(int, n_fine+1);
-   P_j    = hypre_CTAlloc(int, P_size);
+   P_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
+   P_j    = hypre_CTAlloc(HYPRE_Int, P_size);
    P_data = hypre_CTAlloc(double, P_size);
 
    /*-----------------------------------------------------------------------
@@ -587,7 +587,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    /* allocate the marker array */
    /* for a given fine point i, P_marker[j]=i if j strongly influences i */
-   P_marker = hypre_CTAlloc(int, n_fine);
+   P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
    for (i = 0; i < n_fine; i++)  {
      P_marker[i]=-1;
    }
@@ -639,13 +639,13 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
      loopCount++;
      if(loopCount > 10){
-       printf("too many multipass loops, second pass...\n");
+       hypre_printf("too many multipass loops, second pass...\n");
        /* end(); */
        return(-1);
        
      }
 
-     printf("+++ PASS %d: %d fine points to be treated out of total %d\n",loopCount-1,n_fine_remaining,n_fine);
+     hypre_printf("+++ PASS %d: %d fine points to be treated out of total %d\n",loopCount-1,n_fine_remaining,n_fine);
 
      for (i = 0; i < n_fine; i++)  {
 
@@ -683,7 +683,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 	     /* loop over the coarse grid points i2 that i1 interpolates from */
 	     for (jj1 = P_i[i1]; jj1 < P_i[i1]+elementsPerRowNew[i1]; jj1++) {
 	       i2 = P_j[jj1];
-               /* printf("point %d coarse grid column i2 %d\n",i,i2); */
+               /* hypre_printf("point %d coarse grid column i2 %d\n",i,i2); */
 
                /* first check if a column exists yet for this C point */
                found = 0 ;
@@ -732,18 +732,18 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 	 
          /* calculate the normalization factor */
 	 factor = rsum / diagonal / wsum;
-	 // printf("point %d factor %e\n",i,factor);
+	 // hypre_printf("point %d factor %e\n",i,factor);
 	 
          /* normalize the ith row of P */
 
 	 for(jj1=P_i[i];jj1<P_i[i]+elementsPerRowNew[i];jj1++){
-           /* printf("---point %d P_j %d\n",i,P_j[jj1]);*/
+           /* hypre_printf("---point %d P_j %d\n",i,P_j[jj1]);*/
 	   P_data[jj1] = factor * P_data[jj1] ;
 	 } 
 
 	 n_fine_remaining--; /* one less untreated point remaining*/
 
-	 //         printf("point %d CF %d elemPerRow before %d after %d\n",i,CF_marker[i],
+	 //         hypre_printf("point %d CF %d elemPerRow before %d after %d\n",i,CF_marker[i],
          //            elementsPerRow[i],elementsPerRowNew[i]);
        } /* end building interpolation for i */
 
@@ -751,7 +751,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    
    } /* end while untreated points remaining */
 
-   // printf("jj_counter %d \n",jj_counter);
+   // hypre_printf("jj_counter %d \n",jj_counter);
 
    /*-----------------------------------------------------------------------
     *  Third Pass: Compress P.
@@ -768,7 +768,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
        }
        /* compression going on! */
        /* else {
-	        printf("compression: point %d type %d old elementsPerRow %d new %d\n",i,
+	        hypre_printf("compression: point %d type %d old elementsPerRow %d new %d\n",i,
          	CF_marker[i],elementsPerRow[i],elementsPerRowNew[i]);
 		}*/
      }
@@ -785,12 +785,12 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrixNumNonzeros(P) = jP;
 
-   printf("!!!!!!! compression factor %e \n",(100.0 *((double)(P_size-jP))/(double)P_size));
+   hypre_printf("!!!!!!! compression factor %e \n",(100.0 *((double)(P_size-jP))/(double)P_size));
 
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.
     *-----------------------------------------------------------------------*/
-    coarse_dof_func = hypre_CTAlloc(int, n_coarse);
+    coarse_dof_func = hypre_CTAlloc(HYPRE_Int, n_coarse);
 
     coarse_counter=0;
 
@@ -828,67 +828,67 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
  * matrix P, and returns the new matrix P. 
  *--------------------------------------------------------------------------*/
 
-int
+HYPRE_Int
 hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
-                   int                 *CF_marker,
+                   HYPRE_Int                 *CF_marker,
                    hypre_CSRMatrix     *S,
-                   int                 *dof_func,
-                   int                 **coarse_dof_func_ptr,
+                   HYPRE_Int                 *dof_func,
+                   HYPRE_Int                 **coarse_dof_func_ptr,
                    hypre_CSRMatrix     **P_ptr )
 {
    
    double          *A_data;
-   int             *A_i;
-   int             *A_j;
+   HYPRE_Int             *A_i;
+   HYPRE_Int             *A_j;
 
-   int             *S_i;
-   int             *S_j;
+   HYPRE_Int             *S_i;
+   HYPRE_Int             *S_j;
 
    hypre_CSRMatrix *PJac; 
 
    double          *P_data;
-   int             *P_i;
-   int             *P_j;
+   HYPRE_Int             *P_i;
+   HYPRE_Int             *P_j;
 
    double          *PJac_data;
-   int             *PJac_i;
-   int             *PJac_j;
+   HYPRE_Int             *PJac_i;
+   HYPRE_Int             *PJac_j;
 
-   int              PJac_size;
+   HYPRE_Int              PJac_size;
    
-   int             *P_marker;
+   HYPRE_Int             *P_marker;
 
-   int             *coarse_dof_func;
+   HYPRE_Int             *coarse_dof_func;
 
-   int              jj_counter;
+   HYPRE_Int              jj_counter;
    
-   int              start_indexing = 0; /* start indexing for P_data at 0 */
+   HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
 
-   int              n_fine;
-   int              n_fine_remaining;
-   int              n_coarse;
+   HYPRE_Int              n_fine;
+   HYPRE_Int              n_fine_remaining;
+   HYPRE_Int              n_coarse;
 
 
 
-   int             *fine_to_coarse;
+   HYPRE_Int             *fine_to_coarse;
 
-   int             *elementsPerRow;
-   int             *elementsPerRowNew;
+   HYPRE_Int             *elementsPerRow;
+   HYPRE_Int             *elementsPerRowNew;
 
-   int              elem;
+   HYPRE_Int              elem;
    double           wsum;
    double           rsum;
    double           factor;
-   int              jP;
-   int              found;
-   int              elemIndex;
-   int              jPStart;
+   HYPRE_Int              jP;
+   HYPRE_Int              found;
+   HYPRE_Int              elemIndex;
+   HYPRE_Int              jPStart;
    double           eps = 0.00000001;
 
-   int              coarse_counter;
+   HYPRE_Int              coarse_counter;
    
-   int              i,i1,i2;
-   int              jj,jj1;
+   HYPRE_Int              i,i1,i2;
+   HYPRE_Int              jj,jj1;
 
    
    double           diagonal;
@@ -896,8 +896,8 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    double           zero = 0.0;
    double           one  = 1.0;
    
-   printf("\n");
-   printf("Jacobi iteration...\n");
+   hypre_printf("\n");
+   hypre_printf("Jacobi iteration...\n");
 
    /*-----------------------------------------------------------------------
     *  Access the CSR vectors for A, S and P. Also get size of fine grid.
@@ -922,10 +922,10 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    coarse_counter = 0;
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
 
-   elementsPerRow = hypre_CTAlloc(int, n_fine);
-   elementsPerRowNew = hypre_CTAlloc(int, n_fine);
+   elementsPerRow = hypre_CTAlloc(HYPRE_Int, n_fine);
+   elementsPerRowNew = hypre_CTAlloc(HYPRE_Int, n_fine);
 
    jj_counter = start_indexing;
       
@@ -948,7 +948,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 					      and in column of P */
        coarse_counter++; /* one more coarse grid point */
        n_fine_remaining--; /* one less unassigned point remaining*/
-       // printf("coarse point %d elementsPerRow %d\n",i,elementsPerRow[i]);
+       // hypre_printf("coarse point %d elementsPerRow %d\n",i,elementsPerRow[i]);
      }
    }
 
@@ -956,7 +956,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
     *  Now treat the F points.
     *-----------------------------------------------------------------------*/
     
-   printf("*** Jacobi: %d fine points to be treated out of total %d\n",n_fine_remaining,n_fine);
+   hypre_printf("*** Jacobi: %d fine points to be treated out of total %d\n",n_fine_remaining,n_fine);
 
    /* see which points can be assigned, and determine how many elements in row */
    for (i = 0; i < n_fine; i++)  {
@@ -971,9 +971,9 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
        for (jj = S_i[i]; jj < S_i[i+1]; jj++) {
 	 i1 = S_j[jj];           
 	 elementsPerRow[i]=elementsPerRow[i]+P_i[i1+1]-P_i[i1];
-	 /*	 printf("node %d: interpolates from %d C points\n",i1,P_i[i1+1]-P_i[i1]);*/
+	 /*	 hypre_printf("node %d: interpolates from %d C points\n",i1,P_i[i1+1]-P_i[i1]);*/
        }
-       //	 printf("node %d: interpolates from %d C points\n",i1,elementsPerRow[i]);
+       //	 hypre_printf("node %d: interpolates from %d C points\n",i1,elementsPerRow[i]);
 
        /* in the special case where we have an F point that is not strongly influenced
 	  by any other point, we assign zero interpolation to this F point */
@@ -984,13 +984,13 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
        }
 
        n_fine_remaining--; /* one less point remaining*/
-       //	 printf("F point %d elementsPerRow %d\n",i,elementsPerRow[i]);
+       //	 hypre_printf("F point %d elementsPerRow %d\n",i,elementsPerRow[i]);
        jj_counter=jj_counter+elementsPerRow[i]; /* more elements in P */
 
      }
    }
 
-   //   printf("jj_counter %d \n",jj_counter);
+   //   hypre_printf("jj_counter %d \n",jj_counter);
 
    /*-----------------------------------------------------------------------
     *  Allocate  arrays.
@@ -1000,8 +1000,8 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    PJac_size = jj_counter;
 
-   PJac_i    = hypre_CTAlloc(int, n_fine+1);
-   PJac_j    = hypre_CTAlloc(int, PJac_size);
+   PJac_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
+   PJac_j    = hypre_CTAlloc(HYPRE_Int, PJac_size);
    PJac_data = hypre_CTAlloc(double, PJac_size);
 
    /*-----------------------------------------------------------------------
@@ -1010,7 +1010,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    /* allocate the marker array */
    /* for a given fine point i, P_marker[j]=i if j strongly influences i */
-   P_marker = hypre_CTAlloc(int, n_fine);
+   P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
    for (i = 0; i < n_fine; i++)  {
      P_marker[i]=-1;
    }
@@ -1056,7 +1056,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
     *  Now treat the F points.
     *-----------------------------------------------------------------------*/
     
-   printf("+++ Jacobi iteration: %d fine points to be treated out of total %d\n",n_fine_remaining,n_fine);
+   hypre_printf("+++ Jacobi iteration: %d fine points to be treated out of total %d\n",n_fine_remaining,n_fine);
    
    for (i = 0; i < n_fine; i++)  {
        
@@ -1067,7 +1067,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
        for (jj = S_i[i]; jj < S_i[i+1]; jj++) {
 	 i1 = S_j[jj];           
 	 P_marker[i1]=i;
-	 //         printf("S: i %d i1 %d\n",i,i1);
+	 //         hypre_printf("S: i %d i1 %d\n",i,i1);
        }         
        
        jj_counter = PJac_i[i];   
@@ -1086,12 +1086,12 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 	 
 	 /* check if i1 stronlgy influences i */
 	 if ( P_marker[i1]==i ) {
-           // printf("influence: i %d i1 %d marker %d\n",i,i1,P_marker[i1]);
+           // hypre_printf("influence: i %d i1 %d marker %d\n",i,i1,P_marker[i1]);
 	   
 	   /* loop over the coarse grid points i2 that i1 interpolates from in P */
 	   for (jj1 = P_i[i1]; jj1 < P_i[i1+1]; jj1++) {
 	     i2 = P_j[jj1];
-	     // printf("point %d coarse grid column i2 %d\n",i,i2);
+	     // hypre_printf("point %d coarse grid column i2 %d\n",i,i2);
 	     
 	     /* first check if a column exists yet for this C point */
 	     found = 0 ;
@@ -1114,7 +1114,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 	     /* the weight is -a(i,i1)*P(i1,i2)   */
 	     /*               -A_data[jj]*P_data[jj1]          */
 	     PJac_data[jj_counter+elemIndex]=PJac_data[jj_counter+elemIndex] - A_data[jj] * P_data[jj1];
-	     //printf("i %d i1 %d i2 %d A(i,i1) %e P(i1,i2) %e\n",i,i1,i2,A_data[jj],P_data[jj1]);
+	     //hypre_printf("i %d i1 %d i2 %d A(i,i1) %e P(i1,i2) %e\n",i,i1,i2,A_data[jj],P_data[jj1]);
 	   }
 	 }
        }
@@ -1126,7 +1126,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
        wsum=0.;
        for(jj1=PJac_i[i];jj1<PJac_i[i]+elementsPerRowNew[i];jj1++){
 	 wsum=wsum+PJac_data[jj1];
-         //printf("i %d data %e\n",i,PJac_data[jj1]);
+         //hypre_printf("i %d data %e\n",i,PJac_data[jj1]);
        }
        
        /* then calculate the negative sum of all the elements in the ith row 
@@ -1140,39 +1140,39 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
        diagonal = A_data[A_i[i]];
        
        if ( diagonal < 0. ) {
-	 printf("@@@@@@ WARNING: negative diagonal\n");
+	 hypre_printf("@@@@@@ WARNING: negative diagonal\n");
        }
        else {
-	 if ( diagonal < eps ) printf("@@@@@@ WARNING: small diagonal\n");
+	 if ( diagonal < eps ) hypre_printf("@@@@@@ WARNING: small diagonal\n");
        }
 
        if ( wsum < 0. ) {
-	 printf("@@@@@@ WARNING: negative wsum\n");
+	 hypre_printf("@@@@@@ WARNING: negative wsum\n");
        }
        else {
-	 if ( wsum < eps ) printf("@@@@@@ WARNING: small wsum\n");
+	 if ( wsum < eps ) hypre_printf("@@@@@@ WARNING: small wsum\n");
        }
 
        /* calculate the normalization factor */
        factor = rsum / diagonal / wsum;
-       //printf("point %d factor %e\n",i,factor);
+       //hypre_printf("point %d factor %e\n",i,factor);
        
        /* normalize the ith row of PJac */
        
        for(jj1=PJac_i[i];jj1<PJac_i[i]+elementsPerRowNew[i];jj1++){
-	 /* printf("---point %d P_j %d\n",i,P_j[jj1]);*/
+	 /* hypre_printf("---point %d P_j %d\n",i,P_j[jj1]);*/
 	 PJac_data[jj1] = factor * PJac_data[jj1] ;
        } 
        
        n_fine_remaining--; /* one less untreated point remaining*/
        
-       //                printf("point %d CF %d elemPerRow before %d after %d\n",i,CF_marker[i],
+       //                hypre_printf("point %d CF %d elemPerRow before %d after %d\n",i,CF_marker[i],
        //          elementsPerRow[i],elementsPerRowNew[i]);
      } /* end building interpolation for i */
      
    } /* end loop over fine grid points */
    
-   // printf("jj_counter %d \n",jj_counter);
+   // hypre_printf("jj_counter %d \n",jj_counter);
 
    /*-----------------------------------------------------------------------
     *  Third Pass: Compress PJac.
@@ -1189,7 +1189,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
        }
        /* compression going on! */
        /* else {
-	 printf("compression: point %d type %d old elementsPerRow %d new %d\n",i,
+	 hypre_printf("compression: point %d type %d old elementsPerRow %d new %d\n",i,
 		CF_marker[i],elementsPerRow[i],elementsPerRowNew[i]);
 		} */
      }
@@ -1197,7 +1197,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    }
    PJac_i[n_fine] = jP;
 
-   //printf("PJac_size %d\n",PJac_size);
+   //hypre_printf("PJac_size %d\n",PJac_size);
 
    PJac = hypre_CSRMatrixCreate(n_fine, n_coarse, PJac_size);
    hypre_CSRMatrixData(PJac) = PJac_data; 
@@ -1208,12 +1208,12 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrixNumNonzeros(PJac) = jP;
 
-   printf("!!!!!!! compression factor %e \n",100.*((double)(PJac_size-jP))/(double)PJac_size);
+   hypre_printf("!!!!!!! compression factor %e \n",100.*((double)(PJac_size-jP))/(double)PJac_size);
 
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.
     *-----------------------------------------------------------------------*/
-    coarse_dof_func = hypre_CTAlloc(int, n_coarse);
+    coarse_dof_func = hypre_CTAlloc(HYPRE_Int, n_coarse);
 
     coarse_counter=0;
 

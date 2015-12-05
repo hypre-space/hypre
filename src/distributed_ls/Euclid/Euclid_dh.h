@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -44,7 +44,7 @@
 extern void Euclid_dhCreate(Euclid_dh *ctxOUT);
 extern void Euclid_dhDestroy(Euclid_dh ctx);
 extern void Euclid_dhSetup(Euclid_dh ctx);
-extern void Euclid_dhSolve(Euclid_dh ctx, Vec_dh lhs, Vec_dh rhs, int *its);
+extern void Euclid_dhSolve(Euclid_dh ctx, Vec_dh lhs, Vec_dh rhs, HYPRE_Int *its);
 extern void Euclid_dhApply(Euclid_dh ctx, double *lhs, double *rhs);
 
 extern void Euclid_dhPrintTestData(Euclid_dh ctx, FILE *fp);
@@ -113,8 +113,8 @@ struct _mpi_interface_dh {
        memory reallocation; rho_final is a maximum across all processors.
     */
 
-  int m;         /* local rows in matrix */
-  int n;         /* global rows in matrix */
+  HYPRE_Int m;         /* local rows in matrix */
+  HYPRE_Int n;         /* global rows in matrix */
   double *rhs;   /* used for debugging; this vector is not owned! */
   void *A;       /*  PETSc, HYPRE, Euclid, or other matrix object. */
   Factor_dh F;   /* data structure for the factor, F = L+U-I */
@@ -126,12 +126,12 @@ struct _mpi_interface_dh {
   /* workspace for factorization and triangular solves */
   double *work;
   double *work2;
-  int from, to;  /* which local rows to factor or solve */
+  HYPRE_Int from, to;  /* which local rows to factor or solve */
 
   /* runtime parameters (mostly) */
   char algo_par[MAX_OPT_LEN]; /* parallelization strategy */
   char algo_ilu[MAX_OPT_LEN]; /* ILU factorization method */
-  int level;      /* for ILU(k) */
+  HYPRE_Int level;      /* for ILU(k) */
   double droptol;     /* for ILUT */
   double sparseTolA;  /* for sparsifying A */
   double sparseTolF;  /* for sparsifying the factors */
@@ -145,15 +145,15 @@ struct _mpi_interface_dh {
 
   /* for use with Euclid's internal krylov solvers; */
   char    krylovMethod[MAX_OPT_LEN];
-  int     maxIts;
+  HYPRE_Int     maxIts;
   double  rtol;
   double  atol;
-  int     its; /* number of times preconditioner was applied since last call to Setup */
-  int     itsTotal; /* cululative number of times preconditioner was applied */
+  HYPRE_Int     its; /* number of times preconditioner was applied since last call to Setup */
+  HYPRE_Int     itsTotal; /* cululative number of times preconditioner was applied */
 
   /* internal statistics */
-  int setupCount;
-  int logging;    /* added in support of Hypre */
+  HYPRE_Int setupCount;
+  HYPRE_Int logging;    /* added in support of Hypre */
   double timing[TIMING_BINS];
   double stats[STATS_BINS];
   bool timingsWereReduced;
