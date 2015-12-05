@@ -1,0 +1,105 @@
+# Generated automatically from Makefile.in by configure.
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.0 $
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = .
+ 
+ 
+CC =  mpicc
+
+C_COMPILE_FLAGS= -O 
+CXX_COMPILE_FLAGS= -O 
+CINCLUDES= 
+CDEFS =
+ 
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+RANLIB= ranlib
+ 
+LIBFLAGS =   -lm
+LDLIBFLAGS =  
+ 
+LFLAGS =\
+ -L.\
+ -L../utilities\
+ -lHYPRE_mv\
+ -lHYPRE_utilities\
+ ${LIBFLAGS} ${LDLIBFLAGS}
+
+
+HEADERS =\
+ HYPRE_seq_mv.h\
+ seq_mv.h\
+ csr_matrix.h\
+ headers.h\
+ mapped_matrix.h\
+ multiblock_matrix.h\
+ vector.h
+
+FILES =\
+ HYPRE_csr_matrix.c\
+ HYPRE_mapped_matrix.c\
+ HYPRE_multiblock_matrix.c\
+ HYPRE_vector.c\
+ csr_matop.c\
+ csr_matrix.c\
+ csr_matvec.c\
+ genpart.c\
+ mapped_matrix.c\
+ multiblock_matrix.c\
+ vector.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+ 
+all: libHYPRE_seq_mv.a
+ 
+install: all
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/seq_mv.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+
+clean:
+	@rm -f *.o
+ 
+veryclean: clean
+	@rm -f libHYPRE_seq_mv.a
+ 
+
+##################################################################
+# Main rules
+##################################################################
+
+libHYPRE_seq_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+

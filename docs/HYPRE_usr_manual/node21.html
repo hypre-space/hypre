@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>5 Finite Element Interface (FEI)</TITLE>
+<META NAME="description" CONTENT="5 Finite Element Interface (FEI)">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html355" HREF="node22.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html353" HREF="usr_manual.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html347" HREF="node20.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html357" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html358" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html356" HREF="node22.html">5.1 Iterative methods and </A>
+<B>Up:</B> <A NAME="tex2html354" HREF="usr_manual.html">User's Manual</A>
+<B> Previous:</B> <A NAME="tex2html348" HREF="node20.html">4.5 Setting Up the </A>
+<BR> <P>
+<H1><A NAME="SECTION00600000000000000000">5 Finite Element Interface (FEI)</A></H1>
+<P>
+<A NAME="FiniteElementInterface">&#160;</A>
+<P>
+The finite element interface (FEI) defines a linear solver interface 
+for finite element applications.  For information on how to use this
+interface, see [&make_named_href('',
+	"node39.html#FEI-ref","[4]")].  
+This chapter describes the iterative methods and 
+preconditioners in the HYPRE implementation
+of this interface.
+<P>
+Solving a linear system from a finite element problem consists of
+four steps in the FEI:
+<OL>
+<LI> Initialize the structure of the finite-element data,
+      including loading the element connectivity data
+<LI> Load the element or super-element stiffness matrices and forcing terms
+<LI> Set solver parameters and solve the linear system
+<LI> Retrieve the solution to the linear system
+</OL>
+<P>
+Parameters to the HYPRE solvers are specified by calling
+<blockquote><PRE>void FEI_parameters(int sysHandle, int numParams, char **paramStrings);</PRE>
+</blockquote>
+where <TT>sysHandle</TT> is an identifier for the linear system being solved,
+<TT>numParams</TT> is the number of parameter strings, and <TT>paramStrings</TT> is
+an array of null-terminated strings with the format: 
+``<EM>parameter_name value</EM>''.
+For example, setting the preconditioner can be accomplished by:
+<blockquote><PRE>char **paramStrings[1];
+paramStrings[0] = (char *) malloc(64*sizeof(char));
+strcpy(paramStrings[0], &quot;preconditioner parasails&quot;);
+FEI_parameters(sysHandle, 1, paramStrings);</PRE>
+</blockquote>
+All possible parameters are listed in Table <A HREF="node22.html#tablefeiparam">5.1</A>.
+<P>
+A linear system is then solved by calling 
+<blockquote><PRE>void FEI_iterateToSolve(int sysHandle);</PRE>
+</blockquote><BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html359" HREF="node22.html#SECTION00610000000000000000">5.1 Iterative methods and preconditioners available</A>
+</UL>
+<HR><A NAME="tex2html355" HREF="node22.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html353" HREF="usr_manual.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html347" HREF="node20.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html357" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html358" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html356" HREF="node22.html">5.1 Iterative methods and </A>
+<B>Up:</B> <A NAME="tex2html354" HREF="usr_manual.html">User's Manual</A>
+<B> Previous:</B> <A NAME="tex2html348" HREF="node20.html">4.5 Setting Up the </A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

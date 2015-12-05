@@ -1,0 +1,169 @@
+# Generated automatically from Makefile.in by configure.
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.2 $
+#EHEADER***********************************************************************
+
+.SUFFIXES: .C .c .f .o
+
+HYPRE_ARCH = solaris
+
+srcdir = .
+
+CC =  mpicc
+CXX =  mpiCC
+
+#SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
+#SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
+#MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
+#MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
+SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
+SUPERLU_LIB     = -L$(srcdir)/../SuperLU
+MLPACK_INCLUDE  = 
+MLPACK_LIB      =
+
+C_COMPILE_FLAGS= -O 
+CXX_COMPILE_FLAGS= -O 
+CINCLUDES= 
+CXXINCLUDES= 
+#CDEFS = -DSUPERLU -DMLPACK
+#CXXDEFS = -DSUPERLU -DMLPACK
+CDEFS = -DBOOL_NOT_SUPPORTED
+CXXDEFS = -DBOOL_NOT_SUPPORTED
+
+CFLAGS = -w ${C_COMPILE_FLAGS} ${CDEFS}\
+ -I../..\
+ -I$(srcdir)\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../IJ_mv\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../parcsr_ls\
+ -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../../distributed_matrix\
+ -I$(srcdir)/../../distributed_ls\
+ -I$(srcdir)/../fei-base\
+ ${SUPERLU_INCLUDE}\
+ ${MLPACK_INCLUDE}\
+ ${CINCLUDES}
+
+MPILIBFLAGS =   
+CXXFLAGS = -w ${CXX_COMPILE_FLAGS} ${CXXDEFS}\
+ -I../..\
+ -I$(srcdir)/../..\
+ -I$(srcdir)/../../IJ_mv\
+ -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../krylov\
+ -I$(srcdir)/../../parcsr_mv\
+ -I$(srcdir)/../../parcsr_ls\
+ -I$(srcdir)/../../seq_mv\
+ -I$(srcdir)/../fei-base\
+ ${SUPERLU_INCLUDE}\
+ ${CXXINCLUDES}
+
+MPILIBFLAGS =   
+LIBFLAGS =   -lm
+LDLIBFLAGS =  
+
+MPI_LIBS = -lpmpich -lmpich -lrpc -lgs -lpthread
+
+RANLIB = ranlib
+
+LFLAGS =\
+ -L.\
+ -L../../hypre/lib\
+ ${SUPERLU_LIB} ${MLPACK_LIB}\
+ -lHYPRE_FEI\
+ -lHYPRE_FEI_BASE\
+ -lHYPRE_parcsr_ls \
+ -lHYPRE_ParaSails \
+ -lHYPRE_FEI_isismv \
+ -lHYPRE_IJ_mv \
+ -lml \
+ -lHYPRE_utilities \
+ -lHYPRE_parcsr_mv \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_superlu \
+ -lHYPRE_seq_mv \
+ ${MPILIBFLAGS} ${MPI_LIBS} ${LIBFLAGS} ${LDLIBFLAGS}\
+ -ldxml -lm
+
+FILES = HYPRE_LinSysCore.C HYPRE_LSC_aux.C cfei_hypre.C hypre_slide_reduce.C \
+        hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
+        HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c hypre_lsi_amge.c \
+        HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
+        HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
+        TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c
+
+TEMP = ${FILES:.c=.o}
+OBJS = ${TEMP:.C=.o}
+
+FILESV12 = HYPRE_LinSysCore.C HYPRE_LSC_aux.C hypre_slide_reduce.C \
+           hypre_schur_reduce.C hypre_lsi_misc.c hypre_lsi_ddamg.C \
+           HYPRE_parcsr_ml.c HYPRE_LSI_ddilut.c \
+           HYPRE_parcsr_bicgstabl.c bicgstabl.c fegridinfo.C \
+           HYPRE_LSI_poly.c HYPRE_LSI_ddict.c HYPRE_parcsr_TFQmr.c \
+           TFQmr.c HYPRE_parcsr_bicgs.c bicgs.c HYPRE_LSI_schwarz.c
+
+TEMPV12 = ${FILESV12:.c=.o}
+OBJSV12 = ${TEMPV12:.C=.o}
+
+##################################################################
+# Main rules
+##################################################################
+
+all: libHYPRE_FEI.a
+
+lib: all
+
+install: all
+	@cp -f $(srcdir)/HYPRE_LinSysCore.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_FEI.a $$HYPRE_INSTALL_DIR/lib
+
+driver: driver.o libHYPRE_FEI.a
+	@echo  "Linking" $@ "... "
+	${CXX} -o $@ driver.o ${LFLAGS}
+
+libHYPRE_FEI.a: ${OBJS}
+	@echo  "Building $@ ... "
+	@ar -rcu libHYPRE_FEI.a ${OBJS}
+	${RANLIB} $@
+
+libHYPRE_FEI_V12.a: ${OBJSV12}
+	@echo  "Building $@ ... "
+	${CXX} -o $@ -c ${CXXFLAGS} -DFEI_V1.2 HYPRE_LinSysCore.C
+	@ar -rcu libHYPRE_FEI_V12.a ${OBJSV12}
+	${RANLIB} $@
+
+##################################################################
+# Targets
+##################################################################
+
+clean:
+	@touch erase.tmp
+	@rm -rf erase.tmp *.o ti_files driver
+
+veryclean: clean
+	@touch erase.tmp
+	@rm -rf erase.tmp *.o *.a ti_files driver
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+.C.o:
+	${CXX} -o $@ ${DEFINES} -c ${CXXFLAGS} $<
+
+.c.o:
+	${CC} -o $@ ${DEFINES} -c ${CFLAGS} $<
+

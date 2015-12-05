@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>3.1 Setting Up the Struct Grid</TITLE>
+<META NAME="description" CONTENT="3.1 Setting Up the Struct Grid">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html222" HREF="node11.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html220" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html214" HREF="node9.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html224" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html225" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html223" HREF="node11.html">3.2 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html221" HREF="node9.html">3 Structured-Grid System Interface </A>
+<B> Previous:</B> <A NAME="tex2html215" HREF="node9.html">3 Structured-Grid System Interface </A>
+<BR> <P>
+<H1><A NAME="SECTION00410000000000000000">3.1 Setting Up the Struct Grid</A></H1>
+<P>
+<A NAME="SettingUptheStructGrid">&#160;</A>
+<P>
+The grid is described via a global <EM>index space</EM>, i.e., via
+integer tuples (triples in 3D).  The integers may have any value,
+negative or positive.  The global indexes allow HYPRE to discern
+how data is related spatially, and how it is distributed across the
+parallel machine.  Each process describes that portion of the grid
+that it ``owns'', one <EM>box</EM> at a time.  For example, in the
+figure, the global grid can be described in terms of three boxes, two
+owned by process 0, and one owned by process 1.  A box is described in
+terms of a lower and upper index.
+<P>
+On process 0, the following code will set up the grid shown in the
+figure (the code for process 1 is similar).
+<blockquote><PRE>HYPRE_StructGrid  grid;
+int               ilower[2][2] = {{-3, 1}, {0, 1}};
+int               iupper[2][2] = {{-1, 2}, {2, 4}};
+
+HYPRE_StructGridCreate(MPI_COMM_WORLD, 2, &amp;grid);
+
+HYPRE_StructGridSetExtents(grid, ilower[0], iupper[0]);
+HYPRE_StructGridSetExtents(grid, ilower[1], iupper[1]);
+
+HYPRE_StructGridAssemble(grid);</PRE>
+</blockquote>
+The <code>Create()</code> routine creates an empty 2D grid object that lives
+on the <code>MPI_COMM_WORLD</code> communicator.  The <code>SetExtents()</code>
+routine adds a new box to the grid.  The <code>Assemble()</code> routine is
+a collective call (i.e., must be called on all processes from a common
+synchronization point), and finalizes the grid assembly, making the
+grid ``ready to use''.
+<P>
+<HR><A NAME="tex2html222" HREF="node11.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html220" HREF="node9.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html214" HREF="node9.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html224" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html225" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html223" HREF="node11.html">3.2 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html221" HREF="node9.html">3 Structured-Grid System Interface </A>
+<B> Previous:</B> <A NAME="tex2html215" HREF="node9.html">3 Structured-Grid System Interface </A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

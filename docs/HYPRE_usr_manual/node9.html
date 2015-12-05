@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>3 Structured-Grid System Interface (Struct)</TITLE>
+<META NAME="description" CONTENT="3 Structured-Grid System Interface (Struct)">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html205" HREF="node10.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html203" HREF="usr_manual.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html197" HREF="node8.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html207" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html208" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html206" HREF="node10.html">3.1 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html204" HREF="usr_manual.html">User's Manual</A>
+<B> Previous:</B> <A NAME="tex2html198" HREF="node8.html">2.3 Which conceptual interface </A>
+<BR> <P>
+<H1><A NAME="SECTION00400000000000000000">3 Structured-Grid System Interface (Struct)</A></H1>
+<P>
+<A NAME="StructuredGridSystemInterface">&#160;</A>
+<P>
+In order to get access to the most efficient and scalable solvers for
+scalar structured-grid applications, users should use the
+<code>Struct</code> interface described in this chapter.  This interface
+will also provide access (this is not yet supported) to solvers in
+HYPRE that were designed for unstructured-grid applications and
+sparse linear systems in general.  These additional solvers are
+usually provided via the unstructured-grid interface (<code>FEI</code>) or
+the linear-algebraic interface (<code>IJ</code>) described in Chapters
+<A HREF="node21.html#FiniteElementInterface">5</A> and <A HREF="node23.html#LinearAlgebraicSystemInterface">6</A>.
+<P>
+Figure <A HREF="node9.html#figfvgrid">3.1</A> gives an example of the type of grid
+currently supported by the <code>Struct</code> interface.  The interface
+uses a finite-difference or finite-volume style, and currently
+supports only scalar PDEs (i.e., one unknown per gridpoint).
+<P><A NAME="154">&#160;</A><A NAME="figfvgrid">&#160;</A> <IMG WIDTH=480 HEIGHT=216 ALIGN=BOTTOM  SRC="img2.gif"  > <BR>
+<STRONG>Figure 3.1:</STRONG> An example 2D structured grid, distributed accross two processors.<BR>
+<P>
+There are four basic steps involved in setting up the linear system
+to be solved:
+<OL>
+<LI> set up the grid,
+<LI> set up the stencil,
+<LI> set up the matrix,
+<LI> set up the right-hand-side vector.
+</OL>
+To describe each of these steps in more detail, consider solving the
+2D Laplacian problem
+<P><A NAME="eqnlaplacian">&#160;</A> <IMG WIDTH=514 HEIGHT=49 ALIGN=BOTTOM  SRC="img3.gif"  > <P>
+Assume (<A HREF="node9.html#eqnlaplacian">3.1</A>) is discretized using standard 5-pt
+finite-volumes on the uniform grid pictured in <A HREF="node9.html#figfvgrid">3.1</A>, and
+assume that the problem data is distributed across two processes as
+depicted.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html209" HREF="node10.html#SECTION00410000000000000000">3.1 Setting Up the Struct Grid</A>
+<LI> <A NAME="tex2html210" HREF="node11.html#SECTION00420000000000000000">3.2 Setting Up the Struct Stencil</A>
+<LI> <A NAME="tex2html211" HREF="node12.html#SECTION00430000000000000000">3.3 Setting Up the Struct Matrix</A>
+<LI> <A NAME="tex2html212" HREF="node13.html#SECTION00440000000000000000">3.4 Setting Up the Struct Right-Hand-Side Vector</A>
+<LI> <A NAME="tex2html213" HREF="node14.html#SECTION00450000000000000000">3.5 Symmetric Matrices</A>
+</UL>
+<HR><A NAME="tex2html205" HREF="node10.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html203" HREF="usr_manual.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html197" HREF="node8.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html207" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html208" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html206" HREF="node10.html">3.1 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html204" HREF="usr_manual.html">User's Manual</A>
+<B> Previous:</B> <A NAME="tex2html198" HREF="node8.html">2.3 Which conceptual interface </A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

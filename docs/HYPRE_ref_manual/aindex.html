@@ -1,0 +1,774 @@
+<html><head><TITLE>Table of Contents</TITLE></head><BODY>
+
+<H1>Table of contents</H1>
+<H2>General</H2>
+<UL>
+<LI>
+<A HREF="index.html"><IT>hypre</IT> Reference Manual</A> <I>
+</I>
+<UL>
+<LI>
+<A HREF="IJSystemInterface.html">IJ System Interface</A> <I>A linear-algebraic conceptual interface</I>
+<UL>
+<LI>
+<A HREF="IJMatrices.html">IJ Matrices</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="IJVectors.html">IJ Vectors</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="ParCSRSolvers.html">ParCSR Solvers</A> <I>Linear solvers for sparse matrix systems</I>
+<UL>
+<LI>
+<A HREF="ParCSRBoomerAMGSolver.html">ParCSR BoomerAMG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSREuclidPreconditioner.html">ParCSR Euclid Preconditioner </A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRGMRESSolver.html">ParCSR GMRES Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRPCGSolver.html">ParCSR PCG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRParaSailsPreconditioner.html">ParCSR ParaSails Preconditioner</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRPilutPreconditioner.html">ParCSR Pilut Preconditioner</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="ParCSRSolvers.2.html">ParCSR Solvers</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="SStructSolvers.html">SStruct Solvers</A> <I>Linear solvers for semi-structured grids</I>
+<UL>
+<LI>
+<A HREF="SStructGMRESSolver.html">SStruct GMRES Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructPCGSolver.html">SStruct PCG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructSolvers.2.html">SStruct Solvers</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructSysPFMGSolver.html">SStruct SysPFMG Solver</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="SStructSystemInterface.html">SStruct System Interface</A> <I>A semi-structured-grid conceptual interface
+</I>
+<UL>
+<LI>
+<A HREF="SStructGraphs.html">SStruct Graphs</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructGrids.html">SStruct Grids</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructMatrices.html">SStruct Matrices</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructStencils.html">SStruct Stencils</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="SStructVectors.html">SStruct Vectors</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="StructSolvers.html">Struct Solvers</A> <I>Linear solvers for structured grids</I>
+<UL>
+<LI>
+<A HREF="StructGMRESSolver.html">Struct GMRES Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructJacobiSolver.html">Struct Jacobi Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructPCGSolver.html">Struct PCG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructPFMGSolver.html">Struct PFMG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructSMGSolver.html">Struct SMG Solver</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructSolvers.2.html">Struct Solvers</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+<LI>
+<A HREF="StructSystemInterface.html">Struct System Interface</A> <I>A structured-grid conceptual interface
+</I>
+<UL>
+<LI>
+<A HREF="StructGrids.html">Struct Grids</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructMatrices.html">Struct Matrices</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructStencils.html">Struct Stencils</A> <I>
+</I>
+<UL>
+</UL>
+<LI>
+<A HREF="StructVectors.html">Struct Vectors</A> <I>
+</I>
+<UL>
+</UL>
+</UL>
+</UL>
+</UL>
+<H2>Functions, Macros</H2>
+<UL>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.1">HYPRE_BoomerAMGCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.2">HYPRE_BoomerAMGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.20">HYPRE_BoomerAMGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.19">HYPRE_BoomerAMGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.10">HYPRE_BoomerAMGSetCoarsenType</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.12">HYPRE_BoomerAMGSetCycleType</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.18">HYPRE_BoomerAMGSetDebugFlag</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.15">HYPRE_BoomerAMGSetGridRelaxPoints</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.14">HYPRE_BoomerAMGSetGridRelaxType</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.17">HYPRE_BoomerAMGSetIOutDat</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.6">HYPRE_BoomerAMGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.7">HYPRE_BoomerAMGSetMaxLevels</A> <I>
+(Optional) Set maximum number of multigrid levels</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.9">HYPRE_BoomerAMGSetMaxRowSum</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.11">HYPRE_BoomerAMGSetMeasureType</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.13">HYPRE_BoomerAMGSetNumGridSweeps</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.16">HYPRE_BoomerAMGSetRelaxWeight</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.8">HYPRE_BoomerAMGSetStrongThreshold</A> <I>
+(Optional) Set AMG strength threshold</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.5">HYPRE_BoomerAMGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.3">HYPRE_BoomerAMGSetup</A>
+<LI><!2><A HREF="ParCSRBoomerAMGSolver.html#DOC.6.2.4">HYPRE_BoomerAMGSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="ParCSREuclidPreconditioner.html#DOC.6.4.6">HYPRE_EuclidCreate</A> <I>
+Create a Euclid object</I>
+<LI><!2><A HREF="ParCSREuclidPreconditioner.html#DOC.6.4.7">HYPRE_EuclidDestroy</A> <I>
+Destroy a Euclid object</I>
+<LI><A HREF="HYPRE_EuclidSetParam.html">HYPRE_EuclidSetParam</A> <I>
+Insert a single (name, value) pair in Euclid's options database</I>
+<LI><A HREF="HYPRE_EuclidSetParams.html">HYPRE_EuclidSetParams</A> <I>
+Insert (name, value) pairs in Euclid's options database
+by passing Euclid the command line (or an array of strings)</I>
+<LI><A HREF="HYPRE_EuclidSetParamsFromFile.html">HYPRE_EuclidSetParamsFromFile</A> <I>
+Insert (name, value) pairs in Euclid's options database</I>
+<LI><A HREF="HYPRE_EuclidSetup.html">HYPRE_EuclidSetup</A> <I>
+Set up the Euclid preconditioner</I>
+<LI><A HREF="HYPRE_EuclidSolve.html">HYPRE_EuclidSolve</A> <I>
+Apply the Euclid preconditioner</I>
+<LI><A HREF="HYPRE_IJMatrixAddToValues.html">HYPRE_IJMatrixAddToValues</A> <I>
+Adds to values for <TT>nrows</tt> of the matrix</I>
+<LI><!2><A HREF="IJMatrices.html#DOC.3.1.14">HYPRE_IJMatrixAssemble</A> <I>
+Finalize the construction of the matrix before using</I>
+<LI><A HREF="HYPRE_IJMatrixCreate.html">HYPRE_IJMatrixCreate</A> <I>
+Create a matrix object</I>
+<LI><A HREF="HYPRE_IJMatrixDestroy.html">HYPRE_IJMatrixDestroy</A> <I>
+Destroy a matrix object</I>
+<LI><A HREF="HYPRE_IJMatrixGetObject.html">HYPRE_IJMatrixGetObject</A> <I>
+Get a reference to the constructed matrix object</I>
+<LI><!2><A HREF="IJMatrices.html#DOC.3.1.15">HYPRE_IJMatrixGetObjectType</A> <I>
+Get the storage type of the constructed matrix object</I>
+<LI><A HREF="HYPRE_IJMatrixGetValues.html">HYPRE_IJMatrixGetValues</A> <I>
+Gets values for <TT>nrows</tt> of the matrix</I>
+<LI><A HREF="HYPRE_IJMatrixInitialize.html">HYPRE_IJMatrixInitialize</A> <I>
+Prepare a matrix object for setting coefficient values</I>
+<LI><A HREF="HYPRE_IJMatrixPrint.html">HYPRE_IJMatrixPrint</A> <I>
+Print the matrix to file</I>
+<LI><A HREF="HYPRE_IJMatrixRead.html">HYPRE_IJMatrixRead</A> <I>
+Read the matrix from file</I>
+<LI><A HREF="HYPRE_IJMatrixSetDiagOffdSizes.html">HYPRE_IJMatrixSetDiagOffdSizes</A> <I>
+(Optional) Set the max number of nonzeros to expect in each row of
+the diagonal and off-diagonal blocks</I>
+<LI><A HREF="HYPRE_IJMatrixSetObjectType.html">HYPRE_IJMatrixSetObjectType</A> <I>
+Set the storage type of the matrix object to be constructed</I>
+<LI><A HREF="HYPRE_IJMatrixSetRowSizes.html">HYPRE_IJMatrixSetRowSizes</A> <I>
+(Optional) Set the max number of nonzeros to expect in each row</I>
+<LI><A HREF="HYPRE_IJMatrixSetValues.html">HYPRE_IJMatrixSetValues</A> <I>
+Sets values for <TT>nrows</tt> of the matrix</I>
+<LI><A HREF="HYPRE_IJVectorAddToValues.html">HYPRE_IJVectorAddToValues</A> <I>
+Adds to values in vector</I>
+<LI><!2><A HREF="IJVectors.html#DOC.3.2.12">HYPRE_IJVectorAssemble</A> <I>
+Finalize the construction of the vector before using</I>
+<LI><A HREF="HYPRE_IJVectorCreate.html">HYPRE_IJVectorCreate</A> <I>
+Create a vector object</I>
+<LI><A HREF="HYPRE_IJVectorDestroy.html">HYPRE_IJVectorDestroy</A> <I>
+Destroy a vector object</I>
+<LI><A HREF="HYPRE_IJVectorGetObject.html">HYPRE_IJVectorGetObject</A> <I>
+Get a reference to the constructed vector object</I>
+<LI><!2><A HREF="IJVectors.html#DOC.3.2.13">HYPRE_IJVectorGetObjectType</A> <I>
+Get the storage type of the constructed vector object</I>
+<LI><A HREF="HYPRE_IJVectorGetValues.html">HYPRE_IJVectorGetValues</A> <I>
+Gets values in vector</I>
+<LI><A HREF="HYPRE_IJVectorInitialize.html">HYPRE_IJVectorInitialize</A> <I>
+Prepare a vector object for setting coefficient values</I>
+<LI><A HREF="HYPRE_IJVectorPrint.html">HYPRE_IJVectorPrint</A> <I>
+Print the vector to file</I>
+<LI><A HREF="HYPRE_IJVectorRead.html">HYPRE_IJVectorRead</A> <I>
+Read the vector from file</I>
+<LI><A HREF="HYPRE_IJVectorSetObjectType.html">HYPRE_IJVectorSetObjectType</A> <I>
+Set the storage type of the vector object to be constructed</I>
+<LI><A HREF="HYPRE_IJVectorSetValues.html">HYPRE_IJVectorSetValues</A> <I>
+Sets values in vector</I>
+<LI><!2><A HREF="ParCSRParaSailsPreconditioner.html#DOC.6.3.9">HYPRE_ParaSailsCreate</A> <I>
+Create a ParaSails preconditioner</I>
+<LI><!2><A HREF="ParCSRParaSailsPreconditioner.html#DOC.6.3.10">HYPRE_ParaSailsDestroy</A> <I>
+Destroy a ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetFilter.html">HYPRE_ParaSailsSetFilter</A> <I>
+Set the filter parameter for the 
+ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetLoadbal.html">HYPRE_ParaSailsSetLoadbal</A> <I>
+Set the load balance parameter for the
+ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetLogging.html">HYPRE_ParaSailsSetLogging</A> <I>
+Set the logging parameter for the
+ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetParams.html">HYPRE_ParaSailsSetParams</A> <I>
+Set the threshold and levels parameter for the ParaSails
+preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetReuse.html">HYPRE_ParaSailsSetReuse</A> <I>
+Set the pattern reuse parameter for the
+ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetSym.html">HYPRE_ParaSailsSetSym</A> <I>
+Set the symmetry parameter for the
+ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSetup.html">HYPRE_ParaSailsSetup</A> <I>
+Set up the ParaSails preconditioner</I>
+<LI><A HREF="HYPRE_ParaSailsSolve.html">HYPRE_ParaSailsSolve</A> <I>
+Apply the ParaSails preconditioner</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.15">HYPRE_ParCSRDiagScale</A> <I>
+Solve routine for diagonal preconditioning</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.14">HYPRE_ParCSRDiagScaleSetup</A> <I>
+Setup routine for diagonal preconditioning</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.1">HYPRE_ParCSRGMRESCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.2">HYPRE_ParCSRGMRESDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.12">HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.11">HYPRE_ParCSRGMRESGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.9">HYPRE_ParCSRGMRESGetPrecond</A>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.5">HYPRE_ParCSRGMRESSetKDim</A> <I>
+(Optional) Set the maximum size of the Krylov space</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.10">HYPRE_ParCSRGMRESSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.7">HYPRE_ParCSRGMRESSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.8">HYPRE_ParCSRGMRESSetPrecond</A> <I>
+(Optional) Set the preconditioner to use</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.6">HYPRE_ParCSRGMRESSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.3">HYPRE_ParCSRGMRESSetup</A>
+<LI><!2><A HREF="ParCSRGMRESSolver.html#DOC.6.7.4">HYPRE_ParCSRGMRESSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.1">HYPRE_ParCSRPCGCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.2">HYPRE_ParCSRPCGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.13">HYPRE_ParCSRPCGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.12">HYPRE_ParCSRPCGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.10">HYPRE_ParCSRPCGGetPrecond</A>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.11">HYPRE_ParCSRPCGSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.6">HYPRE_ParCSRPCGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.9">HYPRE_ParCSRPCGSetPrecond</A> <I>
+(Optional) Set the preconditioner to use</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.8">HYPRE_ParCSRPCGSetRelChange</A> <I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.5">HYPRE_ParCSRPCGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.7">HYPRE_ParCSRPCGSetTwoNorm</A> <I>
+(Optional) Use the two-norm in stopping criteria</I>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.3">HYPRE_ParCSRPCGSetup</A>
+<LI><!2><A HREF="ParCSRPCGSolver.html#DOC.6.6.4">HYPRE_ParCSRPCGSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.1">HYPRE_ParCSRPilutCreate</A> <I>
+Create a preconditioner object</I>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.2">HYPRE_ParCSRPilutDestroy</A> <I>
+Destroy a preconditioner object</I>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.6">HYPRE_ParCSRPilutSetDropTolerance</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.7">HYPRE_ParCSRPilutSetFactorRowSize</A> <I>
+(Optional)</I>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.5">HYPRE_ParCSRPilutSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.3">HYPRE_ParCSRPilutSetup</A>
+<LI><!2><A HREF="ParCSRPilutPreconditioner.html#DOC.6.5.4">HYPRE_ParCSRPilutSolve</A> <I>
+Precondition the system</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.2">HYPRE_SStructGMRESCreate</A> <I>
+Create a solver object</I>
+<LI><A HREF="HYPRE_SStructGMRESDestroy.html">HYPRE_SStructGMRESDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.11">HYPRE_SStructGMRESGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.10">HYPRE_SStructGMRESGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.5">HYPRE_SStructGMRESSetKDim</A> <I>
+(Optional) Set the maximum size of the Krylov space</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.9">HYPRE_SStructGMRESSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.7">HYPRE_SStructGMRESSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.8">HYPRE_SStructGMRESSetPrecond</A> <I>
+(Optional) Set the preconditioner to use</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.6">HYPRE_SStructGMRESSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.3">HYPRE_SStructGMRESSetup</A>
+<LI><!2><A HREF="SStructGMRESSolver.html#DOC.5.3.4">HYPRE_SStructGMRESSolve</A> <I>
+Solve the system</I>
+<LI><A HREF="HYPRE_SStructGraphAddEntries.html">HYPRE_SStructGraphAddEntries</A> <I>
+Add a non-stencil graph entry at a particular index</I>
+<LI><!2><A HREF="SStructGraphs.html#DOC.2.3.6">HYPRE_SStructGraphAssemble</A> <I>
+Finalize the construction of the graph before using</I>
+<LI><!2><A HREF="SStructGraphs.html#DOC.2.3.3">HYPRE_SStructGraphCreate</A> <I>
+Create a graph object</I>
+<LI><!2><A HREF="SStructGraphs.html#DOC.2.3.4">HYPRE_SStructGraphDestroy</A> <I>
+Destroy a graph object</I>
+<LI><!2><A HREF="SStructGraphs.html#DOC.2.3.5">HYPRE_SStructGraphSetStencil</A> <I>
+Set the stencil for a variable on a structured part of the grid</I>
+<LI><A HREF="HYPRE_SStructGridAddUnstructuredPart.html">HYPRE_SStructGridAddUnstructuredPart</A> <I>
+Add an unstructured part to the grid</I>
+<LI><A HREF="HYPRE_SStructGridAddVariables.html">HYPRE_SStructGridAddVariables</A> <I>
+Describe additional variables that live at a particular index</I>
+<LI><!2><A HREF="SStructGrids.html#DOC.2.1.10">HYPRE_SStructGridAssemble</A> <I>
+Finalize the construction of the grid before using</I>
+<LI><!2><A HREF="SStructGrids.html#DOC.2.1.7">HYPRE_SStructGridCreate</A> <I>
+Create an <TT>ndim</tt>-dimensional grid object with <TT>nparts</tt>
+structured parts</I>
+<LI><A HREF="HYPRE_SStructGridDestroy.html">HYPRE_SStructGridDestroy</A> <I>
+Destroy a grid object</I>
+<LI><!2><A HREF="SStructGrids.html#DOC.2.1.8">HYPRE_SStructGridSetExtents</A> <I>
+Set the extents for a box on a structured part of the grid</I>
+<LI><A HREF="HYPRE_SStructGridSetNeighborBox.html">HYPRE_SStructGridSetNeighborBox</A> <I>
+Describe how regions just outside of a part relate to other parts</I>
+<LI><!2><A HREF="SStructGrids.html#DOC.2.1.11">HYPRE_SStructGridSetPeriodic</A> <I>
+(Optional) Set periodic for a particular part</I>
+<LI><!2><A HREF="SStructGrids.html#DOC.2.1.9">HYPRE_SStructGridSetVariables</A> <I>
+Describe the variables that live on a structured part of the grid</I>
+<LI><A HREF="HYPRE_SStructMatrixAddToBoxValues.html">HYPRE_SStructMatrixAddToBoxValues</A> <I>
+Add to matrix coefficients a box at a time</I>
+<LI><A HREF="HYPRE_SStructMatrixAddToValues.html">HYPRE_SStructMatrixAddToValues</A> <I>
+Add to matrix coefficients index by index</I>
+<LI><!2><A HREF="SStructMatrices.html#DOC.2.4.13">HYPRE_SStructMatrixAssemble</A> <I>
+Finalize the construction of the matrix before using</I>
+<LI><!2><A HREF="SStructMatrices.html#DOC.2.4.10">HYPRE_SStructMatrixCreate</A> <I>
+Create a matrix object</I>
+<LI><!2><A HREF="SStructMatrices.html#DOC.2.4.11">HYPRE_SStructMatrixDestroy</A> <I>
+Destroy a matrix object</I>
+<LI><A HREF="HYPRE_SStructMatrixGetObject.html">HYPRE_SStructMatrixGetObject</A> <I>
+Get a reference to the constructed matrix object</I>
+<LI><!2><A HREF="SStructMatrices.html#DOC.2.4.12">HYPRE_SStructMatrixInitialize</A> <I>
+Prepare a matrix object for setting coefficient values</I>
+<LI><A HREF="HYPRE_SStructMatrixPrint.html">HYPRE_SStructMatrixPrint</A> <I>
+Print the matrix to file</I>
+<LI><A HREF="HYPRE_SStructMatrixSetBoxValues.html">HYPRE_SStructMatrixSetBoxValues</A> <I>
+Set matrix coefficients a box at a time</I>
+<LI><!2><A HREF="SStructMatrices.html#DOC.2.4.14">HYPRE_SStructMatrixSetComplex</A> <I>
+Set the matrix to be complex</I>
+<LI><A HREF="HYPRE_SStructMatrixSetObjectType.html">HYPRE_SStructMatrixSetObjectType</A> <I>
+Set the storage type of the matrix object to be constructed</I>
+<LI><A HREF="HYPRE_SStructMatrixSetSymmetric.html">HYPRE_SStructMatrixSetSymmetric</A> <I>
+Define symmetry properties of the matrix</I>
+<LI><A HREF="HYPRE_SStructMatrixSetValues.html">HYPRE_SStructMatrixSetValues</A> <I>
+Set matrix coefficients index by index</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.2">HYPRE_SStructPCGCreate</A> <I>
+Create a solver object</I>
+<LI><A HREF="HYPRE_SStructPCGDestroy.html">HYPRE_SStructPCGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.12">HYPRE_SStructPCGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.11">HYPRE_SStructPCGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.10">HYPRE_SStructPCGSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.6">HYPRE_SStructPCGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.9">HYPRE_SStructPCGSetPrecond</A> <I>
+(Optional) Set the preconditioner to use</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.8">HYPRE_SStructPCGSetRelChange</A> <I>
+(Optional) Set to use additional relative-change convergence test</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.5">HYPRE_SStructPCGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.7">HYPRE_SStructPCGSetTwoNorm</A> <I>
+(Optional) Set type of norm to use in stopping criteria</I>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.3">HYPRE_SStructPCGSetup</A>
+<LI><!2><A HREF="SStructPCGSolver.html#DOC.5.2.4">HYPRE_SStructPCGSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="SStructStencils.html#DOC.2.2.2">HYPRE_SStructStencilCreate</A> <I>
+Create a stencil object for the specified number of spatial dimensions
+and stencil entries</I>
+<LI><!2><A HREF="SStructStencils.html#DOC.2.2.3">HYPRE_SStructStencilDestroy</A> <I>
+Destroy a stencil object</I>
+<LI><!2><A HREF="SStructStencils.html#DOC.2.2.4">HYPRE_SStructStencilSetEntry</A> <I>
+Set a stencil entry</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.1">HYPRE_SStructSysPFMGCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.2">HYPRE_SStructSysPFMGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.16">HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.15">HYPRE_SStructSysPFMGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.14">HYPRE_SStructSysPFMGSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.6">HYPRE_SStructSysPFMGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.9">HYPRE_SStructSysPFMGSetNonZeroGuess</A> <I>
+(Optional) Use a nonzero initial guess</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.12">HYPRE_SStructSysPFMGSetNumPostRelax</A> <I>
+(Optional) Set number of post-relaxation sweeps</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.11">HYPRE_SStructSysPFMGSetNumPreRelax</A> <I>
+(Optional) Set number of pre-relaxation sweeps</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.10">HYPRE_SStructSysPFMGSetRelaxType</A> <I>
+(Optional) Set relaxation type</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.7">HYPRE_SStructSysPFMGSetRelChange</A> <I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.13">HYPRE_SStructSysPFMGSetSkipRelax</A> <I>
+(Optional) Skip relaxation on certain grids for isotropic problems</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.5">HYPRE_SStructSysPFMGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.3">HYPRE_SStructSysPFMGSetup</A>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.8">HYPRE_SStructSysPFMGSetZeroGuess</A> <I>
+(Optional) Use a zero initial guess</I>
+<LI><!2><A HREF="SStructSysPFMGSolver.html#DOC.5.4.4">HYPRE_SStructSysPFMGSolve</A> <I>
+Solve the system</I>
+<LI><A HREF="HYPRE_SStructVectorAddToBoxValues.html">HYPRE_SStructVectorAddToBoxValues</A> <I>
+Set vector coefficients a box at a time</I>
+<LI><A HREF="HYPRE_SStructVectorAddToValues.html">HYPRE_SStructVectorAddToValues</A> <I>
+Set vector coefficients index by index</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.14">HYPRE_SStructVectorAssemble</A> <I>
+Finalize the construction of the vector before using</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVectorCreate</A> <I>
+Create a vector object</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.12">HYPRE_SStructVectorDestroy</A> <I>
+Destroy a vector object</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.15">HYPRE_SStructVectorGather</A> <I>
+Gather vector data so that efficient <TT>GetValues</tt> can be done</I>
+<LI><A HREF="HYPRE_SStructVectorGetBoxValues.html">HYPRE_SStructVectorGetBoxValues</A> <I>
+Get vector coefficients a box at a time</I>
+<LI><A HREF="HYPRE_SStructVectorGetObject.html">HYPRE_SStructVectorGetObject</A> <I>
+Get a reference to the constructed vector object</I>
+<LI><A HREF="HYPRE_SStructVectorGetValues.html">HYPRE_SStructVectorGetValues</A> <I>
+Get vector coefficients index by index</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.13">HYPRE_SStructVectorInitialize</A> <I>
+Prepare a vector object for setting coefficient values</I>
+<LI><A HREF="HYPRE_SStructVectorPrint.html">HYPRE_SStructVectorPrint</A> <I>
+Print the vector to file</I>
+<LI><A HREF="HYPRE_SStructVectorSetBoxValues.html">HYPRE_SStructVectorSetBoxValues</A> <I>
+Set vector coefficients a box at a time</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.16">HYPRE_SStructVectorSetComplex</A> <I>
+Set the vector to be complex</I>
+<LI><A HREF="HYPRE_SStructVectorSetObjectType.html">HYPRE_SStructVectorSetObjectType</A> <I>
+Set the storage type of the vector object to be constructed</I>
+<LI><A HREF="HYPRE_SStructVectorSetValues.html">HYPRE_SStructVectorSetValues</A> <I>
+Set vector coefficients index by index</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.14">HYPRE_StructDiagScale</A> <I>
+Solve routine for diagonal preconditioning</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.13">HYPRE_StructDiagScaleSetup</A> <I>
+Setup routine for diagonal preconditioning</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.1">HYPRE_StructGMRESCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.2">HYPRE_StructGMRESDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.10">HYPRE_StructGMRESGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.9">HYPRE_StructGMRESGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.8">HYPRE_StructGMRESSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.6">HYPRE_StructGMRESSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.7">HYPRE_StructGMRESSetPrecond</A> <I>
+(Optional) Set the preconditioner to use</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.5">HYPRE_StructGMRESSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.3">HYPRE_StructGMRESSetup</A> <I>
+set up</I>
+<LI><!2><A HREF="StructGMRESSolver.html#DOC.4.6.4">HYPRE_StructGMRESSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="StructGrids.html#DOC.1.1.5">HYPRE_StructGridAssemble</A> <I>
+Finalize the construction of the grid before using</I>
+<LI><!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGridCreate</A> <I>
+Create an <TT>ndim</tt>-dimensional grid object</I>
+<LI><A HREF="HYPRE_StructGridDestroy.html">HYPRE_StructGridDestroy</A> <I>
+Destroy a grid object</I>
+<LI><!2><A HREF="StructGrids.html#DOC.1.1.4">HYPRE_StructGridSetExtents</A> <I>
+Set the extents for a box on the grid</I>
+<LI><!2><A HREF="StructGrids.html#DOC.1.1.6">HYPRE_StructGridSetPeriodic</A> <I>
+(Optional) Set periodic</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.2">HYPRE_StructJacobiCreate</A> <I>
+Create a solver object</I>
+<LI><A HREF="HYPRE_StructJacobiDestroy.html">HYPRE_StructJacobiDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.10">HYPRE_StructJacobiGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.9">HYPRE_StructJacobiGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.6">HYPRE_StructJacobiSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.8">HYPRE_StructJacobiSetNonZeroGuess</A> <I>
+(Optional) Use a nonzero initial guess</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.5">HYPRE_StructJacobiSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.3">HYPRE_StructJacobiSetup</A>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.7">HYPRE_StructJacobiSetZeroGuess</A> <I>
+(Optional) Use a zero initial guess</I>
+<LI><!2><A HREF="StructJacobiSolver.html#DOC.4.2.4">HYPRE_StructJacobiSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrixAddToBoxValues</A> <I>
+Add to matrix coefficients a box at a time</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.9">HYPRE_StructMatrixAddToValues</A> <I>
+Add to matrix coefficients index by index</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrixAssemble</A> <I>
+Finalize the construction of the matrix before using</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.4">HYPRE_StructMatrixCreate</A> <I>
+Create a matrix object</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.5">HYPRE_StructMatrixDestroy</A> <I>
+Destroy a matrix object</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.6">HYPRE_StructMatrixInitialize</A> <I>
+Prepare a matrix object for setting coefficient values</I>
+<LI><A HREF="HYPRE_StructMatrixPrint.html">HYPRE_StructMatrixPrint</A> <I>
+Print the matrix to file</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.8">HYPRE_StructMatrixSetBoxValues</A> <I>
+Set matrix coefficients a box at a time</I>
+<LI><A HREF="HYPRE_StructMatrixSetSymmetric.html">HYPRE_StructMatrixSetSymmetric</A> <I>
+(Optional) Define symmetry properties of the matrix</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.7">HYPRE_StructMatrixSetValues</A> <I>
+Set matrix coefficients index by index</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.1">HYPRE_StructPCGCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.2">HYPRE_StructPCGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.12">HYPRE_StructPCGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.11">HYPRE_StructPCGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.10">HYPRE_StructPCGSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.6">HYPRE_StructPCGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.9">HYPRE_StructPCGSetPrecond</A> <I>
+(Optional) Set the preconditioner to use</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.8">HYPRE_StructPCGSetRelChange</A> <I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.5">HYPRE_StructPCGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.7">HYPRE_StructPCGSetTwoNorm</A> <I>
+(Optional) Use the two-norm in stopping criteria</I>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.3">HYPRE_StructPCGSetup</A>
+<LI><!2><A HREF="StructPCGSolver.html#DOC.4.5.4">HYPRE_StructPCGSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.1">HYPRE_StructPFMGCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.2">HYPRE_StructPFMGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.16">HYPRE_StructPFMGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.15">HYPRE_StructPFMGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.14">HYPRE_StructPFMGSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.6">HYPRE_StructPFMGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.9">HYPRE_StructPFMGSetNonZeroGuess</A> <I>
+(Optional) Use a nonzero initial guess</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.12">HYPRE_StructPFMGSetNumPostRelax</A> <I>
+(Optional) Set number of post-relaxation sweeps</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.11">HYPRE_StructPFMGSetNumPreRelax</A> <I>
+(Optional) Set number of pre-relaxation sweeps</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.10">HYPRE_StructPFMGSetRelaxType</A> <I>
+(Optional) Set relaxation type</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.7">HYPRE_StructPFMGSetRelChange</A> <I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.13">HYPRE_StructPFMGSetSkipRelax</A> <I>
+(Optional) Skip relaxation on certain grids for isotropic problems</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.5">HYPRE_StructPFMGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.3">HYPRE_StructPFMGSetup</A>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.8">HYPRE_StructPFMGSetZeroGuess</A> <I>
+(Optional) Use a zero initial guess</I>
+<LI><!2><A HREF="StructPFMGSolver.html#DOC.4.3.4">HYPRE_StructPFMGSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.1">HYPRE_StructSMGCreate</A> <I>
+Create a solver object</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.2">HYPRE_StructSMGDestroy</A> <I>
+Destroy a solver object</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.14">HYPRE_StructSMGGetFinalRelativeResidualNorm</A> <I>
+Return the norm of the final relative residual</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.13">HYPRE_StructSMGGetNumIterations</A> <I>
+Return the number of iterations taken</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.12">HYPRE_StructSMGSetLogging</A> <I>
+(Optional) Set the amount of logging to do</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.6">HYPRE_StructSMGSetMaxIter</A> <I>
+(Optional) Set maximum number of iterations</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.9">HYPRE_StructSMGSetNonZeroGuess</A> <I>
+(Optional) Use a nonzero initial guess</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.11">HYPRE_StructSMGSetNumPostRelax</A> <I>
+(Optional) Set number of post-relaxation sweeps</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.10">HYPRE_StructSMGSetNumPreRelax</A> <I>
+(Optional) Set number of pre-relaxation sweeps</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.7">HYPRE_StructSMGSetRelChange</A> <I>
+(Optional) Additionally require that the relative difference in
+successive iterates be small</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.5">HYPRE_StructSMGSetTol</A> <I>
+(Optional) Set the convergence tolerance</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.3">HYPRE_StructSMGSetup</A>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.8">HYPRE_StructSMGSetZeroGuess</A> <I>
+(Optional) Use a zero initial guess</I>
+<LI><!2><A HREF="StructSMGSolver.html#DOC.4.4.4">HYPRE_StructSMGSolve</A> <I>
+Solve the system</I>
+<LI><!2><A HREF="StructStencils.html#DOC.1.2.3">HYPRE_StructStencilCreate</A> <I>
+Create a stencil object for the specified number of spatial dimensions
+and stencil entries</I>
+<LI><!2><A HREF="StructStencils.html#DOC.1.2.4">HYPRE_StructStencilDestroy</A> <I>
+Destroy a stencil object</I>
+<LI><A HREF="HYPRE_StructStencilSetElement.html">HYPRE_StructStencilSetElement</A> <I>
+Set a stencil entry</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVectorAddToBoxValues</A> <I>
+Set vector coefficients a box at a time</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.8">HYPRE_StructVectorAddToValues</A> <I>
+Set vector coefficients index by index</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.10">HYPRE_StructVectorAssemble</A> <I>
+Finalize the construction of the vector before using</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.3">HYPRE_StructVectorCreate</A> <I>
+Create a vector object</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.4">HYPRE_StructVectorDestroy</A> <I>
+Destroy a vector object</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.12">HYPRE_StructVectorGetBoxValues</A> <I>
+Get vector coefficients a box at a time</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.11">HYPRE_StructVectorGetValues</A> <I>
+Get vector coefficients index by index</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.5">HYPRE_StructVectorInitialize</A> <I>
+Prepare a vector object for setting coefficient values</I>
+<LI><A HREF="HYPRE_StructVectorPrint.html">HYPRE_StructVectorPrint</A> <I>
+Print the vector to file</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.7">HYPRE_StructVectorSetBoxValues</A> <I>
+Set vector coefficients a box at a time</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.6">HYPRE_StructVectorSetValues</A> <I>
+Set vector coefficients index by index</I>
+</UL>
+<H2>Macros</H2>
+<UL>
+<LI><!2><A HREF="IJMatrices.html#DOC.3.1.13">HYPRE_IJMatrix</A> <I>
+The matrix object</I>
+<LI><!2><A HREF="IJVectors.html#DOC.3.2.11">HYPRE_IJVector</A> <I>
+The vector object</I>
+<LI><!2><A HREF="ParCSRSolvers.2.html#DOC.6.1.1">HYPRE_SOLVER_STRUCT</A> <I>
+The solver object</I>
+<LI><!2><A HREF="SStructGraphs.html#DOC.2.3.2">HYPRE_SStructGraph</A> <I>
+The graph object is used to describe the nonzero structure of a
+matrix</I>
+<LI><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> <I>
+A grid object is constructed out of several structured ``parts''
+and an optional unstructured ``part''</I>
+<LI><!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> <I>
+The matrix object</I>
+<LI><!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> <I>
+The solver object</I>
+<LI><!2><A HREF="SStructStencils.html#DOC.2.2.1">HYPRE_SStructStencil</A> <I>
+The stencil object</I>
+<LI><A HREF="HYPRE_SStructVariable.html">HYPRE_SStructVariable</A> <I>
+An enumerated type that supports cell centered, node centered, face
+centered, and edge centered variables</I>
+<LI><!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> <I>
+The vector object</I>
+<LI><!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> <I>
+A grid object is constructed out of several ``boxes'', defined on a
+global abstract index space</I>
+<LI><!2><A HREF="StructMatrices.html#DOC.1.3.3">HYPRE_StructMatrix</A> <I>
+The matrix object</I>
+<LI><!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> <I>
+The solver object</I>
+<LI><!2><A HREF="StructStencils.html#DOC.1.2.2">HYPRE_StructStencil</A> <I>
+The stencil object</I>
+<LI><!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> <I>
+The vector object</I>
+</UL>
+<I><A HREF="HIER.html"> hierarchy of classes</A></I><P></BODY><hr>
+<center>
+<img src="hypre_wiw.gif">
+</center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>

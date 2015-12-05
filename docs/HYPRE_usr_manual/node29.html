@@ -1,0 +1,47 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>7.1 SMG</TITLE>
+<META NAME="description" CONTENT="7.1 SMG">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html456" HREF="node30.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html454" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html448" HREF="node28.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html458" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html459" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html457" HREF="node30.html">7.2 PFMG</A>
+<B>Up:</B> <A NAME="tex2html455" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B> Previous:</B> <A NAME="tex2html449" HREF="node28.html">Use:</A>
+<BR> <P>
+<H1><A NAME="SECTION00830000000000000000">7.1 SMG</A></H1>
+<P>
+SMG is a parallel semicoarsening multigrid solver for the linear
+systems arising from finite difference, finite volume, or finite
+element discretizations of the diffusion equation,
+<P> <IMG WIDTH=500 HEIGHT=19 ALIGN=BOTTOM  SRC="img17.gif"  > <P>
+on logically rectangular grids.  The code solves both 2D and 3D
+problems with discretization stencils of up to 9-point in 2D and up to
+27-point in 3D.  See
+[&make_named_href('',
+	"node39.html#SSchaffer_1998a","[10]"), &make_named_href('',
+	"node39.html#PNBrown_RDFalgout_JEJones_2000","[2]"), &make_named_href('',
+	"node39.html#RDFalgout_JEJones_2000","[5]")]
+for details on the algorithm and its parallel implementation/performance.
+<P>
+SMG is a particularly robust method.  The algorithm semicoarsens in
+the z-direction and uses plane smoothing.  The xy plane-solves are
+effected by one V-cycle of the 2D SMG algorithm, which semicoarsens in
+the y-direction and uses line smoothing.
+<P>
+<HR><A NAME="tex2html456" HREF="node30.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html454" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html448" HREF="node28.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html458" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html459" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html457" HREF="node30.html">7.2 PFMG</A>
+<B>Up:</B> <A NAME="tex2html455" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B> Previous:</B> <A NAME="tex2html449" HREF="node28.html">Use:</A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

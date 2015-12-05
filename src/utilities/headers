@@ -1,0 +1,71 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.0 $
+#EHEADER***********************************************************************
+
+INTERNAL_HEADER=utilities.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#include <HYPRE_config.h>
+
+#include "HYPRE_utilities.h"
+
+#ifndef hypre_UTILITIES_HEADER
+#define hypre_UTILITIES_HEADER
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat general.h                  >> $INTERNAL_HEADER
+
+cat mpistubs.h                 >> $INTERNAL_HEADER
+
+cat memory.h                   >> $INTERNAL_HEADER
+
+./protos random.c              >> $INTERNAL_HEADER
+
+cat thread_mpistubs.h          >> $INTERNAL_HEADER
+
+cat threading.h                >> $INTERNAL_HEADER		          
+
+cat timing.h                   >> $INTERNAL_HEADER
+
+cat amg_linklist.h             >> $INTERNAL_HEADER
+
+./protos amg_linklist.c        >> $INTERNAL_HEADER
+		          
+./protos binsearch.c           >> $INTERNAL_HEADER
+		          
+./protos qsplit.c              >> $INTERNAL_HEADER
+		          
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+

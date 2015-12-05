@@ -1,0 +1,85 @@
+# Generated automatically from Makefile.in by configure.
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.0 $
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = .
+
+
+CC =  mpicc
+
+C_COMPILE_FLAGS= -O 
+CXX_COMPILE_FLAGS= -O 
+F77_COMPILE_FLAGS= -O -silent 
+CINCLUDES= 
+ 
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ ${CINCLUDES}
+
+RANLIB = ranlib
+
+HEADERS =\
+ krylov.h
+
+FILES =\
+ bicgstab.c\
+ cgnr.c\
+ gmres.c\
+ pcg.c\
+ HYPRE_bicgstab.c\
+ HYPRE_cgnr.c\
+ HYPRE_gmres.c\
+ HYPRE_pcg.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libkrylov.a 
+
+install: all
+	@cp -f $(srcdir)/krylov.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f lib*.a $$HYPRE_INSTALL_DIR/lib/.
+clean:
+	@rm -f *.o *.dxx 
+	@rm -f *.prj
+	@rm -f *.kdd
+
+veryclean: clean
+	@rm -f lib*.a
+
+
+##################################################################
+# Rules
+##################################################################
+
+libkrylov.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+

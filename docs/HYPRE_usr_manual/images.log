@@ -1,0 +1,256 @@
+This is TeX, Version 3.14159 (Web2C 7.2) (format=latex 1998.3.30)  27 JUL 2001 10:01
+**./images.tex
+(./images.tex
+LaTeX2e <1997/12/01> patch level 2
+
+(/usr/local/share/texmf/tex/latex/base/book.cls
+Document Class: book 1997/10/10 v1.3x Standard LaTeX document class
+(/usr/local/share/texmf/tex/latex/base/bk11.clo
+File: bk11.clo 1997/10/10 v1.3x Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+) (/usr/local/share/texmf/tex/latex/graphics/epsfig.sty
+Package: epsfig 1996/10/04 v1.7 (e)psfig emulation (SPQR)
+(/usr/local/share/texmf/tex/latex/graphics/graphicx.sty
+Package: graphicx 1997/06/09 v1.0d Enhanced LaTeX Graphics (DPC,SPQR)
+(/usr/local/share/texmf/tex/latex/graphics/keyval.sty
+Package: keyval 1997/11/10 v1.10 key=value parser (DPC)
+\KV@toks@=\toks14
+) (/usr/local/share/texmf/tex/latex/graphics/graphics.sty
+Package: graphics 1997/09/09 v1.0f Standard LaTeX Graphics (DPC,SPQR)
+(/usr/local/share/texmf/tex/latex/graphics/trig.sty
+Package: trig 1994/10/16 v1.08 sin cos tan (DPC)
+) (/usr/local/share/texmf/tex/latex/graphics/graphics.cfg)
+Package graphics Info: Driver file: dvips.def on input line 84.
+(/usr/local/share/texmf/tex/latex/graphics/dvips.def
+File: dvips.def 1997/09/09 v3.0e Driver-dependant file (DPC,SPQR)
+))
+\Gin@req@height=\dimen103
+\Gin@req@width=\dimen104
+)
+\epsfxsize=\dimen105
+\epsfysize=\dimen106
+) (/usr/local/share/texmf/tex/styles/html.sty
+Package: html 1996/02/01 v1.0 hypertext commands for latex2html (nd, hs)
+\c@lpart=\count88
+\c@lchapter=\count89
+\c@lsection=\count90
+\c@lsubsection=\count91
+\c@lsubsubsection=\count92
+\c@lparagraph=\count93
+\c@lsubparagraph=\count94
+\c@lsubsubparagraph=\count95
+\c@lequation=\count96
+\ptrfile=\write3
+) (/home/treadway/hypre-1.6.0/src/linear_solvers/docs/hypre.sty) (/usr/local/sh
+are/texmf/tex/latex/base/makeidx.sty
+Package: makeidx 1995/04/19 v1.0j Standard LaTeX package
+)
+\@indexfile=\write4
+\openout4 = `images.idx'.
+
+Writing index file images.idx
+\lthtmlwrite=\write5
+\sizebox=\box26
+(images.aux)
+\openout1 = `images.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 39.
+LaTeX Font Info:    ... okay on input line 39.
+File: concep_iface.eps Graphic file (type eps)
+<concep_iface.eps> [1]
+File: fv_grid.eps Graphic file (type eps)
+<fv_grid.eps> [2]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 70.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 70.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 70.
+[3
+
+
+
+
+] [4
+
+]
+latex2htmlSize :tex2html_wrap_inline1373: 7.48248pt::1.64249pt.
+[5
+
+]
+latex2htmlSize :tex2html_wrap_inline1377: 7.48248pt::1.64249pt.
+[6
+
+] [7
+
+] [8
+
+]
+File: block_structured.eps Graphic file (type eps)
+<block_structured.eps> [9] [10
+
+
+] [11
+
+] [12
+
+]
+Underfull \hbox (badness 2080) in paragraph at lines 225--227
+[][]\OT1/cmr/m/n/10.95 , [] (de-fault), [], [], [], [],
+ []
+
+
+Underfull \hbox (badness 3158) in paragraph at lines 276--280
+[][] \OT1/cmr/m/n/10.95 (Damped Ja-cobi), [] (se-quen-tial Gauss-Seidel),
+ []
+
+
+LaTeX Warning: Float too large for page by 91.43993pt on input line 319.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[13] [14
+
+
+]
+latex2htmlSize :tex2html_wrap_inline1401: 7.48248pt::3.19804pt.
+[15
+
+] [16
+
+] [17
+
+]
+latex2htmlSize :tex2html_wrap_inline1407: 9.97366pt::2.73749pt.
+[18
+
+]
+latex2htmlSize :tex2html_wrap_inline1409: 9.12923pt::0.0pt.
+[19
+
+]
+latex2htmlSize :tex2html_wrap_inline1415: 7.60416pt::3.33946pt.
+[20
+
+]
+latex2htmlSize :tex2html_wrap_inline1417: 7.60416pt::0.0pt.
+[21
+
+] [22
+
+] [23
+
+] [24
+
+]
+latex2htmlSize :tex2html_wrap_inline1421: 7.60416pt::1.48888pt.
+[25
+
+]
+latex2htmlSize :tex2html_wrap_inline1423: 7.60416pt::1.48888pt.
+[26
+
+]
+latex2htmlSize :tex2html_wrap_inline1425: 7.60416pt::0.0pt.
+[27
+
+]
+latex2htmlSize :tex2html_wrap_inline1427: 7.60416pt::0.0pt.
+[28
+
+]
+latex2htmlSize :tex2html_wrap_inline1431: 10.08096pt::0.0pt.
+[29
+
+]
+latex2htmlSize :tex2html_wrap_inline1433: 10.08096pt::0.0pt.
+[30
+
+] [31
+
+]
+Overfull \hbox (12.22833pt too wide) in paragraph at lines 480--492
+[][]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 480--492
+
+ []
+
+[32
+
+]
+latex2htmlSize :tex2html_wrap_inline1457: 7.05666pt::0.42812pt.
+[33
+
+]
+latex2htmlSize :tex2html_wrap_inline1459: 6.69167pt::0.9125pt.
+[34
+
+]
+latex2htmlSize :tex2html_wrap_inline1461: 7.05666pt::0.9125pt.
+[35
+
+]
+latex2htmlSize :tex2html_wrap_inline1467: 7.05666pt::0.42812pt.
+[36
+
+]
+latex2htmlSize :tex2html_wrap_inline1469: 6.69167pt::0.9125pt.
+[37
+
+]
+latex2htmlSize :tex2html_wrap_inline1471: 7.05666pt::0.9125pt.
+[38
+
+]
+latex2htmlSize :tex2html_wrap_inline1479: 9.44032pt::2.73749pt.
+[39
+
+]
+latex2htmlSize :tex2html_wrap_inline1491: 8.2125pt::2.73749pt.
+[40
+
+]
+latex2htmlSize :tex2html_wrap_inline1495: 8.2125pt::2.73749pt.
+[41
+
+] [42] (images.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 765 strings out of 10982
+ 9287 string characters out of 73717
+ 57841 words of memory out of 263001
+ 3667 multiletter control sequences out of 10000+0
+ 7930 words of font info for 29 fonts, out of 200000 for 1000
+ 14 hyphenation exceptions out of 1000
+ 32i,10n,21p,228b,385s stack positions out of 300i,100n,500p,30000b,4000s
+
+Output written on images.dvi (42 pages, 17780 bytes).

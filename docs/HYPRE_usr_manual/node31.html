@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>7.3 BoomerAMG</TITLE>
+<META NAME="description" CONTENT="7.3 BoomerAMG">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html480" HREF="node32.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html478" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html472" HREF="node30.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html482" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html483" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html481" HREF="node32.html">7.4 ParaSails</A>
+<B>Up:</B> <A NAME="tex2html479" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B> Previous:</B> <A NAME="tex2html473" HREF="node30.html">7.2 PFMG</A>
+<BR> <P>
+<H1><A NAME="SECTION00850000000000000000">7.3 BoomerAMG</A></H1>
+<P>
+BoomerAMG is a parallel implementation of algebraic multigrid.
+It can be used both as a solver or as a preconditioner.
+The user can choose between various different parallel coarsening techniques
+and relaxation schemes.
+See [&make_named_href('',
+	"node39.html#Henson_Yang:2000","[6]")] for a detailed description of the coarsening 
+algorithms, the interpolation and nueemerical results.
+The following coarsening techniques are available:
+<UL>
+<LI> the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
+<LI> various variants of the classical Ruge-Stueben (RS) coarsening algorithm, and
+<LI> the Falgout coarsening which is a combination of CLJP and the
+classical RS coarsening algorithm.
+</UL>
+The following relaxation techniques are available:
+<UL>
+<LI> weighted Jacobi relaxation,
+<LI> a hybrid Gauss-Seidel / Jacobi relaxation scheme,
+<LI> a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, and
+<LI> sequential Gauss-Seidel relaxation.
+</UL><H2><A NAME="SECTION00851000000000000000">7.5.1 Synopsis</A></H2>
+<P>
+The solver is set up and run using the following routines,
+where A is the matrix, b the right hand side and x the solution vector
+of the linear system to be solved:
+<P>
+<blockquote><PRE>#include &quot;HYPRE_parcsr_ls.h&quot;
+
+int HYPRE_BoomerAMGCreate(HYPRE_Solver *solver); 
+
+&lt;set certain parameters if desired &gt;
+
+int HYPRE_BoomerAMGSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_BoomerAMGSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_BoomerAMGDestroy(HYPRE_Solver solver);</PRE>
+</blockquote><H2><A NAME="SECTION00852000000000000000">7.4.2 Interface functions</A></H2>
+<P>
+Parameters for setting up the code are specified using the following routines:
+<P>
+<H3><A NAME="SECTION00852100000000000000">HYPRE_BoomerAMGSetMaxLevels</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetMaxLevels( HYPRE_Solver solver, int max_levels);</PRE>
+</blockquote>
+max_levels defines the maximal number of multigrid levels allowed.
+The default is 25.
+<P>
+<H3><A NAME="SECTION00852200000000000000">HYPRE_BoomerAMGSetMaxIter</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetMaxIter( HYPRE_Solver solver, int max_iter);</PRE>
+</blockquote>
+max_iter defines the maximal number of iterations allowed.
+The default is 20.
+<P>
+<H3><A NAME="SECTION00852300000000000000">HYPRE_BoomerAMGSetTol</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetTol( HYPRE_Solver solver, double tol);</PRE>
+</blockquote>
+tol defines the tolerance needed for the stopping criterion
+ <IMG WIDTH=172 HEIGHT=33 ALIGN=MIDDLE  SRC="img18.gif"  >  tol.
+The default for tol is  <IMG WIDTH=34 HEIGHT=15 ALIGN=BOTTOM  SRC="img19.gif"  > .
+<P>
+<H3><A NAME="SECTION00852400000000000000">HYPRE_BoomerAMGSetStrongThreshold</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetStrongThreshold( HYPRE_Solver solver,
+	double strong_threshold);</PRE>
+</blockquote>
+A point <I>i</I> is strongly connected to <I>j</I>, if  <IMG WIDTH=156 HEIGHT=27 ALIGN=MIDDLE  SRC="img20.gif"  > , where the strong threshold  <IMG WIDTH=6 HEIGHT=13 ALIGN=BOTTOM  SRC="img21.gif"  >  is a value
+between 0 and 1. Weak connections are usually ignored when determining
+the next lower level. Consequently, choosing a larger strong threshold
+leads in general to smaller coarse grids, but worse convergence rates.
+The default value for  <IMG WIDTH=6 HEIGHT=13 ALIGN=BOTTOM  SRC="img21.gif"  > 
+is 0.25, which appears to be a good choice for 2-dimensional
+problems. A better choice for 3-dimensional problems appears to be 0.5. However,
+the choice of the strength threshold is problem dependent and therefore
+there could be better choices than the two suggested ones.
+<P>
+<H3><A NAME="SECTION00852500000000000000">HYPRE_BoomerAMGSetMaxRowSum</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetMaxRowSum( HYPRE_Solver solver, double max_row_sum);</PRE>
+</blockquote>
+This feature leads to a more efficient treatment of very
+diagonally dominant portions of the matrix.
+If the absolute row sum of row i weighted by the diagonal
+is greater than max_row_sum all dependencies of variable i are set
+to be weak. 
+This feature can be switched off by setting max_row_sum to 1.0.
+The default is 0.9.
+<P>
+<H3><A NAME="SECTION00852600000000000000">HYPRE_BoomerAMGSetCoarsenType</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetCoarsenType( HYPRE_Solver solver, int coarsen_type  );</PRE>
+</blockquote>
+coarsen_type defines the coarsening used. The following options 
+are possible:
+<P>
+<P> <IMG WIDTH=573 HEIGHT=85 ALIGN=BOTTOM  SRC="img22.gif"  > <P><H3><A NAME="SECTION00852700000000000000">HYPRE_BoomerAMGSetMeasureType</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetMeasureType( HYPRE_Solver solver, int measure_type  );</PRE>
+</blockquote>
+measure_type defines 
+whether local (measure_type = 0, default) or global measures 
+(measure_type = 1) are used within the coarsening 
+algorithm. This feature is ignored for the CLJP and the Falgout coarsening.
+<P>
+<H3><A NAME="SECTION00852800000000000000">HYPRE_BoomerAMGSetNumGridSweeps</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetNumGridSweeps( HYPRE_Solver solver, int* num_grid_sweeps );</PRE>
+</blockquote>
+num_grid_sweeps[k] defines the number of sweeps over the grid on the fine 
+grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3).
+<P>
+<H3><A NAME="SECTION00852900000000000000">HYPRE_BoomerAMGSetGridRelaxType</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetGridRelaxType( HYPRE_Solver solver, int* grid_relax_type );</PRE>
+</blockquote>
+grid_relax_type[k] defines the relaxation used on the fine 
+grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3).
+The following options are possible for grid_relax_type[k]:
+<P>
+<P> <IMG WIDTH=616 HEIGHT=131 ALIGN=BOTTOM  SRC="img23.gif"  > <P><H3><A NAME="SECTION008521000000000000000">HYPRE_BoomerAMGSetGridRelaxPoints</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetGridRelaxPoints( HYPRE_Solver solver, 
+	int** grid_relax_points);</PRE>
+</blockquote>
+grid_relax_points[i][j] defines which points are to be relaxed during
+the (j+1)-th sweep on the fine 
+grid (i=0), the down cycle (i=1), the up cycle (i=2) and the coarse grid (i=3),
+e.g. if grid_relax_points[1][0] is -1, all points marked -1 (which are in
+general fine points) are relaxed on the first sweep of the down cycle.
+Note: grid_relax_points[3][j] needs to be 0 always, since the concept of 
+coarse and fine points does not exist on the coarsest grid. If the user
+sets it to another value, it will be automatically set to 0 and a warning
+printed, unless the direct solver is used.
+<P>
+<H3><A NAME="SECTION008521100000000000000">HYPRE_BoomerAMGSetRelaxWeight</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver solver, double* relax_weight);</PRE>
+</blockquote>
+defines the relaxation weights used on each level, if weighted Jacobi is used
+as relaxation method. The default relaxation weight is 1.0 on each level.
+<P>
+<H3><A NAME="SECTION008521200000000000000">HYPRE_BoomerAMGSetIOutDat</A></H3>
+<P>
+<blockquote><PRE>int HYPRE_BoomerAMGSetIOutDat( HYPRE_Solver solver, int ioutdat);</PRE>
+</blockquote>
+where ioutdat determines whether statistics information is generated and 
+printed. The information is printed to standard output.
+The following options are possible:
+<P>
+<P> <IMG WIDTH=580 HEIGHT=108 ALIGN=BOTTOM  SRC="img24.gif"  > <P><HR><A NAME="tex2html480" HREF="node32.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html478" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html472" HREF="node30.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html482" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html483" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html481" HREF="node32.html">7.4 ParaSails</A>
+<B>Up:</B> <A NAME="tex2html479" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B> Previous:</B> <A NAME="tex2html473" HREF="node30.html">7.2 PFMG</A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

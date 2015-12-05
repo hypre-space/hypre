@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>6.1 IJ Matrix Interface</TITLE>
+<META NAME="description" CONTENT="6.1 IJ Matrix Interface">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html392" HREF="node25.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html390" HREF="node23.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html384" HREF="node23.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html394" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html395" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html393" HREF="node25.html">6.2 IJ Vector Interface</A>
+<B>Up:</B> <A NAME="tex2html391" HREF="node23.html">6 Linear-Algebraic System Interface </A>
+<B> Previous:</B> <A NAME="tex2html385" HREF="node23.html">6 Linear-Algebraic System Interface </A>
+<BR> <P>
+<H1><A NAME="SECTION00710000000000000000">6.1 IJ Matrix Interface</A></H1>
+<P>
+As with the other interfaces in HYPRE, the <code>IJ</code> interface
+expects to get data in distributed form because this is the only
+scalable approach for assembling matrices on thousands of processes.
+Matrices are assumed to be distributed by blocks of rows as follows:
+<P> <IMG WIDTH=500 HEIGHT=97 ALIGN=BOTTOM  SRC="img14.gif"  > <P>
+In the above example, the matrix is distributed accross the <I>P</I>
+processes, 0, 1, ..., <I>P</I>-1 by blocks of rows.  Each submatrix  <IMG WIDTH=19 HEIGHT=26 ALIGN=MIDDLE  SRC="img15.gif"  > 
+is ``owned'' by a single process and its first and last row numbers
+are given by the global indices <code>ilower</code> and <code>iupper</code> in the
+<code>Create()</code> call below.
+<P>
+The following example code illustrates the basic usage of the
+<code>IJ</code> interface for building matrices:
+<blockquote><PRE>MPI_Comm            comm;
+HYPRE_IJMatrix      ij_matrix;
+HYPRE_ParCSRMatrix  parcsr_matrix;
+int                 ilower, iupper;
+int                 jlower, jupper;
+int                 nrows;
+int                *ncols;
+int                *rows;
+int                *cols;
+double             *values;
+
+HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &amp;ij_matrix);
+HYPRE_IJMatrixSetObjectType(ij_matrix, HYPRE_PARCSR);
+HYPRE_IJMatrixInitialize(ij_matrix);
+
+/* set matrix coefficients */
+HYPRE_IJMatrixSetValues(ij_matrix, nrows, ncols, rows, cols, values);
+...
+/* add-to matrix cofficients, if desired */
+HYPRE_IJMatrixAddToValues(ij_matrix, nrows, ncols, rows, cols, values);
+...
+
+HYPRE_IJMatrixAssemble(ij_matrix);
+HYPRE_IJMatrixGetObject(ij_matrix, (void **) &amp;parcsr_matrix);</PRE>
+</blockquote>
+The <code>Create()</code> routine creates an empty matrix object that lives
+on the <code>comm</code> communicator.  This is a collective call (i.e.,
+must be called on all processes from a common synchronization point),
+with each process passing its own row extents, <code>ilower</code> and
+<code>iupper</code>.  The row partitioning must be contiguous, i.e.,
+<code>iupper</code> for process <code>i</code> must equal <code>ilower</code>-1 for
+process <code>i</code>+1.  Note that this allows matrices to have 0- or
+1-based indexing.  The parameters <code>jlower</code> and <code>jupper</code>
+define a column partitioning, and should match <code>ilower</code> and
+<code>iupper</code> when solving square linear systems.  See the Reference
+Manual for more information.
+<P>
+The <code>SetObjectType()</code> routine sets the underlying matrix object
+type to <code>HYPRE_PARCSR</code> (this is the only object type currently
+supported).  The <code>Initialize()</code> routine indicates that the matrix
+coefficients (or values) are ready to be set.  This routine may or may
+not involve the allocation of memory for the coefficient data,
+depending on the implementation.  The optional <code>SetRowSizes()</code>
+and <code>SetDiagOffdSizes()</code> routines
+mentioned later in this chapter and in the Reference Manual, should be
+called before this step.
+<P>
+The <code>SetValues()</code> routine sets matrix values for some number of
+rows (<code>nrows</code>) and some number of columns in each row
+(<code>ncols</code>).  The actual row and column numbers of the matrix
+<code>values</code> to be set are given by <code>rows</code> and <code>cols</code>.
+After the coefficients are set, they can be added to with an
+<code>AddTo()</code> routine.  Each process should set only those matrix
+values that it ``owns'' in the data distribution.
+<P>
+The <code>Assemble()</code> routine is a collective call, and finalizes the
+matrix assembly, making the matrix ``ready to use''.  The
+<code>GetObject()</code> routine retrieves the built matrix object so that
+it can be passed on to HYPRE solvers that use the <code>ParCSR</code>
+internal storage format.  Note that this is not an expensive routine;
+the matrix already exists in <code>ParCSR</code> storage format, and the
+routine simply returns a ``handle'' or pointer to it.  Although we
+currently only support one underlying data storage format, in the
+future several different formats may be supported.
+<P>
+One can preset the row sizes of the matrix in order to reduce the
+execution time for the matrix specification.  One can specify the
+total number of coefficients for each row, the number of coefficients
+in the row that couple the diagonal unknown to (<code>Diag</code>) unknowns
+in the same processor domain, and the number of coefficients in the
+row that couple the diagonal unknown to (<code>Offd</code>) unknowns in
+other processor domains:
+<P>
+<blockquote><PRE>HYPRE_IJMatrixSetRowSizes(ij_matrix, sizes);
+HYPRE_IJMatrixSetDiagOffdSizes(matrix, diag_sizes, offdiag_sizes);</PRE>
+</blockquote>
+<P>
+Once the matrix has been assembled, the sparsity pattern cannot be
+altered without completely destroying the matrix object and starting
+from scratch.  However, one can modify the matrix values of an already
+assembled matrix.  To do this, first call the <code>Initialize()</code>
+routine to re-initialize the matrix, then set or add-to values as
+before, and call the <code>Assemble()</code> routine to re-assemble before
+using the matrix.  Re-initialization and re-assembly are very cheap,
+essentially a no-op in the current implementation of the code.
+<P>
+<HR><A NAME="tex2html392" HREF="node25.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html390" HREF="node23.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html384" HREF="node23.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html394" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html395" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html393" HREF="node25.html">6.2 IJ Vector Interface</A>
+<B>Up:</B> <A NAME="tex2html391" HREF="node23.html">6 Linear-Algebraic System Interface </A>
+<B> Previous:</B> <A NAME="tex2html385" HREF="node23.html">6 Linear-Algebraic System Interface </A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

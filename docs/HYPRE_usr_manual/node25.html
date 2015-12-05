@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>6.2 IJ Vector Interface</TITLE>
+<META NAME="description" CONTENT="6.2 IJ Vector Interface">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html402" HREF="node26.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html400" HREF="node23.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html396" HREF="node24.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html404" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html405" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html403" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B>Up:</B> <A NAME="tex2html401" HREF="node23.html">6 Linear-Algebraic System Interface </A>
+<B> Previous:</B> <A NAME="tex2html397" HREF="node24.html">6.1 IJ Matrix Interface</A>
+<BR> <P>
+<H1><A NAME="SECTION00720000000000000000">6.2 IJ Vector Interface</A></H1>
+<P>
+The following example code illustrates the basic usage of the
+<code>IJ</code> interface for building vectors:
+<P>
+<blockquote><PRE>MPI_Comm         comm;
+HYPRE_IJVector   ij_vector;
+HYPRE_ParVector  par_vector;
+int              jlower, jupper;
+int              nvalues;
+int             *indices;
+double          *values;
+
+HYPRE_IJVectorCreate(comm, jlower, jupper, &amp;ij_vector);
+HYPRE_IJVectorSetObjectType(ij_vector, HYPRE_PARCSR);
+HYPRE_IJVectorInitialize(ij_vector);
+
+/* set vector values */
+HYPRE_IJVectorSetValues(ij_vector, nvalues, indices, values);
+...
+
+HYPRE_IJVectorAssemble(ij_vector);
+HYPRE_IJVectorGetObject(ij_vector, (void **) &amp;par_vector);</PRE>
+</blockquote>
+The <code>Create()</code> routine creates an empty vector object that lives
+on the <code>comm</code> communicator.  This is a collective call, with each
+process passing its own index extents, <code>jlower</code> and
+<code>jupper</code>.  The names of these extent parameters begin with a
+<code>j</code> because we typically think of matrix-vector multiplies as
+the fundamental operation involving both matrices and vectors.  For
+matrix-vector multiplies, the vector partitioning should match the
+column partitioning of the matrix (which also uses the <code>j</code>
+notation).  For linear system solves, these extents will typically
+match the row partitioning of the matrix as well.
+<P>
+The <code>SetObjectType()</code> routine sets the underlying vector storage
+type to <code>HYPRE_PARCSR</code> (this is the only storage type currently
+supported).  The <code>Initialize()</code> routine indicates that the vector
+coefficients (or values) are ready to be set.  This routine may or may
+not involve the allocation of memory for the coefficient data,
+depending on the implementation.
+<P>
+The <code>SetValues()</code> routine sets the vector <code>values</code> for some
+number (<code>nvalues</code>) of <code>indices</code>.  Each process should set
+only those vector values that it ``owns'' in the data distribution.
+<P>
+The <code>Assemble()</code> routine is a trivial collective call, and
+finalizes the vector assembly, making the vector ``ready to use''.
+The <code>GetObject()</code> routine retrieves the built vector object so
+that it can be passed on to HYPRE solvers that use the
+<code>ParVector</code> internal storage format.
+<P>
+Vector values can be modified in much the same way as with matrices by
+first re-initializing the vector with the <code>Initialize()</code> routine.
+<P>
+<HR><A NAME="tex2html402" HREF="node26.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html400" HREF="node23.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html396" HREF="node24.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html404" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html405" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html403" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B>Up:</B> <A NAME="tex2html401" HREF="node23.html">6 Linear-Algebraic System Interface </A>
+<B> Previous:</B> <A NAME="tex2html397" HREF="node24.html">6.1 IJ Matrix Interface</A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

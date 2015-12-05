@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>4 Semi-Structured-Grid System Interface (SStruct)</TITLE>
+<META NAME="description" CONTENT="4 Semi-Structured-Grid System Interface (SStruct)">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html280" HREF="node16.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html278" HREF="usr_manual.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html272" HREF="node14.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html282" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html283" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html281" HREF="node16.html">4.1 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html279" HREF="usr_manual.html">User's Manual</A>
+<B> Previous:</B> <A NAME="tex2html273" HREF="node14.html">3.5 Symmetric Matrices</A>
+<BR> <P>
+<H1><A NAME="SECTION00500000000000000000">4 Semi-Structured-Grid System Interface (SStruct)</A></H1>
+<P>
+<A NAME="SemiStructuredGridSystemInterface">&#160;</A>
+<P>
+In order to get access to the most efficient and scalable solvers for
+semi-structured-grid applications (applications with grids that are
+mostly structured, but with some unstructured features), users should
+use the <code>SStruct</code> interface described in this chapter.  This
+interface also provides access to solvers in HYPRE that were
+designed for unstructured-grid applications and sparse linear systems
+in general.  These additional solvers are usually provided via the
+unstructured-grid interface (<code>FEI</code>) or the linear-algebraic
+interface (<code>IJ</code>) described in Chapters
+<A HREF="node21.html#FiniteElementInterface">5</A> and <A HREF="node23.html#LinearAlgebraicSystemInterface">6</A>.
+<P>
+Figure <A HREF="node15.html#figblockstructuredgrid">4.1</A> gives an example of the type of
+grid currently supported by the <code>SStruct</code> interface.  The grid is
+composed of three ``parts''.  There is a single cell-centered variable
+across the entire grid, except at the grid cell marked with a square,
+which has one additional cell-centered variable.
+<P><A NAME="267">&#160;</A><A NAME="figblockstructuredgrid">&#160;</A> <IMG WIDTH=478 HEIGHT=436 ALIGN=BOTTOM  SRC="img9.gif"  > <BR>
+<STRONG>Figure 4.1:</STRONG> An example 2D block-structured grid, distributed accross three processes.<BR>
+<P>
+There are five basic steps involved in setting up the linear system to
+be solved:
+<OL>
+<LI> set up the grid,
+<LI> set up the stencils,
+<LI> set up the graph,
+<LI> set up the matrix,
+<LI> set up the right-hand-side vector.
+</OL>
+To describe each of these steps in more detail, consider solving the
+2D Laplacian problem
+<P><A NAME="sstructeqnlaplacian">&#160;</A> <IMG WIDTH=514 HEIGHT=49 ALIGN=BOTTOM  SRC="img10.gif"  > <P>
+Assume (<A HREF="node9.html#eqnlaplacian">3.1</A>) is discretized using standard 9-pt
+finite-volumes on the grid pictured in
+<A HREF="node15.html#figblockstructuredgrid">4.1</A>, and assume that the problem data is
+distributed across three processes as depicted.  In the figure, each
+grid part is distributed onto a different process, but this need not
+be the case; each grid part may also be distributed across several
+processes.  Assume for simplicity and illustration that there is a
+single coupling between the first and second variables in grid part 0
+at index (1,2).  In general, this variable may also be coupled to
+variables at neighboring indices.
+<P>
+<BR> <HR>
+<UL><A NAME="CHILD_LINKS">&#160;</A>
+<LI> <A NAME="tex2html284" HREF="node16.html#SECTION00510000000000000000">4.1 Setting Up the SStruct Grid</A>
+<LI> <A NAME="tex2html285" HREF="node17.html#SECTION00520000000000000000">4.2 Setting Up the SStruct Stencil</A>
+<LI> <A NAME="tex2html286" HREF="node18.html#SECTION00530000000000000000">4.3 Setting Up the SStruct Graph</A>
+<LI> <A NAME="tex2html287" HREF="node19.html#SECTION00540000000000000000">4.4 Setting Up the SStruct Matrix</A>
+<LI> <A NAME="tex2html288" HREF="node20.html#SECTION00550000000000000000">4.5 Setting Up the SStruct Right-Hand-Side Vector</A>
+</UL>
+<HR><A NAME="tex2html280" HREF="node16.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html278" HREF="usr_manual.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html272" HREF="node14.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html282" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html283" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html281" HREF="node16.html">4.1 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html279" HREF="usr_manual.html">User's Manual</A>
+<B> Previous:</B> <A NAME="tex2html273" HREF="node14.html">3.5 Symmetric Matrices</A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

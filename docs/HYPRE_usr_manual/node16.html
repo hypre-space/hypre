@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>4.1 Setting Up the SStruct Grid</TITLE>
+<META NAME="description" CONTENT="4.1 Setting Up the SStruct Grid">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html297" HREF="node17.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html295" HREF="node15.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html289" HREF="node15.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html299" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html300" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html298" HREF="node17.html">4.2 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html296" HREF="node15.html">4 Semi-Structured-Grid System Interface </A>
+<B> Previous:</B> <A NAME="tex2html290" HREF="node15.html">4 Semi-Structured-Grid System Interface </A>
+<BR> <P>
+<H1><A NAME="SECTION00510000000000000000">4.1 Setting Up the SStruct Grid</A></H1>
+<P>
+<A NAME="SettingUptheSStructGrid">&#160;</A>
+<P>
+On process 0, the following code will set up the grid shown in the
+figure (the code for processes 1 and 2 is similar).
+<blockquote><PRE>HYPRE_SStructGrid     grid;
+int                   ilower[2][2] = {{-1, 0}, {1, 0}};
+int                   iupper[2][2] = {{ 0, 3}, {2, 3}};
+HYPRE_SStructVariable vars[1]      = {HYPRE_SSTRUCT_VARIABLE_CELL};
+
+int                   addindex[2]  = {1,2};
+HYPRE_SStructVariable addvars[1]   = {HYPRE_SSTRUCT_VARIABLE_CELL};
+
+HYPRE_SStructGridCreate(MPI_COMM_WORLD, 2, 3, &amp;grid);
+
+HYPRE_SStructGridSetExtents(grid, 0, ilower[0], iupper[0]);
+HYPRE_SStructGridSetExtents(grid, 0, ilower[1], iupper[1]);
+
+HYPRE_SStructGridSetVariables(grid, 0, 1, vars);
+HYPRE_SStructGridAddVariables(grid, 0, addindex, 1, addvars);
+
+HYPRE_SStructGridAssemble(grid);</PRE>
+</blockquote>
+The <code>Create()</code> routine creates an empty 2D grid object that lives
+on the <code>MPI_COMM_WORLD</code> communicator.  The <code>SetExtents()</code>
+routine adds a new box to the grid.  The <code>SetVariables()</code> routine
+sets the variables on a grid part, and the <code>AddVariables()</code>
+routine adds variables to a grid part index (in the above example,
+there are two cell-centered variables at index (1,2)).  The
+<code>Assemble()</code> routine is a collective call (i.e., must be called
+on all processes from a common synchronization point), and finalizes
+the grid assembly, making the grid ``ready to use''.
+<P>
+<HR><A NAME="tex2html297" HREF="node17.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html295" HREF="node15.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html289" HREF="node15.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html299" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html300" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html298" HREF="node17.html">4.2 Setting Up the </A>
+<B>Up:</B> <A NAME="tex2html296" HREF="node15.html">4 Semi-Structured-Grid System Interface </A>
+<B> Previous:</B> <A NAME="tex2html290" HREF="node15.html">4 Semi-Structured-Grid System Interface </A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

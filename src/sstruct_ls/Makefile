@@ -1,0 +1,102 @@
+# Generated automatically from Makefile.in by configure.
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.1 $
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = .
+
+
+CC =  mpicc
+
+C_COMPILE_FLAGS= -O 
+CXX_COMPILE_FLAGS= -O 
+CINCLUDES= 
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../krylov\
+ -I$(srcdir)/../struct_mv\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../IJ_mv\
+ -I$(srcdir)/../sstruct_mv\
+ -I$(srcdir)/../struct_ls\
+ -I$(srcdir)/../parcsr_ls\
+ ${CINCLUDES}
+
+RANLIB= ranlib
+
+HEADERS =\
+ HYPRE_sstruct_ls.h\
+ sstruct_ls.h\
+ sys_pfmg.h\
+ headers.h
+
+FILES =\
+ HYPRE_sstruct_gmres.c\
+ HYPRE_sstruct_pcg.c\
+ HYPRE_sstruct_split.c\
+ HYPRE_sstruct_sys_pfmg.c\
+ node_relax.c\
+ sys_pfmg.c\
+ sys_pfmg_relax.c\
+ sys_pfmg_setup.c\
+ sys_pfmg_setup_interp.c\
+ sys_pfmg_setup_rap.c\
+ sys_pfmg_solve.c\
+ sys_semi_interp.c\
+ sys_semi_restrict.c\
+ krylov.c\
+ krylov_sstruct.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_sstruct_ls.a
+
+install: all
+	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/sstruct_ls.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+
+clean:
+	@rm -f *.o
+	@rm -f *.prj
+	@rm -f *.kdd
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_sstruct_ls.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+

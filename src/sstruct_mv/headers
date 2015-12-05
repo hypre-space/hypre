@@ -1,0 +1,63 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.0 $
+#EHEADER***********************************************************************
+
+INTERNAL_HEADER=sstruct_mv.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#include <HYPRE_config.h>
+
+#include "HYPRE_sstruct_mv.h"
+
+#ifndef hypre_SSTRUCT_MV_HEADER
+#define hypre_SSTRUCT_MV_HEADER
+
+#include "utilities.h"
+#include "struct_mv.h"
+#include "IJ_mv.h"
+#include "HYPRE.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat box_map.h             >> $INTERNAL_HEADER	
+cat sstruct_grid.h        >> $INTERNAL_HEADER	
+cat sstruct_stencil.h     >> $INTERNAL_HEADER	
+cat sstruct_graph.h       >> $INTERNAL_HEADER	
+cat sstruct_matrix.h      >> $INTERNAL_HEADER	
+cat sstruct_vector.h      >> $INTERNAL_HEADER	
+
+../utilities/protos *.c   >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+

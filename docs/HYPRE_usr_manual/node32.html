@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>7.4 ParaSails</TITLE>
+<META NAME="description" CONTENT="7.4 ParaSails">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html492" HREF="node33.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html490" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html484" HREF="node31.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html494" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html495" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html493" HREF="node33.html">7.5 Euclid</A>
+<B>Up:</B> <A NAME="tex2html491" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B> Previous:</B> <A NAME="tex2html485" HREF="node31.html">7.3 BoomerAMG</A>
+<BR> <P>
+<H1><A NAME="SECTION00860000000000000000">7.4 ParaSails</A></H1>
+<P>
+ParaSails is a parallel implementation of a sparse approximate inverse
+preconditioner, using <EM>a priori</EM> sparsity patterns and least-squares
+(Frobenius norm) minimization.  Symmetric positive definite (SPD) problems
+are handled using a factored SPD sparse approximate inverse.  General
+(nonsymmetric and/or indefinite) problems are handled with an
+unfactored sparse approximate inverse.  It is also possible to
+precondition nonsymmetric but definite matrices with a factored, SPD
+preconditioner.
+<P>
+ParaSails uses <EM>a priori</EM> sparsity patterns that are patterns of powers
+of sparsified matrices.  ParaSails also uses a post-filtering technique
+to reduce the cost of applying the preconditioner.  
+In advanced usage not described here, the pattern of the
+preconditioner can also be reused to generate preconditioners for different
+matrices in a sequence of linear solves.
+<P>
+For more details about the ParaSails algorithm, see [&make_named_href('',
+	"node39.html#Chow:1999:APS","[3]")].
+<P>
+<H2><A NAME="SECTION00861000000000000000">Synopsis</A></H2>
+<P>
+<blockquote><PRE>#include &quot;HYPRE_parcsr_ls.h&quot;
+
+int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver, 
+  int symmetry);
+int HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
+  double thresh, int nlevel, double filter);
+int HYPRE_ParaSailsSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_ParaSailsSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+  HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_ParaSailsStats(HYPRE_Solver solver);
+int HYPRE_ParaSailsDestroy(HYPRE_Solver solver);</PRE>
+</blockquote>
+<P>
+The accuracy and cost of ParaSails are parameterized by the real <EM>thresh</EM>
+and integer <EM>nlevels</EM> parameters,
+ <IMG WIDTH=111 HEIGHT=27 ALIGN=MIDDLE  SRC="img25.gif"  > ,  <IMG WIDTH=82 HEIGHT=27 ALIGN=MIDDLE  SRC="img26.gif"  > .
+Lower values of <EM>thresh</EM>
+and higher values of <EM>nlevels</EM> lead to more accurate, but more expensive
+preconditioners.  More accurate preconditioners are also more expensive
+per iteration.  The default values are  <IMG WIDTH=92 HEIGHT=13 ALIGN=BOTTOM  SRC="img27.gif"  > 
+and  <IMG WIDTH=83 HEIGHT=13 ALIGN=BOTTOM  SRC="img28.gif"  > .  The parameters are set using
+<TT>HYPRE_ParaSailsSetParams</TT>.
+<P>
+Mathematically, given a symmetric matrix <I>A</I>, the pattern of the
+approximate inverse is the pattern of  <IMG WIDTH=24 HEIGHT=16 ALIGN=BOTTOM  SRC="img29.gif"  >  where  <IMG WIDTH=12 HEIGHT=16 ALIGN=BOTTOM  SRC="img30.gif"  > 
+is a matrix that has been sparsified from <I>A</I>.  The sparsification
+is performed by dropping all entries in a symmetrically diagonally scaled <I>A</I>
+whose values are less than <EM>thresh</EM> in magnitude.  The parameter
+<EM>nlevel</EM> is equivalent to <I>m</I>+1.
+Filtering is a post-thresholding procedure.
+For more details about the algorithm, see [&make_named_href('',
+	"node39.html#Chow:1999:APS","[3]")].
+<P>
+The storage required for the ParaSails preconditioner depends on
+the parameters <EM>thresh</EM> and <EM>nlevels</EM>.  The default parameters
+often produce a preconditioner that can be stored in less than the
+space required to store the original matrix.
+ParaSails does not need a large amount of intermediate storage in
+order to construct the preconditioner.
+<P>
+<H2><A NAME="SECTION00862000000000000000">Interface functions</A></H2>
+<P>
+A ParaSails solver <TT>solver</TT> is returned with 
+<blockquote><PRE>int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver,
+  int symmetry);</PRE>
+</blockquote>
+where <TT>comm</TT> is the MPI communicator.
+<P>
+The value of <TT>symmetry</TT> has the following meanings, to indicate
+the symmetry and definiteness of the problem, and to specify the 
+type of preconditioner to construct:
+<P> <IMG WIDTH=683 HEIGHT=92 ALIGN=BOTTOM  SRC="img31.gif"  > <P>
+<P>
+For more information about the final case, see section <A HREF="node32.html#nearly">7.4.3</A>.
+<P>
+Parameters for setting up the preconditioner are specified using
+<blockquote><PRE>int HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
+  double thresh, int nlevel, double filter);</PRE>
+</blockquote>
+<P>
+The parameters are used to specify the sparsity pattern and filtering value
+(see above), and are described with suggested values as follows:
+<P>
+<P> <IMG WIDTH=773 HEIGHT=139 ALIGN=BOTTOM  SRC="img32.gif"  > <P>
+<P>
+When  <IMG WIDTH=88 HEIGHT=25 ALIGN=MIDDLE  SRC="img33.gif"  > , then a threshold is selected such that 
+ <IMG WIDTH=71 HEIGHT=20 ALIGN=MIDDLE  SRC="img34.gif"  >  represents the fraction of the nonzero elements
+that are dropped.  For example, if  <IMG WIDTH=116 HEIGHT=22 ALIGN=MIDDLE  SRC="img35.gif"  >  then
+ <IMG WIDTH=12 HEIGHT=16 ALIGN=BOTTOM  SRC="img30.gif"  >  will contain approximately ten percent of the nonzeros
+in <I>A</I>.
+<P>
+When  <IMG WIDTH=88 HEIGHT=25 ALIGN=MIDDLE  SRC="img36.gif"  > , then a filter value is selected such that 
+ <IMG WIDTH=72 HEIGHT=22 ALIGN=MIDDLE  SRC="img37.gif"  >  represents the fraction of the nonzero elements
+that are dropped.  For example, if  <IMG WIDTH=116 HEIGHT=22 ALIGN=MIDDLE  SRC="img38.gif"  >  then
+approximately 90 percent of the entries in the computed approximate 
+inverse are dropped.
+<P>
+<H2><A NAME="SECTION00863000000000000000">7.4.3 Preconditioning nearly symmetric matrices</A></H2>
+<P>
+<A NAME="nearly">&#160;</A>
+A nonsymmetric, but definite and nearly symmetric matrix <I>A</I> 
+may be preconditioned
+with a symmetric preconditioner <I>M</I>.  Using a symmetric preconditioner
+has a few advantages, such as guaranteeing positive
+definiteness of the preconditioner, as well as being less expensive
+to construct.
+<P>
+The nonsymmetric matrix <I>A</I> must be definite,
+i.e.,  <IMG WIDTH=90 HEIGHT=31 ALIGN=MIDDLE  SRC="img39.gif"  >  is SPD, and the <EM>a priori</EM> sparsity pattern to be used
+must be symmetric.  The latter may be guaranteed by 1) 
+constructing the sparsity pattern with a symmetric matrix, or 2) if the
+matrix is structurally symmetric (has symmetric pattern), then
+thresholding to construct the pattern is not used (i.e.,
+zero value of the <TT>thresh</TT> parameter is used).
+<P>
+<HR><A NAME="tex2html492" HREF="node33.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html490" HREF="node26.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html484" HREF="node31.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html494" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html495" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html493" HREF="node33.html">7.5 Euclid</A>
+<B>Up:</B> <A NAME="tex2html491" HREF="node26.html">7 Solvers and Preconditioners</A>
+<B> Previous:</B> <A NAME="tex2html485" HREF="node31.html">7.3 BoomerAMG</A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>

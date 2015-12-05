@@ -1,0 +1,52 @@
+# Generated automatically from Makefile.in by configure.
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision: 2.1 $
+#EHEADER***********************************************************************
+
+SHELL = /bin/sh
+
+srcdir = .
+
+# These are directories that are not yet officially in HYPRE
+HYPRE_FEI_DIRS =\
+ SuperLU \
+ fei-hypre
+
+all: 
+	@ \
+	for i in ${HYPRE_FEI_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	  fi; \
+	done;
+
+install: all
+
+clean:
+	@ \
+	for i in ${HYPRE_FEI_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    (cd $$i; make clean); \
+	  fi; \
+	done
+
+veryclean:
+	@ \
+	for i in ${HYPRE_FEI_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    (cd $$i; make veryclean); \
+	  fi; \
+	done
+

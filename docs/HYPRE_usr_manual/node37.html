@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!--Converted with LaTeX2HTML 96.1-g (June 11, 1996) by Nikos Drakos (nikos@cbl.leeds.ac.uk), CBLU, University of Leeds -->
+<HTML>
+<HEAD>
+<TITLE>8.2 Calling from Fortran</TITLE>
+<META NAME="description" CONTENT="8.2 Calling from Fortran">
+<META NAME="keywords" CONTENT="usr_manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<LINK REL=STYLESHEET HREF="usr_manual.css">
+</HEAD>
+<BODY LANG="EN" >
+ <A NAME="tex2html553" HREF="node38.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html551" HREF="node35.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html545" HREF="node36.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html555" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html556" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html554" HREF="node38.html">8.3 Bug Reporting</A>
+<B>Up:</B> <A NAME="tex2html552" HREF="node35.html">8 Additional Information</A>
+<B> Previous:</B> <A NAME="tex2html546" HREF="node36.html">8.1 Building the Library</A>
+<BR> <P>
+<H1><A NAME="SECTION00920000000000000000">8.2 Calling from Fortran</A></H1>
+<P>
+<A NAME="CallingfromFortran">&#160;</A>
+<P>
+Although HYPRE is written in C, a Fortran interface is provided.
+The Fortran interface is very similar to the C interface, and can be
+determined from the C interface by a few simple conversion rules.
+These conversion rules are described below.
+<P>
+Let us start out with a simple example.  Consider the following
+HYPRE prototype:
+<blockquote><PRE>int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
+                            int  nrows, int  *ncols,
+                            const int *rows, const int  *cols,
+                            const double  *values);</PRE>
+</blockquote>
+The corresponding Fortran code for calling this routine is as follows:
+<blockquote><PRE>      integer*8         matrix, 
+      integer           nrows, ncols(MAX_NCOLS)
+      integer           rows(MAX_ROWS), cols(MAX_COLS)
+      double precision  values(MAX_COLS)
+      integer           ierr
+
+      call HYPRE_IJMatrixSetValues(matrix, nrows, ncols, rows, cols,
+     &amp;                             values, ierr)</PRE>
+</blockquote>
+The Fortran subroutine name is the same, unless the name is longer
+than 31 characters.  In these situations, the name is condensed to 31
+characters, usually by simple truncation.  For now, users should look
+at the Fortran drivers in the <code>test</code> directory for the correct
+condensed names.  In the future, this aspect of the interface conversion
+will be made consistent and straightforward.
+<P>
+The Fortran subroutine argument list is always the same as the
+corresponding C routine, except that the error return code <code>ierr</code>
+is always last.  Conversion from C parameter types to Fortran argument
+type is summarized in Table <A HREF="node37.html#tablefortraninterfacetypes">8.1</A>.
+<P><A NAME="784">&#160;</A><A NAME="tablefortraninterfacetypes">&#160;</A> <IMG WIDTH=451 HEIGHT=187 ALIGN=BOTTOM  SRC="img42.gif"  > <BR>
+<STRONG>Table 8.1:</STRONG> Conversion from C parameters to Fortran arguments
+<BR>
+<P>
+Arrays arguments in HYPRE are always of type <code>(int *)</code> or
+<code>(double *)</code>, and the corresponding Fortran types are simply
+<code>integer</code> or <code>double precision</code> arrays.  Note that the
+Fortran arrays may be indexed in any manner.  For example, an integer
+array of length <code>N</code> may be declared in fortran as either of the
+following:
+<blockquote><PRE>      integer  array(N)
+      integer  array(0:N-1)</PRE>
+</blockquote>
+<P>
+HYPRE objects can usually be declared as in the table because
+<code>integer*8</code> usually corresponds to the length of a pointer.
+However, there may be some machines where this is not the case
+(although we are not aware of any at this time).  On such machines,
+the Fortran type for a HYPRE object should be an <code>integer</code> of
+the appropriate length.
+<P>
+<HR><A NAME="tex2html553" HREF="node38.html"><IMG WIDTH=37 HEIGHT=24 ALIGN=BOTTOM ALT="next" SRC="http://cbl.leeds.ac.uk/nikos/figs/next_motif.gif"></A> <A NAME="tex2html551" HREF="node35.html"><IMG WIDTH=26 HEIGHT=24 ALIGN=BOTTOM ALT="up" SRC="http://cbl.leeds.ac.uk/nikos/figs/up_motif.gif"></A> <A NAME="tex2html545" HREF="node36.html"><IMG WIDTH=63 HEIGHT=24 ALIGN=BOTTOM ALT="previous" SRC="http://cbl.leeds.ac.uk/nikos/figs/previous_motif.gif"></A> <A NAME="tex2html555" HREF="node1.html"><IMG WIDTH=65 HEIGHT=24 ALIGN=BOTTOM ALT="contents" SRC="http://cbl.leeds.ac.uk/nikos/figs/contents_motif.gif"></A> <A NAME="tex2html556" HREF="node40.html"><IMG WIDTH=43 HEIGHT=24 ALIGN=BOTTOM ALT="index" SRC="http://cbl.leeds.ac.uk/nikos/figs/index_motif.gif"></A> <BR>
+<B> Next:</B> <A NAME="tex2html554" HREF="node38.html">8.3 Bug Reporting</A>
+<B>Up:</B> <A NAME="tex2html552" HREF="node35.html">8 Additional Information</A>
+<B> Previous:</B> <A NAME="tex2html546" HREF="node36.html">8.1 Building the Library</A>
+<P><ADDRESS>
+<I>Thomas Treadway <BR>
+Fri Jul 27 10:01:25 PDT 2001</I>
+</ADDRESS>
+</BODY>
+</HTML>
